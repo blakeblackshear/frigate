@@ -29,9 +29,9 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-def detect_objects(image_np, sess, detection_graph):
+def detect_objects(cropped_frame, full_frame, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-    image_np_expanded = np.expand_dims(image_np, axis=0)
+    image_np_expanded = np.expand_dims(cropped_frame, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
 
     # Each box represents a part of the image where a particular object was detected.
@@ -52,22 +52,41 @@ def detect_objects(image_np, sess, detection_graph):
     objects = []
     for index, value in enumerate(classes[0]):
         object_dict = {}
-        if scores[0, index] > 0.5:
+        if scores[0, index] > 0.1:
             object_dict[(category_index.get(value)).get('name').encode('utf8')] = \
                                 scores[0, index]
             objects.append(object_dict)
 
+    squeezed_boxes = np.squeeze(boxes)
+    squeezed_scores = np.squeeze(scores)
+
+    if(len(objects)>0):
+        # reposition bounding box based on full frame
+        for i, box in enumerate(squeezed_boxes):
+            if squeezed_scores[i] > .1:
+                ymin = ((box[0] * 300) + 200)/1080  # ymin
+                xmin = ((box[1] * 300) + 1300)/1920 # xmin
+                xmax = ((box[2] * 300) + 200)/1080  # ymax
+                ymax = ((box[3] * 300) + 1300)/1920 # xmax
+                print("ymin", box[0] * 300, ymin)
+                print("xmin", box[1] * 300, xmin)
+                print("ymax", box[2] * 300, ymax)
+                print("xmax", box[3] * 300, xmax)
+
     # draw boxes for detected objects on image
     vis_util.visualize_boxes_and_labels_on_image_array(
-        image_np,
-        np.squeeze(boxes),
+        cropped_frame,
+        squeezed_boxes,
         np.squeeze(classes).astype(np.int32),
-        np.squeeze(scores),
+        squeezed_scores,
         category_index,
         use_normalized_coordinates=True,
-        line_thickness=4)
+        line_thickness=4,
+        min_score_thresh=.1)
+    
+    # cv2.rectangle(full_frame, (800, 100), (1250, 550), (255,0,0), 2)
 
-    return objects, image_np
+    return objects, cropped_frame
 
 def main():
     # capture a single frame and check the frame shape so the correct array
@@ -88,18 +107,21 @@ def main():
     shared_frame_time = mp.Value('d', 0.0)
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
-    # create shared array for passing the image data from capture to detect_objects
+    # create shared array for storing the full frame image data
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
+    # create shared array for storing the cropped frame image data
+    # TODO: make dynamic
+    shared_cropped_arr = mp.Array(ctypes.c_uint16, 300*300*3)
     # create shared array for passing the image data from detect_objects to flask
-    shared_output_arr = mp.Array(ctypes.c_uint16, flat_array_length)
+    shared_output_arr = mp.Array(ctypes.c_uint16, 300*300*3)#flat_array_length)
     # create a numpy array with the image shape from the shared memory array
     # this is used by flask to output an mjpeg stream
-    frame_output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
+    frame_output_arr = tonumpyarray(shared_output_arr).reshape(300,300,3)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_frame_time, frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape))
     capture_process.daemon = True
 
-    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, shared_frame_time, frame_shape))
+    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_cropped_arr, shared_output_arr, shared_frame_time, frame_shape))
     detection_process.daemon = True
 
     capture_process.start()
@@ -119,9 +141,9 @@ def main():
             # max out at 5 FPS
             time.sleep(0.2)
             # convert back to BGR
-            frame_bgr = cv2.cvtColor(frame_output_arr, cv2.COLOR_RGB2BGR)
+            # frame_bgr = cv2.cvtColor(frame_output_arr, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
-            ret, jpg = cv2.imencode('.jpg', frame_bgr)
+            ret, jpg = cv2.imencode('.jpg', frame_output_arr)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
@@ -136,9 +158,10 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_frame_time, frame_shape):
+def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
+    cropped_frame = tonumpyarray(shared_cropped_arr).reshape(300,300,3)
 
     # start the video capture
     video = cv2.VideoCapture(RTSP_URL)
@@ -158,6 +181,12 @@ def fetch_frames(shared_arr, shared_frame_time, frame_shape):
                 ret, frame = video.retrieve()
                 if ret:
                     # copy the frame into the numpy array
+                    # Position 1
+                    # cropped_frame[:] = frame[270:720, 550:1000]
+                    # Position 2
+                    # frame_cropped = frame[270:720, 100:550]
+                    # Car
+                    cropped_frame[:] = frame[200:500, 1300:1600]
                     arr[:] = frame
                     # signal to the detection_process by setting the shared_frame_time
                     shared_frame_time.value = frame_time.timestamp()
@@ -165,11 +194,12 @@ def fetch_frames(shared_arr, shared_frame_time, frame_shape):
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape):
+def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_frame_time, frame_shape):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
+    shared_cropped_frame = tonumpyarray(shared_cropped_arr).reshape(300,300,3)
     # shape shared output array into frame so it can be copied into
-    output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
+    output_arr = tonumpyarray(shared_output_arr).reshape(300,300,3)
 
     # Load a (frozen) Tensorflow model into memory before the processing loop
     detection_graph = tf.Graph()
@@ -211,14 +241,15 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape
         
         # make a copy of the frame
         frame = arr.copy()
+        cropped_frame = shared_cropped_frame.copy()
         frame_time = shared_frame_time.value
         # signal that the frame has been used so a new one will be ready
         shared_frame_time.value = 0.0
 
         # convert to RGB
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects, frame_overlay = detect_objects(frame_rgb, sess, detection_graph)
+        objects, frame_overlay = detect_objects(cropped_frame_rgb, frame, sess, detection_graph)
         # copy the output frame with the bounding boxes to the output array
         output_arr[:] = frame_overlay
         if(len(objects) > 0):
