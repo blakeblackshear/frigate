@@ -193,6 +193,9 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape
             if no_frames_available > 0 and (datetime.datetime.now().timestamp() - no_frames_available) > 30:
                 time.sleep(1)
                 print("sleeping because no frames have been available in a while")
+            else:
+                # rest a little bit to avoid maxing out the CPU
+                time.sleep(0.01)
             continue
         
         # we got a valid frame, so reset the timer
@@ -202,6 +205,8 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape
         if (datetime.datetime.now().timestamp() - shared_frame_time.value) > 0.5:
             # signal that we need a new frame
             shared_frame_time.value = 0.0
+            # rest a little bit to avoid maxing out the CPU
+            time.sleep(0.01)
             continue
         
         # make a copy of the frame
