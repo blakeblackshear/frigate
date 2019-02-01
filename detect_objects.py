@@ -60,22 +60,21 @@ def detect_objects(cropped_frame, full_frame, sess, detection_graph):
     squeezed_boxes = np.squeeze(boxes)
     squeezed_scores = np.squeeze(scores)
 
+    full_frame_shape = full_frame.shape
+    cropped_frame_shape = cropped_frame.shape
+
     if(len(objects)>0):
         # reposition bounding box based on full frame
         for i, box in enumerate(squeezed_boxes):
-            if squeezed_scores[i] > .1:
-                ymin = ((box[0] * 300) + 200)/1080  # ymin
-                xmin = ((box[1] * 300) + 1300)/1920 # xmin
-                xmax = ((box[2] * 300) + 200)/1080  # ymax
-                ymax = ((box[3] * 300) + 1300)/1920 # xmax
-                print("ymin", box[0] * 300, ymin)
-                print("xmin", box[1] * 300, xmin)
-                print("ymax", box[2] * 300, ymax)
-                print("xmax", box[3] * 300, xmax)
+            if box[2] > 0:
+                squeezed_boxes[i][0] = ((box[0] * cropped_frame_shape[0]) + 200)/full_frame_shape[0]  # ymin
+                squeezed_boxes[i][1] = ((box[1] * cropped_frame_shape[0]) + 1300)/full_frame_shape[1] # xmin
+                squeezed_boxes[i][2] = ((box[2] * cropped_frame_shape[0]) + 200)/full_frame_shape[0]  # ymax
+                squeezed_boxes[i][3] = ((box[3] * cropped_frame_shape[0]) + 1300)/full_frame_shape[1]  # xmax
 
     # draw boxes for detected objects on image
     vis_util.visualize_boxes_and_labels_on_image_array(
-        cropped_frame,
+        full_frame,
         squeezed_boxes,
         np.squeeze(classes).astype(np.int32),
         squeezed_scores,
@@ -86,7 +85,7 @@ def detect_objects(cropped_frame, full_frame, sess, detection_graph):
     
     # cv2.rectangle(full_frame, (800, 100), (1250, 550), (255,0,0), 2)
 
-    return objects, cropped_frame
+    return objects, full_frame
 
 def main():
     # capture a single frame and check the frame shape so the correct array
@@ -113,10 +112,10 @@ def main():
     # TODO: make dynamic
     shared_cropped_arr = mp.Array(ctypes.c_uint16, 300*300*3)
     # create shared array for passing the image data from detect_objects to flask
-    shared_output_arr = mp.Array(ctypes.c_uint16, 300*300*3)#flat_array_length)
+    shared_output_arr = mp.Array(ctypes.c_uint16, flat_array_length)
     # create a numpy array with the image shape from the shared memory array
     # this is used by flask to output an mjpeg stream
-    frame_output_arr = tonumpyarray(shared_output_arr).reshape(300,300,3)
+    frame_output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
 
     capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape))
     capture_process.daemon = True
@@ -199,7 +198,7 @@ def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_fra
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
     shared_cropped_frame = tonumpyarray(shared_cropped_arr).reshape(300,300,3)
     # shape shared output array into frame so it can be copied into
-    output_arr = tonumpyarray(shared_output_arr).reshape(300,300,3)
+    output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
 
     # Load a (frozen) Tensorflow model into memory before the processing loop
     detection_graph = tf.Graph()
