@@ -23,9 +23,9 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
-REGION_SIZE = 700
-REGION_X_OFFSET = 950
-REGION_Y_OFFSET = 380
+REGION_SIZE = 300
+REGION_X_OFFSET = 1250
+REGION_Y_OFFSET = 180
 
 # Loading label map
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
@@ -33,7 +33,7 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-def detect_objects(cropped_frame, sess, detection_graph):
+def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_offset, region_y_offset):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(cropped_frame, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -57,7 +57,15 @@ def detect_objects(cropped_frame, sess, detection_graph):
     for index, value in enumerate(classes[0]):
         score = scores[0, index]
         if score > 0.1:
-            objects += [value, scores[0, index]] + boxes[0, index].tolist()
+            box = boxes[0, index].tolist()
+            box[0] = (box[0] * region_size) + region_y_offset
+            box[1] = (box[1] * region_size) + region_x_offset
+            box[2] = (box[2] * region_size) + region_y_offset
+            box[3] = (box[3] * region_size) + region_x_offset
+            objects += [value, scores[0, index]] + box
+        # only get the first 10 objects
+        if len(objects) = 60:
+            break
 
     return objects
 
@@ -84,16 +92,13 @@ def main():
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    # create shared array for storing the cropped frame image data
-    # TODO: make dynamic
-    shared_cropped_arr = mp.Array(ctypes.c_uint16, REGION_SIZE*REGION_SIZE*3)
-    # create shared array for passing the image data from detect_objects to flask
+    # create shared array for storing 10 detected objects
     shared_output_arr = mp.Array(ctypes.c_double, 6*10)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_frame_time, frame_shape))
     capture_process.daemon = True
 
-    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_cropped_arr, shared_output_arr, shared_frame_time, frame_shape))
+    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, shared_frame_time, frame_shape, REGION_SIZE, REGION_X_OFFSET, REGION_Y_OFFSET))
     detection_process.daemon = True
 
     capture_process.start()
@@ -113,21 +118,33 @@ def main():
             # max out at 5 FPS
             time.sleep(0.2)
             frame = frame_arr.copy()
+            # convert to RGB for drawing
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
             object_index = 0
             while(object_index < 60 and shared_output_arr[object_index] > 0):
                 object_class = shared_output_arr[object_index]
+                object_name = str(category_index.get(object_class).get('name'))
                 score = shared_output_arr[object_index+1]
-                ymin = int(((shared_output_arr[object_index+2] * REGION_SIZE) + REGION_Y_OFFSET))
-                xmin = int(((shared_output_arr[object_index+3] * REGION_SIZE) + REGION_X_OFFSET))
-                ymax = int(((shared_output_arr[object_index+4] * REGION_SIZE) + REGION_Y_OFFSET))
-                xmax = int(((shared_output_arr[object_index+5] * REGION_SIZE) + REGION_X_OFFSET))
-                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255,0,0), 2)
+                display_str = '{}: {}%'.format(object_name, int(100*score))
+                ymin = int(shared_output_arr[object_index+2])
+                xmin = int(shared_output_arr[object_index+3])
+                ymax = int(shared_output_arr[object_index+4])
+                xmax = int(shared_output_arr[object_index+5])
+                vis_util.draw_bounding_box_on_image_array(frame,
+                    ymin,
+                    xmin,
+                    ymax,
+                    xmax,
+                    color='red',
+                    thickness=2,
+                    display_str_list=[display_str],
+                    use_normalized_coordinates=False)
                 object_index += 6
-                print(category_index.get(object_class).get('name').encode('utf8'), score)
-            # encode the image into a jpg
-
             cv2.rectangle(frame, (REGION_X_OFFSET, REGION_Y_OFFSET), (REGION_X_OFFSET+REGION_SIZE, REGION_Y_OFFSET+REGION_SIZE), (255,255,255), 2)
+            # convert back to BGR
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # encode the image into a jpg
             ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
@@ -143,10 +160,9 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape):
+def fetch_frames(shared_arr, shared_frame_time, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    cropped_frame = tonumpyarray(shared_cropped_arr).reshape(REGION_SIZE,REGION_SIZE,3)
 
     # start the video capture
     video = cv2.VideoCapture(RTSP_URL)
@@ -170,8 +186,6 @@ def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape)
                     # cropped_frame[:] = frame[270:720, 550:1000]
                     # Position 2
                     # frame_cropped = frame[270:720, 100:550]
-                    # Car
-                    cropped_frame[:] = frame[REGION_Y_OFFSET:REGION_Y_OFFSET+REGION_SIZE, REGION_X_OFFSET:REGION_X_OFFSET+REGION_SIZE]
                     arr[:] = frame
                     # signal to the detection_process by setting the shared_frame_time
                     shared_frame_time.value = frame_time.timestamp()
@@ -179,10 +193,9 @@ def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape)
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_frame_time, frame_shape):
+def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape, region_size, region_x_offset, region_y_offset):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    shared_cropped_frame = tonumpyarray(shared_cropped_arr).reshape(REGION_SIZE,REGION_SIZE,3)
 
     # Load a (frozen) Tensorflow model into memory before the processing loop
     detection_graph = tf.Graph()
@@ -222,9 +235,8 @@ def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_fra
             time.sleep(0.01)
             continue
         
-        # make a copy of the frame
-        # frame = arr.copy()
-        cropped_frame = shared_cropped_frame.copy()
+        # make a copy of the cropped frame
+        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
         frame_time = shared_frame_time.value
         # signal that the frame has been used so a new one will be ready
         shared_frame_time.value = 0.0
@@ -232,7 +244,7 @@ def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_fra
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects = detect_objects(cropped_frame_rgb, sess, detection_graph)
+        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset)
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
