@@ -23,13 +23,17 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
+REGION_SIZE = 700
+REGION_X_OFFSET = 950
+REGION_Y_OFFSET = 380
+
 # Loading label map
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES,
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-def detect_objects(cropped_frame, full_frame, sess, detection_graph):
+def detect_objects(cropped_frame, sess, detection_graph):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(cropped_frame, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -51,41 +55,11 @@ def detect_objects(cropped_frame, full_frame, sess, detection_graph):
     # build an array of detected objects
     objects = []
     for index, value in enumerate(classes[0]):
-        object_dict = {}
-        if scores[0, index] > 0.1:
-            object_dict[(category_index.get(value)).get('name').encode('utf8')] = \
-                                scores[0, index]
-            objects.append(object_dict)
+        score = scores[0, index]
+        if score > 0.1:
+            objects += [value, scores[0, index]] + boxes[0, index].tolist()
 
-    squeezed_boxes = np.squeeze(boxes)
-    squeezed_scores = np.squeeze(scores)
-
-    full_frame_shape = full_frame.shape
-    cropped_frame_shape = cropped_frame.shape
-
-    if(len(objects)>0):
-        # reposition bounding box based on full frame
-        for i, box in enumerate(squeezed_boxes):
-            if box[2] > 0:
-                squeezed_boxes[i][0] = ((box[0] * cropped_frame_shape[0]) + 200)/full_frame_shape[0]  # ymin
-                squeezed_boxes[i][1] = ((box[1] * cropped_frame_shape[0]) + 1300)/full_frame_shape[1] # xmin
-                squeezed_boxes[i][2] = ((box[2] * cropped_frame_shape[0]) + 200)/full_frame_shape[0]  # ymax
-                squeezed_boxes[i][3] = ((box[3] * cropped_frame_shape[0]) + 1300)/full_frame_shape[1]  # xmax
-
-    # draw boxes for detected objects on image
-    vis_util.visualize_boxes_and_labels_on_image_array(
-        full_frame,
-        squeezed_boxes,
-        np.squeeze(classes).astype(np.int32),
-        squeezed_scores,
-        category_index,
-        use_normalized_coordinates=True,
-        line_thickness=4,
-        min_score_thresh=.1)
-    
-    # cv2.rectangle(full_frame, (800, 100), (1250, 550), (255,0,0), 2)
-
-    return objects, full_frame
+    return objects
 
 def main():
     # capture a single frame and check the frame shape so the correct array
@@ -108,14 +82,13 @@ def main():
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
+    # shape current frame so it can be treated as an image
+    frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
     # create shared array for storing the cropped frame image data
     # TODO: make dynamic
-    shared_cropped_arr = mp.Array(ctypes.c_uint16, 300*300*3)
+    shared_cropped_arr = mp.Array(ctypes.c_uint16, REGION_SIZE*REGION_SIZE*3)
     # create shared array for passing the image data from detect_objects to flask
-    shared_output_arr = mp.Array(ctypes.c_uint16, flat_array_length)
-    # create a numpy array with the image shape from the shared memory array
-    # this is used by flask to output an mjpeg stream
-    frame_output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
+    shared_output_arr = mp.Array(ctypes.c_double, 6*10)
 
     capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape))
     capture_process.daemon = True
@@ -139,10 +112,23 @@ def main():
         while True:
             # max out at 5 FPS
             time.sleep(0.2)
-            # convert back to BGR
-            # frame_bgr = cv2.cvtColor(frame_output_arr, cv2.COLOR_RGB2BGR)
+            frame = frame_arr.copy()
+            # draw the bounding boxes on the screen
+            object_index = 0
+            while(object_index < 60 and shared_output_arr[object_index] > 0):
+                object_class = shared_output_arr[object_index]
+                score = shared_output_arr[object_index+1]
+                ymin = int(((shared_output_arr[object_index+2] * REGION_SIZE) + REGION_Y_OFFSET))
+                xmin = int(((shared_output_arr[object_index+3] * REGION_SIZE) + REGION_X_OFFSET))
+                ymax = int(((shared_output_arr[object_index+4] * REGION_SIZE) + REGION_Y_OFFSET))
+                xmax = int(((shared_output_arr[object_index+5] * REGION_SIZE) + REGION_X_OFFSET))
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255,0,0), 2)
+                object_index += 6
+                print(category_index.get(object_class).get('name').encode('utf8'), score)
             # encode the image into a jpg
-            ret, jpg = cv2.imencode('.jpg', frame_output_arr)
+
+            cv2.rectangle(frame, (REGION_X_OFFSET, REGION_Y_OFFSET), (REGION_X_OFFSET+REGION_SIZE, REGION_Y_OFFSET+REGION_SIZE), (255,255,255), 2)
+            ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
@@ -160,7 +146,7 @@ def tonumpyarray(mp_arr):
 def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    cropped_frame = tonumpyarray(shared_cropped_arr).reshape(300,300,3)
+    cropped_frame = tonumpyarray(shared_cropped_arr).reshape(REGION_SIZE,REGION_SIZE,3)
 
     # start the video capture
     video = cv2.VideoCapture(RTSP_URL)
@@ -185,7 +171,7 @@ def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape)
                     # Position 2
                     # frame_cropped = frame[270:720, 100:550]
                     # Car
-                    cropped_frame[:] = frame[200:500, 1300:1600]
+                    cropped_frame[:] = frame[REGION_Y_OFFSET:REGION_Y_OFFSET+REGION_SIZE, REGION_X_OFFSET:REGION_X_OFFSET+REGION_SIZE]
                     arr[:] = frame
                     # signal to the detection_process by setting the shared_frame_time
                     shared_frame_time.value = frame_time.timestamp()
@@ -196,9 +182,7 @@ def fetch_frames(shared_arr, shared_cropped_arr, shared_frame_time, frame_shape)
 def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_frame_time, frame_shape):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    shared_cropped_frame = tonumpyarray(shared_cropped_arr).reshape(300,300,3)
-    # shape shared output array into frame so it can be copied into
-    output_arr = tonumpyarray(shared_output_arr).reshape(frame_shape)
+    shared_cropped_frame = tonumpyarray(shared_cropped_arr).reshape(REGION_SIZE,REGION_SIZE,3)
 
     # Load a (frozen) Tensorflow model into memory before the processing loop
     detection_graph = tf.Graph()
@@ -239,7 +223,7 @@ def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_fra
             continue
         
         # make a copy of the frame
-        frame = arr.copy()
+        # frame = arr.copy()
         cropped_frame = shared_cropped_frame.copy()
         frame_time = shared_frame_time.value
         # signal that the frame has been used so a new one will be ready
@@ -248,11 +232,9 @@ def process_frames(shared_arr, shared_cropped_arr, shared_output_arr, shared_fra
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects, frame_overlay = detect_objects(cropped_frame_rgb, frame, sess, detection_graph)
-        # copy the output frame with the bounding boxes to the output array
-        output_arr[:] = frame_overlay
-        if(len(objects) > 0):
-            print(objects)
+        objects = detect_objects(cropped_frame_rgb, sess, detection_graph)
+        # copy the detected objects to the output array, filling the array when needed
+        shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 if __name__ == '__main__':
     mp.freeze_support()
