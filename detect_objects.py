@@ -114,6 +114,7 @@ def main():
     #       is a float. otherwise it stops updating the value in shared
     #       memory. probably something to do with the size of the memory block
     shared_frame_time = mp.Value('d', 0.0)
+    shared_frame_time2 = mp.Value('d', 0.0)
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
@@ -122,20 +123,28 @@ def main():
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
     # create shared array for storing 10 detected objects
     shared_output_arr = mp.Array(ctypes.c_double, 6*10)
+    shared_output_arr2 = mp.Array(ctypes.c_double, 6*10)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_frame_time, frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, [shared_frame_time, shared_frame_time2], frame_shape))
     capture_process.daemon = True
 
-    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, shared_frame_time, frame_shape, REGION_SIZE, REGION_X_OFFSET, REGION_Y_OFFSET))
+    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, 
+        shared_frame_time, frame_shape, REGION_SIZE, REGION_X_OFFSET, REGION_Y_OFFSET))
     detection_process.daemon = True
 
-    object_parser = ObjectParser([shared_output_arr])
+    detection_process2 = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr2, 
+        shared_frame_time2, frame_shape, 1080, 0, 0))
+    detection_process.daemon = True
+
+    object_parser = ObjectParser([shared_output_arr, shared_output_arr2])
     object_parser.start()
 
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
     detection_process.start()
     print("detection_process pid ", detection_process.pid)
+    detection_process2.start()
+    print("detection_process pid ", detection_process2.pid)
 
     app = Flask(__name__)
 
@@ -178,6 +187,7 @@ def main():
 
     capture_process.join()
     detection_process.join()
+    detection_process2.join()
     object_parser.join()
 
 # convert shared memory array into numpy array
@@ -186,7 +196,7 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_frame_time, frame_shape):
+def fetch_frames(shared_arr, shared_frame_times, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -203,13 +213,14 @@ def fetch_frames(shared_arr, shared_frame_time, frame_shape):
         if ret:
             # if the detection_process is ready for the next frame decode it
             # otherwise skip this frame and move onto the next one
-            if shared_frame_time.value == 0.0:
+            if all(shared_frame_time.value == 0.0 for shared_frame_time in shared_frame_times):
                 # go ahead and decode the current frame
                 ret, frame = video.retrieve()
                 if ret:
                     arr[:] = frame
-                    # signal to the detection_process by setting the shared_frame_time
-                    shared_frame_time.value = frame_time.timestamp()
+                    # signal to the detection_processes by setting the shared_frame_time
+                    for shared_frame_time in shared_frame_times:
+                        shared_frame_time.value = frame_time.timestamp()
             else:
                 # sleep a little to reduce CPU usage
                 time.sleep(0.01)
