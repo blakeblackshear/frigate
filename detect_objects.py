@@ -24,9 +24,8 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
-REGION_SIZE = 300
-REGION_X_OFFSET = 1250
-REGION_Y_OFFSET = 180
+#REGIONS = "600,0,380:600,600,380:600,1200,380"
+REGIONS = os.getenv('REGIONS')
 
 DETECTED_OBJECTS = []
 
@@ -98,6 +97,15 @@ class ObjectParser(threading.Thread):
             time.sleep(0.01)
 
 def main():
+    # Parse selected regions
+    regions = []
+    for region_string in REGIONS.split(':'):
+        region_parts = region_string.split(',')
+        regions.append({
+            'size': int(region_parts[0]),
+            'x_offset': int(region_parts[1]),
+            'y_offset': int(region_parts[2])
+        })
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
     video = cv2.VideoCapture(RTSP_URL)
@@ -109,42 +117,45 @@ def main():
         exit(1)
     video.release()
 
-    # create shared value for storing the time the frame was captured
-    # note: this must be a double even though the value you are storing
-    #       is a float. otherwise it stops updating the value in shared
-    #       memory. probably something to do with the size of the memory block
-    shared_frame_time = mp.Value('d', 0.0)
-    shared_frame_time2 = mp.Value('d', 0.0)
+    shared_memory_objects = []
+    for region in regions:
+        shared_memory_objects.append({
+            # create shared value for storing the time the frame was captured
+            # note: this must be a double even though the value you are storing
+            #       is a float. otherwise it stops updating the value in shared
+            #       memory. probably something to do with the size of the memory block
+            'frame_time': mp.Value('d', 0.0),
+            # create shared array for storing 10 detected objects
+            'output_array': mp.Array(ctypes.c_double, 6*10)
+        })
+        
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
-    # create shared array for storing 10 detected objects
-    shared_output_arr = mp.Array(ctypes.c_double, 6*10)
-    shared_output_arr2 = mp.Array(ctypes.c_double, 6*10)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, [shared_frame_time, shared_frame_time2], frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, [obj['frame_time'] for obj in shared_memory_objects], frame_shape))
     capture_process.daemon = True
 
-    detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, 
-        shared_frame_time, frame_shape, REGION_SIZE, REGION_X_OFFSET, REGION_Y_OFFSET))
-    detection_process.daemon = True
+    detection_processes = []
+    for index, region in enumerate(regions):
+        detection_process = mp.Process(target=process_frames, args=(shared_arr, 
+            shared_memory_objects[index]['output_array'], 
+            shared_memory_objects[index]['frame_time'], frame_shape, 
+            region['size'], region['x_offset'], region['y_offset']))
+        detection_process.daemon = True
+        detection_processes.append(detection_process)
 
-    detection_process2 = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr2, 
-        shared_frame_time2, frame_shape, 1080, 0, 0))
-    detection_process.daemon = True
-
-    object_parser = ObjectParser([shared_output_arr, shared_output_arr2])
+    object_parser = ObjectParser([obj['output_array'] for obj in shared_memory_objects])
     object_parser.start()
 
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
-    detection_process.start()
-    print("detection_process pid ", detection_process.pid)
-    detection_process2.start()
-    print("detection_process pid ", detection_process2.pid)
+    for detection_process in detection_processes:
+        detection_process.start()
+        print("detection_process pid ", detection_process.pid)
 
     app = Flask(__name__)
 
@@ -175,7 +186,11 @@ def main():
                     thickness=2,
                     display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
                     use_normalized_coordinates=False)
-            cv2.rectangle(frame, (REGION_X_OFFSET, REGION_Y_OFFSET), (REGION_X_OFFSET+REGION_SIZE, REGION_Y_OFFSET+REGION_SIZE), (255,255,255), 2)
+
+            for region in regions:
+                cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
+                    (region['x_offset']+region['size'], region['y_offset']+region['size']), 
+                    (255,255,255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
@@ -186,8 +201,8 @@ def main():
     app.run(host='0.0.0.0', debug=False)
 
     capture_process.join()
-    detection_process.join()
-    detection_process2.join()
+    for detection_process in detection_processes:
+        detection_process.join()
     object_parser.join()
 
 # convert shared memory array into numpy array
