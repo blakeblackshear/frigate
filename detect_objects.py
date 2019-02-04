@@ -5,6 +5,7 @@ import datetime
 import ctypes
 import logging
 import multiprocessing as mp
+import threading
 from contextlib import closing
 import numpy as np
 import tensorflow as tf
@@ -26,6 +27,8 @@ NUM_CLASSES = 90
 REGION_SIZE = 300
 REGION_X_OFFSET = 1250
 REGION_Y_OFFSET = 180
+
+DETECTED_OBJECTS = []
 
 # Loading label map
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
@@ -64,10 +67,35 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
             box[3] = (box[3] * region_size) + region_x_offset
             objects += [value, scores[0, index]] + box
         # only get the first 10 objects
-        if len(objects) = 60:
+        if len(objects) == 60:
             break
 
     return objects
+
+class ObjectParser(threading.Thread):
+    def __init__(self, object_arrays):
+        threading.Thread.__init__(self)
+        self._object_arrays = object_arrays
+
+    def run(self):
+        global DETECTED_OBJECTS
+        while True:
+            detected_objects = []
+            for object_array in self._object_arrays:
+                object_index = 0
+                while(object_index < 60 and object_array[object_index] > 0):
+                    object_class = object_array[object_index]
+                    detected_objects.append({
+                        'name': str(category_index.get(object_class).get('name')),
+                        'score': object_array[object_index+1],
+                        'ymin': int(object_array[object_index+2]),
+                        'xmin': int(object_array[object_index+3]),
+                        'ymax': int(object_array[object_index+4]),
+                        'xmax': int(object_array[object_index+5])
+                    })
+                    object_index += 6
+            DETECTED_OBJECTS = detected_objects
+            time.sleep(0.01)
 
 def main():
     # capture a single frame and check the frame shape so the correct array
@@ -101,6 +129,9 @@ def main():
     detection_process = mp.Process(target=process_frames, args=(shared_arr, shared_output_arr, shared_frame_time, frame_shape, REGION_SIZE, REGION_X_OFFSET, REGION_Y_OFFSET))
     detection_process.daemon = True
 
+    object_parser = ObjectParser([shared_output_arr])
+    object_parser.start()
+
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
     detection_process.start()
@@ -114,33 +145,27 @@ def main():
         return Response(imagestream(),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
     def imagestream():
+        global DETECTED_OBJECTS
         while True:
             # max out at 5 FPS
             time.sleep(0.2)
+            # make a copy of the current detected objects
+            detected_objects = DETECTED_OBJECTS.copy()
+            # make a copy of the current frame
             frame = frame_arr.copy()
             # convert to RGB for drawing
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
-            object_index = 0
-            while(object_index < 60 and shared_output_arr[object_index] > 0):
-                object_class = shared_output_arr[object_index]
-                object_name = str(category_index.get(object_class).get('name'))
-                score = shared_output_arr[object_index+1]
-                display_str = '{}: {}%'.format(object_name, int(100*score))
-                ymin = int(shared_output_arr[object_index+2])
-                xmin = int(shared_output_arr[object_index+3])
-                ymax = int(shared_output_arr[object_index+4])
-                xmax = int(shared_output_arr[object_index+5])
+            for obj in DETECTED_OBJECTS:
                 vis_util.draw_bounding_box_on_image_array(frame,
-                    ymin,
-                    xmin,
-                    ymax,
-                    xmax,
+                    obj['ymin'],
+                    obj['xmin'],
+                    obj['ymax'],
+                    obj['xmax'],
                     color='red',
                     thickness=2,
-                    display_str_list=[display_str],
+                    display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
                     use_normalized_coordinates=False)
-                object_index += 6
             cv2.rectangle(frame, (REGION_X_OFFSET, REGION_Y_OFFSET), (REGION_X_OFFSET+REGION_SIZE, REGION_Y_OFFSET+REGION_SIZE), (255,255,255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -153,6 +178,7 @@ def main():
 
     capture_process.join()
     detection_process.join()
+    object_parser.join()
 
 # convert shared memory array into numpy array
 def tonumpyarray(mp_arr):
@@ -181,14 +207,12 @@ def fetch_frames(shared_arr, shared_frame_time, frame_shape):
                 # go ahead and decode the current frame
                 ret, frame = video.retrieve()
                 if ret:
-                    # copy the frame into the numpy array
-                    # Position 1
-                    # cropped_frame[:] = frame[270:720, 550:1000]
-                    # Position 2
-                    # frame_cropped = frame[270:720, 100:550]
                     arr[:] = frame
                     # signal to the detection_process by setting the shared_frame_time
                     shared_frame_time.value = frame_time.timestamp()
+            else:
+                # sleep a little to reduce CPU usage
+                time.sleep(0.01)
     
     video.release()
 
