@@ -121,11 +121,13 @@ def main():
     for region in regions:
         shared_memory_objects.append({
             # create shared value for storing the time the frame was captured
+            'frame_time': mp.Value('d', 0.0),
+            # shared value for motion detection signal (1 for motion 0 for no motion)
+            'motion_detected': mp.Value('i', 1),
+            # create shared array for storing 10 detected objects
             # note: this must be a double even though the value you are storing
             #       is a float. otherwise it stops updating the value in shared
             #       memory. probably something to do with the size of the memory block
-            'frame_time': mp.Value('d', 0.0),
-            # create shared array for storing 10 detected objects
             'output_array': mp.Array(ctypes.c_double, 6*10)
         })
         
@@ -142,8 +144,10 @@ def main():
     detection_processes = []
     for index, region in enumerate(regions):
         detection_process = mp.Process(target=process_frames, args=(shared_arr, 
-            shared_memory_objects[index]['output_array'], 
-            shared_memory_objects[index]['frame_time'], frame_shape, 
+            shared_memory_objects[index]['output_array'],
+            shared_memory_objects[index]['frame_time'],
+            shared_memory_objects[index]['motion_detected'],
+            frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
         detection_process.daemon = True
         detection_processes.append(detection_process)
@@ -243,7 +247,7 @@ def fetch_frames(shared_arr, shared_frame_times, frame_shape):
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape, region_size, region_x_offset, region_y_offset):
+def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -259,6 +263,11 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_shape
 
     no_frames_available = -1
     while True:
+        # if there is no motion detected
+        if shared_motion.value == 0:
+            time.sleep(0.01)
+            continue
+
         # if there isnt a frame ready for processing
         if shared_frame_time.value == 0.0:
             # save the first time there were no frames available
