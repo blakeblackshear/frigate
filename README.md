@@ -33,10 +33,38 @@ Access the mjpeg stream at http://localhost:5000
 
 ## Tips
 - Lower the framerate of the RTSP feed on the camera to what you want to reduce the CPU usage for capturing the feed
+- Use SSDLite models
 
 ## Future improvements
-- MQTT messages when detected objects change
-- Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
-- Parallel processing to increase FPS
-- Look into GPU accelerated decoding of RTSP stream
-- Send video over a socket and use JSMPEG
+- [ ] Look for a subset of object types
+- [ ] Try and simplify the tensorflow model to just look for the objects we care about
+- [ ] MQTT messages when detected objects change
+- [ ] Implement basic motion detection with opencv and only look for objects in the regions with detected motion
+- [ ] Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
+- [x] Parallel processing to increase FPS
+- [ ] Look into GPU accelerated decoding of RTSP stream
+- [ ] Send video over a socket and use JSMPEG
+
+## Building Tensorflow from source for CPU optimizations
+https://www.tensorflow.org/install/source#docker_linux_builds
+used `tensorflow/tensorflow:1.12.0-devel-py3`
+
+## Optimizing the graph (cant say I saw much difference in CPU usage)
+https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/graph_transforms/README.md#optimizing-for-deployment
+```
+docker run -it -v ${PWD}:/lab -v ${PWD}/../back_camera_model/models/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb:/frozen_inference_graph.pb:ro tensorflow/tensorflow:1.12.0-devel-py3 bash
+
+bazel build tensorflow/tools/graph_transforms:transform_graph
+
+bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
+--in_graph=/frozen_inference_graph.pb \
+--out_graph=/lab/optimized_inception_graph.pb \
+--inputs='image_tensor' \
+--outputs='num_detections,detection_scores,detection_boxes,detection_classes' \
+--transforms='
+  strip_unused_nodes(type=float, shape="1,300,300,3")
+  remove_nodes(op=Identity, op=CheckNumerics)
+  fold_constants(ignore_errors=true)
+  fold_batch_norms
+  fold_old_batch_norms'
+```
