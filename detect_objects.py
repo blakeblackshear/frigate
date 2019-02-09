@@ -25,8 +25,9 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
-REGIONS = "350,0,300:400,350,250:400,750,250"
-#REGIONS = os.getenv('REGIONS')
+# REGIONS = "350,0,300:400,350,250:400,750,250"
+# REGIONS = "400,350,250"
+REGIONS = os.getenv('REGIONS')
 
 DETECTED_OBJECTS = []
 
@@ -121,8 +122,6 @@ def main():
     shared_memory_objects = []
     for region in regions:
         shared_memory_objects.append({
-            # create shared value for storing the time the frame was captured
-            'frame_time': mp.Value('d', 0.0),
             # shared value for signaling to the capture process that we are ready for the next frame
             # (1 for ready 0 for not ready)
             'ready_for_frame': mp.Value('i', 1),
@@ -139,17 +138,19 @@ def main():
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
+    # create shared value for storing the frame_time
+    shared_frame_time = mp.Value('d', 0.0)
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, [obj['frame_time'] for obj in shared_memory_objects], frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_frame_time, [obj['ready_for_frame'] for obj in shared_memory_objects], frame_shape))
     capture_process.daemon = True
 
     detection_processes = []
     for index, region in enumerate(regions):
         detection_process = mp.Process(target=process_frames, args=(shared_arr, 
             shared_memory_objects[index]['output_array'],
-            shared_memory_objects[index]['frame_time'],
+            shared_frame_time,
             shared_memory_objects[index]['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
@@ -158,8 +159,9 @@ def main():
 
     motion_processes = []
     for index, region in enumerate(regions):
-        motion_process = mp.Process(target=detect_motion, args=(shared_arr, 
-            shared_memory_objects[index]['frame_time'],
+        motion_process = mp.Process(target=detect_motion, args=(shared_arr,
+            shared_frame_time,
+            shared_memory_objects[index]['ready_for_frame'],
             shared_memory_objects[index]['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
@@ -197,7 +199,7 @@ def main():
             # convert to RGB for drawing
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
-            for obj in DETECTED_OBJECTS:
+            for obj in detected_objects:
                 vis_util.draw_bounding_box_on_image_array(frame,
                     obj['ymin'],
                     obj['xmin'],
@@ -212,6 +214,12 @@ def main():
                 cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                     (255,255,255), 2)
+
+            motion_status = 'No Motion'
+            if any(obj['motion_detected'].value == 1 for obj in shared_memory_objects):
+                motion_status = 'Motion'
+            cv2.putText(frame, motion_status, (10, 20),
+		        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
@@ -234,7 +242,7 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_frame_times, frame_shape):
+def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -249,16 +257,17 @@ def fetch_frames(shared_arr, shared_frame_times, frame_shape):
         # snapshot the time the frame was grabbed
         frame_time = datetime.datetime.now()
         if ret:
-            # if the detection_process is ready for the next frame decode it
+            # if the anyone is ready for the next frame decode it
             # otherwise skip this frame and move onto the next one
-            if all(shared_frame_time.value == 0.0 for shared_frame_time in shared_frame_times):
+            if any(flag.value == 1 for flag in ready_for_frame_flags):
                 # go ahead and decode the current frame
                 ret, frame = video.retrieve()
                 if ret:
                     arr[:] = frame
+                    shared_frame_time.value = frame_time.timestamp()
                     # signal to the detection_processes by setting the shared_frame_time
-                    for shared_frame_time in shared_frame_times:
-                        shared_frame_time.value = frame_time.timestamp()
+                    for flag in ready_for_frame_flags:
+                        flag.value = 0
             else:
                 # sleep a little to reduce CPU usage
                 time.sleep(0.01)
@@ -325,22 +334,22 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 # do the actual object detection
-def detect_motion(shared_arr, shared_frame_time, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
+def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
     no_frames_available = -1
     avg_frame = None
     last_motion = -1
+    frame_time = 0.0
     while True:
         now = datetime.datetime.now().timestamp()
         # if it has been 30 seconds since the last motion, clear the flag
         if last_motion > 0 and (now - last_motion) > 30:
             last_motion = -1
             shared_motion.value = 0
-            print("motion cleared")
         # if there isnt a frame ready for processing
-        if shared_frame_time.value == 0.0:
+        if shared_frame_time.value == frame_time:
             # save the first time there were no frames available
             if no_frames_available == -1:
                 no_frames_available = now
@@ -352,6 +361,8 @@ def detect_motion(shared_arr, shared_frame_time, shared_motion, frame_shape, reg
             else:
                 # rest a little bit to avoid maxing out the CPU
                 time.sleep(0.01)
+            if ready_for_frame.value == 0:
+                ready_for_frame.value = 1
             continue
         
         # we got a valid frame, so reset the timer
@@ -360,21 +371,19 @@ def detect_motion(shared_arr, shared_frame_time, shared_motion, frame_shape, reg
         # if the frame is more than 0.5 second old, discard it
         if (now - shared_frame_time.value) > 0.5:
             # signal that we need a new frame
-            shared_frame_time.value = 0.0
+            ready_for_frame.value = 1
             # rest a little bit to avoid maxing out the CPU
             time.sleep(0.01)
             continue
         
         # make a copy of the cropped frame
-        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
+        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
         frame_time = shared_frame_time.value
         # signal that the frame has been used so a new one will be ready
-        shared_frame_time.value = 0.0
+        ready_for_frame.value = 1
 
         # convert to grayscale
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
-        # convert to uint8
-        gray = (gray/256).astype('uint8')
         # apply gaussian blur
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -400,15 +409,14 @@ def detect_motion(shared_arr, shared_frame_time, shared_motion, frame_shape, reg
             if cv2.contourArea(c) < 50:
                 continue
             
-            print("motion_detected")
             last_motion = now
             shared_motion.value = 1
 
             # compute the bounding box for the contour, draw it on the frame,
             # and update the text
-            (x, y, w, h) = cv2.boundingRect(c)
-            cv2.rectangle(cropped_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.imwrite("motion%d.png" % frame_time, cropped_frame)
+        #     (x, y, w, h) = cv2.boundingRect(c)
+        #     cv2.rectangle(cropped_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # cv2.imwrite("motion%d.jpg" % frame_time, cropped_frame)
 if __name__ == '__main__':
     mp.freeze_support()
     main()
