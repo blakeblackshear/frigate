@@ -25,7 +25,7 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
-REGIONS = "300,0,0:300,300,0:300,600,0"
+REGIONS = "350,0,300:400,350,250:400,750,250"
 #REGIONS = os.getenv('REGIONS')
 
 DETECTED_OBJECTS = []
@@ -123,8 +123,11 @@ def main():
         shared_memory_objects.append({
             # create shared value for storing the time the frame was captured
             'frame_time': mp.Value('d', 0.0),
+            # shared value for signaling to the capture process that we are ready for the next frame
+            # (1 for ready 0 for not ready)
+            'ready_for_frame': mp.Value('i', 1),
             # shared value for motion detection signal (1 for motion 0 for no motion)
-            'motion_detected': mp.Value('i', 1),
+            'motion_detected': mp.Value('i', 0),
             # create shared array for storing 10 detected objects
             # note: this must be a double even though the value you are storing
             #       is a float. otherwise it stops updating the value in shared
@@ -164,66 +167,66 @@ def main():
         motion_processes.append(motion_process)
 
     object_parser = ObjectParser([obj['output_array'] for obj in shared_memory_objects])
-    # object_parser.start()
+    object_parser.start()
 
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
-    # for detection_process in detection_processes:
-    #     detection_process.start()
-    #     print("detection_process pid ", detection_process.pid)
+    for detection_process in detection_processes:
+        detection_process.start()
+        print("detection_process pid ", detection_process.pid)
     for motion_process in motion_processes:
         motion_process.start()
         print("motion_process pid ", motion_process.pid)
 
-    # app = Flask(__name__)
+    app = Flask(__name__)
 
-    # @app.route('/')
-    # def index():
-    #     # return a multipart response
-    #     return Response(imagestream(),
-    #                     mimetype='multipart/x-mixed-replace; boundary=frame')
-    # def imagestream():
-    #     global DETECTED_OBJECTS
-    #     while True:
-    #         # max out at 5 FPS
-    #         time.sleep(0.2)
-    #         # make a copy of the current detected objects
-    #         detected_objects = DETECTED_OBJECTS.copy()
-    #         # make a copy of the current frame
-    #         frame = frame_arr.copy()
-    #         # convert to RGB for drawing
-    #         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    #         # draw the bounding boxes on the screen
-    #         for obj in DETECTED_OBJECTS:
-    #             vis_util.draw_bounding_box_on_image_array(frame,
-    #                 obj['ymin'],
-    #                 obj['xmin'],
-    #                 obj['ymax'],
-    #                 obj['xmax'],
-    #                 color='red',
-    #                 thickness=2,
-    #                 display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
-    #                 use_normalized_coordinates=False)
+    @app.route('/')
+    def index():
+        # return a multipart response
+        return Response(imagestream(),
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+    def imagestream():
+        global DETECTED_OBJECTS
+        while True:
+            # max out at 5 FPS
+            time.sleep(0.2)
+            # make a copy of the current detected objects
+            detected_objects = DETECTED_OBJECTS.copy()
+            # make a copy of the current frame
+            frame = frame_arr.copy()
+            # convert to RGB for drawing
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # draw the bounding boxes on the screen
+            for obj in DETECTED_OBJECTS:
+                vis_util.draw_bounding_box_on_image_array(frame,
+                    obj['ymin'],
+                    obj['xmin'],
+                    obj['ymax'],
+                    obj['xmax'],
+                    color='red',
+                    thickness=2,
+                    display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
+                    use_normalized_coordinates=False)
 
-    #         for region in regions:
-    #             cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
-    #                 (region['x_offset']+region['size'], region['y_offset']+region['size']), 
-    #                 (255,255,255), 2)
-    #         # convert back to BGR
-    #         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    #         # encode the image into a jpg
-    #         ret, jpg = cv2.imencode('.jpg', frame)
-    #         yield (b'--frame\r\n'
-    #             b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+            for region in regions:
+                cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
+                    (region['x_offset']+region['size'], region['y_offset']+region['size']), 
+                    (255,255,255), 2)
+            # convert back to BGR
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # encode the image into a jpg
+            ret, jpg = cv2.imencode('.jpg', frame)
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
-    # app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=False)
 
     capture_process.join()
-    # for detection_process in detection_processes:
-    #     detection_process.join()
+    for detection_process in detection_processes:
+        detection_process.join()
     for motion_process in motion_processes:
         motion_process.join()
-    # object_parser.join()
+    object_parser.join()
 
 # convert shared memory array into numpy array
 def tonumpyarray(mp_arr):
@@ -278,20 +281,22 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         sess = tf.Session(graph=detection_graph)
 
     no_frames_available = -1
+    frame_time = 0.0
     while True:
+        now = datetime.datetime.now().timestamp()
         # if there is no motion detected
         if shared_motion.value == 0:
             time.sleep(0.01)
             continue
 
-        # if there isnt a frame ready for processing
-        if shared_frame_time.value == 0.0:
+        # if there isnt a new frame ready for processing
+        if shared_frame_time.value == frame_time:
             # save the first time there were no frames available
             if no_frames_available == -1:
-                no_frames_available = datetime.datetime.now().timestamp()
+                no_frames_available = now
             # if there havent been any frames available in 30 seconds, 
             # sleep to avoid using so much cpu if the camera feed is down
-            if no_frames_available > 0 and (datetime.datetime.now().timestamp() - no_frames_available) > 30:
+            if no_frames_available > 0 and (now - no_frames_available) > 30:
                 time.sleep(1)
                 print("sleeping because no frames have been available in a while")
             else:
@@ -302,10 +307,8 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         # we got a valid frame, so reset the timer
         no_frames_available = -1
 
-        # if the frame is more than 0.5 second old, discard it
-        if (datetime.datetime.now().timestamp() - shared_frame_time.value) > 0.5:
-            # signal that we need a new frame
-            shared_frame_time.value = 0.0
+        # if the frame is more than 0.5 second old, ignore it
+        if (now - shared_frame_time.value) > 0.5:
             # rest a little bit to avoid maxing out the CPU
             time.sleep(0.01)
             continue
@@ -313,8 +316,6 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         # make a copy of the cropped frame
         cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
         frame_time = shared_frame_time.value
-        # signal that the frame has been used so a new one will be ready
-        shared_frame_time.value = 0.0
 
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
