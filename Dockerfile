@@ -61,17 +61,17 @@ RUN cd /usr/local/src/ \
 RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
 # Download & build OpenCV
-RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/3.4.1.zip
+RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip
 RUN cd /usr/local/src/ \
- && unzip 3.4.1.zip \
- && rm 3.4.1.zip \
- && cd /usr/local/src/opencv-3.4.1/ \
+ && unzip 4.0.1.zip \
+ && rm 4.0.1.zip \
+ && cd /usr/local/src/opencv-4.0.1/ \
  && mkdir build \
- && cd /usr/local/src/opencv-3.4.1/build \ 
+ && cd /usr/local/src/opencv-4.0.1/build \ 
  && cmake -D CMAKE_INSTALL_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ .. \
  && make -j4 \
  && make install \
- && rm -rf /usr/local/src/opencv-3.4.1
+ && rm -rf /usr/local/src/opencv-4.0.1
 
 # Minimize image size 
 RUN (apt-get autoremove -y; \
