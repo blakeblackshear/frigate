@@ -25,8 +25,8 @@ PATH_TO_LABELS = '/label_map.pbtext'
 # TODO: make dynamic?
 NUM_CLASSES = 90
 
-# REGIONS = "350,0,300:400,350,250:400,750,250"
-# REGIONS = "400,350,250"
+# REGIONS = "350,0,300,50:400,350,250,50:400,750,250,50"
+# REGIONS = "400,350,250,50"
 REGIONS = os.getenv('REGIONS')
 
 DETECTED_OBJECTS = []
@@ -106,7 +106,8 @@ def main():
         regions.append({
             'size': int(region_parts[0]),
             'x_offset': int(region_parts[1]),
-            'y_offset': int(region_parts[2])
+            'y_offset': int(region_parts[2]),
+            'min_object_size': int(region_parts[3])
         })
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
@@ -164,7 +165,8 @@ def main():
             shared_memory_objects[index]['ready_for_frame'],
             shared_memory_objects[index]['motion_detected'],
             frame_shape, 
-            region['size'], region['x_offset'], region['y_offset']))
+            region['size'], region['x_offset'], region['y_offset'],
+            region['min_object_size']))
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
@@ -334,7 +336,7 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 # do the actual object detection
-def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
+def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -405,18 +407,12 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
 
         # loop over the contours
         for c in cnts:
-            # if the contour is too small, ignore it
-            if cv2.contourArea(c) < 50:
-                continue
-            
-            last_motion = now
-            shared_motion.value = 1
+            # if the contour is big enough report motion
+            if cv2.contourArea(c) > min_motion_area:
+                last_motion = now
+                shared_motion.value = 1
+                break
 
-            # compute the bounding box for the contour, draw it on the frame,
-            # and update the text
-        #     (x, y, w, h) = cv2.boundingRect(c)
-        #     cv2.rectangle(cropped_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        # cv2.imwrite("motion%d.jpg" % frame_time, cropped_frame)
 if __name__ == '__main__':
     mp.freeze_support()
     main()
