@@ -20,7 +20,7 @@ Download the cooresponding label map from [here](https://github.com/tensorflow/m
 
 Run the container with
 ```
-docker run -it --rm \
+docker run --rm \
 -v <path_to_frozen_detection_graph.pb>:/frozen_inference_graph.pb:ro \
 -v <path_to_labelmap.pbtext>:/label_map.pbtext:ro \
 -p 5000:5000 \
@@ -42,15 +42,21 @@ Access the mjpeg stream at http://localhost:5000
 ## Future improvements
 - [ ] Add a max size for motion and objects
 - [ ] Filter out detected objects that are not the right size
-- [ ] Change color of bounding box if motion detected
+- [ ] Merge bounding boxes that span multiple regions
+- [x] Change color of bounding box if motion detected
+- [ ] Switch to MQTT prefix
+- [ ] Add last will and availability for MQTT
+- [ ] Add ability to turn detection on and off via MQTT
 - [x] Look for a subset of object types
-- [ ] Try and simplify the tensorflow model to just look for the objects we care about
+- [ ] Try and reduce CPU usage by simplifying the tensorflow model to just include the objects we care about
 - [x] MQTT messages when detected objects change
 - [x] Implement basic motion detection with opencv and only look for objects in the regions with detected motion
 - [x] Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
 - [x] Parallel processing to increase FPS
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
+- [ ] Switch to a config file
+- [ ] Allow motion regions to be different than object detection regions
 
 ## Building Tensorflow from source for CPU optimizations
 https://www.tensorflow.org/install/source#docker_linux_builds
