@@ -157,22 +157,7 @@ def main():
             'size': int(region_parts[0]),
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
-            'min_object_size': int(region_parts[3])
-        })
-    # capture a single frame and check the frame shape so the correct array
-    # size can be allocated in memory
-    video = cv2.VideoCapture(RTSP_URL)
-    ret, frame = video.read()
-    if ret:
-        frame_shape = frame.shape
-    else:
-        print("Unable to capture video stream")
-        exit(1)
-    video.release()
-
-    shared_memory_objects = []
-    for region in regions:
-        shared_memory_objects.append({
+            'min_object_size': int(region_parts[3]),
             # shared value for signaling to the capture process that we are ready for the next frame
             # (1 for ready 0 for not ready)
             'ready_for_frame': mp.Value('i', 1),
@@ -184,6 +169,16 @@ def main():
             #       memory. probably something to do with the size of the memory block
             'output_array': mp.Array(ctypes.c_double, 6*10)
         })
+    # capture a single frame and check the frame shape so the correct array
+    # size can be allocated in memory
+    video = cv2.VideoCapture(RTSP_URL)
+    ret, frame = video.read()
+    if ret:
+        frame_shape = frame.shape
+    else:
+        print("Unable to capture video stream")
+        exit(1)
+    video.release()
         
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
@@ -194,15 +189,16 @@ def main():
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
-    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, shared_frame_time, [obj['ready_for_frame'] for obj in shared_memory_objects], frame_shape))
+    capture_process = mp.Process(target=fetch_frames, args=(shared_arr, 
+        shared_frame_time, [region['ready_for_frame'] for region in regions], frame_shape))
     capture_process.daemon = True
 
     detection_processes = []
     for index, region in enumerate(regions):
         detection_process = mp.Process(target=process_frames, args=(shared_arr, 
-            shared_memory_objects[index]['output_array'],
+            region['output_array'],
             shared_frame_time,
-            shared_memory_objects[index]['motion_detected'],
+            region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
         detection_process.daemon = True
@@ -212,20 +208,20 @@ def main():
     for index, region in enumerate(regions):
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
-            shared_memory_objects[index]['ready_for_frame'],
-            shared_memory_objects[index]['motion_detected'],
+            region['ready_for_frame'],
+            region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
             region['min_object_size']))
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
-    object_parser = ObjectParser([obj['output_array'] for obj in shared_memory_objects])
+    object_parser = ObjectParser([region['output_array'] for region in regions])
     object_parser.start()
 
     mqtt_publisher = MqttPublisher(MQTT_HOST, MQTT_MOTION_TOPIC, MQTT_OBJECT_TOPIC, 
         MQTT_OBJECT_CLASSES.split(','), 
-        [obj['motion_detected'] for obj in shared_memory_objects])
+        [region['motion_detected'] for region in regions])
     mqtt_publisher.start()
 
     capture_process.start()
@@ -268,15 +264,15 @@ def main():
                     use_normalized_coordinates=False)
 
             for region in regions:
+                color = (255,255,255)
+                if region['motion_detected'].value == 1:
+                    color = (0,255,0)
                 cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
-                    (255,255,255), 2)
+                    color, 2)
 
-            motion_status = 'No Motion'
-            if any(obj['motion_detected'].value == 1 for obj in shared_memory_objects):
-                motion_status = 'Motion'
-            cv2.putText(frame, motion_status, (10, 20),
-		        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(frame, datetime.datetime.now().strftime("%H:%M:%S"), (1125, 20),
+		        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
