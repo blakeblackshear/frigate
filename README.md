@@ -40,13 +40,15 @@ Access the mjpeg stream at http://localhost:5000
 - Use SSDLite models
 
 ## Future improvements
+- [x] Switch to MQTT prefix
+- [x] Add last will and availability for MQTT
+- [ ] Add ability to turn detection on and off via MQTT
 - [ ] Add a max size for motion and objects
 - [ ] Filter out detected objects that are not the right size
 - [ ] Merge bounding boxes that span multiple regions
+- [ ] Switch to a config file
+- [ ] Allow motion regions to be different than object detection regions
 - [x] Change color of bounding box if motion detected
-- [ ] Switch to MQTT prefix
-- [ ] Add last will and availability for MQTT
-- [ ] Add ability to turn detection on and off via MQTT
 - [x] Look for a subset of object types
 - [ ] Try and reduce CPU usage by simplifying the tensorflow model to just include the objects we care about
 - [x] MQTT messages when detected objects change
@@ -55,8 +57,6 @@ Access the mjpeg stream at http://localhost:5000
 - [x] Parallel processing to increase FPS
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
-- [ ] Switch to a config file
-- [ ] Allow motion regions to be different than object detection regions
 
 ## Building Tensorflow from source for CPU optimizations
 https://www.tensorflow.org/install/source#docker_linux_builds

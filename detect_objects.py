@@ -25,8 +25,7 @@ PATH_TO_CKPT = '/frozen_inference_graph.pb'
 PATH_TO_LABELS = '/label_map.pbtext'
 
 MQTT_HOST = os.getenv('MQTT_HOST')
-MQTT_MOTION_TOPIC = os.getenv('MQTT_MOTION_TOPIC')
-MQTT_OBJECT_TOPIC = os.getenv('MQTT_OBJECT_TOPIC')
+MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
 MQTT_OBJECT_CLASSES = os.getenv('MQTT_OBJECT_CLASSES')
 
 # TODO: make dynamic?
@@ -105,13 +104,14 @@ class ObjectParser(threading.Thread):
             DETECTED_OBJECTS = detected_objects
             time.sleep(0.1)
 class MqttPublisher(threading.Thread):
-    def __init__(self, host, motion_topic, object_topic, object_classes, motion_flags):
+    def __init__(self, host, topic_prefix, object_classes, motion_flags):
         threading.Thread.__init__(self)
         self.client = mqtt.Client()
+        self.client.will_set(topic_prefix+'/available', payload='offline', qos=1, retain=True)
         self.client.connect(host, 1883, 60)
         self.client.loop_start()
-        self.motion_topic = motion_topic
-        self.object_topic = object_topic
+        self.client.publish(topic_prefix+'/available', 'online', retain=True)
+        self.topic_prefix = topic_prefix
         self.object_classes = object_classes
         self.motion_flags = motion_flags
 
@@ -135,7 +135,7 @@ class MqttPublisher(threading.Thread):
             new_payload = json.dumps(payload, sort_keys=True)
             if new_payload != last_sent_payload:
                 last_sent_payload = new_payload
-                self.client.publish(self.object_topic, new_payload, retain=False)
+                self.client.publish(self.topic_prefix+'/objects', new_payload, retain=False)
 
             motion_status = 'OFF'
             if any(obj.value == 1 for obj in self.motion_flags):
@@ -143,7 +143,7 @@ class MqttPublisher(threading.Thread):
             
             if motion_status != last_motion:
                 last_motion = motion_status
-                self.client.publish(self.motion_topic, motion_status, retain=False)
+                self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
             
 
             time.sleep(0.1)
@@ -219,7 +219,7 @@ def main():
     object_parser = ObjectParser([region['output_array'] for region in regions])
     object_parser.start()
 
-    mqtt_publisher = MqttPublisher(MQTT_HOST, MQTT_MOTION_TOPIC, MQTT_OBJECT_TOPIC, 
+    mqtt_publisher = MqttPublisher(MQTT_HOST, MQTT_TOPIC_PREFIX, 
         MQTT_OBJECT_CLASSES.split(','), 
         [region['motion_detected'] for region in regions])
     mqtt_publisher.start()
