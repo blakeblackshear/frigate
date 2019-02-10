@@ -25,7 +25,11 @@ docker run -it --rm \
 -v <path_to_labelmap.pbtext>:/label_map.pbtext:ro \
 -p 5000:5000 \
 -e RTSP_URL='<rtsp_url>' \
--e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>:<box_size_2>,<x_offset_2>,<y_offset_2>' \
+-e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_object_size_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_object_size_2>' \
+-e MQTT_HOST='your.mqtthost.com' \
+-e MQTT_MOTION_TOPIC='cameras/1/motion' \
+-e MQTT_OBJECT_TOPIC='cameras/1/objects' \
+-e MQTT_OBJECT_CLASSES='person,car,truck' \
 realtime-od:latest
 ```
 
@@ -36,11 +40,14 @@ Access the mjpeg stream at http://localhost:5000
 - Use SSDLite models
 
 ## Future improvements
-- [ ] Look for a subset of object types
+- [ ] Add a max size for motion and objects
+- [ ] Filter out detected objects that are not the right size
+- [ ] Change color of bounding box if motion detected
+- [x] Look for a subset of object types
 - [ ] Try and simplify the tensorflow model to just look for the objects we care about
-- [ ] MQTT messages when detected objects change
-- [ ] Implement basic motion detection with opencv and only look for objects in the regions with detected motion
-- [ ] Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
+- [x] MQTT messages when detected objects change
+- [x] Implement basic motion detection with opencv and only look for objects in the regions with detected motion
+- [x] Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
 - [x] Parallel processing to increase FPS
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
