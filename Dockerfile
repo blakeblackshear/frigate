@@ -40,7 +40,8 @@ RUN  pip install -U pip \
  tensorflow \
  keras \
  autovizwidget \
- Flask
+ Flask \
+ imutils
 
 # Install tensorflow models object detection
 RUN GIT_SSL_NO_VERIFY=true git clone -q https://github.com/tensorflow/models /usr/local/lib/python3.5/dist-packages/tensorflow/models
