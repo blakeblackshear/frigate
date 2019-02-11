@@ -387,7 +387,7 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
-# do the actual object detection
+# do the actual motion detection
 def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -398,8 +398,8 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
     frame_time = 0.0
     while True:
         now = datetime.datetime.now().timestamp()
-        # if it has been 30 seconds since the last motion, clear the flag
-        if last_motion > 0 and (now - last_motion) > 30:
+        # if it has been long enough since the last motion, clear the flag
+        if last_motion > 0 and (now - last_motion) > 5:
             last_motion = -1
             shared_motion.value = 0
         # if there isnt a frame ready for processing
