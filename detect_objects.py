@@ -396,6 +396,7 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
     avg_frame = None
     last_motion = -1
     frame_time = 0.0
+    motion_frames = 0
     while True:
         now = datetime.datetime.now().timestamp()
         # if it has been long enough since the last motion, clear the flag
@@ -459,11 +460,16 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
 
         # loop over the contours
         for c in cnts:
-            # if the contour is big enough report motion
-            if cv2.contourArea(c) > min_motion_area:
-                last_motion = now
-                shared_motion.value = 1
+            # if the contour is big enough, count it as motion
+            contour_area = cv2.contourArea(c)
+            if contour_area > min_motion_area:
+                motion_frames += 1
+                # if there have been enough consecutive motion frames, report motion
+                if motion_frames >= 3:
+                    shared_motion.value = 1
+                    last_motion = now
                 break
+            motion_frames = 0
 
 if __name__ == '__main__':
     mp.freeze_support()
