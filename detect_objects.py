@@ -399,7 +399,7 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
     while True:
         now = datetime.datetime.now().timestamp()
         # if it has been long enough since the last motion, clear the flag
-        if last_motion > 0 and (now - last_motion) > 5:
+        if last_motion > 0 and (now - last_motion) > 2:
             last_motion = -1
             shared_motion.value = 0
         # if there isnt a frame ready for processing
