@@ -145,11 +145,13 @@ class MqttPublisher(threading.Thread):
                 if obj['name'] in self.object_classes:
                     payload[obj['name']].append(obj)
             
+            # send message for objects
             new_payload = json.dumps(payload, sort_keys=True)
             if new_payload != last_sent_payload:
                 last_sent_payload = new_payload
                 self.client.publish(self.topic_prefix+'/objects', new_payload, retain=False)
-
+            
+            # send message for motion
             motion_status = 'OFF'
             if any(obj.value == 1 for obj in self.motion_flags):
                 motion_status = 'ON'
@@ -157,7 +159,6 @@ class MqttPublisher(threading.Thread):
             if motion_status != last_motion:
                 last_motion = motion_status
                 self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
-            
 
             time.sleep(0.1)
 
