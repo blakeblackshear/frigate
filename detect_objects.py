@@ -266,8 +266,10 @@ def main():
             time.sleep(0.2)
             # make a copy of the current detected objects
             detected_objects = DETECTED_OBJECTS.copy()
-            # make a copy of the current frame
+            # lock and make a copy of the current frame
+            frame_lock.aquire()
             frame = frame_arr.copy()
+            frame_lock.release()
             # convert to RGB for drawing
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
