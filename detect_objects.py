@@ -478,25 +478,33 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
             motion_frames = 0
             continue
 
+        motion_found = False
+
         # loop over the contours
         for c in cnts:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             if contour_area > min_motion_area:
+                motion_found = True
                 if debug:
-                    (x, y, w, h) = cv2.boundingRect(c)
-                    cv2.rectangle(thresh, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-                motion_frames += 1
-                # if there have been enough consecutive motion frames, report motion
-                if motion_frames >= 3:
-                    shared_motion.value = 1
-                    last_motion = now
-                break
+                    cv2.drawContours(cropped_frame, [c], -1, (0, 255, 0), 2)
+                    x, y, w, h = cv2.boundingRect(c)
+                    cv2.putText(cropped_frame, str(contour_area), (x, y),
+		                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 100, 0), 2)
+                else:
+                    break
+        
+        if motion_found:
+            motion_frames += 1
+            # if there have been enough consecutive motion frames, report motion
+            if motion_frames >= 3:
+                shared_motion.value = 1
+                last_motion = now
+        else:
             motion_frames = 0
 
         if debug and motion_frames > 0:
-            cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), thresh)
+            cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
 
 if __name__ == '__main__':
     mp.freeze_support()
