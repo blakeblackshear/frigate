@@ -473,6 +473,11 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
             cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
 
+        # if there are no contours, there is no motion
+        if len(cnts) < 1:
+            motion_frames = 0
+            continue
+
         # loop over the contours
         for c in cnts:
             # if the contour is big enough, count it as motion
@@ -489,6 +494,7 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
                     last_motion = now
                 break
             motion_frames = 0
+
         if debug and motion_frames > 0:
             cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), thresh)
 
