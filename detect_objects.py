@@ -200,11 +200,15 @@ def main():
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
     # create shared value for storing the frame_time
     shared_frame_time = mp.Value('d', 0.0)
+    # Lock to control access to the frame while writing
+    frame_lock = mp.Lock()
+    # Condition for notifying that a new frame is ready
+    frame_ready = mp.Condition()
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
     capture_process = mp.Process(target=fetch_frames, args=(shared_arr, 
-        shared_frame_time, [region['ready_for_frame'] for region in regions], frame_shape))
+        shared_frame_time, frame_lock, frame_ready, frame_shape))
     capture_process.daemon = True
 
     detection_processes = []
@@ -222,7 +226,7 @@ def main():
     for index, region in enumerate(regions):
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
-            region['ready_for_frame'],
+            frame_lock, frame_ready,
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
@@ -311,7 +315,7 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_shape):
+def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -326,20 +330,17 @@ def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_sha
         # snapshot the time the frame was grabbed
         frame_time = datetime.datetime.now()
         if ret:
-            # if the anyone is ready for the next frame decode it
-            # otherwise skip this frame and move onto the next one
-            if any(flag.value == 1 for flag in ready_for_frame_flags):
-                # go ahead and decode the current frame
-                ret, frame = video.retrieve()
-                if ret:
-                    arr[:] = frame
-                    shared_frame_time.value = frame_time.timestamp()
-                    # signal to the detection_processes by setting the shared_frame_time
-                    for flag in ready_for_frame_flags:
-                        flag.value = 0
-            else:
-                # sleep a little to reduce CPU usage
-                time.sleep(0.1)
+            # go ahead and decode the current frame
+            ret, frame = video.retrieve()
+            if ret:
+                # Lock access and update frame
+                frame_lock.acquire()
+                arr[:] = frame
+                shared_frame_time.value = frame_time.timestamp()
+                frame_lock.release()
+                # Notify with the condition that a new frame is ready
+                with frame_ready:
+                    frame_ready.notify_all()
     
     video.release()
 
@@ -404,7 +405,7 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 # do the actual motion detection
-def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
+def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -419,39 +420,17 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
         if last_motion > 0 and (now - last_motion) > 2:
             last_motion = -1
             shared_motion.value = 0
-        # if there isnt a frame ready for processing
-        if shared_frame_time.value == frame_time:
-            # save the first time there were no frames available
-            if no_frames_available == -1:
-                no_frames_available = now
-            # if there havent been any frames available in 30 seconds, 
-            # sleep to avoid using so much cpu if the camera feed is down
-            if no_frames_available > 0 and (now - no_frames_available) > 30:
-                time.sleep(1)
-                print("sleeping because no frames have been available in a while")
-            else:
-                # rest a little bit to avoid maxing out the CPU
-                time.sleep(0.1)
-            if ready_for_frame.value == 0:
-                ready_for_frame.value = 1
-            continue
         
-        # we got a valid frame, so reset the timer
-        no_frames_available = -1
-
-        # if the frame is more than 0.5 second old, discard it
-        if (now - shared_frame_time.value) > 0.5:
-            # signal that we need a new frame
-            ready_for_frame.value = 1
-            # rest a little bit to avoid maxing out the CPU
-            time.sleep(0.1)
-            continue
+        with frame_ready:
+            # if there isnt a frame ready for processing or it is old, wait for a signal
+            if shared_frame_time.value == frame_time or (now - shared_frame_time.value) > 0.5:
+                frame_ready.wait()
         
-        # make a copy of the cropped frame
+        # lock and make a copy of the cropped frame
+        frame_lock.acquire()
         cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
         frame_time = shared_frame_time.value
-        # signal that the frame has been used so a new one will be ready
-        ready_for_frame.value = 1
+        frame_lock.release()
 
         # convert to grayscale
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
