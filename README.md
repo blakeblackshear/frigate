@@ -43,8 +43,13 @@ Access the mjpeg stream at http://localhost:5000
 - [x] Switch to MQTT prefix
 - [x] Add last will and availability for MQTT
 - [ ] Add ability to turn detection on and off via MQTT
-- [ ] Add a max size for motion and objects
+- [ ] Add a max size for motion and objects (height/width > 1.5, total area > 1500 and < 100,000)
+- [ ] Make motion less sensitive to rain
+- [ ] Use Events or Conditions to signal between threads rather than polling a value
+- [ ] Implement a debug option to save images with detected objects
+- [ ] Only report if x% of the recent frames have a person to avoid single frame false positives (maybe take an average of the person scores in the past x frames?)
 - [ ] Filter out detected objects that are not the right size
+- [ ] Make resilient to network drop outs
 - [ ] Merge bounding boxes that span multiple regions
 - [ ] Switch to a config file
 - [ ] Allow motion regions to be different than object detection regions
