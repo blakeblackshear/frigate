@@ -93,14 +93,19 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
     return objects
 
 class ObjectParser(threading.Thread):
-    def __init__(self, object_arrays):
+    def __init__(self, objects_changed, object_arrays):
         threading.Thread.__init__(self)
+        self._objects_changed = objects_changed
         self._object_arrays = object_arrays
 
     def run(self):
         global DETECTED_OBJECTS
         while True:
             detected_objects = []
+            # wait until object detection has run
+            with self._objects_changed:
+                self._objects_changed.wait()
+
             for object_array in self._object_arrays:
                 object_index = 0
                 while(object_index < 60 and object_array[object_index] > 0):
@@ -115,7 +120,6 @@ class ObjectParser(threading.Thread):
                     })
                     object_index += 6
             DETECTED_OBJECTS = detected_objects
-            time.sleep(0.1)
 class MqttPublisher(threading.Thread):
     def __init__(self, host, topic_prefix, object_classes, motion_flags):
         threading.Thread.__init__(self)
@@ -201,6 +205,8 @@ def main():
     frame_lock = mp.Lock()
     # Condition for notifying that a new frame is ready
     frame_ready = mp.Condition()
+    # Condition for notifying that object detection ran
+    objects_changed = mp.Condition()
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -216,6 +222,7 @@ def main():
             shared_frame_time,
             frame_lock, frame_ready,
             region['motion_detected'],
+            objects_changed,
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
         detection_process.daemon = True
@@ -232,7 +239,7 @@ def main():
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
-    object_parser = ObjectParser([region['output_array'] for region in regions])
+    object_parser = ObjectParser(objects_changed, [region['output_array'] for region in regions])
     object_parser.start()
 
     mqtt_publisher = MqttPublisher(MQTT_HOST, MQTT_TOPIC_PREFIX, 
@@ -342,7 +349,8 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, frame_shape, region_size, region_x_offset, region_y_offset):
+def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock, frame_ready, 
+                   motion_detected, objects_changed, frame_shape, region_size, region_x_offset, region_y_offset):
     debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -380,6 +388,8 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock,
         objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, True)
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
+        with objects_changed:
+            objects_changed.notify_all()
 
 # do the actual motion detection
 def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
