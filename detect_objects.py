@@ -43,7 +43,7 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_offset, region_y_offset):
+def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_offset, region_y_offset, debug):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(cropped_frame, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -61,6 +61,19 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
     (boxes, scores, classes, num_detections) = sess.run(
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
+
+    if debug:
+        if len([category_index.get(value) for index,value in enumerate(classes[0]) if scores[0,index] > 0.5]) > 0:
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                cropped_frame,
+                np.squeeze(boxes),
+                np.squeeze(classes).astype(np.int32),
+                np.squeeze(scores),
+                category_index,
+                use_normalized_coordinates=True,
+                line_thickness=4)
+            cv2.imwrite("/lab/debug/obj-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
+
 
     # build an array of detected objects
     objects = []
@@ -212,7 +225,8 @@ def main():
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            region['min_object_size']))
+            region['min_object_size'],
+            True))
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
@@ -330,6 +344,7 @@ def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_sha
 
 # do the actual object detection
 def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
+    debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -383,12 +398,12 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset)
+        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, True)
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 # do the actual motion detection
-def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area):
+def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -463,6 +478,10 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             if contour_area > min_motion_area:
+                if debug:
+                    (x, y, w, h) = cv2.boundingRect(c)
+                    cv2.rectangle(thresh, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
                 motion_frames += 1
                 # if there have been enough consecutive motion frames, report motion
                 if motion_frames >= 3:
@@ -470,6 +489,8 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
                     last_motion = now
                 break
             motion_frames = 0
+        if debug and motion_frames > 0:
+            cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), thresh)
 
 if __name__ == '__main__':
     mp.freeze_support()
