@@ -66,7 +66,7 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
     objects = []
     for index, value in enumerate(classes[0]):
         score = scores[0, index]
-        if score > 0.1:
+        if score > 0.5:
             box = boxes[0, index].tolist()
             box[0] = (box[0] * region_size) + region_y_offset
             box[1] = (box[1] * region_size) + region_x_offset
