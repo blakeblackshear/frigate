@@ -153,7 +153,7 @@ class MqttPublisher(threading.Thread):
             
             # send message for motion
             motion_status = 'OFF'
-            if any(obj.value == 1 for obj in self.motion_flags):
+            if any(obj.is_set() for obj in self.motion_flags):
                 motion_status = 'ON'
             
             if motion_status != last_motion:
@@ -172,11 +172,8 @@ def main():
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
             'min_object_size': int(region_parts[3]),
-            # shared value for signaling to the capture process that we are ready for the next frame
-            # (1 for ready 0 for not ready)
-            'ready_for_frame': mp.Value('i', 1),
-            # shared value for motion detection signal (1 for motion 0 for no motion)
-            'motion_detected': mp.Value('i', 0),
+            # Event for motion detection signaling
+            'motion_detected': mp.Event(),
             # create shared array for storing 10 detected objects
             # note: this must be a double even though the value you are storing
             #       is a float. otherwise it stops updating the value in shared
@@ -212,18 +209,18 @@ def main():
     capture_process.daemon = True
 
     detection_processes = []
-    for index, region in enumerate(regions):
+    motion_processes = []
+    for region in regions:
         detection_process = mp.Process(target=process_frames, args=(shared_arr, 
             region['output_array'],
             shared_frame_time,
+            frame_lock, frame_ready,
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset']))
         detection_process.daemon = True
         detection_processes.append(detection_process)
 
-    motion_processes = []
-    for index, region in enumerate(regions):
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
             frame_lock, frame_ready,
@@ -267,9 +264,8 @@ def main():
             # make a copy of the current detected objects
             detected_objects = DETECTED_OBJECTS.copy()
             # lock and make a copy of the current frame
-            frame_lock.aquire()
-            frame = frame_arr.copy()
-            frame_lock.release()
+            with frame_lock:
+                frame = frame_arr.copy()
             # convert to RGB for drawing
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
@@ -286,7 +282,7 @@ def main():
 
             for region in regions:
                 color = (255,255,255)
-                if region['motion_detected'].value == 1:
+                if region['motion_detected'].is_set():
                     color = (0,255,0)
                 cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
@@ -336,10 +332,9 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
             ret, frame = video.retrieve()
             if ret:
                 # Lock access and update frame
-                frame_lock.acquire()
-                arr[:] = frame
-                shared_frame_time.value = frame_time.timestamp()
-                frame_lock.release()
+                with frame_lock:
+                    arr[:] = frame
+                    shared_frame_time.value = frame_time.timestamp()
                 # Notify with the condition that a new frame is ready
                 with frame_ready:
                     frame_ready.notify_all()
@@ -347,7 +342,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
+def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, frame_shape, region_size, region_x_offset, region_y_offset):
     debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -362,42 +357,22 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
             tf.import_graph_def(od_graph_def, name='')
         sess = tf.Session(graph=detection_graph)
 
-    no_frames_available = -1
     frame_time = 0.0
     while True:
         now = datetime.datetime.now().timestamp()
-        # if there is no motion detected
-        if shared_motion.value == 0:
-            time.sleep(0.1)
-            continue
 
-        # if there isnt a new frame ready for processing
-        if shared_frame_time.value == frame_time:
-            # save the first time there were no frames available
-            if no_frames_available == -1:
-                no_frames_available = now
-            # if there havent been any frames available in 30 seconds, 
-            # sleep to avoid using so much cpu if the camera feed is down
-            if no_frames_available > 0 and (now - no_frames_available) > 30:
-                time.sleep(1)
-                print("sleeping because no frames have been available in a while")
-            else:
-                # rest a little bit to avoid maxing out the CPU
-                time.sleep(0.1)
-            continue
-        
-        # we got a valid frame, so reset the timer
-        no_frames_available = -1
+        # wait until motion is detected
+        motion_detected.wait()
 
-        # if the frame is more than 0.5 second old, ignore it
-        if (now - shared_frame_time.value) > 0.5:
-            # rest a little bit to avoid maxing out the CPU
-            time.sleep(0.1)
-            continue
+        with frame_ready:
+            # if there isnt a frame ready for processing or it is old, wait for a signal
+            if shared_frame_time.value == frame_time or (now - shared_frame_time.value) > 0.5:
+                frame_ready.wait()
         
         # make a copy of the cropped frame
-        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
-        frame_time = shared_frame_time.value
+        with frame_lock:
+            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
+            frame_time = shared_frame_time.value
 
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
@@ -407,11 +382,10 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
 
 # do the actual motion detection
-def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
+def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
-    no_frames_available = -1
     avg_frame = None
     last_motion = -1
     frame_time = 0.0
@@ -421,7 +395,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, shared
         # if it has been long enough since the last motion, clear the flag
         if last_motion > 0 and (now - last_motion) > 2:
             last_motion = -1
-            shared_motion.value = 0
+            motion_detected.clear()
         
         with frame_ready:
             # if there isnt a frame ready for processing or it is old, wait for a signal
@@ -429,10 +403,9 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, shared
                 frame_ready.wait()
         
         # lock and make a copy of the cropped frame
-        frame_lock.acquire()
-        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
-        frame_time = shared_frame_time.value
-        frame_lock.release()
+        with frame_lock: 
+            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
+            frame_time = shared_frame_time.value
 
         # convert to grayscale
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
@@ -480,7 +453,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, shared
             motion_frames += 1
             # if there have been enough consecutive motion frames, report motion
             if motion_frames >= 3:
-                shared_motion.value = 1
+                motion_detected.set()
                 last_motion = now
         else:
             motion_frames = 0
