@@ -328,8 +328,6 @@ def main():
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                     color, 2)
 
-            cv2.putText(frame, datetime.datetime.now().strftime("%H:%M:%S"), (1125, 20),
-		        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
