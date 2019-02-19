@@ -43,7 +43,7 @@ categories = label_map_util.convert_label_map_to_categories(label_map, max_num_c
                                                             use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
-def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_offset, region_y_offset):
+def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_offset, region_y_offset, debug):
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(cropped_frame, axis=0)
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -62,11 +62,24 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
 
+    if debug:
+        if len([category_index.get(value) for index,value in enumerate(classes[0]) if scores[0,index] > 0.5]) > 0:
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                cropped_frame,
+                np.squeeze(boxes),
+                np.squeeze(classes).astype(np.int32),
+                np.squeeze(scores),
+                category_index,
+                use_normalized_coordinates=True,
+                line_thickness=4)
+            cv2.imwrite("/lab/debug/obj-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
+
+
     # build an array of detected objects
     objects = []
     for index, value in enumerate(classes[0]):
         score = scores[0, index]
-        if score > 0.1:
+        if score > 0.5:
             box = boxes[0, index].tolist()
             box[0] = (box[0] * region_size) + region_y_offset
             box[1] = (box[1] * region_size) + region_x_offset
@@ -80,14 +93,21 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
     return objects
 
 class ObjectParser(threading.Thread):
-    def __init__(self, object_arrays):
+    def __init__(self, objects_changed, objects_parsed, object_arrays):
         threading.Thread.__init__(self)
+        self._objects_changed = objects_changed
+        self._objects_parsed = objects_parsed
         self._object_arrays = object_arrays
 
     def run(self):
         global DETECTED_OBJECTS
         while True:
             detected_objects = []
+            # wait until object detection has run
+            # TODO: what if something else changed while I was processing???
+            with self._objects_changed:
+                self._objects_changed.wait()
+
             for object_array in self._object_arrays:
                 object_index = 0
                 while(object_index < 60 and object_array[object_index] > 0):
@@ -102,29 +122,56 @@ class ObjectParser(threading.Thread):
                     })
                     object_index += 6
             DETECTED_OBJECTS = detected_objects
-            time.sleep(0.1)
-class MqttPublisher(threading.Thread):
-    def __init__(self, host, topic_prefix, object_classes, motion_flags):
+            # notify that objects were parsed
+            with self._objects_parsed:
+                self._objects_parsed.notify_all()
+
+class MqttMotionPublisher(threading.Thread):
+    def __init__(self, client, topic_prefix, motion_changed, motion_flags):
         threading.Thread.__init__(self)
-        self.client = mqtt.Client()
-        self.client.will_set(topic_prefix+'/available', payload='offline', qos=1, retain=True)
-        self.client.connect(host, 1883, 60)
-        self.client.loop_start()
-        self.client.publish(topic_prefix+'/available', 'online', retain=True)
+        self.client = client
         self.topic_prefix = topic_prefix
-        self.object_classes = object_classes
+        self.motion_changed = motion_changed
         self.motion_flags = motion_flags
+
+    def run(self):
+        last_sent_motion = ""
+        while True:
+            with self.motion_changed:
+                self.motion_changed.wait()
+            
+            # send message for motion
+            motion_status = 'OFF'
+            if any(obj.is_set() for obj in self.motion_flags):
+                motion_status = 'ON'
+
+            if last_sent_motion != motion_status:
+                last_sent_motion = motion_status
+                self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
+
+class MqttObjectPublisher(threading.Thread):
+    def __init__(self, client, topic_prefix, objects_parsed, object_classes):
+        threading.Thread.__init__(self)
+        self.client = client
+        self.topic_prefix = topic_prefix
+        self.objects_parsed = objects_parsed
+        self.object_classes = object_classes
 
     def run(self):
         global DETECTED_OBJECTS
 
         last_sent_payload = ""
-        last_motion = ""
         while True:
+
             # initialize the payload
             payload = {}
             for obj in self.object_classes:
                 payload[obj] = []
+
+            # wait until objects have been parsed
+            with self.objects_parsed:
+                self.objects_parsed.wait()
+
             # loop over detected objects and populate
             # the payload
             detected_objects = DETECTED_OBJECTS.copy()
@@ -132,21 +179,11 @@ class MqttPublisher(threading.Thread):
                 if obj['name'] in self.object_classes:
                     payload[obj['name']].append(obj)
             
+            # send message for objects if different
             new_payload = json.dumps(payload, sort_keys=True)
             if new_payload != last_sent_payload:
                 last_sent_payload = new_payload
                 self.client.publish(self.topic_prefix+'/objects', new_payload, retain=False)
-
-            motion_status = 'OFF'
-            if any(obj.value == 1 for obj in self.motion_flags):
-                motion_status = 'ON'
-            
-            if motion_status != last_motion:
-                last_motion = motion_status
-                self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
-            
-
-            time.sleep(0.1)
 
 def main():
     # Parse selected regions
@@ -158,11 +195,8 @@ def main():
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
             'min_object_size': int(region_parts[3]),
-            # shared value for signaling to the capture process that we are ready for the next frame
-            # (1 for ready 0 for not ready)
-            'ready_for_frame': mp.Value('i', 1),
-            # shared value for motion detection signal (1 for motion 0 for no motion)
-            'motion_detected': mp.Value('i', 0),
+            # Event for motion detection signaling
+            'motion_detected': mp.Event(),
             # create shared array for storing 10 detected objects
             # note: this must be a double even though the value you are storing
             #       is a float. otherwise it stops updating the value in shared
@@ -186,43 +220,66 @@ def main():
     shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
     # create shared value for storing the frame_time
     shared_frame_time = mp.Value('d', 0.0)
+    # Lock to control access to the frame while writing
+    frame_lock = mp.Lock()
+    # Condition for notifying that a new frame is ready
+    frame_ready = mp.Condition()
+    # Condition for notifying that motion status changed globally
+    motion_changed = mp.Condition()
+    # Condition for notifying that object detection ran
+    objects_changed = mp.Condition()
+    # Condition for notifying that objects were parsed
+    objects_parsed = mp.Condition()
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
     capture_process = mp.Process(target=fetch_frames, args=(shared_arr, 
-        shared_frame_time, [region['ready_for_frame'] for region in regions], frame_shape))
+        shared_frame_time, frame_lock, frame_ready, frame_shape))
     capture_process.daemon = True
 
     detection_processes = []
-    for index, region in enumerate(regions):
+    motion_processes = []
+    for region in regions:
         detection_process = mp.Process(target=process_frames, args=(shared_arr, 
             region['output_array'],
             shared_frame_time,
+            frame_lock, frame_ready,
             region['motion_detected'],
+            objects_changed,
             frame_shape, 
-            region['size'], region['x_offset'], region['y_offset']))
+            region['size'], region['x_offset'], region['y_offset'],
+            False))
         detection_process.daemon = True
         detection_processes.append(detection_process)
 
-    motion_processes = []
-    for index, region in enumerate(regions):
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
-            region['ready_for_frame'],
+            frame_lock, frame_ready,
             region['motion_detected'],
+            motion_changed,
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            region['min_object_size']))
+            region['min_object_size'],
+            True))
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
-    object_parser = ObjectParser([region['output_array'] for region in regions])
+    object_parser = ObjectParser(objects_changed, objects_parsed, [region['output_array'] for region in regions])
     object_parser.start()
 
-    mqtt_publisher = MqttPublisher(MQTT_HOST, MQTT_TOPIC_PREFIX, 
-        MQTT_OBJECT_CLASSES.split(','), 
-        [region['motion_detected'] for region in regions])
+    client = mqtt.Client()
+    client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
+    client.connect(MQTT_HOST, 1883, 60)
+    client.loop_start()
+    client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
+
+    mqtt_publisher = MqttObjectPublisher(client, MQTT_TOPIC_PREFIX, objects_parsed,
+        MQTT_OBJECT_CLASSES.split(','))
     mqtt_publisher.start()
+
+    mqtt_motion_publisher = MqttMotionPublisher(client, MQTT_TOPIC_PREFIX, motion_changed,
+        [region['motion_detected'] for region in regions])
+    mqtt_motion_publisher.start()
 
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
@@ -247,8 +304,9 @@ def main():
             time.sleep(0.2)
             # make a copy of the current detected objects
             detected_objects = DETECTED_OBJECTS.copy()
-            # make a copy of the current frame
-            frame = frame_arr.copy()
+            # lock and make a copy of the current frame
+            with frame_lock:
+                frame = frame_arr.copy()
             # convert to RGB for drawing
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             # draw the bounding boxes on the screen
@@ -265,14 +323,12 @@ def main():
 
             for region in regions:
                 color = (255,255,255)
-                if region['motion_detected'].value == 1:
+                if region['motion_detected'].is_set():
                     color = (0,255,0)
                 cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                     color, 2)
 
-            cv2.putText(frame, datetime.datetime.now().strftime("%H:%M:%S"), (1125, 20),
-		        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
             # convert back to BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             # encode the image into a jpg
@@ -296,7 +352,7 @@ def tonumpyarray(mp_arr):
 
 # fetch the frames as fast a possible, only decoding the frames when the
 # detection_process has consumed the current frame
-def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_shape):
+def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -311,25 +367,24 @@ def fetch_frames(shared_arr, shared_frame_time, ready_for_frame_flags, frame_sha
         # snapshot the time the frame was grabbed
         frame_time = datetime.datetime.now()
         if ret:
-            # if the anyone is ready for the next frame decode it
-            # otherwise skip this frame and move onto the next one
-            if any(flag.value == 1 for flag in ready_for_frame_flags):
-                # go ahead and decode the current frame
-                ret, frame = video.retrieve()
-                if ret:
+            # go ahead and decode the current frame
+            ret, frame = video.retrieve()
+            if ret:
+                # Lock access and update frame
+                with frame_lock:
                     arr[:] = frame
                     shared_frame_time.value = frame_time.timestamp()
-                    # signal to the detection_processes by setting the shared_frame_time
-                    for flag in ready_for_frame_flags:
-                        flag.value = 0
-            else:
-                # sleep a little to reduce CPU usage
-                time.sleep(0.1)
+                # Notify with the condition that a new frame is ready
+                with frame_ready:
+                    frame_ready.notify_all()
     
     video.release()
 
 # do the actual object detection
-def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset):
+def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock, frame_ready, 
+                   motion_detected, objects_changed, frame_shape, region_size, region_x_offset, region_y_offset,
+                   debug):
+    debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -343,56 +398,38 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, shared_moti
             tf.import_graph_def(od_graph_def, name='')
         sess = tf.Session(graph=detection_graph)
 
-    no_frames_available = -1
     frame_time = 0.0
     while True:
         now = datetime.datetime.now().timestamp()
-        # if there is no motion detected
-        if shared_motion.value == 0:
-            time.sleep(0.1)
-            continue
 
-        # if there isnt a new frame ready for processing
-        if shared_frame_time.value == frame_time:
-            # save the first time there were no frames available
-            if no_frames_available == -1:
-                no_frames_available = now
-            # if there havent been any frames available in 30 seconds, 
-            # sleep to avoid using so much cpu if the camera feed is down
-            if no_frames_available > 0 and (now - no_frames_available) > 30:
-                time.sleep(1)
-                print("sleeping because no frames have been available in a while")
-            else:
-                # rest a little bit to avoid maxing out the CPU
-                time.sleep(0.1)
-            continue
-        
-        # we got a valid frame, so reset the timer
-        no_frames_available = -1
+        # wait until motion is detected
+        motion_detected.wait()
 
-        # if the frame is more than 0.5 second old, ignore it
-        if (now - shared_frame_time.value) > 0.5:
-            # rest a little bit to avoid maxing out the CPU
-            time.sleep(0.1)
-            continue
+        with frame_ready:
+            # if there isnt a frame ready for processing or it is old, wait for a signal
+            if shared_frame_time.value == frame_time or (now - shared_frame_time.value) > 0.5:
+                frame_ready.wait()
         
         # make a copy of the cropped frame
-        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
-        frame_time = shared_frame_time.value
+        with frame_lock:
+            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
+            frame_time = shared_frame_time.value
 
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset)
+        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, debug)
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
+        with objects_changed:
+            objects_changed.notify_all()
 
 # do the actual motion detection
-def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion, frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area):
+def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, motion_changed,
+                  frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
-    no_frames_available = -1
     avg_frame = None
     last_motion = -1
     frame_time = 0.0
@@ -402,40 +439,19 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
         # if it has been long enough since the last motion, clear the flag
         if last_motion > 0 and (now - last_motion) > 2:
             last_motion = -1
-            shared_motion.value = 0
-        # if there isnt a frame ready for processing
-        if shared_frame_time.value == frame_time:
-            # save the first time there were no frames available
-            if no_frames_available == -1:
-                no_frames_available = now
-            # if there havent been any frames available in 30 seconds, 
-            # sleep to avoid using so much cpu if the camera feed is down
-            if no_frames_available > 0 and (now - no_frames_available) > 30:
-                time.sleep(1)
-                print("sleeping because no frames have been available in a while")
-            else:
-                # rest a little bit to avoid maxing out the CPU
-                time.sleep(0.1)
-            if ready_for_frame.value == 0:
-                ready_for_frame.value = 1
-            continue
+            motion_detected.clear()
+            with motion_changed:
+                motion_changed.notify_all()
         
-        # we got a valid frame, so reset the timer
-        no_frames_available = -1
-
-        # if the frame is more than 0.5 second old, discard it
-        if (now - shared_frame_time.value) > 0.5:
-            # signal that we need a new frame
-            ready_for_frame.value = 1
-            # rest a little bit to avoid maxing out the CPU
-            time.sleep(0.1)
-            continue
+        with frame_ready:
+            # if there isnt a frame ready for processing or it is old, wait for a signal
+            if shared_frame_time.value == frame_time or (now - shared_frame_time.value) > 0.5:
+                frame_ready.wait()
         
-        # make a copy of the cropped frame
-        cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
-        frame_time = shared_frame_time.value
-        # signal that the frame has been used so a new one will be ready
-        ready_for_frame.value = 1
+        # lock and make a copy of the cropped frame
+        with frame_lock: 
+            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
+            frame_time = shared_frame_time.value
 
         # convert to grayscale
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
@@ -447,7 +463,7 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
             continue
         
         # look at the delta from the avg_frame
-        cv2.accumulateWeighted(gray, avg_frame, 0.5)
+        cv2.accumulateWeighted(gray, avg_frame, 0.01)
         frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg_frame))
         thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
  
@@ -458,18 +474,40 @@ def detect_motion(shared_arr, shared_frame_time, ready_for_frame, shared_motion,
             cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
 
+        # if there are no contours, there is no motion
+        if len(cnts) < 1:
+            motion_frames = 0
+            continue
+
+        motion_found = False
+
         # loop over the contours
         for c in cnts:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             if contour_area > min_motion_area:
-                motion_frames += 1
-                # if there have been enough consecutive motion frames, report motion
-                if motion_frames >= 3:
-                    shared_motion.value = 1
-                    last_motion = now
-                break
+                motion_found = True
+                if debug:
+                    cv2.drawContours(cropped_frame, [c], -1, (0, 255, 0), 2)
+                    x, y, w, h = cv2.boundingRect(c)
+                    cv2.putText(cropped_frame, str(contour_area), (x, y),
+		                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 100, 0), 2)
+                else:
+                    break
+        
+        if motion_found:
+            motion_frames += 1
+            # if there have been enough consecutive motion frames, report motion
+            if motion_frames >= 3:
+                motion_detected.set()
+                with motion_changed:
+                    motion_changed.notify_all()
+                last_motion = now
+        else:
             motion_frames = 0
+
+        if debug and motion_frames >= 3:
+            cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
 
 if __name__ == '__main__':
     mp.freeze_support()
