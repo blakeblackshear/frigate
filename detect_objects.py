@@ -247,7 +247,8 @@ def main():
             region['motion_detected'],
             objects_changed,
             frame_shape, 
-            region['size'], region['x_offset'], region['y_offset']))
+            region['size'], region['x_offset'], region['y_offset'],
+            False))
         detection_process.daemon = True
         detection_processes.append(detection_process)
 
@@ -381,7 +382,8 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
 
 # do the actual object detection
 def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock, frame_ready, 
-                   motion_detected, objects_changed, frame_shape, region_size, region_x_offset, region_y_offset):
+                   motion_detected, objects_changed, frame_shape, region_size, region_x_offset, region_y_offset,
+                   debug):
     debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -416,7 +418,7 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock,
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # do the object detection
-        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, True)
+        objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, debug)
         # copy the detected objects to the output array, filling the array when needed
         shared_output_arr[:] = objects + [0.0] * (60-len(objects))
         with objects_changed:
@@ -461,7 +463,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
             continue
         
         # look at the delta from the avg_frame
-        cv2.accumulateWeighted(gray, avg_frame, 0.5)
+        cv2.accumulateWeighted(gray, avg_frame, 0.01)
         frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg_frame))
         thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
  
@@ -504,7 +506,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
         else:
             motion_frames = 0
 
-        if debug and motion_frames > 0:
+        if debug and motion_frames >= 3:
             cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
 
 if __name__ == '__main__':
