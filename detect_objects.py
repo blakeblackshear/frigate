@@ -539,7 +539,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
                 with motion_changed:
                     motion_changed.notify_all()
 
-        if debug and motion_frames >= 3:
+        if debug and motion_frames == 3:
             cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
             cv2.imwrite("/lab/debug/avg_delta-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), avg_delta_image)
 
