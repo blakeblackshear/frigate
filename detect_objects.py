@@ -470,9 +470,9 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
             avg_delta = frameDelta.copy().astype("float")
 
         # compute the average delta over the past few frames
-        # the alpha value can be modified to configure how sensitive the motion detection is
+        # the alpha value can be modified to configure how sensitive the motion detection is.
         # higher values mean the current frame impacts the delta a lot, and a single raindrop may
-        # put it over the edge, too low and a fast moving person wont be detected as motion
+        # register as motion, too low and a fast moving person wont be detected as motion
         # this also assumes that a person is in the same location across more than a single frame
         cv2.accumulateWeighted(frameDelta, avg_delta, 0.2)
 
