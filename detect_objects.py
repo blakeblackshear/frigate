@@ -190,11 +190,14 @@ def main():
     regions = []
     for region_string in REGIONS.split(':'):
         region_parts = region_string.split(',')
+        region_mask_image = cv2.imread("/config/{}".format(region_parts[4]), cv2.IMREAD_GRAYSCALE)
+        region_mask = np.where(region_mask_image==[0])
         regions.append({
             'size': int(region_parts[0]),
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
             'min_object_size': int(region_parts[3]),
+            'mask': region_mask,
             # Event for motion detection signaling
             'motion_detected': mp.Event(),
             # create shared array for storing 10 detected objects
@@ -259,7 +262,7 @@ def main():
             motion_changed,
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            region['min_object_size'],
+            region['min_object_size'], region['mask'],
             True))
         motion_process.daemon = True
         motion_processes.append(motion_process)
@@ -426,7 +429,7 @@ def process_frames(shared_arr, shared_output_arr, shared_frame_time, frame_lock,
 
 # do the actual motion detection
 def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion_detected, motion_changed,
-                  frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, debug):
+                  frame_shape, region_size, region_x_offset, region_y_offset, min_motion_area, mask, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -455,6 +458,10 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
 
         # convert to grayscale
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
+
+        # apply image mask
+        gray[mask] = [255]
+
         # apply gaussian blur
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
