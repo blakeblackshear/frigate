@@ -360,11 +360,18 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
     # start the video capture
-    video = cv2.VideoCapture(RTSP_URL)
+    video = cv2.VideoCapture()
+    video.open(RTSP_URL)
     # keep the buffer small so we minimize old data
     video.set(cv2.CAP_PROP_BUFFERSIZE,1)
 
     while True:
+        # check if the video stream is still open, and reopen if needed
+        if not video.isOpened():
+            success = video.open(RTSP_URL)
+            if not success:
+                time.sleep(1)
+                continue
         # grab the frame, but dont decode it yet
         ret = video.grab()
         # snapshot the time the frame was grabbed
