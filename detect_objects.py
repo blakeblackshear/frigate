@@ -534,9 +534,10 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
             # when no motion, just keep averaging the frames together
             cv2.accumulateWeighted(gray, avg_frame, 0.01)
             motion_frames = 0
-            motion_detected.clear()
-            with motion_changed:
-                motion_changed.notify_all()
+            if motion_detected.is_set():
+                motion_detected.clear()
+                with motion_changed:
+                    motion_changed.notify_all()
 
         if debug and motion_frames >= 3:
             cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
