@@ -63,7 +63,7 @@ def detect_objects(cropped_frame, sess, detection_graph, region_size, region_x_o
         feed_dict={image_tensor: image_np_expanded})
 
     if debug:
-        if len([value for index,value in enumerate(classes[0]) if str(category_index.get(value)) == 'person' and scores[0,index] > 0.5]) > 0:
+        if len([value for index,value in enumerate(classes[0]) if str(category_index.get(value).get('name')) == 'person' and scores[0,index] > 0.5]) > 0:
             vis_util.visualize_boxes_and_labels_on_image_array(
                 cropped_frame,
                 np.squeeze(boxes),
