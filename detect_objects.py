@@ -37,6 +37,8 @@ REGIONS = os.getenv('REGIONS')
 
 DETECTED_OBJECTS = []
 
+DEBUG = (os.getenv('DEBUG') == '1')
+
 # Loading label map
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES,
@@ -102,7 +104,6 @@ class ObjectParser(threading.Thread):
         global DETECTED_OBJECTS
         while True:
             obj = self._object_queue.get()
-            print(obj)
             DETECTED_OBJECTS.append(obj)
 
             # notify that objects were parsed
@@ -259,7 +260,7 @@ def main():
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            False))
+            DEBUG))
         detection_process.daemon = True
         detection_processes.append(detection_process)
 
@@ -271,7 +272,7 @@ def main():
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
             region['min_object_size'], region['mask'],
-            True))
+            DEBUG))
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
@@ -405,7 +406,6 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
 def process_frames(shared_arr, object_queue, shared_frame_time, frame_lock, frame_ready, 
                    motion_detected, frame_shape, region_size, region_x_offset, region_y_offset,
                    debug):
-    debug = True
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
