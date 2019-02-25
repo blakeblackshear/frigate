@@ -200,13 +200,14 @@ def main():
     regions = []
     for region_string in REGIONS.split(':'):
         region_parts = region_string.split(',')
-        region_mask_image = cv2.imread("/config/{}".format(region_parts[4]), cv2.IMREAD_GRAYSCALE)
+        region_mask_image = cv2.imread("/config/{}".format(region_parts[5]), cv2.IMREAD_GRAYSCALE)
         region_mask = np.where(region_mask_image==[0])
         regions.append({
             'size': int(region_parts[0]),
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
-            'min_object_size': int(region_parts[3]),
+            'min_person_area': int(region_parts[3]),
+            'min_object_size': int(region_parts[4]),
             'mask': region_mask,
             # Event for motion detection signaling
             'motion_detected': mp.Event(),
@@ -260,6 +261,7 @@ def main():
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
+            region['min_person_area'],
             DEBUG))
         detection_process.daemon = True
         detection_processes.append(detection_process)
@@ -405,7 +407,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
 # do the actual object detection
 def process_frames(shared_arr, object_queue, shared_frame_time, frame_lock, frame_ready, 
                    motion_detected, frame_shape, region_size, region_x_offset, region_y_offset,
-                   debug):
+                   min_person_area, debug):
     # shape shared input array into frame for processing
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -441,6 +443,9 @@ def process_frames(shared_arr, object_queue, shared_frame_time, frame_lock, fram
         # do the object detection
         objects = detect_objects(cropped_frame_rgb, sess, detection_graph, region_size, region_x_offset, region_y_offset, debug)
         for obj in objects:
+            # ignore persons below the size threshold
+            if obj['name'] == 'person' and (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin']) < min_person_area:
+                continue
             obj['frame_time'] = frame_time
             object_queue.put(obj)
 
