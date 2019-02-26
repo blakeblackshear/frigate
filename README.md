@@ -2,11 +2,12 @@
 This results in a MJPEG stream with objects identified that has a lower latency than directly viewing the RTSP feed with VLC.
 - Prioritizes realtime processing over frames per second. Dropping frames is fine.
 - OpenCV runs in a separate process so it can grab frames as quickly as possible to ensure there aren't old frames in the buffer
-- Object detection with Tensorflow runs in a separate process and ignores frames that are more than 0.5 seconds old
+- Motion detection runs in a separate process per region and signals to object detection to avoid wasting CPU cycles to look for objects when there is no motion
+- Object detection with Tensorflow runs in a separate process per region and ignores frames that are more than 0.5 seconds old
 - Uses shared memory arrays for handing frames between processes
 - Provides a url for viewing the video feed at a hard coded ~5FPS as an mjpeg stream
 - Frames are only encoded into mjpeg stream when it is being viewed
-- A process is created per detection region
+- Publishes motion and person detection scores to MQTT
 
 ## Getting Started
 Build the container with
@@ -52,7 +53,7 @@ Access the mjpeg stream at http://localhost:5000
 - [x] Use Events or Conditions to signal between threads rather than polling a value
 - [x] Implement a debug option to save images with detected objects
 - [x] Only report if x% of the recent frames have a person to avoid single frame false positives (maybe take an average of the person scores in the past x frames?)
-- [ ] Filter out detected objects that are not the right size
+- [x] Filter out detected objects that are not the right size
 - [ ] Make resilient to network drop outs
 - [ ] Merge bounding boxes that span multiple regions
 - [ ] Switch to a config file
