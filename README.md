@@ -25,7 +25,7 @@ docker run --rm \
 -v <path_to_labelmap.pbtext>:/label_map.pbtext:ro \
 -p 5000:5000 \
 -e RTSP_URL='<rtsp_url>' \
--e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_object_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_object_size_2>,<mask_file_2>' \
+-e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>' \
 -e MQTT_HOST='your.mqtthost.com' \
 -e MQTT_MOTION_TOPIC='cameras/1/motion' \
 -e MQTT_OBJECT_TOPIC='cameras/1/objects' \
