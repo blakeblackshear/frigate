@@ -18,7 +18,7 @@ from frigate.util import tonumpyarray
 from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
 from frigate.objects import ObjectParser, ObjectCleaner
 from frigate.motion import detect_motion
-from frigate.video import fetch_frames
+from frigate.video import fetch_frames, FrameTracker
 from frigate.object_detection import detect_objects
 
 RTSP_URL = os.getenv('RTSP_URL')
@@ -35,6 +35,7 @@ DEBUG = (os.getenv('DEBUG') == '1')
 
 def main():
     DETECTED_OBJECTS = []
+    recent_motion_frames = {}
     # Parse selected regions
     regions = []
     for region_string in REGIONS.split(':'):
@@ -119,6 +120,11 @@ def main():
             DEBUG))
         motion_process.daemon = True
         motion_processes.append(motion_process)
+
+    # start a thread to store recent motion frames for processing
+    frame_tracker = FrameTracker(frame_arr, shared_frame_time, frame_ready, frame_lock, 
+        recent_motion_frames, motion_changed, [region['motion_detected'] for region in regions])
+    frame_tracker.start()
 
     # start a thread to parse objects from the queue
     object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS)
@@ -212,6 +218,7 @@ def main():
         detection_process.join()
     for motion_process in motion_processes:
         motion_process.join()
+    frame_tracker.join()
     object_parser.join()
     object_cleaner.join()
     mqtt_publisher.join()
