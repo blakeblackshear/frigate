@@ -16,6 +16,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     # keep the buffer small so we minimize old data
     video.set(cv2.CAP_PROP_BUFFERSIZE,1)
 
+    bad_frame_counter = 0
     while True:
         # check if the video stream is still open, and reopen if needed
         if not video.isOpened():
@@ -38,9 +39,20 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
                 # Notify with the condition that a new frame is ready
                 with frame_ready:
                     frame_ready.notify_all()
+                bad_frame_counter = 0
+            else:
+                print("Unable to decode frame")
+                bad_frame_counter += 1
+        else:
+            print("Unable to grab a frame")
+            bad_frame_counter += 1
+        
+        if bad_frame_counter > 100:
+            video.release()
     
     video.release()
 
+# Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
 class FrameTracker(threading.Thread):
     def __init__(self, shared_frame, frame_time, frame_ready, frame_lock, recent_frames, motion_changed, motion_regions):
         threading.Thread.__init__(self)
@@ -78,8 +90,6 @@ class FrameTracker(threading.Thread):
                     if (now - k) > 2:
                         del self.recent_frames[k]
                 
-                print(stored_frame_times)
-
             # wait for the global motion flag to change
             with self.motion_changed:
                 self.motion_changed.wait()

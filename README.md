@@ -2,6 +2,7 @@
 This results in a MJPEG stream with objects identified that has a lower latency than directly viewing the RTSP feed with VLC.
 - Prioritizes realtime processing over frames per second. Dropping frames is fine.
 - OpenCV runs in a separate process so it can grab frames as quickly as possible to ensure there aren't old frames in the buffer
+- Allows you to define specific regions (squares) in the image to look for motion/objects
 - Motion detection runs in a separate process per region and signals to object detection to avoid wasting CPU cycles to look for objects when there is no motion
 - Object detection with Tensorflow runs in a separate process per region and ignores frames that are more than 0.5 seconds old
 - Uses shared memory arrays for handing frames between processes
@@ -45,16 +46,17 @@ Access the mjpeg stream at http://localhost:5000
 - [x] Add last will and availability for MQTT
 - [ ] Build tensorflow from source for CPU optimizations
 - [ ] Add ability to turn detection on and off via MQTT
-- [ ] MQTT reconnect if disconnected
+- [ ] MQTT reconnect if disconnected (and resend availability message)
 - [ ] MQTT motion occasionally gets stuck ON
 - [ ] Output movie clips of people for notifications, etc.
+- [x] Store highest scoring person frame from most recent event
 - [x] Add a max size for motion and objects (height/width > 1.5, total area > 1500 and < 100,000)
 - [x] Make motion less sensitive to rain
 - [x] Use Events or Conditions to signal between threads rather than polling a value
 - [x] Implement a debug option to save images with detected objects
 - [x] Only report if x% of the recent frames have a person to avoid single frame false positives (maybe take an average of the person scores in the past x frames?)
 - [x] Filter out detected objects that are not the right size
-- [ ] Make resilient to network drop outs
+- [x] Make RTSP resilient to network drop outs
 - [ ] Merge bounding boxes that span multiple regions
 - [ ] Switch to a config file
 - [ ] Allow motion regions to be different than object detection regions

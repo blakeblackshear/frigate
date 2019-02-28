@@ -11,12 +11,12 @@ import json
 from contextlib import closing
 import numpy as np
 from object_detection.utils import visualization_utils as vis_util
-from flask import Flask, Response, make_response
+from flask import Flask, Response, make_response, send_file
 import paho.mqtt.client as mqtt
 
 from frigate.util import tonumpyarray
 from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
-from frigate.objects import ObjectParser, ObjectCleaner
+from frigate.objects import ObjectParser, ObjectCleaner, BestPersonFrame
 from frigate.motion import detect_motion
 from frigate.video import fetch_frames, FrameTracker
 from frigate.object_detection import detect_objects
@@ -126,6 +126,11 @@ def main():
         recent_motion_frames, motion_changed, [region['motion_detected'] for region in regions])
     frame_tracker.start()
 
+    # start a thread to store the highest scoring recent person frame
+    best_person_frame = BestPersonFrame(objects_parsed, recent_motion_frames, DETECTED_OBJECTS, 
+        motion_changed, [region['motion_detected'] for region in regions])
+    best_person_frame.start()
+
     # start a thread to parse objects from the queue
     object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS)
     object_parser.start()
@@ -167,6 +172,14 @@ def main():
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
+
+    @app.route('/best_person.jpg')
+    def best_person():
+        frame = np.zeros(frame_shape, np.uint8) if best_person_frame.best_frame is None else best_person_frame.best_frame
+        ret, jpg = cv2.imencode('.jpg', frame)
+        response = make_response(jpg.tobytes())
+        response.headers['Content-Type'] = 'image/jpg'
+        return response
 
     @app.route('/')
     def index():
@@ -219,6 +232,7 @@ def main():
     for motion_process in motion_processes:
         motion_process.join()
     frame_tracker.join()
+    best_person_frame.join()
     object_parser.join()
     object_cleaner.join()
     mqtt_publisher.join()
