@@ -29,10 +29,29 @@ docker run --rm \
 -e RTSP_URL='<rtsp_url>' \
 -e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>' \
 -e MQTT_HOST='your.mqtthost.com' \
--e MQTT_MOTION_TOPIC='cameras/1/motion' \
--e MQTT_OBJECT_TOPIC='cameras/1/objects' \
--e MQTT_OBJECT_CLASSES='person,car,truck' \
+-e MQTT_TOPIC_PREFIX='cameras/1' \
+-e DEBUG='0' \
 realtime-od:latest
+```
+
+Example compose:
+```
+  frigate:
+    container_name: frigate
+    restart: unless-stopped
+    image: realtime-od:latest
+    volumes:
+      - <path_to_frozen_detection_graph.pb>:/frozen_inference_graph.pb:ro
+      - <path_to_labelmap.pbtext>:/label_map.pbtext:ro
+      - <path_to_config>:/config
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      RTSP_URL: "<rtsp_url>"
+      REGIONS: "<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>"
+      MQTT_HOST: "your.mqtthost.com"
+      MQTT_TOPIC_PREFIX: "cameras/1"
+      DEBUG: "0"
 ```
 
 Access the mjpeg stream at http://localhost:5000

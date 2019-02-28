@@ -25,7 +25,6 @@ RTSP_URL = os.getenv('RTSP_URL')
 
 MQTT_HOST = os.getenv('MQTT_HOST')
 MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
-MQTT_OBJECT_CLASSES = os.getenv('MQTT_OBJECT_CLASSES')
 
 # REGIONS = "350,0,300,50:400,350,250,50:400,750,250,50"
 # REGIONS = "400,350,250,50"
@@ -150,8 +149,7 @@ def main():
     client.loop_start()
 
     # start a thread to publish object scores (currently only person)
-    mqtt_publisher = MqttObjectPublisher(client, MQTT_TOPIC_PREFIX, objects_parsed,
-        MQTT_OBJECT_CLASSES.split(','), DETECTED_OBJECTS)
+    mqtt_publisher = MqttObjectPublisher(client, MQTT_TOPIC_PREFIX, objects_parsed, DETECTED_OBJECTS)
     mqtt_publisher.start()
 
     # start thread to publish motion status

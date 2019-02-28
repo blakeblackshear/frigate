@@ -25,12 +25,11 @@ class MqttMotionPublisher(threading.Thread):
                 self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
 
 class MqttObjectPublisher(threading.Thread):
-    def __init__(self, client, topic_prefix, objects_parsed, object_classes, detected_objects):
+    def __init__(self, client, topic_prefix, objects_parsed, detected_objects):
         threading.Thread.__init__(self)
         self.client = client
         self.topic_prefix = topic_prefix
         self.objects_parsed = objects_parsed
-        self.object_classes = object_classes
         self._detected_objects = detected_objects
 
     def run(self):

@@ -83,6 +83,8 @@ RUN (apt-get autoremove -y; \
 ENV PYTHONPATH "$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim"
 RUN cd /usr/local/lib/python3.5/dist-packages/tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=.
 
+WORKDIR /opt/frigate/
+ADD frigate frigate/
 COPY detect_objects.py .
 
 CMD ["python3", "-u", "detect_objects.py"]
