@@ -139,12 +139,15 @@ def main():
     object_cleaner.start()
 
     # connect to mqtt and setup last will
+    def on_connect(client, userdata, flags, rc): 
+        print("On connect called")
+        # publish a message to signal that the service is running
+        client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
     client = mqtt.Client()
+    client.on_connect = on_connect
     client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
     client.connect(MQTT_HOST, 1883, 60)
     client.loop_start()
-    # publish a message to signal that the service is running
-    client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
 
     # start a thread to publish object scores (currently only person)
     mqtt_publisher = MqttObjectPublisher(client, MQTT_TOPIC_PREFIX, objects_parsed,

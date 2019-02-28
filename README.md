@@ -46,9 +46,10 @@ Access the mjpeg stream at http://localhost:5000
 - [x] Add last will and availability for MQTT
 - [ ] Build tensorflow from source for CPU optimizations
 - [ ] Add ability to turn detection on and off via MQTT
-- [ ] MQTT reconnect if disconnected (and resend availability message)
+- [x] MQTT reconnect if disconnected (and resend availability message)
 - [ ] MQTT motion occasionally gets stuck ON
 - [ ] Output movie clips of people for notifications, etc.
+- [ ] Integrate with homeassistant push camera
 - [x] Store highest scoring person frame from most recent event
 - [x] Add a max size for motion and objects (height/width > 1.5, total area > 1500 and < 100,000)
 - [x] Make motion less sensitive to rain
