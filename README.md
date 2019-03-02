@@ -13,7 +13,7 @@ This results in a MJPEG stream with objects identified that has a lower latency 
 ## Getting Started
 Build the container with
 ```
-docker build -t realtime-od .
+docker build -t frigate .
 ```
 
 Download a model from the [zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md).
@@ -31,7 +31,7 @@ docker run --rm \
 -e MQTT_HOST='your.mqtthost.com' \
 -e MQTT_TOPIC_PREFIX='cameras/1' \
 -e DEBUG='0' \
-realtime-od:latest
+frigate:latest
 ```
 
 Example compose:
@@ -39,7 +39,7 @@ Example compose:
   frigate:
     container_name: frigate
     restart: unless-stopped
-    image: realtime-od:latest
+    image: frigate:latest
     volumes:
       - <path_to_frozen_detection_graph.pb>:/frozen_inference_graph.pb:ro
       - <path_to_labelmap.pbtext>:/label_map.pbtext:ro

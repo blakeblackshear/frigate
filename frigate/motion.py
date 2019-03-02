@@ -70,11 +70,6 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
 
-        # if there are no contours, there is no motion
-        if len(cnts) < 1:
-            motion_frames = 0
-            continue
-
         motion_found = False
 
         # loop over the contours
