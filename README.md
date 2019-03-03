@@ -1,14 +1,20 @@
-# Realtime Object Detection for RTSP Cameras
-This results in a MJPEG stream with objects identified that has a lower latency than directly viewing the RTSP feed with VLC.
-- Prioritizes realtime processing over frames per second. Dropping frames is fine.
-- OpenCV runs in a separate process so it can grab frames as quickly as possible to ensure there aren't old frames in the buffer
+# Frigate - Realtime Object Detection for RTSP Cameras
+Uses OpenCV and Tensorflow to perform realtime object detection locally for RTSP cameras. Designed for integration with HomeAssistant or others via MQTT.
+
+- Leverages multiprocessing and threads heavily with an emphasis on realtime over processing every frame
 - Allows you to define specific regions (squares) in the image to look for motion/objects
-- Motion detection runs in a separate process per region and signals to object detection to avoid wasting CPU cycles to look for objects when there is no motion
-- Object detection with Tensorflow runs in a separate process per region and ignores frames that are more than 0.5 seconds old
-- Uses shared memory arrays for handing frames between processes
-- Provides a url for viewing the video feed at a hard coded ~5FPS as an mjpeg stream
-- Frames are only encoded into mjpeg stream when it is being viewed
-- Publishes motion and person detection scores to MQTT
+- Motion detection runs in a separate process per region and signals to object detection to avoid wasting CPU cycles looking for objects when there is no motion
+- Object detection with Tensorflow runs in a separate process per region
+- Detected objects are placed on a shared mp.Queue and aggregated into a list of recently detected objects in a separate thread
+- A person score is calculated as the sum of all scores/5
+- Motion and object info is published over MQTT for integration into HomeAssistant or others
+- An endpoint is available to view an MJPEG stream for debugging
+
+![Diagram](diagram.png)
+
+## Example video
+You see multiple bounding boxes because it draws bounding boxes from all frames in the past 1 second where a person was detected. Not all of the bounding boxes were from the current frame.
+[![](http://img.youtube.com/vi/nqHbCtyo4dY/0.jpg)](http://www.youtube.com/watch?v=nqHbCtyo4dY "Frigate")
 
 ## Getting Started
 Build the container with
@@ -34,7 +40,7 @@ docker run --rm \
 frigate:latest
 ```
 
-Example compose:
+Example docker-compose:
 ```
   frigate:
     container_name: frigate
@@ -56,39 +62,44 @@ Example compose:
 
 Access the mjpeg stream at http://localhost:5000
 
+## Integration with HomeAssistant
+```
+camera:
+  - name: Camera Last Person
+    platform: generic
+    still_image_url: http://<ip>:5000/best_person.jpg
+
+binary_sensor:
+  - name: Camera Motion
+    platform: mqtt
+    state_topic: "cameras/1/motion"
+    device_class: motion
+    availability_topic: "cameras/1/available"
+
+sensor:
+  - name: Camera Person Score
+    platform: mqtt
+    state_topic: "cameras/1/objects"
+    value_template: '{{ value_json.person }}'
+    unit_of_measurement: '%'
+    availability_topic: "cameras/1/available"
+```
+
 ## Tips
-- Lower the framerate of the RTSP feed on the camera to what you want to reduce the CPU usage for capturing the feed
-- Use SSDLite models
+- Lower the framerate of the RTSP feed on the camera to reduce the CPU usage for capturing the feed
+- Use SSDLite models to reduce CPU usage
 
 ## Future improvements
-- [x] Switch to MQTT prefix
-- [x] Add last will and availability for MQTT
 - [ ] Build tensorflow from source for CPU optimizations
 - [ ] Add ability to turn detection on and off via MQTT
-- [x] MQTT reconnect if disconnected (and resend availability message)
 - [ ] MQTT motion occasionally gets stuck ON
 - [ ] Output movie clips of people for notifications, etc.
 - [ ] Integrate with homeassistant push camera
-- [x] Store highest scoring person frame from most recent event
-- [x] Add a max size for motion and objects (height/width > 1.5, total area > 1500 and < 100,000)
-- [x] Make motion less sensitive to rain
-- [x] Use Events or Conditions to signal between threads rather than polling a value
-- [x] Implement a debug option to save images with detected objects
-- [x] Only report if x% of the recent frames have a person to avoid single frame false positives (maybe take an average of the person scores in the past x frames?)
-- [x] Filter out detected objects that are not the right size
-- [x] Make RTSP resilient to network drop outs
 - [ ] Merge bounding boxes that span multiple regions
 - [ ] Switch to a config file
 - [ ] Allow motion regions to be different than object detection regions
 - [ ] Implement mode to save labeled objects for training
-- [x] Add motion detection masking
-- [x] Change color of bounding box if motion detected
-- [x] Look for a subset of object types
 - [ ] Try and reduce CPU usage by simplifying the tensorflow model to just include the objects we care about
-- [x] MQTT messages when detected objects change
-- [x] Implement basic motion detection with opencv and only look for objects in the regions with detected motion
-- [x] Dynamic changes to processing speed, ie. only process 1FPS unless motion detected
-- [x] Parallel processing to increase FPS
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
 
