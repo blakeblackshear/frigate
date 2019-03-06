@@ -31,6 +31,7 @@ Run the container with
 docker run --rm \
 -v <path_to_frozen_detection_graph.pb>:/frozen_inference_graph.pb:ro \
 -v <path_to_labelmap.pbtext>:/label_map.pbtext:ro \
+-v <path_to_config_dir>:/config:ro \
 -p 5000:5000 \
 -e RTSP_URL='<rtsp_url>' \
 -e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>' \
@@ -59,6 +60,19 @@ Example docker-compose:
       MQTT_TOPIC_PREFIX: "cameras/1"
       DEBUG: "0"
 ```
+
+Here is an example `REGIONS` env variable:
+`350,0,300,5000,200,mask-0-300.bmp:400,350,250,2000,200,mask-350-250.bmp:400,750,250,2000,200,mask-750-250.bmp`
+
+First region broken down (all are required):
+- `350` - size of the square (350px by 350px)
+- `0` - x coordinate of upper left corner (top left of image is 0,0)
+- `300` - y coordinate of upper left corner (top left of image is 0,0)
+- `5000` - minimum person bounding box size (width*height for bounding box of identified person)
+- `200` - minimum number of changed pixels to trigger motion
+- `mask-0-300.bmp` - a bmp file with the masked regions as pure black, must be the same size as the region
+
+Mask files go in the `/config` directory.
 
 Access the mjpeg stream at http://localhost:5000
 
@@ -102,6 +116,7 @@ sensor:
 - [ ] Try and reduce CPU usage by simplifying the tensorflow model to just include the objects we care about
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
+- [ ] Look into neural compute stick
 
 ## Building Tensorflow from source for CPU optimizations
 https://www.tensorflow.org/install/source#docker_linux_builds
