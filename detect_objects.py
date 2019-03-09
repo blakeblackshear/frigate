@@ -24,6 +24,8 @@ from frigate.object_detection import detect_objects
 RTSP_URL = os.getenv('RTSP_URL')
 
 MQTT_HOST = os.getenv('MQTT_HOST')
+MQTT_USER = os.getenv('MQTT_USER')
+MQTT_PASS = os.getenv('MQTT_PASS')
 MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
 
 # REGIONS = "350,0,300,50:400,350,250,50:400,750,250,50"
@@ -145,6 +147,9 @@ def main():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
+    if not MQTT_USER is None:
+        client.username_pw_set(MQTT_USER, password=MQTT_PASS)
+
     client.connect(MQTT_HOST, 1883, 60)
     client.loop_start()
 

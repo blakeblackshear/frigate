@@ -36,6 +36,8 @@ docker run --rm \
 -e RTSP_URL='<rtsp_url>' \
 -e REGIONS='<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>' \
 -e MQTT_HOST='your.mqtthost.com' \
+-e MQTT_USER='username' \
+-e MQTT_PASS='password' \
 -e MQTT_TOPIC_PREFIX='cameras/1' \
 -e DEBUG='0' \
 frigate:latest
@@ -57,6 +59,8 @@ Example docker-compose:
       RTSP_URL: "<rtsp_url>"
       REGIONS: "<box_size_1>,<x_offset_1>,<y_offset_1>,<min_person_size_1>,<min_motion_size_1>,<mask_file_1>:<box_size_2>,<x_offset_2>,<y_offset_2>,<min_person_size_2>,<min_motion_size_2>,<mask_file_2>"
       MQTT_HOST: "your.mqtthost.com"
+      MQTT_USER: "username" #optional
+      MQTT_PASS: "password" #optional
       MQTT_TOPIC_PREFIX: "cameras/1"
       DEBUG: "0"
 ```
