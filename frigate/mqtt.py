@@ -43,11 +43,11 @@ class MqttObjectPublisher(threading.Thread):
             with self.objects_parsed:
                 self.objects_parsed.wait()
 
-            # add all the person scores in detected objects and 
-            # average over past 1 seconds (5fps)
+            # add all the person scores in detected objects
             detected_objects = self._detected_objects.copy()
-            avg_person_score = sum([obj['score'] for obj in detected_objects if obj['name'] == 'person'])/5
-            payload['person'] = int(avg_person_score*100)
+            person_score = sum([obj['score'] for obj in detected_objects if obj['name'] == 'person'])
+            # if the person score is more than 100, set person to ON
+            payload['person'] = 'ON' if int(person_score*100) > 100 else 'OFF'
 
             # send message for objects if different
             new_payload = json.dumps(payload, sort_keys=True)
