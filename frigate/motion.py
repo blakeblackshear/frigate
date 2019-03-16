@@ -12,10 +12,20 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
 
     avg_frame = None
     avg_delta = None
+    last_motion = -1
     frame_time = 0.0
     motion_frames = 0
     while True:
         now = datetime.datetime.now().timestamp()
+
+        # if it has been long enough since the last motion, clear the flag
+        if last_motion > 0 and (now - last_motion) > 5:
+            last_motion = -1
+            if motion_detected.is_set():
+                motion_detected.clear()
+                with motion_changed:
+                    motion_changed.notify_all()
+
         
         with frame_ready:
             # if there isnt a frame ready for processing or it is old, wait for a signal
@@ -95,14 +105,11 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
                 motion_detected.set()
                 with motion_changed:
                     motion_changed.notify_all()
+                last_motion = now
         else:
             # when no motion, just keep averaging the frames together
             cv2.accumulateWeighted(gray, avg_frame, 0.01)
             motion_frames = 0
-            if motion_detected.is_set():
-                motion_detected.clear()
-                with motion_changed:
-                    motion_changed.notify_all()
 
         if debug and motion_frames == 3:
             cv2.imwrite("/lab/debug/motion-{}-{}-{}.jpg".format(region_x_offset, region_y_offset, datetime.datetime.now().timestamp()), cropped_frame)
