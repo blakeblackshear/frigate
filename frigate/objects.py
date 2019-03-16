@@ -20,33 +20,41 @@ class ObjectParser(threading.Thread):
                 self._objects_parsed.notify_all()
 
 class ObjectCleaner(threading.Thread):
-    def __init__(self, objects_parsed, detected_objects):
+    def __init__(self, objects_parsed, detected_objects, motion_changed, motion_regions):
         threading.Thread.__init__(self)
         self._objects_parsed = objects_parsed
         self._detected_objects = detected_objects
+        self.motion_changed = motion_changed
+        self.motion_regions = motion_regions
 
     def run(self):
         while True:
 
-            # expire the objects that are more than 1 second old
-            now = datetime.datetime.now().timestamp()
-            # look for the first object found within the last second
-            # (newest objects are appended to the end)
-            detected_objects = self._detected_objects.copy()
-            num_to_delete = 0
-            for obj in detected_objects:
-                if now-obj['frame_time']<1:
-                    break
-                num_to_delete += 1
-            if num_to_delete > 0:
-                del self._detected_objects[:num_to_delete]
+            # while there is motion
+            while len([r for r in self.motion_regions if r.is_set()]) > 0:
+                # wait a bit before checking for expired frames
+                time.sleep(0.2)
 
-                # notify that parsed objects were changed
-                with self._objects_parsed:
-                    self._objects_parsed.notify_all()
-            
-            # wait a bit before checking for more expired frames
-            time.sleep(0.2)
+                # expire the objects that are more than 1 second old
+                now = datetime.datetime.now().timestamp()
+                # look for the first object found within the last second
+                # (newest objects are appended to the end)
+                detected_objects = self._detected_objects.copy()
+                num_to_delete = 0
+                for obj in detected_objects:
+                    if now-obj['frame_time']<1:
+                        break
+                    num_to_delete += 1
+                if num_to_delete > 0:
+                    del self._detected_objects[:num_to_delete]
+
+                    # notify that parsed objects were changed
+                    with self._objects_parsed:
+                        self._objects_parsed.notify_all()
+
+            # wait for the global motion flag to change
+            with self.motion_changed:
+                self.motion_changed.wait()
 
 # Maintains the frame and person with the highest score from the most recent
 # motion event

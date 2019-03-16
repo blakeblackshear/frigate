@@ -136,7 +136,8 @@ def main():
     object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS)
     object_parser.start()
     # start a thread to expire objects from the detected objects list
-    object_cleaner = ObjectCleaner(objects_parsed, DETECTED_OBJECTS)
+    object_cleaner = ObjectCleaner(objects_parsed, DETECTED_OBJECTS,
+        motion_changed, [region['motion_detected'] for region in regions])
     object_cleaner.start()
 
     # connect to mqtt and setup last will
