@@ -72,7 +72,7 @@ def main():
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
-    shared_arr = mp.Array(ctypes.c_uint16, flat_array_length)
+    shared_arr = mp.Array(ctypes.c_uint8, flat_array_length)
     # create shared value for storing the frame_time
     shared_frame_time = mp.Value('d', 0.0)
     # Lock to control access to the frame
@@ -173,9 +173,14 @@ def main():
         print("detection_process pid ", detection_process.pid)
     
     # start the motion detection processes
-    for motion_process in motion_processes:
-        motion_process.start()
-        print("motion_process pid ", motion_process.pid)
+    # for motion_process in motion_processes:
+    #     motion_process.start()
+    #     print("motion_process pid ", motion_process.pid)
+
+    for region in regions:
+        region['motion_detected'].set()
+    with motion_changed:
+        motion_changed.notify_all()
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)

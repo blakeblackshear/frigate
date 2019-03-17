@@ -78,7 +78,7 @@ class FrameTracker(threading.Thread):
                 
                 # lock and make a copy of the frame
                 with self.frame_lock: 
-                    frame = self.shared_frame.copy().astype('uint8')
+                    frame = self.shared_frame.copy()
                     frame_time = self.frame_time.value
                 
                 # add the frame to recent frames

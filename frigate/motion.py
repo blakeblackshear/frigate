@@ -34,7 +34,7 @@ def detect_motion(shared_arr, shared_frame_time, frame_lock, frame_ready, motion
         
         # lock and make a copy of the cropped frame
         with frame_lock: 
-            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy().astype('uint8')
+            cropped_frame = arr[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
             frame_time = shared_frame_time.value
 
         # convert to grayscale

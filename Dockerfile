@@ -26,20 +26,25 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y python3
  vim \
  ffmpeg \
  unzip \
+ libusb-1.0-0-dev \
+ python3-setuptools \
+ python3-numpy \
+ zlib1g-dev \
+ libgoogle-glog-dev \
+ swig \
+ libunwind-dev \
+ libc++-dev \
+ libc++abi-dev \
+ build-essential \
  && rm -rf /var/lib/apt/lists/* 
 
 # Install core packages 
 RUN wget -q -O /tmp/get-pip.py --no-check-certificate https://bootstrap.pypa.io/get-pip.py && python3 /tmp/get-pip.py
 RUN  pip install -U pip \
  numpy \
+ pillow \
  matplotlib \
  notebook \
- jupyter \
- pandas \
- moviepy \
- tensorflow \
- keras \
- autovizwidget \
  Flask \
  imutils \
  paho-mqtt
@@ -59,9 +64,6 @@ RUN cd /usr/local/src/ \
  && ldconfig \
  && rm -rf /usr/local/src/protobuf-3.5.1/
 
-# Add dataframe display widget
-RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension
-
 # Download & build OpenCV
 RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip
 RUN cd /usr/local/src/ \
@@ -74,6 +76,16 @@ RUN cd /usr/local/src/ \
  && make -j4 \
  && make install \
  && rm -rf /usr/local/src/opencv-4.0.1
+
+# Download and install EdgeTPU libraries
+RUN wget -q -O edgetpu_api.tar.gz --no-check-certificate http://storage.googleapis.com/cloud-iot-edge-pretrained-models/edgetpu_api.tar.gz
+
+RUN tar xzf edgetpu_api.tar.gz \
+  && cd python-tflite-source \
+  && cp -p libedgetpu/libedgetpu_arm32_throttled.so /lib/arm-linux-gnueabihf/libedgetpu.so \
+  && cp edgetpu/swig/compiled_so/_edgetpu_cpp_wrapper_arm32.so edgetpu/swig/_edgetpu_cpp_wrapper.so \
+  && cp edgetpu/swig/compiled_so/edgetpu_cpp_wrapper.py edgetpu/swig/ \
+  && python3 setup.py develop --user
 
 # Minimize image size 
 RUN (apt-get autoremove -y; \
@@ -88,3 +100,6 @@ ADD frigate frigate/
 COPY detect_objects.py .
 
 CMD ["python3", "-u", "detect_objects.py"]
+
+# WORKDIR /python-tflite-source/edgetpu/
+# CMD ["python3", "-u", "demo/classify_image.py", "--model", "test_data/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite", "--label", "test_data/inat_bird_labels.txt", "--image", "test_data/parrot.jpg"]
