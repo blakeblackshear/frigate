@@ -24,8 +24,9 @@ def ReadLabelFile(file_path):
 
 # do the actual object detection
 def tf_detect_objects(cropped_frame, engine, labels, region_size, region_x_offset, region_y_offset, debug):
-    # Resize to 300x300
-    cropped_frame = cv2.resize(cropped_frame, dsize=(300, 300), interpolation=cv2.INTER_LINEAR)
+    # Resize to 300x300 if needed
+    if cropped_frame.shape != (300, 300, 3):
+        cropped_frame = cv2.resize(cropped_frame, dsize=(300, 300), interpolation=cv2.INTER_LINEAR)
     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
     image_np_expanded = np.expand_dims(cropped_frame, axis=0)
 
