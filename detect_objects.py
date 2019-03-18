@@ -108,6 +108,8 @@ def main():
     detection_prep_processes = []
     motion_processes = []
     for region in regions:
+        # possibly try putting these on threads and putting prepped
+        # frames in a queue
         detection_prep_process = mp.Process(target=prep_for_detection, args=(shared_arr, 
             shared_frame_time,
             frame_lock, frame_ready,
@@ -130,6 +132,14 @@ def main():
             DEBUG))
         motion_process.daemon = True
         motion_processes.append(motion_process)
+
+    # create a process for object detection
+    detection_process = mp.Process(target=detect_objects, args=(
+        prepped_frame_array, prepped_frame_time,
+        prepped_frame_lock, prepped_frame_ready,
+        prepped_frame_box, object_queue, DEBUG
+    ))
+    detection_process.daemon = True
 
     # start a thread to store recent motion frames for processing
     frame_tracker = FrameTracker(frame_arr, shared_frame_time, frame_ready, frame_lock, 
@@ -176,10 +186,13 @@ def main():
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
 
-    # start the object detection processes
+    # start the object detection prep processes
     for detection_prep_process in detection_prep_processes:
         detection_prep_process.start()
         print("detection_prep_process pid ", detection_prep_process.pid)
+    
+    detection_process.start()
+    print("detection_process pid ", detection_process.pid)
     
     # start the motion detection processes
     # for motion_process in motion_processes:
@@ -253,6 +266,7 @@ def main():
         detection_prep_process.join()
     for motion_process in motion_processes:
         motion_process.join()
+    detection_process.join()
     frame_tracker.join()
     best_person_frame.join()
     object_parser.join()

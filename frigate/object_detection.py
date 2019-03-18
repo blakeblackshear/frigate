@@ -21,32 +21,34 @@ def ReadLabelFile(file_path):
 
 def detect_objects(prepped_frame_array, prepped_frame_time, prepped_frame_lock, 
                    prepped_frame_ready, prepped_frame_box, object_queue, debug):
+    prepped_frame_np = tonumpyarray(prepped_frame_array)
     # Load the edgetpu engine and labels
     engine = DetectionEngine(PATH_TO_CKPT)
     labels = ReadLabelFile(PATH_TO_LABELS)
 
-    prepped_frame_time = 0.0
+    frame_time = 0.0
+    region_box = [0,0,0,0]
     while True:
         with prepped_frame_ready:
             prepped_frame_ready.wait()
         
         # make a copy of the cropped frame
         with prepped_frame_lock:
-            prepped_frame_copy = prepped_frame_array.copy()
-            prepped_frame_time = prepped_frame_time.value
-            region_box = prepped_frame_box.value
+            prepped_frame_copy = prepped_frame_np.copy()
+            frame_time = prepped_frame_time.value
+            region_box[:] = prepped_frame_box
 
         # Actual detection.
-        ans = engine.DetectWithInputTensor(prepped_frame_copy, threshold=0.5, top_k=3)
-
+        objects = engine.DetectWithInputTensor(prepped_frame_copy, threshold=0.5, top_k=3)
+        # print(engine.get_inference_time())
         # put detected objects in the queue
-        if ans:
+        if objects:
             # assumes square
             region_size = region_box[3]-region_box[0]
-            for obj in ans:
+            for obj in objects:
                 box = obj.bounding_box.flatten().tolist()
                 object_queue.append({
-                            'frame_time': prepped_frame_time,
+                            'frame_time': frame_time,
                             'name': str(labels[obj.label_id]),
                             'score': float(obj.score),
                             'xmin': int((box[0] * region_size) + region_box[0]),
@@ -74,7 +76,6 @@ def prep_for_detection(shared_whole_frame_array, shared_frame_time, frame_lock, 
         with frame_ready:
             # if there isnt a frame ready for processing or it is old, wait for a new frame
             if shared_frame_time.value == frame_time or (now - shared_frame_time.value) > 0.5:
-                print("waiting...")
                 frame_ready.wait()
         
         # make a copy of the cropped frame
@@ -82,8 +83,6 @@ def prep_for_detection(shared_whole_frame_array, shared_frame_time, frame_lock, 
             cropped_frame = shared_whole_frame[region_y_offset:region_y_offset+region_size, region_x_offset:region_x_offset+region_size].copy()
             frame_time = shared_frame_time.value
         
-        print("grabbed frame " + str(frame_time))
-
         # convert to RGB
         cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
         # Resize to 300x300 if needed
