@@ -19,7 +19,7 @@ from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
 from frigate.objects import ObjectParser, ObjectCleaner, BestPersonFrame
 from frigate.motion import detect_motion
 from frigate.video import fetch_frames, FrameTracker
-from frigate.object_detection import detect_objects
+from frigate.object_detection import prep_for_detection, detect_objects
 
 RTSP_URL = os.getenv('RTSP_URL')
 
@@ -85,6 +85,16 @@ def main():
     objects_parsed = mp.Condition()
     # Queue for detected objects
     object_queue = mp.Queue()
+    # array for prepped frame with shape (1, 300, 300, 3)
+    prepped_frame_array = mp.Array(ctypes.c_uint8, 300*300*3)
+    # shared value for storing the prepped_frame_time
+    prepped_frame_time = mp.Value('d', 0.0)
+    # Condition for notifying that a new prepped frame is ready
+    prepped_frame_ready = mp.Condition()
+    # Lock to control access to the prepped frame
+    prepped_frame_lock = mp.Lock()
+    # array for prepped frame box [x1, y1, x2, y2]
+    prepped_frame_box = mp.Array(ctypes.c_uint16, 4)
 
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -95,20 +105,19 @@ def main():
     capture_process.daemon = True
 
     # for each region, start a separate process for motion detection and object detection
-    detection_processes = []
+    detection_prep_processes = []
     motion_processes = []
     for region in regions:
-        detection_process = mp.Process(target=detect_objects, args=(shared_arr, 
-            object_queue,
+        detection_prep_process = mp.Process(target=prep_for_detection, args=(shared_arr, 
             shared_frame_time,
             frame_lock, frame_ready,
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            region['min_person_area'],
-            DEBUG))
-        detection_process.daemon = True
-        detection_processes.append(detection_process)
+            prepped_frame_array, prepped_frame_time, prepped_frame_ready,
+            prepped_frame_lock, prepped_frame_box))
+        detection_prep_process.daemon = True
+        detection_prep_processes.append(detection_prep_process)
 
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
@@ -168,15 +177,16 @@ def main():
     print("capture_process pid ", capture_process.pid)
 
     # start the object detection processes
-    for detection_process in detection_processes:
-        detection_process.start()
-        print("detection_process pid ", detection_process.pid)
+    for detection_prep_process in detection_prep_processes:
+        detection_prep_process.start()
+        print("detection_prep_process pid ", detection_prep_process.pid)
     
     # start the motion detection processes
     # for motion_process in motion_processes:
     #     motion_process.start()
     #     print("motion_process pid ", motion_process.pid)
 
+    # TEMP: short circuit the motion detection
     for region in regions:
         region['motion_detected'].set()
     with motion_changed:
@@ -239,8 +249,8 @@ def main():
     app.run(host='0.0.0.0', debug=False)
 
     capture_process.join()
-    for detection_process in detection_processes:
-        detection_process.join()
+    for detection_prep_process in detection_prep_processes:
+        detection_prep_process.join()
     for motion_process in motion_processes:
         motion_process.join()
     frame_tracker.join()
