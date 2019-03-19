@@ -44,10 +44,10 @@ def detect_objects(prepped_frame_array, prepped_frame_time, prepped_frame_lock,
         # put detected objects in the queue
         if objects:
             # assumes square
-            region_size = region_box[3]-region_box[0]
+            region_size = region_box[2]-region_box[0]
             for obj in objects:
                 box = obj.bounding_box.flatten().tolist()
-                object_queue.append({
+                object_queue.put({
                             'frame_time': frame_time,
                             'name': str(labels[obj.label_id]),
                             'score': float(obj.score),
