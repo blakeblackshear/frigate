@@ -52,11 +52,12 @@ def main():
             'mask': region_mask,
             # Event for motion detection signaling
             'motion_detected': mp.Event(),
-            # create shared array for storing 10 detected objects
-            # note: this must be a double even though the value you are storing
-            #       is a float. otherwise it stops updating the value in shared
-            #       memory. probably something to do with the size of the memory block
-            'output_array': mp.Array(ctypes.c_double, 6*10)
+            # array for prepped frame with shape (1, 300, 300, 3)
+            'prepped_frame_array': mp.Array(ctypes.c_uint8, 300*300*3),
+            # shared value for storing the prepped_frame_time
+            'prepped_frame_time': mp.Value('d', 0.0),
+            # Lock to control access to the prepped frame
+            'prepped_frame_lock': mp.Lock()
         })
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
@@ -85,16 +86,6 @@ def main():
     objects_parsed = mp.Condition()
     # Queue for detected objects
     object_queue = mp.Queue()
-    # array for prepped frame with shape (1, 300, 300, 3)
-    prepped_frame_array = mp.Array(ctypes.c_uint8, 300*300*3)
-    # shared value for storing the prepped_frame_time
-    prepped_frame_time = mp.Value('d', 0.0)
-    # Condition for notifying that a new prepped frame is ready
-    prepped_frame_ready = mp.Condition()
-    # Lock to control access to the prepped frame
-    prepped_frame_lock = mp.Lock()
-    # array for prepped frame box [x1, y1, x2, y2]
-    prepped_frame_box = mp.Array(ctypes.c_uint16, 4)
 
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -116,8 +107,8 @@ def main():
             region['motion_detected'],
             frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            prepped_frame_array, prepped_frame_time, prepped_frame_ready,
-            prepped_frame_lock, prepped_frame_box))
+            region['prepped_frame_array'], region['prepped_frame_time'],
+            region['prepped_frame_lock']))
         detection_prep_process.daemon = True
         detection_prep_processes.append(detection_prep_process)
 
@@ -135,9 +126,12 @@ def main():
 
     # create a process for object detection
     detection_process = mp.Process(target=detect_objects, args=(
-        prepped_frame_array, prepped_frame_time,
-        prepped_frame_lock, prepped_frame_ready,
-        prepped_frame_box, object_queue, DEBUG
+        [region['prepped_frame_array'] for region in regions],
+        [region['prepped_frame_time'] for region in regions],
+        [region['prepped_frame_lock'] for region in regions],
+        [[region['size'], region['x_offset'], region['y_offset']] for region in regions],
+        motion_changed, [region['motion_detected'] for region in regions],
+        object_queue, DEBUG
     ))
     detection_process.daemon = True
 
