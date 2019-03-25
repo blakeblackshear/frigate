@@ -6,6 +6,7 @@ import datetime
 import ctypes
 import logging
 import multiprocessing as mp
+import queue
 import threading
 import json
 from contextlib import closing
@@ -19,7 +20,7 @@ from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
 from frigate.objects import ObjectParser, ObjectCleaner, BestPersonFrame
 from frigate.motion import detect_motion
 from frigate.video import fetch_frames, FrameTracker
-from frigate.object_detection import prep_for_detection, detect_objects
+from frigate.object_detection import FramePrepper, PreppedQueueProcessor, detect_objects
 
 RTSP_URL = os.getenv('RTSP_URL')
 
@@ -82,10 +83,20 @@ def main():
     frame_ready = mp.Condition()
     # Condition for notifying that motion status changed globally
     motion_changed = mp.Condition()
+
+    prepped_frame_array = mp.Array(ctypes.c_uint8, 300*300*3)
+    # create shared value for storing the frame_time
+    prepped_frame_time = mp.Value('d', 0.0)
+    # Event for notifying that object detection needs a new frame
+    prepped_frame_grabbed = mp.Event()
+    prepped_frame_ready = mp.Event()
     # Condition for notifying that objects were parsed
     objects_parsed = mp.Condition()
     # Queue for detected objects
     object_queue = mp.Queue()
+    # Queue for prepped frames
+    prepped_frame_queue = queue.Queue()
+    prepped_frame_box = mp.Array(ctypes.c_uint16, 3)
 
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -96,21 +107,18 @@ def main():
     capture_process.daemon = True
 
     # for each region, start a separate process for motion detection and object detection
-    detection_prep_processes = []
+    detection_prep_threads = []
     motion_processes = []
     for region in regions:
-        # possibly try putting these on threads and putting prepped
-        # frames in a queue
-        detection_prep_process = mp.Process(target=prep_for_detection, args=(shared_arr, 
+        detection_prep_threads.append(FramePrepper(
+            frame_arr,
             shared_frame_time,
-            frame_lock, frame_ready,
+            frame_ready,
+            frame_lock,
             region['motion_detected'],
-            frame_shape, 
             region['size'], region['x_offset'], region['y_offset'],
-            region['prepped_frame_array'], region['prepped_frame_time'],
-            region['prepped_frame_lock']))
-        detection_prep_process.daemon = True
-        detection_prep_processes.append(detection_prep_process)
+            prepped_frame_queue
+        ))
 
         motion_process = mp.Process(target=detect_motion, args=(shared_arr,
             shared_frame_time,
@@ -124,13 +132,25 @@ def main():
         motion_process.daemon = True
         motion_processes.append(motion_process)
 
+    prepped_queue_processor = PreppedQueueProcessor(
+        prepped_frame_array,
+        prepped_frame_time,
+        prepped_frame_ready,
+        prepped_frame_grabbed,
+        prepped_frame_box,
+        prepped_frame_queue
+    )
+    prepped_queue_processor.start()
+
     # create a process for object detection
+    # if the coprocessor is doing the work, can this run as a thread
+    # since it is waiting for IO?
     detection_process = mp.Process(target=detect_objects, args=(
-        [region['prepped_frame_array'] for region in regions],
-        [region['prepped_frame_time'] for region in regions],
-        [region['prepped_frame_lock'] for region in regions],
-        [[region['size'], region['x_offset'], region['y_offset']] for region in regions],
-        motion_changed, [region['motion_detected'] for region in regions],
+        prepped_frame_array,
+        prepped_frame_time,
+        prepped_frame_ready,
+        prepped_frame_grabbed,
+        prepped_frame_box,
         object_queue, DEBUG
     ))
     detection_process.daemon = True
@@ -181,9 +201,8 @@ def main():
     print("capture_process pid ", capture_process.pid)
 
     # start the object detection prep processes
-    for detection_prep_process in detection_prep_processes:
-        detection_prep_process.start()
-        print("detection_prep_process pid ", detection_prep_process.pid)
+    for detection_prep_thread in detection_prep_threads:
+        detection_prep_thread.start()
     
     detection_process.start()
     print("detection_process pid ", detection_process.pid)
@@ -256,8 +275,8 @@ def main():
     app.run(host='0.0.0.0', debug=False)
 
     capture_process.join()
-    for detection_prep_process in detection_prep_processes:
-        detection_prep_process.join()
+    for detection_prep_thread in detection_prep_threads:
+        detection_prep_thread.join()
     for motion_process in motion_processes:
         motion_process.join()
     detection_process.join()
