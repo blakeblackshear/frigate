@@ -82,8 +82,8 @@ RUN wget -q -O edgetpu_api.tar.gz --no-check-certificate http://storage.googleap
 
 RUN tar xzf edgetpu_api.tar.gz \
   && cd python-tflite-source \
-  && cp -p libedgetpu/libedgetpu_arm32_throttled.so /lib/arm-linux-gnueabihf/libedgetpu.so \
-  && cp edgetpu/swig/compiled_so/_edgetpu_cpp_wrapper_arm32.so edgetpu/swig/_edgetpu_cpp_wrapper.so \
+  && cp -p libedgetpu/libedgetpu_x86_64.so /lib/x86_64-linux-gnu/libedgetpu.so \
+  && cp edgetpu/swig/compiled_so/_edgetpu_cpp_wrapper_x86_64.so edgetpu/swig/_edgetpu_cpp_wrapper.so \
   && cp edgetpu/swig/compiled_so/edgetpu_cpp_wrapper.py edgetpu/swig/ \
   && python3 setup.py develop --user
 
