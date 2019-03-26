@@ -1,4 +1,5 @@
 import datetime
+import time
 import cv2
 import threading
 import numpy as np
@@ -33,7 +34,6 @@ def detect_objects(prepped_frame_array, prepped_frame_time,
     region_box = [0,0,0]
     while True:
         # wait until a frame is ready
-        prepped_frame_grabbed.clear()
         prepped_frame_ready.wait()
 
         prepped_frame_copy = prepped_frame_np.copy()
@@ -41,10 +41,13 @@ def detect_objects(prepped_frame_array, prepped_frame_time,
         region_box[:] = prepped_frame_box
 
         prepped_frame_grabbed.set()
+        # print("Grabbed " + str(region_box[1]) + "," + str(region_box[2]))
 
         # Actual detection.
         objects = engine.DetectWithInputTensor(prepped_frame_copy, threshold=0.5, top_k=3)
-        # print(engine.get_inference_time())
+        # time.sleep(0.1)
+        # objects = []
+        print(engine.get_inference_time())
         # put detected objects in the queue
         if objects:
             for obj in objects:
@@ -90,14 +93,16 @@ class PreppedQueueProcessor(threading.Thread):
         # process queue...
         while True:
             frame = self.prepped_frame_queue.get()
-            print(self.prepped_frame_queue.qsize())
+            # print(self.prepped_frame_queue.qsize())
             prepped_frame_np[:] = frame['frame']
             self.prepped_frame_time.value = frame['frame_time']
             self.prepped_frame_box[0] = frame['region_size']
             self.prepped_frame_box[1] = frame['region_x_offset']
             self.prepped_frame_box[2] = frame['region_y_offset']
+            # print("Passed " + str(frame['region_x_offset']) + "," + str(frame['region_x_offset']))
             self.prepped_frame_ready.set()
             self.prepped_frame_grabbed.wait()
+            self.prepped_frame_grabbed.clear()
             self.prepped_frame_ready.clear()
 
 
@@ -145,11 +150,15 @@ class FramePrepper(threading.Thread):
             # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
             frame_expanded = np.expand_dims(cropped_frame_rgb, axis=0)
 
+            # print("Prepped frame at " + str(self.region_x_offset) + "," + str(self.region_y_offset))
             # add the frame to the queue
-            self.prepped_frame_queue.put({
-                'frame_time': frame_time,
-                'frame': frame_expanded.flatten().copy(),
-                'region_size': self.region_size,
-                'region_x_offset': self.region_x_offset,
-                'region_y_offset': self.region_y_offset
-            })
+            if not self.prepped_frame_queue.full():
+                self.prepped_frame_queue.put({
+                    'frame_time': frame_time,
+                    'frame': frame_expanded.flatten().copy(),
+                    'region_size': self.region_size,
+                    'region_x_offset': self.region_x_offset,
+                    'region_y_offset': self.region_y_offset
+                })
+            # else:
+            #     print("queue full. moving on")

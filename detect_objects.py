@@ -29,9 +29,9 @@ MQTT_USER = os.getenv('MQTT_USER')
 MQTT_PASS = os.getenv('MQTT_PASS')
 MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
 
-# REGIONS = "350,0,300,50:400,350,250,50:400,750,250,50"
+REGIONS = "300,0,0,2000,200,no-mask-300.bmp:300,300,0,2000,200,no-mask-300.bmp:300,600,0,2000,200,no-mask-300.bmp:300,900,0,2000,200,no-mask-300.bmp"
 # REGIONS = "400,350,250,50"
-REGIONS = os.getenv('REGIONS')
+# REGIONS = os.getenv('REGIONS')
 
 DEBUG = (os.getenv('DEBUG') == '1')
 
@@ -70,7 +70,7 @@ def main():
         print("Unable to capture video stream")
         exit(1)
     video.release()
-        
+
     # compute the flattened array length from the array shape
     flat_array_length = frame_shape[0] * frame_shape[1] * frame_shape[2]
     # create shared array for storing the full frame image data
@@ -95,7 +95,7 @@ def main():
     # Queue for detected objects
     object_queue = mp.Queue()
     # Queue for prepped frames
-    prepped_frame_queue = queue.Queue()
+    prepped_frame_queue = queue.Queue(len(regions)*2)
     prepped_frame_box = mp.Array(ctypes.c_uint16, 3)
 
     # shape current frame so it can be treated as an image

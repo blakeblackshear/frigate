@@ -11,8 +11,18 @@ class ObjectParser(threading.Thread):
         self._detected_objects = detected_objects
 
     def run(self):
+        # frame_times = {}
         while True:
             obj = self._object_queue.get()
+            # frame_time = obj['frame_time']
+            # if frame_time in frame_times:
+            #     if frame_times[frame_time] == 7:
+            #         del frame_times[frame_time]
+            #     else:
+            #         frame_times[frame_time] += 1
+            # else:
+            #     frame_times[frame_time] = 1
+            # print(frame_times)
             self._detected_objects.append(obj)
 
             # notify that objects were parsed
@@ -40,9 +50,11 @@ class ObjectCleaner(threading.Thread):
                 # look for the first object found within the last second
                 # (newest objects are appended to the end)
                 detected_objects = self._detected_objects.copy()
+
+                #print([round(now-obj['frame_time'],2) for obj in detected_objects])
                 num_to_delete = 0
                 for obj in detected_objects:
-                    if now-obj['frame_time']<1:
+                    if now-obj['frame_time']<2:
                         break
                     num_to_delete += 1
                 if num_to_delete > 0:
