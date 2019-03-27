@@ -61,16 +61,16 @@ def detect_objects(prepped_frame_array, prepped_frame_time,
                             'xmax': int((box[2] * region_box[0]) + region_box[1]),
                             'ymax': int((box[3] * region_box[0]) + region_box[2])
                         })
-        else:
-            object_queue.put({
-                            'frame_time': frame_time,
-                            'name': 'dummy',
-                            'score': 0.99,
-                            'xmin': int(0 + region_box[1]),
-                            'ymin': int(0 + region_box[2]),
-                            'xmax': int(10 + region_box[1]),
-                            'ymax': int(10 + region_box[2])
-                        })
+        # else:
+        #     object_queue.put({
+        #                     'frame_time': frame_time,
+        #                     'name': 'dummy',
+        #                     'score': 0.99,
+        #                     'xmin': int(0 + region_box[1]),
+        #                     'ymin': int(0 + region_box[2]),
+        #                     'xmax': int(10 + region_box[1]),
+        #                     'ymax': int(10 + region_box[2])
+        #                 })
 
 class PreppedQueueProcessor(threading.Thread):
     def __init__(self, prepped_frame_array,
