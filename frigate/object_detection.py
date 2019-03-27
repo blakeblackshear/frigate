@@ -47,7 +47,7 @@ def detect_objects(prepped_frame_array, prepped_frame_time,
         objects = engine.DetectWithInputTensor(prepped_frame_copy, threshold=0.5, top_k=3)
         # time.sleep(0.1)
         # objects = []
-        print(engine.get_inference_time())
+        # print(engine.get_inference_time())
         # put detected objects in the queue
         if objects:
             for obj in objects:
@@ -109,7 +109,7 @@ class PreppedQueueProcessor(threading.Thread):
 # should this be a region class?
 class FramePrepper(threading.Thread):
     def __init__(self, shared_frame, frame_time, frame_ready, 
-        frame_lock, motion_detected,
+        frame_lock,
         region_size, region_x_offset, region_y_offset,
         prepped_frame_queue):
 
@@ -118,7 +118,6 @@ class FramePrepper(threading.Thread):
         self.frame_time = frame_time
         self.frame_ready = frame_ready
         self.frame_lock = frame_lock
-        self.motion_detected = motion_detected
         self.region_size = region_size
         self.region_x_offset = region_x_offset
         self.region_y_offset = region_y_offset
@@ -128,9 +127,6 @@ class FramePrepper(threading.Thread):
         frame_time = 0.0
         while True:
             now = datetime.datetime.now().timestamp()
-
-            # wait until motion is detected
-            self.motion_detected.wait()
 
             with self.frame_ready:
                 # if there isnt a frame ready for processing or it is old, wait for a new frame

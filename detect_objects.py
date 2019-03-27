@@ -37,22 +37,16 @@ DEBUG = (os.getenv('DEBUG') == '1')
 
 def main():
     DETECTED_OBJECTS = []
-    recent_motion_frames = {}
+    recent_frames = {}
     # Parse selected regions
     regions = []
     for region_string in REGIONS.split(':'):
         region_parts = region_string.split(',')
-        region_mask_image = cv2.imread("/config/{}".format(region_parts[5]), cv2.IMREAD_GRAYSCALE)
-        region_mask = np.where(region_mask_image==[0])
         regions.append({
             'size': int(region_parts[0]),
             'x_offset': int(region_parts[1]),
             'y_offset': int(region_parts[2]),
             'min_person_area': int(region_parts[3]),
-            'min_object_size': int(region_parts[4]),
-            'mask': region_mask,
-            # Event for motion detection signaling
-            'motion_detected': mp.Event(),
             # array for prepped frame with shape (1, 300, 300, 3)
             'prepped_frame_array': mp.Array(ctypes.c_uint8, 300*300*3),
             # shared value for storing the prepped_frame_time
@@ -81,14 +75,13 @@ def main():
     frame_lock = mp.Lock()
     # Condition for notifying that a new frame is ready
     frame_ready = mp.Condition()
-    # Condition for notifying that motion status changed globally
-    motion_changed = mp.Condition()
-
+    # Shared memory array for passing prepped frame to tensorflow
     prepped_frame_array = mp.Array(ctypes.c_uint8, 300*300*3)
     # create shared value for storing the frame_time
     prepped_frame_time = mp.Value('d', 0.0)
     # Event for notifying that object detection needs a new frame
     prepped_frame_grabbed = mp.Event()
+    # Event for notifying that new frame is ready for detection
     prepped_frame_ready = mp.Event()
     # Condition for notifying that objects were parsed
     objects_parsed = mp.Condition()
@@ -96,6 +89,7 @@ def main():
     object_queue = mp.Queue()
     # Queue for prepped frames
     prepped_frame_queue = queue.Queue(len(regions)*2)
+    # Array for passing original region box to compute object bounding box
     prepped_frame_box = mp.Array(ctypes.c_uint16, 3)
 
     # shape current frame so it can be treated as an image
@@ -106,31 +100,17 @@ def main():
         shared_frame_time, frame_lock, frame_ready, frame_shape, RTSP_URL))
     capture_process.daemon = True
 
-    # for each region, start a separate process for motion detection and object detection
+    # for each region, start a separate thread to resize the region and prep for detection
     detection_prep_threads = []
-    motion_processes = []
     for region in regions:
         detection_prep_threads.append(FramePrepper(
             frame_arr,
             shared_frame_time,
             frame_ready,
             frame_lock,
-            region['motion_detected'],
             region['size'], region['x_offset'], region['y_offset'],
             prepped_frame_queue
         ))
-
-        motion_process = mp.Process(target=detect_motion, args=(shared_arr,
-            shared_frame_time,
-            frame_lock, frame_ready,
-            region['motion_detected'],
-            motion_changed,
-            frame_shape, 
-            region['size'], region['x_offset'], region['y_offset'],
-            region['min_object_size'], region['mask'],
-            DEBUG))
-        motion_process.daemon = True
-        motion_processes.append(motion_process)
 
     prepped_queue_processor = PreppedQueueProcessor(
         prepped_frame_array,
@@ -157,24 +137,22 @@ def main():
 
     # start a thread to store recent motion frames for processing
     frame_tracker = FrameTracker(frame_arr, shared_frame_time, frame_ready, frame_lock, 
-        recent_motion_frames, motion_changed, [region['motion_detected'] for region in regions])
+        recent_frames)
     frame_tracker.start()
 
     # start a thread to store the highest scoring recent person frame
-    best_person_frame = BestPersonFrame(objects_parsed, recent_motion_frames, DETECTED_OBJECTS, 
-        motion_changed, [region['motion_detected'] for region in regions])
+    best_person_frame = BestPersonFrame(objects_parsed, recent_frames, DETECTED_OBJECTS)
     best_person_frame.start()
 
     # start a thread to parse objects from the queue
     object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS)
     object_parser.start()
     # start a thread to expire objects from the detected objects list
-    object_cleaner = ObjectCleaner(objects_parsed, DETECTED_OBJECTS,
-        motion_changed, [region['motion_detected'] for region in regions])
+    object_cleaner = ObjectCleaner(objects_parsed, DETECTED_OBJECTS)
     object_cleaner.start()
 
     # connect to mqtt and setup last will
-    def on_connect(client, userdata, flags, rc): 
+    def on_connect(client, userdata, flags, rc):
         print("On connect called")
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
@@ -191,32 +169,16 @@ def main():
     mqtt_publisher = MqttObjectPublisher(client, MQTT_TOPIC_PREFIX, objects_parsed, DETECTED_OBJECTS)
     mqtt_publisher.start()
 
-    # start thread to publish motion status
-    mqtt_motion_publisher = MqttMotionPublisher(client, MQTT_TOPIC_PREFIX, motion_changed,
-        [region['motion_detected'] for region in regions])
-    mqtt_motion_publisher.start()
-
     # start the process of capturing frames
     capture_process.start()
     print("capture_process pid ", capture_process.pid)
 
-    # start the object detection prep processes
+    # start the object detection prep threads
     for detection_prep_thread in detection_prep_threads:
         detection_prep_thread.start()
     
     detection_process.start()
     print("detection_process pid ", detection_process.pid)
-    
-    # start the motion detection processes
-    # for motion_process in motion_processes:
-    #     motion_process.start()
-    #     print("motion_process pid ", motion_process.pid)
-
-    # TEMP: short circuit the motion detection
-    for region in regions:
-        region['motion_detected'].set()
-    with motion_changed:
-        motion_changed.notify_all()
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
@@ -259,8 +221,6 @@ def main():
 
             for region in regions:
                 color = (255,255,255)
-                if region['motion_detected'].is_set():
-                    color = (0,255,0)
                 cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                     (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                     color, 2)
@@ -277,8 +237,6 @@ def main():
     capture_process.join()
     for detection_prep_thread in detection_prep_threads:
         detection_prep_thread.join()
-    for motion_process in motion_processes:
-        motion_process.join()
     detection_process.join()
     frame_tracker.join()
     best_person_frame.join()
