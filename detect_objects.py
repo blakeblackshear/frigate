@@ -29,9 +29,9 @@ MQTT_USER = os.getenv('MQTT_USER')
 MQTT_PASS = os.getenv('MQTT_PASS')
 MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
 
-REGIONS = "300,0,0,2000,200,no-mask-300.bmp:300,300,0,2000,200,no-mask-300.bmp:300,600,0,2000,200,no-mask-300.bmp:300,900,0,2000,200,no-mask-300.bmp"
+# REGIONS = "300,0,0,2000,200,no-mask-300.bmp:300,300,0,2000,200,no-mask-300.bmp:300,600,0,2000,200,no-mask-300.bmp:300,900,0,2000,200,no-mask-300.bmp:300,0,300,2000,200,no-mask-300.bmp:300,300,300,2000,200,no-mask-300.bmp:300,600,300,2000,200,no-mask-300.bmp:300,900,300,2000,200,no-mask-300.bmp"
 # REGIONS = "400,350,250,50"
-# REGIONS = os.getenv('REGIONS')
+REGIONS = os.getenv('REGIONS')
 
 DEBUG = (os.getenv('DEBUG') == '1')
 
@@ -145,7 +145,7 @@ def main():
     best_person_frame.start()
 
     # start a thread to parse objects from the queue
-    object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS)
+    object_parser = ObjectParser(object_queue, objects_parsed, DETECTED_OBJECTS, regions)
     object_parser.start()
     # start a thread to expire objects from the detected objects list
     object_cleaner = ObjectCleaner(objects_parsed, DETECTED_OBJECTS)

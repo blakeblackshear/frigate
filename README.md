@@ -108,19 +108,26 @@ sensor:
 - Use SSDLite models to reduce CPU usage
 
 ## Future improvements
-- [ ] Build tensorflow from source for CPU optimizations
+- [x] Remove motion detection for now
+- [ ] Try running object detection in a thread rather than a process
+- [x] Implement min person size again
+- [ ] Switch to a config file
+- [ ] Handle multiple cameras in the same container
+- [ ] Simplify motion detection (check entire image against mask)
+- [ ] See if motion detection is even worth running
+- [ ] Scan for people across entire image rather than specfic regions
+- [ ] Dynamically resize detection area and follow people
 - [ ] Add ability to turn detection on and off via MQTT
 - [ ] MQTT motion occasionally gets stuck ON
 - [ ] Output movie clips of people for notifications, etc.
 - [ ] Integrate with homeassistant push camera
 - [ ] Merge bounding boxes that span multiple regions
-- [ ] Switch to a config file
 - [ ] Allow motion regions to be different than object detection regions
 - [ ] Implement mode to save labeled objects for training
 - [ ] Try and reduce CPU usage by simplifying the tensorflow model to just include the objects we care about
 - [ ] Look into GPU accelerated decoding of RTSP stream
 - [ ] Send video over a socket and use JSMPEG
-- [ ] Look into neural compute stick
+- [x] Look into neural compute stick
 
 ## Building Tensorflow from source for CPU optimizations
 https://www.tensorflow.org/install/source#docker_linux_builds
