@@ -21,89 +21,40 @@ def ReadLabelFile(file_path):
         ret[int(pair[0])] = pair[1].strip()
     return ret
 
-def detect_objects(prepped_frame_array, prepped_frame_time,
-                   prepped_frame_ready, prepped_frame_grabbed,
-                   prepped_frame_box, object_queue, debug):
-    prepped_frame_np = tonumpyarray(prepped_frame_array)
-
-    # Load the edgetpu engine and labels
-    engine = DetectionEngine(PATH_TO_CKPT)
-    labels = ReadLabelFile(PATH_TO_LABELS)
-
-    frame_time = 0.0
-    region_box = [0,0,0]
-    while True:
-        # wait until a frame is ready
-        prepped_frame_ready.wait()
-
-        prepped_frame_copy = prepped_frame_np.copy()
-        frame_time = prepped_frame_time.value
-        region_box[:] = prepped_frame_box
-
-        prepped_frame_grabbed.set()
-        # print("Grabbed " + str(region_box[1]) + "," + str(region_box[2]))
-
-        # Actual detection.
-        objects = engine.DetectWithInputTensor(prepped_frame_copy, threshold=0.5, top_k=3)
-        # time.sleep(0.1)
-        # objects = []
-        # print(engine.get_inference_time())
-        # put detected objects in the queue
-        if objects:
-            for obj in objects:
-                box = obj.bounding_box.flatten().tolist()
-                object_queue.put({
-                            'frame_time': frame_time,
-                            'name': str(labels[obj.label_id]),
-                            'score': float(obj.score),
-                            'xmin': int((box[0] * region_box[0]) + region_box[1]),
-                            'ymin': int((box[1] * region_box[0]) + region_box[2]),
-                            'xmax': int((box[2] * region_box[0]) + region_box[1]),
-                            'ymax': int((box[3] * region_box[0]) + region_box[2])
-                        })
-        # else:
-        #     object_queue.put({
-        #                     'frame_time': frame_time,
-        #                     'name': 'dummy',
-        #                     'score': 0.99,
-        #                     'xmin': int(0 + region_box[1]),
-        #                     'ymin': int(0 + region_box[2]),
-        #                     'xmax': int(10 + region_box[1]),
-        #                     'ymax': int(10 + region_box[2])
-        #                 })
-
 class PreppedQueueProcessor(threading.Thread):
-    def __init__(self, prepped_frame_array,
-        prepped_frame_time,
-        prepped_frame_ready,
-        prepped_frame_grabbed,
-        prepped_frame_box,
-        prepped_frame_queue):
+    def __init__(self, prepped_frame_queue, object_queue):
 
         threading.Thread.__init__(self)
-        self.prepped_frame_array = prepped_frame_array
-        self.prepped_frame_time = prepped_frame_time
-        self.prepped_frame_ready = prepped_frame_ready
-        self.prepped_frame_grabbed = prepped_frame_grabbed
-        self.prepped_frame_box = prepped_frame_box
         self.prepped_frame_queue = prepped_frame_queue
+        self.object_queue = object_queue
+        
+        # Load the edgetpu engine and labels
+        self.engine = DetectionEngine(PATH_TO_CKPT)
+        self.labels = ReadLabelFile(PATH_TO_LABELS)
 
     def run(self):
-        prepped_frame_np = tonumpyarray(self.prepped_frame_array)
         # process queue...
         while True:
             frame = self.prepped_frame_queue.get()
             # print(self.prepped_frame_queue.qsize())
-            prepped_frame_np[:] = frame['frame']
-            self.prepped_frame_time.value = frame['frame_time']
-            self.prepped_frame_box[0] = frame['region_size']
-            self.prepped_frame_box[1] = frame['region_x_offset']
-            self.prepped_frame_box[2] = frame['region_y_offset']
-            # print("Passed " + str(frame['region_x_offset']) + "," + str(frame['region_x_offset']))
-            self.prepped_frame_ready.set()
-            self.prepped_frame_grabbed.wait()
-            self.prepped_frame_grabbed.clear()
-            self.prepped_frame_ready.clear()
+            # Actual detection.
+            objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=3)
+            # time.sleep(0.1)
+            # objects = []
+            # print(engine.get_inference_time())
+            # put detected objects in the queue
+            if objects:
+                for obj in objects:
+                    box = obj.bounding_box.flatten().tolist()
+                    self.object_queue.put({
+                                'frame_time': frame['frame_time'],
+                                'name': str(self.labels[obj.label_id]),
+                                'score': float(obj.score),
+                                'xmin': int((box[0] * frame['region_size']) + frame['region_x_offset']),
+                                'ymin': int((box[1] * frame['region_size']) + frame['region_y_offset']),
+                                'xmax': int((box[2] * frame['region_size']) + frame['region_x_offset']),
+                                'ymax': int((box[3] * frame['region_size']) + frame['region_y_offset'])
+                            })
 
 
 # should this be a region class?
@@ -156,5 +107,5 @@ class FramePrepper(threading.Thread):
                     'region_x_offset': self.region_x_offset,
                     'region_y_offset': self.region_y_offset
                 })
-            # else:
-            #     print("queue full. moving on")
+            else:
+                print("queue full. moving on")

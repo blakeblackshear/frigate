@@ -75,22 +75,12 @@ def main():
     frame_lock = mp.Lock()
     # Condition for notifying that a new frame is ready
     frame_ready = mp.Condition()
-    # Shared memory array for passing prepped frame to tensorflow
-    prepped_frame_array = mp.Array(ctypes.c_uint8, 300*300*3)
-    # create shared value for storing the frame_time
-    prepped_frame_time = mp.Value('d', 0.0)
-    # Event for notifying that object detection needs a new frame
-    prepped_frame_grabbed = mp.Event()
-    # Event for notifying that new frame is ready for detection
-    prepped_frame_ready = mp.Event()
     # Condition for notifying that objects were parsed
     objects_parsed = mp.Condition()
     # Queue for detected objects
-    object_queue = mp.Queue()
+    object_queue = queue.Queue()
     # Queue for prepped frames
     prepped_frame_queue = queue.Queue(len(regions)*2)
-    # Array for passing original region box to compute object bounding box
-    prepped_frame_box = mp.Array(ctypes.c_uint16, 3)
 
     # shape current frame so it can be treated as an image
     frame_arr = tonumpyarray(shared_arr).reshape(frame_shape)
@@ -113,27 +103,10 @@ def main():
         ))
 
     prepped_queue_processor = PreppedQueueProcessor(
-        prepped_frame_array,
-        prepped_frame_time,
-        prepped_frame_ready,
-        prepped_frame_grabbed,
-        prepped_frame_box,
-        prepped_frame_queue
+        prepped_frame_queue,
+        object_queue
     )
     prepped_queue_processor.start()
-
-    # create a process for object detection
-    # if the coprocessor is doing the work, can this run as a thread
-    # since it is waiting for IO?
-    detection_process = mp.Process(target=detect_objects, args=(
-        prepped_frame_array,
-        prepped_frame_time,
-        prepped_frame_ready,
-        prepped_frame_grabbed,
-        prepped_frame_box,
-        object_queue, DEBUG
-    ))
-    detection_process.daemon = True
 
     # start a thread to store recent motion frames for processing
     frame_tracker = FrameTracker(frame_arr, shared_frame_time, frame_ready, frame_lock, 
@@ -176,9 +149,6 @@ def main():
     # start the object detection prep threads
     for detection_prep_thread in detection_prep_threads:
         detection_prep_thread.start()
-    
-    detection_process.start()
-    print("detection_process pid ", detection_process.pid)
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
@@ -237,7 +207,6 @@ def main():
     capture_process.join()
     for detection_prep_thread in detection_prep_threads:
         detection_prep_thread.join()
-    detection_process.join()
     frame_tracker.join()
     best_person_frame.join()
     object_parser.join()
