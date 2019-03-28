@@ -9,6 +9,7 @@ import multiprocessing as mp
 import queue
 import threading
 import json
+import yaml
 from contextlib import closing
 import numpy as np
 from object_detection.utils import visualization_utils as vis_util
@@ -20,40 +21,33 @@ from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
 from frigate.objects import ObjectParser, ObjectCleaner, BestPersonFrame
 from frigate.motion import detect_motion
 from frigate.video import fetch_frames, FrameTracker
-from frigate.object_detection import FramePrepper, PreppedQueueProcessor, detect_objects
+from frigate.object_detection import FramePrepper, PreppedQueueProcessor
 
-RTSP_URL = os.getenv('RTSP_URL')
+with open('/config/config.yml') as f:
+    # use safe_load instead load
+    CONFIG = yaml.safe_load(f)
 
-MQTT_HOST = os.getenv('MQTT_HOST')
-MQTT_USER = os.getenv('MQTT_USER')
-MQTT_PASS = os.getenv('MQTT_PASS')
-MQTT_TOPIC_PREFIX = os.getenv('MQTT_TOPIC_PREFIX')
+rtsp_camera = CONFIG['cameras']['back']['rtsp']
+if (rtsp_camera['password'].startswith('$')):
+    rtsp_camera['password'] = os.getenv(rtsp_camera['password'][1:])
+RTSP_URL = 'rtsp://{}:{}@{}:{}{}'.format(rtsp_camera['user'], 
+    rtsp_camera['password'], rtsp_camera['host'], rtsp_camera['port'],
+    rtsp_camera['path'])
 
-# REGIONS = "300,0,0,2000,200,no-mask-300.bmp:300,300,0,2000,200,no-mask-300.bmp:300,600,0,2000,200,no-mask-300.bmp:300,900,0,2000,200,no-mask-300.bmp:300,0,300,2000,200,no-mask-300.bmp:300,300,300,2000,200,no-mask-300.bmp:300,600,300,2000,200,no-mask-300.bmp:300,900,300,2000,200,no-mask-300.bmp"
-# REGIONS = "400,350,250,50"
-REGIONS = os.getenv('REGIONS')
+MQTT_HOST = CONFIG['mqtt']['host']
+MQTT_PORT = CONFIG.get('mqtt', {}).get('port', 1883)
+MQTT_TOPIC_PREFIX = CONFIG['mqtt']['topic_prefix'] + '/back'
+MQTT_USER = CONFIG.get('mqtt', {}).get('user')
+MQTT_PASS = CONFIG.get('mqtt', {}).get('password')
 
-DEBUG = (os.getenv('DEBUG') == '1')
+WEB_PORT = CONFIG.get('web_port', 5000)
+DEBUG = (CONFIG.get('debug', '0') == '1')
 
 def main():
     DETECTED_OBJECTS = []
     recent_frames = {}
     # Parse selected regions
-    regions = []
-    for region_string in REGIONS.split(':'):
-        region_parts = region_string.split(',')
-        regions.append({
-            'size': int(region_parts[0]),
-            'x_offset': int(region_parts[1]),
-            'y_offset': int(region_parts[2]),
-            'min_person_area': int(region_parts[3]),
-            # array for prepped frame with shape (1, 300, 300, 3)
-            'prepped_frame_array': mp.Array(ctypes.c_uint8, 300*300*3),
-            # shared value for storing the prepped_frame_time
-            'prepped_frame_time': mp.Value('d', 0.0),
-            # Lock to control access to the prepped frame
-            'prepped_frame_lock': mp.Lock()
-        })
+    regions = CONFIG['cameras']['back']['regions']
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
     video = cv2.VideoCapture(RTSP_URL)
@@ -135,7 +129,7 @@ def main():
     if not MQTT_USER is None:
         client.username_pw_set(MQTT_USER, password=MQTT_PASS)
 
-    client.connect(MQTT_HOST, 1883, 60)
+    client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
 
     # start a thread to publish object scores (currently only person)
@@ -202,7 +196,7 @@ def main():
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
     capture_process.join()
     for detection_prep_thread in detection_prep_threads:

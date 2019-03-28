@@ -47,7 +47,8 @@ RUN  pip install -U pip \
  notebook \
  Flask \
  imutils \
- paho-mqtt
+ paho-mqtt \
+ PyYAML
 
 # Install tensorflow models object detection
 RUN GIT_SSL_NO_VERIFY=true git clone -q https://github.com/tensorflow/models /usr/local/lib/python3.5/dist-packages/tensorflow/models
