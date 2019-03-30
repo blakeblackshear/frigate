@@ -66,6 +66,7 @@ def main():
 
     for name, camera in cameras.items():
         camera.start()
+        print("Capture process for {}: {}".format(name, camera.get_capture_pid()))
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
