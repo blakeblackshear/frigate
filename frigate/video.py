@@ -5,6 +5,7 @@ import cv2
 import threading
 import ctypes
 import multiprocessing as mp
+from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, ObjectParser, BestPersonFrame
@@ -214,6 +215,38 @@ class Camera:
 
     def get_best_person(self):
         return self.best_person_frame.best_frame
+    
+    def get_current_frame_with_objects(self):
+        # make a copy of the current detected objects
+        detected_objects = self.detected_objects.copy()
+        # lock and make a copy of the current frame
+        with self.frame_lock:
+            frame = self.shared_frame_np.copy()
+
+        # convert to RGB for drawing
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # draw the bounding boxes on the screen
+        for obj in detected_objects:
+            vis_util.draw_bounding_box_on_image_array(frame,
+                obj['ymin'],
+                obj['xmin'],
+                obj['ymax'],
+                obj['xmax'],
+                color='red',
+                thickness=2,
+                display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
+                use_normalized_coordinates=False)
+
+        for region in self.regions:
+            color = (255,255,255)
+            cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
+                (region['x_offset']+region['size'], region['y_offset']+region['size']), 
+                color, 2)
+
+        # convert back to BGR
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+        return frame
 
 
     

@@ -68,61 +68,36 @@ def main():
     prepped_queue_processor.start()
 
     camera.start()
-    camera.join()
 
     # create a flask app that encodes frames a mjpeg on demand
-    # app = Flask(__name__)
+    app = Flask(__name__)
 
-    # @app.route('/best_person.jpg')
-    # def best_person():
-    #     frame = np.zeros(frame_shape, np.uint8) if camera.get_best_person() is None else camera.get_best_person()
-    #     ret, jpg = cv2.imencode('.jpg', frame)
-    #     response = make_response(jpg.tobytes())
-    #     response.headers['Content-Type'] = 'image/jpg'
-    #     return response
+    @app.route('/best_person.jpg')
+    def best_person():
+        frame = np.zeros((720,1280,3), np.uint8) if camera.get_best_person() is None else camera.get_best_person()
+        ret, jpg = cv2.imencode('.jpg', frame)
+        response = make_response(jpg.tobytes())
+        response.headers['Content-Type'] = 'image/jpg'
+        return response
 
-    # @app.route('/')
-    # def index():
-    #     # return a multipart response
-    #     return Response(imagestream(),
-    #                     mimetype='multipart/x-mixed-replace; boundary=frame')
-    # def imagestream():
-    #     while True:
-    #         # max out at 5 FPS
-    #         time.sleep(0.2)
-    #         # make a copy of the current detected objects
-    #         detected_objects = DETECTED_OBJECTS.copy()
-    #         # lock and make a copy of the current frame
-    #         with frame_lock:
-    #             frame = frame_arr.copy()
-    #         # convert to RGB for drawing
-    #         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    #         # draw the bounding boxes on the screen
-    #         for obj in detected_objects:
-    #             vis_util.draw_bounding_box_on_image_array(frame,
-    #                 obj['ymin'],
-    #                 obj['xmin'],
-    #                 obj['ymax'],
-    #                 obj['xmax'],
-    #                 color='red',
-    #                 thickness=2,
-    #                 display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
-    #                 use_normalized_coordinates=False)
+    @app.route('/')
+    def index():
+        # return a multipart response
+        return Response(imagestream(),
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+    def imagestream():
+        while True:
+            # max out at 5 FPS
+            time.sleep(0.2)
+            frame = camera.get_current_frame_with_objects()
+            # encode the image into a jpg
+            ret, jpg = cv2.imencode('.jpg', frame)
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
-    #         for region in regions:
-    #             color = (255,255,255)
-    #             cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
-    #                 (region['x_offset']+region['size'], region['y_offset']+region['size']), 
-    #                 color, 2)
+    app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
-    #         # convert back to BGR
-    #         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    #         # encode the image into a jpg
-    #         ret, jpg = cv2.imencode('.jpg', frame)
-    #         yield (b'--frame\r\n'
-    #             b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
-
-    # app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
+    camera.join()
 
 if __name__ == '__main__':
     main()

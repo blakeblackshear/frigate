@@ -41,7 +41,7 @@ class PreppedQueueProcessor(threading.Thread):
             objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=3)
             # time.sleep(0.1)
             # objects = []
-            print(self.engine.get_inference_time())
+            # print(self.engine.get_inference_time())
             # put detected objects in the queue
             parsed_objects = []
             for obj in objects:
