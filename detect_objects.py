@@ -54,12 +54,9 @@ def main():
     # TODO: set length to 1.5x the number of total regions
     prepped_frame_queue = queue.Queue(6)
 
-
-    camera = Camera('back', CONFIG['cameras']['back'], prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
-
-    cameras = {
-        'back': camera
-    }
+    cameras = {}
+    for name, config in CONFIG['cameras'].items():
+        cameras[name] = Camera(name, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
@@ -67,29 +64,33 @@ def main():
     )
     prepped_queue_processor.start()
 
-    camera.start()
+    for name, camera in cameras.items():
+        camera.start()
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
 
-    @app.route('/best_person.jpg')
-    def best_person():
-        frame = np.zeros((720,1280,3), np.uint8) if camera.get_best_person() is None else camera.get_best_person()
-        ret, jpg = cv2.imencode('.jpg', frame)
+    @app.route('/<camera_name>/best_person.jpg')
+    def best_person(camera_name):
+        best_person_frame = cameras[camera_name].get_best_person()
+        if best_person_frame is None:
+            best_person_frame = np.zeros((720,1280,3), np.uint8)
+        ret, jpg = cv2.imencode('.jpg', best_person_frame)
         response = make_response(jpg.tobytes())
         response.headers['Content-Type'] = 'image/jpg'
         return response
 
-    @app.route('/')
-    def index():
+    @app.route('/<camera_name>')
+    def mjpeg_feed(camera_name):
         # return a multipart response
-        return Response(imagestream(),
+        return Response(imagestream(camera_name),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
-    def imagestream():
+
+    def imagestream(camera_name):
         while True:
             # max out at 5 FPS
             time.sleep(0.2)
-            frame = camera.get_current_frame_with_objects()
+            frame = cameras[camera_name].get_current_frame_with_objects()
             # encode the image into a jpg
             ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
