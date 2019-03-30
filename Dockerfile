@@ -92,6 +92,10 @@ RUN tar xzf edgetpu_api.tar.gz \
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
 
+# symlink the model and labels
+RUN ln -s /python-tflite-source/edgetpu/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /frozen_inference_graph.pb
+RUN ln -s /python-tflite-source/edgetpu/test_data/coco_labels.txt /label_map.pbtext
+
 # Set TF object detection available
 ENV PYTHONPATH "$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim"
 RUN cd /usr/local/lib/python3.5/dist-packages/tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=.
@@ -101,6 +105,3 @@ ADD frigate frigate/
 COPY detect_objects.py .
 
 CMD ["python3", "-u", "detect_objects.py"]
-
-# WORKDIR /python-tflite-source/edgetpu/
-# CMD ["python3", "-u", "demo/classify_image.py", "--model", "test_data/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite", "--label", "test_data/inat_bird_labels.txt", "--image", "test_data/parrot.jpg"]

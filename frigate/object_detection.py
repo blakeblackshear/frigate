@@ -36,13 +36,10 @@ class PreppedQueueProcessor(threading.Thread):
         # process queue...
         while True:
             frame = self.prepped_frame_queue.get()
-            # print(self.prepped_frame_queue.qsize())
+
             # Actual detection.
             objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=3)
-            # time.sleep(0.1)
-            # objects = []
-            # print(self.engine.get_inference_time())
-            # put detected objects in the queue
+            # parse and pass detected objects back to the camera
             parsed_objects = []
             for obj in objects:
                 box = obj.bounding_box.flatten().tolist()
@@ -99,7 +96,6 @@ class FramePrepper(threading.Thread):
             # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
             frame_expanded = np.expand_dims(cropped_frame_rgb, axis=0)
 
-            # print("Prepped frame at " + str(self.region_x_offset) + "," + str(self.region_y_offset))
             # add the frame to the queue
             if not self.prepped_frame_queue.full():
                 self.prepped_frame_queue.put({

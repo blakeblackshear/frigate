@@ -1,30 +1,15 @@
-import os
 import cv2
-import imutils
 import time
-import datetime
-import ctypes
-import logging
-import multiprocessing as mp
 import queue
-import threading
-import json
 import yaml
-from contextlib import closing
 import numpy as np
-from object_detection.utils import visualization_utils as vis_util
-from flask import Flask, Response, make_response, send_file
+from flask import Flask, Response, make_response
 import paho.mqtt.client as mqtt
 
-from frigate.util import tonumpyarray
-from frigate.mqtt import MqttMotionPublisher, MqttObjectPublisher
-from frigate.objects import ObjectParser, ObjectCleaner, BestPersonFrame
-from frigate.motion import detect_motion
-from frigate.video import fetch_frames, FrameTracker, Camera
-from frigate.object_detection import FramePrepper, PreppedQueueProcessor
+from frigate.video import Camera
+from frigate.object_detection import PreppedQueueProcessor
 
 with open('/config/config.yml') as f:
-    # use safe_load instead load
     CONFIG = yaml.safe_load(f)
 
 MQTT_HOST = CONFIG['mqtt']['host']
@@ -50,9 +35,9 @@ def main():
     client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
     
-    # Queue for prepped frames
-    # TODO: set length to 1.5x the number of total regions
-    prepped_frame_queue = queue.Queue(6)
+    # Queue for prepped frames, max size set to (number of cameras * 5)
+    max_queue_size = len(CONFIG['cameras'].items())*5
+    prepped_frame_queue = queue.Queue(max_queue_size)
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():

@@ -3,18 +3,6 @@ import datetime
 import threading
 import cv2
 from object_detection.utils import visualization_utils as vis_util
-class ObjectParser(threading.Thread):
-    def __init__(self, cameras, object_queue, detected_objects, regions):
-        threading.Thread.__init__(self)
-        self.cameras = cameras
-        self.object_queue = object_queue
-        self.regions = regions
-
-    def run(self):
-        # frame_times = {}
-        while True:
-            obj = self.object_queue.get()
-            self.cameras[obj['camera_name']].add_object(obj)
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):
@@ -34,7 +22,6 @@ class ObjectCleaner(threading.Thread):
             # (newest objects are appended to the end)
             detected_objects = self._detected_objects.copy()
 
-            #print([round(now-obj['frame_time'],2) for obj in detected_objects])
             num_to_delete = 0
             for obj in detected_objects:
                 if now-obj['frame_time']<2:
@@ -69,8 +56,6 @@ class BestPersonFrame(threading.Thread):
             # make a copy of detected objects
             detected_objects = self.detected_objects.copy()
             detected_people = [obj for obj in detected_objects if obj['name'] == 'person']
-            # make a copy of the recent frames
-            recent_frames = self.recent_frames.copy()
 
             # get the highest scoring person
             new_best_person = max(detected_people, key=lambda x:x['score'], default=self.best_person)
@@ -89,7 +74,10 @@ class BestPersonFrame(threading.Thread):
                 # or the current person is more than 1 minute old, use the new best person
                 if new_best_person['score'] > self.best_person['score'] or (now - self.best_person['frame_time']) > 60:
                     self.best_person = new_best_person
-
+            
+            # make a copy of the recent frames
+            recent_frames = self.recent_frames.copy()
+            
             if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
                 best_frame = recent_frames[self.best_person['frame_time']]
                 best_frame = cv2.cvtColor(best_frame, cv2.COLOR_BGR2RGB)

@@ -8,11 +8,10 @@ import multiprocessing as mp
 from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
 from . object_detection import FramePrepper
-from . objects import ObjectCleaner, ObjectParser, BestPersonFrame
+from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
 
-# fetch the frames as fast a possible, only decoding the frames when the
-# detection_process has consumed the current frame
+# fetch the frames as fast a possible and store current frame in a shared memory array
 def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)

@@ -1,29 +1,6 @@
 import json
 import threading
 
-class MqttMotionPublisher(threading.Thread):
-    def __init__(self, client, topic_prefix, motion_changed, motion_flags):
-        threading.Thread.__init__(self)
-        self.client = client
-        self.topic_prefix = topic_prefix
-        self.motion_changed = motion_changed
-        self.motion_flags = motion_flags
-
-    def run(self):
-        last_sent_motion = ""
-        while True:
-            with self.motion_changed:
-                self.motion_changed.wait()
-            
-            # send message for motion
-            motion_status = 'OFF'
-            if any(obj.is_set() for obj in self.motion_flags):
-                motion_status = 'ON'
-
-            if last_sent_motion != motion_status:
-                last_sent_motion = motion_status
-                self.client.publish(self.topic_prefix+'/motion', motion_status, retain=False)
-
 class MqttObjectPublisher(threading.Thread):
     def __init__(self, client, topic_prefix, objects_parsed, detected_objects):
         threading.Thread.__init__(self)
