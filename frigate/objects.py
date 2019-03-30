@@ -4,53 +4,17 @@ import threading
 import cv2
 from object_detection.utils import visualization_utils as vis_util
 class ObjectParser(threading.Thread):
-    def __init__(self, object_queue, objects_parsed, detected_objects, regions):
+    def __init__(self, cameras, object_queue, detected_objects, regions):
         threading.Thread.__init__(self)
-        self._object_queue = object_queue
-        self._objects_parsed = objects_parsed
-        self._detected_objects = detected_objects
+        self.cameras = cameras
+        self.object_queue = object_queue
         self.regions = regions
 
     def run(self):
         # frame_times = {}
         while True:
-            obj = self._object_queue.get()
-            # filter out persons
-            # [obj['score'] for obj in detected_objects if obj['name'] == 'person']
-            if obj['name'] == 'person':
-                person_area = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
-                # find the matching region
-                region = None
-                for r in self.regions:
-                    if (
-                            obj['xmin'] >= r['x_offset'] and
-                            obj['ymin'] >= r['y_offset'] and
-                            obj['xmax'] <= r['x_offset']+r['size'] and
-                            obj['ymax'] <= r['y_offset']+r['size']
-                       ): 
-                        region = r
-                        break
-                
-                # if the min person area is larger than the
-                # detected person, don't add it to detected objects
-                if region and region['min_person_area'] > person_area:
-                    continue
-
-
-            # frame_time = obj['frame_time']
-            # if frame_time in frame_times:
-            #     if frame_times[frame_time] == 7:
-            #         del frame_times[frame_time]
-            #     else:
-            #         frame_times[frame_time] += 1
-            # else:
-            #     frame_times[frame_time] = 1
-            # print(frame_times)
-            self._detected_objects.append(obj)
-
-            # notify that objects were parsed
-            with self._objects_parsed:
-                self._objects_parsed.notify_all()
+            obj = self.object_queue.get()
+            self.cameras[obj['camera_name']].add_object(obj)
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):

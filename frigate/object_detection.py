@@ -22,11 +22,11 @@ def ReadLabelFile(file_path):
     return ret
 
 class PreppedQueueProcessor(threading.Thread):
-    def __init__(self, prepped_frame_queue, object_queue):
+    def __init__(self, cameras, prepped_frame_queue):
 
         threading.Thread.__init__(self)
+        self.cameras = cameras
         self.prepped_frame_queue = prepped_frame_queue
-        self.object_queue = object_queue
         
         # Load the edgetpu engine and labels
         self.engine = DetectionEngine(PATH_TO_CKPT)
@@ -41,30 +41,32 @@ class PreppedQueueProcessor(threading.Thread):
             objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=3)
             # time.sleep(0.1)
             # objects = []
-            # print(engine.get_inference_time())
+            print(self.engine.get_inference_time())
             # put detected objects in the queue
-            if objects:
-                for obj in objects:
-                    box = obj.bounding_box.flatten().tolist()
-                    self.object_queue.put({
-                                'frame_time': frame['frame_time'],
-                                'name': str(self.labels[obj.label_id]),
-                                'score': float(obj.score),
-                                'xmin': int((box[0] * frame['region_size']) + frame['region_x_offset']),
-                                'ymin': int((box[1] * frame['region_size']) + frame['region_y_offset']),
-                                'xmax': int((box[2] * frame['region_size']) + frame['region_x_offset']),
-                                'ymax': int((box[3] * frame['region_size']) + frame['region_y_offset'])
-                            })
+            parsed_objects = []
+            for obj in objects:
+                box = obj.bounding_box.flatten().tolist()
+                parsed_objects.append({
+                            'frame_time': frame['frame_time'],
+                            'name': str(self.labels[obj.label_id]),
+                            'score': float(obj.score),
+                            'xmin': int((box[0] * frame['region_size']) + frame['region_x_offset']),
+                            'ymin': int((box[1] * frame['region_size']) + frame['region_y_offset']),
+                            'xmax': int((box[2] * frame['region_size']) + frame['region_x_offset']),
+                            'ymax': int((box[3] * frame['region_size']) + frame['region_y_offset'])
+                        })
+            self.cameras[frame['camera_name']].add_objects(parsed_objects)
 
 
 # should this be a region class?
 class FramePrepper(threading.Thread):
-    def __init__(self, shared_frame, frame_time, frame_ready, 
+    def __init__(self, camera_name, shared_frame, frame_time, frame_ready, 
         frame_lock,
         region_size, region_x_offset, region_y_offset,
         prepped_frame_queue):
 
         threading.Thread.__init__(self)
+        self.camera_name = camera_name
         self.shared_frame = shared_frame
         self.frame_time = frame_time
         self.frame_ready = frame_ready
@@ -101,6 +103,7 @@ class FramePrepper(threading.Thread):
             # add the frame to the queue
             if not self.prepped_frame_queue.full():
                 self.prepped_frame_queue.put({
+                    'camera_name': self.camera_name,
                     'frame_time': frame_time,
                     'frame': frame_expanded.flatten().copy(),
                     'region_size': self.region_size,
