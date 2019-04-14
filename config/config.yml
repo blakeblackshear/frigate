@@ -17,33 +17,25 @@ cameras:
       - size: 350
         x_offset: 0
         y_offset: 300
-        min_person_area: 5000
       - size: 400
         x_offset: 350
         y_offset: 250
-        min_person_area: 2000
       - size: 400
         x_offset: 750
         y_offset: 250
-        min_person_area: 2000
-  back2:
-    rtsp:
-      user: viewer
-      host: 10.0.10.10
-      port: 554
-      # values that begin with a "$" will be replaced with environment variable
-      password: $RTSP_PASSWORD
-      path: /cam/realmonitor?channel=1&subtype=2
-    regions:
-      - size: 350
-        x_offset: 0
-        y_offset: 300
-        min_person_area: 5000
-      - size: 400
-        x_offset: 350
-        y_offset: 250
-        min_person_area: 2000
-      - size: 400
-        x_offset: 750
-        y_offset: 250
-        min_person_area: 2000
+    known_sizes:
+      - y: 300
+        min: 700
+        max: 1800
+      - y: 400
+        min: 3000
+        max: 7200
+      - y: 500
+        min: 8500
+        max: 20400
+      - y: 600
+        min: 10000
+        max: 50000
+      - y: 700
+        min: 10000
+        max: 125000

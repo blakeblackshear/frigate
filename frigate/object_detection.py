@@ -106,5 +106,3 @@ class FramePrepper(threading.Thread):
                     'region_x_offset': self.region_x_offset,
                     'region_y_offset': self.region_y_offset
                 })
-            else:
-                print("queue full. moving on")

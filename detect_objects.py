@@ -41,7 +41,7 @@ def main():
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
-        cameras[name] = Camera(name, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
+        cameras[name] = Camera(name, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX, DEBUG)
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,

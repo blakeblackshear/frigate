@@ -5,6 +5,7 @@ import cv2
 import threading
 import ctypes
 import multiprocessing as mp
+import numpy as np
 from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
 from . object_detection import FramePrepper
@@ -108,8 +109,59 @@ def get_rtsp_url(rtsp_config):
         rtsp_config['password'], rtsp_config['host'], rtsp_config['port'],
         rtsp_config['path'])
 
+def compute_sizes(frame_shape, known_sizes, mask):
+    # create a 3 dimensional numpy array to store estimated sizes
+    estimated_sizes = np.zeros((frame_shape[0], frame_shape[1], 2), np.uint32)
+
+    sorted_positions = sorted(known_sizes, key=lambda s: s['y'])
+
+    last_position = {'y': 0, 'min': 0, 'max': 0}
+    next_position = sorted_positions.pop(0)
+    # if the next position has the same y coordinate, skip
+    while next_position['y'] == last_position['y']:
+        next_position = sorted_positions.pop(0)
+    y_change = next_position['y']-last_position['y']
+    min_size_change = next_position['min']-last_position['min']
+    max_size_change = next_position['max']-last_position['max']
+    min_step_size = min_size_change/y_change
+    max_step_size = max_size_change/y_change
+
+    min_current_size = 0
+    max_current_size = 0
+
+    for y_position in range(frame_shape[0]):
+        # fill the row with the estimated size
+        estimated_sizes[y_position,:] = [min_current_size, max_current_size]
+
+        # if you have reached the next size
+        if y_position == next_position['y']:
+            last_position = next_position
+            # if there are still positions left
+            if len(sorted_positions) > 0:
+                next_position = sorted_positions.pop(0)
+                # if the next position has the same y coordinate, skip
+                while next_position['y'] == last_position['y']:
+                    next_position = sorted_positions.pop(0)
+                y_change = next_position['y']-last_position['y']
+                min_size_change = next_position['min']-last_position['min']
+                max_size_change = next_position['max']-last_position['max']
+                min_step_size = min_size_change/y_change
+                max_step_size = max_size_change/y_change
+            else:
+                min_step_size = 0
+                max_step_size = 0
+        
+        min_current_size += min_step_size
+        max_current_size += max_step_size
+
+    # apply mask by filling 0s for all locations a person could not be standing
+    if mask is not None:
+        pass
+
+    return estimated_sizes
+
 class Camera:
-    def __init__(self, name, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
+    def __init__(self, name, config, prepped_frame_queue, mqtt_client, mqtt_prefix, debug=False):
         self.name = name
         self.config = config
         self.detected_objects = []
@@ -119,6 +171,7 @@ class Camera:
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
+        self.debug = debug
 
         # compute the flattened array length from the shape of the frame
         flat_array_length = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
@@ -170,6 +223,13 @@ class Camera:
         # start a thread to publish object scores (currently only person)
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects)
         mqtt_publisher.start()
+
+        # pre-compute estimated person size for every pixel in the image
+        if 'known_sizes' in self.config:
+            self.calculated_person_sizes = compute_sizes((self.frame_shape[0], self.frame_shape[1]), 
+                self.config['known_sizes'], None)
+        else:
+            self.calculated_person_sizes = None
     
     def start(self):
         self.capture_process.start()
@@ -188,23 +248,22 @@ class Camera:
             return
 
         for obj in objects:
-            if obj['name'] == 'person':
-                person_area = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
-                # find the matching region
-                region = None
-                for r in self.regions:
-                    if (
-                            obj['xmin'] >= r['x_offset'] and
-                            obj['ymin'] >= r['y_offset'] and
-                            obj['xmax'] <= r['x_offset']+r['size'] and
-                            obj['ymax'] <= r['y_offset']+r['size']
-                        ): 
-                        region = r
-                        break
-                
-                # if the min person area is larger than the
-                # detected person, don't add it to detected objects
-                if region and region['min_person_area'] > person_area:
+            if self.debug:
+                # print out the detected objects, scores and locations
+                print(self.name, obj['name'], obj['score'], obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'])
+
+            if self.calculated_person_sizes is not None and obj['name'] == 'person':
+                standing_location = (int(obj['ymax']), int((obj['xmax']-obj['xmin'])/2))
+                person_size_range = self.calculated_person_sizes[standing_location[0]][standing_location[1]]
+
+                # if the person isnt on the ground, continue
+                if(person_size_range[0] == 0 and person_size_range[1] == 0):
+                    continue
+
+                person_size = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
+
+                # if the person is not within 20% of the estimated size for that location, continue
+                if person_size < person_size_range[0] or person_size > person_size_range[1]:
                     continue
 
             self.detected_objects.append(obj)
