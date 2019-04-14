@@ -23,6 +23,7 @@ cameras:
       - size: 400
         x_offset: 750
         y_offset: 250
+    mask: back-mask.bmp
     known_sizes:
       - y: 300
         min: 700

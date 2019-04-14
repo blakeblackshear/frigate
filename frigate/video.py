@@ -224,6 +224,13 @@ class Camera:
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects)
         mqtt_publisher.start()
 
+        # load in the mask for person detection
+        if 'mask' in self.config:
+            self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
+        else:
+            self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
+            self.mask[:] = 255
+
         # pre-compute estimated person size for every pixel in the image
         if 'known_sizes' in self.config:
             self.calculated_person_sizes = compute_sizes((self.frame_shape[0], self.frame_shape[1]), 
@@ -251,10 +258,15 @@ class Camera:
             if self.debug:
                 # print out the detected objects, scores and locations
                 print(self.name, obj['name'], obj['score'], obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'])
+            
+            location = (int(obj['ymax']), int((obj['xmax']-obj['xmin'])/2))
+
+            # if the person is in a masked location, continue
+            if self.mask[location[0]][location[1]] == [0]:
+                continue
 
             if self.calculated_person_sizes is not None and obj['name'] == 'person':
-                standing_location = (int(obj['ymax']), int((obj['xmax']-obj['xmin'])/2))
-                person_size_range = self.calculated_person_sizes[standing_location[0]][standing_location[1]]
+                person_size_range = self.calculated_person_sizes[location[0]][location[1]]
 
                 # if the person isnt on the ground, continue
                 if(person_size_range[0] == 0 and person_size_range[1] == 0):
