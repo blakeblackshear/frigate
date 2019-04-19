@@ -13,7 +13,7 @@ from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
 
 # fetch the frames as fast a possible and store current frame in a shared memory array
-def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url):
+def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url, take_frame=1):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
@@ -24,6 +24,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     video.set(cv2.CAP_PROP_BUFFERSIZE,1)
 
     bad_frame_counter = 0
+    frame_num = 0
     while True:
         # check if the video stream is still open, and reopen if needed
         if not video.isOpened():
@@ -36,6 +37,9 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
         # snapshot the time the frame was grabbed
         frame_time = datetime.datetime.now()
         if ret:
+            frame_num += 1
+            if (frame_num % take_frame) != 0:
+                continue
             # go ahead and decode the current frame
             ret, frame = video.retrieve()
             if ret:
@@ -167,6 +171,7 @@ class Camera:
         self.detected_objects = []
         self.recent_frames = {}
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
+        self.take_frame = self.config.get('take_frame', 1)
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.mqtt_client = mqtt_client
@@ -191,7 +196,8 @@ class Camera:
 
         # create the process to capture frames from the RTSP stream and store in a shared array
         self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
-            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, self.rtsp_url))
+            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape,
+            self.rtsp_url, self.take_frame))
         self.capture_process.daemon = True
 
         # for each region, create a separate thread to resize the region and prep for detection
