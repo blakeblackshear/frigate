@@ -170,6 +170,13 @@ class Camera:
         # start a thread to publish object scores (currently only person)
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects)
         mqtt_publisher.start()
+
+        # load in the mask for person detection
+        if 'mask' in self.config:
+            self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
+        else:
+            self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
+            self.mask[:] = 255
     
     def start(self):
         self.capture_process.start()
@@ -205,6 +212,15 @@ class Camera:
                 # if the min person area is larger than the
                 # detected person, don't add it to detected objects
                 if region and region['min_person_area'] > person_area:
+                    continue
+            
+                # compute the coordinates of the person and make sure
+                # the location isnt outide the bounds of the image (can happen from rounding)
+                y_location = min(int(obj['ymax']), len(self.mask)-1)
+                x_location = min(int((obj['xmax']-obj['xmin'])/2.0), len(self.mask[0])-1)
+
+                # if the person is in a masked location, continue
+                if self.mask[y_location][x_location] == [0]:
                     continue
 
             self.detected_objects.append(obj)
