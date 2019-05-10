@@ -5,6 +5,7 @@ import cv2
 import threading
 import ctypes
 import multiprocessing as mp
+import numpy as np
 from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
 from . object_detection import FramePrepper
