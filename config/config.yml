@@ -21,11 +21,14 @@ cameras:
         x_offset: 0
         y_offset: 300
         min_person_area: 5000
+        threshold: 0.5
       - size: 400
         x_offset: 350
         y_offset: 250
         min_person_area: 2000
+        threshold: 0.5
       - size: 400
         x_offset: 750
         y_offset: 250
         min_person_area: 2000
+        threshold: 0.5
