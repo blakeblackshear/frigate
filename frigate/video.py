@@ -20,6 +20,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     # start the video capture
     video = cv2.VideoCapture()
     video.open(rtsp_url)
+    print("Opening the RTSP Url...")
     # keep the buffer small so we minimize old data
     video.set(cv2.CAP_PROP_BUFFERSIZE,1)
 
@@ -109,6 +110,22 @@ def get_rtsp_url(rtsp_config):
         rtsp_config['password'], rtsp_config['host'], rtsp_config['port'],
         rtsp_config['path'])
 
+class CameraWatchdog(threading.Thread):
+    def __init__(self, camera):
+        threading.Thread.__init__(self)
+        self.camera = camera
+
+    def run(self):
+
+        while True:
+            # wait a bit before checking
+            time.sleep(60)
+
+            if (datetime.datetime.now().timestamp() - self.camera.shared_frame_time.value) > 2:
+                print("last frame is more than 2 seconds old, restarting camera capture...")
+                self.camera.start_or_restart_capture()
+                time.sleep(5)
+
 class Camera:
     def __init__(self, name, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
         self.name = name
@@ -137,10 +154,7 @@ class Camera:
         # shape current frame so it can be treated as a numpy image
         self.shared_frame_np = tonumpyarray(self.shared_frame_array).reshape(self.frame_shape)
 
-        # create the process to capture frames from the RTSP stream and store in a shared array
-        self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
-            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, self.rtsp_url))
-        self.capture_process.daemon = True
+        self.capture_process = None
 
         # for each region, create a separate thread to resize the region and prep for detection
         self.detection_prep_threads = []
@@ -172,18 +186,38 @@ class Camera:
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects)
         mqtt_publisher.start()
 
+        # create a watchdog thread for capture process
+        self.watchdog = CameraWatchdog(self)
+
         # load in the mask for person detection
         if 'mask' in self.config:
             self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
         else:
             self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
             self.mask[:] = 255
+
+
+    def start_or_restart_capture(self):
+        if not self.capture_process is None:
+            print("Terminating the existing capture process...")
+            self.capture_process.terminate()
+            del self.capture_process
+            self.capture_process = None
+            
+        # create the process to capture frames from the RTSP stream and store in a shared array
+        print("Creating a new capture process...")
+        self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
+            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, self.rtsp_url))
+        self.capture_process.daemon = True
+        print("Starting a new capture process...")
+        self.capture_process.start()
     
     def start(self):
-        self.capture_process.start()
+        self.start_or_restart_capture()
         # start the object detection prep threads
         for detection_prep_thread in self.detection_prep_threads:
             detection_prep_thread.start()
+        self.watchdog.start()
     
     def join(self):
         self.capture_process.join()
