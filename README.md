@@ -62,12 +62,12 @@ camera:
     platform: generic
     still_image_url: http://<ip>:5000/<camera_name>/best_person.jpg
 
-sensor:
+binary_sensor:
   - name: Camera Person
     platform: mqtt
     state_topic: "frigate/<camera_name>/objects"
     value_template: '{{ value_json.person }}'
-    device_class: moving
+    device_class: motion
     availability_topic: "frigate/available"
 ```
 
