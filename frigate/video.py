@@ -159,13 +159,19 @@ class Camera:
         # for each region, create a separate thread to resize the region and prep for detection
         self.detection_prep_threads = []
         for region in self.config['regions']:
+            # set a default threshold of 0.5 if not defined
+            if not 'threshold' in region:
+                region['threshold'] = 0.5
+            if not isinstance(region['threshold'], float):
+                print('Threshold is not a float. Setting to 0.5 default.')
+                region['threshold'] = 0.5
             self.detection_prep_threads.append(FramePrepper(
                 self.name,
                 self.shared_frame_np,
                 self.shared_frame_time,
                 self.frame_ready,
                 self.frame_lock,
-                region['size'], region['x_offset'], region['y_offset'],
+                region['size'], region['x_offset'], region['y_offset'], region['threshold'],
                 prepped_frame_queue
             ))
         

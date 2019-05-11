@@ -38,7 +38,7 @@ class PreppedQueueProcessor(threading.Thread):
             frame = self.prepped_frame_queue.get()
 
             # Actual detection.
-            objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=3)
+            objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=frame['region_threshold'], top_k=3)
             # parse and pass detected objects back to the camera
             parsed_objects = []
             for obj in objects:
@@ -59,7 +59,7 @@ class PreppedQueueProcessor(threading.Thread):
 class FramePrepper(threading.Thread):
     def __init__(self, camera_name, shared_frame, frame_time, frame_ready, 
         frame_lock,
-        region_size, region_x_offset, region_y_offset,
+        region_size, region_x_offset, region_y_offset, region_threshold,
         prepped_frame_queue):
 
         threading.Thread.__init__(self)
@@ -71,6 +71,7 @@ class FramePrepper(threading.Thread):
         self.region_size = region_size
         self.region_x_offset = region_x_offset
         self.region_y_offset = region_y_offset
+        self.region_threshold = region_threshold
         self.prepped_frame_queue = prepped_frame_queue
 
     def run(self):
@@ -103,6 +104,7 @@ class FramePrepper(threading.Thread):
                     'frame_time': frame_time,
                     'frame': frame_expanded.flatten().copy(),
                     'region_size': self.region_size,
+                    'region_threshold': self.region_threshold,
                     'region_x_offset': self.region_x_offset,
                     'region_y_offset': self.region_y_offset
                 })
