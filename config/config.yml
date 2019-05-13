@@ -32,3 +32,9 @@ cameras:
         y_offset: 250
         min_person_area: 2000
         threshold: 0.5
+
+## Reference to the different attributes for the "back" camera in the example above
+## NOTE to size:, x_offset: and y_offset: attributes -- They are all dependent up on the video feed resolution. You will need to adjust this to suit your setup. The numbers are pixels. The different "regions" does not have to be three.
+## Tip, adjust your regions for detection. If you define one "large" region it will just cause un-necessary load on TensorFlow
+## min_person_area: The person area is calculated by width x height of the bounding box (region). Anything smaller than the min_person_area is ignored for that region. It is designed to filter false positives when you know a person couldn’t be that small.
+## threshold: The minimum decimal percentage (50% hit = 0.5) of "Person detected" from Tensorflow that will be reported as "positive" to the MQTT
