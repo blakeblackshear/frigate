@@ -34,8 +34,6 @@ def main():
                 print ("MQTT Not authorized")
             else:
                 print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
-        elif rc == 0:
-            print ("Connection to MQTT established.")
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
     client = mqtt.Client()
