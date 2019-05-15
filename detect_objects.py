@@ -25,6 +25,15 @@ def main():
     # connect to mqtt and setup last will
     def on_connect(client, userdata, flags, rc):
         print("On connect called")
+        if rc != 0:
+            if rc == 3:
+                print ("MQTT Server unavailable")
+            elif rc == 4:
+                print ("MQTT Bad username or password")
+            elif rc == 5:
+                print ("MQTT Not authorized")
+            else:
+                print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
     client = mqtt.Client()
