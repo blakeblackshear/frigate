@@ -1,69 +1,58 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
-# Install system packages
-RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y python3 \ 
- python3-dev \
- python-pil \
- python-lxml \
- python-tk \
+# Install packages for apt repo
+RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    wget \
+    gnupg-agent \
+    dirmngr \
+    software-properties-common
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D986B59D
+
+RUN echo "deb http://deb.odroid.in/5422-s bionic main" > /etc/apt/sources.list.d/odroid.list
+
+RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+ python3 \ 
+ # OpenCV dependencies
+ ffmpeg \
  build-essential \
- cmake \ 
- git \ 
- libgtk2.0-dev \ 
- pkg-config \ 
- libavcodec-dev \ 
- libavformat-dev \ 
- libswscale-dev \ 
- libtbb2 \
- libtbb-dev \ 
+ cmake \
+ unzip \
+ pkg-config \
  libjpeg-dev \
  libpng-dev \
  libtiff-dev \
- libjasper-dev \
- libdc1394-22-dev \
- x11-apps \
- wget \
- vim \
- ffmpeg \
- unzip \
- libusb-1.0-0-dev \
- python3-setuptools \
+ libavcodec-dev \
+ libavformat-dev \
+ libswscale-dev \
+ libv4l-dev \
+ libxvidcore-dev \
+ libx264-dev \
+ libgtk-3-dev \
+ libatlas-base-dev \
+ gfortran \
+ python3-dev \
+ # Coral USB Python API Dependencies
+ libusb-1.0-0 \
+ python3-pip \
+ python3-pil \
  python3-numpy \
- zlib1g-dev \
- libgoogle-glog-dev \
- swig \
- libunwind-dev \
- libc++-dev \
- libc++abi-dev \
- build-essential \
+ libc++1 \
+ libc++abi1 \
+ libunwind8 \
+ libgcc1 \
  && rm -rf /var/lib/apt/lists/* 
 
 # Install core packages 
 RUN wget -q -O /tmp/get-pip.py --no-check-certificate https://bootstrap.pypa.io/get-pip.py && python3 /tmp/get-pip.py
 RUN  pip install -U pip \
  numpy \
- pillow \
- matplotlib \
- notebook \
  Flask \
- imutils \
  paho-mqtt \
  PyYAML
-
-# Install tensorflow models object detection
-RUN GIT_SSL_NO_VERIFY=true git clone -q https://github.com/tensorflow/models /usr/local/lib/python3.5/dist-packages/tensorflow/models
-RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/google/protobuf/releases/download/v3.5.1/protobuf-python-3.5.1.tar.gz
-
-# Download & build protobuf-python
-RUN cd /usr/local/src/ \
- && tar xf protobuf-python-3.5.1.tar.gz \
- && rm protobuf-python-3.5.1.tar.gz \
- && cd /usr/local/src/protobuf-3.5.1/ \
- && ./configure \
- && make \
- && make install \
- && ldconfig \
- && rm -rf /usr/local/src/protobuf-3.5.1/
 
 # Download & build OpenCV
 RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip
@@ -76,29 +65,30 @@ RUN cd /usr/local/src/ \
  && cmake -D CMAKE_INSTALL_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ .. \
  && make -j4 \
  && make install \
+ && ldconfig \
  && rm -rf /usr/local/src/opencv-4.0.1
 
-# Download and install EdgeTPU libraries
-RUN wget -q -O edgetpu_api.tar.gz --no-check-certificate http://storage.googleapis.com/cloud-iot-edge-pretrained-models/edgetpu_api.tar.gz
+# Download and install EdgeTPU libraries for Coral
+RUN wget https://dl.google.com/coral/edgetpu_api/edgetpu_api_latest.tar.gz -O edgetpu_api.tar.gz --trust-server-names
 
 RUN tar xzf edgetpu_api.tar.gz \
-  && cd python-tflite-source \
-  && cp -p libedgetpu/libedgetpu_x86_64.so /lib/x86_64-linux-gnu/libedgetpu.so \
-  && cp edgetpu/swig/compiled_so/_edgetpu_cpp_wrapper_x86_64.so edgetpu/swig/_edgetpu_cpp_wrapper.so \
-  && cp edgetpu/swig/compiled_so/edgetpu_cpp_wrapper.py edgetpu/swig/ \
-  && python3 setup.py develop --user
+  && cd edgetpu_api \
+  && cp -p libedgetpu/libedgetpu_arm32.so /usr/lib/arm-linux-gnueabihf/libedgetpu.so.1.0 \
+  && ldconfig \
+  && python3 -m pip install --no-deps "$(ls edgetpu-*-py3-none-any.whl 2>/dev/null)"
+
+RUN cd /usr/local/lib/python3.6/dist-packages/edgetpu/swig/ \
+  && ln -s _edgetpu_cpp_wrapper.cpython-35m-arm-linux-gnueabihf.so _edgetpu_cpp_wrapper.cpython-36m-arm-linux-gnueabihf.so
+
+# symlink the model and labels
+RUN wget https://dl.google.com/coral/canned_models/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite -O mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite --trust-server-names
+RUN wget https://dl.google.com/coral/canned_models/coco_labels.txt -O coco_labels.txt --trust-server-names
+RUN ln -s mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /frozen_inference_graph.pb
+RUN ln -s /coco_labels.txt /label_map.pbtext
 
 # Minimize image size 
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
-
-# symlink the model and labels
-RUN ln -s /python-tflite-source/edgetpu/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /frozen_inference_graph.pb
-RUN ln -s /python-tflite-source/edgetpu/test_data/coco_labels.txt /label_map.pbtext
-
-# Set TF object detection available
-ENV PYTHONPATH "$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim"
-RUN cd /usr/local/lib/python3.5/dist-packages/tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=.
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/

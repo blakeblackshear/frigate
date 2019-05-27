@@ -6,7 +6,6 @@ import threading
 import ctypes
 import multiprocessing as mp
 import numpy as np
-from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
@@ -283,15 +282,10 @@ class Camera:
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # draw the bounding boxes on the screen
         for obj in detected_objects:
-            vis_util.draw_bounding_box_on_image_array(frame,
-                obj['ymin'],
-                obj['xmin'],
-                obj['ymax'],
-                obj['xmax'],
-                color='red',
-                thickness=2,
-                display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
-                use_normalized_coordinates=False)
+            color = (255,0,0)
+            cv2.rectangle(frame, (obj['xmin'], obj['ymin']), 
+                (obj['xmax'], obj['ymax']), 
+                color, 2)
 
         for region in self.regions:
             color = (255,255,255)
