@@ -2,7 +2,6 @@ import time
 import datetime
 import threading
 import cv2
-from object_detection.utils import visualization_utils as vis_util
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):
@@ -82,15 +81,10 @@ class BestPersonFrame(threading.Thread):
                 best_frame = recent_frames[self.best_person['frame_time']]
                 best_frame = cv2.cvtColor(best_frame, cv2.COLOR_BGR2RGB)
                 # draw the bounding box on the frame
-                vis_util.draw_bounding_box_on_image_array(best_frame,
-                    self.best_person['ymin'],
-                    self.best_person['xmin'],
-                    self.best_person['ymax'],
-                    self.best_person['xmax'],
-                    color='red',
-                    thickness=2,
-                    display_str_list=["{}: {}%".format(self.best_person['name'],int(self.best_person['score']*100))],
-                    use_normalized_coordinates=False)
+                color = (255,0,0)
+                cv2.rectangle(best_frame, (self.best_person['xmin'], self.best_person['ymin']), 
+                    (self.best_person['xmax'], self.best_person['ymax']), 
+                    color, 2)
 
                 # convert back to BGR
                 self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
