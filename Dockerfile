@@ -52,7 +52,8 @@ RUN  pip install -U pip \
  numpy \
  Flask \
  paho-mqtt \
- PyYAML
+ PyYAML \
+ ffmpeg-python
 
 # Download & build OpenCV
 RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip

@@ -6,6 +6,7 @@ import threading
 import ctypes
 import multiprocessing as mp
 import numpy as np
+import ffmpeg
 from . util import tonumpyarray
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
@@ -16,48 +17,41 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
 
-    # start the video capture
-    video = cv2.VideoCapture()
-    video.open(rtsp_url)
-    print("Opening the RTSP Url...")
-    # keep the buffer small so we minimize old data
-    video.set(cv2.CAP_PROP_BUFFERSIZE,1)
+    ffmpeg_process = (
+        ffmpeg
+        .input(rtsp_url, 
+            rtsp_transport="tcp", 
+            stimeout=5000000, 
+            use_wallclock_as_timestamps=1,
+            fflags="+genpts",
+            avoid_negative_ts="make_zero")
+        .output('pipe:', format='rawvideo', pix_fmt='rgb24')
+    )
 
-    bad_frame_counter = 0
+    print(ffmpeg_process.compile())
+
+    ffmpeg_process = ffmpeg_process.run_async(pipe_stdout=True)
+
     while True:
-        # check if the video stream is still open, and reopen if needed
-        if not video.isOpened():
-            success = video.open(rtsp_url)
-            if not success:
-                time.sleep(1)
-                continue
-        # grab the frame, but dont decode it yet
-        ret = video.grab()
-        # snapshot the time the frame was grabbed
-        frame_time = datetime.datetime.now()
-        if ret:
-            # go ahead and decode the current frame
-            ret, frame = video.retrieve()
-            if ret:
-                # Lock access and update frame
-                with frame_lock:
-                    arr[:] = frame
-                    shared_frame_time.value = frame_time.timestamp()
-                # Notify with the condition that a new frame is ready
-                with frame_ready:
-                    frame_ready.notify_all()
-                bad_frame_counter = 0
-            else:
-                print("Unable to decode frame")
-                bad_frame_counter += 1
-        else:
-            print("Unable to grab a frame")
-            bad_frame_counter += 1
-        
-        if bad_frame_counter > 100:
-            video.release()
-    
-    video.release()
+        in_bytes = ffmpeg_process.stdout.read(frame_shape[0] * frame_shape[1] * frame_shape[2])
+        if not in_bytes:
+            print("No bytes received. Waiting 1 second before trying again.")
+            time.sleep(1)
+            continue
+        frame = (
+            np
+            .frombuffer(in_bytes, np.uint8)
+            .reshape(frame_shape)
+        )
+        # Lock access and update frame
+        with frame_lock:
+            shared_frame_time.value = datetime.datetime.now().timestamp()
+            arr[:] = frame
+        # Notify with the condition that a new frame is ready
+        with frame_ready:
+            frame_ready.notify_all()
+
+    ffmpeg_process.wait()
 
 # Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
 class FrameTracker(threading.Thread):
@@ -279,7 +273,7 @@ class Camera:
             frame = self.shared_frame_np.copy()
 
         # convert to RGB for drawing
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # draw the bounding boxes on the screen
         for obj in detected_objects:
             color = (255,0,0)
