@@ -5,9 +5,10 @@ import cv2
 import threading
 import ctypes
 import multiprocessing as mp
+import subprocess as sp
 import numpy as np
 import ffmpeg
-from . util import tonumpyarray
+from . util import tonumpyarray, draw_box_with_label
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
@@ -16,34 +17,29 @@ from . mqtt import MqttObjectPublisher
 def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
+    frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
-    ffmpeg_process = (
-        ffmpeg
-        .input(rtsp_url, 
-            rtsp_transport="tcp", 
-            stimeout=5000000, 
-            use_wallclock_as_timestamps=1,
-            fflags="+genpts",
-            avoid_negative_ts="make_zero")
-        .output('pipe:', format='rawvideo', pix_fmt='rgb24')
-    )
-
-    print(ffmpeg_process.compile())
-
-    ffmpeg_process = ffmpeg_process.run_async(pipe_stdout=True)
+    ffmpeg_cmd = ['ffmpeg', 
+        '-avoid_negative_ts', 'make_zero', 
+        '-fflags', '+genpts', 
+        '-rtsp_transport', 'tcp', 
+        '-stimeout', '5000000', 
+        '-use_wallclock_as_timestamps', '1', 
+        '-i', rtsp_url, 
+        '-f', 'rawvideo', 
+        '-pix_fmt', 'rgb24', 
+        'pipe:']
+    
+    pipe = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size)
 
     while True:
-        in_bytes = ffmpeg_process.stdout.read(frame_shape[0] * frame_shape[1] * frame_shape[2])
-        if not in_bytes:
-            print("No bytes received. Waiting 1 second before trying again.")
-            time.sleep(1)
-            continue
+        raw_image = pipe.stdout.read(frame_size)
         frame = (
             np
-            .frombuffer(in_bytes, np.uint8)
+            .frombuffer(raw_image, np.uint8)
             .reshape(frame_shape)
         )
-        # Lock access and update frame
+
         with frame_lock:
             shared_frame_time.value = datetime.datetime.now().timestamp()
             arr[:] = frame
@@ -51,7 +47,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
         with frame_ready:
             frame_ready.notify_all()
 
-    ffmpeg_process.wait()
+    pipe.stdout.flush()
 
 # Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
 class FrameTracker(threading.Thread):
@@ -272,14 +268,10 @@ class Camera:
         with self.frame_lock:
             frame = self.shared_frame_np.copy()
 
-        # convert to RGB for drawing
-        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # draw the bounding boxes on the screen
         for obj in detected_objects:
-            color = (255,0,0)
-            cv2.rectangle(frame, (obj['xmin'], obj['ymin']), 
-                (obj['xmax'], obj['ymax']), 
-                color, 2)
+            label = "{}: {}%".format(obj['name'],int(obj['score']*100))
+            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], label)
 
         for region in self.regions:
             color = (255,255,255)
@@ -287,7 +279,7 @@ class Camera:
                 (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                 color, 2)
 
-        # convert back to BGR
+        # convert to BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         return frame

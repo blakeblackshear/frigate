@@ -89,8 +89,6 @@ class FramePrepper(threading.Thread):
                 cropped_frame = self.shared_frame[self.region_y_offset:self.region_y_offset+self.region_size, self.region_x_offset:self.region_x_offset+self.region_size].copy()
                 frame_time = self.frame_time.value
             
-            # convert to RGB
-            #cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
             # Resize to 300x300 if needed
             if cropped_frame.shape != (300, 300, 3):
                 cropped_frame = cv2.resize(cropped_frame, dsize=(300, 300), interpolation=cv2.INTER_LINEAR)

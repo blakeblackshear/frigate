@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+ARG DEVICE
+
 # Install packages for apt repo
 RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
@@ -8,11 +10,14 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
     wget \
     gnupg-agent \
     dirmngr \
-    software-properties-common
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D986B59D
+COPY scripts/install_odroid_repo.sh .
 
-RUN echo "deb http://deb.odroid.in/5422-s bionic main" > /etc/apt/sources.list.d/odroid.list
+RUN if [ "$DEVICE" = "odroid" ]; then \
+      sh /install_odroid_repo.sh; \
+    fi
 
 RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
  python3 \ 
@@ -52,10 +57,12 @@ RUN  pip install -U pip \
  numpy \
  Flask \
  paho-mqtt \
- PyYAML \
- ffmpeg-python
+ PyYAML
 
 # Download & build OpenCV
+# TODO: use multistage build to reduce image size: 
+#   https://medium.com/@denismakogon/pain-and-gain-running-opencv-application-with-golang-and-docker-on-alpine-3-7-435aa11c7aec
+#   https://www.merixstudio.com/blog/docker-multi-stage-builds-python-development/
 RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip
 RUN cd /usr/local/src/ \
  && unzip 4.0.1.zip \
@@ -70,14 +77,15 @@ RUN cd /usr/local/src/ \
  && rm -rf /usr/local/src/opencv-4.0.1
 
 # Download and install EdgeTPU libraries for Coral
-RUN wget https://dl.google.com/coral/edgetpu_api/edgetpu_api_latest.tar.gz -O edgetpu_api.tar.gz --trust-server-names
+RUN wget https://dl.google.com/coral/edgetpu_api/edgetpu_api_latest.tar.gz -O edgetpu_api.tar.gz --trust-server-names \
+  && tar xzf edgetpu_api.tar.gz
 
-RUN tar xzf edgetpu_api.tar.gz \
-  && cd edgetpu_api \
-  && cp -p libedgetpu/libedgetpu_arm32.so /usr/lib/arm-linux-gnueabihf/libedgetpu.so.1.0 \
-  && ldconfig \
-  && python3 -m pip install --no-deps "$(ls edgetpu-*-py3-none-any.whl 2>/dev/null)"
+COPY scripts/install_edgetpu_api.sh edgetpu_api/install.sh
 
+RUN cd edgetpu_api \
+  && /bin/bash install.sh
+
+# Copy a python 3.6 version
 RUN cd /usr/local/lib/python3.6/dist-packages/edgetpu/swig/ \
   && ln -s _edgetpu_cpp_wrapper.cpython-35m-arm-linux-gnueabihf.so _edgetpu_cpp_wrapper.cpython-36m-arm-linux-gnueabihf.so
 
