@@ -2,6 +2,7 @@ import time
 import datetime
 import threading
 import cv2
+from . util import draw_box_with_label
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):
@@ -79,12 +80,9 @@ class BestPersonFrame(threading.Thread):
             
             if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
                 best_frame = recent_frames[self.best_person['frame_time']]
-                best_frame = cv2.cvtColor(best_frame, cv2.COLOR_BGR2RGB)
-                # draw the bounding box on the frame
-                color = (255,0,0)
-                cv2.rectangle(best_frame, (self.best_person['xmin'], self.best_person['ymin']), 
-                    (self.best_person['xmax'], self.best_person['ymax']), 
-                    color, 2)
 
-                # convert back to BGR
+                label = "{}: {}%".format(self.best_person['name'],int(self.best_person['score']*100))
+                draw_box_with_label(best_frame, self.best_person['xmin'], self.best_person['ymin'], 
+                    self.best_person['xmax'], self.best_person['ymax'], label)
+                
                 self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
