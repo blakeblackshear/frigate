@@ -7,7 +7,6 @@ import ctypes
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
-import ffmpeg
 from . util import tonumpyarray, draw_box_with_label
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
@@ -20,6 +19,7 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
     ffmpeg_cmd = ['ffmpeg', 
+        '-hide_banner', '-loglevel', 'panic',
         '-avoid_negative_ts', 'make_zero', 
         '-fflags', '+genpts', 
         '-rtsp_transport', 'tcp', 
