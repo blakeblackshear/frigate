@@ -102,5 +102,6 @@ RUN (apt-get autoremove -y; \
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
+COPY benchmark.py .
 
 CMD ["python3", "-u", "detect_objects.py"]
