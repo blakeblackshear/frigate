@@ -6,11 +6,6 @@ import numpy as np
 from edgetpu.detection.engine import DetectionEngine
 from . util import tonumpyarray
 
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = '/frozen_inference_graph.pb'
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = '/label_map.pbtext'
-
 # Function to read labels from text files.
 def ReadLabelFile(file_path):
     with open(file_path, 'r') as f:
@@ -27,10 +22,11 @@ class PreppedQueueProcessor(threading.Thread):
         threading.Thread.__init__(self)
         self.cameras = cameras
         self.prepped_frame_queue = prepped_frame_queue
-        
-        # Load the edgetpu engine and labels
-        self.engine = DetectionEngine(PATH_TO_CKPT)
-        self.labels = ReadLabelFile(PATH_TO_LABELS)
+
+        # Load the edgetpu engine with the model used for object detection.
+        self.engine = DetectionEngine('/mobilenet_ssd_v2_coco.tflite')
+        # Load the strings used to add the correct label for each box.
+        self.labels = ReadLabelFile('/coco_labels.txt')
 
     def run(self):
         # process queue...

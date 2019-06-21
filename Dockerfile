@@ -82,19 +82,20 @@ RUN cd /usr/local/src/ \
 RUN wget -q -O edgetpu_api.tar.gz --no-check-certificate http://storage.googleapis.com/cloud-iot-edge-pretrained-models/edgetpu_api.tar.gz
 
 RUN tar xzf edgetpu_api.tar.gz \
+  && rm -rf edgetpu_api.tar.gz \
   && cd python-tflite-source \
   && cp -p libedgetpu/libedgetpu_x86_64.so /lib/x86_64-linux-gnu/libedgetpu.so \
   && cp edgetpu/swig/compiled_so/_edgetpu_cpp_wrapper_x86_64.so edgetpu/swig/_edgetpu_cpp_wrapper.so \
   && cp edgetpu/swig/compiled_so/edgetpu_cpp_wrapper.py edgetpu/swig/ \
   && python3 setup.py develop --user
 
-# Minimize image size 
+# symlink the model and labels
+RUN ln -s /python-tflite-source/edgetpu/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /mobilenet_ssd_v2_coco.tflite
+RUN ln -s /python-tflite-source/edgetpu/test_data/coco_labels.txt /coco_labels.txt
+
+# Minimize image size
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
-
-# symlink the model and labels
-RUN ln -s /python-tflite-source/edgetpu/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /frozen_inference_graph.pb
-RUN ln -s /python-tflite-source/edgetpu/test_data/coco_labels.txt /label_map.pbtext
 
 # Set TF object detection available
 ENV PYTHONPATH "$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim"
