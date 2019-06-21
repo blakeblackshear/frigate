@@ -57,7 +57,7 @@ class PreppedQueueProcessor(threading.Thread):
 
 # should this be a region class?
 class FramePrepper(threading.Thread):
-    def __init__(self, camera_name, shared_frame, frame_time, frame_ready, 
+    def __init__(self, camera_name, shared_frame, frame_time, frame_ready,
         frame_lock,
         region_size, region_x_offset, region_y_offset, region_threshold,
         prepped_frame_queue):
@@ -83,12 +83,12 @@ class FramePrepper(threading.Thread):
                 # if there isnt a frame ready for processing or it is old, wait for a new frame
                 if self.frame_time.value == frame_time or (now - self.frame_time.value) > 0.5:
                     self.frame_ready.wait()
-            
+
             # make a copy of the cropped frame
             with self.frame_lock:
                 cropped_frame = self.shared_frame[self.region_y_offset:self.region_y_offset+self.region_size, self.region_x_offset:self.region_x_offset+self.region_size].copy()
                 frame_time = self.frame_time.value
-            
+
             # convert to RGB
             cropped_frame_rgb = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
             # Resize to 300x300 if needed
