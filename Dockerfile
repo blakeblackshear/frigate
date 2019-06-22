@@ -50,21 +50,6 @@ RUN  pip install -U pip \
  paho-mqtt \
  PyYAML
 
-# Install tensorflow models object detection
-RUN GIT_SSL_NO_VERIFY=true git clone -q https://github.com/tensorflow/models /usr/local/lib/python3.5/dist-packages/tensorflow/models
-RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/google/protobuf/releases/download/v3.5.1/protobuf-python-3.5.1.tar.gz
-
-# Download & build protobuf-python
-RUN cd /usr/local/src/ \
- && tar xf protobuf-python-3.5.1.tar.gz \
- && rm protobuf-python-3.5.1.tar.gz \
- && cd /usr/local/src/protobuf-3.5.1/ \
- && ./configure \
- && make \
- && make install \
- && ldconfig \
- && rm -rf /usr/local/src/protobuf-3.5.1/
-
 # Download & build OpenCV
 RUN wget -q -P /usr/local/src/ --no-check-certificate https://github.com/opencv/opencv/archive/4.0.1.zip
 RUN cd /usr/local/src/ \
@@ -96,10 +81,6 @@ RUN ln -s /python-tflite-source/edgetpu/test_data/coco_labels.txt /coco_labels.t
 # Minimize image size
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
-
-# Set TF object detection available
-ENV PYTHONPATH "$PYTHONPATH:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research:/usr/local/lib/python3.5/dist-packages/tensorflow/models/research/slim"
-RUN cd /usr/local/lib/python3.5/dist-packages/tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=.
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/

@@ -2,7 +2,7 @@ import time
 import datetime
 import threading
 import cv2
-from object_detection.utils import visualization_utils as vis_util
+from . util import drawobjectbox
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):
@@ -70,27 +70,24 @@ class BestPersonFrame(threading.Thread):
             # if there is already a best_person
             else:
                 now = datetime.datetime.now().timestamp()
-                # if the new best person is a higher score than the current best person 
+                # if the new best person is a higher score than the current best person
                 # or the current person is more than 1 minute old, use the new best person
                 if new_best_person['score'] > self.best_person['score'] or (now - self.best_person['frame_time']) > 60:
                     self.best_person = new_best_person
-            
+
             # make a copy of the recent frames
             recent_frames = self.recent_frames.copy()
-            
-            if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
-                best_frame = recent_frames[self.best_person['frame_time']]
-                best_frame = cv2.cvtColor(best_frame, cv2.COLOR_BGR2RGB)
-                # draw the bounding box on the frame
-                vis_util.draw_bounding_box_on_image_array(best_frame,
-                    self.best_person['ymin'],
-                    self.best_person['xmin'],
-                    self.best_person['ymax'],
-                    self.best_person['xmax'],
-                    color='red',
-                    thickness=2,
-                    display_str_list=["{}: {}%".format(self.best_person['name'],int(self.best_person['score']*100))],
-                    use_normalized_coordinates=False)
 
-                # convert back to BGR
-                self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
+            if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
+                self.best_frame = recent_frames[self.best_person['frame_time']]
+
+                label = "{}: {}%".format(self.best_person['name'], int(self.best_person['score'] * 100))
+                bounding_box = (
+                    self.best_person['xmin'],
+                    self.best_person['ymin'],
+                    self.best_person['xmax'],
+                    self.best_person['ymax']
+                )
+
+                # draw the bounding box on the frame
+                drawobjectbox(self.best_frame, label, bounding_box)

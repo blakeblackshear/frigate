@@ -6,8 +6,8 @@ import threading
 import ctypes
 import multiprocessing as mp
 import numpy as np
-from object_detection.utils import visualization_utils as vis_util
 from . util import tonumpyarray
+from . util import drawobjectbox
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
@@ -54,10 +54,10 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
         else:
             print("Unable to grab a frame")
             bad_frame_counter += 1
-        
+
         if bad_frame_counter > 100:
             video.release()
-    
+
     video.release()
 
 # Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
@@ -79,12 +79,12 @@ class FrameTracker(threading.Thread):
                 # if there isnt a frame ready for processing or it is old, wait for a signal
                 if self.frame_time.value == frame_time or (now - self.frame_time.value) > 0.5:
                     self.frame_ready.wait()
-            
+
             # lock and make a copy of the frame
-            with self.frame_lock: 
+            with self.frame_lock:
                 frame = self.shared_frame.copy()
                 frame_time = self.frame_time.value
-            
+
             # add the frame to recent frames
             self.recent_frames[frame_time] = frame
 
@@ -106,7 +106,7 @@ def get_frame_shape(rtsp_url):
 def get_rtsp_url(rtsp_config):
     if (rtsp_config['password'].startswith('$')):
         rtsp_config['password'] = os.getenv(rtsp_config['password'][1:])
-    return 'rtsp://{}:{}@{}:{}{}'.format(rtsp_config['user'], 
+    return 'rtsp://{}:{}@{}:{}{}'.format(rtsp_config['user'],
         rtsp_config['password'], rtsp_config['host'], rtsp_config['port'],
         rtsp_config['path'])
 
@@ -174,9 +174,9 @@ class Camera:
                 region['size'], region['x_offset'], region['y_offset'], region['threshold'],
                 prepped_frame_queue
             ))
-        
+
         # start a thread to store recent motion frames for processing
-        self.frame_tracker = FrameTracker(self.shared_frame_np, self.shared_frame_time, 
+        self.frame_tracker = FrameTracker(self.shared_frame_np, self.shared_frame_time,
             self.frame_ready, self.frame_lock, self.recent_frames)
         self.frame_tracker.start()
 
@@ -209,28 +209,28 @@ class Camera:
             self.capture_process.terminate()
             del self.capture_process
             self.capture_process = None
-            
+
         # create the process to capture frames from the RTSP stream and store in a shared array
         print("Creating a new capture process...")
-        self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
+        self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array,
             self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, self.rtsp_url))
         self.capture_process.daemon = True
         print("Starting a new capture process...")
         self.capture_process.start()
-    
+
     def start(self):
         self.start_or_restart_capture()
         # start the object detection prep threads
         for detection_prep_thread in self.detection_prep_threads:
             detection_prep_thread.start()
         self.watchdog.start()
-    
+
     def join(self):
         self.capture_process.join()
-    
+
     def get_capture_pid(self):
         return self.capture_process.pid
-    
+
     def add_objects(self, objects):
         if len(objects) == 0:
             return
@@ -246,15 +246,15 @@ class Camera:
                             obj['ymin'] >= r['y_offset'] and
                             obj['xmax'] <= r['x_offset']+r['size'] and
                             obj['ymax'] <= r['y_offset']+r['size']
-                        ): 
+                        ):
                         region = r
                         break
-                
+
                 # if the min person area is larger than the
                 # detected person, don't add it to detected objects
                 if region and region['min_person_area'] > person_area:
                     continue
-            
+
                 # compute the coordinates of the person and make sure
                 # the location isnt outide the bounds of the image (can happen from rounding)
                 y_location = min(int(obj['ymax']), len(self.mask)-1)
@@ -271,7 +271,7 @@ class Camera:
 
     def get_best_person(self):
         return self.best_person_frame.best_frame
-    
+
     def get_current_frame_with_objects(self):
         # make a copy of the current detected objects
         detected_objects = self.detected_objects.copy()
@@ -279,31 +279,21 @@ class Camera:
         with self.frame_lock:
             frame = self.shared_frame_np.copy()
 
-        # convert to RGB for drawing
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # draw the bounding boxes on the screen
         for obj in detected_objects:
-            vis_util.draw_bounding_box_on_image_array(frame,
-                obj['ymin'],
+            label = "{}: {}%".format(obj['name'], int(obj['score'] * 100))
+            bounding_box = (
                 obj['xmin'],
-                obj['ymax'],
+                obj['ymin'],
                 obj['xmax'],
-                color='red',
-                thickness=2,
-                display_str_list=["{}: {}%".format(obj['name'],int(obj['score']*100))],
-                use_normalized_coordinates=False)
+                obj['ymax']
+            )
+
+            drawobjectbox(frame, label, bounding_box)
 
         for region in self.regions:
             color = (255,255,255)
-            cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
-                (region['x_offset']+region['size'], region['y_offset']+region['size']), 
+            cv2.rectangle(frame, (region['x_offset'], region['y_offset']),
+                (region['x_offset']+region['size'], region['y_offset']+region['size']),
                 color, 2)
 
-        # convert back to BGR
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
         return frame
-
-
-    
-        
