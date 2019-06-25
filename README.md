@@ -19,7 +19,10 @@ You see multiple bounding boxes because it draws bounding boxes from all frames 
 [![](http://img.youtube.com/vi/nqHbCtyo4dY/0.jpg)](http://www.youtube.com/watch?v=nqHbCtyo4dY "Frigate")
 
 ## Getting Started
-Download and build the container with
+
+First, ensure that you have installed the Edge TPU runtime and Python library for your Google Coral as described [here](https://coral.withgoogle.com/docs/accelerator/get-started/)
+
+Then, download and build the container with
 ```
 git clone https://github.com/blakeblackshear/frigate.git
 docker build -t frigate .
