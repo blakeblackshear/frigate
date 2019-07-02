@@ -81,7 +81,7 @@ class BestPersonFrame(threading.Thread):
             if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
                 best_frame = recent_frames[self.best_person['frame_time']]
 
-                label = "{}: {}%".format(self.best_person['name'],int(self.best_person['score']*100))
+                label = "{}: {}% {}".format(self.best_person['name'],int(self.best_person['score']*100),int(self.best_person['area']))
                 draw_box_with_label(best_frame, self.best_person['xmin'], self.best_person['ymin'], 
                     self.best_person['xmax'], self.best_person['ymax'], label)
                 

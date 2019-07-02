@@ -236,6 +236,10 @@ class Camera:
         for obj in objects:
             if obj['name'] == 'person':
                 person_area = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
+
+                # Store person_area to use in the label later
+                obj['area'] = person_area
+
                 # find the matching region
                 region = None
                 for r in self.regions:
@@ -279,7 +283,9 @@ class Camera:
 
         # draw the bounding boxes on the screen
         for obj in detected_objects:
-            label = "{}: {}%".format(obj['name'],int(obj['score']*100))
+            # since debug mode can show all kinds of objects, we need to calculate the area outside of `add_objects`
+            area = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
+            label = "{}: {}% {}".format(obj['name'],int(obj['score']*100),int(area))
             draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], label)
 
         for region in self.regions:
