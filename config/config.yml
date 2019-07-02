@@ -16,6 +16,7 @@ cameras:
       password: $RTSP_PASSWORD
       path: /cam/realmonitor?channel=1&subtype=2
     mask: back-mask.bmp
+    take_frame: 1
     regions:
       - size: 350
         x_offset: 0
