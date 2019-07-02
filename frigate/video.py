@@ -13,7 +13,7 @@ from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
 
 # fetch the frames as fast a possible and store current frame in a shared memory array
-def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url):
+def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url, take_frame=1):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
@@ -35,8 +35,12 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
     
     pipe = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size)
 
+    frame_num = 0
     while True:
         raw_image = pipe.stdout.read(frame_size)
+        frame_num += 1
+        if (frame_num % take_frame) != 0:
+            continue
         frame = (
             np
             .frombuffer(raw_image, np.uint8)
@@ -125,6 +129,7 @@ class Camera:
         self.detected_objects = []
         self.recent_frames = {}
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
+        self.take_frame = self.config.get('take_frame', 1)
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.mqtt_client = mqtt_client
@@ -205,7 +210,8 @@ class Camera:
         # create the process to capture frames from the RTSP stream and store in a shared array
         print("Creating a new capture process...")
         self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
-            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, self.rtsp_url))
+            self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, 
+            self.rtsp_url, self.take_frame))
         self.capture_process.daemon = True
         print("Starting a new capture process...")
         self.capture_process.start()
