@@ -49,6 +49,8 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
  libc++abi1 \
  libunwind8 \
  libgcc1 \
+ # VAAPI drivers for Intel hardware accel
+ libva-drm2 libva2 i965-va-driver vainfo \
  && rm -rf /var/lib/apt/lists/* 
 
 # Install core packages 
