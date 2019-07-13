@@ -15,28 +15,38 @@ cameras:
       # values that begin with a "$" will be replaced with environment variable
       password: $RTSP_PASSWORD
       path: /cam/realmonitor?channel=1&subtype=2
-    # Optional mask. Must be the same dimensions as your video feed.
-    # The mask works by looking at the bottom center of the bounding box for the detected
-    # person in the image. If that pixel in the mask is a black pixel, it ignores it as a
-    # false positive. In my mask, the grass and driveway visible from my backdoor camera 
-    # are white. The garage doors, sky, and trees (anywhere it would be impossible for a 
-    # person to stand) are black.
-    mask: back-mask.bmp
+
+    ################
+    ## Optional mask. Must be the same dimensions as your video feed.
+    ## The mask works by looking at the bottom center of the bounding box for the detected
+    ## person in the image. If that pixel in the mask is a black pixel, it ignores it as a
+    ## false positive. In my mask, the grass and driveway visible from my backdoor camera 
+    ## are white. The garage doors, sky, and trees (anywhere it would be impossible for a 
+    ## person to stand) are black.
+    ################
+    # mask: back-mask.bmp
+
+    ################
     # Allows you to limit the framerate within frigate for cameras that do not support
     # custom framerates. A value of 1 tells frigate to look at every frame, 2 every 2nd frame, 
     # 3 every 3rd frame, etc.
+    ################
     take_frame: 1
+
+    ################
     # Optional hardware acceleration parameters for ffmpeg. If your hardware supports it, it can
     # greatly reduce the CPU power used to decode the video stream. You will need to determine which
     # parameters work for your specific hardware. These may work for those with Intel hardware that
     # supports QuickSync.
-    ffmpeg_hwaccel_args:
-      - -hwaccel
-      - vaapi
-      - -hwaccel_device
-      - /dev/dri/renderD128
-      - -hwaccel_output_format
-      - yuv420p
+    ################
+    # ffmpeg_hwaccel_args:
+    #   - -hwaccel
+    #   - vaapi
+    #   - -hwaccel_device
+    #   - /dev/dri/renderD128
+    #   - -hwaccel_output_format
+    #   - yuv420p
+    
     regions:
       - size: 350
         x_offset: 0
