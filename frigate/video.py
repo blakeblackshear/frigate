@@ -13,13 +13,15 @@ from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
 
 # fetch the frames as fast a possible and store current frame in a shared memory array
-def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url, take_frame=1):
+def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_shape, rtsp_url, take_frame=1, ffmpeg_hwaccel_args=[]):
     # convert shared memory array into numpy and shape into image array
     arr = tonumpyarray(shared_arr).reshape(frame_shape)
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
-    ffmpeg_cmd = ['ffmpeg', 
-        '-hide_banner', '-loglevel', 'panic',
+    ffmpeg_global_args = [
+        '-hide_banner', '-loglevel', 'panic'
+    ]
+    ffmpeg_input_args = [
         '-avoid_negative_ts', 'make_zero', 
         '-fflags', 'nobuffer',
         '-flags', 'low_delay',
@@ -27,11 +29,19 @@ def fetch_frames(shared_arr, shared_frame_time, frame_lock, frame_ready, frame_s
         '-fflags', '+genpts', 
         '-rtsp_transport', 'tcp', 
         '-stimeout', '5000000', 
-        '-use_wallclock_as_timestamps', '1', 
-        '-i', rtsp_url, 
-        '-f', 'rawvideo', 
-        '-pix_fmt', 'rgb24', 
-        'pipe:']
+        '-use_wallclock_as_timestamps', '1'
+    ]
+
+    ffmpeg_cmd = (['ffmpeg'] +
+        ffmpeg_global_args +
+        ffmpeg_hwaccel_args +
+        ffmpeg_input_args +
+        ['-i', rtsp_url,
+        '-f', 'rawvideo',
+        '-pix_fmt', 'rgb24',
+        'pipe:'])
+
+    print(" ".join(ffmpeg_cmd))
     
     pipe = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size)
 
@@ -130,6 +140,7 @@ class Camera:
         self.recent_frames = {}
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
         self.take_frame = self.config.get('take_frame', 1)
+        self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.mqtt_client = mqtt_client
@@ -195,7 +206,8 @@ class Camera:
         # load in the mask for person detection
         if 'mask' in self.config:
             self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
-        else:
+
+        if self.mask is None:
             self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
             self.mask[:] = 255
 
@@ -211,7 +223,7 @@ class Camera:
         print("Creating a new capture process...")
         self.capture_process = mp.Process(target=fetch_frames, args=(self.shared_frame_array, 
             self.shared_frame_time, self.frame_lock, self.frame_ready, self.frame_shape, 
-            self.rtsp_url, self.take_frame))
+            self.rtsp_url, self.take_frame, self.ffmpeg_hwaccel_args))
         self.capture_process.daemon = True
         print("Starting a new capture process...")
         self.capture_process.start()
