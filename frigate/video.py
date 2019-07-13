@@ -206,6 +206,8 @@ class Camera:
         # load in the mask for person detection
         if 'mask' in self.config:
             self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
+        else:
+            self.mask = None
 
         if self.mask is None:
             self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
@@ -264,7 +266,7 @@ class Camera:
                 
                 # if the min person area is larger than the
                 # detected person, don't add it to detected objects
-                if region and region['min_person_area'] > obj['area']:
+                if region and 'min_person_area' in region and region['min_person_area'] > obj['area']:
                     continue
             
                 # compute the coordinates of the person and make sure
