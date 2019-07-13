@@ -36,7 +36,7 @@ def main():
                 print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
-    client = mqtt.Client()
+    client = mqtt.Client(client_id="frigate")
     client.on_connect = on_connect
     client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
     if not MQTT_USER is None:
