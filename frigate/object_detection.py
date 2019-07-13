@@ -39,6 +39,8 @@ class PreppedQueueProcessor(threading.Thread):
 
             # Actual detection.
             objects = self.engine.DetectWithInputTensor(frame['frame'], threshold=frame['region_threshold'], top_k=3)
+            # print(self.engine.get_inference_time())
+
             # parse and pass detected objects back to the camera
             parsed_objects = []
             for obj in objects:
