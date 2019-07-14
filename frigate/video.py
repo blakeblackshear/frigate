@@ -175,7 +175,7 @@ class Camera:
         self.object_cleaner.start()
 
         # start a thread to publish object scores (currently only person)
-        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects)
+        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame)
         mqtt_publisher.start()
 
         # create a watchdog thread for capture process

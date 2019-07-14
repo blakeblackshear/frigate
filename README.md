@@ -61,8 +61,8 @@ Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best pe
 ```
 camera:
   - name: Camera Last Person
-    platform: generic
-    still_image_url: http://<ip>:5000/<camera_name>/best_person.jpg
+    platform: mqtt
+    topic: frigate/<camera_name>/snapshot
 
 binary_sensor:
   - name: Camera Person
@@ -71,6 +71,26 @@ binary_sensor:
     value_template: '{{ value_json.person }}'
     device_class: motion
     availability_topic: "frigate/available"
+
+automation:
+  - alias: Alert me if a person is detected while armed away
+    trigger: 
+      platform: state
+      entity_id: binary_sensor.camera_person
+      from: 'off'
+      to: 'on'
+    condition:
+      - condition: state
+        entity_id: alarm_control_panel.home_alarm
+        state: armed_away
+    action:
+      - service: notify.user_telegram
+        data:
+          message: "A person was detected."
+          data:
+            photo:
+              - url: http://<ip>:5000/<camera_name>/best_person.jpg
+                caption: A person was detected.
 ```
 
 ## Tips
