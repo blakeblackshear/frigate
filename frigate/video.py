@@ -270,9 +270,9 @@ class Camera:
                     continue
             
                 # compute the coordinates of the person and make sure
-                # the location isnt outide the bounds of the image (can happen from rounding)
+                # the location isnt outside the bounds of the image (can happen from rounding)
                 y_location = min(int(obj['ymax']), len(self.mask)-1)
-                x_location = min(int((obj['xmax']-obj['xmin'])/2.0), len(self.mask[0])-1)
+                x_location = min(int((obj['xmax']-obj['xmin'])/2.0)+obj['xmin'], len(self.mask[0])-1)
 
                 # if the person is in a masked location, continue
                 if self.mask[y_location][x_location] == [0]:
