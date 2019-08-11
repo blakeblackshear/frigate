@@ -122,6 +122,17 @@ class Camera:
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
         self.take_frame = self.config.get('take_frame', 1)
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
+        self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
+            '-avoid_negative_ts', 'make_zero', 
+            '-fflags', 'nobuffer',
+            '-flags', 'low_delay',
+            '-strict', 'experimental',
+            '-fflags', '+genpts+discardcorrupt',
+            '-vsync', 'drop',
+            '-rtsp_transport', 'tcp', 
+            '-stimeout', '5000000', 
+            '-use_wallclock_as_timestamps', '1'
+        ])
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
@@ -194,9 +205,16 @@ class Camera:
 
     def start_or_restart_capture(self):
         if not self.ffmpeg_process is None:
-            print("Killing the existing ffmpeg process...")
-            self.ffmpeg_process.kill()
-            self.ffmpeg_process.wait()
+            print("Terminating the existing ffmpeg process...")
+            self.ffmpeg_process.terminate()
+            try:
+                print("Waiting for ffmpeg to exit gracefully...")
+                self.ffmpeg_process.wait(timeout=30)
+            except sp.TimeoutExpired:
+                print("FFmpeg didnt exit. Force killing...")
+                self.ffmpeg_process.kill()
+                self.ffmpeg_process.wait()
+
             print("Waiting for the capture thread to exit...")
             self.capture_thread.join()
             self.ffmpeg_process = None
@@ -215,21 +233,11 @@ class Camera:
         ffmpeg_global_args = [
             '-hide_banner', '-loglevel', 'panic'
         ]
-        ffmpeg_input_args = [
-            '-avoid_negative_ts', 'make_zero', 
-            '-fflags', 'nobuffer',
-            '-flags', 'low_delay',
-            '-strict', 'experimental',
-            '-fflags', '+genpts', 
-            '-rtsp_transport', 'tcp', 
-            '-stimeout', '5000000', 
-            '-use_wallclock_as_timestamps', '1'
-        ]
 
         ffmpeg_cmd = (['ffmpeg'] +
             ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
-            ffmpeg_input_args +
+            self.ffmpeg_input_args +
             ['-i', self.rtsp_url,
             '-f', 'rawvideo',
             '-pix_fmt', 'rgb24',
