@@ -46,6 +46,12 @@ cameras:
     #   - /dev/dri/renderD128
     #   - -hwaccel_output_format
     #   - yuv420p
+
+    ################
+    # Optional custom input args. Some cameras may need custom ffmpeg params to work reliably. Specifying
+    # these will replace the default input params.
+    ################
+    # ffmpeg_input_args: []
     
     regions:
       - size: 350
