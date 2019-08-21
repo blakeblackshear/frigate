@@ -50,7 +50,9 @@ def get_frame_shape(rtsp_url):
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
     video = cv2.VideoCapture(rtsp_url)
+    print("Reading video stream from URL: " + str(rtsp_url))
     ret, frame = video.read()
+    print("OpenCV Video Read Ready: " + str(ret))
     frame_shape = frame.shape
     video.release()
     return frame_shape
@@ -73,8 +75,8 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(10)
 
-            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 2:
-                print("last frame is more than 2 seconds old, restarting camera capture...")
+            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 10:
+                print("last frame is more than 10 seconds old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
 
@@ -121,7 +123,10 @@ class Camera:
         self.recent_frames = {}
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
         self.take_frame = self.config.get('take_frame', 1)
+        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', None)
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
+        self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', None)
+        self.ffmpeg_output_args = self.config.get('ffmpeg_output_args', None)
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
@@ -212,43 +217,50 @@ class Camera:
         self.capture_thread.start()
     
     def start_ffmpeg(self):
+        if self.ffmpeg_log_level == None:
+          self.ffmpeg_log_level = 'panic'
         ffmpeg_global_args = [
-            '-hide_banner', '-loglevel', 'panic'
+            '-hide_banner', '-loglevel', self.ffmpeg_log_level
         ]
-        ffmpeg_input_args = [
-            '-avoid_negative_ts', 'make_zero', 
-            '-fflags', 'nobuffer',
-            '-flags', 'low_delay',
-            '-strict', 'experimental',
-            '-fflags', '+genpts', 
-            '-rtsp_transport', 'tcp', 
-            '-stimeout', '5000000', 
-            '-use_wallclock_as_timestamps', '1'
-        ]
+        if self.ffmpeg_input_args == None:
+            self.ffmpeg_input_args = [
+                '-avoid_negative_ts', 'make_zero', 
+                '-fflags', 'nobuffer',
+                '-flags', 'low_delay',
+                '-strict', 'experimental',
+                '-fflags', '+genpts', 
+                '-rtsp_transport', 'tcp', 
+                '-stimeout', '5000000', 
+                '-use_wallclock_as_timestamps', '1'
+            ]
+        if self.ffmpeg_output_args == None:
+            self.ffmpeg_output_args = [
+                '-f', 'rawvideo',
+                '-pix_fmt', 'rgb24'
+            ]
 
         ffmpeg_cmd = (['ffmpeg'] +
             ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
-            ffmpeg_input_args +
-            ['-i', self.rtsp_url,
-            '-f', 'rawvideo',
-            '-pix_fmt', 'rgb24',
-            'pipe:'])
+            self.ffmpeg_input_args +
+            ['-i', self.rtsp_url] +
+            self.ffmpeg_output_args +
+            ['pipe:'])
 
-        print(" ".join(ffmpeg_cmd))
-        
+        ffmpeg_cmd = list(map(str, ffmpeg_cmd))
+        print("".join(ffmpeg_cmd))
         self.ffmpeg_process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=self.frame_size)
-    
+
     def start(self):
         self.start_or_restart_capture()
         # start the object detection prep threads
         for detection_prep_thread in self.detection_prep_threads:
             detection_prep_thread.start()
         self.watchdog.start()
-    
+
     def join(self):
         self.capture_thread.join()
-    
+
     def get_capture_pid(self):
         return self.ffmpeg_process.pid
     
