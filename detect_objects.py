@@ -81,6 +81,11 @@ def main():
         return Response(imagestream(camera_name),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
+    @app.route('/')
+    def ishealthy():
+        # return a healh
+        return "Frigate is running. Alive and healthy!"
+
     def imagestream(camera_name):
         while True:
             # max out at 5 FPS
