@@ -73,8 +73,8 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(10)
 
-            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 2:
-                print("last frame is more than 2 seconds old, restarting camera capture...")
+            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 10:
+                print("last frame is more than 10 seconds old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
 
