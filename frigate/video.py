@@ -121,6 +121,7 @@ class Camera:
         self.recent_frames = {}
         self.rtsp_url = get_rtsp_url(self.config['rtsp'])
         self.take_frame = self.config.get('take_frame', 1)
+        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
         self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
             '-avoid_negative_ts', 'make_zero', 
@@ -132,6 +133,10 @@ class Camera:
             '-rtsp_transport', 'tcp', 
             '-stimeout', '5000000', 
             '-use_wallclock_as_timestamps', '1'
+        ])
+        self.ffmpeg_output_args = self.config.get('ffmpeg_output_args', [
+            '-f', 'rawvideo',
+            '-pix_fmt', 'rgb24'
         ])
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.rtsp_url)
@@ -231,17 +236,16 @@ class Camera:
     
     def start_ffmpeg(self):
         ffmpeg_global_args = [
-            '-hide_banner', '-loglevel', 'panic'
+            '-hide_banner', '-loglevel', self.ffmpeg_log_level
         ]
 
         ffmpeg_cmd = (['ffmpeg'] +
             ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
             self.ffmpeg_input_args +
-            ['-i', self.rtsp_url,
-            '-f', 'rawvideo',
-            '-pix_fmt', 'rgb24',
-            'pipe:'])
+            ['-i', self.rtsp_url] +
+            self.ffmpeg_output_args +
+            ['pipe:'])
 
         print(" ".join(ffmpeg_cmd))
         

@@ -48,10 +48,21 @@ cameras:
     #   - yuv420p
 
     ################
+    # FFmpeg log level. Default is "panic". https://ffmpeg.org/ffmpeg.html#Generic-options
+    ################
+    # ffmpeg_log_level: panic
+
+    ################
     # Optional custom input args. Some cameras may need custom ffmpeg params to work reliably. Specifying
     # these will replace the default input params.
     ################
     # ffmpeg_input_args: []
+
+    ################
+    # Optional custom output args. Some cameras may need custom ffmpeg params to work reliably. Specifying
+    # these will replace the default output params.
+    ################
+    # ffmpeg_output_args: []
     
     regions:
       - size: 350
