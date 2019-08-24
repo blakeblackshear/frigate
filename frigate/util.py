@@ -6,7 +6,7 @@ def tonumpyarray(mp_arr):
     return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label):
-    color = (255,0,0) // red color
+    color = (255,0,0) # red color
     cv2.rectangle(frame, (x_min, y_min), 
         (x_max, y_max), 
         color, 2)
