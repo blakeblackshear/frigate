@@ -163,6 +163,7 @@ class Camera:
                 self.frame_ready,
                 self.frame_lock,
                 region['size'], region['x_offset'], region['y_offset'], region['threshold'],
+                region['save_samples'],
                 prepped_frame_queue
             ))
         
@@ -320,7 +321,7 @@ class Camera:
             draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], label)
 
         for region in self.regions:
-            color = (255,255,255)
+            color = (255,255,255) # white bounding box for regions where we look for objects
             cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                 (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                 color, 2)
