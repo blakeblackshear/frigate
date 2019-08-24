@@ -248,7 +248,7 @@ class Camera:
             ['pipe:'])
 
         ffmpeg_cmd = list(map(str, ffmpeg_cmd))
-        print("".join(ffmpeg_cmd))
+        print("[ffmpeg command line and args]:" + " ".join(ffmpeg_cmd))
         self.ffmpeg_process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=self.frame_size)
 
     def start(self):

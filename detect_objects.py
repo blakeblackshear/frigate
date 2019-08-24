@@ -1,4 +1,5 @@
 import cv2
+from PIL import Image
 import time
 import queue
 import yaml
@@ -52,9 +53,11 @@ def main():
     for name, config in CONFIG['cameras'].items():
         cameras[name] = Camera(name, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
+    tf_args = CONFIG['tensorflow']
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
-        prepped_frame_queue
+        prepped_frame_queue,
+        tf_args
     )
     prepped_queue_processor.start()
 
