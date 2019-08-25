@@ -88,11 +88,14 @@ def main():
         while True:
             # max out at 5 FPS
             time.sleep(0.2)
-            frame = cameras[camera_name].get_current_frame_with_objects()
-            # encode the image into a jpg
-            ret, jpg = cv2.imencode('.jpg', frame)
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+            try:
+                frame = cameras[camera_name].get_current_frame_with_objects()
+                # encode the image into a jpg
+                ret, jpg = cv2.imencode('.jpg', frame)
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+            except Exception as e:
+                print("Error while preparing the next image for http output: " + str(e))
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 

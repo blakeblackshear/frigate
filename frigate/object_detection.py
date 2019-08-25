@@ -119,8 +119,8 @@ class PreppedQueueProcessor(threading.Thread):
                 file_prefix = now.strftime("%Y%m%d-%H%M%S")
                 if detected_objects:
                     # default 2 seconds between saved detection samples
-                    save_det_interval = frame['save_samples'].get('detection_interval', 2)
-                    # print("Detection interval for saved samples : {}".format(save_det_interval))
+                    save_det_interval = frame['save_samples'].get('detections_interval', 2)
+                    # print("Interval for saved detection samples : {}".format(save_det_interval))
                     # check if enough time has passed since the last saved detection sample
                     if (now - self.last_saved_det_frame_time).total_seconds() >= save_det_interval:
                         dir += "/detections/"
@@ -153,8 +153,8 @@ class PreppedQueueProcessor(threading.Thread):
                         img.save(img_file_path, "JPEG")
                 else:
                     # default 300 seconds (5 min) between saved non detection samples
-                    save_non_det_interval = frame['save_samples'].get('detection_interval', 300)
-                    # print("Detection interval for non saved samples : {}".format(save_non_det_interval))
+                    save_non_det_interval = frame['save_samples'].get('non_detections_interval', 300)
+                    # print("Interval for saved non-detection samples : {}".format(save_non_det_interval))
                     # check if enough time has passed since the last saved non-detection sample
                     if (now - self.last_saved_non_det_frame_time).total_seconds() >= save_non_det_interval:
                         dir += "/non_detections/"
