@@ -56,11 +56,23 @@ def get_frame_shape(rtsp_url):
     return frame_shape
 
 def get_rtsp_url(rtsp_config):
-    if (rtsp_config['password'].startswith('$')):
-        rtsp_config['password'] = os.getenv(rtsp_config['password'][1:])
-    return 'rtsp://{}:{}@{}:{}{}'.format(rtsp_config['user'], 
-        rtsp_config['password'], rtsp_config['host'], rtsp_config['port'],
-        rtsp_config['path'])
+
+    if 'user' in rtsp_config:
+        if 'password' not in rtsp_config:
+            auth_str = '{user}@'.format(user=rtsp_config['user'])
+        else:
+            if (rtsp_config['password'].startswith('$')):
+                rtsp_config['password'] = os.getenv(rtsp_config['password'][1:])
+
+            auth_str = '{user}:{password}@'.format(user=rtsp_config['user'],
+                                                   password=rtsp_config['password'])
+    else:
+        auth_str = ''
+
+    return 'rtsp://{auth}{host}:{port}{path}'.format(auth=auth_str,
+                                                     host=rtsp_config['host'],
+                                                     port=rtsp_config['port'],
+                                                     path=rtsp_config['path'])
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera):
