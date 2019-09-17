@@ -5,11 +5,11 @@ import cv2
 def tonumpyarray(mp_arr):
     return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
-def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label):
-    color = (255,0,0)
-    cv2.rectangle(frame, (x_min, y_min), 
-        (x_max, y_max), 
-        color, 2)
+def draw_box_with_label(frame, x_min, y_min, x_max, y_max, name, score, area, color):
+    label = "{}: {}% {}".format(name, int(score * 100), int(area))
+    cv2.rectangle(frame, (x_min, y_min),
+        (x_max, y_max),
+        color, 1)
     font_scale = 0.5
     font = cv2.FONT_HERSHEY_SIMPLEX
     # get the width and height of the text box

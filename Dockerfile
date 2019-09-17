@@ -101,6 +101,8 @@ RUN ln -s /coco_labels.txt /label_map.pbtext
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
 
+RUN  pip install -U matplotlib
+
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .

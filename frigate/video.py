@@ -11,6 +11,7 @@ from . util import tonumpyarray, draw_box_with_label
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
 from . mqtt import MqttObjectPublisher
+import matplotlib.pyplot as plt
 
 # Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
 class FrameTracker(threading.Thread):
@@ -207,6 +208,7 @@ class Camera:
             self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
             self.mask[:] = 255
 
+        self.color_map = plt.cm.get_cmap('tab20', 100)
 
     def start_or_restart_capture(self):
         if not self.ffmpeg_process is None:
@@ -316,8 +318,9 @@ class Camera:
 
         # draw the bounding boxes on the screen
         for obj in detected_objects:
-            label = "{}: {}% {}".format(obj['name'],int(obj['score']*100),int(obj['area']))
-            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], label)
+            color = tuple(int(round(255 * c)) for c in self.color_map(obj['label_id'])[:3])
+            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'],
+                                obj['name'], obj['score'], obj['area'], color)
 
         for region in self.regions:
             color = (255,255,255)

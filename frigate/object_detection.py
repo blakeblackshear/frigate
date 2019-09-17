@@ -47,6 +47,7 @@ class PreppedQueueProcessor(threading.Thread):
                 box = obj.bounding_box.flatten().tolist()
                 parsed_objects.append({
                             'frame_time': frame['frame_time'],
+                            'label_id': obj.label_id,
                             'name': str(self.labels[obj.label_id]),
                             'score': float(obj.score),
                             'xmin': int((box[0] * frame['region_size']) + frame['region_x_offset']),
