@@ -15,12 +15,6 @@ cameras:
       # values that begin with a "$" will be replaced with environment variable
       password: $RTSP_PASSWORD
       path: /cam/realmonitor?channel=1&subtype=2
-      ################
-      ## Optional URL format. Specifying this will override the default RTSP URL format.
-      ## Some cameras support the RTMP protocol which may give better performance. 
-      ################
-      # urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
-
 
     ################
     ## Optional URL format. Specifying this will override the default RTSP URL format.
