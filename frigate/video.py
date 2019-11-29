@@ -4,7 +4,6 @@ import datetime
 import cv2
 import threading
 import ctypes
-import logging
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
