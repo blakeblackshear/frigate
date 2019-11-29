@@ -23,6 +23,12 @@ cameras:
 
 
     ################
+    ## Optional URL format. Specifying this will override the default RTSP URL format.
+    ## Some cameras support the RTMP protocol which may give better performance. 
+    ################
+    # urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
+
+    ################
     ## Optional mask. Must be the same dimensions as your video feed.
     ## The mask works by looking at the bottom center of the bounding box for the detected
     ## person in the image. If that pixel in the mask is a black pixel, it ignores it as a
@@ -69,6 +75,29 @@ cameras:
     # these will replace the default output params.
     ################
     # ffmpeg_output_args: []
+
+
+    ################
+    ## RTMP supports all RTSP arguments
+    ## The RTMP config uses different ffmpeg arguments to make it compatible with frigate.
+    ################
+
+    rtmp:
+      user: viewer
+      host: 10.0.10.11
+      port: 1935
+      # values that begin with a "$" will be replaced with environment variable
+      password: $RTSP_PASSWORD
+      path: /cam/realmonitor?channel=1&subtype=2    
+
+    rtmp:
+      user: viewer
+      host: 10.0.10.12
+      port: 1935
+      # values that begin with a "$" will be replaced with environment variable
+      password: $RTSP_PASSWORD
+      path: /cam/realmonitor?channel=1&subtype=2    
+      urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
     
     regions:
       - size: 350

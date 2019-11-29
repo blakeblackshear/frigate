@@ -4,6 +4,7 @@ import datetime
 import cv2
 import threading
 import ctypes
+import logging
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
@@ -46,10 +47,10 @@ class FrameTracker(threading.Thread):
                 if (now - k) > 2:
                     del self.recent_frames[k]
 
-def get_frame_shape(rtsp_url):
+def get_frame_shape(stream_url):
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
-    video = cv2.VideoCapture(rtsp_url)
+    video = cv2.VideoCapture(stream_url)
     ret, frame = video.read()
     frame_shape = frame.shape
     video.release()
@@ -61,6 +62,13 @@ def get_rtsp_url(rtsp_config):
     urlformat = rtsp_config.get('urlformat', 'rtsp://{user}:{password}@{host}:{port}{path}')
     return urlformat.format(host=rtsp_config['host'], port=rtsp_config['port'], 
         path=rtsp_config['path'], user=rtsp_config['user'], password=rtsp_config['password'])
+
+def get_rtmp_url(rtmp_config):
+    if (rtmp_config['password'].startswith('$')):
+        rtmp_config['password'] = os.getenv(rtmp_config['password'][1:])
+    urlformat = rtmp_config.get('urlformat', 'rtmp://{user}:{password}@{host}:{port}{path}')
+    return urlformat.format(host=rtmp_config['host'], port=rtmp_config['port'], 
+        path=rtmp_config['path'], user=rtmp_config['user'], password=rtmp_config['password'])
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera):
@@ -119,27 +127,45 @@ class Camera:
         self.config = config
         self.detected_objects = []
         self.recent_frames = {}
-        self.rtsp_url = get_rtsp_url(self.config['rtsp'])
+        if ('rtsp' in config):
+            print('Found rtsp camera config.')
+            self.stream_url = get_rtsp_url(self.config['rtsp'])
+            self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
+                '-avoid_negative_ts', 'make_zero', 
+                '-fflags', 'nobuffer',
+                '-flags', 'low_delay',
+                '-strict', 'experimental',
+                '-fflags', '+genpts+discardcorrupt',
+                '-vsync', 'drop',
+                '-rtsp_transport', 'tcp', 
+                '-stimeout', '5000000', 
+                '-use_wallclock_as_timestamps', '1'
+            ])
+        elif ('rtmp' in config):
+            print('Found rtmp camera config.')
+            self.stream_url = get_rtmp_url(self.config['rtmp'])
+            self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
+                '-avoid_negative_ts', 'make_zero', 
+                '-fflags', 'nobuffer',
+                '-flags', 'low_delay',
+                '-strict', 'experimental',
+                '-fflags', '+genpts+discardcorrupt',
+                '-vsync', 'drop',
+                '-use_wallclock_as_timestamps', '1'
+            ])
+        else:
+            print('No valid camera config found.')
+
         self.take_frame = self.config.get('take_frame', 1)
-        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
+        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'info')
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
-        self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
-            '-avoid_negative_ts', 'make_zero', 
-            '-fflags', 'nobuffer',
-            '-flags', 'low_delay',
-            '-strict', 'experimental',
-            '-fflags', '+genpts+discardcorrupt',
-            '-vsync', 'drop',
-            '-rtsp_transport', 'tcp', 
-            '-stimeout', '5000000', 
-            '-use_wallclock_as_timestamps', '1'
-        ])
+
         self.ffmpeg_output_args = self.config.get('ffmpeg_output_args', [
             '-f', 'rawvideo',
             '-pix_fmt', 'rgb24'
         ])
         self.regions = self.config['regions']
-        self.frame_shape = get_frame_shape(self.rtsp_url)
+        self.frame_shape = get_frame_shape(self.stream_url)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
@@ -243,7 +269,7 @@ class Camera:
             ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
             self.ffmpeg_input_args +
-            ['-i', self.rtsp_url] +
+            ['-i', self.stream_url] +
             self.ffmpeg_output_args +
             ['pipe:'])
 
