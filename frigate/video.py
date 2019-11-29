@@ -157,7 +157,7 @@ class Camera:
             print('No valid camera config found.')
 
         self.take_frame = self.config.get('take_frame', 1)
-        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'info')
+        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
 
         self.ffmpeg_output_args = self.config.get('ffmpeg_output_args', [
