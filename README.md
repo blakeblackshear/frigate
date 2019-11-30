@@ -1,9 +1,9 @@
 <a href='https://ko-fi.com/P5P7XGO9' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi4.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
-# Frigate - Realtime Object Detection for RTSP Cameras
+# Frigate - Realtime Object Detection for RTSP/RTMP Cameras
 **Note:** This version requires the use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/)
 
-Uses OpenCV and Tensorflow to perform realtime object detection locally for RTSP cameras. Designed for integration with HomeAssistant or others via MQTT.
+Uses OpenCV and Tensorflow to perform realtime object detection locally for RTSP/RTMP cameras. Designed for integration with HomeAssistant or others via MQTT.
 
 - Leverages multiprocessing and threads heavily with an emphasis on realtime over processing every frame
 - Allows you to define specific regions (squares) in the image to look for objects
