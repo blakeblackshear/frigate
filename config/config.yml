@@ -7,20 +7,90 @@ mqtt:
   # password: password # Optional -- Uncomment for use
 
 cameras:
-  back:
+  backyard:
     rtsp:
+      # The camera URL protocol is determined by the key (`rtsp`) above unless overridden by `urlformat`
       user: viewer
       host: 10.0.10.10
       port: 554
       # values that begin with a "$" will be replaced with environment variable
       password: $RTSP_PASSWORD
       path: /cam/realmonitor?channel=1&subtype=2
-
-    ################
-    ## Optional URL format. Specifying this will override the default RTSP URL format.
-    ## Some cameras support the RTMP protocol which may give better performance. 
-    ################
-    # urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
+      regions:
+        - size: 350
+          x_offset: 0
+          y_offset: 300
+          min_person_area: 5000
+          threshold: 0.5
+        - size: 400
+          x_offset: 350
+          y_offset: 250
+          min_person_area: 2000
+          threshold: 0.5
+        - size: 400
+          x_offset: 750
+          y_offset: 250
+          min_person_area: 2000
+          threshold: 0.5      
+  front_yard:      
+    rtmp:
+      user: viewer
+      host: 10.0.10.11
+      port: 1935
+      # values that begin with a "$" will be replaced with environment variable
+      password: $RTMP_PASSWORD
+      path: /cam/realmonitor?channel=1&subtype=2   
+      ffmpeg_input_args:
+        - -avoid_negative_ts
+        - make_zero
+        - -fflags
+        - nobuffer
+        - -flags
+        - low_delay
+        - -strict
+        - experimental
+        - -fflags
+        - +genpts+discardcorrupt
+        - -vsync
+        - drop
+        - -use_wallclock_as_timestamps
+        - '1'
+      regions:
+        - size: 350
+          x_offset: 0
+          y_offset: 300
+          min_person_area: 5000
+          threshold: 0.5            
+  garage:
+    rtmp:
+      user: viewer
+      host: 10.0.10.12
+      port: 1935
+      # values that begin with a "$" will be replaced with environment variable
+      password: $CUSTOM_PASSWORD
+      path: /cam/realmonitor?channel=1&subtype=2    
+      urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
+      ffmpeg_input_args:
+        - -avoid_negative_ts
+        - make_zero
+        - -fflags
+        - nobuffer
+        - -flags
+        - low_delay
+        - -strict
+        - experimental
+        - -fflags
+        - +genpts+discardcorrupt
+        - -vsync
+        - drop
+        - -use_wallclock_as_timestamps
+        - '1'            
+      regions:
+      - size: 350
+        x_offset: 0
+        y_offset: 300
+        min_person_area: 5000
+        threshold: 0.5       
 
     ################
     ## Optional mask. Must be the same dimensions as your video feed.
@@ -37,7 +107,7 @@ cameras:
     # custom framerates. A value of 1 tells frigate to look at every frame, 2 every 2nd frame, 
     # 3 every 3rd frame, etc.
     ################
-    take_frame: 1
+    # take_frame: 1
 
     ################
     # Optional hardware acceleration parameters for ffmpeg. If your hardware supports it, it can
@@ -70,42 +140,8 @@ cameras:
     ################
     # ffmpeg_output_args: []
 
-
     ################
-    ## RTMP supports all RTSP arguments
-    ## The RTMP config uses different ffmpeg arguments to make it compatible with frigate.
+    ## Optional URL format. Specifying this will override the default protocol URL format.
+    ## Some cameras support the RTMP protocol which may give better performance. 
     ################
-
-    rtmp:
-      user: viewer
-      host: 10.0.10.11
-      port: 1935
-      # values that begin with a "$" will be replaced with environment variable
-      password: $RTSP_PASSWORD
-      path: /cam/realmonitor?channel=1&subtype=2    
-
-    rtmp:
-      user: viewer
-      host: 10.0.10.12
-      port: 1935
-      # values that begin with a "$" will be replaced with environment variable
-      password: $RTSP_PASSWORD
-      path: /cam/realmonitor?channel=1&subtype=2    
-      urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
-    
-    regions:
-      - size: 350
-        x_offset: 0
-        y_offset: 300
-        min_person_area: 5000
-        threshold: 0.5
-      - size: 400
-        x_offset: 350
-        y_offset: 250
-        min_person_area: 2000
-        threshold: 0.5
-      - size: 400
-        x_offset: 750
-        y_offset: 250
-        min_person_area: 2000
-        threshold: 0.5
+    # urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}

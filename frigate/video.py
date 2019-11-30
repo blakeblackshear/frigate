@@ -55,19 +55,13 @@ def get_frame_shape(stream_url):
     video.release()
     return frame_shape
 
-def get_rtsp_url(rtsp_config):
-    if (rtsp_config['password'].startswith('$')):
-        rtsp_config['password'] = os.getenv(rtsp_config['password'][1:])
-    urlformat = rtsp_config.get('urlformat', 'rtsp://{user}:{password}@{host}:{port}{path}')
-    return urlformat.format(host=rtsp_config['host'], port=rtsp_config['port'], 
-        path=rtsp_config['path'], user=rtsp_config['user'], password=rtsp_config['password'])
-
-def get_rtmp_url(rtmp_config):
-    if (rtmp_config['password'].startswith('$')):
-        rtmp_config['password'] = os.getenv(rtmp_config['password'][1:])
-    urlformat = rtmp_config.get('urlformat', 'rtmp://{user}:{password}@{host}:{port}{path}')
-    return urlformat.format(host=rtmp_config['host'], port=rtmp_config['port'], 
-        path=rtmp_config['path'], user=rtmp_config['user'], password=rtmp_config['password'])
+def get_stream_url(stream_protocol, stream_config):
+    if (stream_config['password'].startswith('$')):
+        stream_config['password'] = os.getenv(stream_config['password'][1:])
+    urlformat = stream_config.get('urlformat', '{urlProtocol}://{user}:{password}@{host}:{port}{path}')
+    return urlformat.format(host=stream_config['host'], port=stream_config['port'], 
+        path=stream_config['path'], user=stream_config['user'], 
+        password=stream_config['password'], urlProtocol=stream_protocol)
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera):
@@ -126,35 +120,23 @@ class Camera:
         self.config = config
         self.detected_objects = []
         self.recent_frames = {}
-        if ('rtsp' in config):
-            print('Found rtsp camera config.')
-            self.stream_url = get_rtsp_url(self.config['rtsp'])
-            self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
-                '-avoid_negative_ts', 'make_zero', 
-                '-fflags', 'nobuffer',
-                '-flags', 'low_delay',
-                '-strict', 'experimental',
-                '-fflags', '+genpts+discardcorrupt',
-                '-vsync', 'drop',
-                '-rtsp_transport', 'tcp', 
-                '-stimeout', '5000000', 
-                '-use_wallclock_as_timestamps', '1'
-            ])
-        elif ('rtmp' in config):
-            print('Found rtmp camera config.')
-            self.stream_url = get_rtmp_url(self.config['rtmp'])
-            self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
-                '-avoid_negative_ts', 'make_zero', 
-                '-fflags', 'nobuffer',
-                '-flags', 'low_delay',
-                '-strict', 'experimental',
-                '-fflags', '+genpts+discardcorrupt',
-                '-vsync', 'drop',
-                '-use_wallclock_as_timestamps', '1'
-            ])
-        else:
-            print('No valid camera config found.')
+        self.stream_protocol = list(self.config.keys())[0]
+        self.stream_config = list(self.config.values())[0]
 
+        print('Found {} camera config.'.format(self.stream_protocol))
+        self.stream_url = get_stream_url(self.stream_protocol, self.stream_config)
+
+        self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
+            '-avoid_negative_ts', 'make_zero', 
+            '-fflags', 'nobuffer',
+            '-flags', 'low_delay',
+            '-strict', 'experimental',
+            '-fflags', '+genpts+discardcorrupt',
+            '-vsync', 'drop',
+            '-rtsp_transport', 'tcp', 
+            '-stimeout', '5000000', 
+            '-use_wallclock_as_timestamps', '1'
+        ])
         self.take_frame = self.config.get('take_frame', 1)
         self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
