@@ -92,7 +92,7 @@ cameras:
         min_person_area: 5000
         threshold: 0.5    
   garden:
-    http:
+    https:
       # Example of a theoretical camera that uses HTTP for streaming instead of RTSP/RTMP
       user: viewer
       host: 10.0.10.13
