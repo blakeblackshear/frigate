@@ -67,7 +67,7 @@ cameras:
       host: 10.0.10.12
       port: 1935
       # values that begin with a "$" will be replaced with environment variable
-      password: $CUSTOM_PASSWORD
+      password: $RTMP_PASSWORD
       path: /cam/realmonitor?channel=1&subtype=2    
       urlformat: rtmp://{host}:{port}{path}&user={user}&password={password}
       ffmpeg_input_args:
@@ -90,7 +90,22 @@ cameras:
         x_offset: 0
         y_offset: 300
         min_person_area: 5000
-        threshold: 0.5       
+        threshold: 0.5    
+  garden:
+    http:
+      # Example of a theoretical camera that uses HTTP for streaming instead of RTSP/RTMP
+      user: viewer
+      host: 10.0.10.13
+      port: 1234
+      # values that begin with a "$" will be replaced with environment variable
+      password: $CUSTOM_PASSWORD
+      path: /cam/5          
+      regions:
+      - size: 350
+        x_offset: 0
+        y_offset: 300
+        min_person_area: 5000
+        threshold: 0.5              
 
     ################
     ## Optional mask. Must be the same dimensions as your video feed.
