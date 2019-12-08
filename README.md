@@ -1,9 +1,9 @@
 <a href='https://ko-fi.com/P5P7XGO9' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi4.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
-# Frigate - Realtime Object Detection for RTSP Cameras
+# Frigate - Realtime Object Detection for IP Cameras
 **Note:** This version requires the use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/)
 
-Uses OpenCV and Tensorflow to perform realtime object detection locally for RTSP cameras. Designed for integration with HomeAssistant or others via MQTT.
+Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras. Designed for integration with HomeAssistant or others via MQTT.
 
 - Leverages multiprocessing and threads heavily with an emphasis on realtime over processing every frame
 - Allows you to define specific regions (squares) in the image to look for objects
@@ -33,7 +33,7 @@ docker run --rm \
 -v /dev/bus/usb:/dev/bus/usb \
 -v <path_to_config_dir>:/config:ro \
 -p 5000:5000 \
--e RTSP_PASSWORD='password' \
+-e FRIGATE_RTSP_PASSWORD='password' \
 frigate:latest
 ```
 
@@ -50,7 +50,7 @@ Example docker-compose:
     ports:
       - "5000:5000"
     environment:
-      RTSP_PASSWORD: "password"
+      FRIGATE_RTSP_PASSWORD: "password"
 ```
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.yml).
@@ -94,7 +94,7 @@ automation:
 ```
 
 ## Tips
-- Lower the framerate of the RTSP feed on the camera to reduce the CPU usage for capturing the feed
+- Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed
 
 ## Future improvements
 - [x] Remove motion detection for now

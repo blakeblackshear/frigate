@@ -46,21 +46,18 @@ class FrameTracker(threading.Thread):
                 if (now - k) > 2:
                     del self.recent_frames[k]
 
-def get_frame_shape(rtsp_url):
+def get_frame_shape(source):
     # capture a single frame and check the frame shape so the correct array
     # size can be allocated in memory
-    video = cv2.VideoCapture(rtsp_url)
+    video = cv2.VideoCapture(source)
     ret, frame = video.read()
     frame_shape = frame.shape
     video.release()
     return frame_shape
 
-def get_rtsp_url(rtsp_config):
-    if (rtsp_config['password'].startswith('$')):
-        rtsp_config['password'] = os.getenv(rtsp_config['password'][1:])
-    return 'rtsp://{}:{}@{}:{}{}'.format(rtsp_config['user'], 
-        rtsp_config['password'], rtsp_config['host'], rtsp_config['port'],
-        rtsp_config['path'])
+def get_ffmpeg_input(ffmpeg_input):
+    frigate_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
+    return ffmpeg_input.format(**frigate_vars)
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera):
@@ -119,7 +116,7 @@ class Camera:
         self.config = config
         self.detected_objects = []
         self.recent_frames = {}
-        self.rtsp_url = get_rtsp_url(self.config['rtsp'])
+        self.ffmpeg_input = get_ffmpeg_input(self.config['ffmpeg_input'])
         self.take_frame = self.config.get('take_frame', 1)
         self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
         self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
@@ -139,7 +136,7 @@ class Camera:
             '-pix_fmt', 'rgb24'
         ])
         self.regions = self.config['regions']
-        self.frame_shape = get_frame_shape(self.rtsp_url)
+        self.frame_shape = get_frame_shape(self.ffmpeg_input)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
@@ -225,7 +222,7 @@ class Camera:
             self.ffmpeg_process = None
             self.capture_thread = None
             
-        # create the process to capture frames from the RTSP stream and store in a shared array
+        # create the process to capture frames from the input stream and store in a shared array
         print("Creating a new ffmpeg process...")
         self.start_ffmpeg()
         
@@ -243,7 +240,7 @@ class Camera:
             ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
             self.ffmpeg_input_args +
-            ['-i', self.rtsp_url] +
+            ['-i', self.ffmpeg_input] +
             self.ffmpeg_output_args +
             ['pipe:'])
 
