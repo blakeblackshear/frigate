@@ -85,4 +85,8 @@ class BestPersonFrame(threading.Thread):
                 draw_box_with_label(best_frame, self.best_person['xmin'], self.best_person['ymin'], 
                     self.best_person['xmax'], self.best_person['ymax'], label)
                 
+                # print a timestamp
+                time_to_show = datetime.datetime.fromtimestamp(self.best_person['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
+                cv2.putText(best_frame, time_to_show, (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 255, 255), thickness=4)
+                
                 self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)

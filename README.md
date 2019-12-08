@@ -32,6 +32,7 @@ docker run --rm \
 --privileged \
 -v /dev/bus/usb:/dev/bus/usb \
 -v <path_to_config_dir>:/config:ro \
+-v /etc/localtime:/etc/localtime:ro \
 -p 5000:5000 \
 -e FRIGATE_RTSP_PASSWORD='password' \
 frigate:latest
@@ -46,6 +47,7 @@ Example docker-compose:
     image: frigate:latest
     volumes:
       - /dev/bus/usb:/dev/bus/usb
+      - /etc/localtime:/etc/localtime:ro
       - <path_to_config>:/config
     ports:
       - "5000:5000"

@@ -315,6 +315,7 @@ class Camera:
         # lock and make a copy of the current frame
         with self.frame_lock:
             frame = self.current_frame.copy()
+            frame_time = self.frame_time.value
 
         # draw the bounding boxes on the screen
         for obj in detected_objects:
@@ -326,6 +327,10 @@ class Camera:
             cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
                 (region['x_offset']+region['size'], region['y_offset']+region['size']), 
                 color, 2)
+        
+        # print a timestamp
+        time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+        cv2.putText(frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
 
         # convert to BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
