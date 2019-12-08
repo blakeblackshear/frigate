@@ -61,6 +61,16 @@ cameras:
     ################
     # ffmpeg_output_args: []
     
+    ################
+    # size: size of the region in pixels
+    # x_offset/y_offset: position of the upper left corner of your region (top left of image is 0,0)
+    # min_person_area: minimum width*height of the bounding box for the detected person
+    # max_person_area: maximum width*height of the bounding box for the detected person
+    # threshold: The minimum decimal percentage (50% hit = 0.5) for the confidence from tensorflow
+    # Tips: All regions are resized to 300x300 before detection because the model is trained on that size.
+    #       Resizing regions takes CPU power. Ideally, all regions should be as close to 300x300 as possible.
+    #       Defining a region that goes outside the bounds of the image will result in errors.
+    ################
     regions:
       - size: 350
         x_offset: 0
