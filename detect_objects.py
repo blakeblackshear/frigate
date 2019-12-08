@@ -66,21 +66,32 @@ def main():
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
 
+    @app.route('/')
+    def ishealthy():
+        # return a healh
+        return "Frigate is running. Alive and healthy!"
+
     @app.route('/<camera_name>/best_person.jpg')
     def best_person(camera_name):
-        best_person_frame = cameras[camera_name].get_best_person()
-        if best_person_frame is None:
-            best_person_frame = np.zeros((720,1280,3), np.uint8)
-        ret, jpg = cv2.imencode('.jpg', best_person_frame)
-        response = make_response(jpg.tobytes())
-        response.headers['Content-Type'] = 'image/jpg'
-        return response
+        if camera_name in cameras:
+            best_person_frame = cameras[camera_name].get_best_person()
+            if best_person_frame is None:
+                best_person_frame = np.zeros((720,1280,3), np.uint8)
+            ret, jpg = cv2.imencode('.jpg', best_person_frame)
+            response = make_response(jpg.tobytes())
+            response.headers['Content-Type'] = 'image/jpg'
+            return response
+        else:
+            return f'Camera named {camera_name} not found', 404
 
     @app.route('/<camera_name>')
     def mjpeg_feed(camera_name):
-        # return a multipart response
-        return Response(imagestream(camera_name),
-                        mimetype='multipart/x-mixed-replace; boundary=frame')
+        if camera_name in cameras:
+            # return a multipart response
+            return Response(imagestream(camera_name),
+                            mimetype='multipart/x-mixed-replace; boundary=frame')
+        else:
+            return f'Camera named {camera_name} not found', 404
 
     def imagestream(camera_name):
         while True:
