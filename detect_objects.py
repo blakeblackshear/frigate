@@ -17,6 +17,7 @@ MQTT_PORT = CONFIG.get('mqtt', {}).get('port', 1883)
 MQTT_TOPIC_PREFIX = CONFIG.get('mqtt', {}).get('topic_prefix', 'frigate')
 MQTT_USER = CONFIG.get('mqtt', {}).get('user')
 MQTT_PASS = CONFIG.get('mqtt', {}).get('password')
+MQTT_CLIENT_ID = CONFIG.get('mqtt', {}).get('client_id', 'frigate')
 
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
@@ -36,7 +37,7 @@ def main():
                 print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
-    client = mqtt.Client(client_id="frigate")
+    client = mqtt.Client(client_id=MQTT_CLIENT_ID)
     client.on_connect = on_connect
     client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
     if not MQTT_USER is None:
