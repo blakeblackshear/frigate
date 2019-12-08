@@ -286,6 +286,11 @@ class Camera:
                 # detected person, don't add it to detected objects
                 if region and 'min_person_area' in region and region['min_person_area'] > obj['area']:
                     continue
+                
+                # if the detected person is larger than the
+                # max person area, don't add it to detected objects
+                if region and 'max_person_area' in region and region['max_person_area'] < obj['area']:
+                    continue
             
                 # compute the coordinates of the person and make sure
                 # the location isnt outside the bounds of the image (can happen from rounding)
