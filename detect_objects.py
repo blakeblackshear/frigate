@@ -19,6 +19,29 @@ MQTT_USER = CONFIG.get('mqtt', {}).get('user')
 MQTT_PASS = CONFIG.get('mqtt', {}).get('password')
 MQTT_CLIENT_ID = CONFIG.get('mqtt', {}).get('client_id', 'frigate')
 
+# Set the default FFmpeg config
+FFMPEG_CONFIG = CONFIG.get('ffmpeg', {})
+FFMPEG_DEFAULT_CONFIG = {
+    'global_args': FFMPEG_CONFIG.get('global_args', 
+        ['-hide_banner','-loglevel','panic']),
+    'hwaccel_args': FFMPEG_CONFIG.get('hwaccel_args', 
+        []),
+    'input_args': FFMPEG_CONFIG.get('input_args',
+        ['-avoid_negative_ts', 'make_zero',
+         '-fflags', 'nobuffer',
+         '-flags', 'low_delay',
+         '-strict', 'experimental',
+         '-fflags', '+genpts+discardcorrupt',
+         '-vsync', 'drop',
+         '-rtsp_transport', 'tcp',
+         '-stimeout', '5000000',
+         '-use_wallclock_as_timestamps', '1']),
+    'output_args': FFMPEG_CONFIG.get('output_args',
+        ['-vf', 'mpdecimate',
+         '-f', 'rawvideo',
+         '-pix_fmt', 'rgb24'])
+}
+
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 
@@ -51,7 +74,7 @@ def main():
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
-        cameras[name] = Camera(name, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
+        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,

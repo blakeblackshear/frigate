@@ -111,30 +111,20 @@ class CameraCapture(threading.Thread):
                 self.camera.frame_ready.notify_all()
 
 class Camera:
-    def __init__(self, name, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
+    def __init__(self, name, ffmpeg_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
         self.name = name
         self.config = config
         self.detected_objects = []
         self.recent_frames = {}
-        self.ffmpeg_input = get_ffmpeg_input(self.config['ffmpeg_input'])
+
+        self.ffmpeg = config.get('ffmpeg', {})
+        self.ffmpeg_input = get_ffmpeg_input(self.ffmpeg['input'])
+        self.ffmpeg_global_args = self.ffmpeg.get('global_args', ffmpeg_config['global_args'])
+        self.ffmpeg_hwaccel_args = self.ffmpeg.get('hwaccel_args', ffmpeg_config['hwaccel_args'])
+        self.ffmpeg_input_args = self.ffmpeg.get('input_args', ffmpeg_config['input_args'])
+        self.ffmpeg_output_args = self.ffmpeg.get('output_args', ffmpeg_config['output_args'])
+
         self.take_frame = self.config.get('take_frame', 1)
-        self.ffmpeg_log_level = self.config.get('ffmpeg_log_level', 'panic')
-        self.ffmpeg_hwaccel_args = self.config.get('ffmpeg_hwaccel_args', [])
-        self.ffmpeg_input_args = self.config.get('ffmpeg_input_args', [
-            '-avoid_negative_ts', 'make_zero', 
-            '-fflags', 'nobuffer',
-            '-flags', 'low_delay',
-            '-strict', 'experimental',
-            '-fflags', '+genpts+discardcorrupt',
-            '-vsync', 'drop',
-            '-rtsp_transport', 'tcp', 
-            '-stimeout', '5000000', 
-            '-use_wallclock_as_timestamps', '1'
-        ])
-        self.ffmpeg_output_args = self.config.get('ffmpeg_output_args', [
-            '-f', 'rawvideo',
-            '-pix_fmt', 'rgb24'
-        ])
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.ffmpeg_input)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
@@ -232,12 +222,8 @@ class Camera:
         self.capture_thread.start()
     
     def start_ffmpeg(self):
-        ffmpeg_global_args = [
-            '-hide_banner', '-loglevel', self.ffmpeg_log_level
-        ]
-
         ffmpeg_cmd = (['ffmpeg'] +
-            ffmpeg_global_args +
+            self.ffmpeg_global_args +
             self.ffmpeg_hwaccel_args +
             self.ffmpeg_input_args +
             ['-i', self.ffmpeg_input] +
