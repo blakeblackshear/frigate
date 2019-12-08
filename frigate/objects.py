@@ -87,6 +87,6 @@ class BestPersonFrame(threading.Thread):
                 
                 # print a timestamp
                 time_to_show = datetime.datetime.fromtimestamp(self.best_person['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(best_frame, time_to_show, (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 255, 255), thickness=4)
+                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
                 
                 self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
