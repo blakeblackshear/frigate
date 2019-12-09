@@ -55,7 +55,7 @@ Example docker-compose:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
 
-A `config.yml` file must exist in the `config` directory. See example [here](config/config.yml) and device specific info can be found [here](docs/DEVICES.md).
+A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
 Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best person snapshot at `http://localhost:5000/<camera_name>/best_person.jpg`
 
