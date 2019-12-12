@@ -1,5 +1,3 @@
-<a href='https://ko-fi.com/P5P7XGO9' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi4.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-
 # Frigate - Realtime Object Detection for IP Cameras
 **Note:** This version requires the use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/)
 
