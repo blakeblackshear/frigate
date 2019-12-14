@@ -42,6 +42,8 @@ FFMPEG_DEFAULT_CONFIG = {
          '-pix_fmt', 'rgb24'])
 }
 
+GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
+
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 
@@ -74,7 +76,7 @@ def main():
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
-        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
+        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
@@ -94,13 +96,13 @@ def main():
         # return a healh
         return "Frigate is running. Alive and healthy!"
 
-    @app.route('/<camera_name>/best_person.jpg')
-    def best_person(camera_name):
+    @app.route('/<camera_name>/<label>/best.jpg')
+    def best(camera_name, label):
         if camera_name in cameras:
-            best_person_frame = cameras[camera_name].get_best_person()
-            if best_person_frame is None:
-                best_person_frame = np.zeros((720,1280,3), np.uint8)
-            ret, jpg = cv2.imencode('.jpg', best_person_frame)
+            best_frame = cameras[camera_name].get_best(label)
+            if best_frame is None:
+                best_frame = np.zeros((720,1280,3), np.uint8)
+            ret, jpg = cv2.imencode('.jpg', best_frame)
             response = make_response(jpg.tobytes())
             response.headers['Content-Type'] = 'image/jpg'
             return response

@@ -2,6 +2,7 @@ import time
 import datetime
 import threading
 import cv2
+import numpy as np
 from . util import draw_box_with_label
 
 class ObjectCleaner(threading.Thread):
@@ -35,16 +36,15 @@ class ObjectCleaner(threading.Thread):
                     self._objects_parsed.notify_all()
 
 
-# Maintains the frame and person with the highest score from the most recent
-# motion event
-class BestPersonFrame(threading.Thread):
+# Maintains the frame and object with the highest score
+class BestFrames(threading.Thread):
     def __init__(self, objects_parsed, recent_frames, detected_objects):
         threading.Thread.__init__(self)
         self.objects_parsed = objects_parsed
         self.recent_frames = recent_frames
         self.detected_objects = detected_objects
-        self.best_person = None
-        self.best_frame = None
+        self.best_objects = {}
+        self.best_frames = {}
 
     def run(self):
         while True:
@@ -55,38 +55,30 @@ class BestPersonFrame(threading.Thread):
 
             # make a copy of detected objects
             detected_objects = self.detected_objects.copy()
-            detected_people = [obj for obj in detected_objects if obj['name'] == 'person']
 
-            # get the highest scoring person
-            new_best_person = max(detected_people, key=lambda x:x['score'], default=self.best_person)
-
-            # if there isnt a person, continue
-            if new_best_person is None:
-                continue
-
-            # if there is no current best_person
-            if self.best_person is None:
-                self.best_person = new_best_person
-            # if there is already a best_person
-            else:
-                now = datetime.datetime.now().timestamp()
-                # if the new best person is a higher score than the current best person 
-                # or the current person is more than 1 minute old, use the new best person
-                if new_best_person['score'] > self.best_person['score'] or (now - self.best_person['frame_time']) > 60:
-                    self.best_person = new_best_person
+            for obj in detected_objects:
+                if obj['name'] in self.best_objects:
+                    now = datetime.datetime.now().timestamp()
+                    # if the object is a higher score than the current best score 
+                    # or the current object is more than 1 minute old, use the new object
+                    if obj['score'] > self.best_objects[obj['name']]['score'] or (now - self.best_objects[obj['name']]['frame_time']) > 60:
+                        self.best_objects[obj['name']] = obj
+                else:
+                    self.best_objects[obj['name']] = obj
             
             # make a copy of the recent frames
             recent_frames = self.recent_frames.copy()
-            
-            if not self.best_person is None and self.best_person['frame_time'] in recent_frames:
-                best_frame = recent_frames[self.best_person['frame_time']]
 
-                label = "{}: {}% {}".format(self.best_person['name'],int(self.best_person['score']*100),int(self.best_person['area']))
-                draw_box_with_label(best_frame, self.best_person['xmin'], self.best_person['ymin'], 
-                    self.best_person['xmax'], self.best_person['ymax'], label)
-                
-                # print a timestamp
-                time_to_show = datetime.datetime.fromtimestamp(self.best_person['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-                
-                self.best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
+            for name, obj in self.best_objects.items():
+                if obj['frame_time'] in recent_frames:
+                    best_frame = recent_frames[obj['frame_time']] #, np.zeros((720,1280,3), np.uint8))
+
+                    label = "{}: {}% {}".format(name,int(obj['score']*100),int(obj['area']))
+                    draw_box_with_label(best_frame, obj['xmin'], obj['ymin'], 
+                        obj['xmax'], obj['ymax'], label)
+                    
+                    # print a timestamp
+                    time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
+                    cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+                    
+                    self.best_frames[name] = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)

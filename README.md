@@ -55,20 +55,22 @@ Example docker-compose:
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
-Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best person snapshot at `http://localhost:5000/<camera_name>/best_person.jpg`
+Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best snapshot for any object type with at `http://localhost:5000/<camera_name>/<object_name>/best.jpg`
 
 ## Integration with HomeAssistant
 ```
 camera:
   - name: Camera Last Person
     platform: mqtt
-    topic: frigate/<camera_name>/snapshot
+    topic: frigate/<camera_name>/person/snapshot
+  - name: Camera Last Car
+    platform: mqtt
+    topic: frigate/<camera_name>/car/snapshot
 
 binary_sensor:
   - name: Camera Person
     platform: mqtt
-    state_topic: "frigate/<camera_name>/objects"
-    value_template: '{{ value_json.person }}'
+    state_topic: "frigate/<camera_name>/person"
     device_class: motion
     availability_topic: "frigate/available"
 
@@ -89,7 +91,7 @@ automation:
           message: "A person was detected."
           data:
             photo:
-              - url: http://<ip>:5000/<camera_name>/best_person.jpg
+              - url: http://<ip>:5000/<camera_name>/person/best.jpg
                 caption: A person was detected.
 ```
 
