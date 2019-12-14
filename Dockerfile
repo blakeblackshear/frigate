@@ -53,14 +53,6 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
  libva-drm2 libva2 i965-va-driver vainfo \
  && rm -rf /var/lib/apt/lists/* 
 
-# Install core packages 
-RUN wget -q -O /tmp/get-pip.py --no-check-certificate https://bootstrap.pypa.io/get-pip.py && python3 /tmp/get-pip.py
-RUN  pip install -U pip \
- numpy \
- Flask \
- paho-mqtt \
- PyYAML
-
 # Download & build OpenCV
 # TODO: use multistage build to reduce image size: 
 #   https://medium.com/@denismakogon/pain-and-gain-running-opencv-application-with-golang-and-docker-on-alpine-3-7-435aa11c7aec
@@ -100,6 +92,15 @@ RUN ln -s /coco_labels.txt /label_map.pbtext
 # Minimize image size 
 RUN (apt-get autoremove -y; \
      apt-get autoclean -y)
+
+# Install core packages 
+RUN wget -q -O /tmp/get-pip.py --no-check-certificate https://bootstrap.pypa.io/get-pip.py && python3 /tmp/get-pip.py
+RUN  pip install -U pip \
+ numpy \
+ Flask \
+ paho-mqtt \
+ PyYAML \
+ matplotlib
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/

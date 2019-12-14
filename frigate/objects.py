@@ -73,9 +73,8 @@ class BestFrames(threading.Thread):
                 if obj['frame_time'] in recent_frames:
                     best_frame = recent_frames[obj['frame_time']] #, np.zeros((720,1280,3), np.uint8))
 
-                    label = "{}: {}% {}".format(name,int(obj['score']*100),int(obj['area']))
                     draw_box_with_label(best_frame, obj['xmin'], obj['ymin'], 
-                        obj['xmax'], obj['ymax'], label)
+                        obj['xmax'], obj['ymax'], obj['name'], obj['score'], obj['area'])
                     
                     # print a timestamp
                     time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
