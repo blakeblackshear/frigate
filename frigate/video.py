@@ -7,9 +7,10 @@ import ctypes
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
+from collections import defaultdict
 from . util import tonumpyarray, draw_box_with_label
 from . object_detection import FramePrepper
-from . objects import ObjectCleaner, BestPersonFrame
+from . objects import ObjectCleaner, BestFrames
 from . mqtt import MqttObjectPublisher
 
 # Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
@@ -70,8 +71,8 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(10)
 
-            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 10:
-                print("last frame is more than 10 seconds old, restarting camera capture...")
+            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 300:
+                print("last frame is more than 5 minutes old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
 
@@ -111,7 +112,7 @@ class CameraCapture(threading.Thread):
                 self.camera.frame_ready.notify_all()
 
 class Camera:
-    def __init__(self, name, ffmpeg_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
+    def __init__(self, name, ffmpeg_config, global_objects_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
         self.name = name
         self.config = config
         self.detected_objects = []
@@ -123,6 +124,8 @@ class Camera:
         self.ffmpeg_hwaccel_args = self.ffmpeg.get('hwaccel_args', ffmpeg_config['hwaccel_args'])
         self.ffmpeg_input_args = self.ffmpeg.get('input_args', ffmpeg_config['input_args'])
         self.ffmpeg_output_args = self.ffmpeg.get('output_args', ffmpeg_config['output_args'])
+
+        camera_objects_config = config.get('objects', {})
 
         self.take_frame = self.config.get('take_frame', 1)
         self.regions = self.config['regions']
@@ -147,20 +150,23 @@ class Camera:
 
         # for each region, create a separate thread to resize the region and prep for detection
         self.detection_prep_threads = []
-        for region in self.config['regions']:
-            # set a default threshold of 0.5 if not defined
-            if not 'threshold' in region:
-                region['threshold'] = 0.5
-            if not isinstance(region['threshold'], float):
-                print('Threshold is not a float. Setting to 0.5 default.')
-                region['threshold'] = 0.5
+        for index, region in enumerate(self.config['regions']):
+            region_objects = region.get('objects', {})
+            # build objects config for region
+            objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys(), region_objects.keys())
+            merged_objects_config = defaultdict(lambda: {})
+            for obj in objects_with_config:
+                merged_objects_config[obj] = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {}), **region_objects.get(obj, {})}
+            
+            region['objects'] = merged_objects_config
+
             self.detection_prep_threads.append(FramePrepper(
                 self.name,
                 self.current_frame,
                 self.frame_time,
                 self.frame_ready,
                 self.frame_lock,
-                region['size'], region['x_offset'], region['y_offset'], region['threshold'],
+                region['size'], region['x_offset'], region['y_offset'], index,
                 prepped_frame_queue
             ))
         
@@ -169,22 +175,22 @@ class Camera:
             self.frame_ready, self.frame_lock, self.recent_frames)
         self.frame_tracker.start()
 
-        # start a thread to store the highest scoring recent person frame
-        self.best_person_frame = BestPersonFrame(self.objects_parsed, self.recent_frames, self.detected_objects)
-        self.best_person_frame.start()
+        # start a thread to store the highest scoring recent frames for monitored object types
+        self.best_frames = BestFrames(self.objects_parsed, self.recent_frames, self.detected_objects)
+        self.best_frames.start()
 
         # start a thread to expire objects from the detected objects list
         self.object_cleaner = ObjectCleaner(self.objects_parsed, self.detected_objects)
         self.object_cleaner.start()
 
-        # start a thread to publish object scores (currently only person)
-        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame)
+        # start a thread to publish object scores
+        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_frames)
         mqtt_publisher.start()
 
         # create a watchdog thread for capture process
         self.watchdog = CameraWatchdog(self)
 
-        # load in the mask for person detection
+        # load in the mask for object detection
         if 'mask' in self.config:
             self.mask = cv2.imread("/config/{}".format(self.config['mask']), cv2.IMREAD_GRAYSCALE)
         else:
@@ -252,38 +258,45 @@ class Camera:
             return
 
         for obj in objects:
-            # Store object area to use in bounding box labels
+            # find the matching region
+            region = self.regions[obj['region_id']]
+
+            # Compute some extra properties
+            obj.update({
+                'xmin': int((obj['box'][0] * region['size']) + region['x_offset']),
+                'ymin': int((obj['box'][1] * region['size']) + region['y_offset']),
+                'xmax': int((obj['box'][2] * region['size']) + region['x_offset']),
+                'ymax': int((obj['box'][3] * region['size']) + region['y_offset'])
+            })
+            
+            # Compute the area
             obj['area'] = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
 
-            if obj['name'] == 'person':
-                # find the matching region
-                region = None
-                for r in self.regions:
-                    if (
-                            obj['xmin'] >= r['x_offset'] and
-                            obj['ymin'] >= r['y_offset'] and
-                            obj['xmax'] <= r['x_offset']+r['size'] and
-                            obj['ymax'] <= r['y_offset']+r['size']
-                        ): 
-                        region = r
-                        break
-                
-                # if the min person area is larger than the
-                # detected person, don't add it to detected objects
-                if region and 'min_person_area' in region and region['min_person_area'] > obj['area']:
+            object_name = obj['name']
+
+            if object_name in region['objects']:
+                obj_settings = region['objects'][object_name]
+
+                # if the min area is larger than the
+                # detected object, don't add it to detected objects
+                if obj_settings.get('min_area',-1) > obj['area']:
                     continue
                 
-                # if the detected person is larger than the
-                # max person area, don't add it to detected objects
-                if region and 'max_person_area' in region and region['max_person_area'] < obj['area']:
+                # if the detected object is larger than the
+                # max area, don't add it to detected objects
+                if obj_settings.get('max_area', region['size']**2) < obj['area']:
+                    continue
+
+                # if the score is lower than the threshold, skip
+                if obj_settings.get('threshold', 0) > obj['score']:
                     continue
             
-                # compute the coordinates of the person and make sure
+                # compute the coordinates of the object and make sure
                 # the location isnt outside the bounds of the image (can happen from rounding)
                 y_location = min(int(obj['ymax']), len(self.mask)-1)
                 x_location = min(int((obj['xmax']-obj['xmin'])/2.0)+obj['xmin'], len(self.mask[0])-1)
 
-                # if the person is in a masked location, continue
+                # if the object is in a masked location, don't add it to detected objects
                 if self.mask[y_location][x_location] == [0]:
                     continue
 
@@ -291,9 +304,9 @@ class Camera:
 
         with self.objects_parsed:
             self.objects_parsed.notify_all()
-
-    def get_best_person(self):
-        return self.best_person_frame.best_frame
+    
+    def get_best(self, label):
+        return self.best_frames.best_frames.get(label)
     
     def get_current_frame_with_objects(self):
         # make a copy of the current detected objects

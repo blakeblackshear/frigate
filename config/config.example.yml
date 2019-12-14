@@ -45,7 +45,19 @@ mqtt:
 #     - rawvideo
 #     - -pix_fmt
 #     - rgb24
-  
+
+####################
+# Global object configuration. Applies to all cameras and regions
+# unless overridden at the camera/region levels.
+# Keys must be valid labels. By default, the model uses coco (https://dl.google.com/coral/canned_models/coco_labels.txt).
+# All labels from the model are reported over MQTT. These values are used to filter out false positives.
+####################
+objects:
+  person:
+    min_area: 5000
+    max_area: 100000
+    threshold: 0.5
+
 cameras:
   back:
     ffmpeg:
@@ -78,6 +90,12 @@ cameras:
     # 3 every 3rd frame, etc.
     ################
     take_frame: 1
+
+    objects:
+      person:
+        min_area: 5000
+        max_area: 100000
+        threshold: 0.5
     
     ################
     # size: size of the region in pixels
@@ -93,18 +111,18 @@ cameras:
       - size: 350
         x_offset: 0
         y_offset: 300
-        min_person_area: 5000
-        max_person_area: 100000
-        threshold: 0.5
+        objects:
+          car:
+            threshold: 0.2
       - size: 400
         x_offset: 350
         y_offset: 250
-        min_person_area: 2000
-        max_person_area: 100000
-        threshold: 0.5
+        objects:
+          person:
+            min_area: 2000
       - size: 400
         x_offset: 750
         y_offset: 250
-        min_person_area: 2000
-        max_person_area: 100000
-        threshold: 0.5
+        objects:
+          person:
+            min_area: 2000
