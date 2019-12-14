@@ -4,22 +4,7 @@ import cv2
 import threading
 import numpy as np
 from edgetpu.detection.engine import DetectionEngine
-from . util import tonumpyarray
-
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = '/frozen_inference_graph.pb'
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = '/label_map.pbtext'
-
-# Function to read labels from text files.
-def ReadLabelFile(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    ret = {}
-    for line in lines:
-        pair = line.strip().split(maxsplit=1)
-        ret[int(pair[0])] = pair[1].strip()
-    return ret
+from . util import tonumpyarray, LABELS, PATH_TO_CKPT
 
 class PreppedQueueProcessor(threading.Thread):
     def __init__(self, cameras, prepped_frame_queue):
@@ -30,7 +15,7 @@ class PreppedQueueProcessor(threading.Thread):
         
         # Load the edgetpu engine and labels
         self.engine = DetectionEngine(PATH_TO_CKPT)
-        self.labels = ReadLabelFile(PATH_TO_LABELS)
+        self.labels = LABELS
 
     def run(self):
         # process queue...

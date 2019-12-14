@@ -318,8 +318,7 @@ class Camera:
 
         # draw the bounding boxes on the screen
         for obj in detected_objects:
-            label = "{}: {}% {}".format(obj['name'],int(obj['score']*100),int(obj['area']))
-            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], label)
+            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], obj['name'], obj['score'], obj['area'])
 
         for region in self.regions:
             color = (255,255,255)
