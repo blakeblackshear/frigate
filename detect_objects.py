@@ -120,8 +120,8 @@ def main():
 
     def imagestream(camera_name):
         while True:
-            # max out at 5 FPS
-            time.sleep(0.2)
+            # max out at 1 FPS
+            time.sleep(1)
             frame = cameras[camera_name].get_current_frame_with_objects()
             # encode the image into a jpg
             ret, jpg = cv2.imencode('.jpg', frame)
