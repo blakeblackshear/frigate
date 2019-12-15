@@ -123,10 +123,8 @@ def main():
             # max out at 1 FPS
             time.sleep(1)
             frame = cameras[camera_name].get_current_frame_with_objects()
-            # encode the image into a jpg
-            ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
