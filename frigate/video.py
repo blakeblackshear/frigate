@@ -144,6 +144,12 @@ class Camera:
         self.frame_ready = mp.Condition()
         # Condition for notifying that objects were parsed
         self.objects_parsed = mp.Condition()
+        
+        # initialize the frame cache
+        self.cached_frame_with_objects = {
+            'frame_bytes': [],
+            'frame_time': 0
+        }
 
         self.ffmpeg_process = None
         self.capture_thread = None
@@ -315,6 +321,9 @@ class Camera:
         with self.frame_lock:
             frame = self.current_frame.copy()
             frame_time = self.frame_time.value
+        
+        if frame_time == self.cached_frame_with_objects['frame_time']:
+            return self.cached_frame_with_objects['frame_bytes']
 
         # draw the bounding boxes on the screen
         for obj in detected_objects:
@@ -333,7 +342,17 @@ class Camera:
         # convert to BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-        return frame
+        # encode the image into a jpg
+        ret, jpg = cv2.imencode('.jpg', frame)
+
+        frame_bytes = jpg.tobytes()
+
+        self.cached_frame_with_objects = {
+            'frame_bytes': frame_bytes,
+            'frame_time': frame_time
+        }
+
+        return frame_bytes
 
 
     
