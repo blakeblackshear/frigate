@@ -7,6 +7,7 @@ import ctypes
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
+import queue
 from . util import tonumpyarray, draw_box_with_label
 from . object_detection import FramePrepper
 from . objects import ObjectCleaner, BestPersonFrame
@@ -63,10 +64,11 @@ class CameraWatchdog(threading.Thread):
     def __init__(self, camera):
         threading.Thread.__init__(self)
         self.camera = camera
+        self.disable = False
 
     def run(self):
 
-        while True:
+        while not self.disable:
             # wait a bit before checking
             time.sleep(10)
 
@@ -194,9 +196,10 @@ class Camera:
             self.mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
             self.mask[:] = 255
 
-
-    def start_or_restart_capture(self):
-        if not self.ffmpeg_process is None:
+    def disable_capture(self):
+        if self.ffmpeg_process is None:
+            print("Attempted to disable capture but was already disabled")
+        else:
             print("Terminating the existing ffmpeg process...")
             self.ffmpeg_process.terminate()
             try:
@@ -211,6 +214,10 @@ class Camera:
             self.capture_thread.join()
             self.ffmpeg_process = None
             self.capture_thread = None
+
+    def start_or_restart_capture(self):
+        if not self.ffmpeg_process is None:
+            self.disable_capture()
             
         # create the process to capture frames from the input stream and store in a shared array
         print("Creating a new ffmpeg process...")
@@ -220,7 +227,10 @@ class Camera:
         self.capture_thread = CameraCapture(self)
         print("Starting a new capture thread...")
         self.capture_thread.start()
-    
+        
+        if self.watchdog == None:
+            self.watchdog = CameraWatchdog(self)
+            
     def start_ffmpeg(self):
         ffmpeg_cmd = (['ffmpeg'] +
             self.ffmpeg_global_args +

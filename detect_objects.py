@@ -9,6 +9,8 @@ import paho.mqtt.client as mqtt
 from frigate.video import Camera
 from frigate.object_detection import PreppedQueueProcessor
 
+from frigate.mqtt import MqttObjectConsumer
+
 with open('/config/config.yml') as f:
     CONFIG = yaml.safe_load(f)
 
@@ -60,13 +62,25 @@ def main():
                 print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
         # publish a message to signal that the service is running
         client.publish(MQTT_TOPIC_PREFIX+'/available', 'online', retain=True)
+        
+    # start a thread to listen for responses over mqtt
+    listen_queue = queue.Queue(10) # since we are listening for messages shouldn't need a very large queue
+    def on_message(client, obj, msg):
+        if msg.topic.startswith(MQTT_TOPIC_PREFIX):
+            payload = str(msg.payload.decode("utf-8"))
+            listen_queue.put({
+                'topic': msg.topic,
+                'payload': payload
+            })
     client = mqtt.Client(client_id=MQTT_CLIENT_ID)
     client.on_connect = on_connect
+    client.on_message = on_message
     client.will_set(MQTT_TOPIC_PREFIX+'/available', payload='offline', qos=1, retain=True)
     if not MQTT_USER is None:
         client.username_pw_set(MQTT_USER, password=MQTT_PASS)
     client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
+    client.subscribe("frigate/detection")
     
     # Queue for prepped frames, max size set to (number of cameras * 5)
     max_queue_size = len(CONFIG['cameras'].items())*5
@@ -76,6 +90,9 @@ def main():
     for name, config in CONFIG['cameras'].items():
         cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
+    mqtt_listener = MqttObjectConsumer(client, MQTT_TOPIC_PREFIX, listen_queue, cameras.values())
+    mqtt_listener.start()
+    
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
         prepped_frame_queue
