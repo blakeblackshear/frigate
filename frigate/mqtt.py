@@ -43,4 +43,5 @@ class MqttObjectPublisher(threading.Thread):
             # expire any objects that are ON and no longer detected
             expired_objects = [obj_name for obj_name, status in current_object_status.items() if status == 'ON' and not obj_name in obj_counter]
             for obj_name in expired_objects:
+                current_object_status[obj_name] = 'OFF'
                 self.client.publish(self.topic_prefix+'/'+obj_name, 'OFF', retain=False)
