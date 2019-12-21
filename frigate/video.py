@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import cv2
+import queue
 import threading
 import ctypes
 import multiprocessing as mp
@@ -9,11 +10,11 @@ import subprocess as sp
 import numpy as np
 from collections import defaultdict
 from . util import tonumpyarray, draw_box_with_label
-from . object_detection import FramePrepper
+from . object_detection import FramePrepper, RegionPrepper, RegionRequester
 from . objects import ObjectCleaner, BestFrames
 from . mqtt import MqttObjectPublisher
 
-# Stores 2 seconds worth of frames when motion is detected so they can be used for other threads
+# Stores 2 seconds worth of frames so they can be used for other threads
 class FrameTracker(threading.Thread):
     def __init__(self, shared_frame, frame_time, frame_ready, frame_lock, recent_frames):
         threading.Thread.__init__(self)
@@ -116,7 +117,7 @@ class Camera:
         self.name = name
         self.config = config
         self.detected_objects = []
-        self.recent_frames = {}
+        self.frame_cache = {}
 
         self.ffmpeg = config.get('ffmpeg', {})
         self.ffmpeg_input = get_ffmpeg_input(self.ffmpeg['input'])
@@ -144,6 +145,10 @@ class Camera:
         self.frame_ready = mp.Condition()
         # Condition for notifying that objects were parsed
         self.objects_parsed = mp.Condition()
+
+        # Queue for prepped frames, max size set to (number of regions * 5)
+        max_queue_size = len(self.config['regions'])*5
+        self.resize_queue = queue.PriorityQueue(max_queue_size)
         
         # initialize the frame cache
         self.cached_frame_with_objects = {
@@ -154,9 +159,9 @@ class Camera:
         self.ffmpeg_process = None
         self.capture_thread = None
 
-        # for each region, create a separate thread to resize the region and prep for detection
+        # for each region, merge the object config
         self.detection_prep_threads = []
-        for index, region in enumerate(self.config['regions']):
+        for region in self.config['regions']:
             region_objects = region.get('objects', {})
             # build objects config for region
             objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys(), region_objects.keys())
@@ -166,23 +171,20 @@ class Camera:
             
             region['objects'] = merged_objects_config
 
-            self.detection_prep_threads.append(FramePrepper(
-                self.name,
-                self.current_frame,
-                self.frame_time,
-                self.frame_ready,
-                self.frame_lock,
-                region['size'], region['x_offset'], region['y_offset'], index,
-                prepped_frame_queue
-            ))
-        
-        # start a thread to store recent motion frames for processing
+        # start a thread to queue resize requests for regions
+        self.region_requester = RegionRequester(self)
+
+        # start a thread to cache recent frames for processing
         self.frame_tracker = FrameTracker(self.current_frame, self.frame_time, 
-            self.frame_ready, self.frame_lock, self.recent_frames)
+            self.frame_ready, self.frame_lock, self.frame_cache)
         self.frame_tracker.start()
 
+        # start a thread to resize regions
+        self.region_prepper = RegionPrepper(self.frame_cache, self.resize_queue, prepped_frame_queue)
+        self.region_prepper.start()
+
         # start a thread to store the highest scoring recent frames for monitored object types
-        self.best_frames = BestFrames(self.objects_parsed, self.recent_frames, self.detected_objects)
+        self.best_frames = BestFrames(self.objects_parsed, self.frame_cache, self.detected_objects)
         self.best_frames.start()
 
         # start a thread to expire objects from the detected objects list

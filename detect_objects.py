@@ -72,11 +72,12 @@ def main():
     
     # Queue for prepped frames, max size set to (number of cameras * 5)
     max_queue_size = len(CONFIG['cameras'].items())*5
-    prepped_frame_queue = queue.Queue(max_queue_size)
+    prepped_frame_queue = queue.PriorityQueue(max_queue_size)
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
-        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, config, prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
+        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, config, 
+            prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
