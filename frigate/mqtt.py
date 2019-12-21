@@ -33,8 +33,8 @@ class MqttObjectPublisher(threading.Thread):
                 if new_status != current_object_status[obj_name]:
                     current_object_status[obj_name] = new_status
                     self.client.publish(self.topic_prefix+'/'+obj_name, new_status, retain=False)
-                    # send the snapshot over mqtt as well
-                    if not self.best_frames.best_frames[obj_name] is None:
+                    # send the snapshot over mqtt if we have it as well
+                    if obj_name in self.best_frames.best_frames:
                         ret, jpg = cv2.imencode('.jpg', self.best_frames.best_frames[obj_name])
                         if ret:
                             jpg_bytes = jpg.tobytes()
