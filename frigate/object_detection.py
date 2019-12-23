@@ -35,7 +35,7 @@ class PreppedQueueProcessor(threading.Thread):
             self.fps.update()
             self.avg_inference_speed = (self.avg_inference_speed*9 + self.engine.get_inference_time())/10
 
-            self.cameras[frame['camera_name']].add_objects(frame)
+            self.cameras[frame['camera_name']].detected_objects_queue.put(frame)
 
 class RegionRequester(threading.Thread):
     def __init__(self, camera):
