@@ -1,6 +1,7 @@
 import json
 import cv2
 import threading
+import prctl
 from collections import Counter, defaultdict
 
 class MqttObjectPublisher(threading.Thread):
@@ -13,6 +14,7 @@ class MqttObjectPublisher(threading.Thread):
         self.best_frames = best_frames
 
     def run(self):
+        prctl.set_name("MqttObjectPublisher")
         current_object_status = defaultdict(lambda: 'OFF')
         while True:
             # wait until objects have been parsed
@@ -35,7 +37,8 @@ class MqttObjectPublisher(threading.Thread):
                     self.client.publish(self.topic_prefix+'/'+obj_name, new_status, retain=False)
                     # send the snapshot over mqtt if we have it as well
                     if obj_name in self.best_frames.best_frames:
-                        ret, jpg = cv2.imencode('.jpg', self.best_frames.best_frames[obj_name])
+                        best_frame = cv2.cvtColor(self.best_frames.best_frames[obj_name], cv2.COLOR_RGB2BGR)
+                        ret, jpg = cv2.imencode('.jpg', best_frame)
                         if ret:
                             jpg_bytes = jpg.tobytes()
                             self.client.publish(self.topic_prefix+'/'+obj_name+'/snapshot', jpg_bytes, retain=True)

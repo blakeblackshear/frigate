@@ -2,6 +2,7 @@ import time
 import datetime
 import threading
 import cv2
+import prctl
 import numpy as np
 from . util import draw_box_with_label
 
@@ -12,6 +13,7 @@ class ObjectCleaner(threading.Thread):
         self._detected_objects = detected_objects
 
     def run(self):
+        prctl.set_name("ObjectCleaner")
         while True:
 
             # wait a bit before checking for expired frames
@@ -47,6 +49,7 @@ class BestFrames(threading.Thread):
         self.best_frames = {}
 
     def run(self):
+        prctl.set_name("BestFrames")
         while True:
 
             # wait until objects have been parsed
@@ -80,4 +83,4 @@ class BestFrames(threading.Thread):
                     time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
                     cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
                     
-                    self.best_frames[name] = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
+                    self.best_frames[name] = best_frame
