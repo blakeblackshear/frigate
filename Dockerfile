@@ -45,6 +45,7 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
  python3-pip \
  python3-pil \
  python3-numpy \
+ python3-prctl \
  libc++1 \
  libc++abi1 \
  libunwind8 \

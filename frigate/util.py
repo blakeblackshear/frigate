@@ -1,5 +1,8 @@
+import datetime
+import collections
 import numpy as np
 import cv2
+import threading
 import matplotlib.pyplot as plt
 
 # Function to read labels from text files.
@@ -11,6 +14,31 @@ def ReadLabelFile(file_path):
         pair = line.strip().split(maxsplit=1)
         ret[int(pair[0])] = pair[1].strip()
     return ret
+
+def calculate_region(frame_shape, xmin, ymin, xmax, ymax):    
+    # size is 50% larger than longest edge
+    size = max(xmax-xmin, ymax-ymin)
+    # if the size is too big to fit in the frame
+    if size > min(frame_shape[0], frame_shape[1]):
+        size = min(frame_shape[0], frame_shape[1])
+
+    # x_offset is midpoint of bounding box minus half the size
+    x_offset = int(((xmax-xmin)/2+xmin)-size/2)
+    # if outside the image
+    if x_offset < 0:
+        x_offset = 0
+    elif x_offset > (frame_shape[1]-size):
+        x_offset = (frame_shape[1]-size)
+
+    # x_offset is midpoint of bounding box minus half the size
+    y_offset = int(((ymax-ymin)/2+ymin)-size/2)
+    # if outside the image
+    if y_offset < 0:
+        y_offset = 0
+    elif y_offset > (frame_shape[0]-size):
+        y_offset = (frame_shape[0]-size)
+
+    return (size, x_offset, y_offset)
 
 # convert shared memory array into numpy array
 def tonumpyarray(mp_arr):
@@ -48,3 +76,44 @@ cmap = plt.cm.get_cmap('tab10', len(LABELS.keys()))
 COLOR_MAP = {}
 for key, val in LABELS.items():
     COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+
+class QueueMerger():
+    def __init__(self, from_queues, to_queue):
+        self.from_queues = from_queues
+        self.to_queue = to_queue
+        self.merge_threads = []
+
+    def start(self):
+        for from_q in self.from_queues:
+            self.merge_threads.append(QueueTransfer(from_q,self.to_queue))
+
+class QueueTransfer(threading.Thread):
+    def __init__(self, from_queue, to_queue):
+        threading.Thread.__init__(self)
+        self.from_queue = from_queue
+        self.to_queue = to_queue
+
+    def run(self):
+        while True:
+            self.to_queue.put(self.from_queue.get())
+
+class EventsPerSecond:
+    def __init__(self, max_events=1000):
+        self._start = None
+        self._max_events = max_events
+        self._timestamps = []
+    
+    def start(self):
+        self._start = datetime.datetime.now().timestamp()
+
+    def update(self):
+        self._timestamps.append(datetime.datetime.now().timestamp())
+        # truncate the list when it goes 100 over the max_size
+        if len(self._timestamps) > self._max_events+100:
+            self._timestamps = self._timestamps[(1-self._max_events):]
+
+    def eps(self, last_n_seconds=10):
+		# compute the (approximate) events in the last n seconds
+        now = datetime.datetime.now().timestamp()
+        seconds = min(now-self._start, last_n_seconds)
+        return len([t for t in self._timestamps if t > (now-last_n_seconds)]) / seconds

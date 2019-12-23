@@ -3,11 +3,12 @@ import time
 import queue
 import yaml
 import numpy as np
-from flask import Flask, Response, make_response
+from flask import Flask, Response, make_response, jsonify
 import paho.mqtt.client as mqtt
 
 from frigate.video import Camera
 from frigate.object_detection import PreppedQueueProcessor
+from frigate.util import EventsPerSecond
 
 with open('/config/config.yml') as f:
     CONFIG = yaml.safe_load(f)
@@ -70,20 +71,27 @@ def main():
     client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
     
-    # Queue for prepped frames, max size set to (number of cameras * 5)
-    max_queue_size = len(CONFIG['cameras'].items())*5
-    prepped_frame_queue = queue.PriorityQueue(max_queue_size)
+    # Queue for prepped frames, max size set to number of regions * 3
+    max_queue_size = sum([len(camera['regions'])*3 for name, camera in CONFIG['cameras'].items()])
+    prepped_frame_queue = queue.Queue(max_queue_size)
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
         cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, config, 
             prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
+    fps_tracker = EventsPerSecond()
+    queue_full_tracker = EventsPerSecond()
+
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
-        prepped_frame_queue
+        prepped_frame_queue,
+        fps_tracker,
+        queue_full_tracker
     )
     prepped_queue_processor.start()
+    fps_tracker.start()
+    queue_full_tracker.start()
 
     for name, camera in cameras.items():
         camera.start()
@@ -96,6 +104,22 @@ def main():
     def ishealthy():
         # return a healh
         return "Frigate is running. Alive and healthy!"
+
+    @app.route('/debug/stats')
+    def stats():
+        stats = {
+            'coral': {
+                'fps': fps_tracker.eps(),
+                'inference_speed': prepped_queue_processor.avg_inference_speed,
+                'queue_length': prepped_frame_queue.qsize(),
+                'queue_full_events_per_min': queue_full_tracker.eps(60)
+            }
+        }
+
+        for name, camera in cameras.items():
+            stats[name] = camera.stats()
+
+        return jsonify(stats)
 
     @app.route('/<camera_name>/<label>/best.jpg')
     def best(camera_name, label):

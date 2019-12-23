@@ -8,9 +8,10 @@ import ctypes
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
+import prctl
 from collections import defaultdict
-from . util import tonumpyarray, draw_box_with_label
-from . object_detection import FramePrepper, RegionPrepper, RegionRequester
+from . util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
+from . object_detection import RegionPrepper, RegionRequester
 from . objects import ObjectCleaner, BestFrames
 from . mqtt import MqttObjectPublisher
 
@@ -25,23 +26,13 @@ class FrameTracker(threading.Thread):
         self.recent_frames = recent_frames
 
     def run(self):
-        frame_time = 0.0
+        prctl.set_name("FrameTracker")
         while True:
-            now = datetime.datetime.now().timestamp()
             # wait for a frame
             with self.frame_ready:
-                # if there isnt a frame ready for processing or it is old, wait for a signal
-                if self.frame_time.value == frame_time or (now - self.frame_time.value) > 0.5:
-                    self.frame_ready.wait()
-            
-            # lock and make a copy of the frame
-            with self.frame_lock: 
-                frame = self.shared_frame.copy()
-                frame_time = self.frame_time.value
-            
-            # add the frame to recent frames
-            self.recent_frames[frame_time] = frame
+                self.frame_ready.wait()
 
+            now = datetime.datetime.now().timestamp()
             # delete any old frames
             stored_frame_times = list(self.recent_frames.keys())
             for k in stored_frame_times:
@@ -67,7 +58,7 @@ class CameraWatchdog(threading.Thread):
         self.camera = camera
 
     def run(self):
-
+        prctl.set_name("CameraWatchdog")
         while True:
             # wait a bit before checking
             time.sleep(10)
@@ -84,6 +75,7 @@ class CameraCapture(threading.Thread):
         self.camera = camera
 
     def run(self):
+        prctl.set_name("CameraCapture")
         frame_num = 0
         while True:
             if self.camera.ffmpeg_process.poll() != None:
@@ -108,9 +100,12 @@ class CameraCapture(threading.Thread):
                     .frombuffer(raw_image, np.uint8)
                     .reshape(self.camera.frame_shape)
                 )
+                self.camera.frame_cache[self.camera.frame_time.value] = self.camera.current_frame.copy()
             # Notify with the condition that a new frame is ready
             with self.camera.frame_ready:
                 self.camera.frame_ready.notify_all()
+
+            self.camera.fps.update()
 
 class Camera:
     def __init__(self, name, ffmpeg_config, global_objects_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
@@ -148,7 +143,7 @@ class Camera:
 
         # Queue for prepped frames, max size set to (number of regions * 5)
         max_queue_size = len(self.config['regions'])*5
-        self.resize_queue = queue.PriorityQueue(max_queue_size)
+        self.resize_queue = queue.Queue(max_queue_size)
         
         # initialize the frame cache
         self.cached_frame_with_objects = {
@@ -158,6 +153,7 @@ class Camera:
 
         self.ffmpeg_process = None
         self.capture_thread = None
+        self.fps = EventsPerSecond()
 
         # for each region, merge the object config
         self.detection_prep_threads = []
@@ -173,6 +169,7 @@ class Camera:
 
         # start a thread to queue resize requests for regions
         self.region_requester = RegionRequester(self)
+        self.region_requester.start()
 
         # start a thread to cache recent frames for processing
         self.frame_tracker = FrameTracker(self.current_frame, self.frame_time, 
@@ -234,6 +231,7 @@ class Camera:
         self.capture_thread = CameraCapture(self)
         print("Starting a new capture thread...")
         self.capture_thread.start()
+        self.fps.start()
     
     def start_ffmpeg(self):
         ffmpeg_cmd = (['ffmpeg'] +
@@ -261,20 +259,30 @@ class Camera:
     def get_capture_pid(self):
         return self.ffmpeg_process.pid
     
-    def add_objects(self, objects):
+    def add_objects(self, frame):
+        objects = frame['detected_objects']
+
         if len(objects) == 0:
             return
 
-        for obj in objects:
+        for raw_obj in objects:
+            obj = {
+                'score': float(raw_obj.score),
+                'box': raw_obj.bounding_box.flatten().tolist(),
+                'name': str(LABELS[raw_obj.label_id]),
+                'frame_time': frame['frame_time'],
+                'region_id': frame['region_id']
+            }
+
             # find the matching region
-            region = self.regions[obj['region_id']]
+            region = self.regions[frame['region_id']]
 
             # Compute some extra properties
             obj.update({
-                'xmin': int((obj['box'][0] * region['size']) + region['x_offset']),
-                'ymin': int((obj['box'][1] * region['size']) + region['y_offset']),
-                'xmax': int((obj['box'][2] * region['size']) + region['x_offset']),
-                'ymax': int((obj['box'][3] * region['size']) + region['y_offset'])
+                'xmin': int((obj['box'][0] * frame['size']) + frame['x_offset']),
+                'ymin': int((obj['box'][1] * frame['size']) + frame['y_offset']),
+                'xmax': int((obj['box'][2] * frame['size']) + frame['x_offset']),
+                'ymax': int((obj['box'][3] * frame['size']) + frame['y_offset'])
             })
             
             # Compute the area
@@ -307,6 +315,29 @@ class Camera:
                 # if the object is in a masked location, don't add it to detected objects
                 if self.mask[y_location][x_location] == [0]:
                     continue
+            
+            # look to see if the bounding box is too close to the region border and the region border is not the edge of the frame
+            # if ((frame['x_offset'] > 0 and obj['box'][0] < 0.01) or 
+            #     (frame['y_offset'] > 0 and obj['box'][1] < 0.01) or
+            #     (frame['x_offset']+frame['size'] < self.frame_shape[1] and obj['box'][2] > 0.99) or
+            #     (frame['y_offset']+frame['size'] < self.frame_shape[0] and obj['box'][3] > 0.99)):
+
+            #     size, x_offset, y_offset = calculate_region(self.frame_shape, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'])
+                # This triggers WAY too often with stationary objects on the edge of a region. 
+                # Every frame triggers it and fills the queue...
+                # I need to create a new region and add it to the list of regions, but 
+                # it needs to check for a duplicate region first.
+
+                # self.resize_queue.put({
+                #     'camera_name': self.name,
+                #     'frame_time': frame['frame_time'],
+                #     'region_id': frame['region_id'],
+                #     'size': size,
+                #     'x_offset': x_offset,
+                #     'y_offset': y_offset
+                # })
+                # print('object too close to region border')
+                #continue
 
             self.detected_objects.append(obj)
 
@@ -315,6 +346,12 @@ class Camera:
     
     def get_best(self, label):
         return self.best_frames.best_frames.get(label)
+
+    def stats(self):
+        return {
+            'camera_fps': self.fps.eps(60),
+            'resize_queue': self.resize_queue.qsize()
+        }
     
     def get_current_frame_with_objects(self):
         # make a copy of the current detected objects
@@ -340,6 +377,9 @@ class Camera:
         # print a timestamp
         time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
         cv2.putText(frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+        
+        # print fps
+        cv2.putText(frame, str(self.fps.eps())+'FPS', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
 
         # convert to BGR
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
