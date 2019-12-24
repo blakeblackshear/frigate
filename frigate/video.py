@@ -131,6 +131,7 @@ class Camera:
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
         self.label = config.get('label', 'person')
+        self.dedupe_snapshot_publish = config.get('dedupe_snapshot_publish', True)
 
         # create a numpy array for the current frame in initialize to zeros
         self.current_frame = np.zeros(self.frame_shape, np.uint8)
@@ -179,7 +180,7 @@ class Camera:
         self.object_cleaner.start()
 
         # start a thread to publish object scores (currently only person)
-        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame, self.label)
+        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame, self.label, self.dedupe_snapshot_publish)
         mqtt_publisher.start()
 
         # create a watchdog thread for capture process
