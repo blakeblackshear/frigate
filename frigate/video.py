@@ -130,6 +130,7 @@ class Camera:
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
+        self.label = config.get('label', 'person')
 
         # create a numpy array for the current frame in initialize to zeros
         self.current_frame = np.zeros(self.frame_shape, np.uint8)
@@ -170,7 +171,7 @@ class Camera:
         self.frame_tracker.start()
 
         # start a thread to store the highest scoring recent person frame
-        self.best_person_frame = BestPersonFrame(self.objects_parsed, self.recent_frames, self.detected_objects)
+        self.best_person_frame = BestPersonFrame(self.objects_parsed, self.recent_frames, self.detected_objects, self.label)
         self.best_person_frame.start()
 
         # start a thread to expire objects from the detected objects list
@@ -178,7 +179,7 @@ class Camera:
         self.object_cleaner.start()
 
         # start a thread to publish object scores (currently only person)
-        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame)
+        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_person_frame, self.label)
         mqtt_publisher.start()
 
         # create a watchdog thread for capture process
@@ -255,7 +256,7 @@ class Camera:
             # Store object area to use in bounding box labels
             obj['area'] = (obj['xmax']-obj['xmin'])*(obj['ymax']-obj['ymin'])
 
-            if obj['name'] == 'person':
+            if obj['name'] == self.label:
                 # find the matching region
                 region = None
                 for r in self.regions:

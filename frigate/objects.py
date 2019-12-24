@@ -38,11 +38,12 @@ class ObjectCleaner(threading.Thread):
 # Maintains the frame and person with the highest score from the most recent
 # motion event
 class BestPersonFrame(threading.Thread):
-    def __init__(self, objects_parsed, recent_frames, detected_objects):
+    def __init__(self, objects_parsed, recent_frames, detected_objects, label):
         threading.Thread.__init__(self)
         self.objects_parsed = objects_parsed
         self.recent_frames = recent_frames
         self.detected_objects = detected_objects
+        self.label = label
         self.best_person = None
         self.best_frame = None
 
@@ -55,7 +56,7 @@ class BestPersonFrame(threading.Thread):
 
             # make a copy of detected objects
             detected_objects = self.detected_objects.copy()
-            detected_people = [obj for obj in detected_objects if obj['name'] == 'person']
+            detected_people = [obj for obj in detected_objects if obj['name'] == self.label]
 
             # get the highest scoring person
             new_best_person = max(detected_people, key=lambda x:x['score'], default=self.best_person)
