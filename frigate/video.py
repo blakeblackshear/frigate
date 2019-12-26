@@ -132,6 +132,7 @@ class Camera:
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
         self.label = config.get('label', 'person')
         self.dedupe_snapshot_publish = config.get('dedupe_snapshot_publish', False)
+        self.best_person_invalidate_seconds = config.get('best_person_invalidate_seconds', 60)
 
         # create a numpy array for the current frame in initialize to zeros
         self.current_frame = np.zeros(self.frame_shape, np.uint8)
@@ -172,7 +173,7 @@ class Camera:
         self.frame_tracker.start()
 
         # start a thread to store the highest scoring recent person frame
-        self.best_person_frame = BestPersonFrame(self.objects_parsed, self.recent_frames, self.detected_objects, self.label)
+        self.best_person_frame = BestPersonFrame(self.objects_parsed, self.recent_frames, self.detected_objects, self.label, self.best_person_invalidate_seconds)
         self.best_person_frame.start()
 
         # start a thread to expire objects from the detected objects list
