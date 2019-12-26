@@ -131,7 +131,7 @@ class Camera:
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
         self.label = config.get('label', 'person')
-        self.dedupe_snapshot_publish = config.get('dedupe_snapshot_publish', True)
+        self.dedupe_snapshot_publish = config.get('dedupe_snapshot_publish', False)
 
         # create a numpy array for the current frame in initialize to zeros
         self.current_frame = np.zeros(self.frame_shape, np.uint8)
