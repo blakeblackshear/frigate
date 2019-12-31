@@ -3,6 +3,7 @@ import cv2
 import threading
 import prctl
 from collections import Counter, defaultdict
+import itertools
 
 class MqttObjectPublisher(threading.Thread):
     def __init__(self, client, topic_prefix, objects_parsed, detected_objects, best_frames):
@@ -26,7 +27,7 @@ class MqttObjectPublisher(threading.Thread):
 
             # total up all scores by object type
             obj_counter = Counter()
-            for obj in detected_objects:
+            for obj in itertools.chain.from_iterable(detected_objects.values()):
                 obj_counter[obj['name']] += obj['score']
             
             # report on detected objects
