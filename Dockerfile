@@ -101,7 +101,8 @@ RUN  pip install -U pip \
  Flask \
  paho-mqtt \
  PyYAML \
- matplotlib
+ matplotlib \
+ scipy
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/

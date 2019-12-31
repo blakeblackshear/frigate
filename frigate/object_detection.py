@@ -31,7 +31,7 @@ class PreppedQueueProcessor(threading.Thread):
             frame = self.prepped_frame_queue.get()
 
             # Actual detection.
-            frame['detected_objects'] = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.5, top_k=5)
+            frame['detected_objects'] = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.4, top_k=5)
             self.fps.update()
             self.avg_inference_speed = (self.avg_inference_speed*9 + self.engine.get_inference_time())/10
 
@@ -56,8 +56,10 @@ class RegionRequester(threading.Thread):
             # make a copy of the frame_time
             frame_time = self.camera.frame_time.value
 
+            with self.camera.regions_in_process_lock:
+                self.camera.regions_in_process[frame_time] = len(self.camera.config['regions'])
+
             for index, region in enumerate(self.camera.config['regions']):
-                # queue with priority 1
                 self.camera.resize_queue.put({
                     'camera_name': self.camera.name,
                     'frame_time': frame_time,
@@ -88,14 +90,14 @@ class RegionPrepper(threading.Thread):
 
             # make a copy of the region
             cropped_frame = frame[resize_request['y_offset']:resize_request['y_offset']+resize_request['size'], resize_request['x_offset']:resize_request['x_offset']+resize_request['size']].copy()
-            
+
             # Resize to 300x300 if needed
             if cropped_frame.shape != (300, 300, 3):
+                # TODO: use Pillow-SIMD?
                 cropped_frame = cv2.resize(cropped_frame, dsize=(300, 300), interpolation=cv2.INTER_LINEAR)
             # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
             frame_expanded = np.expand_dims(cropped_frame, axis=0)
 
             # add the frame to the queue
-            if not self.prepped_frame_queue.full():
-                resize_request['frame'] = frame_expanded.flatten().copy()
-                self.prepped_frame_queue.put(resize_request)
+            resize_request['frame'] = frame_expanded.flatten().copy()
+            self.prepped_frame_queue.put(resize_request)

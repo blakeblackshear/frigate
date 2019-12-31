@@ -9,10 +9,11 @@ import multiprocessing as mp
 import subprocess as sp
 import numpy as np
 import prctl
+import itertools
 from collections import defaultdict
 from . util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
 from . object_detection import RegionPrepper, RegionRequester
-from . objects import ObjectCleaner, BestFrames, DetectedObjectsProcessor
+from . objects import ObjectCleaner, BestFrames, DetectedObjectsProcessor, RegionRefiner, ObjectTracker
 from . mqtt import MqttObjectPublisher
 
 # Stores 2 seconds worth of frames so they can be used for other threads
@@ -24,7 +25,7 @@ class FrameTracker(threading.Thread):
         self.frame_ready = frame_ready
         self.frame_lock = frame_lock
         self.recent_frames = recent_frames
-
+    
     def run(self):
         prctl.set_name("FrameTracker")
         while True:
@@ -36,7 +37,7 @@ class FrameTracker(threading.Thread):
             # delete any old frames
             stored_frame_times = list(self.recent_frames.keys())
             for k in stored_frame_times:
-                if (now - k) > 2:
+                if (now - k) > 10:
                     del self.recent_frames[k]
 
 def get_frame_shape(source):
@@ -101,6 +102,7 @@ class CameraCapture(threading.Thread):
                     .reshape(self.camera.frame_shape)
                 )
                 self.camera.frame_cache[self.camera.frame_time.value] = self.camera.current_frame.copy()
+                self.camera.frame_queue.put(self.camera.frame_time.value)
             # Notify with the condition that a new frame is ready
             with self.camera.frame_ready:
                 self.camera.frame_ready.notify_all()
@@ -111,8 +113,17 @@ class Camera:
     def __init__(self, name, ffmpeg_config, global_objects_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
         self.name = name
         self.config = config
-        self.detected_objects = []
+        self.detected_objects = defaultdict(lambda: [])
+        self.tracked_objects = []
         self.frame_cache = {}
+        # queue for re-assembling frames in order
+        self.frame_queue = queue.Queue()
+        # track how many regions have been requested for a frame so we know when a frame is complete
+        self.regions_in_process = {}
+        # Lock to control access
+        self.regions_in_process_lock = mp.Lock()
+        self.finished_frame_queue = queue.Queue()
+        self.refined_frame_queue = queue.Queue()
 
         self.ffmpeg = config.get('ffmpeg', {})
         self.ffmpeg_input = get_ffmpeg_input(self.ffmpeg['input'])
@@ -149,7 +160,7 @@ class Camera:
         self.detected_objects_queue = queue.Queue()
         self.detected_objects_processor = DetectedObjectsProcessor(self)
         self.detected_objects_processor.start()
-        
+
         # initialize the frame cache
         self.cached_frame_with_objects = {
             'frame_bytes': [],
@@ -192,6 +203,16 @@ class Camera:
         # start a thread to expire objects from the detected objects list
         self.object_cleaner = ObjectCleaner(self.objects_parsed, self.detected_objects)
         self.object_cleaner.start()
+
+        # start a thread to refine regions when objects are clipped
+        self.dynamic_region_fps = EventsPerSecond()
+        self.region_refiner = RegionRefiner(self)
+        self.region_refiner.start()
+        self.dynamic_region_fps.start()
+
+        # start a thread to track objects
+        self.object_tracker = ObjectTracker(self, 10)
+        self.object_tracker.start()
 
         # start a thread to publish object scores
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_frames)
@@ -270,12 +291,47 @@ class Camera:
     def stats(self):
         return {
             'camera_fps': self.fps.eps(60),
-            'resize_queue': self.resize_queue.qsize()
+            'resize_queue': self.resize_queue.qsize(),
+            'frame_queue': self.frame_queue.qsize(),
+            'finished_frame_queue': self.finished_frame_queue.qsize(),
+            'refined_frame_queue': self.refined_frame_queue.qsize(),
+            'regions_in_process': self.regions_in_process,
+            'dynamic_regions_per_sec': self.dynamic_region_fps.eps()
         }
     
+    def frame_with_objects(self, frame_time):
+        frame = self.frame_cache[frame_time].copy()
+
+        for region in self.regions:
+            color = (255,255,255)
+            cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
+                (region['x_offset']+region['size'], region['y_offset']+region['size']), 
+                color, 2)
+
+        # draw the bounding boxes on the screen
+        for obj in self.detected_objects[frame_time]:
+        # for obj in detected_objects[frame_time]:
+            cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
+                (obj['region']['xmax'], obj['region']['ymax']), 
+                (0,255,0), 1)
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {obj['clipped']}")
+            
+        # print a timestamp
+        time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+        cv2.putText(frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+        
+        # print fps
+        cv2.putText(frame, str(self.fps.eps())+'FPS', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
+        # convert to BGR
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+        # encode the image into a jpg
+        ret, jpg = cv2.imencode('.jpg', frame)
+
+        return jpg.tobytes()
+
     def get_current_frame_with_objects(self):
-        # make a copy of the current detected objects
-        detected_objects = self.detected_objects.copy()
         # lock and make a copy of the current frame
         with self.frame_lock:
             frame = self.current_frame.copy()
@@ -284,9 +340,16 @@ class Camera:
         if frame_time == self.cached_frame_with_objects['frame_time']:
             return self.cached_frame_with_objects['frame_bytes']
 
+        # make a copy of the current detected objects
+        detected_objects = self.detected_objects.copy()
+
         # draw the bounding boxes on the screen
-        for obj in detected_objects:
-            draw_box_with_label(frame, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax'], obj['name'], obj['score'], obj['area'])
+        for obj in [obj for frame_list in detected_objects.values() for obj in frame_list]:
+        # for obj in detected_objects[frame_time]:
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {obj['clipped']}")
+            cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
+                (obj['region']['xmax'], obj['region']['ymax']), 
+                (0,255,0), 2)
 
         for region in self.regions:
             color = (255,255,255)

@@ -16,22 +16,22 @@ def ReadLabelFile(file_path):
     return ret
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax):    
-    # size is 50% larger than longest edge
-    size = max(xmax-xmin, ymax-ymin)
+    # size is larger than longest edge
+    size = int(max(xmax-xmin, ymax-ymin)*1.5)
     # if the size is too big to fit in the frame
     if size > min(frame_shape[0], frame_shape[1]):
         size = min(frame_shape[0], frame_shape[1])
 
     # x_offset is midpoint of bounding box minus half the size
-    x_offset = int(((xmax-xmin)/2+xmin)-size/2)
+    x_offset = int((xmax-xmin)/2.0+xmin-size/2.0)
     # if outside the image
     if x_offset < 0:
         x_offset = 0
     elif x_offset > (frame_shape[1]-size):
         x_offset = (frame_shape[1]-size)
 
-    # x_offset is midpoint of bounding box minus half the size
-    y_offset = int(((ymax-ymin)/2+ymin)-size/2)
+    # y_offset is midpoint of bounding box minus half the size
+    y_offset = int((ymax-ymin)/2.0+ymin-size/2.0)
     # if outside the image
     if y_offset < 0:
         y_offset = 0
@@ -40,13 +40,44 @@ def calculate_region(frame_shape, xmin, ymin, xmax, ymax):
 
     return (size, x_offset, y_offset)
 
+def compute_intersection_rectangle(box_a, box_b):
+    return {
+        'xmin': max(box_a['xmin'], box_b['xmin']),
+        'ymin': max(box_a['ymin'], box_b['ymin']),
+        'xmax': min(box_a['xmax'], box_b['xmax']),
+        'ymax': min(box_a['ymax'], box_b['ymax'])
+    }
+    
+def compute_intersection_over_union(box_a, box_b):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    intersect = compute_intersection_rectangle(box_a, box_b)
+
+    # compute the area of intersection rectangle
+    inter_area = max(0, intersect['xmax'] - intersect['xmin'] + 1) * max(0, intersect['ymax'] - intersect['ymin'] + 1)
+
+    if inter_area == 0:
+        return 0.0
+    
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    box_a_area = (box_a['xmax'] - box_a['xmin'] + 1) * (box_a['ymax'] - box_a['ymin'] + 1)
+    box_b_area = (box_b['xmax'] - box_b['xmin'] + 1) * (box_b['ymax'] - box_b['ymin'] + 1)
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = inter_area / float(box_a_area + box_b_area - inter_area)
+
+    # return the intersection over union value
+    return iou
+
 # convert shared memory array into numpy array
 def tonumpyarray(mp_arr):
     return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
-def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, score, area):
+def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info):
     color = COLOR_MAP[label]
-    display_text = "{}: {}% {}".format(label,int(score*100),int(area))
+    display_text = "{}: {}".format(label, info)
     cv2.rectangle(frame, (x_min, y_min), 
         (x_max, y_max), 
         color, 2)
