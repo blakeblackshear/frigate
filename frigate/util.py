@@ -17,7 +17,7 @@ def ReadLabelFile(file_path):
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax):    
     # size is larger than longest edge
-    size = int(max(xmax-xmin, ymax-ymin)*1.5)
+    size = int(max(xmax-xmin, ymax-ymin)*2)
     # if the size is too big to fit in the frame
     if size > min(frame_shape[0], frame_shape[1]):
         size = min(frame_shape[0], frame_shape[1])

@@ -31,7 +31,7 @@ class PreppedQueueProcessor(threading.Thread):
             frame = self.prepped_frame_queue.get()
 
             # Actual detection.
-            frame['detected_objects'] = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.4, top_k=5)
+            frame['detected_objects'] = self.engine.DetectWithInputTensor(frame['frame'], threshold=0.2, top_k=5)
             self.fps.update()
             self.avg_inference_speed = (self.avg_inference_speed*9 + self.engine.get_inference_time())/10
 
