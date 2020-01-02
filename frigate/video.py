@@ -116,6 +116,7 @@ class Camera:
         self.detected_objects = defaultdict(lambda: [])
         self.tracked_objects = []
         self.frame_cache = {}
+        self.last_processed_frame = None
         # queue for re-assembling frames in order
         self.frame_queue = queue.Queue()
         # track how many regions have been requested for a frame so we know when a frame is complete
@@ -332,45 +333,11 @@ class Camera:
         return jpg.tobytes()
 
     def get_current_frame_with_objects(self):
-        # lock and make a copy of the current frame
-        with self.frame_lock:
-            frame = self.current_frame.copy()
-            frame_time = self.frame_time.value
-        
+        frame_time = self.last_processed_frame
         if frame_time == self.cached_frame_with_objects['frame_time']:
             return self.cached_frame_with_objects['frame_bytes']
 
-        # make a copy of the current detected objects
-        detected_objects = self.detected_objects.copy()
-
-        # draw the bounding boxes on the screen
-        for obj in [obj for frame_list in detected_objects.values() for obj in frame_list]:
-        # for obj in detected_objects[frame_time]:
-            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {obj['clipped']}")
-            cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
-                (obj['region']['xmax'], obj['region']['ymax']), 
-                (0,255,0), 2)
-
-        for region in self.regions:
-            color = (255,255,255)
-            cv2.rectangle(frame, (region['x_offset'], region['y_offset']), 
-                (region['x_offset']+region['size'], region['y_offset']+region['size']), 
-                color, 2)
-        
-        # print a timestamp
-        time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
-        cv2.putText(frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-        
-        # print fps
-        cv2.putText(frame, str(self.fps.eps())+'FPS', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-
-        # convert to BGR
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-        # encode the image into a jpg
-        ret, jpg = cv2.imencode('.jpg', frame)
-
-        frame_bytes = jpg.tobytes()
+        frame_bytes = self.frame_with_objects(frame_time)
 
         self.cached_frame_with_objects = {
             'frame_bytes': frame_bytes,
