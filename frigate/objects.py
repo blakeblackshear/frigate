@@ -133,9 +133,6 @@ class DetectedObjectsProcessor(threading.Thread):
                     # print(f"{frame['frame_time']} no remaining regions")
                     self.camera.finished_frame_queue.put(frame['frame_time'])
 
-            with self.camera.objects_parsed:
-                self.camera.objects_parsed.notify_all()
-
 # Thread that checks finished frames for clipped objects and sends back
 # for processing if needed
 class RegionRefiner(threading.Thread):
@@ -166,7 +163,7 @@ class RegionRefiner(threading.Thread):
             self.camera.detected_objects[frame_time] = [obj for obj in self.camera.detected_objects[frame_time] if obj['clipped'] == False]
 
             # print(f"{frame_time} found {len(object_groups)} groups")
-            clipped_object = False
+            look_again = False
             # find the largest unclipped object in each group
             for group in object_groups:
                 unclipped_objects = [obj for obj in group if obj['clipped'] == False]
@@ -198,10 +195,12 @@ class RegionRefiner(threading.Thread):
                         'y_offset': y_offset
                     })
                     self.camera.dynamic_region_fps.update()
-                    clipped_object = True
+                    look_again = True
+                # TODO: zoom in on unclipped low confidence objects
+                # else: ...
 
-            # if we found a clipped object, then this frame is not ready for processing
-            if clipped_object:
+            # if we are looking again, then this frame is not ready for processing
+            if look_again:
                 continue
 
             # dedupe the unclipped objects
@@ -220,14 +219,19 @@ class RegionRefiner(threading.Thread):
                 else:
                     if deduped_objects[duplicate]['score'] < obj['score']:
                         deduped_objects[duplicate] = obj
+
             self.camera.detected_objects[frame_time] = deduped_objects
+
+            with self.camera.objects_parsed:
+                self.camera.objects_parsed.notify_all()
             
             # print(f"{frame_time} is actually finished")
 
             # keep adding frames to the refined queue as long as they are finished
             with self.camera.regions_in_process_lock:
                 while self.camera.frame_queue.qsize() > 0 and self.camera.frame_queue.queue[0] not in self.camera.regions_in_process:
-                    self.camera.refined_frame_queue.put(self.camera.frame_queue.get())
+                    self.camera.last_processed_frame = self.camera.frame_queue.get()
+                    self.camera.refined_frame_queue.put(self.camera.last_processed_frame)
              
     def has_overlap(self, new_obj, obj, overlap=.7):
         # compute intersection rectangle with existing object and new objects region
@@ -265,9 +269,9 @@ class ObjectTracker(threading.Thread):
         while True:
             # TODO: track objects
             frame_time = self.camera.refined_frame_queue.get()
-            f = open(f"/debug/{str(frame_time)}.jpg", 'wb')
-            f.write(self.camera.frame_with_objects(frame_time))
-            f.close()
+            # f = open(f"/debug/{str(frame_time)}.jpg", 'wb')
+            # f.write(self.camera.frame_with_objects(frame_time))
+            # f.close()
 
 
     def register(self, index, obj):
