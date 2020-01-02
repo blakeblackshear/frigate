@@ -2,6 +2,7 @@ import json
 import cv2
 import threading
 from collections import Counter, defaultdict
+import subprocess as sp
 
 class MqttObjectPublisher(threading.Thread):
     def __init__(self, client, topic_prefix, objects_parsed, detected_objects, best_frames):
@@ -45,3 +46,27 @@ class MqttObjectPublisher(threading.Thread):
             for obj_name in expired_objects:
                 current_object_status[obj_name] = 'OFF'
                 self.client.publish(self.topic_prefix+'/'+obj_name, 'OFF', retain=False)
+                        
+class MqttObjectConsumer(threading.Thread):
+    def __init__(self, client, topic_prefix, listen_queue, cameras):
+        threading.Thread.__init__(self)
+        self.client = client
+        self.topic_prefix = topic_prefix
+        self.listen_queue = listen_queue
+        self.cameras = cameras
+        
+    def run(self):
+        while True:
+            # Now we want to see if there are more messages and then process them
+            item = self.listen_queue.get()
+            topic = item['topic']
+            payload = item['payload']
+            if topic == ("%s/detection" % self.topic_prefix):
+                if payload == 'enable':
+                    for camera in self.cameras:
+                        camera.start_or_restart_capture()
+                elif payload == 'disable':
+                    for camera in self.cameras:
+                        camera.disable_capture()
+                        camera.watchdog.disable = True
+                        camera.watchdog = None

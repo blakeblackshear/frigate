@@ -95,6 +95,9 @@ automation:
                 caption: A person was detected.
 ```
 
+## Disabling Detection
+You can disable or enable detection via mqtt by publishing to `topic_prefix/detection` then you want to send a payload of either 'enable' or 'disable'.
+
 ## Tips
 - Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed
 
@@ -111,7 +114,7 @@ automation:
 - [ ] See if motion detection is even worth running
 - [ ] Scan for people across entire image rather than specfic regions
 - [ ] Dynamically resize detection area and follow people
-- [ ] Add ability to turn detection on and off via MQTT
+- [x] Add ability to turn detection on and off via MQTT
 - [ ] Output movie clips of people for notifications, etc.
 - [ ] Integrate with homeassistant push camera
 - [ ] Merge bounding boxes that span multiple regions
