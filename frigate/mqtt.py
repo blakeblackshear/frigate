@@ -22,7 +22,6 @@ class MqttObjectPublisher(threading.Thread):
 
             # make a copy of detected objects
             detected_objects = self._detected_objects.copy()
-
             # total up all scores by object type
             obj_counter = Counter()
             for obj in detected_objects:
