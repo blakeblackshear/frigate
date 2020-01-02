@@ -122,33 +122,15 @@ class DetectedObjectsProcessor(threading.Thread):
                 #     if self.camera.mask[y_location][x_location] == [0]:
                 #         continue
 
-                # see if the current object is a duplicate
-                # TODO: still need to decide which copy to keep
-                obj['duplicate'] = False
-                for existing_obj in self.camera.detected_objects[frame['frame_time']]:
-                    # compute intersection rectangle with existing object and new objects region
-                    existing_obj_current_region = compute_intersection_rectangle(existing_obj['box'], obj['region'])
-
-                    # compute intersection rectangle with new object and existing objects region
-                    new_obj_existing_region = compute_intersection_rectangle(obj['box'], existing_obj['region'])
-
-                    # compute iou for the two intersection rectangles that were just computed
-                    iou = compute_intersection_over_union(existing_obj_current_region, new_obj_existing_region)
-
-                    # if intersection is greater than ?, flag as duplicate
-                    if iou > .7:
-                        obj['duplicate'] = True
-                        break
-
                 self.camera.detected_objects[frame['frame_time']].append(obj)
             
             with self.camera.regions_in_process_lock:
                 self.camera.regions_in_process[frame['frame_time']] -= 1
-                # print(f"Remaining regions for {frame['frame_time']}: {self.camera.regions_in_process[frame['frame_time']]}")
+                # print(f"{frame['frame_time']} remaining regions {self.camera.regions_in_process[frame['frame_time']]}")
 
                 if self.camera.regions_in_process[frame['frame_time']] == 0:
                     del self.camera.regions_in_process[frame['frame_time']]
-                    # print('Finished frame: ', frame['frame_time'])
+                    # print(f"{frame['frame_time']} no remaining regions")
                     self.camera.finished_frame_queue.put(frame['frame_time'])
 
             with self.camera.objects_parsed:
@@ -183,9 +165,8 @@ class RegionRefiner(threading.Thread):
             # just keep the unclipped objects
             self.camera.detected_objects[frame_time] = [obj for obj in self.camera.detected_objects[frame_time] if obj['clipped'] == False]
 
-            # print(f"{frame_time} found {len(object_groups)} groups {object_groups}")
+            # print(f"{frame_time} found {len(object_groups)} groups")
             clipped_object = False
-            # deduped_objects = []
             # find the largest unclipped object in each group
             for group in object_groups:
                 unclipped_objects = [obj for obj in group if obj['clipped'] == False]
@@ -219,23 +200,36 @@ class RegionRefiner(threading.Thread):
                     self.camera.dynamic_region_fps.update()
                     clipped_object = True
 
-                # add the largest unclipped object
-                # TODO: this makes no sense
-                # deduped_objects.append(max(unclipped_objects, key=lambda obj: obj['area']))
-
             # if we found a clipped object, then this frame is not ready for processing
             if clipped_object:
                 continue
+
+            # dedupe the unclipped objects
+            deduped_objects = []
+            for obj in self.camera.detected_objects[frame_time]:
+                duplicate = None
+                for index, deduped_obj in enumerate(deduped_objects):
+                    # if the IOU is more than 0.7, consider it a duplicate
+                    if self.has_overlap(obj, deduped_obj, .5):
+                        duplicate = index
+                        break
+                
+                # get the higher scoring object
+                if duplicate is None:
+                    deduped_objects.append(obj)
+                else:
+                    if deduped_objects[duplicate]['score'] < obj['score']:
+                        deduped_objects[duplicate] = obj
+            self.camera.detected_objects[frame_time] = deduped_objects
             
             # print(f"{frame_time} is actually finished")
-            # self.camera.detected_objects[frame_time] = deduped_objects
 
             # keep adding frames to the refined queue as long as they are finished
             with self.camera.regions_in_process_lock:
                 while self.camera.frame_queue.qsize() > 0 and self.camera.frame_queue.queue[0] not in self.camera.regions_in_process:
                     self.camera.refined_frame_queue.put(self.camera.frame_queue.get())
              
-    def has_overlap(self, new_obj, obj, overlap=0):
+    def has_overlap(self, new_obj, obj, overlap=.7):
         # compute intersection rectangle with existing object and new objects region
         existing_obj_current_region = compute_intersection_rectangle(obj['box'], new_obj['region'])
 
