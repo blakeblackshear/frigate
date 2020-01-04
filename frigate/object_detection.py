@@ -5,7 +5,8 @@ import threading
 import prctl
 import numpy as np
 from edgetpu.detection.engine import DetectionEngine
-from . util import tonumpyarray, LABELS, PATH_TO_CKPT
+
+from frigate.util import tonumpyarray, LABELS, PATH_TO_CKPT
 
 class PreppedQueueProcessor(threading.Thread):
     def __init__(self, cameras, prepped_frame_queue, fps, queue_full):
