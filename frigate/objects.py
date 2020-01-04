@@ -6,7 +6,7 @@ import prctl
 import itertools
 import numpy as np
 from scipy.spatial import distance as dist
-from . util import draw_box_with_label, LABELS, compute_intersection_rectangle, compute_intersection_over_union, calculate_region
+from frigate.util import draw_box_with_label, LABELS, compute_intersection_rectangle, compute_intersection_over_union, calculate_region
 
 class ObjectCleaner(threading.Thread):
     def __init__(self, objects_parsed, detected_objects):

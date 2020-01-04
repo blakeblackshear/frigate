@@ -11,10 +11,10 @@ import numpy as np
 import prctl
 import itertools
 from collections import defaultdict
-from . util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
-from . object_detection import RegionPrepper, RegionRequester
-from . objects import ObjectCleaner, BestFrames, DetectedObjectsProcessor, RegionRefiner, ObjectTracker
-from . mqtt import MqttObjectPublisher
+from frigate.util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
+from frigate.object_detection import RegionPrepper, RegionRequester
+from frigate.objects import ObjectCleaner, BestFrames, DetectedObjectsProcessor, RegionRefiner, ObjectTracker
+from frigate.mqtt import MqttObjectPublisher
 
 # Stores 2 seconds worth of frames so they can be used for other threads
 class FrameTracker(threading.Thread):
