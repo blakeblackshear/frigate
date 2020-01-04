@@ -90,38 +90,6 @@ class DetectedObjectsProcessor(threading.Thread):
                 # Compute the area
                 obj['area'] = (obj['box']['xmax']-obj['box']['xmin'])*(obj['box']['ymax']-obj['box']['ymin'])
 
-                # find the matching region
-                # region = self.camera.regions[frame['region_id']]
-                
-
-                # object_name = obj['name']
-                # TODO: move all this to wherever we manage "tracked objects"
-                # if object_name in region['objects']:
-                #     obj_settings = region['objects'][object_name]
-
-                #     # if the min area is larger than the
-                #     # detected object, don't add it to detected objects
-                #     if obj_settings.get('min_area',-1) > obj['area']:
-                #         continue
-                    
-                #     # if the detected object is larger than the
-                #     # max area, don't add it to detected objects
-                #     if obj_settings.get('max_area', region['size']**2) < obj['area']:
-                #         continue
-
-                #     # if the score is lower than the threshold, skip
-                #     if obj_settings.get('threshold', 0) > obj['score']:
-                #         continue
-                
-                #     # compute the coordinates of the object and make sure
-                #     # the location isnt outside the bounds of the image (can happen from rounding)
-                #     y_location = min(int(obj['ymax']), len(self.mask)-1)
-                #     x_location = min(int((obj['xmax']-obj['xmin'])/2.0)+obj['xmin'], len(self.mask[0])-1)
-
-                #     # if the object is in a masked location, don't add it to detected objects
-                #     if self.camera.mask[y_location][x_location] == [0]:
-                #         continue
-
                 self.camera.detected_objects[frame['frame_time']].append(obj)
             
             with self.camera.regions_in_process_lock:
@@ -143,47 +111,38 @@ class RegionRefiner(threading.Thread):
     def run(self):
         prctl.set_name(self.__class__.__name__)
         while True:
-            # TODO: I need to process the frames in order for tracking...
             frame_time = self.camera.finished_frame_queue.get()
 
+            detected_objects = self.camera.detected_objects[frame_time].copy()
             # print(f"{frame_time} finished")
 
-            object_groups = []
+            # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+            boxes = [(o['box']['xmin'], o['box']['ymin'], o['box']['xmax']-o['box']['xmin'], o['box']['ymax']-o['box']['ymin'])
+                for o in detected_objects]
+            confidences = [o['score'] for o in detected_objects]
+            idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
-            # group all the duplicate objects together
-            # TODO: should I be grouping by object type too? also, the order can determine how well they group...
-            for new_obj in self.camera.detected_objects[frame_time]:
-                matching_group = self.find_group(new_obj, object_groups)
-                if matching_group is None:
-                    object_groups.append([new_obj])
-                else:
-                    object_groups[matching_group].append(new_obj)
-            
-            # just keep the unclipped objects
-            self.camera.detected_objects[frame_time] = [obj for obj in self.camera.detected_objects[frame_time] if obj['clipped'] == False]
+            # print(f"{frame_time} - NMS reduced objects from {len(detected_objects)} to {len(idxs)}")
 
-            # print(f"{frame_time} found {len(object_groups)} groups")
             look_again = False
-            # find the largest unclipped object in each group
-            for group in object_groups:
-                unclipped_objects = [obj for obj in group if obj['clipped'] == False]
-                # if no unclipped objects, we need to look again
-                if len(unclipped_objects) == 0:
-                    # print(f"{frame_time} no unclipped objects in group")
+            # get selected objects
+            selected_objects = []
+            for index in idxs:
+                obj = detected_objects[index[0]]
+                selected_objects.append(obj)
+                if obj['clipped']:
+                    box = obj['box']
+                    # calculate a new region that will hopefully get the entire object
+                    (size, x_offset, y_offset) = calculate_region(self.camera.frame_shape, 
+                        box['xmin'], box['ymin'],
+                        box['xmax'], box['ymax'])
+                    # print(f"{frame_time} new region: {size} {x_offset} {y_offset}")
+
                     with self.camera.regions_in_process_lock:
                         if not frame_time in self.camera.regions_in_process:
                             self.camera.regions_in_process[frame_time] = 1
                         else:
                             self.camera.regions_in_process[frame_time] += 1
-                    xmin = min([obj['box']['xmin'] for obj in group])
-                    ymin = min([obj['box']['ymin'] for obj in group])
-                    xmax = max([obj['box']['xmax'] for obj in group])
-                    ymax = max([obj['box']['ymax'] for obj in group])
-                    # calculate a new region that will hopefully get the entire object
-                    (size, x_offset, y_offset) = calculate_region(self.camera.frame_shape, 
-                        xmin, ymin,
-                        xmax, ymax)
-                    # print(f"{frame_time} new region: {size} {x_offset} {y_offset}")
 
                     # add it to the queue
                     self.camera.resize_queue.put({
@@ -201,26 +160,14 @@ class RegionRefiner(threading.Thread):
 
             # if we are looking again, then this frame is not ready for processing
             if look_again:
+                # remove the clipped objects
+                self.camera.detected_objects[frame_time] = [o for o in selected_objects if not o['clipped']]
                 continue
 
-            # dedupe the unclipped objects
-            deduped_objects = []
-            for obj in self.camera.detected_objects[frame_time]:
-                duplicate = None
-                for index, deduped_obj in enumerate(deduped_objects):
-                    # if the IOU is more than 0.7, consider it a duplicate
-                    if self.has_overlap(obj, deduped_obj, .5):
-                        duplicate = index
-                        break
-                
-                # get the higher scoring object
-                if duplicate is None:
-                    deduped_objects.append(obj)
-                else:
-                    if deduped_objects[duplicate]['score'] < obj['score']:
-                        deduped_objects[duplicate] = obj
+            # filter objects based on camera settings
+            selected_objects = [o for o in selected_objects if not self.filtered(o)]
 
-            self.camera.detected_objects[frame_time] = deduped_objects
+            self.camera.detected_objects[frame_time] = selected_objects
 
             with self.camera.objects_parsed:
                 self.camera.objects_parsed.notify_all()
@@ -232,6 +179,37 @@ class RegionRefiner(threading.Thread):
                 while self.camera.frame_queue.qsize() > 0 and self.camera.frame_queue.queue[0] not in self.camera.regions_in_process:
                     self.camera.last_processed_frame = self.camera.frame_queue.get()
                     self.camera.refined_frame_queue.put(self.camera.last_processed_frame)
+
+    def filtered(self, obj):
+        object_name = obj['name']
+        
+        if object_name in self.camera.object_filters:
+            obj_settings = self.camera.object_filters[object_name]
+
+            # if the min area is larger than the
+            # detected object, don't add it to detected objects
+            if obj_settings.get('min_area',-1) > obj['area']:
+                return True
+            
+            # if the detected object is larger than the
+            # max area, don't add it to detected objects
+            if obj_settings.get('max_area', self.camera.frame_shape[0]*self.camera.frame_shape[1]) < obj['area']:
+                return True
+
+            # if the score is lower than the threshold, skip
+            if obj_settings.get('threshold', 0) > obj['score']:
+                return True
+        
+            # compute the coordinates of the object and make sure
+            # the location isnt outside the bounds of the image (can happen from rounding)
+            y_location = min(int(obj['ymax']), len(self.camera.mask)-1)
+            x_location = min(int((obj['xmax']-obj['xmin'])/2.0)+obj['xmin'], len(self.camera.mask[0])-1)
+
+            # if the object is in a masked location, don't add it to detected objects
+            if self.camera.mask[y_location][x_location] == [0]:
+                return True
+            
+            return False
              
     def has_overlap(self, new_obj, obj, overlap=.7):
         # compute intersection rectangle with existing object and new objects region
