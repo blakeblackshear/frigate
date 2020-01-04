@@ -172,17 +172,21 @@ class Camera:
         self.capture_thread = None
         self.fps = EventsPerSecond()
 
-        # for each region, merge the object config
-        self.detection_prep_threads = []
-        for region in self.config['regions']:
-            region_objects = region.get('objects', {})
-            # build objects config for region
-            objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys(), region_objects.keys())
-            merged_objects_config = defaultdict(lambda: {})
-            for obj in objects_with_config:
-                merged_objects_config[obj] = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {}), **region_objects.get(obj, {})}
+        # merge object filter config
+        objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys())
+        for obj in objects_with_config:
+            self.object_filters = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {})}
+
+        # # for each region, merge the object config
+        # for region in self.config['regions']:
+        #     region_objects = region.get('objects', {})
+        #     # build objects config for region
+        #     objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys(), region_objects.keys())
+        #     merged_objects_config = defaultdict(lambda: {})
+        #     for obj in objects_with_config:
+        #         merged_objects_config[obj] = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {}), **region_objects.get(obj, {})}
             
-            region['objects'] = merged_objects_config
+        #     region['objects'] = merged_objects_config
 
         # start a thread to queue resize requests for regions
         self.region_requester = RegionRequester(self)
@@ -275,9 +279,6 @@ class Camera:
     
     def start(self):
         self.start_or_restart_capture()
-        # start the object detection prep threads
-        for detection_prep_thread in self.detection_prep_threads:
-            detection_prep_thread.start()
         self.watchdog.start()
     
     def join(self):
