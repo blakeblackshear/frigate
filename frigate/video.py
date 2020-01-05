@@ -114,7 +114,6 @@ class Camera:
         self.name = name
         self.config = config
         self.detected_objects = defaultdict(lambda: [])
-        self.tracked_objects = []
         self.frame_cache = {}
         self.last_processed_frame = None
         # queue for re-assembling frames in order
@@ -172,21 +171,13 @@ class Camera:
         self.capture_thread = None
         self.fps = EventsPerSecond()
 
-        # merge object filter config
-        objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys())
-        for obj in objects_with_config:
-            self.object_filters = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {})}
+        # combine tracked objects lists
+        self.objects_to_track = set().union(global_objects_config.get('track', ['person', 'car', 'truck']), camera_objects_config.get('track', []))
 
-        # # for each region, merge the object config
-        # for region in self.config['regions']:
-        #     region_objects = region.get('objects', {})
-        #     # build objects config for region
-        #     objects_with_config = set().union(global_objects_config.keys(), camera_objects_config.keys(), region_objects.keys())
-        #     merged_objects_config = defaultdict(lambda: {})
-        #     for obj in objects_with_config:
-        #         merged_objects_config[obj] = {**global_objects_config.get(obj,{}), **camera_objects_config.get(obj, {}), **region_objects.get(obj, {})}
-            
-        #     region['objects'] = merged_objects_config
+        # merge object filters
+        objects_with_config = set().union(global_objects_config.get('filters', {}).keys(), camera_objects_config.get('filters', {}).keys())
+        for obj in objects_with_config:
+            self.object_filters = {**global_objects_config.get(obj, {}), **camera_objects_config.get(obj, {})}
 
         # start a thread to queue resize requests for regions
         self.region_requester = RegionRequester(self)
@@ -311,12 +302,12 @@ class Camera:
                 color, 2)
 
         # draw the bounding boxes on the screen
-        for obj in self.detected_objects[frame_time]:
+        for id, obj in self.object_tracker.tracked_objects.items():
         # for obj in detected_objects[frame_time]:
             cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
                 (obj['region']['xmax'], obj['region']['ymax']), 
                 (0,255,0), 1)
-            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {obj['clipped']}")
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {id}")
             
         # print a timestamp
         time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")

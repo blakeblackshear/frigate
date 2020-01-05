@@ -6,7 +6,7 @@ import prctl
 import numpy as np
 from edgetpu.detection.engine import DetectionEngine
 
-from frigate.util import tonumpyarray, LABELS, PATH_TO_CKPT
+from frigate.util import tonumpyarray, LABELS, PATH_TO_CKPT, calculate_region
 
 class PreppedQueueProcessor(threading.Thread):
     def __init__(self, cameras, prepped_frame_queue, fps, queue_full):
@@ -57,8 +57,12 @@ class RegionRequester(threading.Thread):
             # make a copy of the frame_time
             frame_time = self.camera.frame_time.value
 
+            # grab the current tracked objects
+            tracked_objects = self.camera.object_tracker.tracked_objects.values()
+
             with self.camera.regions_in_process_lock:
                 self.camera.regions_in_process[frame_time] = len(self.camera.config['regions'])
+                self.camera.regions_in_process[frame_time] += len(tracked_objects)
 
             for index, region in enumerate(self.camera.config['regions']):
                 self.camera.resize_queue.put({
@@ -69,6 +73,24 @@ class RegionRequester(threading.Thread):
                     'x_offset': region['x_offset'],
                     'y_offset': region['y_offset']
                 })
+            
+            # request a region for tracked objects
+            for tracked_object in tracked_objects:
+                box = tracked_object['box']
+                # calculate a new region that will hopefully get the entire object
+                (size, x_offset, y_offset) = calculate_region(self.camera.frame_shape, 
+                    box['xmin'], box['ymin'],
+                    box['xmax'], box['ymax'])
+
+                self.camera.resize_queue.put({
+                    'camera_name': self.camera.name,
+                    'frame_time': frame_time,
+                    'region_id': -1,
+                    'size': size,
+                    'x_offset': x_offset,
+                    'y_offset': y_offset
+                })
+
 
 class RegionPrepper(threading.Thread):
     def __init__(self, frame_cache, resize_request_queue, prepped_frame_queue):
