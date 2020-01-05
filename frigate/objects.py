@@ -152,8 +152,6 @@ class RegionRefiner(threading.Thread):
                     })
                     self.camera.dynamic_region_fps.update()
                     look_again = True
-                # TODO: zoom in on unclipped low confidence objects
-                # else: ...
 
             # if we are looking again, then this frame is not ready for processing
             if look_again:

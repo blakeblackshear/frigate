@@ -14,7 +14,7 @@ flattened_frame = np.expand_dims(frame, axis=0).flatten()
 detection_times = []
 
 for x in range(0, 1000):
-    objects = engine.DetectWithInputTensor(flattened_frame, threshold=0.1, top_k=3)
+    objects = engine.detect_with_input_tensor(flattened_frame, threshold=0.1, top_k=3)
     detection_times.append(engine.get_inference_time())
 
 print("Average inference time: " + str(statistics.mean(detection_times)))
