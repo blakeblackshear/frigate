@@ -18,9 +18,8 @@ from frigate.mqtt import MqttObjectPublisher
 
 # Stores 2 seconds worth of frames so they can be used for other threads
 class FrameTracker(threading.Thread):
-    def __init__(self, shared_frame, frame_time, frame_ready, frame_lock, recent_frames):
+    def __init__(self, frame_time, frame_ready, frame_lock, recent_frames):
         threading.Thread.__init__(self)
-        self.shared_frame = shared_frame
         self.frame_time = frame_time
         self.frame_ready = frame_ready
         self.frame_lock = frame_lock
@@ -94,14 +93,13 @@ class CameraCapture(threading.Thread):
                 continue
 
             with self.camera.frame_lock:
+                # TODO: use frame_queue instead
                 self.camera.frame_time.value = datetime.datetime.now().timestamp()
-                
-                self.camera.current_frame[:] = (
+                self.camera.frame_cache[self.camera.frame_time.value] = (
                     np
                     .frombuffer(raw_image, np.uint8)
                     .reshape(self.camera.frame_shape)
                 )
-                self.camera.frame_cache[self.camera.frame_time.value] = self.camera.current_frame.copy()
                 self.camera.frame_queue.put(self.camera.frame_time.value)
             # Notify with the condition that a new frame is ready
             with self.camera.frame_ready:
@@ -141,8 +139,6 @@ class Camera:
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
 
-        # create a numpy array for the current frame in initialize to zeros
-        self.current_frame = np.zeros(self.frame_shape, np.uint8)
         # create shared value for storing the frame_time
         self.frame_time = mp.Value('d', 0.0)
         # Lock to control access to the frame
@@ -184,7 +180,7 @@ class Camera:
         self.region_requester.start()
 
         # start a thread to cache recent frames for processing
-        self.frame_tracker = FrameTracker(self.current_frame, self.frame_time, 
+        self.frame_tracker = FrameTracker(self.frame_time, 
             self.frame_ready, self.frame_lock, self.frame_cache)
         self.frame_tracker.start()
 
