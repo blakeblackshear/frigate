@@ -8,10 +8,12 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     ffmpeg \
     python3 \
     python3-pip \
+    python3-dev \
+    python3-numpy \
     # python-prctl
     build-essential libcap-dev \
     # pillow-simd
-    zlib1g-dev libjpeg-dev python3-dev\
+    # zlib1g-dev libjpeg-dev \
     # VAAPI drivers for Intel hardware accel
     libva-drm2 libva2 i965-va-driver vainfo \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
@@ -30,13 +32,11 @@ RUN pip3 install -U wheel setuptools
 RUN pip3 install -U \
     opencv-python \
     python-prctl \
-    numpy \
     Flask \
     paho-mqtt \
     PyYAML \
     matplotlib \
-    scipy \
-    pillow-simd
+    scipy
 
 # symlink the model and labels
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite -O mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite --trust-server-names
