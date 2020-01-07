@@ -107,6 +107,21 @@ class CameraCapture(threading.Thread):
 
             self.camera.fps.update()
 
+class VideoWriter(threading.Thread):
+    def __init__(self, camera):
+        threading.Thread.__init__(self)
+        self.camera = camera
+
+    def run(self):
+        prctl.set_name("VideoWriter")
+        while True:
+            frame_time = self.camera.frame_tracked_queue.get()
+            if len(self.camera.detected_objects[frame_time]) == 0:
+                continue
+            f = open(f"/debug/{self.camera.name}-{str(frame_time)}.jpg", 'wb')
+            f.write(self.camera.frame_with_objects(frame_time))
+            f.close()
+
 class Camera:
     def __init__(self, name, ffmpeg_config, global_objects_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
         self.name = name
@@ -122,6 +137,7 @@ class Camera:
         self.regions_in_process_lock = mp.Lock()
         self.finished_frame_queue = queue.Queue()
         self.refined_frame_queue = queue.Queue()
+        self.frame_tracked_queue = queue.Queue()
 
         self.ffmpeg = config.get('ffmpeg', {})
         self.ffmpeg_input = get_ffmpeg_input(self.ffmpeg['input'])
@@ -205,6 +221,10 @@ class Camera:
         # start a thread to track objects
         self.object_tracker = ObjectTracker(self, 10)
         self.object_tracker.start()
+
+        # start a thread to write tracked frames to disk
+        self.video_writer = VideoWriter(self)
+        self.video_writer.start()
 
         # start a thread to publish object scores
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_frames)
