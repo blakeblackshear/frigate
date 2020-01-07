@@ -246,9 +246,7 @@ class ObjectTracker(threading.Thread):
         while True:
             frame_time = self.camera.refined_frame_queue.get()
             self.match_and_update(self.camera.detected_objects[frame_time])
-            # f = open(f"/debug/{str(frame_time)}.jpg", 'wb')
-            # f.write(self.camera.frame_with_objects(frame_time))
-            # f.close()
+            self.camera.frame_tracked_queue.put(frame_time)
 
     def register(self, index, obj):
         id = f"{str(obj['frame_time'])}-{index}"
