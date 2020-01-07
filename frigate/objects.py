@@ -113,45 +113,49 @@ class RegionRefiner(threading.Thread):
             detected_objects = self.camera.detected_objects[frame_time].copy()
             # print(f"{frame_time} finished")
 
-            # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-            boxes = [(o['box']['xmin'], o['box']['ymin'], o['box']['xmax']-o['box']['xmin'], o['box']['ymax']-o['box']['ymin'])
-                for o in detected_objects]
-            confidences = [o['score'] for o in detected_objects]
-            idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-            # print(f"{frame_time} - NMS reduced objects from {len(detected_objects)} to {len(idxs)}")
+            detected_object_groups = defaultdict(lambda: []))
+            # group by name
+            for obj in detected_objects:
+                detected_object_groups[obj['name']].append(obj)
 
             look_again = False
-            # get selected objects
             selected_objects = []
-            for index in idxs:
-                obj = detected_objects[index[0]]
-                selected_objects.append(obj)
-                if obj['clipped']:
-                    box = obj['box']
-                    # calculate a new region that will hopefully get the entire object
-                    (size, x_offset, y_offset) = calculate_region(self.camera.frame_shape, 
-                        box['xmin'], box['ymin'],
-                        box['xmax'], box['ymax'])
-                    # print(f"{frame_time} new region: {size} {x_offset} {y_offset}")
+            for name, group in detected_object_groups.items():
 
-                    with self.camera.regions_in_process_lock:
-                        if not frame_time in self.camera.regions_in_process:
-                            self.camera.regions_in_process[frame_time] = 1
-                        else:
-                            self.camera.regions_in_process[frame_time] += 1
+                # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                boxes = [(o['box']['xmin'], o['box']['ymin'], o['box']['xmax']-o['box']['xmin'], o['box']['ymax']-o['box']['ymin'])
+                    for o in detected_objects]
+                confidences = [o['score'] for o in detected_objects]
+                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
-                    # add it to the queue
-                    self.camera.resize_queue.put({
-                        'camera_name': self.camera.name,
-                        'frame_time': frame_time,
-                        'region_id': -1,
-                        'size': size,
-                        'x_offset': x_offset,
-                        'y_offset': y_offset
-                    })
-                    self.camera.dynamic_region_fps.update()
-                    look_again = True
+                for index in idxs:
+                    obj = group[index[0]]
+                    selected_objects.append(obj)
+                    if obj['clipped']:
+                        box = obj['box']
+                        # calculate a new region that will hopefully get the entire object
+                        (size, x_offset, y_offset) = calculate_region(self.camera.frame_shape, 
+                            box['xmin'], box['ymin'],
+                            box['xmax'], box['ymax'])
+                        # print(f"{frame_time} new region: {size} {x_offset} {y_offset}")
+
+                        with self.camera.regions_in_process_lock:
+                            if not frame_time in self.camera.regions_in_process:
+                                self.camera.regions_in_process[frame_time] = 1
+                            else:
+                                self.camera.regions_in_process[frame_time] += 1
+
+                        # add it to the queue
+                        self.camera.resize_queue.put({
+                            'camera_name': self.camera.name,
+                            'frame_time': frame_time,
+                            'region_id': -1,
+                            'size': size,
+                            'x_offset': x_offset,
+                            'y_offset': y_offset
+                        })
+                        self.camera.dynamic_region_fps.update()
+                        look_again = True
 
             # if we are looking again, then this frame is not ready for processing
             if look_again:
