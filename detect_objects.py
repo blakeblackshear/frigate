@@ -127,6 +127,7 @@ def main():
             best_frame = cameras[camera_name].get_best(label)
             if best_frame is None:
                 best_frame = np.zeros((720,1280,3), np.uint8)
+            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
             ret, jpg = cv2.imencode('.jpg', best_frame)
             response = make_response(jpg.tobytes())
             response.headers['Content-Type'] = 'image/jpg'
