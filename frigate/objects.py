@@ -258,11 +258,7 @@ class ObjectTracker(threading.Thread):
         del self.tracked_objects[id]
     
     def update(self, id, new_obj):
-        self.tracked_objects[id]['centroid'] = new_obj['centroid']
-        self.tracked_objects[id]['box'] = new_obj['box']
-        self.tracked_objects[id]['region'] = new_obj['region']
-        self.tracked_objects[id]['score'] = new_obj['score']
-        self.tracked_objects[id]['name'] = new_obj['name']
+        self.tracked_objects[id].update(new_obj)
         # TODO: am i missing anything? history?  
 
     def match_and_update(self, new_objects):
