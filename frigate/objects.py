@@ -5,6 +5,7 @@ import cv2
 import prctl
 import itertools
 import numpy as np
+from collections import defaultdict
 from scipy.spatial import distance as dist
 from frigate.util import draw_box_with_label, LABELS, compute_intersection_rectangle, compute_intersection_over_union, calculate_region
 
@@ -113,19 +114,19 @@ class RegionRefiner(threading.Thread):
             detected_objects = self.camera.detected_objects[frame_time].copy()
             # print(f"{frame_time} finished")
 
-            detected_object_groups = defaultdict(lambda: []))
+            detected_object_groups = defaultdict(lambda: [])
             # group by name
             for obj in detected_objects:
                 detected_object_groups[obj['name']].append(obj)
 
             look_again = False
             selected_objects = []
-            for name, group in detected_object_groups.items():
+            for group in detected_object_groups.values():
 
                 # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                 boxes = [(o['box']['xmin'], o['box']['ymin'], o['box']['xmax']-o['box']['xmin'], o['box']['ymax']-o['box']['ymin'])
-                    for o in detected_objects]
-                confidences = [o['score'] for o in detected_objects]
+                    for o in group]
+                confidences = [o['score'] for o in group]
                 idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
                 for index in idxs:
