@@ -187,9 +187,12 @@ class Camera:
         self.objects_to_track = set().union(global_objects_config.get('track', ['person', 'car', 'truck']), camera_objects_config.get('track', []))
 
         # merge object filters
-        objects_with_config = set().union(global_objects_config.get('filters', {}).keys(), camera_objects_config.get('filters', {}).keys())
+        global_object_filters = global_objects_config.get('filters', {})
+        camera_object_filters = camera_objects_config.get('filters', {})
+        objects_with_config = set().union(global_object_filters.keys(), camera_object_filters.keys())
+        self.object_filters = {}
         for obj in objects_with_config:
-            self.object_filters = {**global_objects_config.get(obj, {}), **camera_objects_config.get(obj, {})}
+            self.object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
 
         # start a thread to queue resize requests for regions
         self.region_requester = RegionRequester(self)
