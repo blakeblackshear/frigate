@@ -251,6 +251,7 @@ class ObjectTracker(threading.Thread):
 
     def register(self, index, obj):
         id = f"{str(obj['frame_time'])}-{index}"
+        obj['id'] = id
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
@@ -280,96 +281,106 @@ class ObjectTracker(threading.Thread):
             # return early as there are no centroids or tracking info
             # to update
             return
-
-        # compute centroids
+            
+        # group by name
+        new_object_groups = defaultdict(lambda: [])
         for obj in new_objects:
-            centroid_x = int((obj['box']['xmin']+obj['box']['xmax']) / 2.0)
-            centroid_y = int((obj['box']['ymin']+obj['box']['ymax']) / 2.0)
-            obj['centroid'] = (centroid_x, centroid_y)
-
-        if len(self.tracked_objects) == 0:
-            for index, obj in enumerate(new_objects):
-                self.register(index, obj)
-            return
+            new_object_groups[obj['name']].append(obj)
         
-        new_centroids = np.array([o['centroid'] for o in new_objects])
-        current_ids = list(self.tracked_objects.keys())
-        current_centroids = np.array([o['centroid'] for o in self.tracked_objects.values()])
+        # track objects for each label type
+        # TODO: this is going to miss deregistering objects that are not in the new groups
+        for label, group in new_object_groups.items():
+            current_objects = [o for o in self.tracked_objects.values() if o['name'] == label]
+            current_ids = [o['id'] for o in current_objects]
+            current_centroids = np.array([o['centroid'] for o in current_objects])
 
-        # compute the distance between each pair of tracked
-        # centroids and new centroids, respectively -- our
-        # goal will be to match each new centroid to an existing
-        # object centroid
-        D = dist.cdist(current_centroids, new_centroids)
+            # compute centroids
+            for obj in group:
+                centroid_x = int((obj['box']['xmin']+obj['box']['xmax']) / 2.0)
+                centroid_y = int((obj['box']['ymin']+obj['box']['ymax']) / 2.0)
+                obj['centroid'] = (centroid_x, centroid_y)
 
-        # in order to perform this matching we must (1) find the
-        # smallest value in each row and then (2) sort the row
-        # indexes based on their minimum values so that the row
-        # with the smallest value is at the *front* of the index
-        # list
-        rows = D.min(axis=1).argsort()
+            if len(current_objects) == 0:
+                for index, obj in enumerate(group):
+                    self.register(index, obj)
+                return
+            
+            new_centroids = np.array([o['centroid'] for o in group])
 
-        # next, we perform a similar process on the columns by
-        # finding the smallest value in each column and then
-        # sorting using the previously computed row index list
-        cols = D.argmin(axis=1)[rows]
+            # compute the distance between each pair of tracked
+            # centroids and new centroids, respectively -- our
+            # goal will be to match each new centroid to an existing
+            # object centroid
+            D = dist.cdist(current_centroids, new_centroids)
 
-        # in order to determine if we need to update, register,
-        # or deregister an object we need to keep track of which
-        # of the rows and column indexes we have already examined
-        usedRows = set()
-        usedCols = set()
+            # in order to perform this matching we must (1) find the
+            # smallest value in each row and then (2) sort the row
+            # indexes based on their minimum values so that the row
+            # with the smallest value is at the *front* of the index
+            # list
+            rows = D.min(axis=1).argsort()
 
-        # loop over the combination of the (row, column) index
-        # tuples
-        for (row, col) in zip(rows, cols):
-            # if we have already examined either the row or
-            # column value before, ignore it
-            # val
-            if row in usedRows or col in usedCols:
-                continue
+            # next, we perform a similar process on the columns by
+            # finding the smallest value in each column and then
+            # sorting using the previously computed row index list
+            cols = D.argmin(axis=1)[rows]
 
-            # otherwise, grab the object ID for the current row,
-            # set its new centroid, and reset the disappeared
-            # counter
-            objectID = current_ids[row]
-            self.update(objectID, new_objects[col])
-            self.disappeared[objectID] = 0
+            # in order to determine if we need to update, register,
+            # or deregister an object we need to keep track of which
+            # of the rows and column indexes we have already examined
+            usedRows = set()
+            usedCols = set()
 
-            # indicate that we have examined each of the row and
-            # column indexes, respectively
-            usedRows.add(row)
-            usedCols.add(col)
+            # loop over the combination of the (row, column) index
+            # tuples
+            for (row, col) in zip(rows, cols):
+                # if we have already examined either the row or
+                # column value before, ignore it
+                # val
+                if row in usedRows or col in usedCols:
+                    continue
 
-        # compute both the row and column index we have NOT yet
-        # examined
-        unusedRows = set(range(0, D.shape[0])).difference(usedRows)
-        unusedCols = set(range(0, D.shape[1])).difference(usedCols)
-
-        # in the event that the number of object centroids is
-        # equal or greater than the number of input centroids
-        # we need to check and see if some of these objects have
-        # potentially disappeared
-        if D.shape[0] >= D.shape[1]:
-            # loop over the unused row indexes
-            for row in unusedRows:
-                # grab the object ID for the corresponding row
-                # index and increment the disappeared counter
+                # otherwise, grab the object ID for the current row,
+                # set its new centroid, and reset the disappeared
+                # counter
                 objectID = current_ids[row]
-                self.disappeared[objectID] += 1
+                self.update(objectID, new_objects[col])
+                self.disappeared[objectID] = 0
 
-                # check to see if the number of consecutive
-                # frames the object has been marked "disappeared"
-                # for warrants deregistering the object
-                if self.disappeared[objectID] > self.max_disappeared:
-                    self.deregister(objectID)
+                # indicate that we have examined each of the row and
+                # column indexes, respectively
+                usedRows.add(row)
+                usedCols.add(col)
 
-        # otherwise, if the number of input centroids is greater
-        # than the number of existing object centroids we need to
-        # register each new input centroid as a trackable object
-        else:
-            for col in unusedCols:
-                self.register(col, new_objects[col])
+            # compute both the row and column index we have NOT yet
+            # examined
+            unusedRows = set(range(0, D.shape[0])).difference(usedRows)
+            unusedCols = set(range(0, D.shape[1])).difference(usedCols)
+
+            # in the event that the number of object centroids is
+            # equal or greater than the number of input centroids
+            # we need to check and see if some of these objects have
+            # potentially disappeared
+            if D.shape[0] >= D.shape[1]:
+                # loop over the unused row indexes
+                for row in unusedRows:
+                    # grab the object ID for the corresponding row
+                    # index and increment the disappeared counter
+                    objectID = current_ids[row]
+                    self.disappeared[objectID] += 1
+
+                    # check to see if the number of consecutive
+                    # frames the object has been marked "disappeared"
+                    # for warrants deregistering the object
+                    if self.disappeared[objectID] > self.max_disappeared:
+                        self.deregister(objectID)
+
+            # otherwise, if the number of input centroids is greater
+            # than the number of existing object centroids we need to
+            # register each new input centroid as a trackable object
+            else:
+                for col in unusedCols:
+                    self.register(col, new_objects[col])
 
 # Maintains the frame and object with the highest score
 class BestFrames(threading.Thread):
