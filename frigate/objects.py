@@ -114,8 +114,8 @@ class RegionRefiner(threading.Thread):
             detected_objects = self.camera.detected_objects[frame_time].copy()
             # print(f"{frame_time} finished")
 
-            detected_object_groups = defaultdict(lambda: [])
             # group by name
+            detected_object_groups = defaultdict(lambda: [])
             for obj in detected_objects:
                 detected_object_groups[obj['name']].append(obj)
 
@@ -202,8 +202,8 @@ class RegionRefiner(threading.Thread):
         
             # compute the coordinates of the object and make sure
             # the location isnt outside the bounds of the image (can happen from rounding)
-            y_location = min(int(obj['ymax']), len(self.camera.mask)-1)
-            x_location = min(int((obj['xmax']-obj['xmin'])/2.0)+obj['xmin'], len(self.camera.mask[0])-1)
+            y_location = min(int(obj['box']['ymax']), len(self.camera.mask)-1)
+            x_location = min(int((obj['box']['xmax']-obj['box']['xmin'])/2.0)+obj['box']['xmin'], len(self.camera.mask[0])-1)
 
             # if the object is in a masked location, don't add it to detected objects
             if self.camera.mask[y_location][x_location] == [0]:
