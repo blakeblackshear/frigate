@@ -58,7 +58,7 @@ class RegionRequester(threading.Thread):
             frame_time = self.camera.frame_time.value
 
             # grab the current tracked objects
-            tracked_objects = self.camera.object_tracker.tracked_objects.values()
+            tracked_objects = self.camera.object_tracker.tracked_objects.values().copy()
 
             with self.camera.regions_in_process_lock:
                 self.camera.regions_in_process[frame_time] = len(self.camera.config['regions'])
