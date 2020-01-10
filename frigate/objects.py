@@ -10,10 +10,9 @@ from scipy.spatial import distance as dist
 from frigate.util import draw_box_with_label, LABELS, compute_intersection_rectangle, compute_intersection_over_union, calculate_region
 
 class ObjectCleaner(threading.Thread):
-    def __init__(self, objects_parsed, detected_objects):
+    def __init__(self, camera):
         threading.Thread.__init__(self)
-        self._objects_parsed = objects_parsed
-        self._detected_objects = detected_objects
+        self.camera = camera
 
     def run(self):
         prctl.set_name("ObjectCleaner")
@@ -22,22 +21,9 @@ class ObjectCleaner(threading.Thread):
             # wait a bit before checking for expired frames
             time.sleep(0.2)
 
-            # expire the objects that are more than 1 second old
-            now = datetime.datetime.now().timestamp()
-            # look for the first object found within the last second
-            # (newest objects are appended to the end)
-            detected_objects = self._detected_objects.copy()
-
-            objects_removed = False
-            for frame_time in detected_objects.keys():
-                if now-frame_time>2:
-                    del self._detected_objects[frame_time]
-                    objects_removed = True
-
-            if objects_removed:
-                # notify that parsed objects were changed
-                with self._objects_parsed:
-                    self._objects_parsed.notify_all()
+            for frame_time in list(self.camera.detected_objects.keys()).copy():
+                if not frame_time in self.camera.frame_cache:
+                    del self.camera.detected_objects[frame_time]
 
 class DetectedObjectsProcessor(threading.Thread):
     def __init__(self, camera):
@@ -168,9 +154,6 @@ class RegionRefiner(threading.Thread):
             selected_objects = [o for o in selected_objects if not self.filtered(o)]
 
             self.camera.detected_objects[frame_time] = selected_objects
-
-            with self.camera.objects_parsed:
-                self.camera.objects_parsed.notify_all()
             
             # print(f"{frame_time} is actually finished")
 
@@ -247,11 +230,16 @@ class ObjectTracker(threading.Thread):
         while True:
             frame_time = self.camera.refined_frame_queue.get()
             self.match_and_update(self.camera.detected_objects[frame_time])
-            self.camera.frame_tracked_queue.put(frame_time)
+            self.camera.frame_output_queue.put(frame_time)
+            if len(self.tracked_objects) > 0:
+                with self.camera.objects_tracked:
+                    self.camera.objects_tracked.notify_all()
 
     def register(self, index, obj):
         id = f"{str(obj['frame_time'])}-{index}"
         obj['id'] = id
+        obj['top_score'] = obj['score']
+        self.add_history(obj)
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
@@ -261,7 +249,22 @@ class ObjectTracker(threading.Thread):
     
     def update(self, id, new_obj):
         self.tracked_objects[id].update(new_obj)
-        # TODO: am i missing anything? history?  
+        self.add_history(self.tracked_objects[id])
+        if self.tracked_objects[id]['score'] > self.tracked_objects[id]['top_score']:
+            self.tracked_objects[id]['top_score'] = self.tracked_objects[id]['score']
+    
+    def add_history(self, obj):
+        entry = {
+            'score': obj['score'],
+            'box': obj['box'],
+            'region': obj['region'],
+            'centroid': obj['centroid'],
+            'frame_time': obj['frame_time']
+        }
+        if 'history' in obj:
+            obj['history'].append(entry)
+        else:
+            obj['history'] = [entry]
 
     def match_and_update(self, new_objects):
         # check to see if the list of input bounding box rectangles
@@ -384,26 +387,23 @@ class ObjectTracker(threading.Thread):
 
 # Maintains the frame and object with the highest score
 class BestFrames(threading.Thread):
-    def __init__(self, objects_parsed, recent_frames, detected_objects):
+    def __init__(self, camera):
         threading.Thread.__init__(self)
-        self.objects_parsed = objects_parsed
-        self.recent_frames = recent_frames
-        self.detected_objects = detected_objects
+        self.camera = camera
         self.best_objects = {}
         self.best_frames = {}
 
     def run(self):
-        prctl.set_name("BestFrames")
+        prctl.set_name(self.__class__.__name__)
         while True:
-
-            # wait until objects have been parsed
-            with self.objects_parsed:
-                self.objects_parsed.wait()
+            # wait until objects have been tracked
+            with self.camera.objects_tracked:
+                self.camera.objects_tracked.wait()
 
             # make a copy of detected objects
-            detected_objects = self.detected_objects.copy()
+            detected_objects = list(self.camera.object_tracker.tracked_objects.values()).copy()
 
-            for obj in itertools.chain.from_iterable(detected_objects.values()):
+            for obj in detected_objects:
                 if obj['name'] in self.best_objects:
                     now = datetime.datetime.now().timestamp()
                     # if the object is a higher score than the current best score 
@@ -413,12 +413,9 @@ class BestFrames(threading.Thread):
                 else:
                     self.best_objects[obj['name']] = obj
             
-            # make a copy of the recent frames
-            recent_frames = self.recent_frames.copy()
-
             for name, obj in self.best_objects.items():
-                if obj['frame_time'] in recent_frames:
-                    best_frame = recent_frames[obj['frame_time']] #, np.zeros((720,1280,3), np.uint8))
+                if obj['frame_time'] in self.camera.frame_cache:
+                    best_frame = self.camera.frame_cache[obj['frame_time']]
 
                     draw_box_with_label(best_frame, obj['box']['xmin'], obj['box']['ymin'], 
                         obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']}")

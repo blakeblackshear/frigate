@@ -23,7 +23,7 @@ class PreppedQueueProcessor(threading.Thread):
         self.avg_inference_speed = 10
 
     def run(self):
-        prctl.set_name("PreppedQueueProcessor")
+        prctl.set_name(self.__class__.__name__)
         # process queue...
         while True:
             if self.prepped_frame_queue.full():
@@ -44,7 +44,7 @@ class RegionRequester(threading.Thread):
         self.camera = camera
 
     def run(self):
-        prctl.set_name("RegionRequester")
+        prctl.set_name(self.__class__.__name__)
         frame_time = 0.0
         while True:
             now = datetime.datetime.now().timestamp()
@@ -58,7 +58,7 @@ class RegionRequester(threading.Thread):
             frame_time = self.camera.frame_time.value
 
             # grab the current tracked objects
-            tracked_objects = self.camera.object_tracker.tracked_objects.values().copy()
+            tracked_objects = list(self.camera.object_tracker.tracked_objects.values()).copy()
 
             with self.camera.regions_in_process_lock:
                 self.camera.regions_in_process[frame_time] = len(self.camera.config['regions'])
@@ -100,7 +100,7 @@ class RegionPrepper(threading.Thread):
         self.prepped_frame_queue = prepped_frame_queue
 
     def run(self):
-        prctl.set_name("RegionPrepper")
+        prctl.set_name(self.__class__.__name__)
         while True:
 
             resize_request = self.resize_request_queue.get()
