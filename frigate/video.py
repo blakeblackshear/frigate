@@ -26,17 +26,18 @@ class FrameTracker(threading.Thread):
         self.recent_frames = recent_frames
     
     def run(self):
-        prctl.set_name("FrameTracker")
+        prctl.set_name(self.__class__.__name__)
         while True:
             # wait for a frame
             with self.frame_ready:
                 self.frame_ready.wait()
 
-            now = datetime.datetime.now().timestamp()
             # delete any old frames
             stored_frame_times = list(self.recent_frames.keys())
-            for k in stored_frame_times:
-                if (now - k) > 10:
+            stored_frame_times.sort(reverse=True)
+            if len(stored_frame_times) > 100:
+                frames_to_delete = stored_frame_times[50:]
+                for k in frames_to_delete:
                     del self.recent_frames[k]
 
 def get_frame_shape(source):
@@ -58,7 +59,7 @@ class CameraWatchdog(threading.Thread):
         self.camera = camera
 
     def run(self):
-        prctl.set_name("CameraWatchdog")
+        prctl.set_name(self.__class__.__name__)
         while True:
             # wait a bit before checking
             time.sleep(10)
@@ -75,7 +76,7 @@ class CameraCapture(threading.Thread):
         self.camera = camera
 
     def run(self):
-        prctl.set_name("CameraCapture")
+        prctl.set_name(self.__class__.__name__)
         frame_num = 0
         while True:
             if self.camera.ffmpeg_process.poll() != None:
@@ -113,10 +114,10 @@ class VideoWriter(threading.Thread):
         self.camera = camera
 
     def run(self):
-        prctl.set_name("VideoWriter")
+        prctl.set_name(self.__class__.__name__)
         while True:
-            frame_time = self.camera.frame_tracked_queue.get()
-            if len(self.camera.detected_objects[frame_time]) == 0:
+            frame_time = self.camera.frame_output_queue.get()
+            if len(self.camera.object_tracker.tracked_objects) == 0:
                 continue
             f = open(f"/debug/{self.camera.name}-{str(frame_time)}.jpg", 'wb')
             f.write(self.camera.frame_with_objects(frame_time))
@@ -137,7 +138,7 @@ class Camera:
         self.regions_in_process_lock = mp.Lock()
         self.finished_frame_queue = queue.Queue()
         self.refined_frame_queue = queue.Queue()
-        self.frame_tracked_queue = queue.Queue()
+        self.frame_output_queue = queue.Queue()
 
         self.ffmpeg = config.get('ffmpeg', {})
         self.ffmpeg_input = get_ffmpeg_input(self.ffmpeg['input'])
@@ -161,8 +162,8 @@ class Camera:
         self.frame_lock = mp.Lock()
         # Condition for notifying that a new frame is ready
         self.frame_ready = mp.Condition()
-        # Condition for notifying that objects were parsed
-        self.objects_parsed = mp.Condition()
+        # Condition for notifying that objects were tracked
+        self.objects_tracked = mp.Condition()
 
         # Queue for prepped frames, max size set to (number of regions * 5)
         max_queue_size = len(self.config['regions'])*5
@@ -208,11 +209,11 @@ class Camera:
         self.region_prepper.start()
 
         # start a thread to store the highest scoring recent frames for monitored object types
-        self.best_frames = BestFrames(self.objects_parsed, self.frame_cache, self.detected_objects)
+        self.best_frames = BestFrames(self)
         self.best_frames.start()
 
         # start a thread to expire objects from the detected objects list
-        self.object_cleaner = ObjectCleaner(self.objects_parsed, self.detected_objects)
+        self.object_cleaner = ObjectCleaner(self)
         self.object_cleaner.start()
 
         # start a thread to refine regions when objects are clipped
@@ -230,7 +231,7 @@ class Camera:
         self.video_writer.start()
 
         # start a thread to publish object scores
-        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self.objects_parsed, self.detected_objects, self.best_frames)
+        mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self)
         mqtt_publisher.start()
 
         # create a watchdog thread for capture process
@@ -321,7 +322,7 @@ class Camera:
                 color, 2)
 
         # draw the bounding boxes on the screen
-        for id, obj in self.object_tracker.tracked_objects.items():
+        for id, obj in list(self.object_tracker.tracked_objects.items()):
         # for obj in detected_objects[frame_time]:
             cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
                 (obj['region']['xmax'], obj['region']['ymax']), 
