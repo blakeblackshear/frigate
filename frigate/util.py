@@ -75,12 +75,13 @@ def compute_intersection_over_union(box_a, box_b):
 def tonumpyarray(mp_arr):
     return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
-def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info):
-    color = COLOR_MAP[label]
+def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None):
+    if color is None:
+        color = COLOR_MAP[label]
     display_text = "{}: {}".format(label, info)
     cv2.rectangle(frame, (x_min, y_min), 
         (x_max, y_max), 
-        color, 2)
+        color, thickness)
     font_scale = 0.5
     font = cv2.FONT_HERSHEY_SIMPLEX
     # get the width and height of the text box
