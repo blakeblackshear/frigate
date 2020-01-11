@@ -9,6 +9,7 @@ import multiprocessing as mp
 import subprocess as sp
 import numpy as np
 import prctl
+import copy
 import itertools
 from collections import defaultdict
 from frigate.util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
@@ -64,7 +65,7 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(10)
 
-            if (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 300:
+            if self.camera.frame_time.value != 0.0 and (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 300:
                 print("last frame is more than 5 minutes old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
@@ -116,12 +117,12 @@ class VideoWriter(threading.Thread):
     def run(self):
         prctl.set_name(self.__class__.__name__)
         while True:
-            frame_time = self.camera.frame_output_queue.get()
-            if len(self.camera.object_tracker.tracked_objects) == 0:
-                continue
-            f = open(f"/debug/{self.camera.name}-{str(frame_time)}.jpg", 'wb')
-            f.write(self.camera.frame_with_objects(frame_time))
-            f.close()
+            (frame_time, tracked_objects) = self.camera.frame_output_queue.get()
+            # if len(self.camera.object_tracker.tracked_objects) == 0:
+            #     continue
+            # f = open(f"/debug/output/{self.camera.name}-{str(format(frame_time, '.8f'))}.jpg", 'wb')
+            # f.write(self.camera.frame_with_objects(frame_time, tracked_objects))
+            # f.close()
 
 class Camera:
     def __init__(self, name, ffmpeg_config, global_objects_config, config, prepped_frame_queue, mqtt_client, mqtt_prefix):
@@ -195,6 +196,14 @@ class Camera:
         for obj in objects_with_config:
             self.object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
 
+        # start a thread to track objects
+        self.object_tracker = ObjectTracker(self, 10)
+        self.object_tracker.start()
+
+        # start a thread to write tracked frames to disk
+        self.video_writer = VideoWriter(self)
+        self.video_writer.start()
+
         # start a thread to queue resize requests for regions
         self.region_requester = RegionRequester(self)
         self.region_requester.start()
@@ -221,14 +230,6 @@ class Camera:
         self.region_refiner = RegionRefiner(self)
         self.region_refiner.start()
         self.dynamic_region_fps.start()
-
-        # start a thread to track objects
-        self.object_tracker = ObjectTracker(self, 10)
-        self.object_tracker.start()
-
-        # start a thread to write tracked frames to disk
-        self.video_writer = VideoWriter(self)
-        self.video_writer.start()
 
         # start a thread to publish object scores
         mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self)
@@ -312,8 +313,9 @@ class Camera:
             'dynamic_regions_per_sec': self.dynamic_region_fps.eps()
         }
     
-    def frame_with_objects(self, frame_time):
+    def frame_with_objects(self, frame_time, tracked_objects=None):
         frame = self.frame_cache[frame_time].copy()
+        detected_objects = self.detected_objects[frame_time].copy()
 
         for region in self.regions:
             color = (255,255,255)
@@ -322,13 +324,17 @@ class Camera:
                 color, 2)
 
         # draw the bounding boxes on the screen
-        for id, obj in list(self.object_tracker.tracked_objects.items()):
-        # for obj in detected_objects[frame_time]:
-            cv2.rectangle(frame, (obj['region']['xmin'], obj['region']['ymin']), 
-                (obj['region']['xmax'], obj['region']['ymax']), 
-                (0,255,0), 1)
-            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {id}")
-            
+
+        if tracked_objects is None:
+            tracked_objects = copy.deepcopy(self.object_tracker.tracked_objects)
+
+        for obj in detected_objects:
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']}", thickness=3)
+        
+        for id, obj in tracked_objects.items():
+            color = (0, 255,0) if obj['frame_time'] == frame_time else (255, 0, 0)
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {id}", color=color, thickness=1)
+
         # print a timestamp
         time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
         cv2.putText(frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)

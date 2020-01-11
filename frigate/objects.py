@@ -4,7 +4,9 @@ import threading
 import cv2
 import prctl
 import itertools
+import copy
 import numpy as np
+import multiprocessing as mp
 from collections import defaultdict
 from scipy.spatial import distance as dist
 from frigate.util import draw_box_with_label, LABELS, compute_intersection_rectangle, compute_intersection_over_union, calculate_region
@@ -24,6 +26,14 @@ class ObjectCleaner(threading.Thread):
             for frame_time in list(self.camera.detected_objects.keys()).copy():
                 if not frame_time in self.camera.frame_cache:
                     del self.camera.detected_objects[frame_time]
+            
+            with self.camera.object_tracker.tracked_objects_lock:
+                now = datetime.datetime.now().timestamp()
+                for id, obj in list(self.camera.object_tracker.tracked_objects.items()):
+                    # if the object is more than 10 seconds old
+                    # and not in the most recent frame, deregister
+                    if (now - obj['frame_time']) > 10 and self.camera.object_tracker.most_recent_frame_time > obj['frame_time']:
+                        self.camera.object_tracker.deregister(id)
 
 class DetectedObjectsProcessor(threading.Thread):
     def __init__(self, camera):
@@ -222,15 +232,17 @@ class ObjectTracker(threading.Thread):
         threading.Thread.__init__(self)
         self.camera = camera
         self.tracked_objects = {}
-        self.disappeared = {}
-        self.max_disappeared = max_disappeared
+        self.tracked_objects_lock = mp.Lock()
+        self.most_recent_frame_time = None
     
     def run(self):
         prctl.set_name(self.__class__.__name__)
         while True:
             frame_time = self.camera.refined_frame_queue.get()
-            self.match_and_update(self.camera.detected_objects[frame_time])
-            self.camera.frame_output_queue.put(frame_time)
+            with self.tracked_objects_lock:
+                self.match_and_update(self.camera.detected_objects[frame_time])
+                self.most_recent_frame_time = frame_time
+                self.camera.frame_output_queue.put((frame_time, copy.deepcopy(self.tracked_objects)))
             if len(self.tracked_objects) > 0:
                 with self.camera.objects_tracked:
                     self.camera.objects_tracked.notify_all()
@@ -241,10 +253,8 @@ class ObjectTracker(threading.Thread):
         obj['top_score'] = obj['score']
         self.add_history(obj)
         self.tracked_objects[id] = obj
-        self.disappeared[id] = 0
 
     def deregister(self, id):
-        del self.disappeared[id]
         del self.tracked_objects[id]
     
     def update(self, id, new_obj):
@@ -267,22 +277,7 @@ class ObjectTracker(threading.Thread):
             obj['history'] = [entry]
 
     def match_and_update(self, new_objects):
-        # check to see if the list of input bounding box rectangles
-        # is empty
         if len(new_objects) == 0:
-            # loop over any existing tracked objects and mark them
-            # as disappeared
-            for objectID in list(self.disappeared.keys()):
-                self.disappeared[objectID] += 1
-
-                # if we have reached a maximum number of consecutive
-                # frames where a given object has been marked as
-                # missing, deregister it
-                if self.disappeared[objectID] > self.max_disappeared:
-                    self.deregister(objectID)
-
-            # return early as there are no centroids or tracking info
-            # to update
             return
             
         # group by name
@@ -291,13 +286,12 @@ class ObjectTracker(threading.Thread):
             new_object_groups[obj['name']].append(obj)
         
         # track objects for each label type
-        # TODO: this is going to miss deregistering objects that are not in the new groups
         for label, group in new_object_groups.items():
             current_objects = [o for o in self.tracked_objects.values() if o['name'] == label]
             current_ids = [o['id'] for o in current_objects]
             current_centroids = np.array([o['centroid'] for o in current_objects])
 
-            # compute centroids
+            # compute centroids of new objects
             for obj in group:
                 centroid_x = int((obj['box']['xmin']+obj['box']['xmax']) / 2.0)
                 centroid_y = int((obj['box']['ymin']+obj['box']['ymax']) / 2.0)
@@ -339,7 +333,6 @@ class ObjectTracker(threading.Thread):
             for (row, col) in zip(rows, cols):
                 # if we have already examined either the row or
                 # column value before, ignore it
-                # val
                 if row in usedRows or col in usedCols:
                     continue
 
@@ -347,43 +340,22 @@ class ObjectTracker(threading.Thread):
                 # set its new centroid, and reset the disappeared
                 # counter
                 objectID = current_ids[row]
-                self.update(objectID, new_objects[col])
-                self.disappeared[objectID] = 0
+                self.update(objectID, group[col])
 
                 # indicate that we have examined each of the row and
                 # column indexes, respectively
                 usedRows.add(row)
                 usedCols.add(col)
 
-            # compute both the row and column index we have NOT yet
-            # examined
-            unusedRows = set(range(0, D.shape[0])).difference(usedRows)
+            # compute the column index we have NOT yet examined
             unusedCols = set(range(0, D.shape[1])).difference(usedCols)
 
-            # in the event that the number of object centroids is
-            # equal or greater than the number of input centroids
-            # we need to check and see if some of these objects have
-            # potentially disappeared
-            if D.shape[0] >= D.shape[1]:
-                # loop over the unused row indexes
-                for row in unusedRows:
-                    # grab the object ID for the corresponding row
-                    # index and increment the disappeared counter
-                    objectID = current_ids[row]
-                    self.disappeared[objectID] += 1
-
-                    # check to see if the number of consecutive
-                    # frames the object has been marked "disappeared"
-                    # for warrants deregistering the object
-                    if self.disappeared[objectID] > self.max_disappeared:
-                        self.deregister(objectID)
-
-            # otherwise, if the number of input centroids is greater
+            # if the number of input centroids is greater
             # than the number of existing object centroids we need to
             # register each new input centroid as a trackable object
-            else:
-                for col in unusedCols:
-                    self.register(col, new_objects[col])
+            # if D.shape[0] < D.shape[1]:
+            for col in unusedCols:
+                self.register(col, group[col])
 
 # Maintains the frame and object with the highest score
 class BestFrames(threading.Thread):
@@ -400,18 +372,18 @@ class BestFrames(threading.Thread):
             with self.camera.objects_tracked:
                 self.camera.objects_tracked.wait()
 
-            # make a copy of detected objects
-            detected_objects = list(self.camera.object_tracker.tracked_objects.values()).copy()
+            # make a copy of tracked objects
+            tracked_objects = list(self.camera.object_tracker.tracked_objects.values())
 
-            for obj in detected_objects:
+            for obj in tracked_objects:
                 if obj['name'] in self.best_objects:
                     now = datetime.datetime.now().timestamp()
                     # if the object is a higher score than the current best score 
                     # or the current object is more than 1 minute old, use the new object
                     if obj['score'] > self.best_objects[obj['name']]['score'] or (now - self.best_objects[obj['name']]['frame_time']) > 60:
-                        self.best_objects[obj['name']] = obj
+                        self.best_objects[obj['name']] = copy.deepcopy(obj)
                 else:
-                    self.best_objects[obj['name']] = obj
+                    self.best_objects[obj['name']] = copy.deepcopy(obj)
             
             for name, obj in self.best_objects.items():
                 if obj['frame_time'] in self.camera.frame_cache:
