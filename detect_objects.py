@@ -133,7 +133,7 @@ def main():
             response.headers['Content-Type'] = 'image/jpg'
             return response
         else:
-            return f'Camera named {camera_name} not found', 404
+            return "Camera named {} not found".format(camera_name), 404
 
     @app.route('/<camera_name>')
     def mjpeg_feed(camera_name):
@@ -142,7 +142,7 @@ def main():
             return Response(imagestream(camera_name),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
         else:
-            return f'Camera named {camera_name} not found', 404
+            return "Camera named {} not found".format(camera_name), 404
 
     def imagestream(camera_name):
         while True:
