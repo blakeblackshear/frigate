@@ -75,7 +75,7 @@ def compute_intersection_over_union(box_a, box_b):
 def tonumpyarray(mp_arr):
     return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
-def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None):
+def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
         color = COLOR_MAP[label]
     display_text = "{}: {}".format(label, info)
@@ -90,8 +90,18 @@ def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thicknes
     text_height = size[0][1]
     line_height = text_height + size[1]
     # set the text start position
-    text_offset_x = x_min
-    text_offset_y = 0 if y_min < line_height else y_min - (line_height+8)
+    if position == 'ul':
+        text_offset_x = x_min
+        text_offset_y = 0 if y_min < line_height else y_min - (line_height+8)
+    elif position == 'ur':
+        text_offset_x = x_max - (text_width+8)
+        text_offset_y = 0 if y_min < line_height else y_min - (line_height+8)
+    elif position == 'bl':
+        text_offset_x = x_min
+        text_offset_y = y_max
+    elif position == 'br':
+        text_offset_x = x_max - (text_width+8)
+        text_offset_y = y_max
     # make the coords of the box with a small padding of two pixels
     textbox_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y + line_height))
     cv2.rectangle(frame, textbox_coords[0], textbox_coords[1], color, cv2.FILLED)
