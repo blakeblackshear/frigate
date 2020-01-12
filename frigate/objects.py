@@ -27,6 +27,7 @@ class ObjectCleaner(threading.Thread):
                 if not frame_time in self.camera.frame_cache:
                     del self.camera.detected_objects[frame_time]
             
+            objects_deregistered = False
             with self.camera.object_tracker.tracked_objects_lock:
                 now = datetime.datetime.now().timestamp()
                 for id, obj in list(self.camera.object_tracker.tracked_objects.items()):
@@ -34,6 +35,11 @@ class ObjectCleaner(threading.Thread):
                     # and not in the most recent frame, deregister
                     if (now - obj['frame_time']) > 10 and self.camera.object_tracker.most_recent_frame_time > obj['frame_time']:
                         self.camera.object_tracker.deregister(id)
+                        objects_deregistered = True
+            
+            if objects_deregistered:
+                with self.camera.objects_tracked:
+                    self.camera.objects_tracked.notify_all()
 
 class DetectedObjectsProcessor(threading.Thread):
     def __init__(self, camera):

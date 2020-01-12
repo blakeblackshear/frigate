@@ -45,3 +45,10 @@ class MqttObjectPublisher(threading.Thread):
             for obj_name in expired_objects:
                 current_object_status[obj_name] = 'OFF'
                 self.client.publish(self.topic_prefix+'/'+obj_name, 'OFF', retain=False)
+                # send updated snapshot snapshot over mqtt if we have it as well
+                if obj_name in self.camera.best_frames.best_frames:
+                    best_frame = cv2.cvtColor(self.camera.best_frames.best_frames[obj_name], cv2.COLOR_RGB2BGR)
+                    ret, jpg = cv2.imencode('.jpg', best_frame)
+                    if ret:
+                        jpg_bytes = jpg.tobytes()
+                        self.client.publish(self.topic_prefix+'/'+obj_name+'/snapshot', jpg_bytes, retain=True)
