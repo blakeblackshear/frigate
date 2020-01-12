@@ -168,7 +168,7 @@ class Camera:
 
         # Queue for prepped frames, max size set to (number of regions * 5)
         max_queue_size = len(self.config['regions'])*5
-        self.resize_queue = queue.Queue(max_queue_size)
+        self.resize_queue = queue.Queue()
 
         # Queue for raw detected objects
         self.detected_objects_queue = queue.Queue()

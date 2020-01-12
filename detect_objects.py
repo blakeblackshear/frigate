@@ -73,7 +73,7 @@ def main():
     
     # Queue for prepped frames, max size set to number of regions * 3
     max_queue_size = sum([len(camera['regions'])*3 for name, camera in CONFIG['cameras'].items()])
-    prepped_frame_queue = queue.Queue(max_queue_size)
+    prepped_frame_queue = queue.Queue()
 
     cameras = {}
     for name, config in CONFIG['cameras'].items():
