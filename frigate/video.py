@@ -333,7 +333,7 @@ class Camera:
         
         for id, obj in tracked_objects.items():
             color = (0, 255,0) if obj['frame_time'] == frame_time else (255, 0, 0)
-            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']} {id}", color=color, thickness=1)
+            draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{id}", color=color, thickness=1, position='bl')
 
         # print a timestamp
         time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
