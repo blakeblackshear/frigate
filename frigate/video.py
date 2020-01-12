@@ -118,7 +118,7 @@ class VideoWriter(threading.Thread):
         prctl.set_name(self.__class__.__name__)
         while True:
             (frame_time, tracked_objects) = self.camera.frame_output_queue.get()
-            # if len(self.camera.object_tracker.tracked_objects) == 0:
+            # if len(tracked_objects) == 0:
             #     continue
             # f = open(f"/debug/output/{self.camera.name}-{str(format(frame_time, '.8f'))}.jpg", 'wb')
             # f.write(self.camera.frame_with_objects(frame_time, tracked_objects))
