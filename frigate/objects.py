@@ -254,7 +254,7 @@ class ObjectTracker(threading.Thread):
                     self.camera.objects_tracked.notify_all()
 
     def register(self, index, obj):
-        id = f"{str(obj['frame_time'])}-{index}"
+        id = "{}-{}".format(str(obj['frame_time']), index)
         obj['id'] = id
         obj['top_score'] = obj['score']
         self.add_history(obj)
@@ -396,7 +396,7 @@ class BestFrames(threading.Thread):
                     best_frame = self.camera.frame_cache[obj['frame_time']]
 
                     draw_box_with_label(best_frame, obj['box']['xmin'], obj['box']['ymin'], 
-                        obj['box']['xmax'], obj['box']['ymax'], obj['name'], f"{int(obj['score']*100)}% {obj['area']}")
+                        obj['box']['xmax'], obj['box']['ymax'], obj['name'], "{}% {}".format(int(obj['score']*100), obj['area']))
                     
                     # print a timestamp
                     time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")

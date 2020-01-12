@@ -1,9 +1,10 @@
-FROM debian:buster-slim
+FROM debian:stretch-slim
 LABEL maintainer "blakeb@blakeshome.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt -qq update && apt -qq install --no-install-recommends -y \
+    apt-transport-https ca-certificates \
     gnupg wget \
     ffmpeg \
     python3 \
@@ -15,7 +16,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     # pillow-simd
     # zlib1g-dev libjpeg-dev \
     # VAAPI drivers for Intel hardware accel
-    libva-drm2 libva2 i965-va-driver vainfo \
+    i965-va-driver vainfo \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
     && apt -qq update \
