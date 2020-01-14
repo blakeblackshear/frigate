@@ -167,7 +167,6 @@ class Camera:
         self.objects_tracked = mp.Condition()
 
         # Queue for prepped frames, max size set to (number of regions * 5)
-        max_queue_size = len(self.config['regions'])*5
         self.resize_queue = queue.Queue()
 
         # Queue for raw detected objects
@@ -184,6 +183,7 @@ class Camera:
         self.ffmpeg_process = None
         self.capture_thread = None
         self.fps = EventsPerSecond()
+        self.skipped_region_tracker = EventsPerSecond()
 
         # combine tracked objects lists
         self.objects_to_track = set().union(global_objects_config.get('track', ['person', 'car', 'truck']), camera_objects_config.get('track', []))
@@ -214,7 +214,7 @@ class Camera:
         self.frame_tracker.start()
 
         # start a thread to resize regions
-        self.region_prepper = RegionPrepper(self.frame_cache, self.resize_queue, prepped_frame_queue)
+        self.region_prepper = RegionPrepper(self, self.frame_cache, self.resize_queue, prepped_frame_queue)
         self.region_prepper.start()
 
         # start a thread to store the highest scoring recent frames for monitored object types
@@ -275,6 +275,7 @@ class Camera:
         print("Starting a new capture thread...")
         self.capture_thread.start()
         self.fps.start()
+        self.skipped_region_tracker.start()
     
     def start_ffmpeg(self):
         ffmpeg_cmd = (['ffmpeg'] +
@@ -310,11 +311,16 @@ class Camera:
             'finished_frame_queue': self.finished_frame_queue.qsize(),
             'refined_frame_queue': self.refined_frame_queue.qsize(),
             'regions_in_process': self.regions_in_process,
-            'dynamic_regions_per_sec': self.dynamic_region_fps.eps()
+            'dynamic_regions_per_sec': self.dynamic_region_fps.eps(),
+            'skipped_regions_per_sec': self.skipped_region_tracker.eps(60)
         }
     
     def frame_with_objects(self, frame_time, tracked_objects=None):
-        frame = self.frame_cache[frame_time].copy()
+        if not frame_time in self.frame_cache:
+            frame = np.zeros(self.frame_shape, np.uint8)
+        else:
+            frame = self.frame_cache[frame_time].copy()
+            
         detected_objects = self.detected_objects[frame_time].copy()
 
         for region in self.regions:
@@ -326,7 +332,8 @@ class Camera:
         # draw the bounding boxes on the screen
 
         if tracked_objects is None:
-            tracked_objects = copy.deepcopy(self.object_tracker.tracked_objects)
+            with self.object_tracker.tracked_objects_lock:
+                tracked_objects = copy.deepcopy(self.object_tracker.tracked_objects)
 
         for obj in detected_objects:
             draw_box_with_label(frame, obj['box']['xmin'], obj['box']['ymin'], obj['box']['xmax'], obj['box']['ymax'], obj['name'], "{}% {}".format(int(obj['score']*100), obj['area']), thickness=3)

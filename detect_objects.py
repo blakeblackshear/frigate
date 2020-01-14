@@ -72,7 +72,6 @@ def main():
     client.loop_start()
     
     # Queue for prepped frames, max size set to number of regions * 3
-    max_queue_size = sum([len(camera['regions'])*3 for name, camera in CONFIG['cameras'].items()])
     prepped_frame_queue = queue.Queue()
 
     cameras = {}
@@ -81,17 +80,14 @@ def main():
             prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
 
     fps_tracker = EventsPerSecond()
-    queue_full_tracker = EventsPerSecond()
 
     prepped_queue_processor = PreppedQueueProcessor(
         cameras,
         prepped_frame_queue,
-        fps_tracker,
-        queue_full_tracker
+        fps_tracker
     )
     prepped_queue_processor.start()
     fps_tracker.start()
-    queue_full_tracker.start()
 
     for name, camera in cameras.items():
         camera.start()
@@ -111,8 +107,7 @@ def main():
             'coral': {
                 'fps': fps_tracker.eps(),
                 'inference_speed': prepped_queue_processor.avg_inference_speed,
-                'queue_length': prepped_frame_queue.qsize(),
-                'queue_full_events_per_min': queue_full_tracker.eps(60)
+                'queue_length': prepped_frame_queue.qsize()
             }
         }
 

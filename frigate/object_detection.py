@@ -2,6 +2,7 @@ import datetime
 import time
 import cv2
 import threading
+import copy
 import prctl
 import numpy as np
 from edgetpu.detection.engine import DetectionEngine
@@ -9,7 +10,7 @@ from edgetpu.detection.engine import DetectionEngine
 from frigate.util import tonumpyarray, LABELS, PATH_TO_CKPT, calculate_region
 
 class PreppedQueueProcessor(threading.Thread):
-    def __init__(self, cameras, prepped_frame_queue, fps, queue_full):
+    def __init__(self, cameras, prepped_frame_queue, fps):
 
         threading.Thread.__init__(self)
         self.cameras = cameras
@@ -19,16 +20,12 @@ class PreppedQueueProcessor(threading.Thread):
         self.engine = DetectionEngine(PATH_TO_CKPT)
         self.labels = LABELS
         self.fps = fps
-        self.queue_full = queue_full
         self.avg_inference_speed = 10
 
     def run(self):
         prctl.set_name(self.__class__.__name__)
         # process queue...
         while True:
-            if self.prepped_frame_queue.full():
-                self.queue_full.update()
-
             frame = self.prepped_frame_queue.get()
 
             # Actual detection.
@@ -58,7 +55,8 @@ class RegionRequester(threading.Thread):
             frame_time = self.camera.frame_time.value
 
             # grab the current tracked objects
-            tracked_objects = list(self.camera.object_tracker.tracked_objects.values()).copy()
+            with self.camera.object_tracker.tracked_objects_lock:
+                tracked_objects = copy.deepcopy(self.camera.object_tracker.tracked_objects).values()
 
             with self.camera.regions_in_process_lock:
                 self.camera.regions_in_process[frame_time] = len(self.camera.config['regions'])
@@ -93,8 +91,9 @@ class RegionRequester(threading.Thread):
 
 
 class RegionPrepper(threading.Thread):
-    def __init__(self, frame_cache, resize_request_queue, prepped_frame_queue):
+    def __init__(self, camera, frame_cache, resize_request_queue, prepped_frame_queue):
         threading.Thread.__init__(self)
+        self.camera = camera
         self.frame_cache = frame_cache
         self.resize_request_queue = resize_request_queue
         self.prepped_frame_queue = prepped_frame_queue
@@ -104,6 +103,15 @@ class RegionPrepper(threading.Thread):
         while True:
 
             resize_request = self.resize_request_queue.get()
+
+            # if the queue is over 100 items long, only prep dynamic regions
+            if resize_request['region_id'] != -1 and self.prepped_frame_queue.qsize() > 100:
+                with self.camera.regions_in_process_lock:
+                    self.camera.regions_in_process[resize_request['frame_time']] -= 1
+                    if self.camera.regions_in_process[resize_request['frame_time']] == 0:
+                        del self.camera.regions_in_process[resize_request['frame_time']]
+                self.camera.skipped_region_tracker.update()
+                continue
 
             frame = self.frame_cache.get(resize_request['frame_time'], None)
             
