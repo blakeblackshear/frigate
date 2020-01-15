@@ -117,6 +117,11 @@ class RegionPrepper(threading.Thread):
             
             if frame is None:
                 print("RegionPrepper: frame_time not in frame_cache")
+                with self.camera.regions_in_process_lock:
+                    self.camera.regions_in_process[resize_request['frame_time']] -= 1
+                    if self.camera.regions_in_process[resize_request['frame_time']] == 0:
+                        del self.camera.regions_in_process[resize_request['frame_time']]
+                self.camera.skipped_region_tracker.update()
                 continue
 
             # make a copy of the region
