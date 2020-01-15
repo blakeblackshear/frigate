@@ -31,7 +31,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
 RUN pip3 install -U wheel setuptools
 
 RUN pip3 install -U \
-    opencv-python \
+    opencv-python-headless \
     python-prctl \
     Flask \
     paho-mqtt \
