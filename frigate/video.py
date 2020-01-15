@@ -66,7 +66,7 @@ class CameraWatchdog(threading.Thread):
             time.sleep(10)
 
             if self.camera.frame_time.value != 0.0 and (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 300:
-                print("last frame is more than 5 minutes old, restarting camera capture...")
+                print(self.camera.name + ": last frame is more than 5 minutes old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
 
@@ -81,13 +81,13 @@ class CameraCapture(threading.Thread):
         frame_num = 0
         while True:
             if self.camera.ffmpeg_process.poll() != None:
-                print("ffmpeg process is not running. exiting capture thread...")
+                print(self.camera.name + ": ffmpeg process is not running. exiting capture thread...")
                 break
 
             raw_image = self.camera.ffmpeg_process.stdout.read(self.camera.frame_size)
 
             if len(raw_image) == 0:
-                print("ffmpeg didnt return a frame. something is wrong. exiting capture thread...")
+                print(self.camera.name + ": ffmpeg didnt return a frame. something is wrong. exiting capture thread...")
                 break
 
             frame_num += 1
