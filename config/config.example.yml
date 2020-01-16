@@ -100,7 +100,7 @@ cameras:
     take_frame: 1
 
     ################
-    # Overrides for global object config
+    # Camera level object config. This config is merged with the global config above.
     ################
     objects:
       track:
