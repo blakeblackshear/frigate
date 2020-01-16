@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM ubuntu:18.04
 LABEL maintainer "blakeb@blakeshome.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,7 +16,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     # pillow-simd
     # zlib1g-dev libjpeg-dev \
     # VAAPI drivers for Intel hardware accel
-    i965-va-driver vainfo \
+    libva-drm2 libva2 i965-va-driver vainfo \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
     && apt -qq update \
