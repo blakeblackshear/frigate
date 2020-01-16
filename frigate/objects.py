@@ -93,12 +93,15 @@ class DetectedObjectsProcessor(threading.Thread):
                 self.camera.detected_objects[frame['frame_time']].append(obj)
             
             with self.camera.regions_in_process_lock:
-                self.camera.regions_in_process[frame['frame_time']] -= 1
+                if frame['frame_time'] in self.camera.regions_in_process:
+                    self.camera.regions_in_process[frame['frame_time']] -= 1
                 # print(f"{frame['frame_time']} remaining regions {self.camera.regions_in_process[frame['frame_time']]}")
 
-                if self.camera.regions_in_process[frame['frame_time']] == 0:
-                    del self.camera.regions_in_process[frame['frame_time']]
-                    # print(f"{frame['frame_time']} no remaining regions")
+                    if self.camera.regions_in_process[frame['frame_time']] == 0:
+                        del self.camera.regions_in_process[frame['frame_time']]
+                        # print(f"{frame['frame_time']} no remaining regions")
+                        self.camera.finished_frame_queue.put(frame['frame_time'])
+                else:
                     self.camera.finished_frame_queue.put(frame['frame_time'])
 
 # Thread that checks finished frames for clipped objects and sends back
