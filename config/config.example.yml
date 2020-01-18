@@ -100,6 +100,12 @@ cameras:
     take_frame: 1
 
     ################
+    # The number of seconds frigate will allow a camera to go without sending a frame before
+    # assuming the ffmpeg process has a problem and restarting.
+    ################
+    # watchdog_timeout: 300
+
+    ################
     # Camera level object config. This config is merged with the global config above.
     ################
     objects:
