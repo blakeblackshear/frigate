@@ -65,7 +65,7 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(10)
 
-            if self.camera.frame_time.value != 0.0 and (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > 300:
+            if self.camera.frame_time.value != 0.0 and (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > self.camera.watchdog_timeout:
                 print(self.camera.name + ": last frame is more than 5 minutes old, restarting camera capture...")
                 self.camera.start_or_restart_capture()
                 time.sleep(5)
@@ -151,6 +151,7 @@ class Camera:
         camera_objects_config = config.get('objects', {})
 
         self.take_frame = self.config.get('take_frame', 1)
+        self.watchdog_timeout = self.config.get('watchdog_timeout', 300)
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.ffmpeg_input)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
