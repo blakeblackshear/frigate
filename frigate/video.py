@@ -152,6 +152,9 @@ class Camera:
 
         self.take_frame = self.config.get('take_frame', 1)
         self.watchdog_timeout = self.config.get('watchdog_timeout', 300)
+        self.snapshot_config = {
+            'show_timestamp': self.config.get('snapshots', {}).get('show_timestamp', True)
+        }
         self.regions = self.config['regions']
         self.frame_shape = get_frame_shape(self.ffmpeg_input)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
