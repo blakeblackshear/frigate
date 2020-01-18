@@ -106,6 +106,12 @@ cameras:
     # watchdog_timeout: 300
 
     ################
+    # Configuration for the snapshot sent over mqtt
+    ################
+    snapshots:
+      show_timestamp: True
+
+    ################
     # Camera level object config. This config is merged with the global config above.
     ################
     objects:

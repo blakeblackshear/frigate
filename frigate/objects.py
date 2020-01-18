@@ -88,10 +88,12 @@ class DetectedObjectsProcessor(threading.Thread):
                     obj['clipped'] = True
                 
                 # Compute the area
+                # TODO: +1 right?
                 obj['area'] = (obj['box']['xmax']-obj['box']['xmin'])*(obj['box']['ymax']-obj['box']['ymin'])
 
                 self.camera.detected_objects[frame['frame_time']].append(obj)
             
+            # TODO: use in_process and processed counts instead to avoid lock 
             with self.camera.regions_in_process_lock:
                 if frame['frame_time'] in self.camera.regions_in_process:
                     self.camera.regions_in_process[frame['frame_time']] -= 1
@@ -106,6 +108,10 @@ class DetectedObjectsProcessor(threading.Thread):
 
 # Thread that checks finished frames for clipped objects and sends back
 # for processing if needed
+# TODO: evaluate whether or not i really need separate threads/queues for each step
+#       given that only 1 thread will really be able to run at a time. you need a 
+#       separate process to actually do things in parallel for when you are CPU bound. 
+#       threads are good when you are waiting and could be processing while you wait
 class RegionRefiner(threading.Thread):
     def __init__(self, camera):
         threading.Thread.__init__(self)
@@ -363,6 +369,9 @@ class ObjectTracker(threading.Thread):
             # than the number of existing object centroids we need to
             # register each new input centroid as a trackable object
             # if D.shape[0] < D.shape[1]:
+            # TODO: rather than assuming these are new objects, we could
+            # look to see if any of the remaining boxes have a large amount
+            # of overlap...
             for col in unusedCols:
                 self.register(col, group[col])
 
@@ -402,7 +411,8 @@ class BestFrames(threading.Thread):
                         obj['box']['xmax'], obj['box']['ymax'], obj['name'], "{}% {}".format(int(obj['score']*100), obj['area']))
                     
                     # print a timestamp
-                    time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-                    cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+                    if self.camera.snapshot_config['show_timestamp']:
+                        time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
+                        cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
                     
                     self.best_frames[name] = best_frame
