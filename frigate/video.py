@@ -11,6 +11,7 @@ import numpy as np
 import prctl
 import copy
 import itertools
+import json
 from collections import defaultdict
 from frigate.util import tonumpyarray, LABELS, draw_box_with_label, calculate_region, EventsPerSecond
 from frigate.object_detection import RegionPrepper, RegionRequester
@@ -42,13 +43,26 @@ class FrameTracker(threading.Thread):
                     del self.recent_frames[k]
 
 def get_frame_shape(source):
-    # capture a single frame and check the frame shape so the correct array
-    # size can be allocated in memory
-    video = cv2.VideoCapture(source)
-    ret, frame = video.read()
-    frame_shape = frame.shape
-    video.release()
-    return frame_shape
+    ffprobe_cmd = " ".join([
+        'ffprobe',
+        '-v',
+        'panic',
+        '-show_error',
+        '-show_streams',
+        '-of',
+        'json',
+        '"'+source+'"'
+    ])
+    print(ffprobe_cmd)
+    p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
+    (output, err) = p.communicate()
+    p_status = p.wait()
+    info = json.loads(output)
+    print(info)
+
+    video_info = [s for s in info['streams'] if s['codec_type'] == 'video'][0]
+
+    return (video_info['height'], video_info['width'], 3)
 
 def get_ffmpeg_input(ffmpeg_input):
     frigate_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
