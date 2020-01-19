@@ -81,6 +81,12 @@ cameras:
       # hwaccel_args: []
       # input_args: []
       # output_args: []
+    
+    ################
+    ## Optionally specify the resolution of the video feed. Frigate will try to auto detect if not specified
+    ################
+    # height: 1280
+    # width: 720
 
     ################
     ## Optional mask. Must be the same dimensions as your video feed.
