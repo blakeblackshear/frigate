@@ -62,7 +62,15 @@ def get_frame_shape(source):
 
     video_info = [s for s in info['streams'] if s['codec_type'] == 'video'][0]
 
-    return (video_info['height'], video_info['width'], 3)
+    if video_info['height'] != 0 and video_info['width'] != 0:
+        return (video_info['height'], video_info['width'], 3)
+    
+    # fallback to using opencv if ffprobe didnt succeed
+    video = cv2.VideoCapture(source)
+    ret, frame = video.read()
+    frame_shape = frame.shape
+    video.release()
+    return frame_shape
 
 def get_ffmpeg_input(ffmpeg_input):
     frigate_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
@@ -170,7 +178,10 @@ class Camera:
             'show_timestamp': self.config.get('snapshots', {}).get('show_timestamp', True)
         }
         self.regions = self.config['regions']
-        self.frame_shape = get_frame_shape(self.ffmpeg_input)
+        if 'width' in self.config and 'height' in self.config:
+            self.frame_shape = (self.config['height'], self.config['width'], 3)
+        else:
+            self.frame_shape = get_frame_shape(self.ffmpeg_input)
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * self.frame_shape[2]
         self.mqtt_client = mqtt_client
         self.mqtt_topic_prefix = '{}/{}'.format(mqtt_prefix, self.name)
