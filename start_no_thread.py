@@ -4,9 +4,11 @@ import threading
 import queue
 import itertools
 from collections import defaultdict
+from statistics import mean
 import cv2
 import imutils
 import numpy as np
+import subprocess as sp
 from scipy.spatial import distance as dist
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
@@ -413,24 +415,40 @@ def main():
     frames = 0
     # frame_queue = queue.Queue(maxsize=5)
     # frame_cache = {}
-    # frame_shape = (1080,1920,3)
-    frame_shape = (720,1280,3)
+    frame_shape = (1080,1920,3)
+    # frame_shape = (720,1280,3)
     frame_size = frame_shape[0]*frame_shape[1]*frame_shape[2]
     frame = np.zeros(frame_shape, np.uint8)
-    motion_detector = MotionDetector(frame_shape, resize_factor=4)
+    motion_detector = MotionDetector(frame_shape, resize_factor=6)
     object_detector = ObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
     # object_detector = ObjectDetector('/lab/detect.tflite', '/lab/labelmap.txt')
     object_tracker = ObjectTracker(10)
 
     # f = open('/debug/input/back.rgb24', 'rb')
-    f = open('/debug/back.raw_video', 'rb')
+    # f = open('/debug/back.raw_video', 'rb')
     # f = open('/debug/ali-jake.raw_video', 'rb')
+
+    # -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p -i output.mp4 -f rawvideo -pix_fmt rgb24 pipe:
+    ffmpeg_cmd = (['ffmpeg'] +
+            ['-hide_banner','-loglevel','panic'] +
+            ['-hwaccel','vaapi','-hwaccel_device','/dev/dri/renderD129','-hwaccel_output_format','yuv420p'] +
+            ['-i', '/debug/input/output.mp4'] +
+            # ['-i', '/debug/back-ali-jake.mp4'] +
+            ['-f','rawvideo','-pix_fmt','rgb24'] +
+            ['pipe:'])
+
+    print(" ".join(ffmpeg_cmd))
+    
+    ffmpeg_process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size)
 
     total_detections = 0
     start = datetime.datetime.now().timestamp()
+    frame_times = []
     while True:
+
+        start_frame = datetime.datetime.now().timestamp()
         frame_detections = 0
-        frame_bytes = f.read(frame_size)
+        frame_bytes = ffmpeg_process.stdout.read(frame_size)#f.read(frame_size)
         if not frame_bytes:
             break
         frame_time = datetime.datetime.now().timestamp()
@@ -584,6 +602,7 @@ def main():
         object_tracker.match_and_update(frame_time, detections)
 
         total_detections += frame_detections
+        frame_times.append(datetime.datetime.now().timestamp()-start_frame)
 
         # if (frames >= 700 and frames <= 1635) or (frames >= 2500):
         # if (frames >= 700 and frames <= 1000):
@@ -609,11 +628,12 @@ def main():
         #     cv2.putText(frame, str(total_detections), (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
         #     cv2.putText(frame, str(frame_detections), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
         #     cv2.imwrite(f"/lab/debug/output/frame-{frames}.jpg", frame)
-            # break
+        #     break
 
     duration = datetime.datetime.now().timestamp()-start
     print(f"Processed {frames} frames for {duration:.2f} seconds and {(frames/duration):.2f} FPS.")
     print(f"Total detections: {total_detections}")
+    print(f"Average frame processing time: {mean(frame_times)*1000:.2f}ms")
 
 if __name__ == '__main__':
     main()
