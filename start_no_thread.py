@@ -308,15 +308,13 @@ class RemoteObjectDetector():
             detections = sa.attach("detections")
 
             while True:
-                # signal that the process is ready to detect
-                detect_ready.set()
                 # wait until a frame is ready
                 frame_ready.wait()
                 # signal that the process is busy
-                detect_ready.clear()
                 frame_ready.clear()
-
                 detections[:] = object_detector.detect_raw(input_frame)
+                # signal that the process is ready to detect
+                detect_ready.set()
 
         self.detect_process = mp.Process(target=run_detector, args=(model, labels, self.detect_ready, self.frame_ready))
         self.detect_process.daemon = True
@@ -326,7 +324,8 @@ class RemoteObjectDetector():
         detections = []
         with self.detect_lock:
             self.input_frame[:] = tensor_input
-            # signal that a frame is ready
+            # unset detections and signal that a frame is ready
+            self.detect_ready.clear()
             self.frame_ready.set()
             # wait until the detection process is finished,
             self.detect_ready.wait()
@@ -492,9 +491,10 @@ def main():
     frame_size = frame_shape[0]*frame_shape[1]*frame_shape[2]
     frame = np.zeros(frame_shape, np.uint8)
     motion_detector = MotionDetector(frame_shape, resize_factor=6)
-    object_detector = ObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
+    # object_detector = ObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
     # object_detector = RemoteObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
     # object_detector = ObjectDetector('/lab/detect.tflite', '/lab/labelmap.txt')
+    object_detector = RemoteObjectDetector('/lab/detect.tflite', '/lab/labelmap.txt')
     object_tracker = ObjectTracker(10)
 
     # f = open('/debug/input/back.rgb24', 'rb')
@@ -504,9 +504,9 @@ def main():
     # -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p -i output.mp4 -f rawvideo -pix_fmt rgb24 pipe:
     ffmpeg_cmd = (['ffmpeg'] +
             ['-hide_banner','-loglevel','panic'] +
-            ['-hwaccel','vaapi','-hwaccel_device','/dev/dri/renderD129','-hwaccel_output_format','yuv420p'] +
+            # ['-hwaccel','vaapi','-hwaccel_device','/dev/dri/renderD129','-hwaccel_output_format','yuv420p'] +
             # ['-i', '/debug/input/output.mp4'] +
-            ['-i', '/debug/back-ali-jake.mp4'] +
+            ['-i', '/lab/debug/back-night.mp4'] +
             ['-f','rawvideo','-pix_fmt','rgb24'] +
             ['pipe:'])
 
@@ -678,7 +678,7 @@ def main():
         frame_times.append(datetime.datetime.now().timestamp()-start_frame)
 
         # if (frames >= 700 and frames <= 1635) or (frames >= 2500):
-        # if (frames >= 700 and frames <= 1000):
+        # if (frames >= 300 and frames <= 600):
         if (frames >= 0):
             # row1 = cv2.hconcat([gray, cv2.convertScaleAbs(avg_frame)])
             # row2 = cv2.hconcat([frameDelta, thresh])
