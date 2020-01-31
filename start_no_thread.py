@@ -9,6 +9,8 @@ import cv2
 import imutils
 import numpy as np
 import subprocess as sp
+import multiprocessing as mp
+import SharedArray as sa
 from scipy.spatial import distance as dist
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
@@ -245,6 +247,19 @@ class ObjectDetector():
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
+    
+    def detect_raw(self, tensor_input):
+        self.interpreter.set_tensor(self.tensor_input_details[0]['index'], tensor_input)
+        self.interpreter.invoke()
+        boxes = np.squeeze(self.interpreter.get_tensor(self.tensor_output_details[0]['index']))
+        label_codes = np.squeeze(self.interpreter.get_tensor(self.tensor_output_details[1]['index']))
+        scores = np.squeeze(self.interpreter.get_tensor(self.tensor_output_details[2]['index']))
+
+        detections = np.zeros((20,6), np.float32)
+        for i, score in enumerate(scores):
+            detections[i] = [label_codes[i], score, boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]]
+        
+        return detections
 
     def detect(self, tensor_input, threshold=.4):
         self.interpreter.set_tensor(self.tensor_input_details[0]['index'], tensor_input)
@@ -266,6 +281,63 @@ class ObjectDetector():
                 boxes[i]
             ))
         
+        return detections
+
+class RemoteObjectDetector():
+    def __init__(self, model, labels):
+        self.labels = load_labels(labels)
+        try:
+            sa.delete("frame")
+        except:
+            pass
+        try:
+            sa.delete("detections")
+        except:
+            pass
+
+        self.input_frame = sa.create("frame", shape=(1,300,300,3), dtype=np.uint8)
+        self.detections = sa.create("detections", shape=(20,6), dtype=np.float32)
+
+        self.detect_lock = mp.Lock()
+        self.detect_ready = mp.Event()
+        self.frame_ready = mp.Event()
+
+        def run_detector(model, labels, detect_ready, frame_ready):
+            object_detector = ObjectDetector(model, labels)
+            input_frame = sa.attach("frame")
+            detections = sa.attach("detections")
+
+            while True:
+                # signal that the process is ready to detect
+                detect_ready.set()
+                # wait until a frame is ready
+                frame_ready.wait()
+                # signal that the process is busy
+                detect_ready.clear()
+                frame_ready.clear()
+
+                detections[:] = object_detector.detect_raw(input_frame)
+
+        self.detect_process = mp.Process(target=run_detector, args=(model, labels, self.detect_ready, self.frame_ready))
+        self.detect_process.daemon = True
+        self.detect_process.start()
+    
+    def detect(self, tensor_input, threshold=.4):
+        detections = []
+        with self.detect_lock:
+            self.input_frame[:] = tensor_input
+            # signal that a frame is ready
+            self.frame_ready.set()
+            # wait until the detection process is finished,
+            self.detect_ready.wait()
+            for d in self.detections:
+                if d[1] < threshold:
+                    break
+                detections.append((
+                    self.labels[int(d[0])],
+                    float(d[1]),
+                    (d[2], d[3], d[4], d[5])
+                ))
         return detections
 
 class ObjectTracker():
@@ -421,6 +493,7 @@ def main():
     frame = np.zeros(frame_shape, np.uint8)
     motion_detector = MotionDetector(frame_shape, resize_factor=6)
     object_detector = ObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
+    # object_detector = RemoteObjectDetector('/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite', '/lab/labelmap.txt')
     # object_detector = ObjectDetector('/lab/detect.tflite', '/lab/labelmap.txt')
     object_tracker = ObjectTracker(10)
 
@@ -432,8 +505,8 @@ def main():
     ffmpeg_cmd = (['ffmpeg'] +
             ['-hide_banner','-loglevel','panic'] +
             ['-hwaccel','vaapi','-hwaccel_device','/dev/dri/renderD129','-hwaccel_output_format','yuv420p'] +
-            ['-i', '/debug/input/output.mp4'] +
-            # ['-i', '/debug/back-ali-jake.mp4'] +
+            # ['-i', '/debug/input/output.mp4'] +
+            ['-i', '/debug/back-ali-jake.mp4'] +
             ['-f','rawvideo','-pix_fmt','rgb24'] +
             ['pipe:'])
 
@@ -606,29 +679,29 @@ def main():
 
         # if (frames >= 700 and frames <= 1635) or (frames >= 2500):
         # if (frames >= 700 and frames <= 1000):
-        # if (frames >= 0):
-        #     # row1 = cv2.hconcat([gray, cv2.convertScaleAbs(avg_frame)])
-        #     # row2 = cv2.hconcat([frameDelta, thresh])
-        #     # cv2.imwrite(f"/lab/debug/output/{frames}.jpg", cv2.vconcat([row1, row2]))
-        #     # # cv2.imwrite(f"/lab/debug/output/resized-frame-{frames}.jpg", resized_frame)
-        #     # for region in motion_regions:
-        #     #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (255,128,0), 2)
-        #     # for region in object_regions:
-        #     #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,128,255), 2)
-        #     for region in merged_regions:
-        #         cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 2)
-        #     for box in motion_boxes:
-        #         cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), (255,0,0), 2)
-        #     for detection in detections:
-        #         box = detection[2]
-        #         draw_box_with_label(frame, box[0], box[1], box[2], box[3], detection[0], f"{detection[1]*100}%")
-        #     for obj in object_tracker.tracked_objects.values():
-        #         box = obj['box']
-        #         draw_box_with_label(frame, box[0], box[1], box[2], box[3], obj['label'], obj['id'], thickness=1, color=(0,0,255), position='bl')
-        #     cv2.putText(frame, str(total_detections), (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
-        #     cv2.putText(frame, str(frame_detections), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
-        #     cv2.imwrite(f"/lab/debug/output/frame-{frames}.jpg", frame)
-        #     break
+        if (frames >= 0):
+            # row1 = cv2.hconcat([gray, cv2.convertScaleAbs(avg_frame)])
+            # row2 = cv2.hconcat([frameDelta, thresh])
+            # cv2.imwrite(f"/lab/debug/output/{frames}.jpg", cv2.vconcat([row1, row2]))
+            # # cv2.imwrite(f"/lab/debug/output/resized-frame-{frames}.jpg", resized_frame)
+            # for region in motion_regions:
+            #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (255,128,0), 2)
+            # for region in object_regions:
+            #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,128,255), 2)
+            for region in merged_regions:
+                cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 2)
+            for box in motion_boxes:
+                cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), (255,0,0), 2)
+            for detection in detections:
+                box = detection[2]
+                draw_box_with_label(frame, box[0], box[1], box[2], box[3], detection[0], f"{detection[1]*100}%")
+            for obj in object_tracker.tracked_objects.values():
+                box = obj['box']
+                draw_box_with_label(frame, box[0], box[1], box[2], box[3], obj['label'], obj['id'], thickness=1, color=(0,0,255), position='bl')
+            cv2.putText(frame, str(total_detections), (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
+            cv2.putText(frame, str(frame_detections), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
+            cv2.imwrite(f"/lab/debug/output/frame-{frames}.jpg", frame)
+            # break
 
     duration = datetime.datetime.now().timestamp()-start
     print(f"Processed {frames} frames for {duration:.2f} seconds and {(frames/duration):.2f} FPS.")

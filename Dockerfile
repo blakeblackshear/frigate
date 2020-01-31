@@ -23,6 +23,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         # python-prctl \
         numpy \
         imutils \
+        SharedArray \
         # Flask \
         # paho-mqtt \
         # PyYAML \
@@ -50,7 +51,6 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
-COPY start.py .
 COPY benchmark.py .
 
-CMD ["python3", "-u", "start.py"]
+CMD ["python3", "-u", "benchmark.py"]
