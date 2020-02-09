@@ -37,9 +37,9 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     && apt -qq install --no-install-recommends -y \
         libedgetpu1-max \
     ## Tensorflow lite (python 3.7 only)
-    && wget -q https://dl.google.com/coral/python/tflite_runtime-1.14.0-cp37-cp37m-linux_x86_64.whl \
-    && python3.7 -m pip install tflite_runtime-1.14.0-cp37-cp37m-linux_x86_64.whl \
-    && rm tflite_runtime-1.14.0-cp37-cp37m-linux_x86_64.whl \
+    && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0-cp37-cp37m-linux_x86_64.whl \
+    && python3.7 -m pip install tflite_runtime-2.1.0-cp37-cp37m-linux_x86_64.whl \
+    && rm tflite_runtime-2.1.0-cp37-cp37m-linux_x86_64.whl \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
