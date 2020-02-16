@@ -670,7 +670,7 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def track_camera(name, config, ffmpeg_global_config, global_objects_config, detect_lock, detect_ready, frame_ready, detected_objects_queue, fps, avg_wait):
+def track_camera(name, config, ffmpeg_global_config, global_objects_config, detect_lock, detect_ready, frame_ready, detected_objects_queue, fps, skipped_fps):
     print(f"Starting process for {name}: {os.getpid()}")
 
     # Merge the ffmpeg config with the global config
@@ -693,8 +693,10 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     for obj in objects_with_config:
         object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
 
+    min_fps = config.get('min_fps', 0)
     take_frame = config.get('take_frame', 1)
 
+    # TODO: some kind of watchdog replacement...
     # watchdog_timeout = config.get('watchdog_timeout', 300)
 
     frame_shape = get_frame_shape(ffmpeg_input)
@@ -737,14 +739,11 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     plasma_client = plasma.connect("/tmp/plasma")
     frame_num = 0
     fps_tracker = EventsPerSecond()
+    skipped_fps_tracker = EventsPerSecond()
     fps_tracker.start()
+    skipped_fps_tracker.start()
     while True:
-        # TODO: implement something to determine if it had to wait for a frame at all
-        # to determine if it might be behind and the buffer is filling up
-        start = datetime.datetime.now().timestamp()
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
-        duration = datetime.datetime.now().timestamp()-start
-        avg_wait.value = (avg_wait.value*9 + duration)/10
 
         if not frame_bytes:
             # TODO: restart the ffmpeg process and track number of restarts
@@ -767,6 +766,14 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         
         # look for motion
         motion_boxes = motion_detector.detect(frame)
+
+        # skip object detection if we are below the min_fps
+        if frame_num > 50 and fps.value < min_fps:
+            skipped_fps_tracker.update()
+            skipped_fps.value = skipped_fps_tracker.eps()
+            continue
+        
+        skipped_fps.value = skipped_fps_tracker.eps()
 
         tracked_objects = object_tracker.tracked_objects.values()
 

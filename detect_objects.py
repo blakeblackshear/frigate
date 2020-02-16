@@ -106,11 +106,11 @@ def main():
     for name, config in CONFIG['cameras'].items():
         camera_stats_values[name] = {
             'fps': mp.Value('d', 10.0),
-            'avg_wait': mp.Value('d', 0.0)
+            'skipped_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
             tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
-            camera_stats_values[name]['fps'], camera_stats_values[name]['avg_wait']))
+            camera_stats_values[name]['fps'], camera_stats_values[name]['skipped_fps']))
         camera_process.daemon = True
         camera_processes.append(camera_process)
 
@@ -141,7 +141,7 @@ def main():
         for name, camera_stats in camera_stats_values.items():
             stats[name] = {
                 'fps': camera_stats['fps'].value,
-                'avg_wait': camera_stats['avg_wait'].value
+                'skipped_fps': camera_stats['skipped_fps'].value
             }
 
         return jsonify(stats)
