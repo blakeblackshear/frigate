@@ -2,6 +2,7 @@ import cv2
 import time
 import queue
 import yaml
+import threading
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
@@ -50,9 +51,39 @@ GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 
+# TODO: make CPU/Coral switching more seamless
 # MODEL_PATH = CONFIG.get('tflite_model', '/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
 MODEL_PATH = CONFIG.get('tflite_model', '/lab/detect.tflite')
 LABEL_MAP = CONFIG.get('label_map', '/lab/labelmap.txt')
+
+
+class CameraWatchdog(threading.Thread):
+    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue):
+        threading.Thread.__init__(self)
+        self.camera_processes = camera_processes
+        self.config = config
+        self.tflite_process = tflite_process
+        self.tracked_objects_queue = tracked_objects_queue
+
+    def run(self):
+        time.sleep(10)
+        while True:
+            # wait a bit before checking
+            time.sleep(10)
+
+            for name, camera_process in self.camera_processes.items():
+                process = camera_process['process']
+                if not process.is_alive():
+                    print(f"Process for {name} is not alive. Starting again...")
+                    camera_process['fps'].value = 10.0
+                    camera_process['skipped_fps'].value = 0.0
+                    process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
+                        self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
+                        camera_process['fps'], camera_process['skipped_fps']))
+                    process.daemon = True
+                    camera_process['process'] = process
+                    process.start()
+                    print(f"Camera_process started for {name}: {process.pid}")
 
 def main():
     # connect to mqtt and setup last will
@@ -101,22 +132,24 @@ def main():
     tflite_process = EdgeTPUProcess(MODEL_PATH)
 
     # start the camera processes
-    camera_processes = []
-    camera_stats_values = {}
+    camera_processes = {}
     for name, config in CONFIG['cameras'].items():
-        camera_stats_values[name] = {
+        camera_processes[name] = {
             'fps': mp.Value('d', 10.0),
             'skipped_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
             tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
-            camera_stats_values[name]['fps'], camera_stats_values[name]['skipped_fps']))
+            camera_processes[name]['fps'], camera_processes[name]['skipped_fps']))
         camera_process.daemon = True
-        camera_processes.append(camera_process)
+        camera_processes[name]['process'] = camera_process
 
-    for camera_process in camera_processes:
-        camera_process.start()
-        print(f"Camera_process started {camera_process.pid}")
+    for name, camera_process in camera_processes.items():
+        camera_process['process'].start()
+        print(f"Camera_process started for {name}: {camera_process['process'].pid}")
+    
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue)
+    camera_watchdog.start()
     
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue)
     object_processor.start()
@@ -138,7 +171,7 @@ def main():
             }
         }
 
-        for name, camera_stats in camera_stats_values.items():
+        for name, camera_stats in camera_processes.items():
             stats[name] = {
                 'fps': camera_stats['fps'].value,
                 'skipped_fps': camera_stats['skipped_fps'].value
@@ -183,8 +216,7 @@ def main():
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
-    for camera_process in camera_processes:
-        camera_process.join()
+    camera_watchdog.join()
     
     plasma_process.terminate()
 
