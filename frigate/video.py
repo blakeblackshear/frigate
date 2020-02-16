@@ -16,7 +16,7 @@ import copy
 import itertools
 import json
 from collections import defaultdict
-from frigate.util import tonumpyarray, LABELS, draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond
+from frigate.util import tonumpyarray, draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond
 # from frigate.object_detection import RegionPrepper, RegionRequester
 from frigate.objects import ObjectTracker
 # from frigate.mqtt import MqttObjectPublisher
