@@ -26,10 +26,11 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         scipy \
     && python3.7 -m pip install -U \
         SharedArray \
-        # Flask \
-        # paho-mqtt \
-        # PyYAML \
-        # matplotlib \
+        Flask \
+        paho-mqtt \
+        PyYAML \
+        matplotlib \
+        pyarrow \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
     && apt -qq update \

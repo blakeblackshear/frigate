@@ -1,8 +1,11 @@
+import os
+import datetime
 import multiprocessing as mp
 import numpy as np
 import SharedArray as sa
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
+from frigate.util import EventsPerSecond
 
 def load_labels(path, encoding='utf-8'):
   """Loads labels from file (with or without index numbers).
@@ -59,6 +62,7 @@ class ObjectDetector():
 
 class EdgeTPUProcess():
     def __init__(self, model):
+        # TODO: see if we can use the plasma store with a queue and maintain the same speeds
         try:
             sa.delete("frame")
         except:
@@ -74,22 +78,32 @@ class EdgeTPUProcess():
         self.detect_lock = mp.Lock()
         self.detect_ready = mp.Event()
         self.frame_ready = mp.Event()
+        self.fps = mp.Value('d', 0.0)
+        self.avg_inference_speed = mp.Value('d', 10.0)
 
-        def run_detector(model, detect_ready, frame_ready):
+        def run_detector(model, detect_ready, frame_ready, fps, avg_speed):
+            print(f"Starting detection process: {os.getpid()}")
             object_detector = ObjectDetector(model)
             input_frame = sa.attach("frame")
             detections = sa.attach("detections")
+            fps_tracker = EventsPerSecond()
+            fps_tracker.start()
 
             while True:
                 # wait until a frame is ready
                 frame_ready.wait()
+                start = datetime.datetime.now().timestamp()
                 # signal that the process is busy
                 frame_ready.clear()
                 detections[:] = object_detector.detect_raw(input_frame)
                 # signal that the process is ready to detect
                 detect_ready.set()
+                fps_tracker.update()
+                fps.value = fps_tracker.eps()
+                duration = datetime.datetime.now().timestamp()-start
+                avg_speed.value = (avg_speed.value*9 + duration)/10
 
-        self.detect_process = mp.Process(target=run_detector, args=(model, self.detect_ready, self.frame_ready))
+        self.detect_process = mp.Process(target=run_detector, args=(model, self.detect_ready, self.frame_ready, self.fps, self.avg_inference_speed))
         self.detect_process.daemon = True
         self.detect_process.start()
 

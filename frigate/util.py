@@ -15,73 +15,11 @@ def ReadLabelFile(file_path):
         ret[int(pair[0])] = pair[1].strip()
     return ret
 
-def calculate_region(frame_shape, xmin, ymin, xmax, ymax):    
-    # size is larger than longest edge
-    size = int(max(xmax-xmin, ymax-ymin)*2)
-    # if the size is too big to fit in the frame
-    if size > min(frame_shape[0], frame_shape[1]):
-        size = min(frame_shape[0], frame_shape[1])
-
-    # x_offset is midpoint of bounding box minus half the size
-    x_offset = int((xmax-xmin)/2.0+xmin-size/2.0)
-    # if outside the image
-    if x_offset < 0:
-        x_offset = 0
-    elif x_offset > (frame_shape[1]-size):
-        x_offset = (frame_shape[1]-size)
-
-    # y_offset is midpoint of bounding box minus half the size
-    y_offset = int((ymax-ymin)/2.0+ymin-size/2.0)
-    # if outside the image
-    if y_offset < 0:
-        y_offset = 0
-    elif y_offset > (frame_shape[0]-size):
-        y_offset = (frame_shape[0]-size)
-
-    return (size, x_offset, y_offset)
-
-def compute_intersection_rectangle(box_a, box_b):
-    return {
-        'xmin': max(box_a['xmin'], box_b['xmin']),
-        'ymin': max(box_a['ymin'], box_b['ymin']),
-        'xmax': min(box_a['xmax'], box_b['xmax']),
-        'ymax': min(box_a['ymax'], box_b['ymax'])
-    }
-    
-def compute_intersection_over_union(box_a, box_b):
-    # determine the (x, y)-coordinates of the intersection rectangle
-    intersect = compute_intersection_rectangle(box_a, box_b)
-
-    # compute the area of intersection rectangle
-    inter_area = max(0, intersect['xmax'] - intersect['xmin'] + 1) * max(0, intersect['ymax'] - intersect['ymin'] + 1)
-
-    if inter_area == 0:
-        return 0.0
-    
-    # compute the area of both the prediction and ground-truth
-    # rectangles
-    box_a_area = (box_a['xmax'] - box_a['xmin'] + 1) * (box_a['ymax'] - box_a['ymin'] + 1)
-    box_b_area = (box_b['xmax'] - box_b['xmin'] + 1) * (box_b['ymax'] - box_b['ymin'] + 1)
-
-    # compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
-    iou = inter_area / float(box_a_area + box_b_area - inter_area)
-
-    # return the intersection over union value
-    return iou
-
-# convert shared memory array into numpy array
-def tonumpyarray(mp_arr):
-    return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
-
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
-        color = COLOR_MAP[label]
+        color = (0,0,255)
     display_text = "{}: {}".format(label, info)
-    cv2.rectangle(frame, (x_min, y_min), 
-        (x_max, y_max), 
-        color, thickness)
+    cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, thickness)
     font_scale = 0.5
     font = cv2.FONT_HERSHEY_SIMPLEX
     # get the width and height of the text box
@@ -107,37 +45,81 @@ def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thicknes
     cv2.rectangle(frame, textbox_coords[0], textbox_coords[1], color, cv2.FILLED)
     cv2.putText(frame, display_text, (text_offset_x, text_offset_y + line_height - 3), font, fontScale=font_scale, color=(0, 0, 0), thickness=2)
 
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = '/frozen_inference_graph.pb'
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = '/label_map.pbtext'
+def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):    
+    # size is larger than longest edge
+    size = int(max(xmax-xmin, ymax-ymin)*multiplier)
+    # if the size is too big to fit in the frame
+    if size > min(frame_shape[0], frame_shape[1]):
+        size = min(frame_shape[0], frame_shape[1])
 
-LABELS = ReadLabelFile(PATH_TO_LABELS)
-cmap = plt.cm.get_cmap('tab10', len(LABELS.keys()))
+    # x_offset is midpoint of bounding box minus half the size
+    x_offset = int((xmax-xmin)/2.0+xmin-size/2.0)
+    # if outside the image
+    if x_offset < 0:
+        x_offset = 0
+    elif x_offset > (frame_shape[1]-size):
+        x_offset = (frame_shape[1]-size)
 
-COLOR_MAP = {}
-for key, val in LABELS.items():
-    COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+    # y_offset is midpoint of bounding box minus half the size
+    y_offset = int((ymax-ymin)/2.0+ymin-size/2.0)
+    # if outside the image
+    if y_offset < 0:
+        y_offset = 0
+    elif y_offset > (frame_shape[0]-size):
+        y_offset = (frame_shape[0]-size)
 
-class QueueMerger():
-    def __init__(self, from_queues, to_queue):
-        self.from_queues = from_queues
-        self.to_queue = to_queue
-        self.merge_threads = []
+    return (x_offset, y_offset, x_offset+size, y_offset+size)
 
-    def start(self):
-        for from_q in self.from_queues:
-            self.merge_threads.append(QueueTransfer(from_q,self.to_queue))
+def intersection(box_a, box_b):
+    return (
+        max(box_a[0], box_b[0]),
+        max(box_a[1], box_b[1]),
+        min(box_a[2], box_b[2]),
+        min(box_a[3], box_b[3])
+    )
 
-class QueueTransfer(threading.Thread):
-    def __init__(self, from_queue, to_queue):
-        threading.Thread.__init__(self)
-        self.from_queue = from_queue
-        self.to_queue = to_queue
+def area(box):
+    return (box[2]-box[0] + 1)*(box[3]-box[1] + 1)
+    
+def intersection_over_union(box_a, box_b):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    intersect = intersection(box_a, box_b)
 
-    def run(self):
-        while True:
-            self.to_queue.put(self.from_queue.get())
+    # compute the area of intersection rectangle
+    inter_area = max(0, intersect[2] - intersect[0] + 1) * max(0, intersect[3] - intersect[1] + 1)
+
+    if inter_area == 0:
+        return 0.0
+    
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    box_a_area = (box_a[2] - box_a[0] + 1) * (box_a[3] - box_a[1] + 1)
+    box_b_area = (box_b[2] - box_b[0] + 1) * (box_b[3] - box_b[1] + 1)
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = inter_area / float(box_a_area + box_b_area - inter_area)
+
+    # return the intersection over union value
+    return iou
+
+def clipped(obj, frame_shape):
+    # if the object is within 5 pixels of the region border, and the region is not on the edge
+    # consider the object to be clipped
+    box = obj[2]
+    region = obj[4]
+    if ((region[0] > 5 and box[0]-region[0] <= 5) or 
+        (region[1] > 5 and box[1]-region[1] <= 5) or
+        (frame_shape[1]-region[2] > 5 and region[2]-box[2] <= 5) or
+        (frame_shape[0]-region[3] > 5 and region[3]-box[3] <= 5)):
+        return True
+    else:
+        return False
+
+# convert shared memory array into numpy array
+def tonumpyarray(mp_arr):
+    return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
 class EventsPerSecond:
     def __init__(self, max_events=1000):
