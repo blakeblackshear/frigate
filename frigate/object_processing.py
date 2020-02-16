@@ -40,51 +40,9 @@ class TrackedObjectProcessor(threading.Thread):
             return self.camera_data[camera]['best_objects'][label]['frame']
         else:
             return None
-
-    def get_frame(self, config, camera, obj):
-        object_id_hash = hashlib.sha1(str.encode(f"{camera}{obj['frame_time']}"))
-        object_id_bytes = object_id_hash.digest()
-        object_id = plasma.ObjectID(object_id_bytes)
-        best_frame = self.plasma_client.get(object_id)
-        box = obj['box']
-        draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}")
-        # print a timestamp
-        if config['snapshots']['show_timestamp']:
-            time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-            cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-        return best_frame
     
-    def current_frame_with_objects(self, camera):
-        frame_time = self.camera_data[camera]['current_frame']
-        object_id_hash = hashlib.sha1(str.encode(f"{camera}{frame_time}"))
-        object_id_bytes = object_id_hash.digest()
-        object_id = plasma.ObjectID(object_id_bytes)
-        current_frame = self.plasma_client.get(object_id)
-            
-        tracked_objects = copy.deepcopy(self.camera_data[camera]['tracked_objects'])
-
-        # draw the bounding boxes on the screen
-        for obj in tracked_objects.values():
-            thickness = 2
-            color = COLOR_MAP[obj['label']]
-            
-            if obj['frame_time'] != frame_time:
-                thickness = 1
-                color = (255,0,0)
-
-            box = obj['box']
-            draw_box_with_label(current_frame, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
-        
-        # # print fps
-        # cv2.putText(frame, str(self.fps.eps())+'FPS', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-
-        # convert to BGR
-        frame = cv2.cvtColor(current_frame, cv2.COLOR_RGB2BGR)
-
-        # encode the image into a jpg
-        ret, jpg = cv2.imencode('.jpg', frame)
-
-        return jpg.tobytes()
+    def get_current_frame(self, camera):
+        return self.camera_data[camera]['current_frame']
 
     def run(self):
         while True:
@@ -94,21 +52,56 @@ class TrackedObjectProcessor(threading.Thread):
             best_objects = self.camera_data[camera]['best_objects']
             current_object_status = self.camera_data[camera]['object_status']
             self.camera_data[camera]['tracked_objects'] = tracked_objects
-            self.camera_data[camera]['current_frame'] = frame_time
+
+            ###
+            # Draw tracked objects on the frame
+            ###
+            object_id_hash = hashlib.sha1(str.encode(f"{camera}{frame_time}"))
+            object_id_bytes = object_id_hash.digest()
+            object_id = plasma.ObjectID(object_id_bytes)
+            current_frame = self.plasma_client.get(object_id)
+
+            # draw the bounding boxes on the frame
+            for obj in tracked_objects.values():
+                thickness = 2
+                color = COLOR_MAP[obj['label']]
+                
+                if obj['frame_time'] != frame_time:
+                    thickness = 1
+                    color = (255,0,0)
+
+                # draw the bounding boxes on the frame
+                box = obj['box']
+                draw_box_with_label(current_frame, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
+                # draw the regions on the frame
+                region = obj['region']
+                cv2.rectangle(current_frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 1)
+            
+            if config['snapshots']['show_timestamp']:
+                time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+                cv2.putText(current_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
+            ###
+            # Set the current frame as ready
+            ###
+            self.camera_data[camera]['current_frame'] = current_frame
             
             ###
             # Maintain the highest scoring recent object and frame for each label
             ###
             for obj in tracked_objects.values():
+                # if the object wasn't seen on the current frame, skip it
+                if obj['frame_time'] != frame_time:
+                    continue
                 if obj['label'] in best_objects:
                     now = datetime.datetime.now().timestamp()
                     # if the object is a higher score than the current best score 
                     # or the current object is more than 1 minute old, use the new object
                     if obj['score'] > best_objects[obj['label']]['score'] or (now - best_objects[obj['label']]['frame_time']) > 60:
-                        obj['frame'] = self.get_frame(config, camera, obj)
+                        obj['frame'] = np.copy(current_frame)
                         best_objects[obj['label']] = obj
                 else:
-                    obj['frame'] = self.get_frame(config, camera, obj)
+                    obj['frame'] = np.copy(current_frame)
                     best_objects[obj['label']] = obj
 
             ###

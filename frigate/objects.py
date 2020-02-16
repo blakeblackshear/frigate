@@ -9,7 +9,7 @@ import numpy as np
 import multiprocessing as mp
 from collections import defaultdict
 from scipy.spatial import distance as dist
-from frigate.util import draw_box_with_label, LABELS, calculate_region
+from frigate.util import draw_box_with_label, calculate_region
 
 # class ObjectCleaner(threading.Thread):
 #     def __init__(self, camera):

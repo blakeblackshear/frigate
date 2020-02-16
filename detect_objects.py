@@ -80,6 +80,11 @@ def main():
     # start plasma store
     plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
     plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    time.sleep(1)
+    rc = plasma_process.poll()
+    if rc is not None:
+        raise RuntimeError("plasma_store exited unexpectedly with "
+                            "code %d" % (rc,))
 
     ##
     # Setup config defaults for cameras
@@ -95,6 +100,7 @@ def main():
     # Start the shared tflite process
     tflite_process = EdgeTPUProcess(MODEL_PATH)
 
+    # start the camera processes
     camera_processes = []
     camera_stats_values = {}
     for name, config in CONFIG['cameras'].items():
@@ -167,9 +173,13 @@ def main():
         while True:
             # max out at 1 FPS
             time.sleep(1)
-            frame = object_processor.current_frame_with_objects(camera_name)
+            frame = object_processor.get_current_frame(camera_name)
+            if frame is None:
+                frame = np.zeros((720,1280,3), np.uint8)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
