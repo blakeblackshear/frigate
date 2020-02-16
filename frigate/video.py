@@ -11,42 +11,14 @@ import numpy as np
 import hashlib
 import pyarrow.plasma as plasma
 import SharedArray as sa
-# import prctl
 import copy
 import itertools
 import json
 from collections import defaultdict
-from frigate.util import tonumpyarray, draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond
-# from frigate.object_detection import RegionPrepper, RegionRequester
+from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond
 from frigate.objects import ObjectTracker
-# from frigate.mqtt import MqttObjectPublisher
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
-
-# Stores 2 seconds worth of frames so they can be used for other threads
-# TODO: we do actually know when these frames are no longer needed
-# class FrameTracker(threading.Thread):
-#     def __init__(self, frame_time, frame_ready, frame_lock, recent_frames):
-#         threading.Thread.__init__(self)
-#         self.frame_time = frame_time
-#         self.frame_ready = frame_ready
-#         self.frame_lock = frame_lock
-#         self.recent_frames = recent_frames
-    
-#     def run(self):
-#         prctl.set_name(self.__class__.__name__)
-#         while True:
-#             # wait for a frame
-#             with self.frame_ready:
-#                 self.frame_ready.wait()
-
-#             # delete any old frames
-#             stored_frame_times = list(self.recent_frames.keys())
-#             stored_frame_times.sort(reverse=True)
-#             if len(stored_frame_times) > 100:
-#                 frames_to_delete = stored_frame_times[50:]
-#                 for k in frames_to_delete:
-#                     del self.recent_frames[k]
 
 # TODO: add back opencv fallback
 def get_frame_shape(source):
@@ -302,23 +274,7 @@ class Camera:
             self.capture_thread.join()
             self.ffmpeg_process = None
             self.capture_thread = None
-=======
-# class CameraWatchdog(threading.Thread):
-#     def __init__(self, camera):
-#         threading.Thread.__init__(self)
-#         self.camera = camera
-
-#     def run(self):
-#         prctl.set_name(self.__class__.__name__)
-#         while True:
-#             # wait a bit before checking
-#             time.sleep(10)
-
-#             if self.camera.frame_time.value != 0.0 and (datetime.datetime.now().timestamp() - self.camera.frame_time.value) > self.camera.watchdog_timeout:
-#                 print(self.camera.name + ": last frame is more than 5 minutes old, restarting camera capture...")
-#                 self.camera.start_or_restart_capture()
-#                 time.sleep(5)
-
+        
 # # Thread to read the stdout of the ffmpeg process and update the current frame
 # class CameraCapture(threading.Thread):
 #     def __init__(self, camera):
@@ -518,7 +474,6 @@ class Camera:
 #             self.capture_thread.join()
 #             self.ffmpeg_process = None
 #             self.capture_thread = None
->>>>>>> 9b1c7e9... split into separate processes
             
 #         # create the process to capture frames from the input stream and store in a shared array
 #         print("Creating a new ffmpeg process...")
@@ -626,6 +581,8 @@ class Camera:
 
 #         return frame_bytes
 
+=======
+>>>>>>> 2a2fbe7... cleanup old code
 def filtered(obj, objects_to_track, object_filters, mask):
     object_name = obj[0]
 

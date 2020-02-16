@@ -5,16 +5,6 @@ import cv2
 import threading
 import matplotlib.pyplot as plt
 
-# Function to read labels from text files.
-def ReadLabelFile(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    ret = {}
-    for line in lines:
-        pair = line.strip().split(maxsplit=1)
-        ret[int(pair[0])] = pair[1].strip()
-    return ret
-
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
         color = (0,0,255)
@@ -116,10 +106,6 @@ def clipped(obj, frame_shape):
         return True
     else:
         return False
-
-# convert shared memory array into numpy array
-def tonumpyarray(mp_arr):
-    return np.frombuffer(mp_arr.get_obj(), dtype=np.uint8)
 
 class EventsPerSecond:
     def __init__(self, max_events=1000):

@@ -10,11 +10,12 @@ import itertools
 import pyarrow.plasma as plasma
 import SharedArray as sa
 import matplotlib.pyplot as plt
-from frigate.util import draw_box_with_label, ReadLabelFile
+from frigate.util import draw_box_with_label
+from frigate.edgetpu import load_labels
 
 PATH_TO_LABELS = '/lab/labelmap.txt'
 
-LABELS = ReadLabelFile(PATH_TO_LABELS)
+LABELS = load_labels(PATH_TO_LABELS)
 cmap = plt.cm.get_cmap('tab10', len(LABELS.keys()))
 
 COLOR_MAP = {}
