@@ -2,13 +2,16 @@ import cv2
 import time
 import queue
 import yaml
+import multiprocessing as mp
+import subprocess as sp
 import numpy as np
 from flask import Flask, Response, make_response, jsonify
 import paho.mqtt.client as mqtt
 
-from frigate.video import Camera
-from frigate.object_detection import PreppedQueueProcessor
+from frigate.video import track_camera
+from frigate.object_processing import TrackedObjectProcessor
 from frigate.util import EventsPerSecond
+from frigate.edgetpu import EdgeTPUProcess
 
 with open('/config/config.yml') as f:
     CONFIG = yaml.safe_load(f)
@@ -38,8 +41,7 @@ FFMPEG_DEFAULT_CONFIG = {
          '-stimeout', '5000000',
          '-use_wallclock_as_timestamps', '1']),
     'output_args': FFMPEG_CONFIG.get('output_args',
-        ['-vf', 'mpdecimate',
-         '-f', 'rawvideo',
+        ['-f', 'rawvideo',
          '-pix_fmt', 'rgb24'])
 }
 
@@ -47,6 +49,10 @@ GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
+
+# MODEL_PATH = CONFIG.get('tflite_model', '/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
+MODEL_PATH = CONFIG.get('tflite_model', '/lab/detect.tflite')
+LABEL_MAP = CONFIG.get('label_map', '/lab/labelmap.txt')
 
 def main():
     # connect to mqtt and setup last will
@@ -70,28 +76,44 @@ def main():
         client.username_pw_set(MQTT_USER, password=MQTT_PASS)
     client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
-    
-    # Queue for prepped frames, max size set to number of regions * 3
-    prepped_frame_queue = queue.Queue()
 
-    cameras = {}
+    # start plasma store
+    plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
+    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+
+    ##
+    # Setup config defaults for cameras
+    ##
     for name, config in CONFIG['cameras'].items():
-        cameras[name] = Camera(name, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, config, 
-            prepped_frame_queue, client, MQTT_TOPIC_PREFIX)
+        config['snapshots'] = {
+            'show_timestamp': config.get('snapshots', {}).get('show_timestamp', True)
+        }
 
-    fps_tracker = EventsPerSecond()
+    # Queue for cameras to push tracked objects to
+    tracked_objects_queue = mp.Queue()
+    
+    # Start the shared tflite process
+    tflite_process = EdgeTPUProcess(MODEL_PATH)
 
-    prepped_queue_processor = PreppedQueueProcessor(
-        cameras,
-        prepped_frame_queue,
-        fps_tracker
-    )
-    prepped_queue_processor.start()
-    fps_tracker.start()
+    camera_processes = []
+    camera_stats_values = {}
+    for name, config in CONFIG['cameras'].items():
+        camera_stats_values[name] = {
+            'fps': mp.Value('d', 10.0),
+            'avg_wait': mp.Value('d', 0.0)
+        }
+        camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
+            tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
+            camera_stats_values[name]['fps'], camera_stats_values[name]['avg_wait']))
+        camera_process.daemon = True
+        camera_processes.append(camera_process)
 
-    for name, camera in cameras.items():
-        camera.start()
-        print("Capture process for {}: {}".format(name, camera.get_capture_pid()))
+    for camera_process in camera_processes:
+        camera_process.start()
+        print(f"Camera_process started {camera_process.pid}")
+    
+    object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue)
+    object_processor.start()
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
@@ -105,21 +127,23 @@ def main():
     def stats():
         stats = {
             'coral': {
-                'fps': fps_tracker.eps(),
-                'inference_speed': prepped_queue_processor.avg_inference_speed,
-                'queue_length': prepped_frame_queue.qsize()
+                'fps': tflite_process.fps.value,
+                'inference_speed': tflite_process.avg_inference_speed.value
             }
         }
 
-        for name, camera in cameras.items():
-            stats[name] = camera.stats()
+        for name, camera_stats in camera_stats_values.items():
+            stats[name] = {
+                'fps': camera_stats['fps'].value,
+                'avg_wait': camera_stats['avg_wait'].value
+            }
 
         return jsonify(stats)
 
     @app.route('/<camera_name>/<label>/best.jpg')
     def best(camera_name, label):
-        if camera_name in cameras:
-            best_frame = cameras[camera_name].get_best(label)
+        if camera_name in CONFIG['cameras']:
+            best_frame = object_processor.get_best(camera_name, label)
             if best_frame is None:
                 best_frame = np.zeros((720,1280,3), np.uint8)
             best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
@@ -132,7 +156,7 @@ def main():
 
     @app.route('/<camera_name>')
     def mjpeg_feed(camera_name):
-        if camera_name in cameras:
+        if camera_name in CONFIG['cameras']:
             # return a multipart response
             return Response(imagestream(camera_name),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -143,13 +167,16 @@ def main():
         while True:
             # max out at 1 FPS
             time.sleep(1)
-            frame = cameras[camera_name].get_current_frame_with_objects()
+            frame = object_processor.current_frame_with_objects(camera_name)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
-    camera.join()
+    for camera_process in camera_processes:
+        camera_process.join()
+    
+    plasma_process.terminate()
 
 if __name__ == '__main__':
     main()

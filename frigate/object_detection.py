@@ -3,7 +3,7 @@ import time
 import cv2
 import threading
 import copy
-import prctl
+# import prctl
 import numpy as np
 from edgetpu.detection.engine import DetectionEngine
 

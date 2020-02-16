@@ -3,14 +3,15 @@ import imutils
 import numpy as np
 
 class MotionDetector():
-    # TODO: add motion masking
-    def __init__(self, frame_shape, resize_factor=4):
+    def __init__(self, frame_shape, mask, resize_factor=4):
         self.resize_factor = resize_factor
         self.motion_frame_size = (int(frame_shape[0]/resize_factor), int(frame_shape[1]/resize_factor))
         self.avg_frame = np.zeros(self.motion_frame_size, np.float)
         self.avg_delta = np.zeros(self.motion_frame_size, np.float)
         self.motion_frame_count = 0
         self.frame_counter = 0
+        resized_mask = cv2.resize(mask, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
+        self.mask = np.where(resized_mask==[0])
 
     def detect(self, frame):
         motion_boxes = []
@@ -20,6 +21,9 @@ class MotionDetector():
 
         # convert to grayscale
         gray = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+
+        # mask frame
+        gray[self.mask] = [255]
 
         # it takes ~30 frames to establish a baseline
         # dont bother looking for motion
@@ -58,7 +62,6 @@ class MotionDetector():
                 # if the contour is big enough, count it as motion
                 contour_area = cv2.contourArea(c)
                 if contour_area > 100:
-                    # cv2.drawContours(resized_frame, [c], -1, (255,255,255), 2)
                     x, y, w, h = cv2.boundingRect(c)
                     motion_boxes.append((x*self.resize_factor, y*self.resize_factor, (x+w)*self.resize_factor, (y+h)*self.resize_factor))
         
