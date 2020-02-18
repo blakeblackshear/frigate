@@ -51,12 +51,6 @@ GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 
-# TODO: make CPU/Coral switching more seamless
-# MODEL_PATH = CONFIG.get('tflite_model', '/lab/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
-MODEL_PATH = CONFIG.get('tflite_model', '/lab/detect.tflite')
-LABEL_MAP = CONFIG.get('label_map', '/lab/labelmap.txt')
-
-
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue):
         threading.Thread.__init__(self)
@@ -129,13 +123,13 @@ def main():
     tracked_objects_queue = mp.Queue()
     
     # Start the shared tflite process
-    tflite_process = EdgeTPUProcess(MODEL_PATH)
+    tflite_process = EdgeTPUProcess()
 
     # start the camera processes
     camera_processes = {}
     for name, config in CONFIG['cameras'].items():
         camera_processes[name] = {
-            'fps': mp.Value('d', float(config[name]['fps'])),
+            'fps': mp.Value('d', float(config['fps'])),
             'skipped_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
