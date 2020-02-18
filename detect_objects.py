@@ -6,6 +6,7 @@ import threading
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
+import logging
 from flask import Flask, Response, make_response, jsonify
 import paho.mqtt.client as mqtt
 
@@ -150,6 +151,8 @@ def main():
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
 
     @app.route('/')
     def ishealthy():
