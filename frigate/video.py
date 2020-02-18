@@ -146,7 +146,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
-    object_detector = RemoteObjectDetector('/lab/labelmap.txt', detect_lock, detect_ready, frame_ready)
+    object_detector = RemoteObjectDetector('/labelmap.txt', detect_lock, detect_ready, frame_ready)
 
     object_tracker = ObjectTracker(10)
 
@@ -193,7 +193,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         motion_boxes = motion_detector.detect(frame)
 
         # skip object detection if we are below the min_fps
-        if frame_num > 50 and fps.value < expected_fps-1:
+        if frame_num > 100 and fps.value < expected_fps-1:
             skipped_fps_tracker.update()
             skipped_fps.value = skipped_fps_tracker.eps()
             continue

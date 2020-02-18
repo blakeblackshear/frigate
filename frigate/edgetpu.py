@@ -27,7 +27,7 @@ def load_labels(path, encoding='utf-8'):
         return {index: line.strip() for index, line in enumerate(lines)}
 
 class ObjectDetector():
-    def __init__(self, model_file):
+    def __init__(self):
         edge_tpu_delegate = None
         try:
             edge_tpu_delegate = load_delegate('libedgetpu.so.1.0')
@@ -61,7 +61,7 @@ class ObjectDetector():
         return detections
 
 class EdgeTPUProcess():
-    def __init__(self, model):
+    def __init__(self):
         # TODO: see if we can use the plasma store with a queue and maintain the same speeds
         try:
             sa.delete("frame")
@@ -79,11 +79,11 @@ class EdgeTPUProcess():
         self.detect_ready = mp.Event()
         self.frame_ready = mp.Event()
         self.fps = mp.Value('d', 0.0)
-        self.avg_inference_speed = mp.Value('d', 10.0)
+        self.avg_inference_speed = mp.Value('d', 0.01)
 
-        def run_detector(model, detect_ready, frame_ready, fps, avg_speed):
+        def run_detector(detect_ready, frame_ready, fps, avg_speed):
             print(f"Starting detection process: {os.getpid()}")
-            object_detector = ObjectDetector(model)
+            object_detector = ObjectDetector()
             input_frame = sa.attach("frame")
             detections = sa.attach("detections")
             fps_tracker = EventsPerSecond()
@@ -103,7 +103,7 @@ class EdgeTPUProcess():
                 duration = datetime.datetime.now().timestamp()-start
                 avg_speed.value = (avg_speed.value*9 + duration)/10
 
-        self.detect_process = mp.Process(target=run_detector, args=(model, self.detect_ready, self.frame_ready, self.fps, self.avg_inference_speed))
+        self.detect_process = mp.Process(target=run_detector, args=(self.detect_ready, self.frame_ready, self.fps, self.avg_inference_speed))
         self.detect_process.daemon = True
         self.detect_process.start()
 
