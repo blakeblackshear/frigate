@@ -36,10 +36,10 @@ class ObjectDetector():
         
         if edge_tpu_delegate is None:
             self.interpreter = tflite.Interpreter(
-                model_path=model_file)
+                model_path='/cpu_model.tflite')
         else:
             self.interpreter = tflite.Interpreter(
-                model_path=model_file,
+                model_path='/edgetpu_model.tflite',
                 experimental_delegates=[edge_tpu_delegate])
         
         self.interpreter.allocate_tensors()

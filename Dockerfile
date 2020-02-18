@@ -7,7 +7,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     software-properties-common \
     # apt-transport-https ca-certificates \
     build-essential \
-    gnupg wget \
+    gnupg wget unzip \
     # libcap-dev \
     && add-apt-repository ppa:deadsnakes/ppa -y \
     && apt -qq install --no-install-recommends -y \
@@ -44,15 +44,16 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
-# # symlink the model and labels
-# RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite -O mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite --trust-server-names
-# RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O coco_labels.txt --trust-server-names
-# RUN ln -s mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite /frozen_inference_graph.pb
-# RUN ln -s /coco_labels.txt /label_map.pbtext
+# get model and labels
+RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite --trust-server-names
+RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O /labelmap.txt --trust-server-names
+RUN wget -q https://storage.googleapis.com/download.tensorflow.org/models/tflite/coco_ssd_mobilenet_v1_1.0_quant_2018_06_29.zip -O /cpu_model.zip && \
+    unzip /cpu_model.zip detect.tflite -d / && \
+    mv /detect.tflite /cpu_model.tflite && \
+    rm /cpu_model.zip
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
-COPY benchmark.py .
 
-CMD ["python3", "-u", "benchmark.py"]
+CMD ["python3.7", "-u", "detect_objects.py"]
