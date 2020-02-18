@@ -122,11 +122,8 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     for obj in objects_with_config:
         object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
 
-    min_fps = config.get('min_fps', 0)
+    expected_fps = config['fps']
     take_frame = config.get('take_frame', 1)
-
-    # TODO: some kind of watchdog replacement...
-    # watchdog_timeout = config.get('watchdog_timeout', 300)
 
     frame_shape = get_frame_shape(ffmpeg_input)
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
@@ -175,7 +172,6 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
 
         if not frame_bytes:
-            # TODO: restart the ffmpeg process and track number of restarts
             break
 
         # limit frame rate
@@ -197,7 +193,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         motion_boxes = motion_detector.detect(frame)
 
         # skip object detection if we are below the min_fps
-        if frame_num > 50 and fps.value < min_fps:
+        if frame_num > 50 and fps.value < expected_fps-1:
             skipped_fps_tracker.update()
             skipped_fps.value = skipped_fps_tracker.eps()
             continue

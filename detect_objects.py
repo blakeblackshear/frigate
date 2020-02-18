@@ -75,7 +75,7 @@ class CameraWatchdog(threading.Thread):
                 process = camera_process['process']
                 if not process.is_alive():
                     print(f"Process for {name} is not alive. Starting again...")
-                    camera_process['fps'].value = 10.0
+                    camera_process['fps'].value = float(self.config[name]['fps'])
                     camera_process['skipped_fps'].value = 0.0
                     process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
                         self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
@@ -135,7 +135,7 @@ def main():
     camera_processes = {}
     for name, config in CONFIG['cameras'].items():
         camera_processes[name] = {
-            'fps': mp.Value('d', 10.0),
+            'fps': mp.Value('d', float(config[name]['fps'])),
             'skipped_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
@@ -167,7 +167,7 @@ def main():
         stats = {
             'coral': {
                 'fps': tflite_process.fps.value,
-                'inference_speed': tflite_process.avg_inference_speed.value
+                'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2)
             }
         }
 

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from frigate.util import draw_box_with_label
 from frigate.edgetpu import load_labels
 
-PATH_TO_LABELS = '/lab/labelmap.txt'
+PATH_TO_LABELS = '/labelmap.txt'
 
 LABELS = load_labels(PATH_TO_LABELS)
 cmap = plt.cm.get_cmap('tab10', len(LABELS.keys()))
