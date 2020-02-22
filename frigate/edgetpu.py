@@ -78,16 +78,13 @@ class EdgeTPUProcess():
         self.detect_lock = mp.Lock()
         self.detect_ready = mp.Event()
         self.frame_ready = mp.Event()
-        self.fps = mp.Value('d', 0.0)
         self.avg_inference_speed = mp.Value('d', 0.01)
 
-        def run_detector(detect_ready, frame_ready, fps, avg_speed):
+        def run_detector(detect_ready, frame_ready, avg_speed):
             print(f"Starting detection process: {os.getpid()}")
             object_detector = ObjectDetector()
             input_frame = sa.attach("frame")
             detections = sa.attach("detections")
-            fps_tracker = EventsPerSecond()
-            fps_tracker.start()
 
             while True:
                 # wait until a frame is ready
@@ -98,12 +95,10 @@ class EdgeTPUProcess():
                 detections[:] = object_detector.detect_raw(input_frame)
                 # signal that the process is ready to detect
                 detect_ready.set()
-                fps_tracker.update()
-                fps.value = fps_tracker.eps()
                 duration = datetime.datetime.now().timestamp()-start
                 avg_speed.value = (avg_speed.value*9 + duration)/10
 
-        self.detect_process = mp.Process(target=run_detector, args=(self.detect_ready, self.frame_ready, self.fps, self.avg_inference_speed))
+        self.detect_process = mp.Process(target=run_detector, args=(self.detect_ready, self.frame_ready, self.avg_inference_speed))
         self.detect_process.daemon = True
         self.detect_process.start()
 
@@ -113,6 +108,8 @@ class RemoteObjectDetector():
 
         self.input_frame = sa.attach("frame")
         self.detections = sa.attach("detections")
+
+        self.fps = EventsPerSecond()
 
         self.detect_lock = detect_lock
         self.detect_ready = detect_ready
@@ -135,4 +132,5 @@ class RemoteObjectDetector():
                     float(d[1]),
                     (d[2], d[3], d[4], d[5])
                 ))
+        self.fps.update()
         return detections
