@@ -87,7 +87,7 @@ class CameraWatchdog(threading.Thread):
                     camera_process['skipped_fps'].value = 0.0
                     process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
                         self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
-                        camera_process['fps'], camera_process['skipped_fps']))
+                        camera_process['fps'], camera_process['skipped_fps'], camera_process['detection_fps']))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
