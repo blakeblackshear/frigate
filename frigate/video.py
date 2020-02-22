@@ -164,13 +164,17 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     
     plasma_client = plasma.connect("/tmp/plasma")
     frame_num = 0
+    avg_wait = 0.0
     fps_tracker = EventsPerSecond()
     skipped_fps_tracker = EventsPerSecond()
     fps_tracker.start()
     skipped_fps_tracker.start()
     object_detector.fps.start()
     while True:
+        start = datetime.datetime.now().timestamp()
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
+        duration = datetime.datetime.now().timestamp()-start
+        avg_wait = (avg_wait*99+duration)/100
 
         if not frame_bytes:
             break
@@ -194,9 +198,8 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         # look for motion
         motion_boxes = motion_detector.detect(frame)
 
-        # skip object detection if we are below the min_fps
-        # TODO: its about more than just the FPS. also look at avg wait or min wait
-        if frame_num > 100 and fps.value < expected_fps-1:
+        # skip object detection if we are below the min_fps and wait time is less than half the average
+        if frame_num > 100 and fps.value < expected_fps-1 and duration < 0.5*avg_wait:
             skipped_fps_tracker.update()
             skipped_fps.value = skipped_fps_tracker.eps()
             continue
