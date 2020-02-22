@@ -33,7 +33,8 @@ class TrackedObjectProcessor(threading.Thread):
         self.camera_data = defaultdict(lambda: {
             'best_objects': {},
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
-            'tracked_objects': {}
+            'tracked_objects': {},
+            'current_frame_time': datetime.datetime.now().timestamp()
         })
         
     def get_best(self, camera, label):
@@ -44,6 +45,9 @@ class TrackedObjectProcessor(threading.Thread):
     
     def get_current_frame(self, camera):
         return self.camera_data[camera]['current_frame']
+    
+    def get_current_frame_time(self, camera):
+        return self.camera_data[camera]['current_frame_time']
 
     def run(self):
         while True:
@@ -86,6 +90,7 @@ class TrackedObjectProcessor(threading.Thread):
             # Set the current frame as ready
             ###
             self.camera_data[camera]['current_frame'] = current_frame
+            self.camera_data[camera]['current_frame_time'] = frame_time
             
             ###
             # Maintain the highest scoring recent object and frame for each label

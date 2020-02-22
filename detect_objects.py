@@ -1,5 +1,6 @@
 import cv2
 import time
+import datetime
 import queue
 import yaml
 import threading
@@ -53,12 +54,13 @@ WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 
 class CameraWatchdog(threading.Thread):
-    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue):
+    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, object_processor):
         threading.Thread.__init__(self)
         self.camera_processes = camera_processes
         self.config = config
         self.tflite_process = tflite_process
         self.tracked_objects_queue = tracked_objects_queue
+        self.object_processor = object_processor
 
     def run(self):
         time.sleep(10)
@@ -68,6 +70,17 @@ class CameraWatchdog(threading.Thread):
 
             for name, camera_process in self.camera_processes.items():
                 process = camera_process['process']
+                if (datetime.datetime.now().timestamp() - self.object_processor.get_current_frame_time(name)) > 30:
+                    print(f"Last frame for {name} is more than 30 seconds old...")
+                    if process.is_alive():
+                        process.terminate()
+                        try:
+                            print("Waiting for process to exit gracefully...")
+                            process.wait(timeout=30)
+                        except sp.TimeoutExpired:
+                            print("Process didnt exit. Force killing...")
+                            process.kill()
+                            process.wait()
                 if not process.is_alive():
                     print(f"Process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
@@ -131,11 +144,13 @@ def main():
     for name, config in CONFIG['cameras'].items():
         camera_processes[name] = {
             'fps': mp.Value('d', float(config['fps'])),
-            'skipped_fps': mp.Value('d', 0.0)
+            'skipped_fps': mp.Value('d', 0.0),
+            'detection_fps': mp.Value('d', 0.0),
+            'last_frame': datetime.datetime.now().timestamp()
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
             tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
-            camera_processes[name]['fps'], camera_processes[name]['skipped_fps']))
+            camera_processes[name]['fps'], camera_processes[name]['skipped_fps'], camera_processes[name]['detection_fps']))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
 
@@ -143,11 +158,11 @@ def main():
         camera_process['process'].start()
         print(f"Camera_process started for {name}: {camera_process['process'].pid}")
     
-    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue)
-    camera_watchdog.start()
-    
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue)
     object_processor.start()
+    
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, object_processor)
+    camera_watchdog.start()
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
@@ -161,18 +176,22 @@ def main():
 
     @app.route('/debug/stats')
     def stats():
-        stats = {
-            'coral': {
-                'fps': tflite_process.fps.value,
-                'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2)
-            }
-        }
+        stats = {}
+
+        total_detection_fps = 0
 
         for name, camera_stats in camera_processes.items():
+            total_detection_fps += camera_stats['detection_fps'].value
             stats[name] = {
                 'fps': camera_stats['fps'].value,
-                'skipped_fps': camera_stats['skipped_fps'].value
+                'skipped_fps': camera_stats['skipped_fps'].value,
+                'detection_fps': camera_stats['detection_fps'].value
             }
+        
+        stats['coral'] = {
+            'fps': total_detection_fps,
+            'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2)
+        }
 
         return jsonify(stats)
 

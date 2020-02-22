@@ -99,7 +99,7 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def track_camera(name, config, ffmpeg_global_config, global_objects_config, detect_lock, detect_ready, frame_ready, detected_objects_queue, fps, skipped_fps):
+def track_camera(name, config, ffmpeg_global_config, global_objects_config, detect_lock, detect_ready, frame_ready, detected_objects_queue, fps, skipped_fps, detection_fps):
     print(f"Starting process for {name}: {os.getpid()}")
 
     # Merge the ffmpeg config with the global config
@@ -168,6 +168,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     skipped_fps_tracker = EventsPerSecond()
     fps_tracker.start()
     skipped_fps_tracker.start()
+    object_detector.fps.start()
     while True:
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
 
@@ -181,6 +182,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
 
         fps_tracker.update()
         fps.value = fps_tracker.eps()
+        detection_fps.value = object_detector.fps.eps()
 
         frame_time = datetime.datetime.now().timestamp()
         
@@ -193,6 +195,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         motion_boxes = motion_detector.detect(frame)
 
         # skip object detection if we are below the min_fps
+        # TODO: its about more than just the FPS. also look at avg wait or min wait
         if frame_num > 100 and fps.value < expected_fps-1:
             skipped_fps_tracker.update()
             skipped_fps.value = skipped_fps_tracker.eps()
