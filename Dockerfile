@@ -55,5 +55,6 @@ RUN wget -q https://storage.googleapis.com/download.tensorflow.org/models/tflite
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
+COPY benchmark.py .
 
 CMD ["python3.7", "-u", "detect_objects.py"]

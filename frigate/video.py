@@ -350,38 +350,3 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         plasma_client.put(frame, plasma.ObjectID(object_id))
         # add to the queue
         detected_objects_queue.put((name, frame_time, object_tracker.tracked_objects))
-
-        # if (frames >= 700 and frames <= 1635) or (frames >= 2500):
-        # if (frames >= 300 and frames <= 600):
-        # if (frames >= 0):
-            # row1 = cv2.hconcat([gray, cv2.convertScaleAbs(avg_frame)])
-            # row2 = cv2.hconcat([frameDelta, thresh])
-            # cv2.imwrite(f"/lab/debug/output/{frames}.jpg", cv2.vconcat([row1, row2]))
-            # # cv2.imwrite(f"/lab/debug/output/resized-frame-{frames}.jpg", resized_frame)
-            # for region in motion_regions:
-            #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (255,128,0), 2)
-            # for region in object_regions:
-            #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,128,255), 2)
-            # for region in merged_regions:
-            #     cv2.rectangle(frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 2)
-            # for box in motion_boxes:
-            #     cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), (255,0,0), 2)
-            # for detection in detections:
-            #     box = detection[2]
-            #     draw_box_with_label(frame, box[0], box[1], box[2], box[3], detection[0], f"{detection[1]*100}%")
-            # for obj in object_tracker.tracked_objects.values():
-            #     box = obj['box']
-            #     draw_box_with_label(frame, box[0], box[1], box[2], box[3], obj['label'], obj['id'], thickness=1, color=(0,0,255), position='bl')
-            # cv2.putText(frame, str(total_detections), (10, 10), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
-            # cv2.putText(frame, str(frame_detections), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0, 0, 0), thickness=2)
-            # cv2.imwrite(f"/lab/debug/output/frame-{frames}.jpg", frame)
-            # break
-
-    # start a thread to publish object scores
-    # mqtt_publisher = MqttObjectPublisher(self.mqtt_client, self.mqtt_topic_prefix, self)
-    # mqtt_publisher.start()
-
-    # create a watchdog thread for capture process
-    # self.watchdog = CameraWatchdog(self)
-
-
