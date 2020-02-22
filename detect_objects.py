@@ -74,13 +74,12 @@ class CameraWatchdog(threading.Thread):
                     print(f"Last frame for {name} is more than 30 seconds old...")
                     if process.is_alive():
                         process.terminate()
-                        try:
-                            print("Waiting for process to exit gracefully...")
-                            process.wait(timeout=30)
-                        except sp.TimeoutExpired:
+                        print("Waiting for process to exit gracefully...")
+                        process.join(timeout=30)
+                        if process.exitcode is None:
                             print("Process didnt exit. Force killing...")
                             process.kill()
-                            process.wait()
+                            process.join()
                 if not process.is_alive():
                     print(f"Process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
