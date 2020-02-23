@@ -49,14 +49,6 @@ class ObjectTracker():
             obj['history'] = [entry]
 
     def match_and_update(self, frame_time, new_objects):
-        if len(new_objects) == 0:
-            for id in list(self.tracked_objects.keys()):
-                if self.disappeared[id] >= self.max_disappeared:
-                    self.deregister(id)
-                else:
-                    self.disappeared[id] += 1
-            return
-            
         # group by name
         new_object_groups = defaultdict(lambda: [])
         for obj in new_objects:
@@ -68,6 +60,18 @@ class ObjectTracker():
                 'region': obj[4],
                 'frame_time': frame_time
             })
+        
+        # update any tracked objects with labels that are not
+        # seen in the current objects and deregister if needed
+        for id, obj in self.tracked_objects.items():
+            if not obj['label'] in new_object_groups:
+                if self.disappeared[id] >= self.max_disappeared:
+                    self.deregister(id)
+                else:
+                    self.disappeared[id] += 1
+        
+        if len(new_objects) == 0:
+            return
         
         # track objects for each label type
         for label, group in new_object_groups.items():
