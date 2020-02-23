@@ -66,11 +66,12 @@ class CameraWatchdog(threading.Thread):
         time.sleep(10)
         while True:
             # wait a bit before checking
-            time.sleep(10)
+            time.sleep(30)
 
             for name, camera_process in self.camera_processes.items():
                 process = camera_process['process']
-                if (datetime.datetime.now().timestamp() - self.object_processor.get_current_frame_time(name)) > 30:
+                if (not self.object_processor.get_current_frame_time(name) is None and 
+                    (datetime.datetime.now().timestamp() - self.object_processor.get_current_frame_time(name)) > 30):
                     print(f"Last frame for {name} is more than 30 seconds old...")
                     if process.is_alive():
                         process.terminate()
@@ -84,6 +85,7 @@ class CameraWatchdog(threading.Thread):
                     print(f"Process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
                     camera_process['skipped_fps'].value = 0.0
+                    self.object_processor.camera_data[name]['current_frame_time'] = None
                     process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
                         self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
                         camera_process['fps'], camera_process['skipped_fps'], camera_process['detection_fps']))
@@ -144,8 +146,7 @@ def main():
         camera_processes[name] = {
             'fps': mp.Value('d', float(config['fps'])),
             'skipped_fps': mp.Value('d', 0.0),
-            'detection_fps': mp.Value('d', 0.0),
-            'last_frame': datetime.datetime.now().timestamp()
+            'detection_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
             tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
