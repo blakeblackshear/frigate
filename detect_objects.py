@@ -85,6 +85,7 @@ class CameraWatchdog(threading.Thread):
                     print(f"Process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
                     camera_process['skipped_fps'].value = 0.0
+                    camera_process['detection_fps'].value = 0.0
                     self.object_processor.camera_data[name]['current_frame_time'] = None
                     process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
                         self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
