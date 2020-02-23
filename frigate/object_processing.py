@@ -34,7 +34,7 @@ class TrackedObjectProcessor(threading.Thread):
             'best_objects': {},
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
             'tracked_objects': {},
-            'current_frame_time': datetime.datetime.now().timestamp()
+            'current_frame_time': None
         })
         
     def get_best(self, camera, label):
