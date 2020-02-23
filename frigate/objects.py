@@ -63,12 +63,12 @@ class ObjectTracker():
         
         # update any tracked objects with labels that are not
         # seen in the current objects and deregister if needed
-        for id, obj in self.tracked_objects.items():
+        for obj in list(self.tracked_objects.values()):
             if not obj['label'] in new_object_groups:
-                if self.disappeared[id] >= self.max_disappeared:
-                    self.deregister(id)
+                if self.disappeared[obj['id']] >= self.max_disappeared:
+                    self.deregister(obj['id'])
                 else:
-                    self.disappeared[id] += 1
+                    self.disappeared[obj['id']] += 1
         
         if len(new_objects) == 0:
             return
