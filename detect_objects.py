@@ -120,7 +120,7 @@ def main():
 
     # start plasma store
     plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
-    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL)
     time.sleep(1)
     rc = plasma_process.poll()
     if rc is not None:
