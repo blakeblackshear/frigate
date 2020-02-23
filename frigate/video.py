@@ -20,7 +20,6 @@ from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
 
-# TODO: add back opencv fallback
 def get_frame_shape(source):
     ffprobe_cmd = " ".join([
         'ffprobe',
@@ -125,7 +124,11 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     expected_fps = config['fps']
     take_frame = config.get('take_frame', 1)
 
-    frame_shape = get_frame_shape(ffmpeg_input)
+    if 'width' in config and 'height' in config:
+        frame_shape = (config['height'], config['width'], 3)
+    else:
+        frame_shape = get_frame_shape(ffmpeg_input)
+
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
     try:
