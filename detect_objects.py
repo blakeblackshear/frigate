@@ -194,6 +194,11 @@ def main():
             'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2)
         }
 
+        rc = plasma_process.poll()
+        stats['plasma_store_rc'] = rc
+
+        stats['tracked_objects_queue'] = tracked_objects_queue.qsize()
+
         return jsonify(stats)
 
     @app.route('/<camera_name>/<label>/best.jpg')
