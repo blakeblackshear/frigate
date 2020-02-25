@@ -163,7 +163,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
 
     print(" ".join(ffmpeg_cmd))
     
-    ffmpeg_process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size)
+    ffmpeg_process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size*10)
     
     plasma_client = plasma.connect("/tmp/plasma")
     frame_num = 0
