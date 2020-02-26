@@ -180,7 +180,12 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         avg_wait = (avg_wait*99+duration)/100
 
         if not frame_bytes:
-            break
+            rc = ffmpeg_process.poll()
+            if rc is not None:
+                print(f"{name}: ffmpeg_process exited unexpectedly with {rc}")
+                break
+            else:
+                print(f"{name}: ffmpeg_process is still running but didnt return any bytes")
 
         # limit frame rate
         frame_num += 1
@@ -353,3 +358,5 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         plasma_client.put(frame, plasma.ObjectID(object_id))
         # add to the queue
         detected_objects_queue.put((name, frame_time, object_tracker.tracked_objects))
+
+    print(f"{name}: exiting subprocess")
