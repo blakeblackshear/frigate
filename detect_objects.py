@@ -70,17 +70,6 @@ class CameraWatchdog(threading.Thread):
 
             for name, camera_process in self.camera_processes.items():
                 process = camera_process['process']
-                if (not self.object_processor.get_current_frame_time(name) is None and 
-                    (datetime.datetime.now().timestamp() - self.object_processor.get_current_frame_time(name)) > 30):
-                    print(f"Last frame for {name} is more than 30 seconds old...")
-                    if process.is_alive():
-                        process.terminate()
-                        print("Waiting for process to exit gracefully...")
-                        process.join(timeout=30)
-                        if process.exitcode is None:
-                            print("Process didnt exit. Force killing...")
-                            process.kill()
-                            process.join()
                 if not process.is_alive():
                     print(f"Process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
