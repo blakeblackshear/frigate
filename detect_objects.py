@@ -31,7 +31,7 @@ FFMPEG_CONFIG = CONFIG.get('ffmpeg', {})
 FFMPEG_DEFAULT_CONFIG = {
     'global_args': FFMPEG_CONFIG.get('global_args', 
         ['-hide_banner','-loglevel','panic']),
-    'hwaccel_args': FFMPEG_CONFIG.get('hwaccel_args', 
+    'hwaccel_args': FFMPEG_CONFIG.get('hwaccel_args',
         []),
     'input_args': FFMPEG_CONFIG.get('input_args',
         ['-avoid_negative_ts', 'make_zero',
@@ -68,6 +68,11 @@ class CameraWatchdog(threading.Thread):
             # wait a bit before checking
             time.sleep(30)
 
+            if (self.tflite_process.detection_start.value > 0.0 and 
+                datetime.datetime.now().timestamp() - self.tflite_process.detection_start.value > 10):
+                print("Detection appears to be stuck. Restarting detection process")
+                time.sleep(30)
+
             for name, camera_process in self.camera_processes.items():
                 process = camera_process['process']
                 if not process.is_alive():
@@ -75,9 +80,8 @@ class CameraWatchdog(threading.Thread):
                     camera_process['fps'].value = float(self.config[name]['fps'])
                     camera_process['skipped_fps'].value = 0.0
                     camera_process['detection_fps'].value = 0.0
-                    self.object_processor.camera_data[name]['current_frame_time'] = None
                     process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
-                        self.tflite_process.detect_lock, self.tflite_process.detect_ready, self.tflite_process.frame_ready, self.tracked_objects_queue, 
+                        self.tflite_process.detection_queue, self.tracked_objects_queue, 
                         camera_process['fps'], camera_process['skipped_fps'], camera_process['detection_fps']))
                     process.daemon = True
                     camera_process['process'] = process
@@ -139,7 +143,7 @@ def main():
             'detection_fps': mp.Value('d', 0.0)
         }
         camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
-            tflite_process.detect_lock, tflite_process.detect_ready, tflite_process.frame_ready, tracked_objects_queue, 
+            tflite_process.detection_queue, tracked_objects_queue, 
             camera_processes[name]['fps'], camera_processes[name]['skipped_fps'], camera_processes[name]['detection_fps']))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
@@ -173,14 +177,16 @@ def main():
         for name, camera_stats in camera_processes.items():
             total_detection_fps += camera_stats['detection_fps'].value
             stats[name] = {
-                'fps': camera_stats['fps'].value,
-                'skipped_fps': camera_stats['skipped_fps'].value,
-                'detection_fps': camera_stats['detection_fps'].value
+                'fps': round(camera_stats['fps'].value, 2),
+                'skipped_fps': round(camera_stats['skipped_fps'].value, 2),
+                'detection_fps': round(camera_stats['detection_fps'].value, 2)
             }
         
         stats['coral'] = {
-            'fps': total_detection_fps,
-            'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2)
+            'fps': round(total_detection_fps, 2),
+            'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2),
+            'detection_queue': tflite_process.detection_queue.qsize(),
+            'detection_start': tflite_process.detection_start.value
         }
 
         rc = plasma_process.poll()

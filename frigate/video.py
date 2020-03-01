@@ -114,7 +114,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     print(" ".join(ffmpeg_cmd))
     return sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size*10)
 
-def track_camera(name, config, ffmpeg_global_config, global_objects_config, detect_lock, detect_ready, frame_ready, detected_objects_queue, fps, skipped_fps, detection_fps):
+def track_camera(name, config, ffmpeg_global_config, global_objects_config, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps):
     print(f"Starting process for {name}: {os.getpid()}")
 
     # Merge the ffmpeg config with the global config
@@ -172,7 +172,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
-    object_detector = RemoteObjectDetector('/labelmap.txt', detect_lock, detect_ready, frame_ready)
+    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue)
 
     object_tracker = ObjectTracker(10)
     
@@ -196,8 +196,8 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
             rc = ffmpeg_process.poll()
             if rc is not None:
                 print(f"{name}: ffmpeg_process exited unexpectedly with {rc}")
-                time.sleep(10)
                 ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process)
+                time.sleep(10)
             else:
                 print(f"{name}: ffmpeg_process is still running but didnt return any bytes")
             continue
