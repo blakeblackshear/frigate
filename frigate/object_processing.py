@@ -34,7 +34,6 @@ class TrackedObjectProcessor(threading.Thread):
             'best_objects': {},
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
             'tracked_objects': {},
-            'current_frame_time': None,
             'current_frame': np.zeros((720,1280,3), np.uint8),
             'object_id': None
         })
@@ -47,9 +46,6 @@ class TrackedObjectProcessor(threading.Thread):
     
     def get_current_frame(self, camera):
         return self.camera_data[camera]['current_frame']
-    
-    def get_current_frame_time(self, camera):
-        return self.camera_data[camera]['current_frame_time']
 
     def run(self):
         while True:
@@ -93,7 +89,6 @@ class TrackedObjectProcessor(threading.Thread):
                 # Set the current frame as ready
                 ###
                 self.camera_data[camera]['current_frame'] = current_frame
-                self.camera_data[camera]['current_frame_time'] = frame_time
 
                 # store the object id, so you can delete it at the next loop
                 previous_object_id = self.camera_data[camera]['object_id']
