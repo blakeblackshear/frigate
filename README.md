@@ -16,16 +16,6 @@ You see multiple bounding boxes because it draws bounding boxes from all frames 
 [![](http://img.youtube.com/vi/nqHbCtyo4dY/0.jpg)](http://www.youtube.com/watch?v=nqHbCtyo4dY "Frigate")
 
 ## Getting Started
-Build the container with
-```
-docker build -t frigate .
-```
-
-Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use your own models with volume mounts:
-- CPU Model: `/cpu_model.tflite`
-- EdgeTPU Model: `/edgetpu_model.tflite`
-- Labels: `/labelmap.txt`
-
 Run the container with
 ```bash
 docker run --rm \
@@ -36,7 +26,7 @@ docker run --rm \
 -v /etc/localtime:/etc/localtime:ro \
 -p 5000:5000 \
 -e FRIGATE_RTSP_PASSWORD='password' \
-frigate:latest
+blakeblackshear/frigate:stable
 ```
 
 Example docker-compose:
@@ -46,7 +36,7 @@ Example docker-compose:
     restart: unless-stopped
     privileged: true
     shm_size: '1g' # should work for 5-7 cameras
-    image: frigate:latest
+    image: blakeblackshear/frigate:stable
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
@@ -127,6 +117,11 @@ sensor:
         value_template: '{{ states.sensor.frigate_debug.attributes["coral"]["inference_speed"] }}' 
         unit_of_measurement: 'ms'
 ```
+## Using a custom model
+Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use your own models with volume mounts:
+- CPU Model: `/cpu_model.tflite`
+- EdgeTPU Model: `/edgetpu_model.tflite`
+- Labels: `/labelmap.txt`
 
 ## Tips
 - Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed
