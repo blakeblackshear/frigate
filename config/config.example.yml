@@ -3,9 +3,13 @@ web_port: 5000
 mqtt:
   host: mqtt.server.com
   topic_prefix: frigate
-#  client_id: frigate # Optional -- set to override default client id of 'frigate' if running multiple instances
-#  user: username # Optional -- Uncomment for use
-#  password: password # Optional -- Uncomment for use
+  # client_id: frigate # Optional -- set to override default client id of 'frigate' if running multiple instances
+  # user: username # Optional
+  #################
+  ## Environment variables that begin with 'FRIGATE_' may be referenced in {}.
+  ##   password: '{FRIGATE_MQTT_PASSWORD}'
+  #################
+  # password: password # Optional
 
 #################
 # Default ffmpeg args. Optional and can be overwritten per camera.
