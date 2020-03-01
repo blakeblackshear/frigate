@@ -1,3 +1,4 @@
+import os
 import cv2
 import time
 import datetime
@@ -16,6 +17,8 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.util import EventsPerSecond
 from frigate.edgetpu import EdgeTPUProcess
 
+FRIGATE_VARS = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
+
 with open('/config/config.yml') as f:
     CONFIG = yaml.safe_load(f)
 
@@ -24,6 +27,8 @@ MQTT_PORT = CONFIG.get('mqtt', {}).get('port', 1883)
 MQTT_TOPIC_PREFIX = CONFIG.get('mqtt', {}).get('topic_prefix', 'frigate')
 MQTT_USER = CONFIG.get('mqtt', {}).get('user')
 MQTT_PASS = CONFIG.get('mqtt', {}).get('password')
+if not MQTT_PASS is None:
+    MQTT_PASS = MQTT_PASS.format(**FRIGATE_VARS)
 MQTT_CLIENT_ID = CONFIG.get('mqtt', {}).get('client_id', 'frigate')
 
 # Set the default FFmpeg config
