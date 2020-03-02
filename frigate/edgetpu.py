@@ -75,7 +75,6 @@ def run_detector(detection_queue, avg_speed, start):
         input_frame = plasma_client.get(object_id, timeout_ms=0)
 
         if input_frame is plasma.ObjectNotAvailable:
-            plasma_client.put(np.zeros((20,6), np.float32), object_id_out)
             continue
 
         # detect and put the output in the plasma store
@@ -124,7 +123,11 @@ class RemoteObjectDetector():
         object_id_detections = plasma.ObjectID(hashlib.sha1(str.encode(f"out-{now}")).digest())
         self.plasma_client.put(tensor_input, object_id_frame)
         self.detection_queue.put(now)
-        raw_detections = self.plasma_client.get(object_id_detections)
+        raw_detections = self.plasma_client.get(object_id_detections, timeout_ms=10000)
+
+        if raw_detections is plasma.ObjectNotAvailable:
+            self.plasma_client.delete([object_id_frame])
+            return detections
 
         for d in raw_detections:
             if d[1] < threshold:
