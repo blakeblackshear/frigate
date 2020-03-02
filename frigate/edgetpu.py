@@ -71,16 +71,19 @@ def run_detector(detection_queue, avg_speed, start):
         object_id_str = detection_queue.get()
         object_id_hash = hashlib.sha1(str.encode(object_id_str))
         object_id = plasma.ObjectID(object_id_hash.digest())
+        object_id_out = plasma.ObjectID(hashlib.sha1(str.encode(f"out-{object_id_str}")).digest())
         input_frame = plasma_client.get(object_id, timeout_ms=0)
 
-        start.value = datetime.datetime.now().timestamp()
+        if input_frame is plasma.ObjectNotAvailable:
+            plasma_client.put(np.zeros((20,6), np.float32), object_id_out)
+            continue
 
         # detect and put the output in the plasma store
-        object_id_out = hashlib.sha1(str.encode(f"out-{object_id_str}")).digest()
-        plasma_client.put(object_detector.detect_raw(input_frame), plasma.ObjectID(object_id_out))
-
+        start.value = datetime.datetime.now().timestamp()
+        plasma_client.put(object_detector.detect_raw(input_frame), object_id_out)
         duration = datetime.datetime.now().timestamp()-start.value
         start.value = 0.0
+
         avg_speed.value = (avg_speed.value*9 + duration)/10
         
 class EdgeTPUProcess():

@@ -76,6 +76,7 @@ class CameraWatchdog(threading.Thread):
             if (self.tflite_process.detection_start.value > 0.0 and 
                 datetime.datetime.now().timestamp() - self.tflite_process.detection_start.value > 10):
                 print("Detection appears to be stuck. Restarting detection process")
+                self.tflite_process.start_or_restart()
                 time.sleep(30)
 
             for name, camera_process in self.camera_processes.items():
