@@ -9,7 +9,7 @@ import multiprocessing as mp
 import subprocess as sp
 import numpy as np
 import logging
-from flask import Flask, Response, make_response, jsonify
+from flask import Flask, Response, make_response, jsonify, request
 import paho.mqtt.client as mqtt
 
 from frigate.video import track_camera
@@ -218,21 +218,26 @@ def main():
 
     @app.route('/<camera_name>')
     def mjpeg_feed(camera_name):
+        fps = int(request.args.get('fps', '3'))
+        height = int(request.args.get('h', '360'))
         if camera_name in CONFIG['cameras']:
             # return a multipart response
-            return Response(imagestream(camera_name),
+            return Response(imagestream(camera_name, fps, height),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
         else:
             return "Camera named {} not found".format(camera_name), 404
 
-    def imagestream(camera_name):
+    def imagestream(camera_name, fps, height):
         while True:
-            # max out at 1 FPS
-            time.sleep(1)
+            # max out at specified FPS
+            time.sleep(1/fps)
             frame = object_processor.get_current_frame(camera_name)
             if frame is None:
-                frame = np.zeros((720,1280,3), np.uint8)
+                frame = np.zeros((height,int(height*16/9),3), np.uint8)
+
+            frame = cv2.resize(frame, dsize=(int(height*16/9), height), interpolation=cv2.INTER_LINEAR)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
             ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
