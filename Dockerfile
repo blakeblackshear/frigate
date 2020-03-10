@@ -52,6 +52,12 @@ RUN wget -q https://storage.googleapis.com/download.tensorflow.org/models/tflite
     mv /detect.tflite /cpu_model.tflite && \
     rm /cpu_model.zip
 
+RUN apt -qq update && apt -qq install --no-install-recommends -y \
+    gdb \
+    python3.7-dbg \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get autoremove -y; apt-get autoclean -y)
+
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
