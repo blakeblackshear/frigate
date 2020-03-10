@@ -1,4 +1,6 @@
 import datetime
+import signal
+import traceback
 import collections
 import numpy as np
 import cv2
@@ -127,3 +129,9 @@ class EventsPerSecond:
         now = datetime.datetime.now().timestamp()
         seconds = min(now-self._start, last_n_seconds)
         return len([t for t in self._timestamps if t > (now-last_n_seconds)]) / seconds
+
+def print_stack(sig, frame):
+    traceback.print_stack(frame)
+
+def listen():
+    signal.signal(signal.SIGUSR1, print_stack)

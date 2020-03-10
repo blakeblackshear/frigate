@@ -15,7 +15,7 @@ import copy
 import itertools
 import json
 from collections import defaultdict
-from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond
+from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
@@ -98,28 +98,32 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
+def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, pid, ffmpeg_process=None):
     if not ffmpeg_process is None:
         print("Terminating the existing ffmpeg process...")
         ffmpeg_process.terminate()
         try:
             print("Waiting for ffmpeg to exit gracefully...")
-            ffmpeg_process.wait(timeout=30)
+            ffmpeg_process.communicate(timeout=30)
         except sp.TimeoutExpired:
             print("FFmpeg didnt exit. Force killing...")
             ffmpeg_process.kill()
-            ffmpeg_process.wait()
+            ffmpeg_process.communicate()
 
     print("Creating ffmpeg process...")
     print(" ".join(ffmpeg_cmd))
-    return sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size*10)
+    process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size*10)
+    pid.value = process.pid
+    return process
 
-def track_camera(name, config, ffmpeg_global_config, global_objects_config, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps):
+def track_camera(name, config, ffmpeg_global_config, global_objects_config, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start, ffmpeg_pid):
     print(f"Starting process for {name}: {os.getpid()}")
+    listen()
 
     # Merge the ffmpeg config with the global config
     ffmpeg = config.get('ffmpeg', {})
     ffmpeg_input = get_ffmpeg_input(ffmpeg['input'])
+    ffmpeg_restart_delay = ffmpeg.get('restart_delay', 0)
     ffmpeg_global_args = ffmpeg.get('global_args', ffmpeg_global_config['global_args'])
     ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', ffmpeg_global_config['hwaccel_args'])
     ffmpeg_input_args = ffmpeg.get('input_args', ffmpeg_global_config['input_args'])
@@ -176,7 +180,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
 
     object_tracker = ObjectTracker(10)
     
-    ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size)
+    ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_pid)
     
     plasma_client = plasma.connect("/tmp/plasma")
     frame_num = 0
@@ -187,19 +191,22 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     skipped_fps_tracker.start()
     object_detector.fps.start()
     while True:
-        start = datetime.datetime.now().timestamp()
+        rc = ffmpeg_process.poll()
+        if rc != None:
+            print(f"{name}: ffmpeg_process exited unexpectedly with {rc}")
+            print(f"Letting {name} rest for {ffmpeg_restart_delay} seconds before restarting...")
+            time.sleep(ffmpeg_restart_delay)
+            ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_pid, ffmpeg_process)
+            time.sleep(10)
+
+        read_start.value = datetime.datetime.now().timestamp()
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
-        duration = datetime.datetime.now().timestamp()-start
+        duration = datetime.datetime.now().timestamp()-read_start.value
+        read_start.value = 0.0
         avg_wait = (avg_wait*99+duration)/100
 
-        if not frame_bytes:
-            rc = ffmpeg_process.poll()
-            if rc is not None:
-                print(f"{name}: ffmpeg_process exited unexpectedly with {rc}")
-                ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process)
-                time.sleep(10)
-            else:
-                print(f"{name}: ffmpeg_process is still running but didnt return any bytes")
+        if len(frame_bytes) == 0:
+            print(f"{name}: ffmpeg_process didnt return any bytes")
             continue
 
         # limit frame rate
