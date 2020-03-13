@@ -3,7 +3,6 @@ import datetime
 import hashlib
 import multiprocessing as mp
 import numpy as np
-import SharedArray as sa
 import pyarrow.plasma as plasma
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate

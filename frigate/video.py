@@ -10,7 +10,6 @@ import subprocess as sp
 import numpy as np
 import hashlib
 import pyarrow.plasma as plasma
-import SharedArray as sa
 import copy
 import itertools
 import json
@@ -109,6 +108,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, pid, ffmpeg_process=None):
             print("FFmpeg didnt exit. Force killing...")
             ffmpeg_process.kill()
             ffmpeg_process.communicate()
+        ffmpeg_process = None
 
     print("Creating ffmpeg process...")
     print(" ".join(ffmpeg_cmd))
@@ -158,12 +158,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
 
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
-    try:
-        sa.delete(name)
-    except:
-        pass
-
-    frame = sa.create(name, shape=frame_shape, dtype=np.uint8)
+    frame = np.zeros(frame_shape, np.uint8)
 
     # load in the mask for object detection
     if 'mask' in config:
