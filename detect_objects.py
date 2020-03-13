@@ -71,13 +71,12 @@ def start_plasma_store():
     return plasma_process
 
 class CameraWatchdog(threading.Thread):
-    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, object_processor, plasma_process):
+    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, plasma_process):
         threading.Thread.__init__(self)
         self.camera_processes = camera_processes
         self.config = config
         self.tflite_process = tflite_process
         self.tracked_objects_queue = tracked_objects_queue
-        self.object_processor = object_processor
         self.plasma_process = plasma_process
 
     def run(self):
@@ -202,7 +201,7 @@ def main():
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue)
     object_processor.start()
     
-    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, object_processor, plasma_process)
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process)
     camera_watchdog.start()
 
     # create a flask app that encodes frames a mjpeg on demand
