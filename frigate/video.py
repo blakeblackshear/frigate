@@ -5,16 +5,15 @@ import cv2
 import queue
 import threading
 import ctypes
+import pyarrow.plasma as plasma
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
-import hashlib
-import pyarrow.plasma as plasma
 import copy
 import itertools
 import json
 from collections import defaultdict
-from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen
+from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, PlasmaManager
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
@@ -97,7 +96,7 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, pid, ffmpeg_process=None):
+def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     if not ffmpeg_process is None:
         print("Terminating the existing ffmpeg process...")
         ffmpeg_process.terminate()
@@ -112,29 +111,53 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, pid, ffmpeg_process=None):
 
     print("Creating ffmpeg process...")
     print(" ".join(ffmpeg_cmd))
-    process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, bufsize=frame_size*10)
-    pid.value = process.pid
+    process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
     return process
 
-def track_camera(name, config, ffmpeg_global_config, global_objects_config, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start, ffmpeg_pid):
+class CameraCapture(threading.Thread):
+    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps):
+        threading.Thread.__init__(self)
+        self.name = name
+        self.frame_shape = frame_shape
+        self.frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
+        self.frame_queue = frame_queue
+        self.take_frame = take_frame
+        self.fps = fps
+        self.plasma_client = PlasmaManager()
+        self.ffmpeg_process = ffmpeg_process
+
+    def run(self):
+        frame_num = 0
+        while True:
+            if self.ffmpeg_process.poll() != None:
+                print(f"{self.name}: ffmpeg process is not running. exiting capture thread...")
+                break
+
+            frame_bytes = self.ffmpeg_process.stdout.read(self.frame_size)
+            frame_time = datetime.datetime.now().timestamp()
+
+            if len(frame_bytes) == 0:
+                print(f"{self.name}: ffmpeg didnt return a frame. something is wrong.")
+                continue
+
+            frame_num += 1
+            if (frame_num % self.take_frame) != 0:
+                continue
+
+            # put the frame in the plasma store
+            self.plasma_client.put(f"{self.name}{frame_time}",
+                    np
+                        .frombuffer(frame_bytes, np.uint8)
+                        .reshape(self.frame_shape)
+                )
+            # add to the queue
+            self.frame_queue.put(frame_time)
+
+            self.fps.update()
+
+def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
-
-    # Merge the ffmpeg config with the global config
-    ffmpeg = config.get('ffmpeg', {})
-    ffmpeg_input = get_ffmpeg_input(ffmpeg['input'])
-    ffmpeg_restart_delay = ffmpeg.get('restart_delay', 0)
-    ffmpeg_global_args = ffmpeg.get('global_args', ffmpeg_global_config['global_args'])
-    ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', ffmpeg_global_config['hwaccel_args'])
-    ffmpeg_input_args = ffmpeg.get('input_args', ffmpeg_global_config['input_args'])
-    ffmpeg_output_args = ffmpeg.get('output_args', ffmpeg_global_config['output_args'])
-    ffmpeg_cmd = (['ffmpeg'] +
-            ffmpeg_global_args +
-            ffmpeg_hwaccel_args +
-            ffmpeg_input_args +
-            ['-i', ffmpeg_input] +
-            ffmpeg_output_args +
-            ['pipe:'])
 
     # Merge the tracked object config with the global config
     camera_objects_config = config.get('objects', {})    
@@ -149,14 +172,6 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
 
     expected_fps = config['fps']
-    take_frame = config.get('take_frame', 1)
-
-    if 'width' in config and 'height' in config:
-        frame_shape = (config['height'], config['width'], 3)
-    else:
-        frame_shape = get_frame_shape(ffmpeg_input)
-
-    frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
 
     frame = np.zeros(frame_shape, np.uint8)
 
@@ -174,10 +189,8 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue)
 
     object_tracker = ObjectTracker(10)
-    
-    ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_pid)
-    
-    plasma_client = plasma.connect("/tmp/plasma")
+
+    plasma_client = PlasmaManager()
     frame_num = 0
     avg_wait = 0.0
     fps_tracker = EventsPerSecond()
@@ -186,39 +199,23 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
     skipped_fps_tracker.start()
     object_detector.fps.start()
     while True:
-        rc = ffmpeg_process.poll()
-        if rc != None:
-            print(f"{name}: ffmpeg_process exited unexpectedly with {rc}")
-            print(f"Letting {name} rest for {ffmpeg_restart_delay} seconds before restarting...")
-            time.sleep(ffmpeg_restart_delay)
-            ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_pid, ffmpeg_process)
-            time.sleep(10)
-
         read_start.value = datetime.datetime.now().timestamp()
-        frame_bytes = ffmpeg_process.stdout.read(frame_size)
+        frame_time = frame_queue.get()
         duration = datetime.datetime.now().timestamp()-read_start.value
         read_start.value = 0.0
         avg_wait = (avg_wait*99+duration)/100
 
-        if len(frame_bytes) == 0:
-            print(f"{name}: ffmpeg_process didnt return any bytes")
-            continue
-
-        # limit frame rate
-        frame_num += 1
-        if (frame_num % take_frame) != 0:
-            continue
-
         fps_tracker.update()
         fps.value = fps_tracker.eps()
         detection_fps.value = object_detector.fps.eps()
-
-        frame_time = datetime.datetime.now().timestamp()
         
-        # Store frame in numpy array
-        frame[:] = (np
-                    .frombuffer(frame_bytes, np.uint8)
-                    .reshape(frame_shape))
+        # Get frame from plasma store
+        frame = plasma_client.get(f"{name}{frame_time}")
+
+        if frame is plasma.ObjectNotAvailable:
+            skipped_fps_tracker.update()
+            skipped_fps.value = skipped_fps_tracker.eps()
+            continue
         
         # look for motion
         motion_boxes = motion_detector.detect(frame)
@@ -227,6 +224,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         if frame_num > 100 and fps.value < expected_fps-1 and duration < 0.5*avg_wait:
             skipped_fps_tracker.update()
             skipped_fps.value = skipped_fps_tracker.eps()
+            plasma_client.delete(f"{name}{frame_time}")
             continue
         
         skipped_fps.value = skipped_fps_tracker.eps()
@@ -330,7 +328,7 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
 
                 for index in idxs:
                     obj = group[index[0]]
-                    if clipped(obj, frame_shape): #obj['clipped']:
+                    if clipped(obj, frame_shape):
                         box = obj[2]
                         # calculate a new region that will hopefully get the entire object
                         region = calculate_region(frame_shape, 
@@ -370,9 +368,6 @@ def track_camera(name, config, ffmpeg_global_config, global_objects_config, dete
         # now that we have refined our detections, we need to track objects
         object_tracker.match_and_update(frame_time, detections)
 
-        # put the frame in the plasma store
-        object_id = hashlib.sha1(str.encode(f"{name}{frame_time}")).digest()
-        plasma_client.put(frame, plasma.ObjectID(object_id))
         # add to the queue
         detected_objects_queue.put((name, frame_time, object_tracker.tracked_objects))
 

@@ -1,4 +1,5 @@
 import datetime
+import time
 import signal
 import traceback
 import collections
@@ -6,6 +7,8 @@ import numpy as np
 import cv2
 import threading
 import matplotlib.pyplot as plt
+import hashlib
+import pyarrow.plasma as plasma
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
@@ -135,3 +138,46 @@ def print_stack(sig, frame):
 
 def listen():
     signal.signal(signal.SIGUSR1, print_stack)
+
+class PlasmaManager:
+    def __init__(self):
+        self.connect()
+    
+    def connect(self):
+        while True:
+            try:
+                self.plasma_client = plasma.connect("/tmp/plasma")
+                return
+            except:
+                print(f"TrackedObjectProcessor: unable to connect plasma client")
+                time.sleep(10)
+
+    def get(self, name, timeout_ms=0):
+        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
+        while True:
+            try:
+                return self.plasma_client.get(object_id, timeout_ms=timeout_ms)
+            except:
+                self.connect()
+                time.sleep(1)
+
+    def put(self, name, obj):
+        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
+        while True:
+            try:
+                self.plasma_client.put(obj, object_id)
+                return
+            except Exception as e:
+                print(f"Failed to put in plasma: {e}")
+                self.connect()
+                time.sleep(1)
+
+    def delete(self, name):
+        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
+        while True:
+            try:
+                self.plasma_client.delete([object_id])
+                return
+            except:
+                self.connect()
+                time.sleep(1)
