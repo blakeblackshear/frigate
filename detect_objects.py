@@ -15,7 +15,7 @@ import logging
 from flask import Flask, Response, make_response, jsonify, request
 import paho.mqtt.client as mqtt
 
-from frigate.video import track_camera
+from frigate.video import track_camera, get_ffmpeg_input, get_frame_shape, CameraCapture, start_or_restart_ffmpeg
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.util import EventsPerSecond
 from frigate.edgetpu import EdgeTPUProcess
@@ -83,60 +83,50 @@ class CameraWatchdog(threading.Thread):
         time.sleep(10)
         while True:
             # wait a bit before checking
-            time.sleep(30)
+            time.sleep(10)
             
             # check the plasma process
             rc = self.plasma_process.poll()
             if rc != None:
                 print(f"plasma_process exited unexpectedly with {rc}")
                 self.plasma_process = start_plasma_store()
-                time.sleep(10)
 
             # check the detection process
             if (self.tflite_process.detection_start.value > 0.0 and 
                 datetime.datetime.now().timestamp() - self.tflite_process.detection_start.value > 10):
                 print("Detection appears to be stuck. Restarting detection process")
                 self.tflite_process.start_or_restart()
-                time.sleep(30)
             elif not self.tflite_process.detect_process.is_alive():
                 print("Detection appears to have stopped. Restarting detection process")
                 self.tflite_process.start_or_restart()
-                time.sleep(30)
 
             # check the camera processes
             for name, camera_process in self.camera_processes.items():
                 process = camera_process['process']
                 if not process.is_alive():
-                    print(f"Process for {name} is not alive. Starting again...")
+                    print(f"Track process for {name} is not alive. Starting again...")
                     camera_process['fps'].value = float(self.config[name]['fps'])
                     camera_process['skipped_fps'].value = 0.0
                     camera_process['detection_fps'].value = 0.0
                     camera_process['read_start'].value = 0.0
-                    camera_process['ffmpeg_pid'].value = 0
-                    process = mp.Process(target=track_camera, args=(name, self.config[name], FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
-                        self.tflite_process.detection_queue, self.tracked_objects_queue, 
+                    process = mp.Process(target=track_camera, args=(name, self.config[name], GLOBAL_OBJECT_CONFIG, camera_process['frame_queue'],
+                        camera_process['frame_shape'], self.tflite_process.detection_queue, self.tracked_objects_queue, 
                         camera_process['fps'], camera_process['skipped_fps'], camera_process['detection_fps'],
-                        camera_process['read_start'], camera_process['ffmpeg_pid']))
+                        camera_process['read_start']))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
-                    print(f"Camera_process started for {name}: {process.pid}")
-
-                if (camera_process['read_start'].value > 0.0 and 
-                    datetime.datetime.now().timestamp() - camera_process['read_start'].value > 10):
-                    print(f"Process for {name} has been reading from ffmpeg for over 10 seconds long. Killing ffmpeg...")
-                    ffmpeg_pid = camera_process['ffmpeg_pid'].value
-                    if ffmpeg_pid != 0:
-                        try:
-                            os.kill(ffmpeg_pid, signal.SIGTERM)
-                        except OSError:
-                            print(f"Unable to terminate ffmpeg with pid {ffmpeg_pid}")
-                        time.sleep(10)
-                        try:
-                            os.kill(ffmpeg_pid, signal.SIGKILL)
-                            print(f"Unable to kill ffmpeg with pid {ffmpeg_pid}")
-                        except OSError:
-                            pass
+                    print(f"Track process started for {name}: {process.pid}")
+                
+                if not camera_process['capture_thread'].is_alive():
+                    frame_shape = camera_process['frame_shape']
+                    frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
+                    ffmpeg_process = start_or_restart_ffmpeg(camera_process['ffmpeg_cmd'], frame_size)
+                    camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, camera_process['frame_queue'], 
+                        camera_process['take_frame'], camera_process['camera_fps'])
+                    camera_capture.start()
+                    camera_process['ffmpeg_process'] = ffmpeg_process
+                    camera_process['capture_thread'] = camera_capture
 
 def main():
     # connect to mqtt and setup last will
@@ -180,17 +170,54 @@ def main():
     # start the camera processes
     camera_processes = {}
     for name, config in CONFIG['cameras'].items():
+        # Merge the ffmpeg config with the global config
+        ffmpeg = config.get('ffmpeg', {})
+        ffmpeg_input = get_ffmpeg_input(ffmpeg['input'])
+        ffmpeg_global_args = ffmpeg.get('global_args', FFMPEG_DEFAULT_CONFIG['global_args'])
+        ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', FFMPEG_DEFAULT_CONFIG['hwaccel_args'])
+        ffmpeg_input_args = ffmpeg.get('input_args', FFMPEG_DEFAULT_CONFIG['input_args'])
+        ffmpeg_output_args = ffmpeg.get('output_args', FFMPEG_DEFAULT_CONFIG['output_args'])
+        ffmpeg_cmd = (['ffmpeg'] +
+                ffmpeg_global_args +
+                ffmpeg_hwaccel_args +
+                ffmpeg_input_args +
+                ['-i', ffmpeg_input] +
+                ffmpeg_output_args +
+                ['pipe:'])
+        
+        if 'width' in config and 'height' in config:
+            frame_shape = (config['height'], config['width'], 3)
+        else:
+            frame_shape = get_frame_shape(ffmpeg_input)
+
+        frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
+        take_frame = config.get('take_frame', 1)
+
+        ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size)
+        frame_queue = mp.SimpleQueue()
+        camera_fps = EventsPerSecond()
+        camera_fps.start()
+        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps)
+        camera_capture.start()
+
         camera_processes[name] = {
+            'camera_fps': camera_fps,
+            'take_frame': take_frame,
             'fps': mp.Value('d', float(config['fps'])),
             'skipped_fps': mp.Value('d', 0.0),
             'detection_fps': mp.Value('d', 0.0),
             'read_start': mp.Value('d', 0.0),
-            'ffmpeg_pid': mp.Value('i', 0)
+            'ffmpeg_process': ffmpeg_process,
+            'ffmpeg_cmd': ffmpeg_cmd,
+            'frame_queue': frame_queue,
+            'frame_shape': frame_shape,
+            'capture_thread': camera_capture
         }
-        camera_process = mp.Process(target=track_camera, args=(name, config, FFMPEG_DEFAULT_CONFIG, GLOBAL_OBJECT_CONFIG, 
+
+        camera_process = mp.Process(target=track_camera, args=(name, config, GLOBAL_OBJECT_CONFIG, frame_queue, frame_shape,
             tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['fps'], 
             camera_processes[name]['skipped_fps'], camera_processes[name]['detection_fps'], 
-            camera_processes[name]['read_start'], camera_processes[name]['ffmpeg_pid']))
+            camera_processes[name]['read_start']))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
 
@@ -245,7 +272,7 @@ def main():
                 'detection_fps': round(camera_stats['detection_fps'].value, 2),
                 'read_start': camera_stats['read_start'].value,
                 'pid': camera_stats['process'].pid,
-                'ffmpeg_pid': camera_stats['ffmpeg_pid'].value
+                'ffmpeg_pid': camera_stats['ffmpeg_process'].pid
             }
         
         stats['coral'] = {
@@ -302,7 +329,7 @@ def main():
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
-    camera_watchdog.join()
+    object_processor.join()
     
     plasma_process.terminate()
 
