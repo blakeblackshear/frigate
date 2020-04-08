@@ -1,0 +1,13 @@
+numpy
+imutils
+scipy
+Flask
+paho-mqtt
+PyYAML
+matplotlib
+pyarrow
+pycuda
+tensorrt
+opencv-python
+tensorflow
+tflite_runtime

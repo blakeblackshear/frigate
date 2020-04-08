@@ -1,0 +1,183 @@
+FROM frigate AS base
+
+#
+# CUDA 10.2 base
+#
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/ubuntu18.04/10.2/base/Dockerfile
+#
+RUN apt-get update && apt-get install -y --no-install-recommends \
+gnupg2 curl ca-certificates && \
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
+    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \
+    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list && \
+    apt-get purge --autoremove -y curl && \
+rm -rf /var/lib/apt/lists/*
+
+ENV CUDA_VERSION 10.2.89
+LABEL com.nvidia.cuda.version="${CUDA_VERSION}"
+
+ENV CUDA_PKG_VERSION 10-2=$CUDA_VERSION-1
+
+# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cuda-cudart-$CUDA_PKG_VERSION \
+cuda-compat-10-2 && \
+ln -s cuda-10.2 /usr/local/cuda && \
+    rm -rf /var/lib/apt/lists/*
+
+# Required for nvidia-docker v1
+RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
+    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
+
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV NVIDIA_REQUIRE_CUDA "cuda>=10.2 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=396,driver<397 brand=tesla,driver>=410,driver<411 brand=tesla,driver>=418,driver<419"
+
+#
+# CUDA 10.2 runtime
+#
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/ubuntu18.04/10.2/runtime/Dockerfile
+#
+ENV NCCL_VERSION 2.5.6
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cuda-libraries-$CUDA_PKG_VERSION \
+cuda-nvtx-$CUDA_PKG_VERSION \
+libcublas10=10.2.2.89-1 \
+libnccl2=$NCCL_VERSION-1+cuda10.2 && \
+    apt-mark hold libnccl2 && \
+    rm -rf /var/lib/apt/lists/*
+
+#
+# cuDNN 7.6.5.32 runtime
+#
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/ubuntu18.04/10.2/runtime/cudnn7/Dockerfile
+#
+ENV CUDNN_VERSION 7.6.5.32
+LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcudnn7=$CUDNN_VERSION-1+cuda10.2 \
+&& \
+    apt-mark hold libcudnn7 && \
+    rm -rf /var/lib/apt/lists/*
+
+#
+# TensorRT 6.0.1.8
+#
+# https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/tensorrt-601/tensorrt-install-guide/index.html#maclearn-net-repo-install
+#
+ENV TENSORRT_VERSION 6.0.1
+LABEL com.nvidia.tensorrt.version="${TENSORRT_VERSION}"
+
+RUN version=$TENSORRT_VERSION-1+cuda10.2 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    libnvinfer6=${version} \
+    libnvonnxparsers6=${version} libnvparsers6=${version} \
+    libnvinfer-plugin6=${version} \
+    python3-libnvinfer=${version} \
+&& \
+    apt-mark hold \
+    libnvinfer6 \
+    libnvonnxparsers6 libnvparsers6 \
+    libnvinfer-plugin6 \
+    python3-libnvinfer \
+&& \
+    rm -rf /var/lib/apt/lists/*
+
+#
+# Use a previous stage as a new temporary stage for building libraries
+#
+FROM base AS builder
+
+#
+# CUDA 10.2 devel
+#
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/ubuntu18.04/10.2/devel/Dockerfile
+#
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cuda-nvml-dev-$CUDA_PKG_VERSION \
+        cuda-command-line-tools-$CUDA_PKG_VERSION \
+cuda-libraries-dev-$CUDA_PKG_VERSION \
+        cuda-minimal-build-$CUDA_PKG_VERSION \
+        libnccl-dev=$NCCL_VERSION-1+cuda10.2 \
+libcublas-dev=10.2.2.89-1 \
+&& \
+    rm -rf /var/lib/apt/lists/*
+
+ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
+
+#
+# cuDNN 7.6.5.32 devel
+#
+# https://gitlab.com/nvidia/container-images/cuda/blob/master/dist/ubuntu18.04/10.2/devel/cudnn7/Dockerfile
+#
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcudnn7-dev=$CUDNN_VERSION-1+cuda10.2 \
+&& \
+    rm -rf /var/lib/apt/lists/*
+
+#
+# TensorRT 6.0.1.8 devel
+#
+# https://docs.nvidia.com/deeplearning/sdk/tensorrt-archived/tensorrt-601/tensorrt-install-guide/index.html#maclearn-net-repo-install
+#
+RUN version=$TENSORRT_VERSION-1+cuda10.2 && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    libnvinfer-dev=${version} \
+    libnvonnxparsers-dev=${version} libnvparsers-dev=${version} \
+    libnvinfer-plugin-dev=${version} \
+&& \
+    apt-mark hold \
+    libnvinfer-dev \
+    libnvonnxparsers-dev libnvparsers-dev \
+    libnvinfer-plugin-dev \
+&& \
+    rm -rf /var/lib/apt/lists/*
+
+# Install PyCUDA
+RUN python3 -m pip install pycuda \
+    && python3 -m pip wheel --wheel-dir install pycuda
+
+# Install Cmake
+ENV CMAKE_VERSION 3.14.4
+
+RUN cd /tmp && \
+    wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-Linux-x86_64.sh && \
+    chmod +x cmake-$CMAKE_VERSION-Linux-x86_64.sh && \
+    ./cmake-$CMAKE_VERSION-Linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license && \
+    rm ./cmake-$CMAKE_VERSION-Linux-x86_64.sh
+
+# Build plugin
+ADD plugin plugin/
+RUN mkdir -p build \
+    && cd build \
+    && cmake ../plugin \
+    && make \
+    && cd ..
+
+#
+# Copy libraries to the final image
+#
+FROM base AS result
+
+COPY --from=builder /opt/frigate/install install
+COPY --from=builder /opt/frigate/build/libflattenconcat.so /usr/lib
+
+RUN python3 -m pip install install/* \
+    && rm -r install
+
+# Get UFF model
+RUN wget -q https://github.com/dusty-nv/jetson-inference/releases/download/model-mirror-190618/SSD-Mobilenet-v2.tar.gz -O /gpu_model.tar.gz && \
+    tar -xf /gpu_model.tar.gz -C / SSD-Mobilenet-v2/ssd_mobilenet_v2_coco.uff --strip-components 1 && \
+    mv /ssd_mobilenet_v2_coco.uff /gpu_model.uff && \
+    rm /gpu_model.tar.gz
+
+COPY engine.py .
+COPY detect_objects_gpu.py .
+
+CMD ["python3", "-u", "detect_objects_gpu.py"]

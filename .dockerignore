@@ -2,5 +2,9 @@ README.md
 diagram.png
 .gitignore
 debug
+build
+venv*
+.idea
 config/
+docker-compose.*
 *.pyc

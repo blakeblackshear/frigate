@@ -1,7 +1,7 @@
 # Frigate - Realtime Object Detection for IP Cameras
-Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras. Designed for integration with HomeAssistant or others via MQTT.
+Uses OpenCV, Tensorflow/TensorRT to perform realtime object detection locally for IP cameras. Designed for integration with HomeAssistant or others via MQTT.
 
-Use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/) is optional, but highly recommended. On my Intel i7 processor, I can process 2-3 FPS with the CPU. The Coral can process 100+ FPS with very low CPU load.
+Use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/) or [Nvidia CUDA GPUs](https://developer.nvidia.com/cuda-gpus) is optional, but highly recommended. On my Intel i7 processor, I can process 24 FPS with the CPU. Budget entry-level GPU processes 64 FPS and powerful GPU or the Coral can process 100+ FPS with very low CPU load.
 
 - Leverages multiprocessing heavily with an emphasis on realtime over processing every frame
 - Uses a very low overhead motion detection to determine where to run object detection
@@ -29,6 +29,10 @@ docker run --rm \
 blakeblackshear/frigate:stable
 ```
 
+To run GPU accelerated `frigate-gpu` Docker image use the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)).
+If your GPU supports Half precision (also known as FP16), you can boost performance by enabling this mode as follows:
+`docker run --gpus all --env TRT_FLOAT_PRECISION=16 ...` 
+
 Example docker-compose:
 ```yaml
   frigate:
@@ -46,6 +50,8 @@ Example docker-compose:
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
+
+Please note that native GPU support has not landed in docker-compose [yet](https://github.com/docker/compose/issues/6691).
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
@@ -118,10 +124,12 @@ sensor:
         unit_of_measurement: 'ms'
 ```
 ## Using a custom model
-Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use your own models with volume mounts:
-- CPU Model: `/cpu_model.tflite`
+Models for CPU/GPU and EdgeTPU (Coral) are bundled in the images. You can use your own models with volume mounts:
+- CPU Model: `/cpu_model.pb`
+- GPU Model: `/gpu_model.uff`
 - EdgeTPU Model: `/edgetpu_model.tflite`
 - Labels: `/labelmap.txt`
 
 ## Tips
 - Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed
+- Choose smaller camera resolution as the images are resized to the shape of the model 300x300 anyway

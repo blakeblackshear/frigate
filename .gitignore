@@ -1,4 +1,8 @@
 *.pyc 
 debug
+build
+venv*
 .vscode
+.idea
 config/config.yml
+docker-compose.*

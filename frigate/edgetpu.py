@@ -7,6 +7,12 @@ import pyarrow.plasma as plasma
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 from frigate.util import EventsPerSecond, listen
+from frigate.tensorflowcpu import ObjectDetector as CPUObjectDetector
+try:
+    import pycuda.driver as cuda
+    from frigate.tensorrtgpu import ObjectDetector as GPUObjectDetector
+except ImportError:
+    pass
 
 def load_labels(path, encoding='utf-8'):
   """Loads labels from file (with or without index numbers).
@@ -28,26 +34,22 @@ def load_labels(path, encoding='utf-8'):
         return {index: line.strip() for index, line in enumerate(lines)}
 
 class ObjectDetector():
-    def __init__(self):
-        edge_tpu_delegate = None
-        try:
-            edge_tpu_delegate = load_delegate('libedgetpu.so.1.0')
-        except ValueError:
-            print("No EdgeTPU detected. Falling back to CPU.")
-        
-        if edge_tpu_delegate is None:
-            self.interpreter = tflite.Interpreter(
-                model_path='/cpu_model.tflite')
-        else:
-            self.interpreter = tflite.Interpreter(
-                model_path='/edgetpu_model.tflite',
-                experimental_delegates=[edge_tpu_delegate])
-        
+    def __init__(self, edge_tpu_delegate):
+        self.interpreter = tflite.Interpreter(
+            model_path='/edgetpu_model.tflite',
+            experimental_delegates=[edge_tpu_delegate])
+
         self.interpreter.allocate_tensors()
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
-    
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
     def detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]['index'], tensor_input)
         self.interpreter.invoke()
@@ -57,34 +59,62 @@ class ObjectDetector():
 
         detections = np.zeros((20,6), np.float32)
         for i, score in enumerate(scores):
+            if i == detections.shape[0]:
+                break
             detections[i] = [label_codes[i], score, boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]]
-        
+
         return detections
+
+def create_object_detector():
+    edge_tpu_delegate = None
+    try:
+        edge_tpu_delegate = load_delegate('libedgetpu.so.1.0')
+    except ValueError:
+        pass
+
+    if edge_tpu_delegate is not None:
+        return ObjectDetector(edge_tpu_delegate)
+
+    gpu_device_count = 0
+    try:
+        cuda.init()
+        gpu_device_count = cuda.Device.count()
+    except (RuntimeError, TypeError, NameError):
+        pass
+    except cuda.RuntimeError:
+        pass
+
+    if gpu_device_count > 0:
+        print("No EdgeTPU detected. Falling back to GPU.")
+        return GPUObjectDetector()
+
+    print("No EdgeTPU or GPU detected. Falling back to CPU.")
+    return CPUObjectDetector()
 
 def run_detector(detection_queue, avg_speed, start):
     print(f"Starting detection process: {os.getpid()}")
     listen()
     plasma_client = plasma.connect("/tmp/plasma")
-    object_detector = ObjectDetector()
 
-    while True:
-        object_id_str = detection_queue.get()
-        object_id_hash = hashlib.sha1(str.encode(object_id_str))
-        object_id = plasma.ObjectID(object_id_hash.digest())
-        object_id_out = plasma.ObjectID(hashlib.sha1(str.encode(f"out-{object_id_str}")).digest())
-        input_frame = plasma_client.get(object_id, timeout_ms=0)
+    with create_object_detector() as object_detector:
+        while True:
+            object_id_str = detection_queue.get()
+            object_id_hash = hashlib.sha1(str.encode(object_id_str))
+            object_id = plasma.ObjectID(object_id_hash.digest())
+            object_id_out = plasma.ObjectID(hashlib.sha1(str.encode(f"out-{object_id_str}")).digest())
+            input_frame = plasma_client.get(object_id, timeout_ms=0)
 
-        if input_frame is plasma.ObjectNotAvailable:
-            continue
+            if input_frame is plasma.ObjectNotAvailable:
+                continue
 
-        # detect and put the output in the plasma store
-        start.value = datetime.datetime.now().timestamp()
-        plasma_client.put(object_detector.detect_raw(input_frame), object_id_out)
-        duration = datetime.datetime.now().timestamp()-start.value
-        start.value = 0.0
+            # detect and put the output in the plasma store
+            start.value = datetime.datetime.now().timestamp()
+            plasma_client.put(object_detector.detect_raw(input_frame), object_id_out)
+            duration = datetime.datetime.now().timestamp()-start.value
+            start.value = 0.0
 
-        avg_speed.value = (avg_speed.value*9 + duration)/10
-        
+            avg_speed.value = (avg_speed.value*9 + duration)/10
+
 class EdgeTPUProcess():
     def __init__(self):
         self.detection_queue = mp.SimpleQueue()
@@ -114,7 +144,7 @@ class RemoteObjectDetector():
         self.fps = EventsPerSecond()
         self.plasma_client = plasma.connect("/tmp/plasma")
         self.detection_queue = detection_queue
-    
+
     def detect(self, tensor_input, threshold=.4):
         detections = []
 
