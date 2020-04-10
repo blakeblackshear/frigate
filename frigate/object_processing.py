@@ -83,14 +83,13 @@ class TrackedObjectProcessor(threading.Thread):
                     cv2.putText(current_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
 
                 ###
-                # Set the current frame as ready
+                # Set the current frame
                 ###
                 self.camera_data[camera]['current_frame'] = current_frame
 
-                # store the object id, so you can delete it at the next loop
-                previous_object_id = f"{camera}{frame_time}"
-                if not previous_object_id is None:
-                    self.plasma_client.delete(f"{camera}{frame_time}")
+                # delete the previous frame from the plasma store and update the object id
+                if not self.camera_data[camera]['object_id'] is None:
+                    self.plasma_client.delete(self.camera_data[camera]['object_id'])
                 self.camera_data[camera]['object_id'] = f"{camera}{frame_time}"
             
             ###
