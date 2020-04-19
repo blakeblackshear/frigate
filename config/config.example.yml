@@ -111,13 +111,6 @@ cameras:
     take_frame: 1
 
     ################
-    # The expected framerate for the camera. Frigate will try and ensure it maintains this framerate
-    # by dropping frames as necessary. Setting this lower than the actual framerate will allow frigate
-    # to process every frame at the expense of realtime processing.
-    ################
-    fps: 5
-
-    ################
     # Configuration for the snapshots in the debug view and mqtt
     ################
     snapshots:

@@ -115,7 +115,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     return process
 
 class CameraCapture(threading.Thread):
-    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps):
+    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame):
         threading.Thread.__init__(self)
         self.name = name
         self.frame_shape = frame_shape
@@ -123,12 +123,16 @@ class CameraCapture(threading.Thread):
         self.frame_queue = frame_queue
         self.take_frame = take_frame
         self.fps = fps
+        self.skipped_fps = EventsPerSecond()
         self.plasma_client = PlasmaManager()
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = 0
+        self.last_frame = 0
+        self.detection_frame = detection_frame
 
     def run(self):
         frame_num = 0
+        self.skipped_fps.start()
         while True:
             if self.ffmpeg_process.poll() != None:
                 print(f"{self.name}: ffmpeg process is not running. exiting capture thread...")
@@ -141,8 +145,16 @@ class CameraCapture(threading.Thread):
                 print(f"{self.name}: ffmpeg didnt return a frame. something is wrong.")
                 continue
 
+            self.fps.update()
+
             frame_num += 1
             if (frame_num % self.take_frame) != 0:
+                self.skipped_fps.update()
+                continue
+
+            # if the detection process is more than 1 second behind, skip this frame
+            if self.detection_frame.value > 0.0 and (self.last_frame - self.detection_frame.value) > 1:
+                self.skipped_fps.update()
                 continue
 
             # put the frame in the plasma store
@@ -153,12 +165,13 @@ class CameraCapture(threading.Thread):
                 )
             # add to the queue
             self.frame_queue.put(self.current_frame)
+            self.last_frame = self.current_frame
 
-            self.fps.update()
-
-def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start, detection_frame):
+def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
+
+    detection_frame.value = 0.0
 
     # Merge the tracked object config with the global config
     camera_objects_config = config.get('objects', {})    
@@ -171,8 +184,6 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
     object_filters = {}
     for obj in objects_with_config:
         object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
-
-    expected_fps = config['fps']
 
     frame = np.zeros(frame_shape, np.uint8)
 
@@ -192,12 +203,9 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
     object_tracker = ObjectTracker(10)
 
     plasma_client = PlasmaManager()
-    frame_num = 0
     avg_wait = 0.0
     fps_tracker = EventsPerSecond()
-    skipped_fps_tracker = EventsPerSecond()
     fps_tracker.start()
-    skipped_fps_tracker.start()
     object_detector.fps.start()
     while True:
         read_start.value = datetime.datetime.now().timestamp()
@@ -206,30 +214,19 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
         read_start.value = 0.0
         avg_wait = (avg_wait*99+duration)/100
         detection_frame.value = frame_time
-
-        fps_tracker.update()
-        fps.value = fps_tracker.eps()
-        detection_fps.value = object_detector.fps.eps()
         
         # Get frame from plasma store
         frame = plasma_client.get(f"{name}{frame_time}")
 
         if frame is plasma.ObjectNotAvailable:
-            skipped_fps_tracker.update()
-            skipped_fps.value = skipped_fps_tracker.eps()
             continue
+
+        fps_tracker.update()
+        fps.value = fps_tracker.eps()
+        detection_fps.value = object_detector.fps.eps()
         
         # look for motion
         motion_boxes = motion_detector.detect(frame)
-
-        # skip object detection if we are below the min_fps and wait time is less than half the average
-        if frame_num > 100 and fps.value < expected_fps-1 and duration < 0.5*avg_wait:
-            skipped_fps_tracker.update()
-            skipped_fps.value = skipped_fps_tracker.eps()
-            plasma_client.delete(f"{name}{frame_time}")
-            continue
-        
-        skipped_fps.value = skipped_fps_tracker.eps()
 
         tracked_objects = object_tracker.tracked_objects.values()
 
