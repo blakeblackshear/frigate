@@ -125,6 +125,7 @@ class CameraCapture(threading.Thread):
         self.fps = fps
         self.plasma_client = PlasmaManager()
         self.ffmpeg_process = ffmpeg_process
+        self.current_frame = 0
 
     def run(self):
         frame_num = 0
@@ -134,7 +135,7 @@ class CameraCapture(threading.Thread):
                 break
 
             frame_bytes = self.ffmpeg_process.stdout.read(self.frame_size)
-            frame_time = datetime.datetime.now().timestamp()
+            self.current_frame = datetime.datetime.now().timestamp()
 
             if len(frame_bytes) == 0:
                 print(f"{self.name}: ffmpeg didnt return a frame. something is wrong.")
@@ -145,17 +146,17 @@ class CameraCapture(threading.Thread):
                 continue
 
             # put the frame in the plasma store
-            self.plasma_client.put(f"{self.name}{frame_time}",
+            self.plasma_client.put(f"{self.name}{self.current_frame}",
                     np
                         .frombuffer(frame_bytes, np.uint8)
                         .reshape(self.frame_shape)
                 )
             # add to the queue
-            self.frame_queue.put(frame_time)
+            self.frame_queue.put(self.current_frame)
 
             self.fps.update()
 
-def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start):
+def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, skipped_fps, detection_fps, read_start, detection_frame):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
 
@@ -204,6 +205,7 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
         duration = datetime.datetime.now().timestamp()-read_start.value
         read_start.value = 0.0
         avg_wait = (avg_wait*99+duration)/100
+        detection_frame.value = frame_time
 
         fps_tracker.update()
         fps.value = fps_tracker.eps()

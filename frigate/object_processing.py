@@ -34,6 +34,7 @@ class TrackedObjectProcessor(threading.Thread):
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
             'tracked_objects': {},
             'current_frame': np.zeros((720,1280,3), np.uint8),
+            'current_frame_time': 0.0,
             'object_id': None
         })
         self.plasma_client = PlasmaManager()
@@ -55,6 +56,7 @@ class TrackedObjectProcessor(threading.Thread):
             best_objects = self.camera_data[camera]['best_objects']
             current_object_status = self.camera_data[camera]['object_status']
             self.camera_data[camera]['tracked_objects'] = tracked_objects
+            self.camera_data[camera]['current_frame_time'] = frame_time
 
             ###
             # Draw tracked objects on the frame

@@ -206,6 +206,7 @@ def main():
             'fps': mp.Value('d', float(config['fps'])),
             'skipped_fps': mp.Value('d', 0.0),
             'detection_fps': mp.Value('d', 0.0),
+            'detection_frame': mp.Value('d', 0.0),
             'read_start': mp.Value('d', 0.0),
             'ffmpeg_process': ffmpeg_process,
             'ffmpeg_cmd': ffmpeg_cmd,
@@ -217,7 +218,7 @@ def main():
         camera_process = mp.Process(target=track_camera, args=(name, config, GLOBAL_OBJECT_CONFIG, frame_queue, frame_shape,
             tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['fps'], 
             camera_processes[name]['skipped_fps'], camera_processes[name]['detection_fps'], 
-            camera_processes[name]['read_start']))
+            camera_processes[name]['read_start'], camera_processes[name]['detection_frame']))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
 
@@ -272,7 +273,12 @@ def main():
                 'detection_fps': round(camera_stats['detection_fps'].value, 2),
                 'read_start': camera_stats['read_start'].value,
                 'pid': camera_stats['process'].pid,
-                'ffmpeg_pid': camera_stats['ffmpeg_process'].pid
+                'ffmpeg_pid': camera_stats['ffmpeg_process'].pid,
+                'frame_info': {
+                    'read': camera_stats['capture_thread'].current_frame,
+                    'detect': camera_stats['detection_frame'].value,
+                    'process': object_processor.camera_data[name]['current_frame_time']
+                }
             }
         
         stats['coral'] = {
