@@ -105,14 +105,13 @@ class CameraWatchdog(threading.Thread):
                 process = camera_process['process']
                 if not process.is_alive():
                     print(f"Track process for {name} is not alive. Starting again...")
-                    camera_process['fps'].value = float(self.config[name]['fps'])
-                    camera_process['skipped_fps'].value = 0.0
+                    camera_process['process_fps'].value = 0.0
                     camera_process['detection_fps'].value = 0.0
                     camera_process['read_start'].value = 0.0
                     process = mp.Process(target=track_camera, args=(name, self.config[name], GLOBAL_OBJECT_CONFIG, camera_process['frame_queue'],
                         camera_process['frame_shape'], self.tflite_process.detection_queue, self.tracked_objects_queue, 
-                        camera_process['fps'], camera_process['skipped_fps'], camera_process['detection_fps'],
-                        camera_process['read_start']))
+                        camera_process['process_fps'], camera_process['detection_fps'],
+                        camera_process['read_start'], camera_process['detection_frame']))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
@@ -123,7 +122,7 @@ class CameraWatchdog(threading.Thread):
                     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
                     ffmpeg_process = start_or_restart_ffmpeg(camera_process['ffmpeg_cmd'], frame_size)
                     camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, camera_process['frame_queue'], 
-                        camera_process['take_frame'], camera_process['camera_fps'])
+                        camera_process['take_frame'], camera_process['camera_fps'], camera_process['detection_frame'])
                     camera_capture.start()
                     camera_process['ffmpeg_process'] = ffmpeg_process
                     camera_process['capture_thread'] = camera_capture
@@ -193,20 +192,21 @@ def main():
         frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
         take_frame = config.get('take_frame', 1)
 
+        detection_frame = mp.Value('d', 0.0)
+
         ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size)
         frame_queue = mp.SimpleQueue()
         camera_fps = EventsPerSecond()
         camera_fps.start()
-        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps)
+        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps, detection_frame)
         camera_capture.start()
 
         camera_processes[name] = {
             'camera_fps': camera_fps,
             'take_frame': take_frame,
-            'fps': mp.Value('d', float(config['fps'])),
-            'skipped_fps': mp.Value('d', 0.0),
+            'process_fps': mp.Value('d', 0.0),
             'detection_fps': mp.Value('d', 0.0),
-            'detection_frame': mp.Value('d', 0.0),
+            'detection_frame': detection_frame,
             'read_start': mp.Value('d', 0.0),
             'ffmpeg_process': ffmpeg_process,
             'ffmpeg_cmd': ffmpeg_cmd,
@@ -216,8 +216,8 @@ def main():
         }
 
         camera_process = mp.Process(target=track_camera, args=(name, config, GLOBAL_OBJECT_CONFIG, frame_queue, frame_shape,
-            tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['fps'], 
-            camera_processes[name]['skipped_fps'], camera_processes[name]['detection_fps'], 
+            tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['process_fps'], 
+            camera_processes[name]['detection_fps'], 
             camera_processes[name]['read_start'], camera_processes[name]['detection_frame']))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
@@ -267,15 +267,17 @@ def main():
 
         for name, camera_stats in camera_processes.items():
             total_detection_fps += camera_stats['detection_fps'].value
+            capture_thread = camera_stats['capture_thread']
             stats[name] = {
-                'fps': round(camera_stats['fps'].value, 2),
-                'skipped_fps': round(camera_stats['skipped_fps'].value, 2),
+                'camera_fps': round(capture_thread.fps.eps(), 2),
+                'process_fps': round(camera_stats['process_fps'].value, 2),
+                'skipped_fps': round(capture_thread.skipped_fps.eps(), 2),
                 'detection_fps': round(camera_stats['detection_fps'].value, 2),
                 'read_start': camera_stats['read_start'].value,
                 'pid': camera_stats['process'].pid,
                 'ffmpeg_pid': camera_stats['ffmpeg_process'].pid,
                 'frame_info': {
-                    'read': camera_stats['capture_thread'].current_frame,
+                    'read': capture_thread.current_frame,
                     'detect': camera_stats['detection_frame'].value,
                     'process': object_processor.camera_data[name]['current_frame_time']
                 }
