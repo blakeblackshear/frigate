@@ -63,7 +63,7 @@ DEBUG = (CONFIG.get('debug', '0') == '1')
 
 def start_plasma_store():
     plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
-    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL)
+    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
     time.sleep(1)
     rc = plasma_process.poll()
     if rc is not None:
