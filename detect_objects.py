@@ -328,7 +328,9 @@ def main():
             if frame is None:
                 frame = np.zeros((height,int(height*16/9),3), np.uint8)
 
-            frame = cv2.resize(frame, dsize=(int(height*16/9), height), interpolation=cv2.INTER_LINEAR)
+            width = int(height*frame.shape[1]/frame.shape[0])
+
+            frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
             ret, jpg = cv2.imencode('.jpg', frame)
