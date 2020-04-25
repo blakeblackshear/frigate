@@ -92,8 +92,9 @@ class CameraWatchdog(threading.Thread):
                 self.plasma_process = start_plasma_store()
 
             # check the detection process
-            if (self.tflite_process.detection_start.value > 0.0 and 
-                datetime.datetime.now().timestamp() - self.tflite_process.detection_start.value > 10):
+            detection_start = self.tflite_process.detection_start.value
+            if (detection_start > 0.0 and 
+                datetime.datetime.now().timestamp() - detection_start > 10):
                 print("Detection appears to be stuck. Restarting detection process")
                 self.tflite_process.start_or_restart()
             elif not self.tflite_process.detect_process.is_alive():
