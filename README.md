@@ -19,6 +19,7 @@ You see multiple bounding boxes because it draws bounding boxes from all frames 
 Run the container with
 ```bash
 docker run --rm \
+-name frigate \
 --privileged \
 --shm-size=512m \ # should work for a 2-3 cameras
 -v /dev/bus/usb:/dev/bus/usb \
@@ -126,11 +127,19 @@ Keep in mind the MJPEG endpoint is for debugging only, but should not be used co
 
 Debug info is available at `http://localhost:5000/debug/stats`
 
+
 ## Using a custom model
 Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use your own models with volume mounts:
 - CPU Model: `/cpu_model.tflite`
 - EdgeTPU Model: `/edgetpu_model.tflite`
 - Labels: `/labelmap.txt`
+
+## Masks and limiting detection to a certain area
+You can create a *bitmap (bmp)* file the same aspect ratio as your camera feed to limit detection to certain areas. The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
+
+<a href="docs/example-mask-check-point.png"><img src="docs/example-mask-check-point.png" height="300"></a>
+<a href="docs/example-mask.bmp"><img src="docs/example-mask.bmp" height="300"></a>
+<a href="docs/example-mask-overlay.png"><img src="docs/example-mask-overlay.png" height="300"></a>
 
 ## Tips
 - Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed. Not as effective, but you can also modify the `take_frame` [configuration](config/config.example.yml) for each camera to only analyze every other frame, or every third frame, etc. 
@@ -143,11 +152,6 @@ cameras:
     height: 1080
     width: 1920
 ```
+- Additional logging is available in the docker container - You can view the logs by running `docker logs -t frigate`
 - Object configuration - Tracked objects types, sizes and thresholds can be defined globally and/or on a per camera basis. The global and camera object configuration is *merged*. For example, if you defined tracking person, car, and truck globally but modified your backyard camera to only track person, the global config would merge making the effective list for the backyard camera still contain person, car and truck. If you want precise object tracking per camera, best practice to put a minimal list of objects at the global level and expand objects on a per camera basis. Object threshold and area configuration will be used first from the camera object config (if defined) and then from the global config.  See the [example config](config/config.example.yml) for more information. 
-- Masks and limiting detection to a certain area - You can create a bitmap (bmp) file the same aspect ratio as your camera feed to limit detection to certain areas. The mask works by looking at the bottom center of any bounding box (red dot below) and comparing that to your mask. 
 
-<a href="docs/example-mask-check-point.png"><img src="docs/example-mask-check-point.png" height="300"></a>
-
-If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. Here is a sample mask that would limit detection to only the front yard and not the street for the above image:
-
-<a href="docs/example-mask.bmp"><img src="docs/example-mask.bmp" height="300"></a>
