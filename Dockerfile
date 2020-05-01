@@ -7,7 +7,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     software-properties-common \
     # apt-transport-https ca-certificates \
     build-essential \
-    gnupg wget unzip \
+    gnupg wget unzip tzdata \
     # libcap-dev \
     && add-apt-repository ppa:deadsnakes/ppa -y \
     && apt -qq install --no-install-recommends -y \
