@@ -84,6 +84,8 @@ class CameraWatchdog(threading.Thread):
         while True:
             # wait a bit before checking
             time.sleep(10)
+
+            now = datetime.datetime.now().timestamp()
             
             # check the plasma process
             rc = self.plasma_process.poll()
@@ -94,7 +96,7 @@ class CameraWatchdog(threading.Thread):
             # check the detection process
             detection_start = self.tflite_process.detection_start.value
             if (detection_start > 0.0 and 
-                datetime.datetime.now().timestamp() - detection_start > 10):
+                now - detection_start > 10):
                 print("Detection appears to be stuck. Restarting detection process")
                 self.tflite_process.start_or_restart()
             elif not self.tflite_process.detect_process.is_alive():
@@ -127,6 +129,17 @@ class CameraWatchdog(threading.Thread):
                     camera_capture.start()
                     camera_process['ffmpeg_process'] = ffmpeg_process
                     camera_process['capture_thread'] = camera_capture
+                elif now - camera_process['capture_thread'].current_frame > 5:
+                    print(f"No frames received from {name} in 5 seconds. Exiting ffmpeg...")
+                    ffmpeg_process = camera_process['ffmpeg_process']
+                    ffmpeg_process.terminate()
+                    try:
+                        print("Waiting for ffmpeg to exit gracefully...")
+                        ffmpeg_process.communicate(timeout=30)
+                    except sp.TimeoutExpired:
+                        print("FFmpeg didnt exit. Force killing...")
+                        ffmpeg_process.kill()
+                        ffmpeg_process.communicate()
 
 def main():
     # connect to mqtt and setup last will
