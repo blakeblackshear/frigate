@@ -125,3 +125,4 @@ Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use yo
 
 ## Tips
 - Lower the framerate of the video feed on the camera to reduce the CPU usage for capturing the feed
+- If running virtualized in Proxmox, pass the USB card/interface to the virtual machine not the USB ID for faster inference speed.
