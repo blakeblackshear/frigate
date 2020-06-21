@@ -11,6 +11,9 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     # libcap-dev \
     && add-apt-repository ppa:deadsnakes/ppa -y \
     && apt -qq install --no-install-recommends -y \
+    && add-apt-repository ppa:savoury1/ffmpeg4 -y \
+    && add-apt-repository ppa:savoury1/graphics -y \
+    && add-apt-repository ppa:savoury1/multimedia -y \
         python3.7 \
         python3.7-dev \
         python3-pip \
