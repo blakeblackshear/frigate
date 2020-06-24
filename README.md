@@ -49,7 +49,10 @@ Example docker-compose:
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
-Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best snapshot for any object type with at `http://localhost:5000/<camera_name>/<object_name>/best.jpg`
+Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best snapshot for any object type with at `http://localhost:5000/<camera_name>/<object_name>/best.jpg`.  You can specify the following arguments on the URL:
+
+- `fps`: The framerate of the debug stream.  Defaults to 1.
+- `h`: The height of the debug stream.
 
 Debug info is available at `http://localhost:5000/debug/stats`
 
