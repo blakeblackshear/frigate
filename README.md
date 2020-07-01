@@ -50,6 +50,17 @@ Example docker-compose:
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
+## Recommended Hardware
+|Name|Inference Speed|Notes|
+|----|---------------|-----|
+|Atomic Pi|16ms|Best option for a dedicated low power board with a small number of cameras.|
+|Intel NUC NUC7i3BNK|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
+|BMAX B2 Plus|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.
+
+ARM boards are not officially supported at the moment due to some python dependencies that require modification to work on ARM devices. The Raspberry Pi4 gets about 16ms inference speeds, but the hardware acceleration for ffmpeg does not work for converting yuv420 to rgb24. The Atomic Pi is x86 and much more efficient.
+
+Users have reported varying success in getting frigate to run in a VM. In some cases, the virtualization layer introduces a significant delay in communication with the Coral.
+
 ## Integration with HomeAssistant
 
 Setup a the camera, binary_sensor, sensor and optionally automation as shown for each camera you define in frigate. Replace <camera_name> with the camera name as defined in the frigate `config.yml` (The `frigate_coral_fps` and `frigate_coral_inference` sensors only need to be defined once)
@@ -117,13 +128,13 @@ automation:
               - url: http://<ip>:5000/<camera_name>/person/best.jpg
                 caption: A person was detected.        
 ```
-## Debuging Endpoint
+## Debugging Endpoint
+
+Keep in mind the MJPEG endpoint is for debugging only, but should not be used continuously as it will put additional load on the system. 
 
 Access the mjpeg stream at `http://localhost:5000/<camera_name>` and the best snapshot for any object type with at `http://localhost:5000/<camera_name>/<object_name>/best.jpg`
 
-You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10`
-
-Keep in mind the MJPEG endpoint is for debugging only, but should not be used continuously as it will put additional load on the system. 
+You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`
 
 Debug info is available at `http://localhost:5000/debug/stats`
 
