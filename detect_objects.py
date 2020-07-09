@@ -17,6 +17,7 @@ import paho.mqtt.client as mqtt
 
 from frigate.video import track_camera, get_ffmpeg_input, get_frame_shape, CameraCapture, start_or_restart_ffmpeg
 from frigate.object_processing import TrackedObjectProcessor
+from frigate.events import EventProcessor
 from frigate.util import EventsPerSecond
 from frigate.edgetpu import EdgeTPUProcess
 
@@ -176,6 +177,9 @@ def main():
 
     # Queue for cameras to push tracked objects to
     tracked_objects_queue = mp.SimpleQueue()
+
+    # Queue for clip processing
+    event_queue = mp.Queue()
     
     # Start the shared tflite process
     tflite_process = EdgeTPUProcess()
@@ -190,6 +194,25 @@ def main():
         ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', FFMPEG_DEFAULT_CONFIG['hwaccel_args'])
         ffmpeg_input_args = ffmpeg.get('input_args', FFMPEG_DEFAULT_CONFIG['input_args'])
         ffmpeg_output_args = ffmpeg.get('output_args', FFMPEG_DEFAULT_CONFIG['output_args'])
+        if config.get('save_clips', False):
+            ffmpeg_output_args = [
+                "-f",
+                "segment",
+                "-segment_time",
+                "10",
+                "-segment_format",
+                "mp4",
+                "-reset_timestamps",
+                "1",
+                "-strftime",
+                "1",
+                "-c",
+                "copy",
+                "-an",
+                "-map",
+                "0",
+                f"/cache/{name}-%Y%m%d%H%M%S.mp4"
+            ] + ffmpeg_output_args
         ffmpeg_cmd = (['ffmpeg'] +
                 ffmpeg_global_args +
                 ffmpeg_hwaccel_args +
@@ -239,8 +262,11 @@ def main():
     for name, camera_process in camera_processes.items():
         camera_process['process'].start()
         print(f"Camera_process started for {name}: {camera_process['process'].pid}")
-    
-    object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue)
+
+    event_processor = EventProcessor(CONFIG['cameras'], camera_processes, '/cache', '/clips', event_queue)
+    event_processor.start()
+
+    object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue)
     object_processor.start()
     
     camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process)

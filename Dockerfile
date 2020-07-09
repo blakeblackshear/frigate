@@ -24,6 +24,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         numpy \
         imutils \
         scipy \
+        psutil \
     && python3.7 -m pip install -U \
         Flask \
         paho-mqtt \
@@ -48,6 +49,8 @@ RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mob
 RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O /labelmap.txt --trust-server-names
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
 
+
+RUN mkdir /cache && mkdir /clips
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
