@@ -48,7 +48,6 @@ FFMPEG_DEFAULT_CONFIG = {
          '-flags', 'low_delay',
          '-strict', 'experimental',
          '-fflags', '+genpts+discardcorrupt',
-         '-vsync', 'drop',
          '-rtsp_transport', 'tcp',
          '-stimeout', '5000000',
          '-use_wallclock_as_timestamps', '1']),
