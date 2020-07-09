@@ -23,12 +23,13 @@ for key, val in LABELS.items():
     COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
 class TrackedObjectProcessor(threading.Thread):
-    def __init__(self, config, client, topic_prefix, tracked_objects_queue):
+    def __init__(self, config, client, topic_prefix, tracked_objects_queue, event_queue):
         threading.Thread.__init__(self)
         self.config = config
         self.client = client
         self.topic_prefix = topic_prefix
         self.tracked_objects_queue = tracked_objects_queue
+        self.event_queue = event_queue
         self.camera_data = defaultdict(lambda: {
             'best_objects': {},
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
@@ -50,12 +51,35 @@ class TrackedObjectProcessor(threading.Thread):
 
     def run(self):
         while True:
-            camera, frame_time, tracked_objects = self.tracked_objects_queue.get()
+            camera, frame_time, current_tracked_objects = self.tracked_objects_queue.get()
 
             config = self.config[camera]
             best_objects = self.camera_data[camera]['best_objects']
             current_object_status = self.camera_data[camera]['object_status']
-            self.camera_data[camera]['tracked_objects'] = tracked_objects
+            tracked_objects = self.camera_data[camera]['tracked_objects']
+
+            current_ids = current_tracked_objects.keys()
+            previous_ids = tracked_objects.keys()
+            removed_ids = list(set(previous_ids).difference(current_ids))
+            new_ids = list(set(current_ids).difference(previous_ids))
+            updated_ids = list(set(current_ids).intersection(previous_ids))
+
+            for id in new_ids:
+                tracked_objects[id] = current_tracked_objects[id]
+                # publish events to mqtt
+                self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(tracked_objects[id]), retain=False)
+                self.event_queue.put(('start', camera, tracked_objects[id]))
+            
+            for id in updated_ids:
+                tracked_objects[id] = current_tracked_objects[id]
+            
+            for id in removed_ids:
+                # publish events to mqtt
+                tracked_objects[id]['end_time'] = frame_time
+                self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(tracked_objects[id]), retain=False)
+                self.event_queue.put(('end', camera, tracked_objects[id]))
+                del tracked_objects[id]
+
             self.camera_data[camera]['current_frame_time'] = frame_time
 
             ###

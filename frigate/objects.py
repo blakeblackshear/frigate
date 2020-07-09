@@ -19,6 +19,7 @@ class ObjectTracker():
     def register(self, index, obj):
         id = f"{obj['frame_time']}-{index}"
         obj['id'] = id
+        obj['start_time'] = obj['frame_time']
         obj['top_score'] = obj['score']
         self.add_history(obj)
         self.tracked_objects[id] = obj
@@ -45,6 +46,9 @@ class ObjectTracker():
         }
         if 'history' in obj:
             obj['history'].append(entry)
+            # only maintain the last 20 in history
+            if len(obj['history']) > 20:
+                obj['history'] = obj['history'][-20:]
         else:
             obj['history'] = [entry]
 
