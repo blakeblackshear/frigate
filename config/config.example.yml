@@ -116,6 +116,9 @@ cameras:
     # from the video stream without re-encoding. Clips are them created by using ffmpeg to merge segments
     # without re-encoding. The segements saved are unaltered from what frigate receives to avoid re-encoding.
     # They do not contain bounding boxes. 30 seconds of video is added to the start of the clip.
+    #
+    # NOTE: This will only work for camera feeds that can be copied into the mp4 container format without
+    # encoding such as h264. I do not expect this to work for mjpeg streams.
     ################
     save_clips: False
 
