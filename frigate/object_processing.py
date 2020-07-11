@@ -22,6 +22,11 @@ COLOR_MAP = {}
 for key, val in LABELS.items():
     COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
+def filter_false_positives(event):
+    if len(event['history']) < 2:
+        return True
+    return False
+
 class TrackedObjectProcessor(threading.Thread):
     def __init__(self, config, client, topic_prefix, tracked_objects_queue, event_queue):
         threading.Thread.__init__(self)
@@ -65,10 +70,12 @@ class TrackedObjectProcessor(threading.Thread):
             updated_ids = list(set(current_ids).intersection(previous_ids))
 
             for id in new_ids:
-                tracked_objects[id] = current_tracked_objects[id]
-                # publish events to mqtt
-                self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(tracked_objects[id]), retain=False)
-                self.event_queue.put(('start', camera, tracked_objects[id]))
+                # only register the object here if we are sure it isnt a false positive
+                if not filter_false_positives(current_tracked_objects[id]):
+                    tracked_objects[id] = current_tracked_objects[id]
+                    # publish events to mqtt
+                    self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(tracked_objects[id]), retain=False)
+                    self.event_queue.put(('start', camera, tracked_objects[id]))
             
             for id in updated_ids:
                 tracked_objects[id] = current_tracked_objects[id]
@@ -139,11 +146,10 @@ class TrackedObjectProcessor(threading.Thread):
             ###
             # Report over MQTT
             ###
-            # count objects with more than 2 entries in history by type
+            # count objects by type
             obj_counter = Counter()
             for obj in tracked_objects.values():
-                if len(obj['history']) > 1:
-                    obj_counter[obj['label']] += 1
+                obj_counter[obj['label']] += 1
                     
             # report on detected objects
             for obj_name, count in obj_counter.items():
