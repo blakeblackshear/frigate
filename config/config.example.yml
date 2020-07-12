@@ -119,7 +119,11 @@ cameras:
     # optimized to capture "false_positive" examples for improving frigate.
     #
     # NOTE: This will only work for camera feeds that can be copied into the mp4 container format without
-    # encoding such as h264. I do not expect this to work for mjpeg streams.
+    # encoding such as h264. I do not expect this to work for mjpeg streams, and it may not work for many other
+    # types of streams.
+    #
+    # WARNING: Videos in /cache are retained until there are no ongoing events. If you are tracking cars or
+    # other objects for long periods of time, the cache will continue to grow indefinitely.
     ################
     save_clips: False
 
