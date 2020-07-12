@@ -147,7 +147,7 @@ Designed to be used as an availability topic with HomeAssistant. Possible messag
 "offline": published right before frigate stops
 
 ### frigate/<camera_name>/<object_name>
-Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeAsistant for whether or not that object type is detected.
+Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeAssistant for whether or not that object type is detected.
 
 ### frigate/<camera_name>/<object_name>/snapshot
 Publishes a jpeg encoded frame of the detected object type. When the object is no longer detected, the highest confidence image is published or the original image
