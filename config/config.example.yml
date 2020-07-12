@@ -113,7 +113,7 @@ cameras:
     ################
     # This will save a clip for each tracked object by frigate along with a json file that contains
     # data related to the tracked object. This works by telling ffmpeg to write video segments to /cache
-    # from the video stream without re-encoding. Clips are them created by using ffmpeg to merge segments
+    # from the video stream without re-encoding. Clips are then created by using ffmpeg to merge segments
     # without re-encoding. The segments saved are unaltered from what frigate receives to avoid re-encoding.
     # They do not contain bounding boxes. 30 seconds of video is added to the start of the clip. These are
     # optimized to capture "false_positive" examples for improving frigate.
