@@ -12,6 +12,7 @@ import numpy as np
 import copy
 import itertools
 import json
+import base64
 from collections import defaultdict
 from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, PlasmaManager
 from frigate.objects import ObjectTracker
@@ -189,7 +190,12 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
 
     # load in the mask for object detection
     if 'mask' in config:
-        mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
+        if config['mask'].startswith('base64,'):
+            img = base64.b64decode(config['mask'][7:]) 
+            npimg = np.fromstring(img, dtype=np.uint8)
+            mask = cv2.imdecode(npimg, cv2.IMREAD_GRAYSCALE)
+        else:
+            mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
     else:
         mask = None
 
