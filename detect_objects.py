@@ -359,7 +359,28 @@ def main():
                             mimetype='multipart/x-mixed-replace; boundary=frame')
         else:
             return "Camera named {} not found".format(camera_name), 404
+    
+    @app.route('/<camera_name>/latest.jpg')
+    def latest_frame(camera_name):
+        if camera_name in CONFIG['cameras']:
+            # max out at specified FPS
+            frame = object_processor.get_current_frame(camera_name)
+            if frame is None:
+                frame = np.zeros((height,int(height*16/9),3), np.uint8)
 
+            height = int(request.args.get('h', str(frame.shape[1])))
+            width = int(height*frame.shape[1]/frame.shape[0])
+
+            frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+            ret, jpg = cv2.imencode('.jpg', frame)
+            response = make_response(jpg.tobytes())
+            response.headers['Content-Type'] = 'image/jpg'
+            return response
+        else:
+            return "Camera named {} not found".format(camera_name), 404
+            
     def imagestream(camera_name, fps, height):
         while True:
             # max out at specified FPS
