@@ -78,7 +78,7 @@ class EventProcessor(threading.Thread):
                 del self.cached_clips[f]
                 os.remove(os.path.join(self.cache_dir,f))
 
-    def create_clip(self, camera, event_data):
+    def create_clip(self, camera, event_data, pre_capture):
         # get all clips from the camera with the event sorted
         sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
 
@@ -88,7 +88,7 @@ class EventProcessor(threading.Thread):
             # get all clips from the camera with the event sorted
             sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
         
-        playlist_start = event_data['start_time']-30
+        playlist_start = event_data['start_time']-pre_capture
         playlist_end = event_data['end_time']+5
         playlist_lines = []
         for clip in sorted_clips:
@@ -145,8 +145,8 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                if self.config[camera].get('save_clips', False) and len(self.cached_clips) > 0:
-                    self.create_clip(camera, event_data)
+                if self.config[camera].get('save_clips', {}).get('enabled', False) and len(self.cached_clips) > 0:
+                    self.create_clip(camera, event_data, self.config[camera].get('save_clips', {}).get('pre_capture', 30))
                 del self.events_in_process[event_data['id']]
 
                 

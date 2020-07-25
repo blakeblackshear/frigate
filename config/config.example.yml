@@ -125,7 +125,12 @@ cameras:
     # WARNING: Videos in /cache are retained until there are no ongoing events. If you are tracking cars or
     # other objects for long periods of time, the cache will continue to grow indefinitely.
     ################
-    save_clips: False
+    save_clips:
+      enabled: False
+      #########
+      # Number of seconds before the event to include in the clips
+      #########
+      pre_capture: 30
 
     ################
     # Configuration for the snapshots in the debug view and mqtt
