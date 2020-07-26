@@ -236,7 +236,7 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
         for obj in tracked_objects:
             x_min, y_min, x_max, y_max = obj['box']
             for m_index, motion_box in enumerate(motion_boxes):
-                if area(intersection(obj['box'], motion_box))/area(motion_box) > .5:
+                if intersection_over_union(motion_box, obj['box']) > .2:
                     used_motion_boxes.append(m_index)
                     x_min = min(obj['box'][0], motion_box[0])
                     y_min = min(obj['box'][1], motion_box[1])
