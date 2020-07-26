@@ -38,8 +38,8 @@ class EventProcessor(threading.Thread):
             if f in files_in_use or f in self.cached_clips:
                 continue
 
-            camera = f.split('-')[0]
-            start_time = datetime.datetime.strptime(f.split('-')[1].split('.')[0], '%Y%m%d%H%M%S')
+            camera = '-'.join(f.split('-')[:-1])
+            start_time = datetime.datetime.strptime(f.split('-')[-1].split('.')[0], '%Y%m%d%H%M%S')
         
             ffprobe_cmd = " ".join([
                 'ffprobe',
