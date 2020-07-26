@@ -50,7 +50,7 @@ RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O /labelm
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
 
 
-RUN mkdir /cache && mkdir /clips
+RUN mkdir /cache /clips
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
