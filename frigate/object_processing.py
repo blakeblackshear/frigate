@@ -139,6 +139,12 @@ class TrackedObjectProcessor(threading.Thread):
                     if obj['score'] > best_objects[obj['label']]['score'] or (now - best_objects[obj['label']]['frame_time']) > 60:
                         obj['frame'] = np.copy(self.camera_data[camera]['current_frame'])
                         best_objects[obj['label']] = obj
+                        # send updated snapshot over mqtt
+                        best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_RGB2BGR)
+                        ret, jpg = cv2.imencode('.jpg', best_frame)
+                        if ret:
+                            jpg_bytes = jpg.tobytes()
+                            self.client.publish(f"{self.topic_prefix}/{camera}/{obj['label']}/snapshot", jpg_bytes, retain=True)
                 else:
                     obj['frame'] = np.copy(self.camera_data[camera]['current_frame'])
                     best_objects[obj['label']] = obj
