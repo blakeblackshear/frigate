@@ -5,6 +5,8 @@ import cv2
 import itertools
 import copy
 import numpy as np
+import random
+import string
 import multiprocessing as mp
 from collections import defaultdict
 from scipy.spatial import distance as dist
@@ -17,7 +19,8 @@ class ObjectTracker():
         self.max_disappeared = max_disappeared
 
     def register(self, index, obj):
-        id = f"{obj['frame_time']}-{index}"
+        rand_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        id = f"{obj['frame_time']}-{rand_id}"
         obj['id'] = id
         obj['start_time'] = obj['frame_time']
         obj['top_score'] = obj['score']
