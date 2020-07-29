@@ -192,6 +192,7 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
         mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
         if mask.size == 0:
             print("Failed to read mask file")
+            mask = None
     else:
         mask = None
 
