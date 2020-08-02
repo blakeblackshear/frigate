@@ -87,7 +87,7 @@ def run_detector(detection_queue, avg_speed, start):
         
 class EdgeTPUProcess():
     def __init__(self):
-        self.detection_queue = mp.SimpleQueue()
+        self.detection_queue = mp.Queue()
         self.avg_inference_speed = mp.Value('d', 0.01)
         self.detection_start = mp.Value('d', 0.0)
         self.detect_process = None

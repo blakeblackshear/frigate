@@ -1,4 +1,5 @@
 import os
+import signal
 import sys
 import traceback
 import signal
@@ -71,19 +72,24 @@ def start_plasma_store():
     return plasma_process
 
 class CameraWatchdog(threading.Thread):
-    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, plasma_process):
+    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, plasma_process, stop_event):
         threading.Thread.__init__(self)
         self.camera_processes = camera_processes
         self.config = config
         self.tflite_process = tflite_process
         self.tracked_objects_queue = tracked_objects_queue
         self.plasma_process = plasma_process
+        self.stop_event = stop_event
 
     def run(self):
         time.sleep(10)
         while True:
             # wait a bit before checking
             time.sleep(10)
+
+            if self.stop_event.is_set():
+                print(f"Exiting watchdog...")
+                break
 
             now = datetime.datetime.now().timestamp()
             
@@ -125,7 +131,7 @@ class CameraWatchdog(threading.Thread):
                     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
                     ffmpeg_process = start_or_restart_ffmpeg(camera_process['ffmpeg_cmd'], frame_size)
                     camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, camera_process['frame_queue'], 
-                        camera_process['take_frame'], camera_process['camera_fps'], camera_process['detection_frame'])
+                        camera_process['take_frame'], camera_process['camera_fps'], camera_process['detection_frame'], self.stop_event)
                     camera_capture.start()
                     camera_process['ffmpeg_process'] = ffmpeg_process
                     camera_process['capture_thread'] = camera_capture
@@ -142,6 +148,7 @@ class CameraWatchdog(threading.Thread):
                         ffmpeg_process.communicate()
 
 def main():
+    stop_event = threading.Event()
     # connect to mqtt and setup last will
     def on_connect(client, userdata, flags, rc):
         print("On connect called")
@@ -176,7 +183,7 @@ def main():
         }
 
     # Queue for cameras to push tracked objects to
-    tracked_objects_queue = mp.SimpleQueue()
+    tracked_objects_queue = mp.Queue()
 
     # Queue for clip processing
     event_queue = mp.Queue()
@@ -232,10 +239,10 @@ def main():
         detection_frame = mp.Value('d', 0.0)
 
         ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size)
-        frame_queue = mp.SimpleQueue()
+        frame_queue = mp.Queue()
         camera_fps = EventsPerSecond()
         camera_fps.start()
-        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps, detection_frame)
+        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps, detection_frame, stop_event)
         camera_capture.start()
 
         camera_processes[name] = {
@@ -263,14 +270,30 @@ def main():
         camera_process['process'].start()
         print(f"Camera_process started for {name}: {camera_process['process'].pid}")
 
-    event_processor = EventProcessor(CONFIG['cameras'], camera_processes, '/cache', '/clips', event_queue)
+    event_processor = EventProcessor(CONFIG['cameras'], camera_processes, '/cache', '/clips', event_queue, stop_event)
     event_processor.start()
     
-    object_processor = TrackedObjectProcessor(CONFIG['cameras'], CONFIG.get('zones', {}), client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue)
+    object_processor = TrackedObjectProcessor(CONFIG['cameras'], CONFIG.get('zones', {}), client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue,stop_event)
     object_processor.start()
     
-    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process)
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process, stop_event)
     camera_watchdog.start()
+
+    def receiveSignal(signalNumber, frame):
+        print('Received:', signalNumber)
+        stop_event.set()
+        event_processor.join()
+        object_processor.join()
+        camera_watchdog.join()
+        for name, camera_process in camera_processes.items():
+            camera_process['capture_thread'].join()
+        rc = camera_watchdog.plasma_process.poll()
+        if rc == None:
+            camera_watchdog.plasma_process.terminate()
+        sys.exit()
+    
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
 
     # create a flask app that encodes frames a mjpeg on demand
     app = Flask(__name__)
