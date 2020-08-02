@@ -366,9 +366,9 @@ def main():
             # max out at specified FPS
             frame = object_processor.get_current_frame(camera_name)
             if frame is None:
-                frame = np.zeros((height,int(height*16/9),3), np.uint8)
+                frame = np.zeros((720,1280,3), np.uint8)
 
-            height = int(request.args.get('h', str(frame.shape[1])))
+            height = int(request.args.get('h', str(frame.shape[0])))
             width = int(height*frame.shape[1]/frame.shape[0])
 
             frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
