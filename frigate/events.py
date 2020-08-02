@@ -9,7 +9,7 @@ import subprocess as sp
 import queue
 
 class EventProcessor(threading.Thread):
-    def __init__(self, config, camera_processes, cache_dir, clip_dir, event_queue):
+    def __init__(self, config, camera_processes, cache_dir, clip_dir, event_queue, stop_event):
         threading.Thread.__init__(self)
         self.config = config
         self.camera_processes = camera_processes
@@ -18,6 +18,7 @@ class EventProcessor(threading.Thread):
         self.cached_clips = {}
         self.event_queue = event_queue
         self.events_in_process = {}
+        self.stop_event = stop_event
     
     def refresh_cache(self):
         cached_files = os.listdir(self.cache_dir)
@@ -133,6 +134,10 @@ class EventProcessor(threading.Thread):
 
     def run(self):
         while True:
+            if self.stop_event.is_set():
+                print(f"Exiting event processor...")
+                break
+            
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
             except queue.Empty:

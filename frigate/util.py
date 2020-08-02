@@ -140,11 +140,14 @@ def listen():
     signal.signal(signal.SIGUSR1, print_stack)
 
 class PlasmaManager:
-    def __init__(self):
+    def __init__(self, stop_event=None):
+        self.stop_event = stop_event
         self.connect()
     
     def connect(self):
         while True:
+            if self.stop_event != None and self.stop_event.is_set():
+                return
             try:
                 self.plasma_client = plasma.connect("/tmp/plasma")
                 return
@@ -155,6 +158,8 @@ class PlasmaManager:
     def get(self, name, timeout_ms=0):
         object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
         while True:
+            if self.stop_event != None and self.stop_event.is_set():
+                return
             try:
                 return self.plasma_client.get(object_id, timeout_ms=timeout_ms)
             except:
@@ -164,6 +169,8 @@ class PlasmaManager:
     def put(self, name, obj):
         object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
         while True:
+            if self.stop_event != None and self.stop_event.is_set():
+                return
             try:
                 self.plasma_client.put(obj, object_id)
                 return
@@ -175,6 +182,8 @@ class PlasmaManager:
     def delete(self, name):
         object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
         while True:
+            if self.stop_event != None and self.stop_event.is_set():
+                return
             try:
                 self.plasma_client.delete([object_id])
                 return

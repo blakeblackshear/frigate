@@ -116,7 +116,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     return process
 
 class CameraCapture(threading.Thread):
-    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame):
+    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame, stop_event):
         threading.Thread.__init__(self)
         self.name = name
         self.frame_shape = frame_shape
@@ -125,16 +125,21 @@ class CameraCapture(threading.Thread):
         self.take_frame = take_frame
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
-        self.plasma_client = PlasmaManager()
+        self.plasma_client = PlasmaManager(stop_event)
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = 0
         self.last_frame = 0
         self.detection_frame = detection_frame
+        self.stop_event = stop_event
 
     def run(self):
         frame_num = 0
         self.skipped_fps.start()
         while True:
+            if self.stop_event.is_set():
+                print(f"{self.name}: stop event set. exiting capture thread...")
+                break
+
             if self.ffmpeg_process.poll() != None:
                 print(f"{self.name}: ffmpeg process is not running. exiting capture thread...")
                 break

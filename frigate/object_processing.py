@@ -5,6 +5,7 @@ import time
 import copy
 import cv2
 import threading
+import queue
 import numpy as np
 from collections import Counter, defaultdict
 import itertools
@@ -51,7 +52,7 @@ def zone_filtered(obj, object_config):
     return False
 
 class TrackedObjectProcessor(threading.Thread):
-    def __init__(self, camera_config, zone_config, client, topic_prefix, tracked_objects_queue, event_queue):
+    def __init__(self, camera_config, zone_config, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
         threading.Thread.__init__(self)
         self.camera_config = camera_config
         self.zone_config = zone_config
@@ -59,6 +60,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.topic_prefix = topic_prefix
         self.tracked_objects_queue = tracked_objects_queue
         self.event_queue = event_queue
+        self.stop_event = stop_event
         self.camera_data = defaultdict(lambda: {
             'best_objects': {},
             'object_status': defaultdict(lambda: defaultdict(lambda: 'OFF')),
@@ -89,7 +91,7 @@ class TrackedObjectProcessor(threading.Thread):
         for i, zone in enumerate(self.zone_data.values()):
             zone['color'] = tuple(int(round(255 * c)) for c in colors(i)[:3])
 
-        self.plasma_client = PlasmaManager()
+        self.plasma_client = PlasmaManager(self.stop_event)
         
     def get_best(self, camera, label):
         if label in self.camera_data[camera]['best_objects']:
@@ -102,7 +104,14 @@ class TrackedObjectProcessor(threading.Thread):
 
     def run(self):
         while True:
-            camera, frame_time, current_tracked_objects = self.tracked_objects_queue.get()
+            if self.stop_event.is_set():
+                print(f"Exiting event processor...")
+                break
+
+            try:
+                camera, frame_time, current_tracked_objects = self.tracked_objects_queue.get(True, 10)
+            except queue.Empty:
+                continue
 
             camera_config = self.camera_config[camera]
             best_objects = self.camera_data[camera]['best_objects']
@@ -215,7 +224,7 @@ class TrackedObjectProcessor(threading.Thread):
             ###
             # Report over MQTT
             ###
-            
+
             # get the zones that are relevant for this camera
             relevant_zones = [zone for zone, config in self.zone_config.items() if camera in config]
             # for each zone
