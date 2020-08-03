@@ -150,10 +150,14 @@ class TrackedObjectProcessor(threading.Thread):
                 bottom_center = (obj['centroid'][0], obj['box'][3])
                 # check each zone
                 for name, zone in self.zone_data.items():
-                    # check each camera with a contour for the zone
-                    for camera, contour in zone['contours'].items():
-                        if cv2.pointPolygonTest(contour, bottom_center, False) >= 0 and not zone_filtered(obj, self.zone_config[name][camera].get('filters', {})):
-                            current_objects_in_zones[name].append(obj['label'])
+                    current_contour = zone['contours'].get(camera, None)
+                    # if the current camera does not have a contour for this zone, skip
+                    if current_contour is None:
+                        continue
+                    # check if the object is in the zone and not filtered
+                    if (cv2.pointPolygonTest(current_contour, bottom_center, False) >= 0 
+                        and not zone_filtered(obj, self.zone_config[name][camera].get('filters', {}))):
+                        current_objects_in_zones[name].append(obj['label'])
 
             ###
             # Draw tracked objects on the frame
@@ -226,17 +230,17 @@ class TrackedObjectProcessor(threading.Thread):
             ###
 
             # get the zones that are relevant for this camera
+            # TODO: precompute this
             relevant_zones = [zone for zone, config in self.zone_config.items() if camera in config]
-            # for each zone
             for zone in relevant_zones:
                 # create the set of labels in the current frame and previously reported
                 labels_for_zone = set(current_objects_in_zones[zone] + list(self.zone_data[zone]['object_status'][camera].keys()))
                 # for each label
                 for label in labels_for_zone:
                     # compute the current 'ON' vs 'OFF' status by checking if any camera sees the object in the zone
-                    previous_state = any([camera[label] == 'ON' for camera in self.zone_data[zone]['object_status'].values()])
+                    previous_state = any([c[label] == 'ON' for c in self.zone_data[zone]['object_status'].values()])
                     self.zone_data[zone]['object_status'][camera][label] = 'ON' if label in current_objects_in_zones[zone] else 'OFF'
-                    new_state = any([camera[label] == 'ON' for camera in self.zone_data[zone]['object_status'].values()])
+                    new_state = any([c[label] == 'ON' for c in self.zone_data[zone]['object_status'].values()])
                     # if the value is changing, send over MQTT
                     if previous_state == False and new_state == True:
                         self.client.publish(f"{self.topic_prefix}/{zone}/{label}", 'ON', retain=False)
