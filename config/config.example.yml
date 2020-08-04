@@ -165,3 +165,66 @@ cameras:
       min_hits: 1
       max_age: 5
       iou_threshold: 0.2
+
+    ################
+    ## Room tracker configuration
+    ##
+    ## Enable and configure this to track if a person is in an area. It will track objects
+    ## leaving and entering the picture at configured locations in the camera view.
+    ##
+    ## All distances, points, widths and heights are in pixels.
+    ################
+    room_tracker:
+      enabled: False
+      ################
+      ## Print tracking progress in the console, can be helpful when calibrating constants below.
+      ################
+      verbose: False
+
+      ################
+      ## Minimum distance from object start track to count as a leave room event.
+      ## Minimum distance from leave room checkpoint count as a enter room event.
+      ################
+      min_distance_leave: 200
+      min_distance_enter: 100
+
+      ################
+      ## Room points width and height. A tracked object will only be counted if within this zone.
+      ################
+      region_width: 500
+      region_height: 500
+
+      ################
+      ## Minimum amount of frames an object has been tracked for to be counted in.
+      ################
+      min_history: 10
+
+      ################
+      ## Maximum total objects to be tracked in all rooms. Recommended to set to number of
+      ## residents. If more detected, the oldest one will be discarded and replace with new one.
+      ## This helps to recover from false positives. Set to 0 for infinite.
+      ################
+      max_count_in_rooms: 2
+
+      ################
+      ## Points in the camera view to be used as room enterences.
+      ################
+      rooms:
+        kok:
+          point_x: 450
+          point_y: 850
+        sovrum:
+          point_x: 900
+          point_y: 373
+        toa:
+          point_x: 1250
+          point_y: 250
+        vardagsrum:
+          point_x: 1600
+          point_y: 400
+        kontor:
+          point_x: 1867
+          point_y: 650
+        ute:
+          point_x: 1050
+          point_y: 1350

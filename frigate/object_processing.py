@@ -10,6 +10,7 @@ from collections import Counter, defaultdict
 import itertools
 import pyarrow.plasma as plasma
 import matplotlib.pyplot as plt
+from frigate.room_tracker import RoomTracker
 from frigate.util import draw_box_with_label, PlasmaManager
 from frigate.edgetpu import load_labels
 
@@ -40,13 +41,15 @@ class TrackedObjectProcessor(threading.Thread):
             'object_id': None
         })
         self.plasma_client = PlasmaManager()
-        
+        self.room_tracker = None
+        self.room_tracker_mqtt_state = {}
+
     def get_best(self, camera, label):
         if label in self.camera_data[camera]['best_objects']:
             return self.camera_data[camera]['best_objects'][label]['frame']
         else:
             return None
-    
+
     def get_current_frame(self, camera):
         return self.camera_data[camera]['current_frame']
 
@@ -73,7 +76,7 @@ class TrackedObjectProcessor(threading.Thread):
 
             for id in updated_ids:
                 tracked_objects[id] = current_tracked_objects[id]
-            
+
             for id in removed_ids:
                 # publish events to mqtt
                 tracked_objects[id]['end_time'] = frame_time
@@ -82,6 +85,15 @@ class TrackedObjectProcessor(threading.Thread):
                 del tracked_objects[id]
 
             self.camera_data[camera]['current_frame_time'] = frame_time
+
+            ###
+            # Update room tracker if enabled
+            ###
+            room_tracker_conf = config.get("room_tracker", None)
+            if room_tracker_conf is not None and room_tracker_conf.get("enabled", False):
+                if self.room_tracker is None:
+                    self.room_tracker = RoomTracker(room_tracker_conf)
+                self.room_tracker.on_change(frame_time, tracked_objects)
 
             ###
             # Draw tracked objects on the frame
@@ -93,7 +105,7 @@ class TrackedObjectProcessor(threading.Thread):
                 for obj in tracked_objects.values():
                     thickness = 2
                     color = COLOR_MAP[obj['label']]
-                    
+
                     if obj['frame_time'] != frame_time:
                         thickness = 1
                         color = (255,0,0)
@@ -104,10 +116,16 @@ class TrackedObjectProcessor(threading.Thread):
                     # draw the regions on the frame
                     region = obj['region']
                     cv2.rectangle(current_frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 1)
-                
+
                 if config['snapshots']['show_timestamp']:
                     time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
                     cv2.putText(current_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
+                # Draw room tracker area points
+                if self.room_tracker is not None:
+                    for room_name, c in self.room_tracker.rooms_conf.items():
+                        p = (c["point_x"], c["point_y"])
+                        cv2.rectangle(current_frame, (p[0] - 10, p[1] - 10), (p[0] + 10, p[1] + 10), (255, 0, 0), 3)
 
                 ###
                 # Set the current frame
@@ -118,7 +136,7 @@ class TrackedObjectProcessor(threading.Thread):
                 if not self.camera_data[camera]['object_id'] is None:
                     self.plasma_client.delete(self.camera_data[camera]['object_id'])
                 self.camera_data[camera]['object_id'] = f"{camera}{frame_time}"
-            
+
             ###
             # Maintain the highest scoring recent object and frame for each label
             ###
@@ -128,7 +146,7 @@ class TrackedObjectProcessor(threading.Thread):
                     continue
                 if obj['label'] in best_objects:
                     now = datetime.datetime.now().timestamp()
-                    # if the object is a higher score than the current best score 
+                    # if the object is a higher score than the current best score
                     # or the current object is more than 1 minute old, use the new object
                     if obj['score'] > best_objects[obj['label']]['score'] or (now - best_objects[obj['label']]['frame_time']) > 60:
                         obj['frame'] = np.copy(self.camera_data[camera]['current_frame'])
@@ -150,7 +168,7 @@ class TrackedObjectProcessor(threading.Thread):
             obj_counter = Counter()
             for obj in tracked_objects.values():
                 obj_counter[obj['label']] += 1
-                    
+
             # report on detected objects
             for obj_name, count in obj_counter.items():
                 new_status = 'ON' if count > 0 else 'OFF'
@@ -175,3 +193,22 @@ class TrackedObjectProcessor(threading.Thread):
                 if ret:
                     jpg_bytes = jpg.tobytes()
                     self.client.publish(f"{self.topic_prefix}/{camera}/{obj_name}/snapshot", jpg_bytes, retain=True)
+
+            # report area tracking
+            if self.room_tracker is not None:
+                for room_name, _ in self.room_tracker.rooms_conf.items():
+                    ppl_count = self.room_tracker.get_area_count(room_name)
+                    status = "ON" if ppl_count > 0 else "OFF"
+                    timestamp = self.room_tracker.get_latest_change_timestamp(room_name)
+                    r = {
+                        "status": status,
+                        "count": ppl_count,
+                        "timestamp": timestamp,
+                    }
+                    if room_name in self.room_tracker_mqtt_state and self.room_tracker_mqtt_state[room_name] == r:
+                        continue
+                    else:
+                        self.client.publish(f"{self.topic_prefix}/{camera}/area/{room_name}",
+                                            json.dumps(r),
+                                            retain=False)
+                        self.room_tracker_mqtt_state[room_name] = r
