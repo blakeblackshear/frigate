@@ -22,10 +22,6 @@ COLOR_MAP = {}
 for key, val in LABELS.items():
     COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
-def filter_false_positives(event):
-    if len(event['history']) < 2:
-        return True
-    return False
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(self, config, client, topic_prefix, tracked_objects_queue, event_queue):
@@ -70,13 +66,11 @@ class TrackedObjectProcessor(threading.Thread):
             updated_ids = list(set(current_ids).intersection(previous_ids))
 
             for id in new_ids:
-                # only register the object here if we are sure it isnt a false positive
-                if not filter_false_positives(current_tracked_objects[id]):
-                    tracked_objects[id] = current_tracked_objects[id]
-                    # publish events to mqtt
-                    self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(tracked_objects[id]), retain=False)
-                    self.event_queue.put(('start', camera, tracked_objects[id]))
-            
+                tracked_objects[id] = current_tracked_objects[id]
+                # publish events to mqtt
+                self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(tracked_objects[id]), retain=False)
+                self.event_queue.put(('start', camera, tracked_objects[id]))
+
             for id in updated_ids:
                 tracked_objects[id] = current_tracked_objects[id]
             

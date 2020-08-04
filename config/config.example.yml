@@ -83,7 +83,7 @@ cameras:
       # hwaccel_args: []
       # input_args: []
       # output_args: []
-    
+
     ################
     ## Optionally specify the resolution of the video feed. Frigate will try to auto detect if not specified
     ################
@@ -92,20 +92,20 @@ cameras:
 
     ################
     ## Optional mask. Must be the same aspect ratio as your video feed.
-    ## 
+    ##
     ## The mask works by looking at the bottom center of the bounding box for the detected
     ## person in the image. If that pixel in the mask is a black pixel, it ignores it as a
-    ## false positive. In my mask, the grass and driveway visible from my backdoor camera 
-    ## are white. The garage doors, sky, and trees (anywhere it would be impossible for a 
+    ## false positive. In my mask, the grass and driveway visible from my backdoor camera
+    ## are white. The garage doors, sky, and trees (anywhere it would be impossible for a
     ## person to stand) are black.
-    ## 
+    ##
     ## Masked areas are also ignored for motion detection.
     ################
     # mask: back-mask.bmp
 
     ################
     # Allows you to limit the framerate within frigate for cameras that do not support
-    # custom framerates. A value of 1 tells frigate to look at every frame, 2 every 2nd frame, 
+    # custom framerates. A value of 1 tells frigate to look at every frame, 2 every 2nd frame,
     # 3 every 3rd frame, etc.
     ################
     take_frame: 1
@@ -149,3 +149,19 @@ cameras:
           min_area: 5000
           max_area: 100000
           threshold: 0.5
+
+    ################
+    ## Tracker configuration
+    ##
+    ## If you have problems with keeping track of objects try changing these constants.
+    ## See SORT project for details:
+    ##  https://github.com/abewley/sort/blob/master/sort.py
+    ##
+    ## min_hits: Minimum number of hits to start tracking an object.
+    ## max_age: Number of missed frames before discarding track.
+    ## iou_threshold: Intersection over union threshold.
+    ################
+    tracker:
+      min_hits: 1
+      max_age: 5
+      iou_threshold: 0.2
