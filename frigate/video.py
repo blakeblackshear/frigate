@@ -200,7 +200,10 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
     object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue)
 
-    object_tracker = ObjectTracker(10)
+    camera_tracker_config = config.get('tracker', {"min_hits": 1, "max_age": 5, "iou_threshold": 0.2})
+    object_tracker = ObjectTracker(camera_tracker_config["min_hits"],
+                                   camera_tracker_config["max_age"],
+                                   camera_tracker_config["iou_threshold"])
 
     plasma_client = PlasmaManager()
     avg_wait = 0.0

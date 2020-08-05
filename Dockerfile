@@ -25,6 +25,8 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         imutils \
         scipy \
         psutil \
+        # SORT deps
+        filterpy scikit-image lap \
     && python3.7 -m pip install -U \
         Flask \
         paho-mqtt \
@@ -47,7 +49,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
 # get model and labels
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite --trust-server-names
 RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O /labelmap.txt --trust-server-names
-RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
+RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite
 
 
 RUN mkdir /cache /clips
