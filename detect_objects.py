@@ -364,6 +364,11 @@ def main():
             best_frame = object_processor.get_best(camera_name, label)
             if best_frame is None:
                 best_frame = np.zeros((720,1280,3), np.uint8)
+
+            height = int(request.args.get('h', str(best_frame.shape[0])))
+            width = int(height*best_frame.shape[1]/best_frame.shape[0])
+
+            best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
             ret, jpg = cv2.imencode('.jpg', best_frame)
             response = make_response(jpg.tobytes())
