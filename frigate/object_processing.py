@@ -230,7 +230,6 @@ class TrackedObjectProcessor(threading.Thread):
             ###
 
             # get the zones that are relevant for this camera
-            # TODO: precompute this
             relevant_zones = [zone for zone, config in self.zone_config.items() if camera in config]
             for zone in relevant_zones:
                 # create the set of labels in the current frame and previously reported
