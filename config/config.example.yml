@@ -66,7 +66,7 @@ objects:
     person:
       min_area: 5000
       max_area: 100000
-      threshold: 0.5
+      threshold: 0.8
 
 zones:
   #################
@@ -76,8 +76,8 @@ zones:
     cameras:
       front_door:
         ####################
-        # For each camera, a list of x,y coordinates to define the polygon of the zone.
-        # Can also be a comma separated string of all x,y coordinates combined.
+        # For each camera, a list of x,y coordinates to define the polygon of the zone. The top 
+        # left corner is 0,0. Can also be a comma separated string of all x,y coordinates combined.
         # The same zone can exist across multiple cameras if they have overlapping FOVs.
         # An object is determined to be in the zone based on whether or not the bottom center
         # of it's bounding box is within the polygon. The polygon must have at least 3 points.
@@ -96,7 +96,7 @@ zones:
           person:
             min_area: 5000
             max_area: 100000
-            threshold: 0.5
+            threshold: 0.8
   driveway:
     cameras:
       front_door:
@@ -186,4 +186,4 @@ cameras:
         person:
           min_area: 5000
           max_area: 100000
-          threshold: 0.5
+          threshold: 0.8
