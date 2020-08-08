@@ -105,7 +105,7 @@ class TrackedObjectProcessor(threading.Thread):
     def run(self):
         while True:
             if self.stop_event.is_set():
-                print(f"Exiting event processor...")
+                print(f"Exiting object processor...")
                 break
 
             try:

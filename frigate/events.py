@@ -137,11 +137,12 @@ class EventProcessor(threading.Thread):
             if self.stop_event.is_set():
                 print(f"Exiting event processor...")
                 break
-            
+
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
             except queue.Empty:
-                self.refresh_cache()
+                if not self.stop_event.is_set():
+                    self.refresh_cache()
                 continue
 
             self.refresh_cache()
