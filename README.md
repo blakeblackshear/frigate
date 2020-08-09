@@ -257,10 +257,11 @@ During testing, `draw_zones` can be set in the config to tell frigate to draw th
         /***************
         * Frames per second being consumed from your camera. If this is higher
         * than it is supposed to be, you should set -r FPS in your input_args.
+        * camera_fps = process_fps + skipped_fps
         ***************/
         "camera_fps": 5.0,
         /***************
-        * Number of times detection is run per second. This will often be higher than
+        * Number of times detection is run per second. This can be higher than
         * your camera FPS because frigate often looks at the same frame multiple times
         * or in multiple locations
         ***************/
@@ -274,11 +275,11 @@ During testing, `draw_zones` can be set in the config to tell frigate to draw th
         ***************/
         "frame_info": {
             /***************
-            * Timestamp of the frame frigate is running object detection on was read from ffmpeg.
+            * Timestamp of the frame frigate is running object detection on.
             ***************/
             "detect": 1596994991.91426,
             /***************
-            * Timestamp of the frame frigate is processing detected objects on was read from ffmpeg.
+            * Timestamp of the frame frigate is processing detected objects on.
             * This is where MQTT messages are sent, zones are checked, etc.
             ***************/
             "process": 1596994991.91426,
@@ -308,7 +309,7 @@ During testing, `draw_zones` can be set in the config to tell frigate to draw th
     /* Coral Stats */
     "coral": {
         /***************
-        * Timestamp when object detection started. If this value stays constant
+        * Timestamp when object detection started. If this value stays non-zero and constant
         * for a long time, that means the detection process is stuck.
         ***************/
         "detection_start": 0.0,
