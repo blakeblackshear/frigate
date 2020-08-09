@@ -238,9 +238,9 @@ The labelmap can be customized to your needs. A common reason to do this is to c
 ## Masks and limiting detection to a certain area
 You can create a *bitmap (bmp)* file the same aspect ratio as your camera feed to limit detection to certain areas. The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
 
-<img src="docs/example-mask-check-point.png" height="300">
-<img src="docs/example-mask.bmp" height="300">
-<img src="docs/example-mask-overlay.png" height="300">
+<a href="docs/example-mask-check-point.png"><img src="docs/example-mask-check-point.png" height="300"></a>
+<a href="docs/example-mask.bmp"><img src="docs/example-mask.bmp" height="300"></a>
+<a href="docs/example-mask-overlay.png"><img src="docs/example-mask-overlay.png" height="300"></a>
 
 ## Zones
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area. See the sample config for details on how to configure.
