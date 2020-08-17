@@ -19,6 +19,16 @@ Include your full config file wrapped in back ticks.
 config here
 ```
 
+**Logs**
+```
+Include relevant log output here
+```
+
+**Frigate debug stats**
+```
+Output from frigate's /debug/stats endpoint
+```
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
