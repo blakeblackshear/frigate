@@ -41,6 +41,8 @@ If applicable, add screenshots to help explain your problem.
 **Camera Info:**
  - Manufacturer: [e.g. Dahua]
  - Model: [e.g. IPC-HDW5231R-ZE]
+ - Resolution: [e.g. 720p]
+ - FPS: [e.g. 5]
 
 **Additional context**
 Add any other context about the problem here.
