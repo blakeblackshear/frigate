@@ -156,7 +156,7 @@ class TrackedObjectProcessor(threading.Thread):
                         continue
                     # check if the object is in the zone and not filtered
                     if (cv2.pointPolygonTest(current_contour, bottom_center, False) >= 0 
-                        and not zone_filtered(obj, self.zone_config[name][camera].get('filters', {}))):
+                        and not zone_filtered(obj, self.zone_config[name][camera])):
                         current_objects_in_zones[name].append(obj['label'])
 
             ###
