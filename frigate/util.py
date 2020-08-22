@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import datetime
 import time
 import signal
@@ -139,7 +140,33 @@ def print_stack(sig, frame):
 def listen():
     signal.signal(signal.SIGUSR1, print_stack)
 
-class PlasmaManager:
+class FrameManager(ABC):
+    @abstractmethod
+    def get(self, name, timeout_ms=0):
+        pass
+
+    @abstractmethod
+    def put(self, name, frame):
+        pass
+
+    @abstractmethod
+    def delete(self, name):
+        pass
+
+class DictFrameManager(FrameManager):
+    def __init__(self):
+        self.frames = {}
+    
+    def get(self, name, timeout_ms=0):
+        return self.frames.get(name)
+    
+    def put(self, name, frame):
+        self.frames[name] = frame
+    
+    def delete(self, name):
+        del self.frames[name]
+
+class PlasmaFrameManager(FrameManager):
     def __init__(self, stop_event=None):
         self.stop_event = stop_event
         self.connect()
@@ -161,18 +188,21 @@ class PlasmaManager:
             if self.stop_event != None and self.stop_event.is_set():
                 return
             try:
-                return self.plasma_client.get(object_id, timeout_ms=timeout_ms)
+                frame = self.plasma_client.get(object_id, timeout_ms=timeout_ms)
+                if frame is plasma.ObjectNotAvailable:
+                    return None
+                return frame
             except:
                 self.connect()
                 time.sleep(1)
 
-    def put(self, name, obj):
+    def put(self, name, frame):
         object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
         while True:
             if self.stop_event != None and self.stop_event.is_set():
                 return
             try:
-                self.plasma_client.put(obj, object_id)
+                self.plasma_client.put(frame, object_id)
                 return
             except Exception as e:
                 print(f"Failed to put in plasma: {e}")
