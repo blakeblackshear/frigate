@@ -30,7 +30,8 @@ Output from frigate's /debug/stats endpoint
 ```
 
 **FFprobe from your camera**
-Run the following command
+
+Run the following command and paste output below
 ```
 ffprobe <stream_url>
 ```
