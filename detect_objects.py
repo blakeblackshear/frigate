@@ -262,7 +262,7 @@ def main():
         camera_process = mp.Process(target=track_camera, args=(name, config, GLOBAL_OBJECT_CONFIG, frame_queue, frame_shape,
             tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['process_fps'], 
             camera_processes[name]['detection_fps'], 
-            camera_processes[name]['read_start'], camera_processes[name]['detection_frame']))
+            camera_processes[name]['read_start'], camera_processes[name]['detection_frame'], stop_event))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
 

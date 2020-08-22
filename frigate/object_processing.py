@@ -11,7 +11,7 @@ from collections import Counter, defaultdict
 import itertools
 import pyarrow.plasma as plasma
 import matplotlib.pyplot as plt
-from frigate.util import draw_box_with_label, PlasmaManager
+from frigate.util import draw_box_with_label, PlasmaFrameManager
 from frigate.edgetpu import load_labels
 
 PATH_TO_LABELS = '/labelmap.txt'
@@ -91,7 +91,7 @@ class TrackedObjectProcessor(threading.Thread):
         for i, zone in enumerate(self.zone_data.values()):
             zone['color'] = tuple(int(round(255 * c)) for c in colors(i)[:3])
 
-        self.plasma_client = PlasmaManager(self.stop_event)
+        self.plasma_client = PlasmaFrameManager(self.stop_event)
         
     def get_best(self, camera, label):
         if label in self.camera_data[camera]['best_objects']:

@@ -3,7 +3,7 @@ from statistics import mean
 import multiprocessing as mp
 import numpy as np
 import datetime
-from frigate.edgetpu import ObjectDetector, EdgeTPUProcess, RemoteObjectDetector, load_labels
+from frigate.edgetpu import LocalObjectDetector, EdgeTPUProcess, RemoteObjectDetector, load_labels
 
 my_frame = np.expand_dims(np.full((300,300,3), 1, np.uint8), axis=0)
 labels = load_labels('/labelmap.txt')
