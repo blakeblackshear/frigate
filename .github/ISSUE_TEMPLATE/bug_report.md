@@ -29,6 +29,12 @@ Include relevant log output here
 Output from frigate's /debug/stats endpoint
 ```
 
+**FFprobe from your camera**
+Run the following command
+```
+ffprobe <stream_url>
+```
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
