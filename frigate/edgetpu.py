@@ -31,9 +31,14 @@ class ObjectDetector():
     def __init__(self):
         edge_tpu_delegate = None
         try:
-            edge_tpu_delegate = load_delegate('libedgetpu.so.1.0')
+            edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', {"device": "usb"})
+            print("USB TPU found")
         except ValueError:
-            print("No EdgeTPU detected. Falling back to CPU.")
+            try:
+                edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', {"device": "pci:0"})
+                print("PCIe TPU found")
+            except ValueError:
+                print("No EdgeTPU detected. Falling back to CPU.")
         
         if edge_tpu_delegate is None:
             self.interpreter = tflite.Interpreter(
