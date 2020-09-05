@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:focal
 LABEL maintainer "blakeb@blakeshome.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -17,6 +17,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         ffmpeg \
         # VAAPI drivers for Intel hardware accel
         libva-drm2 libva2 i965-va-driver vainfo \
+        intel-media-va-driver-non-free \
     && python3.7 -m pip install -U wheel setuptools \
     && python3.7 -m pip install -U \
         opencv-python-headless \
