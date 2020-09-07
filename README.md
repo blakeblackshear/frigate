@@ -342,5 +342,17 @@ cameras:
     width: 1920
 ```
 - Additional logging is available in the docker container - You can view the logs by running `docker logs -t frigate`
-- Object configuration - Tracked objects types, sizes and thresholds can be defined globally and/or on a per camera basis. The global and camera object configuration is *merged*. For example, if you defined tracking person, car, and truck globally but modified your backyard camera to only track person, the global config would merge making the effective list for the backyard camera still contain person, car and truck. If you want precise object tracking per camera, best practice to put a minimal list of objects at the global level and expand objects on a per camera basis. Object threshold and area configuration will be used first from the camera object config (if defined) and then from the global config.  See the [example config](config/config.example.yml) for more information. 
+- Object configuration - Tracked objects types, sizes and thresholds can be defined globally and/or on a per camera basis. The global and camera object configuration is *merged*. For example, if you defined tracking person, car, and truck globally but modified your backyard camera to only track person, the global config would merge making the effective list for the backyard camera still contain person, car and truck. If you want precise object tracking per camera, best practice to put a minimal list of objects at the global level and expand objects on a per camera basis. Object threshold and area configuration will be used first from the camera object config (if defined) and then from the global config.  See the [example config](config/config.example.yml) for more information.
+
+## Troubleshooting
+
+### "ffmpeg didnt return a frame. something is wrong"
+Turn on logging for the camera by overriding the global_args and setting the log level to `info`:
+```yaml
+ffmpeg:
+  global_args:
+    - -hide_banner
+    - -loglevel
+    - panic
+```
 

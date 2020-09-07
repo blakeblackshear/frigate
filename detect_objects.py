@@ -120,7 +120,7 @@ class CameraWatchdog(threading.Thread):
                     process = mp.Process(target=track_camera, args=(name, self.config[name], GLOBAL_OBJECT_CONFIG, camera_process['frame_queue'],
                         camera_process['frame_shape'], self.tflite_process.detection_queue, self.tracked_objects_queue, 
                         camera_process['process_fps'], camera_process['detection_fps'],
-                        camera_process['read_start'], camera_process['detection_frame']))
+                        camera_process['read_start'], camera_process['detection_frame'], self.stop_event))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
@@ -135,7 +135,7 @@ class CameraWatchdog(threading.Thread):
                     camera_capture.start()
                     camera_process['ffmpeg_process'] = ffmpeg_process
                     camera_process['capture_thread'] = camera_capture
-                elif now - camera_process['capture_thread'].current_frame > 5:
+                elif now - camera_process['capture_thread'].current_frame.value > 5:
                     print(f"No frames received from {name} in 5 seconds. Exiting ffmpeg...")
                     ffmpeg_process = camera_process['ffmpeg_process']
                     ffmpeg_process.terminate()
@@ -181,6 +181,7 @@ def main():
             'show_timestamp': config.get('snapshots', {}).get('show_timestamp', True),
             'draw_zones': config.get('snapshots', {}).get('draw_zones', False)
         }
+        config['zones'] = {}
 
     # Queue for cameras to push tracked objects to
     tracked_objects_queue = mp.Queue()
@@ -259,7 +260,23 @@ def main():
             'capture_thread': camera_capture
         }
 
-        camera_process = mp.Process(target=track_camera, args=(name, config, GLOBAL_OBJECT_CONFIG, frame_queue, frame_shape,
+        # merge global object config into camera object config
+        camera_objects_config = config.get('objects', {})
+        # get objects to track for camera
+        objects_to_track = camera_objects_config.get('track', GLOBAL_OBJECT_CONFIG.get('track', ['person']))
+        # merge object filters
+        global_object_filters = GLOBAL_OBJECT_CONFIG.get('filters', {})
+        camera_object_filters = camera_objects_config.get('filters', {})
+        objects_with_config = set().union(global_object_filters.keys(), camera_object_filters.keys())
+        object_filters = {}
+        for obj in objects_with_config:
+            object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
+        config['objects'] = {
+            'track': objects_to_track,
+            'filters': object_filters
+        }
+
+        camera_process = mp.Process(target=track_camera, args=(name, config, frame_queue, frame_shape,
             tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['process_fps'], 
             camera_processes[name]['detection_fps'], 
             camera_processes[name]['read_start'], camera_processes[name]['detection_frame'], stop_event))
@@ -340,7 +357,7 @@ def main():
                 'pid': camera_stats['process'].pid,
                 'ffmpeg_pid': camera_stats['ffmpeg_process'].pid,
                 'frame_info': {
-                    'read': capture_thread.current_frame,
+                    'read': capture_thread.current_frame.value,
                     'detect': camera_stats['detection_frame'].value,
                     'process': object_processor.camera_data[name]['current_frame_time']
                 }

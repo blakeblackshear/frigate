@@ -53,9 +53,10 @@ mqtt:
 # unless overridden at the camera levels.
 # Keys must be valid labels. By default, the model uses coco (https://dl.google.com/coral/canned_models/coco_labels.txt).
 # All labels from the model are reported over MQTT. These values are used to filter out false positives.
-# min_area (optional): minimum width*height of the bounding box for the detected person
-# max_area (optional): maximum width*height of the bounding box for the detected person
-# threshold (optional): The minimum decimal percentage (50% hit = 0.5) for the confidence from tensorflow
+# min_area (optional): minimum width*height of the bounding box for the detected object
+# max_area (optional): maximum width*height of the bounding box for the detected object
+# min_score (optional): minimum score for the object
+# threshold (optional): The minimum decimal percentage for tracked object's computed score to considered a true positive
 ####################
 objects:
   track:
@@ -66,7 +67,8 @@ objects:
     person:
       min_area: 5000
       max_area: 100000
-      threshold: 0.8
+      min_score: 0.5
+      threshold: 0.85
 
 zones:
   #################
@@ -184,4 +186,5 @@ cameras:
         person:
           min_area: 5000
           max_area: 100000
-          threshold: 0.8
+          min_score: 0.5
+          threshold: 0.85

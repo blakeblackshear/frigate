@@ -31,6 +31,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         PyYAML \
         matplotlib \
         pyarrow \
+        click \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
     && apt -qq update \
@@ -46,7 +47,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
 
 # get model and labels
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite --trust-server-names
-RUN wget -q https://dl.google.com/coral/canned_models/coco_labels.txt -O /labelmap.txt --trust-server-names
+COPY labelmap.txt /labelmap.txt
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
 
 
