@@ -44,6 +44,9 @@ def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thicknes
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):    
     # size is larger than longest edge
     size = int(max(xmax-xmin, ymax-ymin)*multiplier)
+    # dont go any smaller than 300
+    if size < 300:
+        size = 300
     # if the size is too big to fit in the frame
     if size > min(frame_shape[0], frame_shape[1]):
         size = min(frame_shape[0], frame_shape[1])

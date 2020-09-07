@@ -73,8 +73,8 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
         if obj_settings.get('max_area', 24000000) < obj[3]:
             return True
 
-        # if the score is lower than the threshold, skip
-        if obj_settings.get('threshold', 0) > obj[1]:
+        # if the score is lower than the min_score, skip
+        if obj_settings.get('min_score', 0) > obj[1]:
             return True
     
         # compute the coordinates of the object and make sure
@@ -83,10 +83,10 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
         x_location = min(int((obj[2][2]-obj[2][0])/2.0)+obj[2][0], len(mask[0])-1)
 
         # if the object is in a masked location, don't add it to detected objects
-        if mask != None and mask[y_location][x_location] == [0]:
+        if (not mask is None) and (mask[y_location][x_location][0] == 0):
             return True
         
-        return False
+    return False
 
 def create_tensor_input(frame, region):
     cropped_frame = frame[region[1]:region[3], region[0]:region[2]]
@@ -118,7 +118,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
 
 def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
     frame_queue, take_frame: int, fps:EventsPerSecond, skipped_fps: EventsPerSecond, 
-    stop_event: mp.Event, detection_frame: mp.Value):
+    stop_event: mp.Event, detection_frame: mp.Value, current_frame: mp.Value):
 
     frame_num = 0
     last_frame = 0
@@ -130,7 +130,7 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             break
 
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
-        current_frame = datetime.datetime.now().timestamp()
+        current_frame.value = datetime.datetime.now().timestamp()
 
         if len(frame_bytes) == 0:
             print(f"{camera_name}: ffmpeg didnt return a frame. something is wrong.")
@@ -154,14 +154,14 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             continue
 
         # put the frame in the frame manager
-        frame_manager.put(f"{camera_name}{current_frame}",
+        frame_manager.put(f"{camera_name}{current_frame.value}",
                 np
                     .frombuffer(frame_bytes, np.uint8)
                     .reshape(frame_shape)
             )
         # add to the queue
-        frame_queue.put(current_frame)
-        last_frame = current_frame
+        frame_queue.put(current_frame.value)
+        last_frame = current_frame.value
 
 class CameraCapture(threading.Thread):
     def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame, stop_event):
@@ -175,7 +175,7 @@ class CameraCapture(threading.Thread):
         self.skipped_fps = EventsPerSecond()
         self.plasma_client = PlasmaFrameManager(stop_event)
         self.ffmpeg_process = ffmpeg_process
-        self.current_frame = 0
+        self.current_frame = mp.Value('d', 0.0)
         self.last_frame = 0
         self.detection_frame = detection_frame
         self.stop_event = stop_event
@@ -183,25 +183,18 @@ class CameraCapture(threading.Thread):
     def run(self):
         self.skipped_fps.start()
         capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.plasma_client, self.frame_queue, self.take_frame,
-            self.fps, self.skipped_fps, self.stop_event, self.detection_frame)
+            self.fps, self.skipped_fps, self.stop_event, self.detection_frame, self.current_frame)
 
-def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
+def track_camera(name, config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
 
     detection_frame.value = 0.0
 
     # Merge the tracked object config with the global config
-    camera_objects_config = config.get('objects', {})    
-    # combine tracked objects lists
-    objects_to_track = set().union(global_objects_config.get('track', ['person', 'car', 'truck']), camera_objects_config.get('track', []))
-    # merge object filters
-    global_object_filters = global_objects_config.get('filters', {})
-    camera_object_filters = camera_objects_config.get('filters', {})
-    objects_with_config = set().union(global_object_filters.keys(), camera_object_filters.keys())
-    object_filters = {}
-    for obj in objects_with_config:
-        object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
+    camera_objects_config = config.get('objects', {})
+    objects_to_track = camera_objects_config.get('track', [])
+    object_filters = camera_objects_config.get('filters', {})
 
     # load in the mask for object detection
     if 'mask' in config:

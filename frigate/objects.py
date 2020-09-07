@@ -24,7 +24,6 @@ class ObjectTracker():
         obj['id'] = id
         obj['start_time'] = obj['frame_time']
         obj['top_score'] = obj['score']
-        self.add_history(obj)
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
@@ -35,25 +34,8 @@ class ObjectTracker():
     def update(self, id, new_obj):
         self.disappeared[id] = 0
         self.tracked_objects[id].update(new_obj)
-        self.add_history(self.tracked_objects[id])
         if self.tracked_objects[id]['score'] > self.tracked_objects[id]['top_score']:
             self.tracked_objects[id]['top_score'] = self.tracked_objects[id]['score']
-    
-    def add_history(self, obj):
-        entry = {
-            'score': obj['score'],
-            'box': obj['box'],
-            'region': obj['region'],
-            'centroid': obj['centroid'],
-            'frame_time': obj['frame_time']
-        }
-        if 'history' in obj:
-            obj['history'].append(entry)
-            # only maintain the last 20 in history
-            if len(obj['history']) > 20:
-                obj['history'] = obj['history'][-20:]
-        else:
-            obj['history'] = [entry]
 
     def match_and_update(self, frame_time, new_objects):
         # group by name
