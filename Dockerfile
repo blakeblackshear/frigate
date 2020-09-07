@@ -17,6 +17,7 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         ffmpeg \
         # VAAPI drivers for Intel hardware accel
         libva-drm2 libva2 i965-va-driver vainfo \
+    && python3.7 -m pip install -U pip \
     && python3.7 -m pip install -U wheel setuptools \
     && python3.7 -m pip install -U \
         opencv-python-headless \
