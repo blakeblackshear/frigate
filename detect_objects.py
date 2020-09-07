@@ -61,6 +61,7 @@ GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 
 WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
+TENSORFLOW_DEVICE = CONFIG.get('tensorflow_device')
 
 def start_plasma_store():
     plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
@@ -190,7 +191,7 @@ def main():
     event_queue = mp.Queue()
     
     # Start the shared tflite process
-    tflite_process = EdgeTPUProcess()
+    tflite_process = EdgeTPUProcess(TENSORFLOW_DEVICE)
 
     # start the camera processes
     camera_processes = {}
