@@ -130,7 +130,7 @@ class EventProcessor(threading.Thread):
             return
         
         with open(f"{os.path.join(self.clip_dir, clip_name)}.json", 'w') as outfile:
-            json.dump({x: event_data[x] for x in event_data if x not in ['frame']}), outfile)
+            json.dump({x: event_data[x] for x in event_data if x not in ['frame']}, outfile)
 
     def run(self):
         while True:
