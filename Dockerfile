@@ -58,5 +58,6 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 COPY detect_objects.py .
 COPY benchmark.py .
+COPY process_clip.py .
 
 CMD ["python3.7", "-u", "detect_objects.py"]
