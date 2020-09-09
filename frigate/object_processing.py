@@ -13,6 +13,7 @@ import pyarrow.plasma as plasma
 import matplotlib.pyplot as plt
 from frigate.util import draw_box_with_label, PlasmaManager
 from frigate.edgetpu import load_labels
+import base64
 
 PATH_TO_LABELS = '/labelmap.txt'
 
@@ -262,6 +263,16 @@ class TrackedObjectProcessor(threading.Thread):
                     ret, jpg = cv2.imencode('.jpg', best_frame)
                     if ret:
                         jpg_bytes = jpg.tobytes()
+                        jpg_as_text = base64.b64encode(jpg).decode()
+                        payload={
+                                "image": jpg_as_text,
+                                "status":"ON",
+                                "label":obj["label"],
+                                "score": obj["score"],
+                                "start_time" : obj["start_time"],
+                                "id": obj["id"]
+                                }
+                        self.client.publish(f"{self.topic_prefix}/{camera}/{obj_name}/event", json.dumps(payload), retain=True)
                         self.client.publish(f"{self.topic_prefix}/{camera}/{obj_name}/snapshot", jpg_bytes, retain=True)
 
             # expire any objects that are ON and no longer detected
@@ -274,4 +285,14 @@ class TrackedObjectProcessor(threading.Thread):
                 ret, jpg = cv2.imencode('.jpg', best_frame)
                 if ret:
                     jpg_bytes = jpg.tobytes()
+                    jpg_as_text = base64.b64encode(jpg).decode()
+                    payload={
+                            "image": jpg_as_text,
+                            "status":"OFF",
+                            "label":obj["label"],
+                            "score": obj["score"],
+                            "start_time" : obj["start_time"],
+                            "id": obj["id"]
+                            }
+                    self.client.publish(f"{self.topic_prefix}/{camera}/{obj_name}/event", json.dumps(payload), retain=True)
                     self.client.publish(f"{self.topic_prefix}/{camera}/{obj_name}/snapshot", jpg_bytes, retain=True)
