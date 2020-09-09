@@ -151,7 +151,7 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                if self.config[camera].get('save_clips', {}).get('enabled', False) and len(self.cached_clips) > 0:
+                if self.config[camera].get('save_clips', {}).get('enabled', False) and len(self.cached_clips) > 0 and not event_data['false_positive']:
                     self.create_clip(camera, event_data, self.config[camera].get('save_clips', {}).get('pre_capture', 30))
                 del self.events_in_process[event_data['id']]
 
