@@ -331,7 +331,7 @@ class TrackedObjectProcessor(threading.Thread):
             # update zone status for each label
             for zone in camera_state.config['zones'].keys():
                 # get labels for current camera and all labels in current zone
-                labels_for_camera = set([obj['label'] for obj in camera_state.tracked_objects.values() if zone in obj['zones']])
+                labels_for_camera = set([obj['label'] for obj in camera_state.tracked_objects.values() if zone in obj['zones'] and not obj['false_positive']])
                 labels_to_check = labels_for_camera | set(self.zone_data[zone].keys())
                 # for each label in zone
                 for label in labels_to_check:
