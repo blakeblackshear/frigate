@@ -118,7 +118,7 @@ class CameraWatchdog(threading.Thread):
                     camera_process['process_fps'].value = 0.0
                     camera_process['detection_fps'].value = 0.0
                     camera_process['read_start'].value = 0.0
-                    process = mp.Process(target=track_camera, args=(name, self.config[name], GLOBAL_OBJECT_CONFIG, camera_process['frame_queue'],
+                    process = mp.Process(target=track_camera, args=(name, self.config[name], camera_process['frame_queue'],
                         camera_process['frame_shape'], self.tflite_process.detection_queue, self.tracked_objects_queue, 
                         camera_process['process_fps'], camera_process['detection_fps'],
                         camera_process['read_start'], camera_process['detection_frame'], self.stop_event))
