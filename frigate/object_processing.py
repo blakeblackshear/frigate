@@ -65,6 +65,10 @@ class CameraState():
         self.callbacks = defaultdict(lambda: [])
 
     def false_positive(self, obj):
+        # once a true positive, always a true positive
+        if not obj.get('false_positive', True):
+            return False
+
         threshold = self.config['objects'].get('filters', {}).get(obj['label'], {}).get('threshold', 0.85)
         if obj['computed_score'] < threshold:
             return True
