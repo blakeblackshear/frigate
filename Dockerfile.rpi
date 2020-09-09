@@ -1,0 +1,76 @@
+ARG PYARROW_IMAGE=kpine/raspberrypi-pyarrow-plasma:0.17.1
+fROM ${PYARROW_IMAGE} as pyarrow
+
+FROM balenalib/raspberrypi3-debian:buster-run
+
+# Add the Coral EdgeTPU repository
+RUN APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+ && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
+ && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
+
+RUN install_packages \
+      wget \
+      unzip \
+      python3 \
+      python3-pip \
+      python3-wheel \
+      ffmpeg \
+# opencv-python-headless dependencies
+      libatk1.0-0 \
+      libatlas3-base \
+      libavcodec58 \
+      libavformat58 \
+      libavutil56 \
+      libcairo-gobject2 \
+      libcairo2 \
+      libgdk-pixbuf2.0-0 \
+      libgtk-3-0 \
+      libilmbase23 \
+      libjasper1 \
+      libopenexr23 \
+      libpango-1.0-0 \
+      libpangocairo-1.0-0 \
+      libswscale5 \
+      libtiff5 \
+      libwebp6 \
+# Coral EdgeTPU dependencies
+      libedgetpu1-max=14.1 \
+# Frigate dependencies
+      python3-numpy \
+      python3-scipy \
+      python3-flask \
+      python3-paho-mqtt \
+      python3-yaml \
+      python3-matplotlib \
+ && rm -rf /var/lib/apt/lists/*
+
+# Python Arrow from Apache is a Frigate dependency, but Arrow does not support arm7, we require a
+# custom wheel.
+COPY --from=pyarrow /dist/*.whl /tmp/
+
+# opencv and other python packages not available in Debian Buster 4.1.1.26 is currently the latest
+# available piwheel build
+RUN python3 -m pip install --extra-index-url https://www.piwheels.org/simple \
+      opencv-python-headless==4.1.1.26 \
+      psutil \
+      imutils==0.5.* \
+      /tmp/*.whl \
+      https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl \
+ && rm /tmp/*.whl
+
+# get model and labels
+ARG MODEL_REFS=7064b94dd5b996189242320359dbab8b52c94a84
+RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/coco_labels.txt -O /labelmap.txt
+RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite
+RUN mkdir /cache
+RUN chmod 777 /cache
+# piwheels opencv build workaround: https://github.com/piwheels/packages/issues/59
+ENV LD_PRELOAD="/usr/lib/arm-linux-gnueabihf/libatomic.so.1"
+
+WORKDIR /opt/frigate/
+COPY frigate frigate/
+COPY detect_objects.py .
+COPY benchmark.py .
+
+CMD ["python3.7", "-u", "detect_objects.py"]
