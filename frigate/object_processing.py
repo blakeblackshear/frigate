@@ -224,7 +224,7 @@ class CameraState():
             for c in self.callbacks['object_status']:
                 c(self.name, obj_name, 'OFF')
             for c in self.callbacks['snapshot']:
-                c(self.name, self.best_objects[object_type])
+                c(self.name, self.best_objects[obj_name])
 
 
 class TrackedObjectProcessor(threading.Thread):
