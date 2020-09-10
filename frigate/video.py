@@ -83,7 +83,7 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
         x_location = min(int((obj[2][2]-obj[2][0])/2.0)+obj[2][0], len(mask[0])-1)
 
         # if the object is in a masked location, don't add it to detected objects
-        if (not mask is None) and (mask[y_location][x_location][0] == 0):
+        if (not mask is None) and (mask[y_location][x_location] == 0):
             return True
         
     return False
@@ -208,7 +208,7 @@ def track_camera(name, config, frame_queue, frame_shape, detection_queue, detect
         mask = None
 
     if mask is None:
-        mask = np.zeros((frame_shape[0], frame_shape[1], 1), np.uint8)
+        mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
