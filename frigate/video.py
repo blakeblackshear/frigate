@@ -202,6 +202,12 @@ def track_camera(name, config, frame_queue, frame_shape, detection_queue, detect
             img = base64.b64decode(config['mask'][7:]) 
             npimg = np.fromstring(img, dtype=np.uint8)
             mask = cv2.imdecode(npimg, cv2.IMREAD_GRAYSCALE)
+        elif config['mask'].startswith('poly,'):
+            points = config['mask'].split(',')[1:]
+            contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+            mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
+            mask[:] = 255
+            cv2.fillPoly(mask, pts=[contour], color=(0))
         else:
             mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
     else:
