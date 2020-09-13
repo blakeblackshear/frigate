@@ -126,12 +126,16 @@ class EventsPerSecond:
         self._start = datetime.datetime.now().timestamp()
 
     def update(self):
+        if self._start is None:
+            self.start()
         self._timestamps.append(datetime.datetime.now().timestamp())
         # truncate the list when it goes 100 over the max_size
         if len(self._timestamps) > self._max_events+100:
             self._timestamps = self._timestamps[(1-self._max_events):]
 
     def eps(self, last_n_seconds=10):
+        if self._start is None:
+            self.start()
 		# compute the (approximate) events in the last n seconds
         now = datetime.datetime.now().timestamp()
         seconds = min(now-self._start, last_n_seconds)
