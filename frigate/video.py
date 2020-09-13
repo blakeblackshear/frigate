@@ -219,7 +219,7 @@ def track_camera(name, config, frame_queue, frame_shape, detection_queue, detect
     plasma_client = PlasmaFrameManager()
 
     process_frames(name, frame_queue, frame_shape, plasma_client, motion_detector, object_detector,
-        object_tracker, detected_objects_queue, fps, detection_frame, objects_to_track, object_filters, mask, stop_event)
+        object_tracker, detected_objects_queue, fps, detection_fps, detection_frame, objects_to_track, object_filters, mask, stop_event)
 
     print(f"{name}: exiting subprocess")
 
@@ -255,7 +255,7 @@ def detect(object_detector, frame, region, objects_to_track, object_filters, mas
 def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, 
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
-    detected_objects_queue: mp.Queue, fps: mp.Value, current_frame_time: mp.Value,
+    detected_objects_queue: mp.Queue, fps: mp.Value, detection_fps: mp.Value, current_frame_time: mp.Value,
     objects_to_track: List[str], object_filters: Dict, mask, stop_event: mp.Event,
     exit_on_empty: bool = False):
     
@@ -352,3 +352,5 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
 
         # add to the queue
         detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
+
+        detection_fps.value = object_detector.fps.eps()
