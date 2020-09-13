@@ -6,6 +6,7 @@ import copy
 import cv2
 import threading
 import queue
+import copy
 import numpy as np
 from collections import Counter, defaultdict
 import itertools
@@ -187,19 +188,20 @@ class CameraState():
             # if the object wasn't seen on the current frame, skip it
             if obj['frame_time'] != self.current_frame_time or obj['false_positive']:
                 continue
+            obj_copy = copy.deepcopy(obj)
             if object_type in self.best_objects:
                 current_best = self.best_objects[object_type]
                 now = datetime.datetime.now().timestamp()
                 # if the object is a higher score than the current best score 
                 # or the current object is more than 1 minute old, use the new object
-                if obj['score'] > current_best['score'] or (now - current_best['frame_time']) > 60:
-                    obj['frame'] = np.copy(self.current_frame)
-                    self.best_objects[object_type] = obj
+                if obj_copy['score'] > current_best['score'] or (now - current_best['frame_time']) > 60:
+                    obj_copy['frame'] = np.copy(self.current_frame)
+                    self.best_objects[object_type] = obj_copy
                     for c in self.callbacks['snapshot']:
                         c(self.name, self.best_objects[object_type])
             else:
-                obj['frame'] = np.copy(self.current_frame)
-                self.best_objects[object_type] = obj
+                obj_copy['frame'] = np.copy(self.current_frame)
+                self.best_objects[object_type] = obj_copy
                 for c in self.callbacks['snapshot']:
                     c(self.name, self.best_objects[object_type])
         
@@ -242,17 +244,19 @@ class TrackedObjectProcessor(threading.Thread):
 
         def start(camera, obj):
             # publish events to mqtt
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps({x: obj[x] for x in obj if x not in ['frame']}), retain=False)
+            self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(obj), retain=False)
             self.event_queue.put(('start', camera, obj))
 
         def update(camera, obj):
             pass
 
         def end(camera, obj):
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps({x: obj[x] for x in obj if x not in ['frame']}), retain=False)
+            self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj), retain=False)
             self.event_queue.put(('end', camera, obj))
         
         def snapshot(camera, obj):
+            if not 'frame' in obj:
+                return
             best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_RGB2BGR)
             mqtt_config = self.camera_config[camera].get('mqtt', {'crop_to_region': False})
             if mqtt_config.get('crop_to_region'):
