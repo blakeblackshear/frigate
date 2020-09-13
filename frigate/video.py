@@ -207,7 +207,7 @@ def track_camera(name, config, frame_queue, frame_shape, detection_queue, detect
     else:
         mask = None
 
-    if mask is None:
+    if mask is None or mask.size == 0:
         mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
         mask[:] = 255
 
