@@ -190,6 +190,11 @@ cameras:
       # Number of seconds before the event to include in the clips
       #########
       pre_capture: 30
+      #########
+      # Objects to save clips for. Defaults to all tracked object types.
+      #########
+      # objects:
+      #   - person      
 
     ################
     # Configuration for the snapshots in the debug view and mqtt
