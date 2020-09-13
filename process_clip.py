@@ -68,6 +68,8 @@ class ProcessClip():
                 self.save_debug_frame(debug_path, frame_time, current_tracked_objects.values())
 
             self.camera_state.update(frame_time, current_tracked_objects)
+            for obj in self.camera_state.tracked_objects.values():
+                print(f"{frame_time}: {obj['id']} - {obj['computed_score']} - {obj['score_history']}")
         
         return {
             'object_detected': obj_detected,
