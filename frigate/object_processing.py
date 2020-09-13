@@ -254,6 +254,14 @@ class TrackedObjectProcessor(threading.Thread):
         
         def snapshot(camera, obj):
             best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_RGB2BGR)
+            mqtt_config = self.camera_config.get('mqtt', {'crop_to_region': False})
+            if mqtt_config.get('crop_to_region'):
+                region = obj['region']
+                best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
+            if 'snapshot_height' in mqtt_config: 
+                height = int(mqtt_config['snapshot_height'])
+                width = int(height*best_frame.shape[1]/best_frame.shape[0])
+                best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             ret, jpg = cv2.imencode('.jpg', best_frame)
             if ret:
                 jpg_bytes = jpg.tobytes()
@@ -310,9 +318,9 @@ class TrackedObjectProcessor(threading.Thread):
     def get_best(self, camera, label):
         best_objects = self.camera_states[camera].best_objects
         if label in best_objects:
-            return best_objects[label]['frame']
+            return best_objects[label]
         else:
-            return None
+            return {}
     
     def get_current_frame(self, camera):
         return self.camera_states[camera].current_frame

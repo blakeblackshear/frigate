@@ -163,6 +163,13 @@ cameras:
     take_frame: 1
 
     ################
+    # MQTT settings
+    ################
+    # mqtt:
+    #   crop_to_region: True
+    #   snapshot_height: 300
+
+    ################
     # This will save a clip for each tracked object by frigate along with a json file that contains
     # data related to the tracked object. This works by telling ffmpeg to write video segments to /cache
     # from the video stream without re-encoding. Clips are then created by using ffmpeg to merge segments
