@@ -140,9 +140,10 @@ cameras:
     # fps: 5
 
     ################
-    ## Optional mask. Must be the same aspect ratio as your video feed. Value is either the
-    ## name of a file in the config directory or a base64 encoded bmp image prefixed with
-    ## 'base64,' eg. 'base64,asfasdfasdf....'.
+    ## Optional mask. Must be the same aspect ratio as your video feed. Value is any of the following:
+    ##   - name of a file in the config directory
+    ##   - base64 encoded image prefixed with 'base64,' eg. 'base64,asfasdfasdf....'
+    ##   - polygon of x,y coordinates prefixed with 'poly,' eg. 'poly,0,900,1080,900,1080,1920,0,1920'
     ## 
     ## The mask works by looking at the bottom center of the bounding box for the detected
     ## person in the image. If that pixel in the mask is a black pixel, it ignores it as a
