@@ -42,12 +42,13 @@ class ProcessClip():
 
         object_detector = LocalObjectDetector(labels='/labelmap.txt')
         object_tracker = ObjectTracker(10)
-        process_fps = EventsPerSecond()
+        process_fps = mp.Value('d', 0.0)
+        detection_fps = mp.Value('d', 0.0)
         current_frame = mp.Value('d', 0.0)
         stop_event = mp.Event()
 
         process_frames(self.camera_name, self.frame_queue, self.frame_shape, self.frame_manager, motion_detector, object_detector, object_tracker, self.detected_objects_queue, 
-            process_fps, current_frame, objects_to_track, object_filters, mask, stop_event, exit_on_empty=True)
+            process_fps, detection_fps, current_frame, objects_to_track, object_filters, mask, stop_event, exit_on_empty=True)
     
     def objects_found(self, debug_path=None):
         obj_detected = False

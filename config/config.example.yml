@@ -132,6 +132,14 @@ cameras:
     # width: 720
 
     ################
+    ## Specify the framerate of your camera
+    ##
+    ## NOTE: This should only be set in the event ffmpeg is unable to determine your camera's framerate
+    ##       on its own and the reported framerate for your camera in frigate is well over what is expected.
+    ################
+    # fps: 5
+
+    ################
     ## Optional mask. Must be the same aspect ratio as your video feed. Value is either the
     ## name of a file in the config directory or a base64 encoded bmp image prefixed with
     ## 'base64,' eg. 'base64,asfasdfasdf....'.
