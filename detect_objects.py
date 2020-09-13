@@ -203,6 +203,8 @@ def main():
         ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', FFMPEG_DEFAULT_CONFIG['hwaccel_args'])
         ffmpeg_input_args = ffmpeg.get('input_args', FFMPEG_DEFAULT_CONFIG['input_args'])
         ffmpeg_output_args = ffmpeg.get('output_args', FFMPEG_DEFAULT_CONFIG['output_args'])
+        if not config.get('fps') is None:
+            ffmpeg_output_args = ["-r", str(config.get('fps'))] + ffmpeg_output_args
         if config.get('save_clips', {}).get('enabled', False):
             ffmpeg_output_args = [
                 "-f",

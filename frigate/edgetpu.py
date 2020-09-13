@@ -35,6 +35,7 @@ class ObjectDetector(ABC):
 
 class LocalObjectDetector(ObjectDetector):
     def __init__(self, tf_device=None, labels=None):
+        self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
         else:
@@ -83,6 +84,7 @@ class LocalObjectDetector(ObjectDetector):
                 float(d[1]),
                 (d[2], d[3], d[4], d[5])
             ))
+        self.fps.update()
         return detections
 
     def detect_raw(self, tensor_input):
