@@ -132,8 +132,8 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
         frame_bytes = ffmpeg_process.stdout.read(frame_size)
         current_frame.value = datetime.datetime.now().timestamp()
 
-        if len(frame_bytes) == 0:
-            print(f"{camera_name}: ffmpeg didnt return a frame. something is wrong.")
+        if len(frame_bytes) < frame_size:
+            print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
 
             if ffmpeg_process.poll() != None:
                 print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
