@@ -282,6 +282,10 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         current_frame_time.value = frame_time
 
         frame = frame_manager.get(f"{camera_name}{frame_time}")
+
+        if frame is None:
+            print(f"{camera_name}: frame {frame_time} is not in memory store.")
+            continue
         
         fps_tracker.update()
         fps.value = fps_tracker.eps()
