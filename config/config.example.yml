@@ -17,6 +17,17 @@ mqtt:
   #################
   # password: password # Optional
 
+################
+# Global configuration for saving clips
+################
+save_clips:
+  ###########
+  # Maximum length of time to retain video during long events.
+  # If an object is being tracked for longer than this amount of time, the cache  
+  # will begin to expire and the resulting clip will be the last x seconds of the event.
+  ###########
+  max_seconds: 300
+
 #################
 # Default ffmpeg args. Optional and can be overwritten per camera.
 # Should work with most RTSP cameras that send h264 video
