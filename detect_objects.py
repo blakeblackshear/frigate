@@ -182,7 +182,7 @@ def main():
             'show_timestamp': config.get('snapshots', {}).get('show_timestamp', True),
             'draw_zones': config.get('snapshots', {}).get('draw_zones', False)
         }
-        config['zones'] = {}
+        config['zones'] = config.get('zones', {})
 
     # Queue for cameras to push tracked objects to
     tracked_objects_queue = mp.Queue()
@@ -293,7 +293,7 @@ def main():
     event_processor = EventProcessor(CONFIG['cameras'], camera_processes, '/cache', '/clips', event_queue, stop_event)
     event_processor.start()
     
-    object_processor = TrackedObjectProcessor(CONFIG['cameras'], CONFIG.get('zones', {}), client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
+    object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
     object_processor.start()
     
     camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process, stop_event)

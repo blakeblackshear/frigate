@@ -230,10 +230,9 @@ class CameraState():
 
 
 class TrackedObjectProcessor(threading.Thread):
-    def __init__(self, camera_config, zone_config, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
+    def __init__(self, camera_config, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
         threading.Thread.__init__(self)
         self.camera_config = camera_config
-        self.zone_config = zone_config
         self.client = client
         self.topic_prefix = topic_prefix
         self.tracked_objects_queue = tracked_objects_queue
@@ -299,25 +298,24 @@ class TrackedObjectProcessor(threading.Thread):
         self.zone_data = defaultdict(lambda: defaultdict(lambda: set()))
 
         # set colors for zones
+        all_zone_names = set([zone for config in self.camera_config.values() for zone in config['zones'].keys()])
         zone_colors = {}
-        colors = plt.cm.get_cmap('tab10', len(self.zone_config.keys()))
-        for i, zone in enumerate(self.zone_config.keys()):
+        colors = plt.cm.get_cmap('tab10', len(all_zone_names))
+        for i, zone in enumerate(all_zone_names):
             zone_colors[zone] = tuple(int(round(255 * c)) for c in colors(i)[:3])
 
         # create zone contours
-        for zone_name, config in zone_config.items():
-            for camera, camera_zone_config in config.items():
-                camera_zone = {}
-                camera_zone['color'] = zone_colors[zone_name]
-                coordinates = camera_zone_config['coordinates']
+        for camera_config in self.camera_config.values():
+            for zone_name, zone_config in camera_config['zones'].items():
+                zone_config['color'] = zone_colors[zone_name]
+                coordinates = zone_config['coordinates']
                 if isinstance(coordinates, list):
-                    camera_zone['contour'] =  np.array([[int(p.split(',')[0]), int(p.split(',')[1])] for p in coordinates])
+                    zone_config['contour'] =  np.array([[int(p.split(',')[0]), int(p.split(',')[1])] for p in coordinates])
                 elif isinstance(coordinates, str):
                     points = coordinates.split(',')
-                    camera_zone['contour'] =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+                    zone_config['contour'] =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
                 else:
                     print(f"Unable to parse zone coordinates for {zone_name} - {camera}")
-                self.camera_config[camera]['zones'][zone_name] = camera_zone
         
     def get_best(self, camera, label):
         best_objects = self.camera_states[camera].best_objects
