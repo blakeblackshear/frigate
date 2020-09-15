@@ -76,39 +76,6 @@ objects:
       min_score: 0.5
       threshold: 0.85
 
-zones:
-  #################
-  # Name of the zone
-  ################
-  front_steps:
-    front_door:
-      ####################
-      # For each camera, a list of x,y coordinates to define the polygon of the zone. The top 
-      # left corner is 0,0. Can also be a comma separated string of all x,y coordinates combined.
-      # The same zone can exist across multiple cameras if they have overlapping FOVs.
-      # An object is determined to be in the zone based on whether or not the bottom center
-      # of it's bounding box is within the polygon. The polygon must have at least 3 points.
-      # Coordinates can be generated at https://www.image-map.net/
-      ####################
-      coordinates:
-        - 545,1077
-        - 747,939
-        - 788,805
-      ################
-      # Zone level object filters. These are applied in addition to the global and camera filters
-      # and should be more restrictive than the global and camera filters. The global and camera
-      # filters are applied upstream.
-      ################
-      filters:
-        person:
-          min_area: 5000
-          max_area: 100000
-          threshold: 0.8
-  driveway:
-    front_door:
-      coordinates: 545,1077,747,939,788,805
-  yard:
-
 cameras:
   back:
     ffmpeg:
@@ -168,6 +135,37 @@ cameras:
     # mqtt:
     #   crop_to_region: True
     #   snapshot_height: 300
+
+    ################
+    # Zones
+    ################
+    zones:
+      #################
+      # Name of the zone
+      ################
+      front_steps:
+        ####################
+        # A list of x,y coordinates to define the polygon of the zone. The top 
+        # left corner is 0,0. Can also be a comma separated string of all x,y coordinates combined.
+        # The same zone name can exist across multiple cameras if they have overlapping FOVs.
+        # An object is determined to be in the zone based on whether or not the bottom center
+        # of it's bounding box is within the polygon. The polygon must have at least 3 points.
+        # Coordinates can be generated at https://www.image-map.net/
+        ####################
+        coordinates:
+          - 545,1077
+          - 747,939
+          - 788,805
+        ################
+        # Zone level object filters. These are applied in addition to the global and camera filters
+        # and should be more restrictive than the global and camera filters. The global and camera
+        # filters are applied upstream.
+        ################
+        filters:
+          person:
+            min_area: 5000
+            max_area: 100000
+            threshold: 0.8
 
     ################
     # This will save a clip for each tracked object by frigate along with a json file that contains
