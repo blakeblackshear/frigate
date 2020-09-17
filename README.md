@@ -1,7 +1,7 @@
-# Frigate - Realtime Object Detection for IP Cameras
+# Frigate - NVR With Realtime Object Detection for IP Cameras
 Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras. Designed for integration with HomeAssistant or others via MQTT.
 
-Use of a [Google Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator/) is optional, but highly recommended. On my Intel i7 processor, I can process 2-3 FPS with the CPU. The Coral can process 100+ FPS with very low CPU load.
+Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but highly recommended. On my Intel i7 processor, I can process 2-3 FPS with the CPU. The Coral can process 100+ FPS with very low CPU load.
 
 - Leverages multiprocessing heavily with an emphasis on realtime over processing every frame
 - Uses a very low overhead motion detection to determine where to run object detection
@@ -52,11 +52,13 @@ Example docker-compose:
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
 ## Recommended Hardware
+**Note: I may receive commissions for purchases made through links below.**
 |Name|Inference Speed|Notes|
 |----|---------------|-----|
-|Atomic Pi|16ms|Best option for a dedicated low power board with a small number of cameras.|
-|Intel NUC NUC7i3BNK|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
-|BMAX B2 Plus|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.
+|[Atomic Pi](https://amzn.to/2FKJHpu)|16ms|Best option for a dedicated low power board with a small number of cameras.|
+|[Intel NUC NUC7i3BNK](https://amzn.to/2RDYZPe)|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
+|[BMAX B2 Plus](https://amzn.to/3cjgQ81)|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.|
+|[Minisforum GK41](https://amzn.to/32FyKhG)|9-10ms|Great alternative to a NUC. Easily handiles 4 1080p cameras.|
 
 ARM boards are not officially supported at the moment due to some python dependencies that require modification to work on ARM devices. The Raspberry Pi4 gets about 16ms inference speeds, but the hardware acceleration for ffmpeg does not work for converting yuv420 to rgb24. The Atomic Pi is x86 and much more efficient.
 
@@ -64,7 +66,7 @@ Users have reported varying success in getting frigate to run in a VM. In some c
 
 ## Integration with HomeAssistant
 
-Setup a the camera, binary_sensor, sensor and optionally automation as shown for each camera you define in frigate. Replace <camera_name> with the camera name as defined in the frigate `config.yml` (The `frigate_coral_fps` and `frigate_coral_inference` sensors only need to be defined once)
+Setup a camera, binary_sensor, sensor and optionally automation as shown for each camera you define in frigate. Replace <camera_name> with the camera name as defined in the frigate `config.yml` (The `frigate_coral_fps` and `frigate_coral_inference` sensors only need to be defined once)
 
 ```
 camera:
@@ -137,11 +139,18 @@ An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging 
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`
 
-### `/<camera_name>/<object_name>/best.jpg`
-The best snapshot for any object type. It is a full resolution image by default. You can change the size of the image by appending `h=height-in-pixels` to the endpoint.
+### `/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
+The best snapshot for any object type. It is a full resolution image by default.
 
-### `/<camera_name>/latest.jpg`
-The most recent frame that frigate has finished processing. It is a full resolution image by default. You can change the size of the image by appending `h=height-in-pixels` to the endpoint.
+Example parameters:
+- `h=300`: resizes the image to 300 pixes tall
+- `crop=1`: crops the image to the region of the detection rather than returning the entire image
+
+### `/<camera_name>/latest.jpg[?h=300]`
+The most recent frame that frigate has finished processing. It is a full resolution image by default.
+
+Example parameters:
+- `h=300`: resizes the image to 300 pixes tall
 
 ### `/debug/stats`
 Contains some granular debug info that can be used for sensors in HomeAssistant. See details below.
@@ -161,55 +170,41 @@ Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeA
 Publishes a jpeg encoded frame of the detected object type. When the object is no longer detected, the highest confidence image is published or the original image
 is published again.
 
+The height and crop of snapshots can be configured as shown in the example config.
+
 ### frigate/<camera_name>/events/start
 Message published at the start of any tracked object. JSON looks as follows:
 ```json
 {
     "label": "person",
-    "score": 0.7890625,
+    "score": 0.87890625,
     "box": [
-        468,
-        446,
-        550,
-        592
+        95,
+        155,
+        581,
+        1182
     ],
-    "area": 11972,
+    "area": 499122,
     "region": [
-        403,
-        395,
-        613,
-        605
+        0,
+        132,
+        1080,
+        1212
     ],
-    "frame_time": 1594298020.819046,
+    "frame_time": 1600208805.60284,
     "centroid": [
-        509,
-        519
+        338,
+        668
     ],
-    "id": "1594298020.819046-0",
-    "start_time": 1594298020.819046,
-    "top_score": 0.7890625,
-    "history": [
-        {
-            "score": 0.7890625,
-            "box": [
-                468,
-                446,
-                550,
-                592
-            ],
-            "region": [
-                403,
-                395,
-                613,
-                605
-            ],
-            "centroid": [
-                509,
-                519
-            ],
-            "frame_time": 1594298020.819046
-        }
-    ]
+    "id": "1600208805.60284-k1l43p",
+    "start_time": 1600208805.60284,
+    "top_score": 0.87890625,
+    "zones": [],
+    "score_history": [
+        0.87890625
+    ],
+    "computed_score": 0.0,
+    "false_positive": true
 }
 ```
 
@@ -235,12 +230,34 @@ The labelmap can be customized to your needs. A common reason to do this is to c
   -v ./config/labelmap.txt:/labelmap.txt
   ```
 
+## Recording Clips
+**Note**: Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
+
+Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of 90 seconds of video for each camera. The cache files are written to disk at /cache and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to the /clips directory along with a json file containing the current information about the tracked object.
+
+### Global Configuration Options
+- `max_seconds`: This limits the size of the cache when an object is being tracked. If an object is stationary and being tracked for a long time, the cache files will expire and this value will be the maximum clip length for the *end* of the event. For example, if this is set to 300 seconds and an object is being tracked for 600 seconds, the clip will end up being the last 300 seconds. Defaults to 300 seconds.
+
+### Per-camera Configuration Options
+- `pre_capture`: Defines how much time should be included in the clip prior to the beginning of the event. Defaults to 30 seconds.
+- `objects`: List of object types to save clips for. Object types here must be listed for tracking at the camera or global configuration. Defaults to all tracked objects.
+
+## Google Coral Configuration
+Frigate attempts to detect your Coral device automatically. If you have multiple Coral devices or a version that is not detected automatically, you can specify using the `tensorflow_device` config option.
+
 ## Masks and limiting detection to a certain area
-You can create a *bitmap (bmp)* file the same aspect ratio as your camera feed to limit detection to certain areas. The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
+The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
 
 <a href="docs/example-mask-check-point.png"><img src="docs/example-mask-check-point.png" height="300"></a>
 <a href="docs/example-mask.bmp"><img src="docs/example-mask.bmp" height="300"></a>
 <a href="docs/example-mask-overlay.png"><img src="docs/example-mask-overlay.png" height="300"></a>
+
+The following types of masks are supported:
+- `base64`: Base64 encoded image file
+- `poly`: List of x,y points like zone configuration
+- `image`: Path to an image file in the config directory
+
+`base64` and `image` masks must be the same aspect ratio as your camera. 
 
 ## Zones
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area. See the sample config for details on how to configure.
@@ -353,6 +370,6 @@ ffmpeg:
   global_args:
     - -hide_banner
     - -loglevel
-    - panic
+    - info
 ```
 
