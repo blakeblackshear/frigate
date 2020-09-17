@@ -72,7 +72,7 @@ save_clips:
 # All labels from the model are reported over MQTT. These values are used to filter out false positives.
 # min_area (optional): minimum width*height of the bounding box for the detected object
 # max_area (optional): maximum width*height of the bounding box for the detected object
-# min_score (optional): minimum score for the object
+# min_score (optional): minimum score for the object to initiate tracking
 # threshold (optional): The minimum decimal percentage for tracked object's computed score to considered a true positive
 ####################
 objects:
@@ -183,15 +183,11 @@ cameras:
     # data related to the tracked object. This works by telling ffmpeg to write video segments to /cache
     # from the video stream without re-encoding. Clips are then created by using ffmpeg to merge segments
     # without re-encoding. The segments saved are unaltered from what frigate receives to avoid re-encoding.
-    # They do not contain bounding boxes. 30 seconds of video is added to the start of the clip. These are
-    # optimized to capture "false_positive" examples for improving frigate.
+    # They do not contain bounding boxes. These are optimized to capture "false_positive" examples for improving frigate.
     #
-    # NOTE: This will only work for camera feeds that can be copied into the mp4 container format without
-    # encoding such as h264. I do not expect this to work for mjpeg streams, and it may not work for many other
-    # types of streams.
-    #
-    # WARNING: Videos in /cache are retained until there are no ongoing events. If you are tracking cars or
-    # other objects for long periods of time, the cache will continue to grow indefinitely.
+    # NOTE: This feature does not work if you have "-vsync drop" configured in your input params. 
+    #       This will only work for camera feeds that can be copied into the mp4 container format without
+    #       encoding such as h264. It may not work for some types of streams.
     ################
     save_clips:
       enabled: False
