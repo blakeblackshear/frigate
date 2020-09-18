@@ -19,7 +19,7 @@ You see multiple bounding boxes because it draws bounding boxes from all frames 
 Run the container with
 ```bash
 docker run --rm \
--name frigate \
+-name blakeblackshear/frigate:stable \
 --privileged \
 --shm-size=512m \ # should work for a 2-3 cameras
 -v /dev/bus/usb:/dev/bus/usb \
