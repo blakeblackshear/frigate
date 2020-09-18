@@ -141,6 +141,12 @@ cameras:
     take_frame: 1
 
     ################
+    # The number of seconds to retain the highest scoring image for the best.jpg endpoint before allowing it
+    # to be replaced by a newer image. Defaults to 60 seconds.
+    ################
+    best_image_timeout: 60
+
+    ################
     # MQTT settings
     ################
     # mqtt:
