@@ -384,7 +384,7 @@ def main():
             best_object = object_processor.get_best(camera_name, label)
             best_frame = best_object.get('frame', np.zeros((720,1280,3), np.uint8))
             
-            crop = bool(request.args.get('crop', 0))
+            crop = bool(request.args.get('crop', 0, type=int))
             if crop:
                 region = best_object.get('region', [0,0,300,300])
                 best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
