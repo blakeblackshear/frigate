@@ -63,23 +63,13 @@ WEB_PORT = CONFIG.get('web_port', 5000)
 DEBUG = (CONFIG.get('debug', '0') == '1')
 TENSORFLOW_DEVICE = CONFIG.get('tensorflow_device')
 
-def start_plasma_store():
-    plasma_cmd = ['plasma_store', '-m', '400000000', '-s', '/tmp/plasma']
-    plasma_process = sp.Popen(plasma_cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-    time.sleep(1)
-    rc = plasma_process.poll()
-    if rc is not None:
-        return None
-    return plasma_process
-
 class CameraWatchdog(threading.Thread):
-    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, plasma_process, stop_event):
+    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, stop_event):
         threading.Thread.__init__(self)
         self.camera_processes = camera_processes
         self.config = config
         self.tflite_process = tflite_process
         self.tracked_objects_queue = tracked_objects_queue
-        self.plasma_process = plasma_process
         self.stop_event = stop_event
 
     def run(self):
@@ -93,12 +83,6 @@ class CameraWatchdog(threading.Thread):
                 break
 
             now = datetime.datetime.now().timestamp()
-            
-            # check the plasma process
-            rc = self.plasma_process.poll()
-            if rc != None:
-                print(f"plasma_process exited unexpectedly with {rc}")
-                self.plasma_process = start_plasma_store()
 
             # check the detection process
             detection_start = self.tflite_process.detection_start.value
@@ -172,8 +156,6 @@ def main():
     client.connect(MQTT_HOST, MQTT_PORT, 60)
     client.loop_start()
 
-    plasma_process = start_plasma_store()
-
     ##
     # Setup config defaults for cameras
     ##
@@ -189,11 +171,16 @@ def main():
 
     # Queue for clip processing
     event_queue = mp.Queue()
+
+    # create the detection pipes
+    detection_pipes = {}
+    for name in CONFIG['cameras'].keys():
+        detection_pipes[name] = mp.Pipe(duplex=False)
     
     # Start the shared tflite process
-    tflite_process = EdgeTPUProcess(TENSORFLOW_DEVICE)
+    tflite_process = EdgeTPUProcess(result_connections={ key:value[1] for (key,value) in detection_pipes.items() }, tf_device=TENSORFLOW_DEVICE)
 
-    # start the camera processes
+    # create the camera processes
     camera_processes = {}
     for name, config in CONFIG['cameras'].items():
         # Merge the ffmpeg config with the global config
@@ -236,6 +223,8 @@ def main():
             frame_shape = (config['height'], config['width'], 3)
         else:
             frame_shape = get_frame_shape(ffmpeg_input)
+        
+        config['frame_shape'] = frame_shape
 
         frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
         take_frame = config.get('take_frame', 1)
@@ -275,12 +264,13 @@ def main():
         }
 
         camera_process = mp.Process(target=track_camera, args=(name, config, frame_queue, frame_shape,
-            tflite_process.detection_queue, tracked_objects_queue, camera_processes[name]['process_fps'], 
+            tflite_process.detection_queue, detection_pipes[name][0], tracked_objects_queue, camera_processes[name]['process_fps'], 
             camera_processes[name]['detection_fps'], 
             camera_processes[name]['read_start'], camera_processes[name]['detection_frame'], stop_event))
         camera_process.daemon = True
         camera_processes[name]['process'] = camera_process
 
+    # start the camera_processes
     for name, camera_process in camera_processes.items():
         camera_process['process'].start()
         print(f"Camera_process started for {name}: {camera_process['process'].pid}")
@@ -291,7 +281,7 @@ def main():
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
     object_processor.start()
     
-    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, plasma_process, stop_event)
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, stop_event)
     camera_watchdog.start()
 
     def receiveSignal(signalNumber, frame):
@@ -300,11 +290,9 @@ def main():
         event_processor.join()
         object_processor.join()
         camera_watchdog.join()
-        for name, camera_process in camera_processes.items():
+        for camera_process in camera_processes.values():
             camera_process['capture_thread'].join()
-        rc = camera_watchdog.plasma_process.poll()
-        if rc == None:
-            camera_watchdog.plasma_process.terminate()
+        tflite_process.stop()
         sys.exit()
     
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -367,9 +355,6 @@ def main():
             'detection_start': tflite_process.detection_start.value,
             'pid': tflite_process.detect_process.pid
         }
-
-        rc = camera_watchdog.plasma_process.poll()
-        stats['plasma_store_rc'] = rc
 
         return jsonify(stats)
 
@@ -448,8 +433,6 @@ def main():
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 
     object_processor.join()
-    
-    plasma_process.terminate()
 
 if __name__ == '__main__':
     main()

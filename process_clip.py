@@ -4,7 +4,7 @@ import os
 import datetime
 from unittest import TestCase, main
 from frigate.video import process_frames, start_or_restart_ffmpeg, capture_frames, get_frame_shape
-from frigate.util import DictFrameManager, EventsPerSecond, draw_box_with_label
+from frigate.util import DictFrameManager, SharedMemoryFrameManager, EventsPerSecond, draw_box_with_label
 from frigate.motion import MotionDetector
 from frigate.edgetpu import LocalObjectDetector
 from frigate.objects import ObjectTracker
@@ -19,6 +19,7 @@ class ProcessClip():
         self.frame_shape = frame_shape
         self.camera_name = 'camera'
         self.frame_manager = DictFrameManager()
+        # self.frame_manager = SharedMemoryFrameManager()
         self.frame_queue = mp.Queue()
         self.detected_objects_queue = mp.Queue()
         self.camera_state = CameraState(self.camera_name, config, self.frame_manager)
@@ -72,13 +73,15 @@ class ProcessClip():
             for obj in self.camera_state.tracked_objects.values():
                 print(f"{frame_time}: {obj['id']} - {obj['computed_score']} - {obj['score_history']}")
         
+        self.frame_manager.delete(self.camera_state.previous_frame_id)
+        
         return {
             'object_detected': obj_detected,
             'top_score': top_computed_score
         }
     
     def save_debug_frame(self, debug_path, frame_time, tracked_objects):
-        current_frame = self.frame_manager.get(f"{self.camera_name}{frame_time}")
+        current_frame = self.frame_manager.get(f"{self.camera_name}{frame_time}", self.frame_shape)
         # draw the bounding boxes on the frame
         for obj in tracked_objects:
             thickness = 2
@@ -132,6 +135,7 @@ def process(path, label, threshold, debug_path):
     results = []
     for c in clips:
         frame_shape = get_frame_shape(c)
+        config['frame_shape'] = frame_shape
         process_clip = ProcessClip(c, frame_shape, config)
         process_clip.load_frames()
         process_clip.process_frames(objects_to_track=config['objects']['track'])

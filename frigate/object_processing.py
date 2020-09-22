@@ -10,9 +10,8 @@ import copy
 import numpy as np
 from collections import Counter, defaultdict
 import itertools
-import pyarrow.plasma as plasma
 import matplotlib.pyplot as plt
-from frigate.util import draw_box_with_label, PlasmaFrameManager
+from frigate.util import draw_box_with_label, SharedMemoryFrameManager
 from frigate.edgetpu import load_labels
 from typing import Callable, Dict
 from statistics import mean, median
@@ -59,7 +58,7 @@ class CameraState():
         self.object_status = defaultdict(lambda: 'OFF')
         self.tracked_objects = {}
         self.zone_objects = defaultdict(lambda: [])
-        self.current_frame = np.zeros((720,1280,3), np.uint8)
+        self.current_frame = np.zeros(self.config['frame_shape'], np.uint8)
         self.current_frame_time = 0.0
         self.previous_frame_id = None
         self.callbacks = defaultdict(lambda: [])
@@ -88,7 +87,7 @@ class CameraState():
         self.current_frame_time = frame_time
         # get the new frame and delete the old frame
         frame_id = f"{self.name}{frame_time}"
-        self.current_frame = self.frame_manager.get(frame_id)
+        self.current_frame = self.frame_manager.get(frame_id, self.config['frame_shape'])
         if not self.previous_frame_id is None:
             self.frame_manager.delete(self.previous_frame_id)
         self.previous_frame_id = frame_id
@@ -238,7 +237,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_queue = event_queue
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
-        self.plasma_client = PlasmaFrameManager(self.stop_event)
+        self.frame_manager = SharedMemoryFrameManager()
 
         def start(camera, obj):
             # publish events to mqtt
@@ -273,7 +272,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
 
         for camera in self.camera_config.keys():
-            camera_state = CameraState(camera, self.camera_config[camera], self.plasma_client)
+            camera_state = CameraState(camera, self.camera_config[camera], self.frame_manager)
             camera_state.on('start', start)
             camera_state.on('update', update)
             camera_state.on('end', end)
