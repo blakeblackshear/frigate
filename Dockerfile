@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,27 +11,26 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     # libcap-dev \
     && add-apt-repository ppa:deadsnakes/ppa -y \
     && apt -qq install --no-install-recommends -y \
-        python3.7 \
-        python3.7-dev \
+        python3.8 \
+        python3.8-dev \
         python3-pip \
         ffmpeg \
         # VAAPI drivers for Intel hardware accel
         libva-drm2 libva2 i965-va-driver vainfo \
-    && python3.7 -m pip install -U pip \
-    && python3.7 -m pip install -U wheel setuptools \
-    && python3.7 -m pip install -U \
+    && python3.8 -m pip install -U pip \
+    && python3.8 -m pip install -U wheel setuptools \
+    && python3.8 -m pip install -U \
         opencv-python-headless \
         # python-prctl \
         numpy \
         imutils \
         scipy \
         psutil \
-    && python3.7 -m pip install -U \
+    && python3.8 -m pip install -U \
         Flask \
         paho-mqtt \
         PyYAML \
         matplotlib \
-        pyarrow \
         click \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
@@ -39,10 +38,10 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     && echo "libedgetpu1-max libedgetpu/accepted-eula boolean true" | debconf-set-selections \
     && apt -qq install --no-install-recommends -y \
         libedgetpu1-max \
-    ## Tensorflow lite (python 3.7 only)
-    && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_x86_64.whl \
-    && python3.7 -m pip install tflite_runtime-2.1.0.post1-cp37-cp37m-linux_x86_64.whl \
-    && rm tflite_runtime-2.1.0.post1-cp37-cp37m-linux_x86_64.whl \
+    ## Tensorflow lite
+    && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
+    && python3.8 -m pip install tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
+    && rm tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
@@ -60,4 +59,4 @@ COPY detect_objects.py .
 COPY benchmark.py .
 COPY process_clip.py .
 
-CMD ["python3.7", "-u", "detect_objects.py"]
+CMD ["python3.8", "-u", "detect_objects.py"]
