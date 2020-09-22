@@ -5,7 +5,6 @@ import cv2
 import queue
 import threading
 import ctypes
-import pyarrow.plasma as plasma
 import multiprocessing as mp
 import subprocess as sp
 import numpy as np
@@ -15,7 +14,7 @@ import json
 import base64
 from typing import Dict, List
 from collections import defaultdict
-from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, PlasmaFrameManager
+from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, SharedMemoryFrameManager
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
@@ -154,11 +153,10 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             continue
 
         # put the frame in the frame manager
-        frame_manager.put(f"{camera_name}{current_frame.value}",
-                np
-                    .frombuffer(frame_bytes, np.uint8)
-                    .reshape(frame_shape)
-            )
+        frame_buffer = frame_manager.create(f"{camera_name}{current_frame.value}", frame_size)
+        frame_buffer[:] = frame_bytes[:]
+        frame_manager.close(f"{camera_name}{current_frame.value}")
+
         # add to the queue
         frame_queue.put(current_frame.value)
         last_frame = current_frame.value
@@ -173,7 +171,7 @@ class CameraCapture(threading.Thread):
         self.take_frame = take_frame
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
-        self.plasma_client = PlasmaFrameManager(stop_event)
+        self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value('d', 0.0)
         self.last_frame = 0
@@ -182,10 +180,10 @@ class CameraCapture(threading.Thread):
 
     def run(self):
         self.skipped_fps.start()
-        capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.plasma_client, self.frame_queue, self.take_frame,
+        capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.frame_manager, self.frame_queue, self.take_frame,
             self.fps, self.skipped_fps, self.stop_event, self.detection_frame, self.current_frame)
 
-def track_camera(name, config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
+def track_camera(name, config, frame_queue, frame_shape, detection_queue, result_connection, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
 
@@ -218,13 +216,13 @@ def track_camera(name, config, frame_queue, frame_shape, detection_queue, detect
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
-    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue)
+    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection)
 
     object_tracker = ObjectTracker(10)
 
-    plasma_client = PlasmaFrameManager()
+    frame_manager = SharedMemoryFrameManager()
 
-    process_frames(name, frame_queue, frame_shape, plasma_client, motion_detector, object_detector,
+    process_frames(name, frame_queue, frame_shape, frame_manager, motion_detector, object_detector,
         object_tracker, detected_objects_queue, fps, detection_fps, detection_frame, objects_to_track, object_filters, mask, stop_event)
 
     print(f"{name}: exiting subprocess")
@@ -281,7 +279,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         
         current_frame_time.value = frame_time
 
-        frame = frame_manager.get(f"{camera_name}{frame_time}")
+        frame = frame_manager.get(f"{camera_name}{frame_time}", frame_shape)
 
         if frame is None:
             print(f"{camera_name}: frame {frame_time} is not in memory store.")
@@ -364,3 +362,5 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
 
         detection_fps.value = object_detector.fps.eps()
+
+        frame_manager.close(f"{camera_name}{frame_time}")
