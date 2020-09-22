@@ -9,7 +9,8 @@ import cv2
 import threading
 import matplotlib.pyplot as plt
 import hashlib
-import pyarrow.plasma as plasma
+from multiprocessing import shared_memory
+from typing import AnyStr
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
@@ -149,11 +150,15 @@ def listen():
 
 class FrameManager(ABC):
     @abstractmethod
+    def create(self, name, size) -> AnyStr:
+        pass
+
+    @abstractmethod
     def get(self, name, timeout_ms=0):
         pass
 
     @abstractmethod
-    def put(self, name, frame):
+    def close(self, name):
         pass
 
     @abstractmethod
@@ -164,66 +169,45 @@ class DictFrameManager(FrameManager):
     def __init__(self):
         self.frames = {}
     
-    def get(self, name, timeout_ms=0):
-        return self.frames.get(name)
+    def create(self, name, size) -> AnyStr:
+        mem = bytearray(size)
+        self.frames[name] = mem
+        return mem
     
-    def put(self, name, frame):
-        self.frames[name] = frame
+    def get(self, name, shape):
+        mem = self.frames[name]
+        return np.ndarray(shape, dtype=np.uint8, buffer=mem)
+    
+    def close(self, name):
+        pass
     
     def delete(self, name):
         del self.frames[name]
 
-class PlasmaFrameManager(FrameManager):
-    def __init__(self, stop_event=None):
-        self.stop_event = stop_event
-        self.connect()
+class SharedMemoryFrameManager(FrameManager):
+    def __init__(self):
+        self.shm_store = {}
     
-    def connect(self):
-        while True:
-            if self.stop_event != None and self.stop_event.is_set():
-                return
-            try:
-                self.plasma_client = plasma.connect("/tmp/plasma")
-                return
-            except:
-                print(f"TrackedObjectProcessor: unable to connect plasma client")
-                time.sleep(10)
+    def create(self, name, size) -> AnyStr:
+        shm = shared_memory.SharedMemory(name=name, create=True, size=size)
+        self.shm_store[name] = shm
+        return shm.buf
 
-    def get(self, name, timeout_ms=0):
-        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
-        while True:
-            if self.stop_event != None and self.stop_event.is_set():
-                return
-            try:
-                frame = self.plasma_client.get(object_id, timeout_ms=timeout_ms)
-                if frame is plasma.ObjectNotAvailable:
-                    return None
-                return frame
-            except:
-                self.connect()
-                time.sleep(1)
+    def get(self, name, shape):
+        if name in self.shm_store:
+            shm = self.shm_store[name]
+        else:
+            shm = shared_memory.SharedMemory(name=name)
+            self.shm_store[name] = shm
+        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
 
-    def put(self, name, frame):
-        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
-        while True:
-            if self.stop_event != None and self.stop_event.is_set():
-                return
-            try:
-                self.plasma_client.put(frame, object_id)
-                return
-            except Exception as e:
-                print(f"Failed to put in plasma: {e}")
-                self.connect()
-                time.sleep(1)
+    def close(self, name):
+        if name in self.shm_store:
+            self.shm_store[name].close()
+            del self.shm_store[name]
 
     def delete(self, name):
-        object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
-        while True:
-            if self.stop_event != None and self.stop_event.is_set():
-                return
-            try:
-                self.plasma_client.delete([object_id])
-                return
-            except:
-                self.connect()
-                time.sleep(1)
+        if name in self.shm_store:
+            self.shm_store[name].close()
+            self.shm_store[name].unlink()
+            del self.shm_store[name]
