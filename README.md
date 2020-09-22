@@ -161,6 +161,19 @@ Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeA
 Publishes a jpeg encoded frame of the detected object type. When the object is no longer detected, the highest confidence image is published or the original image
 is published again.
 
+### frigate/<camera_name>/<object_name>/event
+Publishes a jpeg encoded frame  as well as data of the detected object in the same message. The message will have the below format
+```json
+{
+   "image": "<BASE64 encoded image>",
+   "status": "ON/OFF", 
+   "label": "person",
+   "score" : 0.76354,
+   "start_time" : 1594298020.819046,
+   "id": "1594298020.819046-0"
+}
+```
+
 ### frigate/<camera_name>/events/start
 Message published at the start of any tracked object. JSON looks as follows:
 ```json
