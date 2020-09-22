@@ -13,8 +13,9 @@ import copy
 import itertools
 import json
 import base64
+from typing import Dict, List
 from collections import defaultdict
-from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, PlasmaManager
+from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, PlasmaFrameManager
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
@@ -53,7 +54,7 @@ def get_ffmpeg_input(ffmpeg_input):
     frigate_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
     return ffmpeg_input.format(**frigate_vars)
 
-def filtered(obj, objects_to_track, object_filters, mask):
+def filtered(obj, objects_to_track, object_filters, mask=None):
     object_name = obj[0]
 
     if not object_name in objects_to_track:
@@ -72,8 +73,8 @@ def filtered(obj, objects_to_track, object_filters, mask):
         if obj_settings.get('max_area', 24000000) < obj[3]:
             return True
 
-        # if the score is lower than the threshold, skip
-        if obj_settings.get('threshold', 0) > obj[1]:
+        # if the score is lower than the min_score, skip
+        if obj_settings.get('min_score', 0) > obj[1]:
             return True
     
         # compute the coordinates of the object and make sure
@@ -82,10 +83,10 @@ def filtered(obj, objects_to_track, object_filters, mask):
         x_location = min(int((obj[2][2]-obj[2][0])/2.0)+obj[2][0], len(mask[0])-1)
 
         # if the object is in a masked location, don't add it to detected objects
-        if mask[y_location][x_location] == [0]:
+        if (not mask is None) and (mask[y_location][x_location] == 0):
             return True
         
-        return False
+    return False
 
 def create_tensor_input(frame, region):
     cropped_frame = frame[region[1]:region[3], region[0]:region[2]]
@@ -115,6 +116,53 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
     return process
 
+def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
+    frame_queue, take_frame: int, fps:EventsPerSecond, skipped_fps: EventsPerSecond, 
+    stop_event: mp.Event, detection_frame: mp.Value, current_frame: mp.Value):
+
+    frame_num = 0
+    last_frame = 0
+    frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
+    skipped_fps.start()
+    while True:
+        if stop_event.is_set():
+            print(f"{camera_name}: stop event set. exiting capture thread...")
+            break
+
+        frame_bytes = ffmpeg_process.stdout.read(frame_size)
+        current_frame.value = datetime.datetime.now().timestamp()
+
+        if len(frame_bytes) < frame_size:
+            print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
+
+            if ffmpeg_process.poll() != None:
+                print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
+                break
+            else:
+                continue
+
+        fps.update()
+
+        frame_num += 1
+        if (frame_num % take_frame) != 0:
+            skipped_fps.update()
+            continue
+
+        # if the detection process is more than 1 second behind, skip this frame
+        if detection_frame.value > 0.0 and (last_frame - detection_frame.value) > 1:
+            skipped_fps.update()
+            continue
+
+        # put the frame in the frame manager
+        frame_manager.put(f"{camera_name}{current_frame.value}",
+                np
+                    .frombuffer(frame_bytes, np.uint8)
+                    .reshape(frame_shape)
+            )
+        # add to the queue
+        frame_queue.put(current_frame.value)
+        last_frame = current_frame.value
+
 class CameraCapture(threading.Thread):
     def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame, stop_event):
         threading.Thread.__init__(self)
@@ -125,73 +173,28 @@ class CameraCapture(threading.Thread):
         self.take_frame = take_frame
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
-        self.plasma_client = PlasmaManager(stop_event)
+        self.plasma_client = PlasmaFrameManager(stop_event)
         self.ffmpeg_process = ffmpeg_process
-        self.current_frame = 0
+        self.current_frame = mp.Value('d', 0.0)
         self.last_frame = 0
         self.detection_frame = detection_frame
         self.stop_event = stop_event
 
     def run(self):
-        frame_num = 0
         self.skipped_fps.start()
-        while True:
-            if self.stop_event.is_set():
-                print(f"{self.name}: stop event set. exiting capture thread...")
-                break
+        capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.plasma_client, self.frame_queue, self.take_frame,
+            self.fps, self.skipped_fps, self.stop_event, self.detection_frame, self.current_frame)
 
-            if self.ffmpeg_process.poll() != None:
-                print(f"{self.name}: ffmpeg process is not running. exiting capture thread...")
-                break
-
-            frame_bytes = self.ffmpeg_process.stdout.read(self.frame_size)
-            self.current_frame = datetime.datetime.now().timestamp()
-
-            if len(frame_bytes) == 0:
-                print(f"{self.name}: ffmpeg didnt return a frame. something is wrong.")
-                continue
-
-            self.fps.update()
-
-            frame_num += 1
-            if (frame_num % self.take_frame) != 0:
-                self.skipped_fps.update()
-                continue
-
-            # if the detection process is more than 1 second behind, skip this frame
-            if self.detection_frame.value > 0.0 and (self.last_frame - self.detection_frame.value) > 1:
-                self.skipped_fps.update()
-                continue
-
-            # put the frame in the plasma store
-            self.plasma_client.put(f"{self.name}{self.current_frame}",
-                    np
-                        .frombuffer(frame_bytes, np.uint8)
-                        .reshape(self.frame_shape)
-                )
-            # add to the queue
-            self.frame_queue.put(self.current_frame)
-            self.last_frame = self.current_frame
-
-def track_camera(name, config, global_objects_config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame):
+def track_camera(name, config, frame_queue, frame_shape, detection_queue, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
     print(f"Starting process for {name}: {os.getpid()}")
     listen()
 
     detection_frame.value = 0.0
 
     # Merge the tracked object config with the global config
-    camera_objects_config = config.get('objects', {})    
-    # combine tracked objects lists
-    objects_to_track = set().union(global_objects_config.get('track', ['person', 'car', 'truck']), camera_objects_config.get('track', []))
-    # merge object filters
-    global_object_filters = global_objects_config.get('filters', {})
-    camera_object_filters = camera_objects_config.get('filters', {})
-    objects_with_config = set().union(global_object_filters.keys(), camera_object_filters.keys())
-    object_filters = {}
-    for obj in objects_with_config:
-        object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
-
-    frame = np.zeros(frame_shape, np.uint8)
+    camera_objects_config = config.get('objects', {})
+    objects_to_track = camera_objects_config.get('track', [])
+    object_filters = camera_objects_config.get('filters', {})
 
     # load in the mask for object detection
     if 'mask' in config:
@@ -199,13 +202,19 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
             img = base64.b64decode(config['mask'][7:]) 
             npimg = np.fromstring(img, dtype=np.uint8)
             mask = cv2.imdecode(npimg, cv2.IMREAD_GRAYSCALE)
+        elif config['mask'].startswith('poly,'):
+            points = config['mask'].split(',')[1:]
+            contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+            mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
+            mask[:] = 255
+            cv2.fillPoly(mask, pts=[contour], color=(0))
         else:
             mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
     else:
         mask = None
 
-    if mask is None:
-        mask = np.zeros((frame_shape[0], frame_shape[1], 1), np.uint8)
+    if mask is None or mask.size == 0:
+        mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
@@ -213,109 +222,100 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
 
     object_tracker = ObjectTracker(10)
 
-    plasma_client = PlasmaManager()
-    avg_wait = 0.0
+    plasma_client = PlasmaFrameManager()
+
+    process_frames(name, frame_queue, frame_shape, plasma_client, motion_detector, object_detector,
+        object_tracker, detected_objects_queue, fps, detection_fps, detection_frame, objects_to_track, object_filters, mask, stop_event)
+
+    print(f"{name}: exiting subprocess")
+
+def reduce_boxes(boxes):
+    if len(boxes) == 0:
+        return []
+    reduced_boxes = cv2.groupRectangles([list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2)[0]
+    return [tuple(b) for b in reduced_boxes]
+
+def detect(object_detector, frame, region, objects_to_track, object_filters, mask):
+    tensor_input = create_tensor_input(frame, region)
+
+    detections = []
+    region_detections = object_detector.detect(tensor_input)
+    for d in region_detections:
+        box = d[2]
+        size = region[2]-region[0]
+        x_min = int((box[1] * size) + region[0])
+        y_min = int((box[0] * size) + region[1])
+        x_max = int((box[3] * size) + region[0])
+        y_max = int((box[2] * size) + region[1])
+        det = (d[0],
+            d[1],
+            (x_min, y_min, x_max, y_max),
+            (x_max-x_min)*(y_max-y_min),
+            region)
+        # apply object filters
+        if filtered(det, objects_to_track, object_filters, mask):
+            continue
+        detections.append(det)
+    return detections
+
+def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, 
+    frame_manager: FrameManager, motion_detector: MotionDetector, 
+    object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
+    detected_objects_queue: mp.Queue, fps: mp.Value, detection_fps: mp.Value, current_frame_time: mp.Value,
+    objects_to_track: List[str], object_filters: Dict, mask, stop_event: mp.Event,
+    exit_on_empty: bool = False):
+    
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
-    object_detector.fps.start()
-    while True:
-        read_start.value = datetime.datetime.now().timestamp()
-        frame_time = frame_queue.get()
-        duration = datetime.datetime.now().timestamp()-read_start.value
-        read_start.value = 0.0
-        avg_wait = (avg_wait*99+duration)/100
-        detection_frame.value = frame_time
-        
-        # Get frame from plasma store
-        frame = plasma_client.get(f"{name}{frame_time}")
 
-        if frame is plasma.ObjectNotAvailable:
+    while True:
+        if stop_event.is_set() or (exit_on_empty and frame_queue.empty()):
+                print(f"Exiting track_objects...")
+                break
+
+        try:
+            frame_time = frame_queue.get(True, 10)
+        except queue.Empty:
             continue
 
+        
+        current_frame_time.value = frame_time
+
+        frame = frame_manager.get(f"{camera_name}{frame_time}")
+
+        if frame is None:
+            print(f"{camera_name}: frame {frame_time} is not in memory store.")
+            continue
+        
         fps_tracker.update()
         fps.value = fps_tracker.eps()
-        detection_fps.value = object_detector.fps.eps()
-        
+
         # look for motion
         motion_boxes = motion_detector.detect(frame)
 
-        tracked_objects = object_tracker.tracked_objects.values()
+        tracked_object_boxes = [obj['box'] for obj in object_tracker.tracked_objects.values()]
 
-        # merge areas of motion that intersect with a known tracked object into a single area to look at
-        areas_of_interest = []
-        used_motion_boxes = []
-        for obj in tracked_objects:
-            x_min, y_min, x_max, y_max = obj['box']
-            for m_index, motion_box in enumerate(motion_boxes):
-                if intersection_over_union(motion_box, obj['box']) > .2:
-                    used_motion_boxes.append(m_index)
-                    x_min = min(obj['box'][0], motion_box[0])
-                    y_min = min(obj['box'][1], motion_box[1])
-                    x_max = max(obj['box'][2], motion_box[2])
-                    y_max = max(obj['box'][3], motion_box[3])
-            areas_of_interest.append((x_min, y_min, x_max, y_max))
-        unused_motion_boxes = set(range(0, len(motion_boxes))).difference(used_motion_boxes)
-        
-        # compute motion regions
-        motion_regions = [calculate_region(frame_shape, motion_boxes[i][0], motion_boxes[i][1], motion_boxes[i][2], motion_boxes[i][3], 1.2)
-            for i in unused_motion_boxes]
-        
-        # compute tracked object regions
-        object_regions = [calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.2)
-            for a in areas_of_interest]
-        
-        # merge regions with high IOU
-        merged_regions = motion_regions+object_regions
-        while True:
-            max_iou = 0.0
-            max_indices = None
-            region_indices = range(len(merged_regions))
-            for a, b in itertools.combinations(region_indices, 2):
-                iou = intersection_over_union(merged_regions[a], merged_regions[b])
-                if iou > max_iou:
-                    max_iou = iou
-                    max_indices = (a, b)
-            if max_iou > 0.1:
-                a = merged_regions[max_indices[0]]
-                b = merged_regions[max_indices[1]]
-                merged_regions.append(calculate_region(frame_shape,
-                    min(a[0], b[0]),
-                    min(a[1], b[1]),
-                    max(a[2], b[2]),
-                    max(a[3], b[3]),
-                    1
-                ))
-                del merged_regions[max(max_indices[0], max_indices[1])]
-                del merged_regions[min(max_indices[0], max_indices[1])]
-            else:
-                break
+        # combine motion boxes with known locations of existing objects
+        combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
 
+        # compute regions
+        regions = [calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.2)
+            for a in combined_boxes]
+
+        # combine overlapping regions
+        combined_regions = reduce_boxes(regions)
+
+        # re-compute regions
+        regions = [calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
+            for a in combined_regions]
+        
         # resize regions and detect
         detections = []
-        for region in merged_regions:
-
-            tensor_input = create_tensor_input(frame, region)
-
-            region_detections = object_detector.detect(tensor_input)
-
-            for d in region_detections:
-                box = d[2]
-                size = region[2]-region[0]
-                x_min = int((box[1] * size) + region[0])
-                y_min = int((box[0] * size) + region[1])
-                x_max = int((box[3] * size) + region[0])
-                y_max = int((box[2] * size) + region[1])
-                det = (d[0],
-                    d[1],
-                    (x_min, y_min, x_max, y_max),
-                    (x_max-x_min)*(y_max-y_min),
-                    region)
-                if filtered(det, objects_to_track, object_filters, mask):
-                    continue
-                detections.append(det)
-
+        for region in regions:
+            detections.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
+        
         #########
-        # merge objects, check for clipped objects and look again up to N times
+        # merge objects, check for clipped objects and look again up to 4 times
         #########
         refining = True
         refine_count = 0
@@ -345,40 +345,22 @@ def track_camera(name, config, global_objects_config, frame_queue, frame_shape, 
                             box[0], box[1],
                             box[2], box[3])
                         
-                        tensor_input = create_tensor_input(frame, region)
-                        # run detection on new region
-                        refined_detections = object_detector.detect(tensor_input)
-                        for d in refined_detections:
-                            box = d[2]
-                            size = region[2]-region[0]
-                            x_min = int((box[1] * size) + region[0])
-                            y_min = int((box[0] * size) + region[1])
-                            x_max = int((box[3] * size) + region[0])
-                            y_max = int((box[2] * size) + region[1])
-                            det = (d[0],
-                                d[1],
-                                (x_min, y_min, x_max, y_max),
-                                (x_max-x_min)*(y_max-y_min),
-                                region)
-                            if filtered(det, objects_to_track, object_filters, mask):
-                                continue
-                            selected_objects.append(det)
+                        selected_objects.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
 
                         refining = True
                     else:
-                        selected_objects.append(obj)
-                
+                        selected_objects.append(obj)            
             # set the detections list to only include top, complete objects
             # and new detections
             detections = selected_objects
 
             if refining:
                 refine_count += 1
-        
+
         # now that we have refined our detections, we need to track objects
         object_tracker.match_and_update(frame_time, detections)
 
         # add to the queue
-        detected_objects_queue.put((name, frame_time, object_tracker.tracked_objects))
+        detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
 
-    print(f"{name}: exiting subprocess")
+        detection_fps.value = object_detector.fps.eps()

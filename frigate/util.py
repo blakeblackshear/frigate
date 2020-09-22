@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import datetime
 import time
 import signal
@@ -43,6 +44,9 @@ def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thicknes
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):    
     # size is larger than longest edge
     size = int(max(xmax-xmin, ymax-ymin)*multiplier)
+    # dont go any smaller than 300
+    if size < 300:
+        size = 300
     # if the size is too big to fit in the frame
     if size > min(frame_shape[0], frame_shape[1]):
         size = min(frame_shape[0], frame_shape[1])
@@ -122,12 +126,16 @@ class EventsPerSecond:
         self._start = datetime.datetime.now().timestamp()
 
     def update(self):
+        if self._start is None:
+            self.start()
         self._timestamps.append(datetime.datetime.now().timestamp())
         # truncate the list when it goes 100 over the max_size
         if len(self._timestamps) > self._max_events+100:
             self._timestamps = self._timestamps[(1-self._max_events):]
 
     def eps(self, last_n_seconds=10):
+        if self._start is None:
+            self.start()
 		# compute the (approximate) events in the last n seconds
         now = datetime.datetime.now().timestamp()
         seconds = min(now-self._start, last_n_seconds)
@@ -139,7 +147,33 @@ def print_stack(sig, frame):
 def listen():
     signal.signal(signal.SIGUSR1, print_stack)
 
-class PlasmaManager:
+class FrameManager(ABC):
+    @abstractmethod
+    def get(self, name, timeout_ms=0):
+        pass
+
+    @abstractmethod
+    def put(self, name, frame):
+        pass
+
+    @abstractmethod
+    def delete(self, name):
+        pass
+
+class DictFrameManager(FrameManager):
+    def __init__(self):
+        self.frames = {}
+    
+    def get(self, name, timeout_ms=0):
+        return self.frames.get(name)
+    
+    def put(self, name, frame):
+        self.frames[name] = frame
+    
+    def delete(self, name):
+        del self.frames[name]
+
+class PlasmaFrameManager(FrameManager):
     def __init__(self, stop_event=None):
         self.stop_event = stop_event
         self.connect()
@@ -161,18 +195,21 @@ class PlasmaManager:
             if self.stop_event != None and self.stop_event.is_set():
                 return
             try:
-                return self.plasma_client.get(object_id, timeout_ms=timeout_ms)
+                frame = self.plasma_client.get(object_id, timeout_ms=timeout_ms)
+                if frame is plasma.ObjectNotAvailable:
+                    return None
+                return frame
             except:
                 self.connect()
                 time.sleep(1)
 
-    def put(self, name, obj):
+    def put(self, name, frame):
         object_id = plasma.ObjectID(hashlib.sha1(str.encode(name)).digest())
         while True:
             if self.stop_event != None and self.stop_event.is_set():
                 return
             try:
-                self.plasma_client.put(obj, object_id)
+                self.plasma_client.put(frame, object_id)
                 return
             except Exception as e:
                 print(f"Failed to put in plasma: {e}")

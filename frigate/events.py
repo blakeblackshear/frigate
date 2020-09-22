@@ -73,6 +73,11 @@ class EventProcessor(threading.Thread):
             earliest_event = min(self.events_in_process.values(), key=lambda x:x['start_time'])['start_time']
         else:
             earliest_event = datetime.datetime.now().timestamp()
+
+        # if the earliest event exceeds the max seconds, cap it
+        max_seconds = self.config.get('save_clips', {}).get('max_seconds', 300)
+        if datetime.datetime.now().timestamp()-earliest_event > max_seconds:
+            earliest_event = datetime.datetime.now().timestamp()-max_seconds
         
         for f, data in list(self.cached_clips.items()):
             if earliest_event-90 > data['start_time']+data['duration']:
@@ -147,12 +152,23 @@ class EventProcessor(threading.Thread):
 
             self.refresh_cache()
 
+            save_clips_config = self.config['cameras'][camera].get('save_clips', {})
+
+            # if save clips is not enabled for this camera, just continue
+            if not save_clips_config.get('enabled', False):
+                continue
+
+            # if specific objects are listed for this camera, only save clips for them
+            if 'objects' in save_clips_config:
+                if not event_data['label'] in save_clips_config['objects']:
+                    continue
+
             if event_type == 'start':
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                if self.config[camera].get('save_clips', {}).get('enabled', False) and len(self.cached_clips) > 0:
-                    self.create_clip(camera, event_data, self.config[camera].get('save_clips', {}).get('pre_capture', 30))
+                if len(self.cached_clips) > 0 and not event_data['false_positive']:
+                    self.create_clip(camera, event_data, save_clips_config.get('pre_capture', 30))
                 del self.events_in_process[event_data['id']]
 
                 
