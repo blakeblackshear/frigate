@@ -267,13 +267,8 @@ def main():
         camera_objects_config = config.get('objects', {})
         # get objects to track for camera
         objects_to_track = camera_objects_config.get('track', GLOBAL_OBJECT_CONFIG.get('track', ['person']))
-        # merge object filters
-        global_object_filters = GLOBAL_OBJECT_CONFIG.get('filters', {})
-        camera_object_filters = camera_objects_config.get('filters', {})
-        objects_with_config = set().union(global_object_filters.keys(), camera_object_filters.keys())
-        object_filters = {}
-        for obj in objects_with_config:
-            object_filters[obj] = {**global_object_filters.get(obj, {}), **camera_object_filters.get(obj, {})}
+        # get object filters
+        object_filters = camera_objects_config.get('filters', GLOBAL_OBJECT_CONFIG.get('filters', {}))
         config['objects'] = {
             'track': objects_to_track,
             'filters': object_filters
