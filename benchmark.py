@@ -11,7 +11,7 @@ labels = load_labels('/labelmap.txt')
 ######
 # Minimal same process runner
 ######
-# object_detector = ObjectDetector()
+# object_detector = LocalObjectDetector()
 # tensor_input = np.expand_dims(np.full((300,300,3), 0, np.uint8), axis=0)
 
 # start = datetime.datetime.now().timestamp()
@@ -40,8 +40,8 @@ labels = load_labels('/labelmap.txt')
 ######
 # Separate process runner
 ######
-def start(id, num_detections, detection_queue):
-  object_detector = RemoteObjectDetector(str(id), '/labelmap.txt', detection_queue)
+def start(id, num_detections, detection_queue, event):
+  object_detector = RemoteObjectDetector(str(id), '/labelmap.txt', detection_queue, event)
   start = datetime.datetime.now().timestamp()
 
   frame_times = []
@@ -54,26 +54,35 @@ def start(id, num_detections, detection_queue):
   print(f"{id} - Processed for {duration:.2f} seconds.")
   print(f"{id} - Average frame processing time: {mean(frame_times)*1000:.2f}ms")
 
-edgetpu_process = EdgeTPUProcess()
+event = mp.Event()
+edgetpu_process = EdgeTPUProcess({'1': event})
 
-# start(1, 1000, edgetpu_process.detect_lock, edgetpu_process.detect_ready, edgetpu_process.frame_ready)
+start(1, 1000, edgetpu_process.detection_queue, event)
+print(f"Average raw inference speed: {edgetpu_process.avg_inference_speed.value*1000:.2f}ms")
 
 ####
 # Multiple camera processes
 ####
-camera_processes = []
-for x in range(0, 10):
-  camera_process = mp.Process(target=start, args=(x, 100, edgetpu_process.detection_queue))
-  camera_process.daemon = True
-  camera_processes.append(camera_process)
+# camera_processes = []
 
-start = datetime.datetime.now().timestamp()
+# pipes = {}
+# for x in range(0, 10):
+#   pipes[x] = mp.Pipe(duplex=False)
 
-for p in camera_processes:
-  p.start()
+# edgetpu_process = EdgeTPUProcess({str(key): value[1] for (key, value) in pipes.items()})
 
-for p in camera_processes:
-  p.join()
+# for x in range(0, 10):
+#   camera_process = mp.Process(target=start, args=(x, 100, edgetpu_process.detection_queue, pipes[x][0]))
+#   camera_process.daemon = True
+#   camera_processes.append(camera_process)
 
-duration = datetime.datetime.now().timestamp()-start
-print(f"Total - Processed for {duration:.2f} seconds.")
+# start = datetime.datetime.now().timestamp()
+
+# for p in camera_processes:
+#   p.start()
+
+# for p in camera_processes:
+#   p.join()
+
+# duration = datetime.datetime.now().timestamp()-start
+# print(f"Total - Processed for {duration:.2f} seconds.")
