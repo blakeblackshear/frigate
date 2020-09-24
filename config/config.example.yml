@@ -78,8 +78,6 @@ save_clips:
 objects:
   track:
     - person
-    - car
-    - truck
   filters:
     person:
       min_area: 5000
@@ -215,11 +213,12 @@ cameras:
       draw_zones: False
 
     ################
-    # Camera level object config. This config is merged with the global config above.
+    # Camera level object config. If defined, this is used instead of the global config.
     ################
     objects:
       track:
         - person
+        - car
       filters:
         person:
           min_area: 5000
