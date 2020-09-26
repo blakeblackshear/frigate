@@ -126,8 +126,6 @@ def run_detector(detection_queue, out_events: Dict[str, mp.Event], avg_speed, st
 
         # detect and send the output
         start.value = datetime.datetime.now().timestamp()
-        # TODO: what is the overhead for pickling this result vs writing back to shared memory?
-        #       I could try using an Event() and waiting in the other process before looking in memory...
         detections = object_detector.detect_raw(input_frame)
         duration = datetime.datetime.now().timestamp()-start.value
         outputs[connection_id]['np'][:] = detections[:]
@@ -179,16 +177,10 @@ class RemoteObjectDetector():
         detections = []
 
         # copy input to shared memory
-        # TODO: what if I just write it there in the first place?
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
         self.event.wait()
-        
-        # if self.result_connection.poll(10):
-        #     raw_detections = self.result_connection.recv()
-        # else:
-        #     return detections
 
         for d in self.out_np_shm:
             if d[1] < threshold:
