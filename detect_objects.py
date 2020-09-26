@@ -173,12 +173,12 @@ def main():
     event_queue = mp.Queue()
 
     # create the detection pipes
-    detection_pipes = {}
+    out_events = {}
     for name in CONFIG['cameras'].keys():
-        detection_pipes[name] = mp.Pipe(duplex=False)
+        out_events[name] = mp.Event()
     
     # Start the shared tflite process
-    tflite_process = EdgeTPUProcess(result_connections={ key:value[1] for (key,value) in detection_pipes.items() }, tf_device=TENSORFLOW_DEVICE)
+    tflite_process = EdgeTPUProcess(out_events=out_events, tf_device=TENSORFLOW_DEVICE)
 
     # create the camera processes
     camera_processes = {}
@@ -269,7 +269,7 @@ def main():
         }
 
         camera_process = mp.Process(target=track_camera, args=(name, config, frame_queue, frame_shape,
-            tflite_process.detection_queue, detection_pipes[name][0], tracked_objects_queue, camera_processes[name]['process_fps'], 
+            tflite_process.detection_queue, out_events[name], tracked_objects_queue, camera_processes[name]['process_fps'], 
             camera_processes[name]['detection_fps'], 
             camera_processes[name]['read_start'], camera_processes[name]['detection_frame'], stop_event))
         camera_process.daemon = True
