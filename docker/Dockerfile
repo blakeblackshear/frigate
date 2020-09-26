@@ -1,0 +1,16 @@
+FROM frigate.base
+LABEL maintainer "blakeb@blakeshome.com"
+
+ENV DEBIAN_FRONTEND=noninteractive
+# Install packages for apt repo
+RUN apt -qq update \
+    && apt -qq install --no-install-recommends -y \
+        ffmpeg \
+        # VAAPI drivers for Intel hardware accel
+        libva-drm2 libva2 i965-va-driver vainfo \
+        ## Tensorflow lite
+    && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
+    && python3.8 -m pip install tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
+    && rm tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get autoremove -y; apt-get autoclean -y)
