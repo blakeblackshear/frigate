@@ -14,9 +14,6 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
         python3.8 \
         python3.8-dev \
         python3-pip \
-        ffmpeg \
-        # VAAPI drivers for Intel hardware accel
-        libva-drm2 libva2 i965-va-driver vainfo \
     && python3.8 -m pip install -U pip \
     && python3.8 -m pip install -U wheel setuptools \
     && python3.8 -m pip install -U \
@@ -38,10 +35,6 @@ RUN apt -qq update && apt -qq install --no-install-recommends -y \
     && echo "libedgetpu1-max libedgetpu/accepted-eula boolean true" | debconf-set-selections \
     && apt -qq install --no-install-recommends -y \
         libedgetpu1-max \
-    ## Tensorflow lite
-    && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
-    && python3.8 -m pip install tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
-    && rm tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
