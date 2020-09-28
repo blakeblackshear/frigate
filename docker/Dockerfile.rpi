@@ -1,0 +1,17 @@
+FROM frigate-base
+LABEL maintainer "blakeb@blakeshome.com"
+
+ENV DEBIAN_FRONTEND=noninteractive
+# Install packages for apt repo
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
+        ffmpeg \
+        # runtime dependencies
+        libopenexr24 \
+        libgstreamer1.0-0 \
+        libgstreamer-plugins-base1.0-0 \
+        libopenblas-base \
+    ## Tensorflow lite
+    && pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_armv7l.whl \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get autoremove -y; apt-get autoclean -y)
