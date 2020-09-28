@@ -15,9 +15,9 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
     && pip3 install -U /wheels/*.whl \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
-    && apt -qq update \
+    && apt-get -qq update \
     && echo "libedgetpu1-max libedgetpu/accepted-eula boolean true" | debconf-set-selections \
-    && apt -qq install --no-install-recommends -y \
+    && apt-get -qq install --no-install-recommends -y \
         libedgetpu1-max \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
