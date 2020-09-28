@@ -1,48 +1,31 @@
+ARG ARCH=amd64
+FROM blakeblackshear/frigate-wheels:${ARCH} as wheels
+
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
 
+COPY --from=wheels /wheels/. /wheels/
+
 ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
-RUN apt -qq update && apt -qq install --no-install-recommends -y \
-    software-properties-common \
-    # apt-transport-https ca-certificates \
-    build-essential \
+RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
     gnupg wget unzip tzdata \
-    # libcap-dev \
-    && add-apt-repository ppa:deadsnakes/ppa -y \
-    && apt -qq install --no-install-recommends -y \
-        python3.8 \
-        python3.8-dev \
+    && apt-get -qq install --no-install-recommends -y \
         python3-pip \
-    && python3.8 -m pip install -U pip \
-    && python3.8 -m pip install -U wheel setuptools \
-    && python3.8 -m pip install -U \
-        opencv-python-headless \
-        # python-prctl \
-        numpy \
-        imutils \
-        scipy \
-        psutil \
-    && python3.8 -m pip install -U \
-        Flask \
-        paho-mqtt \
-        PyYAML \
-        matplotlib \
-        click \
+    && pip3 install -U /wheels/*.whl \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
     && apt -qq update \
     && echo "libedgetpu1-max libedgetpu/accepted-eula boolean true" | debconf-set-selections \
     && apt -qq install --no-install-recommends -y \
         libedgetpu1-max \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
 # get model and labels
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite --trust-server-names
 COPY labelmap.txt /labelmap.txt
 RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
-
 
 RUN mkdir /cache /clips
 
@@ -52,4 +35,4 @@ COPY detect_objects.py .
 COPY benchmark.py .
 COPY process_clip.py .
 
-CMD ["python3.8", "-u", "detect_objects.py"]
+CMD ["python3", "-u", "detect_objects.py"]
