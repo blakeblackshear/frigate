@@ -47,6 +47,12 @@ Example docker-compose:
       - "5000:5000"
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
+    healthcheck:
+      test: ["CMD", "wget" , "-q", "-O-", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 3m
 ```
 
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
