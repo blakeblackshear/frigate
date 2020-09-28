@@ -199,12 +199,12 @@ class CameraState():
                     obj_copy['frame'] = np.copy(self.current_frame)
                     self.best_objects[object_type] = obj_copy
                     for c in self.callbacks['snapshot']:
-                        c(self.name, self.best_objects[object_type])
+                        c(self.name, self.best_objects[object_type],"ON")
             else:
                 obj_copy['frame'] = np.copy(self.current_frame)
                 self.best_objects[object_type] = obj_copy
                 for c in self.callbacks['snapshot']:
-                    c(self.name, self.best_objects[object_type])
+                    c(self.name, self.best_objects[object_type],"ON")
         
         # update overall camera state for each object type
         obj_counter = Counter()
@@ -227,7 +227,7 @@ class CameraState():
             for c in self.callbacks['object_status']:
                 c(self.name, obj_name, 'OFF')
             for c in self.callbacks['snapshot']:
-                c(self.name, self.best_objects[obj_name])
+                c(self.name, self.best_objects[obj_name],"OFF")
 
 
 class TrackedObjectProcessor(threading.Thread):
@@ -254,7 +254,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj), retain=False)
             self.event_queue.put(('end', camera, obj))
         
-        def snapshot(camera, obj):
+        def snapshot(camera, obj,status):
             if not 'frame' in obj:
                 return
             best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_RGB2BGR)
@@ -272,7 +272,7 @@ class TrackedObjectProcessor(threading.Thread):
                 jpg_as_text = base64.b64encode(jpg).decode()
                 payload={
                         "image": jpg_as_text,
-                        "status":"OFF",
+                        "status": status,
                         "label":obj["label"],
                         "score": obj["score"],
                         "start_time" : obj["start_time"],
