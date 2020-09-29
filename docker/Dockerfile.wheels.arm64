@@ -20,7 +20,17 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py
 
+# need to build cmake from source because binary distribution is broken for arm64
+# https://github.com/scikit-build/cmake-python-distributions/issues/115
+# https://github.com/skvark/opencv-python/issues/366
+# https://github.com/scikit-build/cmake-python-distributions/issues/96#issuecomment-663062358
 RUN pip3 install scikit-build
+
+RUN git clone https://github.com/scikit-build/cmake-python-distributions.git \
+    && cd cmake-python-distributions/ \
+    && python3 setup.py bdist_wheel
+
+RUN pip3 install cmake-python-distributions/dist/*.whl
 
 RUN pip3 wheel --wheel-dir=/wheels \
     opencv-python-headless \
