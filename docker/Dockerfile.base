@@ -13,19 +13,19 @@ RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
     && apt-get -qq install --no-install-recommends -y \
         python3-pip \
     && pip3 install -U /wheels/*.whl \
+    && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
-    && wget -q -O - https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
-    && apt-get -qq update \
-    && echo "libedgetpu1-max libedgetpu/accepted-eula boolean true" | debconf-set-selections \
-    && apt-get -qq install --no-install-recommends -y \
+    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    && apt-get -qq update && apt-get -qq install --no-install-recommends -y \
         libedgetpu1-max \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
 # get model and labels
-RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite --trust-server-names
+ARG MODEL_REFS=7064b94dd5b996189242320359dbab8b52c94a84
 COPY labelmap.txt /labelmap.txt
-RUN wget -q https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite 
+RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite
 
 RUN mkdir /cache /clips
 
