@@ -86,6 +86,8 @@ RUN      buildDeps="autoconf \
                     python \
                     libssl-dev \
                     yasm \
+                    linux-headers-raspi2 \
+                    libomxil-bellagio-dev \
                     zlib1g-dev" && \
         apt-get -yqq update && \
         apt-get install -yq --no-install-recommends ${buildDeps}
@@ -451,9 +453,6 @@ RUN  \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
         curl -sLO https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
         tar -jx --strip-components=1 -f ffmpeg-${FFMPEG_VERSION}.tar.bz2
-
-RUN apt-get install -yq --no-install-recommends linux-headers-raspi2 libomxil-bellagio-dev
-
 
 RUN \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
