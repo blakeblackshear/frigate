@@ -44,7 +44,7 @@ ENV         FFMPEG_VERSION=4.3.1 \
             XVID_VERSION=1.3.4 \
             LIBXML2_VERSION=2.9.10 \
             LIBBLURAY_VERSION=1.1.2 \
-            LIBZMQ_VERSION=4.3.2 \
+            LIBZMQ_VERSION=4.3.3 \
             SRC=/usr/local
 
 ARG         FREETYPE_SHA256SUM="5d03dd76c2171a7601e9ce10551d52d4471cf92cd205948e60289251daddffa8 freetype-2.5.5.tar.gz"
@@ -58,14 +58,13 @@ ARG         VORBIS_SHA256SUM="6efbcecdd3e5dfbf090341b485da9d176eb250d893e3eb378c
 ARG         XVID_SHA256SUM="4e9fd62728885855bc5007fe1be58df42e5e274497591fec37249e1052ae316f xvidcore-1.3.4.tar.gz"
 ARG         LIBXML2_SHA256SUM="f07dab13bf42d2b8db80620cce7419b3b87827cc937c8bb20fe13b8571ee9501  libxml2-v2.9.10.tar.gz"
 ARG         LIBBLURAY_SHA256SUM="a3dd452239b100dc9da0d01b30e1692693e2a332a7d29917bf84bb10ea7c0b42 libbluray-1.1.2.tar.bz2"
-ARG         LIBZMQ_SHA256SUM="02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb v4.3.2.tar.gz"
 
 
 ARG         LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG         MAKEFLAGS="-j2"
-ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig"
+ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig:/opt/vc/lib/pkgconfig"
 ARG         PREFIX=/opt/ffmpeg
-ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:/usr/lib64:/usr/lib:/lib64:/lib"
+ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:/usr/lib64:/usr/lib:/lib64:/lib:/opt/vc/lib"
 
 
 RUN      buildDeps="autoconf \
@@ -84,10 +83,13 @@ RUN      buildDeps="autoconf \
                     perl \
                     pkg-config \
                     python \
+                    sudo \
                     libssl-dev \
                     yasm \
                     linux-headers-raspi2 \
                     libomxil-bellagio-dev \
+                    libx265-dev \
+                    libaom-dev \
                     zlib1g-dev" && \
         apt-get -yqq update && \
         apt-get install -yq --no-install-recommends ${buildDeps}
@@ -113,20 +115,20 @@ RUN \
         make -j $(nproc) && \
         make -j $(nproc) install && \
         rm -rf ${DIR}
-### x265 http://x265.org/
-RUN \
-        DIR=/tmp/x265 && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sL https://download.videolan.org/pub/videolan/x265/x265_${X265_VERSION}.tar.gz  | \
-        tar -zx && \
-        cd x265_${X265_VERSION}/build/linux && \
-        sed -i "/-DEXTRA_LIB/ s/$/ -DCMAKE_INSTALL_PREFIX=\${PREFIX}/" multilib.sh && \
-        sed -i "/^cmake/ s/$/ -DENABLE_CLI=OFF/" multilib.sh && \
-        export CXXFLAGS="${CXXFLAGS} -fPIC" && \
-        ./multilib.sh && \
-        make -C 8bit install && \
-        rm -rf ${DIR}
+# ### x265 http://x265.org/
+# RUN \
+#         DIR=/tmp/x265 && \
+#         mkdir -p ${DIR} && \
+#         cd ${DIR} && \
+#         curl -sL https://download.videolan.org/pub/videolan/x265/x265_${X265_VERSION}.tar.gz  | \
+#         tar -zx && \
+#         cd x265_${X265_VERSION}/build/linux && \
+#         sed -i "/-DEXTRA_LIB/ s/$/ -DCMAKE_INSTALL_PREFIX=\${PREFIX}/" multilib.sh && \
+#         sed -i "/^cmake/ s/$/ -DENABLE_CLI=OFF/" multilib.sh && \
+#         # export CXXFLAGS="${CXXFLAGS} -fPIC" && \
+#         ./multilib.sh && \
+#         make -C 8bit install && \
+#         rm -rf ${DIR}
 ### libogg https://www.xiph.org/ogg/
 RUN \
         DIR=/tmp/ogg && \
@@ -324,17 +326,17 @@ RUN \
         make -j $(nproc) install && \
         rm -rf ${DIR}
 
-RUN \
-        DIR=/tmp/aom && \
-        git clone --branch ${AOM_VERSION} --depth 1 https://aomedia.googlesource.com/aom ${DIR} ; \
-        cd ${DIR} ; \
-        rm -rf CMakeCache.txt CMakeFiles ; \
-        mkdir -p ./aom_build ; \
-        cd ./aom_build ; \
-        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=1 ..; \
-        make ; \
-        make install ; \
-        rm -rf ${DIR}
+# RUN \
+#         DIR=/tmp/aom && \
+#         git clone --branch ${AOM_VERSION} --depth 1 https://aomedia.googlesource.com/aom ${DIR} ; \
+#         cd ${DIR} ; \
+#         rm -rf CMakeCache.txt CMakeFiles ; \
+#         mkdir -p ./aom_build ; \
+#         cd ./aom_build ; \
+#         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=1 ..; \
+#         make ; \
+#         make install ; \
+#         rm -rf ${DIR}
 
 ## libxcb (and supporting libraries) for screen capture https://xcb.freedesktop.org/
 RUN \
@@ -439,13 +441,21 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://github.com/zeromq/libzmq/archive/v${LIBZMQ_VERSION}.tar.gz && \
-        echo ${LIBZMQ_SHA256SUM} | sha256sum --check && \
         tar -xz --strip-components=1 -f v${LIBZMQ_VERSION}.tar.gz && \
         ./autogen.sh && \
         ./configure --prefix="${PREFIX}" && \
         make -j $(nproc) && \
-        make check && \
+        # make check && \
         make -j $(nproc) install && \
+        rm -rf ${DIR}
+
+## userland https://github.com/raspberrypi/userland
+RUN \
+        DIR=/tmp/userland && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        git clone --depth 1 https://github.com/raspberrypi/userland.git . && \
+        ./buildme && \
         rm -rf ${DIR}
 
 ## ffmpeg https://ffmpeg.org/
@@ -493,9 +503,9 @@ RUN \
         --enable-libkvazaar \
         --enable-libaom \
         --extra-libs=-lpthread \
-        # --enable-omx \
-        # --enable-omx-rpi \
-        # --enable-mmal \
+        --enable-omx \
+        --enable-omx-rpi \
+        --enable-mmal \
         --enable-v4l2_m2m \
         --enable-neon \
         --extra-cflags="-I${PREFIX}/include" \
@@ -511,6 +521,8 @@ RUN \
 ## cleanup
 RUN \
         ldd ${PREFIX}/bin/ffmpeg | grep opt/ffmpeg | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib/ && \
+        # copy userland lib too
+        ldd ${PREFIX}/bin/ffmpeg | grep opt/vc | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib/ && \
         for lib in /usr/local/lib/*.so.*; do ln -s "${lib##*/}" "${lib%%.so.*}".so; done && \
         cp ${PREFIX}/bin/* /usr/local/bin/ && \
         cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
@@ -525,9 +537,13 @@ FROM        base AS release
 
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib:/usr/lib64:/lib:/lib64
 
+RUN \
+        apt-get -yqq update && \
+        apt-get install -yq --no-install-recommends libx265-dev libaom-dev && \
+        apt-get autoremove -y && \
+        apt-get clean -y
+
 CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
-
-# Run ffmpeg with -c:v h264_v4l2m2m to enable HW accell for decoding on raspberry pi4 64-bit
