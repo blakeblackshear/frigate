@@ -1,10 +1,7 @@
-# ffmpeg - http://ffmpeg.org/download.html
-#
-# From https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
-#
-# https://hub.docker.com/r/jrottenberg/ffmpeg/
-#
-#
+# inspired by:
+# https://github.com/collelog/ffmpeg/blob/master/4.3.1-alpine-rpi4-arm64v8.Dockerfile
+# https://github.com/jrottenberg/ffmpeg/pull/158/files
+# https://github.com/jrottenberg/ffmpeg/pull/239
 FROM        ubuntu:20.04 AS base
 
 WORKDIR     /tmp/workdir
@@ -515,7 +512,6 @@ RUN \
         done
 
 FROM        base AS release
-MAINTAINER  Julien Rottenberg <julien@rottenberg.info>
 
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib:/usr/lib64:/lib:/lib64
 
@@ -528,6 +524,3 @@ RUN \
 	apt-get update -y && \
 	apt-get install -y --no-install-recommends libva-drm2 libva2 i965-va-driver && \
 	rm -rf /var/lib/apt/lists/*
-
-# Let's make sure the app built correctly
-# Convenient to verify on https://hub.docker.com/r/jrottenberg/ffmpeg/builds/ console output
