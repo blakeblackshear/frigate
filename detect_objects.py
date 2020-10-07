@@ -1,3 +1,4 @@
+import faulthandler; faulthandler.enable()
 import os
 import signal
 import sys
