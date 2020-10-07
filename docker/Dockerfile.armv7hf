@@ -5,12 +5,19 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-        ffmpeg \
+        # ffmpeg runtime dependencies
+        libgomp1 \
         # runtime dependencies
         libopenexr24 \
         libgstreamer1.0-0 \
         libgstreamer-plugins-base1.0-0 \
         libopenblas-base \
+        libjpeg-turbo8 \
+        libpng16-16 \
+        libtiff5 \
+        libdc1394-22 \
+        libaom0 \
+        libx265-179 \
     ## Tensorflow lite
     && pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_armv7l.whl \
     && rm -rf /var/lib/apt/lists/* \

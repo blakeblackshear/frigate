@@ -4,7 +4,8 @@ LABEL maintainer "blakeb@blakeshome.com"
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-        ffmpeg \
+        # ffmpeg dependencies
+        libgomp1 \
         # VAAPI drivers for Intel hardware accel
         libva-drm2 libva2 i965-va-driver vainfo \
         ## Tensorflow lite

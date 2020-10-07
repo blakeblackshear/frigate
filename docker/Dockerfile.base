@@ -1,8 +1,11 @@
 ARG ARCH=amd64
 FROM blakeblackshear/frigate-wheels:${ARCH} as wheels
+FROM blakeblackshear/frigate-ffmpeg:${ARCH} as ffmpeg
 
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
+
+COPY --from=ffmpeg /usr/local /usr/local/
 
 COPY --from=wheels /wheels/. /wheels/
 
