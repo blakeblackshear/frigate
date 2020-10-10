@@ -66,7 +66,7 @@ save_clips:
 #     - -f
 #     - rawvideo
 #     - -pix_fmt
-#     - rgb24
+#     - yuv420p
 
 ####################
 # Global object configuration. Applies to all cameras

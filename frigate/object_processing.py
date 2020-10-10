@@ -94,7 +94,7 @@ class CameraState():
         # get the new frame and delete the old frame
         frame_id = f"{self.name}{frame_time}"
         with self.current_frame_lock:
-            self._current_frame = self.frame_manager.get(frame_id, self.config['frame_shape'])
+            self._current_frame = self.frame_manager.get(frame_id, (self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]))
             if not self.previous_frame_id is None:
                 self.frame_manager.delete(self.previous_frame_id)
             self.previous_frame_id = frame_id
