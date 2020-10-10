@@ -1,10 +1,13 @@
 web_port: 5000
 
 ################
-## Tell frigate to look for a specific EdgeTPU device. Useful if you want to run multiple instances of frigate
-## on the same machine with multiple EdgeTPUs. https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
+## List of detectors.
+## Currently supported types: cpu, edgetpu
+## EdgeTPU requires device as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
 ################
-tensorflow_device: usb
+detectors:
+  - type: edgetpu
+    device: usb
 
 mqtt:
   host: mqtt.server.com

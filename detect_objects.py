@@ -61,15 +61,15 @@ FFMPEG_DEFAULT_CONFIG = {
 GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 
 WEB_PORT = CONFIG.get('web_port', 5000)
-DEBUG = (CONFIG.get('debug', '0') == '1')
-TENSORFLOW_DEVICE = CONFIG.get('tensorflow_device')
+DETECTORS = CONFIG.get('detectors', [{'type': 'edgetpu', 'device': 'usb'}])
 
 class CameraWatchdog(threading.Thread):
-    def __init__(self, camera_processes, config, tflite_process, tracked_objects_queue, stop_event):
+    def __init__(self, camera_processes, config, detectors, detection_queue, tracked_objects_queue, stop_event):
         threading.Thread.__init__(self)
         self.camera_processes = camera_processes
         self.config = config
-        self.tflite_process = tflite_process
+        self.detectors = detectors
+        self.detection_queue = detection_queue
         self.tracked_objects_queue = tracked_objects_queue
         self.stop_event = stop_event
 
@@ -85,15 +85,16 @@ class CameraWatchdog(threading.Thread):
 
             now = datetime.datetime.now().timestamp()
 
-            # check the detection process
-            detection_start = self.tflite_process.detection_start.value
-            if (detection_start > 0.0 and 
-                now - detection_start > 10):
-                print("Detection appears to be stuck. Restarting detection process")
-                self.tflite_process.start_or_restart()
-            elif not self.tflite_process.detect_process.is_alive():
-                print("Detection appears to have stopped. Restarting detection process")
-                self.tflite_process.start_or_restart()
+            # check the detection processes
+            for detector in self.detectors:
+                detection_start = detector.detection_start.value
+                if (detection_start > 0.0 and 
+                    now - detection_start > 10):
+                    print("Detection appears to be stuck. Restarting detection process")
+                    detector.start_or_restart()
+                elif not detector.detect_process.is_alive():
+                    print("Detection appears to have stopped. Restarting detection process")
+                    detector.start_or_restart()
 
             # check the camera processes
             for name, camera_process in self.camera_processes.items():
@@ -104,9 +105,9 @@ class CameraWatchdog(threading.Thread):
                     camera_process['detection_fps'].value = 0.0
                     camera_process['read_start'].value = 0.0
                     process = mp.Process(target=track_camera, args=(name, self.config[name], camera_process['frame_queue'],
-                        camera_process['frame_shape'], self.tflite_process.detection_queue, self.tracked_objects_queue, 
+                        camera_process['frame_shape'], self.detection_queue, self.tracked_objects_queue, 
                         camera_process['process_fps'], camera_process['detection_fps'],
-                        camera_process['read_start'], camera_process['detection_frame'], self.stop_event))
+                        camera_process['read_start'], self.stop_event))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
@@ -117,7 +118,7 @@ class CameraWatchdog(threading.Thread):
                     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
                     ffmpeg_process = start_or_restart_ffmpeg(camera_process['ffmpeg_cmd'], frame_size)
                     camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, camera_process['frame_queue'], 
-                        camera_process['take_frame'], camera_process['camera_fps'], camera_process['detection_frame'], self.stop_event)
+                        camera_process['take_frame'], camera_process['camera_fps'], self.stop_event)
                     camera_capture.start()
                     camera_process['ffmpeg_process'] = ffmpeg_process
                     camera_process['capture_thread'] = camera_capture
@@ -177,9 +178,15 @@ def main():
     out_events = {}
     for name in CONFIG['cameras'].keys():
         out_events[name] = mp.Event()
-    
-    # Start the shared tflite process
-    tflite_process = EdgeTPUProcess(out_events=out_events, tf_device=TENSORFLOW_DEVICE)
+
+    detection_queue = mp.Queue()
+
+    detectors = []
+    for detector in DETECTORS:
+        if detector['type'] == 'cpu':
+            detectors.append(EdgeTPUProcess(detection_queue, out_events=out_events, tf_device='cpu'))
+        if detector['type'] == 'edgetpu':
+            detectors.append(EdgeTPUProcess(detection_queue, out_events=out_events, tf_device=detector['device']))
 
     # create the camera processes
     camera_processes = {}
@@ -233,10 +240,10 @@ def main():
         detection_frame = mp.Value('d', 0.0)
 
         ffmpeg_process = start_or_restart_ffmpeg(ffmpeg_cmd, frame_size)
-        frame_queue = mp.Queue()
+        frame_queue = mp.Queue(maxsize=2)
         camera_fps = EventsPerSecond()
         camera_fps.start()
-        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps, detection_frame, stop_event)
+        camera_capture = CameraCapture(name, ffmpeg_process, frame_shape, frame_queue, take_frame, camera_fps, stop_event)
         camera_capture.start()
 
         camera_processes[name] = {
@@ -265,7 +272,7 @@ def main():
         }
 
         camera_process = mp.Process(target=track_camera, args=(name, config, frame_queue, frame_shape,
-            tflite_process.detection_queue, out_events[name], tracked_objects_queue, camera_processes[name]['process_fps'], 
+            detection_queue, out_events[name], tracked_objects_queue, camera_processes[name]['process_fps'], 
             camera_processes[name]['detection_fps'], 
             camera_processes[name]['read_start'], camera_processes[name]['detection_frame'], stop_event))
         camera_process.daemon = True
@@ -282,7 +289,7 @@ def main():
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
     object_processor.start()
     
-    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], tflite_process, tracked_objects_queue, stop_event)
+    camera_watchdog = CameraWatchdog(camera_processes, CONFIG['cameras'], detectors, detection_queue, tracked_objects_queue, stop_event)
     camera_watchdog.start()
 
     def receiveSignal(signalNumber, frame):
@@ -293,7 +300,8 @@ def main():
         camera_watchdog.join()
         for camera_process in camera_processes.values():
             camera_process['capture_thread'].join()
-        tflite_process.stop()
+        for detector in detectors:
+            detector.stop()
         sys.exit()
     
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -350,12 +358,14 @@ def main():
                 }
             }
         
-        stats['coral'] = {
-            'fps': round(total_detection_fps, 2),
-            'inference_speed': round(tflite_process.avg_inference_speed.value*1000, 2),
-            'detection_start': tflite_process.detection_start.value,
-            'pid': tflite_process.detect_process.pid
-        }
+        stats['detectors'] = []
+        for detector in detectors:
+            stats['detectors'].append({
+                'inference_speed': round(detector.avg_inference_speed.value*1000, 2),
+                'detection_start': detector.detection_start.value,
+                'pid': detector.detect_process.pid
+            })
+        stats['detection_fps'] = round(total_detection_fps, 2)
 
         return jsonify(stats)
 
