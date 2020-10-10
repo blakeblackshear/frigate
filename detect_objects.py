@@ -55,7 +55,7 @@ FFMPEG_DEFAULT_CONFIG = {
          '-use_wallclock_as_timestamps', '1']),
     'output_args': FFMPEG_CONFIG.get('output_args',
         ['-f', 'rawvideo',
-         '-pix_fmt', 'rgb24'])
+         '-pix_fmt', 'yuv420p'])
 }
 
 GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})

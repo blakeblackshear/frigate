@@ -4,6 +4,7 @@ import numpy as np
 
 class MotionDetector():
     def __init__(self, frame_shape, mask, resize_factor=4):
+        self.frame_shape = frame_shape
         self.resize_factor = resize_factor
         self.motion_frame_size = (int(frame_shape[0]/resize_factor), int(frame_shape[1]/resize_factor))
         self.avg_frame = np.zeros(self.motion_frame_size, np.float)
@@ -16,14 +17,16 @@ class MotionDetector():
     def detect(self, frame):
         motion_boxes = []
 
+        gray = frame[0:self.frame_shape[0], 0:self.frame_shape[1]]
+
         # resize frame
-        resized_frame = cv2.resize(frame, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
+        resized_frame = cv2.resize(gray, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
 
         # convert to grayscale
-        gray = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+        # resized_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
 
         # mask frame
-        gray[self.mask] = [255]
+        resized_frame[self.mask] = [255]
 
         # it takes ~30 frames to establish a baseline
         # dont bother looking for motion
@@ -31,7 +34,7 @@ class MotionDetector():
             self.frame_counter += 1
         else:
             # compare to average
-            frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg_frame))
+            frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
 
             # compute the average delta over the past few frames
             # the alpha value can be modified to configure how sensitive the motion detection is.
@@ -70,10 +73,10 @@ class MotionDetector():
             # TODO: this really depends on FPS
             if self.motion_frame_count >= 10:
                 # only average in the current frame if the difference persists for at least 3 frames
-                cv2.accumulateWeighted(gray, self.avg_frame, 0.2)
+                cv2.accumulateWeighted(resized_frame, self.avg_frame, 0.2)
         else:
             # when no motion, just keep averaging the frames together
-            cv2.accumulateWeighted(gray, self.avg_frame, 0.2)
+            cv2.accumulateWeighted(resized_frame, self.avg_frame, 0.2)
             self.motion_frame_count = 0
 
         return motion_boxes
