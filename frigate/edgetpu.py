@@ -48,15 +48,12 @@ class LocalObjectDetector(ObjectDetector):
             device_config = {"device": tf_device}
 
         edge_tpu_delegate = None
-        try:
-            print(f"Attempting to load TPU as {device_config['device']}")
-            edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', device_config)
-            print("TPU found")
-        except ValueError:
+
+        if tf_device != 'cpu':
             try:
-                print(f"Attempting to load TPU as pci:0")
-                edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', {"device": "pci:0"})
-                print("PCIe TPU found")
+                print(f"Attempting to load TPU as {device_config['device']}")
+                edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', device_config)
+                print("TPU found")
             except ValueError:
                 print("No EdgeTPU detected. Falling back to CPU.")
         
@@ -135,9 +132,9 @@ def run_detector(detection_queue, out_events: Dict[str, mp.Event], avg_speed, st
         avg_speed.value = (avg_speed.value*9 + duration)/10
         
 class EdgeTPUProcess():
-    def __init__(self, out_events, tf_device=None):
+    def __init__(self, detection_queue, out_events, tf_device=None):
         self.out_events = out_events
-        self.detection_queue = mp.Queue()
+        self.detection_queue = detection_queue
         self.avg_inference_speed = mp.Value('d', 0.01)
         self.detection_start = mp.Value('d', 0.0)
         self.detect_process = None
@@ -192,3 +189,7 @@ class RemoteObjectDetector():
             ))
         self.fps.update()
         return detections
+    
+    def cleanup(self):
+        self.shm.unlink()
+        self.out_shm.unlink()

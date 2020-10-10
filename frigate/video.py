@@ -117,10 +117,9 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
 
 def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
     frame_queue, take_frame: int, fps:EventsPerSecond, skipped_fps: EventsPerSecond, 
-    stop_event: mp.Event, detection_frame: mp.Value, current_frame: mp.Value):
+    stop_event: mp.Event, current_frame: mp.Value):
 
     frame_num = 0
-    last_frame = 0
     frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
     skipped_fps.start()
     while True:
@@ -147,8 +146,8 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             skipped_fps.update()
             continue
 
-        # if the detection process is more than 1 second behind, skip this frame
-        if detection_frame.value > 0.0 and (last_frame - detection_frame.value) > 1:
+        # if the queue is full, skip this frame
+        if frame_queue.full():
             skipped_fps.update()
             continue
 
@@ -159,10 +158,9 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
 
         # add to the queue
         frame_queue.put(current_frame.value)
-        last_frame = current_frame.value
 
 class CameraCapture(threading.Thread):
-    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, detection_frame, stop_event):
+    def __init__(self, name, ffmpeg_process, frame_shape, frame_queue, take_frame, fps, stop_event):
         threading.Thread.__init__(self)
         self.name = name
         self.frame_shape = frame_shape
@@ -175,13 +173,12 @@ class CameraCapture(threading.Thread):
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value('d', 0.0)
         self.last_frame = 0
-        self.detection_frame = detection_frame
         self.stop_event = stop_event
 
     def run(self):
         self.skipped_fps.start()
         capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.frame_manager, self.frame_queue, self.take_frame,
-            self.fps, self.skipped_fps, self.stop_event, self.detection_frame, self.current_frame)
+            self.fps, self.skipped_fps, self.stop_event, self.current_frame)
 
 def track_camera(name, config, frame_queue, frame_shape, detection_queue, result_connection, detected_objects_queue, fps, detection_fps, read_start, detection_frame, stop_event):
     print(f"Starting process for {name}: {os.getpid()}")
