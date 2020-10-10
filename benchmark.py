@@ -37,9 +37,7 @@ labels = load_labels('/labelmap.txt')
 # print(f"Processed for {duration:.2f} seconds.")
 # print(f"Average frame processing time: {mean(frame_times)*1000:.2f}ms")
 
-######
-# Separate process runner
-######
+
 def start(id, num_detections, detection_queue, event):
   object_detector = RemoteObjectDetector(str(id), '/labelmap.txt', detection_queue, event)
   start = datetime.datetime.now().timestamp()
@@ -51,38 +49,45 @@ def start(id, num_detections, detection_queue, event):
     frame_times.append(datetime.datetime.now().timestamp()-start_frame)
 
   duration = datetime.datetime.now().timestamp()-start
+  object_detector.cleanup()
   print(f"{id} - Processed for {duration:.2f} seconds.")
+  print(f"{id} - FPS: {object_detector.fps.eps():.2f}")
   print(f"{id} - Average frame processing time: {mean(frame_times)*1000:.2f}ms")
 
-event = mp.Event()
-edgetpu_process = EdgeTPUProcess({'1': event})
+######
+# Separate process runner
+######
+# event = mp.Event()
+# detection_queue = mp.Queue()
+# edgetpu_process = EdgeTPUProcess(detection_queue, {'1': event}, 'usb:0')
 
-start(1, 1000, edgetpu_process.detection_queue, event)
-print(f"Average raw inference speed: {edgetpu_process.avg_inference_speed.value*1000:.2f}ms")
+# start(1, 1000, edgetpu_process.detection_queue, event)
+# print(f"Average raw inference speed: {edgetpu_process.avg_inference_speed.value*1000:.2f}ms")
 
 ####
 # Multiple camera processes
 ####
-# camera_processes = []
+camera_processes = []
 
-# pipes = {}
-# for x in range(0, 10):
-#   pipes[x] = mp.Pipe(duplex=False)
+events = {}
+for x in range(0, 10):
+  events[str(x)] = mp.Event()
+detection_queue = mp.Queue()
+edgetpu_process_1 = EdgeTPUProcess(detection_queue, events, 'usb:0')
+edgetpu_process_2 = EdgeTPUProcess(detection_queue, events, 'usb:1')
 
-# edgetpu_process = EdgeTPUProcess({str(key): value[1] for (key, value) in pipes.items()})
+for x in range(0, 10):
+  camera_process = mp.Process(target=start, args=(x, 300, detection_queue, events[str(x)]))
+  camera_process.daemon = True
+  camera_processes.append(camera_process)
 
-# for x in range(0, 10):
-#   camera_process = mp.Process(target=start, args=(x, 100, edgetpu_process.detection_queue, pipes[x][0]))
-#   camera_process.daemon = True
-#   camera_processes.append(camera_process)
+start_time = datetime.datetime.now().timestamp()
 
-# start = datetime.datetime.now().timestamp()
+for p in camera_processes:
+  p.start()
 
-# for p in camera_processes:
-#   p.start()
+for p in camera_processes:
+  p.join()
 
-# for p in camera_processes:
-#   p.join()
-
-# duration = datetime.datetime.now().timestamp()-start
-# print(f"Total - Processed for {duration:.2f} seconds.")
+duration = datetime.datetime.now().timestamp()-start_time
+print(f"Total - Processed for {duration:.2f} seconds.")
