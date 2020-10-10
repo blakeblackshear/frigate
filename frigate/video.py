@@ -120,7 +120,7 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
     stop_event: mp.Event, current_frame: mp.Value):
 
     frame_num = 0
-    frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
+    frame_size = frame_shape[0] * frame_shape[1] * 3 // 2
     skipped_fps.start()
     while True:
         if stop_event.is_set():
@@ -276,7 +276,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         
         current_frame_time.value = frame_time
 
-        frame = frame_manager.get(f"{camera_name}{frame_time}", frame_shape)
+        frame = frame_manager.get(f"{camera_name}{frame_time}", (frame_shape[0]*3//2, frame_shape[1]))
 
         if frame is None:
             print(f"{camera_name}: frame {frame_time} is not in memory store.")
@@ -304,10 +304,13 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         regions = [calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
             for a in combined_regions]
         
+        if len(regions) > 0:
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
+
         # resize regions and detect
         detections = []
         for region in regions:
-            detections.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
+            detections.extend(detect(object_detector, rgb_frame, region, objects_to_track, object_filters, mask))
         
         #########
         # merge objects, check for clipped objects and look again up to 4 times
@@ -340,7 +343,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
                             box[0], box[1],
                             box[2], box[3])
                         
-                        selected_objects.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
+                        selected_objects.extend(detect(object_detector, rgb_frame, region, objects_to_track, object_filters, mask))
 
                         refining = True
                     else:
