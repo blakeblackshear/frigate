@@ -52,13 +52,12 @@ Example docker-compose:
 A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
 
 ## Recommended Hardware
-**Note: I may receive commissions for purchases made through links below.**
 |Name|Inference Speed|Notes|
 |----|---------------|-----|
-|[Atomic Pi](https://amzn.to/2FKJHpu)|16ms|Best option for a dedicated low power board with a small number of cameras.|
-|[Intel NUC NUC7i3BNK](https://amzn.to/2RDYZPe)|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
-|[BMAX B2 Plus](https://amzn.to/3cjgQ81)|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.|
-|[Minisforum GK41](https://amzn.to/32FyKhG)|9-10ms|Great alternative to a NUC. Easily handiles 4 1080p cameras.|
+|Atomic Pi|16ms|Best option for a dedicated low power board with a small number of cameras.|
+|Intel NUC NUC7i3BNK|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
+|BMAX B2 Plus|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.|
+|Minisforum GK41|9-10ms|Great alternative to a NUC. Easily handiles 4 1080p cameras.|
 
 ARM boards are not officially supported at the moment due to some python dependencies that require modification to work on ARM devices. The Raspberry Pi4 gets about 16ms inference speeds, but the hardware acceleration for ffmpeg does not work for converting yuv420 to rgb24. The Atomic Pi is x86 and much more efficient.
 
