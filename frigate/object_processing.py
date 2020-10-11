@@ -28,10 +28,9 @@ for key, val in LABELS.items():
 
 def zone_filtered(obj, object_config):
     object_name = obj['label']
-    object_filters = object_config.get('filters', {})
 
-    if object_name in object_filters:
-        obj_settings = object_filters[object_name]
+    if object_name in object_config:
+        obj_settings = object_config[object_name]
 
         # if the min area is larger than the
         # detected object, don't add it to detected objects
