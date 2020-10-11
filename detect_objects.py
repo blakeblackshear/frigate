@@ -4,6 +4,7 @@ import sys
 import traceback
 import signal
 import cv2
+import base64
 import time
 import datetime
 import queue
@@ -413,7 +414,7 @@ def main():
             return "Camera named {} not found".format(camera_name), 404
     
     @app.route('/<camera_name>/latest.jpg')
-    def latest_frame(camera_name):
+    def latest_frame(camera_name, masqued=False):
         if camera_name in CONFIG['cameras']:
             # max out at specified FPS
             frame = object_processor.get_current_frame(camera_name)
@@ -426,10 +427,55 @@ def main():
             frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
+            if masqued:
+                return frame
+
             ret, jpg = cv2.imencode('.jpg', frame)
             response = make_response(jpg.tobytes())
             response.headers['Content-Type'] = 'image/jpg'
             return response
+        else:
+            return "Camera named {} not found".format(camera_name), 404
+
+    @app.route('/<camera_name>/mask.jpg')
+    def latest_mask(camera_name):
+        if camera_name in CONFIG['cameras']:
+
+            if 'mask' in CONFIG['cameras'][camera_name] :
+                mask = CONFIG['cameras'][camera_name]['mask']
+                frame = latest_frame(camera_name, True)
+
+                if mask.startswith('base64,'):
+                    img = base64.b64decode(mask[7:])
+                    npimg = np.fromstring(img, dtype=np.uint8)
+                    the_mask = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+                elif mask.startswith('poly,'):
+                    points = mask.split(',')[1:]
+                    contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+                    the_mask = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
+                    the_mask[:] = 255
+                    cv2.fillPoly(the_mask, pts=[contour], color=(0))
+
+                elif os.path.isfile('/config/' + mask):
+                    the_mask = cv2.imread('/config/' + mask, 1)
+
+                if the_mask is None:
+                    return "Invalid mask.", 404
+
+                elif frame.shape[0] != the_mask.shape[0] or frame.shape[1] != the_mask.shape[1]:
+                    return "Inconsistent sizes, {}x{} and {}x{}.".format(frame.shape[0], frame.shape[1], the_mask.shape[0], the_mask.shape[1]), 404
+
+                else:
+                    # frame and mask fusion
+                    ret, jpg = cv2.imencode('.jpg', cv2.addWeighted(frame, 0.5, the_mask, 0.5, 0))
+                    response = make_response(jpg.tobytes())
+                    response.headers['Content-Type'] = 'image/jpg'
+                    return response
+
+            else:
+                return "Camera has no mask", 404
+
         else:
             return "Camera named {} not found".format(camera_name), 404
             
