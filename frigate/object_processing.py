@@ -64,9 +64,41 @@ class CameraState():
         self.previous_frame_id = None
         self.callbacks = defaultdict(lambda: [])
 
-    def get_current_frame(self):
+    def get_current_frame(self, draw=False):
         with self.current_frame_lock:
-            return np.copy(self._current_frame)
+            frame_copy = np.copy(self._current_frame)
+            frame_time = self.current_frame_time
+            tracked_objects = copy.deepcopy(self.tracked_objects)
+        
+        frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
+        # draw on the frame
+        if draw:
+            # draw the bounding boxes on the frame
+            for obj in tracked_objects.values():
+                thickness = 2
+                color = COLOR_MAP[obj['label']]
+                
+                if obj['frame_time'] != frame_time:
+                    thickness = 1
+                    color = (255,0,0)
+
+                # draw the bounding boxes on the frame
+                box = obj['box']
+                draw_box_with_label(frame_copy, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
+                # draw the regions on the frame
+                region = obj['region']
+                cv2.rectangle(frame_copy, (region[0], region[1]), (region[2], region[3]), (0,255,0), 1)
+            
+            if self.config['snapshots']['show_timestamp']:
+                time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+                cv2.putText(frame_copy, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
+            if self.config['snapshots']['draw_zones']:
+                for name, zone in self.config['zones'].items():
+                    thickness = 8 if any([name in obj['zones'] for obj in tracked_objects.values()]) else 2
+                    cv2.drawContours(frame_copy, [zone['contour']], -1, zone['color'], thickness)
+        
+        return frame_copy
 
     def false_positive(self, obj):
         # once a true positive, always a true positive
@@ -92,11 +124,7 @@ class CameraState():
         self.current_frame_time = frame_time
         # get the new frame and delete the old frame
         frame_id = f"{self.name}{frame_time}"
-        with self.current_frame_lock:
-            self._current_frame = self.frame_manager.get(frame_id, (self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]))
-            if not self.previous_frame_id is None:
-                self.frame_manager.delete(self.previous_frame_id)
-            self.previous_frame_id = frame_id
+        current_frame = self.frame_manager.get(frame_id, (self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]))
 
         current_ids = tracked_objects.keys()
         previous_ids = self.tracked_objects.keys()
@@ -158,33 +186,6 @@ class CameraState():
                     and not zone_filtered(obj, zone.get('filters', {}))):
                     current_zones.append(name)
             obj['zones'] = current_zones
-        
-        # draw on the frame
-        if not self._current_frame is None:
-            # draw the bounding boxes on the frame
-            for obj in self.tracked_objects.values():
-                thickness = 2
-                color = COLOR_MAP[obj['label']]
-                
-                if obj['frame_time'] != frame_time:
-                    thickness = 1
-                    color = (255,0,0)
-
-                # draw the bounding boxes on the frame
-                box = obj['box']
-                draw_box_with_label(self._current_frame, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
-                # draw the regions on the frame
-                region = obj['region']
-                cv2.rectangle(self._current_frame, (region[0], region[1]), (region[2], region[3]), (0,255,0), 1)
-            
-            if self.config['snapshots']['show_timestamp']:
-                time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(self._current_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-
-            if self.config['snapshots']['draw_zones']:
-                for name, zone in self.config['zones'].items():
-                    thickness = 8 if any([name in obj['zones'] for obj in self.tracked_objects.values()]) else 2
-                    cv2.drawContours(self._current_frame, [zone['contour']], -1, zone['color'], thickness)
 
         # maintain best objects
         for obj in self.tracked_objects.values():
@@ -199,12 +200,12 @@ class CameraState():
                 # if the object is a higher score than the current best score 
                 # or the current object is older than desired, use the new object
                 if obj_copy['score'] > current_best['score'] or (now - current_best['frame_time']) > self.config.get('best_image_timeout', 60):
-                    obj_copy['frame'] = np.copy(self._current_frame)
+                    obj_copy['frame'] = np.copy(current_frame)
                     self.best_objects[object_type] = obj_copy
                     for c in self.callbacks['snapshot']:
                         c(self.name, self.best_objects[object_type])
             else:
-                obj_copy['frame'] = np.copy(self._current_frame)
+                obj_copy['frame'] = np.copy(current_frame)
                 self.best_objects[object_type] = obj_copy
                 for c in self.callbacks['snapshot']:
                     c(self.name, self.best_objects[object_type])
@@ -231,7 +232,12 @@ class CameraState():
                 c(self.name, obj_name, 'OFF')
             for c in self.callbacks['snapshot']:
                 c(self.name, self.best_objects[obj_name])
-
+        
+        with self.current_frame_lock:
+            self._current_frame = current_frame
+            if not self.previous_frame_id is None:
+                self.frame_manager.delete(self.previous_frame_id)
+            self.previous_frame_id = frame_id
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(self, camera_config, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
@@ -328,8 +334,8 @@ class TrackedObjectProcessor(threading.Thread):
         else:
             return {}
     
-    def get_current_frame(self, camera):
-        return self.camera_states[camera].get_current_frame()
+    def get_current_frame(self, camera, draw=False):
+        return self.camera_states[camera].get_current_frame(draw)
 
     def run(self):
         while True:
