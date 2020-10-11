@@ -303,8 +303,15 @@ def main():
         event_processor.join()
         object_processor.join()
         camera_watchdog.join()
-        for camera_process in camera_processes.values():
+        for camera_name, camera_process in camera_processes.items():
             camera_process['capture_thread'].join()
+            # cleanup the frame queue
+            while not camera_process['frame_queue'].empty():
+                frame_time = camera_process['frame_queue'].get()
+                shm = mp.shared_memory.SharedMemory(name=f"{camera_name}{frame_time}")
+                shm.close()
+                shm.unlink()
+
         for detector in detectors:
             detector.stop()
         for shm in camera_shms:
