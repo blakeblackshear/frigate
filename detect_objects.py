@@ -174,10 +174,15 @@ def main():
     # Queue for clip processing
     event_queue = mp.Queue()
 
-    # create the detection pipes
+    # create the detection pipes and shms
     out_events = {}
+    camera_shms = []
     for name in CONFIG['cameras'].keys():
         out_events[name] = mp.Event()
+        shm_in = mp.shared_memory.SharedMemory(name=name, create=True, size=300*300*3)
+        shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}", create=True, size=20*6*4)
+        camera_shms.append(shm_in)
+        camera_shms.append(shm_out)
 
     detection_queue = mp.Queue()
 
@@ -302,6 +307,9 @@ def main():
             camera_process['capture_thread'].join()
         for detector in detectors:
             detector.stop()
+        for shm in camera_shms:
+            shm.close()
+            shm.unlink()
         sys.exit()
     
     signal.signal(signal.SIGTERM, receiveSignal)
