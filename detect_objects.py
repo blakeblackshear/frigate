@@ -426,8 +426,6 @@ def main():
             frame = object_processor.get_current_frame(camera_name)
             if frame is None:
                 frame = np.zeros((720,1280,3), np.uint8)
-            
-            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
             height = int(request.args.get('h', str(frame.shape[0])))
             width = int(height*frame.shape[1]/frame.shape[0])
@@ -445,11 +443,9 @@ def main():
         while True:
             # max out at specified FPS
             time.sleep(1/fps)
-            frame = object_processor.get_current_frame(camera_name)
+            frame = object_processor.get_current_frame(camera_name, draw=True)
             if frame is None:
                 frame = np.zeros((height,int(height*16/9),3), np.uint8)
-
-            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
             width = int(height*frame.shape[1]/frame.shape[0])
             frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
