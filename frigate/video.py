@@ -14,7 +14,7 @@ import json
 import base64
 from typing import Dict, List
 from collections import defaultdict
-from frigate.util import draw_box_with_label, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, SharedMemoryFrameManager
+from frigate.util import draw_box_with_label, yuv_region_2_rgb, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, SharedMemoryFrameManager
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
@@ -88,7 +88,7 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
     return False
 
 def create_tensor_input(frame, region):
-    cropped_frame = frame[region[1]:region[3], region[0]:region[2]]
+    cropped_frame = yuv_region_2_rgb(frame, region)
 
     # Resize to 300x300 if needed
     if cropped_frame.shape != (300, 300, 3):
@@ -303,14 +303,11 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         # re-compute regions
         regions = [calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
             for a in combined_regions]
-        
-        if len(regions) > 0:
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
 
         # resize regions and detect
         detections = []
         for region in regions:
-            detections.extend(detect(object_detector, rgb_frame, region, objects_to_track, object_filters, mask))
+            detections.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
         
         #########
         # merge objects, check for clipped objects and look again up to 4 times
@@ -343,7 +340,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
                             box[0], box[1],
                             box[2], box[3])
                         
-                        selected_objects.extend(detect(object_detector, rgb_frame, region, objects_to_track, object_filters, mask))
+                        selected_objects.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
 
                         refining = True
                     else:

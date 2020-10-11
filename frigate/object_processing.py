@@ -260,7 +260,7 @@ class TrackedObjectProcessor(threading.Thread):
         def snapshot(camera, obj):
             if not 'frame' in obj:
                 return
-            best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_RGB2BGR)
+            best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_YUV2BGR_I420)
             mqtt_config = self.camera_config[camera].get('mqtt', {'crop_to_region': False})
             if mqtt_config.get('crop_to_region'):
                 region = obj['region']
