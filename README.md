@@ -15,13 +15,17 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 You see multiple bounding boxes because it draws bounding boxes from all frames in the past 1 second where a person was detected. Not all of the bounding boxes were from the current frame.
 [![](http://img.youtube.com/vi/nqHbCtyo4dY/0.jpg)](http://www.youtube.com/watch?v=nqHbCtyo4dY "Frigate")
 
+## Documentation
+- [Camera Specific Docs](docs/CAMERAS.md)
+- [Hardware Acceleration](docs/HWACCEL.md)
+
 ## Getting Started
 Run the container with
 ```bash
 docker run --rm \
 --name frigate \
 --privileged \
---shm-size=512m \ # should work for a 2-3 cameras
+--shm-size=100m \ # only needed with large numbers of high res cameras
 -v /dev/bus/usb:/dev/bus/usb \
 -v <path_to_config_dir>:/config:ro \
 -v /etc/localtime:/etc/localtime:ro \
@@ -36,7 +40,7 @@ Example docker-compose:
     container_name: frigate
     restart: unless-stopped
     privileged: true
-    shm_size: '1g' # should work for 5-7 cameras
+    shm_size: '100m' # only needed with large numbers of high res cameras
     image: blakeblackshear/frigate:stable
     volumes:
       - /dev/bus/usb:/dev/bus/usb
@@ -55,7 +59,15 @@ Example docker-compose:
       start_period: 3m
 ```
 
-A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and device specific info can be found [here](docs/DEVICES.md).
+A `config.yml` file must exist in the `config` directory. See example [here](config/config.example.yml) and camera specific info can be found [here](docs/CAMERAS.md).
+
+### Calculating shm-size
+The default shm-size of 64m should be fine for most setups. If you start seeing segfault errors, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
+
+You can calculate the necessary shm-size for each camera with the following formula:
+```
+(width * height * 3 + 270480)/1048576 = <shm size in mb>
+```
 
 ## Recommended Hardware
 |Name|Inference Speed|Notes|
@@ -64,8 +76,9 @@ A `config.yml` file must exist in the `config` directory. See example [here](con
 |Intel NUC NUC7i3BNK|8-10ms|Best possible performance. Can handle 7+ cameras at 5fps depending on typical amounts of motion.|
 |BMAX B2 Plus|10-12ms|Good balance of performance and cost. Also capable of running many other services at the same time as frigate.|
 |Minisforum GK41|9-10ms|Great alternative to a NUC. Easily handiles 4 1080p cameras.|
-
-ARM boards are not officially supported at the moment due to some python dependencies that require modification to work on ARM devices. The Raspberry Pi4 gets about 16ms inference speeds, but the hardware acceleration for ffmpeg does not work for converting yuv420 to rgb24. The Atomic Pi is x86 and much more efficient.
+|Raspberry Pi 3B (32bit)|60ms|Can handle a small number of cameras, but the detection speeds are slow|
+|Raspberry Pi 4 (32bit)|15-20ms|Can handle a small number of cameras. The 2GB version runs fine.|
+|Raspberry Pi 4 (64bit)|10-15ms|Can handle a small number of cameras. The 2GB version runs fine.|
 
 Users have reported varying success in getting frigate to run in a VM. In some cases, the virtualization layer introduces a significant delay in communication with the Coral. If running virtualized in Proxmox, pass the USB card/interface to the virtual machine not the USB ID for faster inference speed.
 
@@ -96,7 +109,8 @@ sensor:
     scan_interval: 5
     json_attributes:
       - <camera_name>
-      - coral
+      - detection_fps
+      - detectors
     value_template: 'OK'  
   - platform: template
     sensors:
@@ -109,11 +123,11 @@ sensor:
       <camera_name>_detection_fps: 
         value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["detection_fps"] }}'
         unit_of_measurement: 'FPS'
-      frigate_coral_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["coral"]["fps"] }}'
+      frigate_detection_fps: 
+        value_template: '{{ states.sensor.frigate_debug.attributes["detection_fps"] }}'
         unit_of_measurement: 'FPS'
       frigate_coral_inference:
-        value_template: '{{ states.sensor.frigate_debug.attributes["coral"]["inference_speed"] }}' 
+        value_template: '{{ states.sensor.frigate_debug.attributes["detectors"]["coral"]["inference_speed"] }}' 
         unit_of_measurement: 'ms'
         
 automation:
@@ -219,7 +233,7 @@ Same as `frigate/<camera_name>/events/start`, but with an `end_time` property as
 ### frigate/<zone_name>/<object_name>
 Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeAssistant for whether or not that object type is detected in the zone.
 
-## Understanding min_score and threshold
+## Understanding min_score and threshold filters
 `min_score` defines the minimum score for Frigate to begin tracking a detected object. Any single detection below `min_score` will be ignored as a false positive. `threshold` is based on the median of the history of scores for a tracked object. Consider the following frames when `min_score` is set to 0.6 and threshold is set to 0.85:
 
 | Frame | Current Score | Score History | Computed Score | Detected Object |
@@ -261,8 +275,8 @@ Frigate can save video clips without any CPU overhead for encoding by simply cop
 - `pre_capture`: Defines how much time should be included in the clip prior to the beginning of the event. Defaults to 30 seconds.
 - `objects`: List of object types to save clips for. Object types here must be listed for tracking at the camera or global configuration. Defaults to all tracked objects.
 
-## Google Coral Configuration
-Frigate attempts to detect your Coral device automatically. If you have multiple Coral devices or a version that is not detected automatically, you can specify using the `tensorflow_device` config option.
+## Detectors Configuration
+Frigate attempts to detect your Coral device automatically. If you have multiple Coral devices or a version that is not detected automatically, you can specify using the `detectors` config option as shown in the example config.
 
 ## Masks and limiting detection to a certain area
 The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
@@ -342,27 +356,29 @@ During testing, `draw_zones` can be set in the config to tell frigate to draw th
         ***************/
         "skipped_fps": 0.0
     },
-    /* Coral Stats */
-    "coral": {
-        /***************
-        * Timestamp when object detection started. If this value stays non-zero and constant
-        * for a long time, that means the detection process is stuck.
-        ***************/
-        "detection_start": 0.0,
-        /***************
-        * Frames per second of the Coral. This should be the sum of all detection_fps values from cameras.
-        ***************/
-        "fps": 6.9,
-        /***************
-        * Time spent running object detection in milliseconds.
-        ***************/
-        "inference_speed": 10.48,
-        /***************
-        * PID for the shared process that runs object detection on the Coral.
-        ***************/
-        "pid": 25321
-    },
-    "plasma_store_rc": null // Return code for the plasma store. This should be null normally.
+    /***************
+    * Sum of detection_fps across all cameras and detectors. 
+    * This should be the sum of all detection_fps values from cameras.
+    ***************/
+    "detection_fps": 5.0,
+    /* Detectors Stats */
+    "detectors": {
+      "coral": {
+          /***************
+          * Timestamp when object detection started. If this value stays non-zero and constant
+          * for a long time, that means the detection process is stuck.
+          ***************/
+          "detection_start": 0.0,
+          /***************
+          * Time spent running object detection in milliseconds.
+          ***************/
+          "inference_speed": 10.48,
+          /***************
+          * PID for the shared process that runs object detection on the Coral.
+          ***************/
+          "pid": 25321
+      }
+    }
 }
 ```
 
