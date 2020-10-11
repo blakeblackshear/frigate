@@ -374,6 +374,8 @@ def main():
         if camera_name in CONFIG['cameras']:
             best_object = object_processor.get_best(camera_name, label)
             best_frame = best_object.get('frame', np.zeros((720,1280,3), np.uint8))
+
+            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
             
             crop = bool(request.args.get('crop', 0, type=int))
             if crop:
@@ -384,7 +386,6 @@ def main():
             width = int(height*best_frame.shape[1]/best_frame.shape[0])
 
             best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
-            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_RGB2BGR)
             ret, jpg = cv2.imencode('.jpg', best_frame)
             response = make_response(jpg.tobytes())
             response.headers['Content-Type'] = 'image/jpg'
@@ -410,12 +411,13 @@ def main():
             frame = object_processor.get_current_frame(camera_name)
             if frame is None:
                 frame = np.zeros((720,1280,3), np.uint8)
+            
+            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
             height = int(request.args.get('h', str(frame.shape[0])))
             width = int(height*frame.shape[1]/frame.shape[0])
 
             frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
             ret, jpg = cv2.imencode('.jpg', frame)
             response = make_response(jpg.tobytes())
@@ -432,10 +434,10 @@ def main():
             if frame is None:
                 frame = np.zeros((height,int(height*16/9),3), np.uint8)
 
-            width = int(height*frame.shape[1]/frame.shape[0])
+            frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
+            width = int(height*frame.shape[1]/frame.shape[0])
             frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
             ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'

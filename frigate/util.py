@@ -70,6 +70,37 @@ def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):
 
     return (x_offset, y_offset, x_offset+size, y_offset+size)
 
+def yuv_region_2_rgb(frame, region):
+    height = frame.shape[0]//3*2
+    width = frame.shape[1]
+    # make sure the size is a multiple of 4
+    size = (region[3] - region[1])//4*4
+
+    x1 = region[0] 
+    y1 = region[1]
+
+    uv_x1 = x1//2
+    uv_y1 = y1//4
+
+    uv_width = size//2
+    uv_height = size//4
+
+    u_y_start = height
+    v_y_start = height + height//4
+    two_x_offset = width//2
+
+    yuv_cropped_frame = np.zeros((size+size//2, size), np.uint8)
+    # y channel
+    yuv_cropped_frame[0:size, 0:size] = frame[y1:y1+size, x1:x1+size]
+    # u channel
+    yuv_cropped_frame[size:size+uv_height, 0:uv_width] = frame[uv_y1+u_y_start:uv_y1+u_y_start+uv_height, uv_x1:uv_x1+uv_width]
+    yuv_cropped_frame[size:size+uv_height, uv_width:size] = frame[uv_y1+u_y_start:uv_y1+u_y_start+uv_height, uv_x1+two_x_offset:uv_x1+two_x_offset+uv_width]
+    # v channel
+    yuv_cropped_frame[size+uv_height:size+uv_height*2, 0:uv_width] = frame[uv_y1+v_y_start:uv_y1+v_y_start+uv_height, uv_x1:uv_x1+uv_width]
+    yuv_cropped_frame[size+uv_height:size+uv_height*2, uv_width:size] = frame[uv_y1+v_y_start:uv_y1+v_y_start+uv_height, uv_x1+two_x_offset:uv_x1+two_x_offset+uv_width]
+
+    return cv2.cvtColor(yuv_cropped_frame, cv2.COLOR_YUV2RGB_I420)
+
 def intersection(box_a, box_b):
     return (
         max(box_a[0], box_b[0]),
