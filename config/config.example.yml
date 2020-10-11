@@ -6,7 +6,8 @@ web_port: 5000
 ## EdgeTPU requires device as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
 ################
 detectors:
-  - type: edgetpu
+  coral:
+    type: edgetpu
     device: usb
 
 mqtt:
