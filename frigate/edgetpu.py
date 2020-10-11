@@ -165,9 +165,9 @@ class RemoteObjectDetector():
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue
         self.event = event
-        self.shm = mp.shared_memory.SharedMemory(name=self.name, create=True, size=300*300*3)
+        self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
         self.np_shm = np.ndarray((1,300,300,3), dtype=np.uint8, buffer=self.shm.buf)
-        self.out_shm = mp.shared_memory.SharedMemory(name=f"out-{self.name}", create=True, size=20*6*4)
+        self.out_shm = mp.shared_memory.SharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm = np.ndarray((20,6), dtype=np.float32, buffer=self.out_shm.buf)
     
     def detect(self, tensor_input, threshold=.4):
