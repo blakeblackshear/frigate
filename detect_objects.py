@@ -61,7 +61,7 @@ FFMPEG_DEFAULT_CONFIG = {
 GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 
 WEB_PORT = CONFIG.get('web_port', 5000)
-DETECTORS = CONFIG.get('detectors', {'coral' {'type': 'edgetpu', 'device': 'usb'}})
+DETECTORS = CONFIG.get('detectors', {'coral': {'type': 'edgetpu', 'device': 'usb'}})
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera_processes, config, detectors, detection_queue, tracked_objects_queue, stop_event):
