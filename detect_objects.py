@@ -86,7 +86,7 @@ class CameraWatchdog(threading.Thread):
             now = datetime.datetime.now().timestamp()
 
             # check the detection processes
-            for detector in self.detectors:
+            for detector in self.detectors.values():
                 detection_start = detector.detection_start.value
                 if (detection_start > 0.0 and 
                     now - detection_start > 10):
@@ -186,12 +186,12 @@ def main():
 
     detection_queue = mp.Queue()
 
-    detectors = []
-    for detector in DETECTORS:
+    detectors = {}
+    for name, detector in DETECTORS.items():
         if detector['type'] == 'cpu':
-            detectors.append(EdgeTPUProcess(detection_queue, out_events=out_events, tf_device='cpu'))
+            detectors[name] = EdgeTPUProcess(detection_queue, out_events=out_events, tf_device='cpu')
         if detector['type'] == 'edgetpu':
-            detectors.append(EdgeTPUProcess(detection_queue, out_events=out_events, tf_device=detector['device']))
+            detectors[name] = EdgeTPUProcess(detection_queue, out_events=out_events, tf_device=detector['device'])
 
     # create the camera processes
     camera_processes = {}
@@ -373,13 +373,13 @@ def main():
                 }
             }
         
-        stats['detectors'] = []
-        for detector in detectors:
-            stats['detectors'].append({
+        stats['detectors'] = {}
+        for name, detector in detectors.items():
+            stats['detectors'][name] = {
                 'inference_speed': round(detector.avg_inference_speed.value*1000, 2),
                 'detection_start': detector.detection_start.value,
                 'pid': detector.detect_process.pid
-            })
+            }
         stats['detection_fps'] = round(total_detection_fps, 2)
 
         return jsonify(stats)
