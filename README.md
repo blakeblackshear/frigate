@@ -151,6 +151,9 @@ The most recent frame that frigate has finished processing. It is a full resolut
 Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
 
+### `/<camera_name>/mask.jpg`
+The mask superimposed on the most recent frame that the frigate has finished processing.
+
 ### `/debug/stats`
 Contains some granular debug info that can be used for sensors in HomeAssistant. See details below.
 
