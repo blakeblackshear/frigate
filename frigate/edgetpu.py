@@ -177,7 +177,11 @@ class RemoteObjectDetector():
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
-        self.event.wait()
+        result = self.event.wait(timeout=10.0)
+
+        # if it timed out
+        if result is None:
+            return detections
 
         for d in self.out_np_shm:
             if d[1] < threshold:
