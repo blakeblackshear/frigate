@@ -132,6 +132,12 @@ cameras:
     ## Masked areas are also ignored for motion detection.
     ################
     # mask: back-mask.bmp
+    ################
+    # Useful only for HTTP Endpoint.
+    # Level of hardness applied to the mask when combined with the image processed by Frigate.
+    # Must be a float between 0 and 1.
+    ################
+    # mask_hardness: 0.5
 
     ################
     # Allows you to limit the framerate within frigate for cameras that do not support
