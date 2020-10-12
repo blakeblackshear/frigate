@@ -441,7 +441,7 @@ def main():
     def latest_mask(camera_name):
         if camera_name in CONFIG['cameras']:
 
-            if 'mask' in CONFIG['cameras'][camera_name] :
+            if 'mask' in CONFIG['cameras'][camera_name]:
                 mask = CONFIG['cameras'][camera_name]['mask']
                 frame = latest_frame(camera_name, True)
 
@@ -467,8 +467,17 @@ def main():
                     return "Inconsistent sizes, {}x{} and {}x{}.".format(frame.shape[0], frame.shape[1], the_mask.shape[0], the_mask.shape[1]), 404
 
                 else:
+                    hardness = 0.5
+                    if 'mask_hardness' in CONFIG['cameras'][camera_name]:
+                        try:
+                            hn = float(CONFIG['cameras'][camera_name]['mask_hardness'])
+                            if isinstance(hn, (int, float)) and not isinstance(hn, bool) and hn >= 0 and hn <= 1:
+                                hardness = hn
+                        except ValueError:
+                            pass
+
                     # frame and mask fusion
-                    ret, jpg = cv2.imencode('.jpg', cv2.addWeighted(frame, 0.5, the_mask, 0.5, 0))
+                    ret, jpg = cv2.imencode('.jpg', cv2.addWeighted(frame, 1-hardness, the_mask, hardness, 0))
                     response = make_response(jpg.tobytes())
                     response.headers['Content-Type'] = 'image/jpg'
                     return response
