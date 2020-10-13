@@ -312,7 +312,7 @@ def main():
                 shm.close()
                 shm.unlink()
 
-        for detector in detectors:
+        for detector in detectors.values():
             detector.stop()
         for shm in camera_shms:
             shm.close()
