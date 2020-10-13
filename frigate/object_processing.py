@@ -181,10 +181,12 @@ class CameraState():
             # check each zone
             for name, zone in self.config['zones'].items():
                 contour = zone['contour']
-                # check if the object is in the zone and not filtered
-                if (cv2.pointPolygonTest(contour, bottom_center, False) >= 0 
-                    and not zone_filtered(obj, zone.get('filters', {}))):
-                    current_zones.append(name)
+                # check if the object is in the zone
+                if (cv2.pointPolygonTest(contour, bottom_center, False) >= 0):
+                    # if the object passed the filters once, dont apply again
+                    if name in obj.get('zones', []) or not zone_filtered(obj, zone.get('filters', {})):
+                        current_zones.append(name)
+                    
             obj['zones'] = current_zones
 
         # maintain best objects
