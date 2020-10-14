@@ -388,9 +388,11 @@ def main():
     def best(camera_name, label):
         if camera_name in CONFIG['cameras']:
             best_object = object_processor.get_best(camera_name, label)
-            best_frame = best_object.get('frame', np.zeros((720,1280,3), np.uint8))
-
-            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
+            best_frame = best_object.get('frame')
+            if best_frame is None:
+                best_frame = np.zeros((720,1280,3), np.uint8)
+            else:
+                best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
             
             crop = bool(request.args.get('crop', 0, type=int))
             if crop:
