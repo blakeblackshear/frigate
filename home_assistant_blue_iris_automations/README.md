@@ -17,4 +17,3 @@ Installation:
 * Test the HTTP request manually in a browser to see that it works and triggers recording of the HD camera instance in Blue Iris
 * Then, just make a copy of the package yaml file above and adjust the entities accordingly into the folder '/config/packages' in your home assistant installation
 * Reload Home Assistant and test trigger the automation
-
