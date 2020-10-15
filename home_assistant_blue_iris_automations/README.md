@@ -6,7 +6,7 @@ There are quite a community around the Blue Iris software and there are other st
 
 I got inspired by the video from "The Hookup" on youtube explaining the setup with the "aitool" and Deepstack. I tried it and it works - ish.
 
-Link to the video with all Blue Iris configuration: https://www.youtube.com/watch?v=fwoonl5JKgo
+Link to the hookups video with all Blue Iris configuration: https://www.youtube.com/watch?v=fwoonl5JKgo
 
 I base all my Blue Iris configuration on the example from the video above - but i´d just simply turned off picture save to folder feature (that the aitool uses to pick up the jpeg and send it deepstack). Instead I use frigate and a Home Assistant automation.
 
