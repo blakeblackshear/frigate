@@ -6,8 +6,8 @@ shell_command:
 ## Example automation that once frigate triggered motion of a person the recording for all cameras on my front yard (three of them) will start
 
 automation:
-  - id: cam9_person_detected_send_bi
-    alias: "Frigate Cam 9 Uppfart BI"
+  - id: person_detected_send_req_to_bi
+    alias: "Frigate Trigger to record BI"
     initial_state: 'on'
     trigger:
     - entity_id: binary_sensor.cam9_uppfart_frigate_person
