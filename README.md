@@ -70,6 +70,8 @@ sensor:
     device_class: moving
     availability_topic: "frigate/available"
 ```
+## Automation example to trigger recording in Blue Iris NVR
+Please see ![Alt text](home_assistant_blue_iris_automations/"Link")
 
 ## Tips
 - Lower the framerate of the RTSP feed on the camera to reduce the CPU usage for capturing the feed
