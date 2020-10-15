@@ -1,0 +1,34 @@
+## This is a package file to be used with Home Assistant. You need to adjust all entities below to suit your installation as well as username/password/ip address to your Blue Iris installation
+
+shell_command:
+  alert_bi: "curl {{ url }}"
+
+## Example automation that once frigate triggered motion of a person the recording for all cameras on my front yard (three of them) will start
+
+automation:
+  - id: cam9_person_detected_send_bi
+    alias: "Frigate Cam 9 Uppfart BI"
+    initial_state: 'on'
+    trigger:
+    - entity_id: binary_sensor.cam9_uppfart_frigate_person
+      platform: state
+      to: 'on'
+    trigger:
+    - entity_id: binary_sensor.cam1_framsidan_frigate_person
+      platform: state
+      to: 'on'
+    trigger:
+    - entity_id: binary_sensor.cam3_framsidan_frigate_person
+      platform: state
+      to: 'on'
+    condition: []
+    action:
+      - service: shell_command.alert_bi
+        data:
+          url: 'http://192.168.1.10:81/admin?trigger&camera=cam9_hd&user=aiuser&pw=secret' # Sends a HTTP requrest to Blue Iris API to start recording in HD in Blue Iris for Camera 9
+      - service: shell_command.alert_bi
+        data:
+          url: 'http://192.168.1.11:81/admin?trigger&camera=cam3_hd&user=aiuser&pw=secret' # Sends a HTTP requrest to Blue Iris API to start recording in HD in Blue Iris for Camera 3
+      - service: shell_command.alert_bi
+        data:
+          url: 'http://192.168.1.12:81/admin?trigger&camera=cam1_sd&user=aiuser&pw=secret' # Sends a HTTP requrest to Blue Iris API to start recording in HD in Blue Iris for Camera 1
