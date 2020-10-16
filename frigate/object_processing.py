@@ -287,7 +287,7 @@ class TrackedObjectProcessor(threading.Thread):
                 best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             
             if self.camera_config[camera]['snapshots']['show_timestamp']:
-                font_scale = (best_frame.shape[0]*best_frame.shape[1])/(original_shape[0]*original_shape[1])*0.8
+                font_scale = (best_frame.shape[0]*best_frame.shape[1])/(original_shape[0]*original_shape[1])*0.7
                 time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
                 cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(255, 255, 255), thickness=2)
 
