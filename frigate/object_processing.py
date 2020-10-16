@@ -268,6 +268,7 @@ class TrackedObjectProcessor(threading.Thread):
         def snapshot(camera, obj):
             if not 'frame' in obj:
                 return
+            
             best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_YUV2BGR_I420)
             if self.camera_config[camera]['snapshots']['draw_bounding_boxes']:
                 thickness = 2
@@ -285,8 +286,10 @@ class TrackedObjectProcessor(threading.Thread):
                 best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             
             if self.camera_config[camera]['snapshots']['show_timestamp']:
+                original_shape = self.camera_config[camera]['frame_shape']
+                font_scale = (best_frame.shape[0]*best_frame.shape[1])/(original_shape[0]*original_shape[1])*0.8
                 time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(255, 255, 255), thickness=2)
 
             ret, jpg = cv2.imencode('.jpg', best_frame)
             if ret:
