@@ -269,6 +269,12 @@ class TrackedObjectProcessor(threading.Thread):
             if not 'frame' in obj:
                 return
             best_frame = cv2.cvtColor(obj['frame'], cv2.COLOR_YUV2BGR_I420)
+            if self.camera_config[camera]['snapshots']['draw_bounding_boxes']:
+                thickness = 2
+                color = COLOR_MAP[obj['label']]
+                box = obj['box']
+                draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
+                
             mqtt_config = self.camera_config[camera].get('mqtt', {'crop_to_region': False})
             if mqtt_config.get('crop_to_region'):
                 region = obj['region']
@@ -277,6 +283,11 @@ class TrackedObjectProcessor(threading.Thread):
                 height = int(mqtt_config['snapshot_height'])
                 width = int(height*best_frame.shape[1]/best_frame.shape[0])
                 best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+            
+            if self.camera_config[camera]['snapshots']['show_timestamp']:
+                time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
+                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
             ret, jpg = cv2.imencode('.jpg', best_frame)
             if ret:
                 jpg_bytes = jpg.tobytes()

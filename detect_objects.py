@@ -164,7 +164,8 @@ def main():
     for name, config in CONFIG['cameras'].items():
         config['snapshots'] = {
             'show_timestamp': config.get('snapshots', {}).get('show_timestamp', True),
-            'draw_zones': config.get('snapshots', {}).get('draw_zones', False)
+            'draw_zones': config.get('snapshots', {}).get('draw_zones', False),
+            'draw_bounding_boxes': config.get('snapshots', {}).get('draw_bounding_boxes', True)
         }
         config['zones'] = config.get('zones', {})
 
