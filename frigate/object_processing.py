@@ -280,13 +280,13 @@ class TrackedObjectProcessor(threading.Thread):
             if mqtt_config.get('crop_to_region'):
                 region = obj['region']
                 best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
+            original_shape = best_frame.shape
             if 'snapshot_height' in mqtt_config: 
                 height = int(mqtt_config['snapshot_height'])
                 width = int(height*best_frame.shape[1]/best_frame.shape[0])
                 best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             
             if self.camera_config[camera]['snapshots']['show_timestamp']:
-                original_shape = self.camera_config[camera]['frame_shape']
                 font_scale = (best_frame.shape[0]*best_frame.shape[1])/(original_shape[0]*original_shape[1])*0.8
                 time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
                 cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(255, 255, 255), thickness=2)
