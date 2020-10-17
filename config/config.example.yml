@@ -215,6 +215,7 @@ cameras:
     snapshots:
       show_timestamp: True
       draw_zones: False
+      draw_bounding_boxes: True
 
     ################
     # Camera level object config. If defined, this is used instead of the global config.
