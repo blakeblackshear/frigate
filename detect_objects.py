@@ -25,6 +25,8 @@ from frigate.edgetpu import EdgeTPUProcess
 
 FRIGATE_VARS = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
 
+CONFIG_FILE = os.environ.get('CONFIG_FILE', '/config/config.yml')
+
 with open('/config/config.yml') as f:
     CONFIG = yaml.safe_load(f)
 
