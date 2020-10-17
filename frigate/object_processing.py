@@ -280,16 +280,19 @@ class TrackedObjectProcessor(threading.Thread):
             if mqtt_config.get('crop_to_region'):
                 region = obj['region']
                 best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
-            original_shape = best_frame.shape
             if 'snapshot_height' in mqtt_config: 
                 height = int(mqtt_config['snapshot_height'])
                 width = int(height*best_frame.shape[1]/best_frame.shape[0])
                 best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
             
             if self.camera_config[camera]['snapshots']['show_timestamp']:
-                font_scale = (best_frame.shape[0]*best_frame.shape[1])/(original_shape[0]*original_shape[1])*0.7
                 time_to_show = datetime.datetime.fromtimestamp(obj['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(best_frame, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(255, 255, 255), thickness=2)
+                size = cv2.getTextSize(time_to_show, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2)
+                text_width = size[0][0]
+                text_height = size[0][1]
+                desired_size = max(200, 0.33*best_frame.shape[1])
+                font_scale = desired_size/text_width
+                cv2.putText(best_frame, time_to_show, (5, best_frame.shape[0]-7), cv2.FONT_HERSHEY_SIMPLEX, fontScale=font_scale, color=(255, 255, 255), thickness=2)
 
             ret, jpg = cv2.imencode('.jpg', best_frame)
             if ret:
