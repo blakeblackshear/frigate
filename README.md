@@ -31,7 +31,7 @@ docker run --rm \
 -v /etc/localtime:/etc/localtime:ro \
 -p 5000:5000 \
 -e FRIGATE_RTSP_PASSWORD='password' \
-blakeblackshear/frigate:stable
+blakeblackshear/frigate:0.7.0-amd64
 ```
 
 Example docker-compose:
@@ -41,7 +41,7 @@ Example docker-compose:
     restart: unless-stopped
     privileged: true
     shm_size: '100m' # only needed with large numbers of high res cameras
-    image: blakeblackshear/frigate:stable
+    image: blakeblackshear/frigate:0.7.0-amd64
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
