@@ -12,26 +12,26 @@ amd64_frigate:
 
 amd64_all: amd64_wheels amd64_ffmpeg amd64_frigate
 
-arm64_wheels:
-	docker build --tag blakeblackshear/frigate-wheels:arm64 --file docker/Dockerfile.wheels.arm64 .
+aarch64_wheels:
+	docker build --tag blakeblackshear/frigate-wheels:aarch64 --file docker/Dockerfile.wheels.aarch64 .
 
-arm64_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:arm64 --file docker/Dockerfile.ffmpeg.arm64 .
+aarch64_ffmpeg:
+	docker build --tag blakeblackshear/frigate-ffmpeg:aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
 
-arm64_frigate:
-	docker build --tag frigate-base --build-arg ARCH=arm64 --file docker/Dockerfile.base .
-	docker build --tag frigate --file docker/Dockerfile.arm64 .
+aarch64_frigate:
+	docker build --tag frigate-base --build-arg ARCH=aarch64 --file docker/Dockerfile.base .
+	docker build --tag frigate --file docker/Dockerfile.aarch64 .
 
-armv7hf_all: arm64_wheels arm64_ffmpeg arm64_frigate
+armv7_all: armv7_wheels armv7_ffmpeg armv7_frigate
 
-armv7hf_wheels:
-	docker build --tag blakeblackshear/frigate-wheels:armv7hf --file docker/Dockerfile.wheels .
+armv7_wheels:
+	docker build --tag blakeblackshear/frigate-wheels:armv7 --file docker/Dockerfile.wheels .
 
-armv7hf_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:armv7hf --file docker/Dockerfile.ffmpeg.armv7hf .
+armv7_ffmpeg:
+	docker build --tag blakeblackshear/frigate-ffmpeg:armv7 --file docker/Dockerfile.ffmpeg.armv7 .
 
-armv7hf_frigate:
-	docker build --tag frigate-base --build-arg ARCH=armv7hf --file docker/Dockerfile.base .
-	docker build --tag frigate --file docker/Dockerfile.armv7hf .
+armv7_frigate:
+	docker build --tag frigate-base --build-arg ARCH=armv7 --file docker/Dockerfile.base .
+	docker build --tag frigate --file docker/Dockerfile.armv7 .
 
-armv7hf_all: armv7hf_wheels armv7hf_ffmpeg armv7hf_frigate
+armv7_all: armv7_wheels armv7_ffmpeg armv7_frigate
