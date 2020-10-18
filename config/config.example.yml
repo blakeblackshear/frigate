@@ -31,6 +31,8 @@ save_clips:
   # will begin to expire and the resulting clip will be the last x seconds of the event.
   ###########
   max_seconds: 300
+  clips_dir: /clips
+  cache_dir: /cache
 
 #################
 # Default ffmpeg args. Optional and can be overwritten per camera.
