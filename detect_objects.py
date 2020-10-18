@@ -9,6 +9,7 @@ import time
 import datetime
 import queue
 import yaml
+import json
 import threading
 import multiprocessing as mp
 import subprocess as sp
@@ -27,8 +28,12 @@ FRIGATE_VARS = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
 
 CONFIG_FILE = os.environ.get('CONFIG_FILE', '/config/config.yml')
 
-with open('/config/config.yml') as f:
-    CONFIG = yaml.safe_load(f)
+if CONFIG_FILE.endswith(".yml"):
+    with open(CONFIG_FILE) as f:
+        CONFIG = yaml.safe_load(f)
+elif CONFIG_FILE.endswith(".json"):
+    with open(CONFIG_FILE) as f:
+        CONFIG = json.load(f)
 
 MQTT_HOST = CONFIG['mqtt']['host']
 MQTT_PORT = CONFIG.get('mqtt', {}).get('port', 1883)
