@@ -214,6 +214,7 @@ def main():
         if not config.get('fps') is None:
             ffmpeg_output_args = ["-r", str(config.get('fps'))] + ffmpeg_output_args
         if config.get('save_clips', {}).get('enabled', False):
+            cache_dir = config.get('save_clips', {}).get('cache_dir', '/cache')
             ffmpeg_output_args = [
                 "-f",
                 "segment",
@@ -230,7 +231,7 @@ def main():
                 "-an",
                 "-map",
                 "0",
-                f"/cache/{name}-%Y%m%d%H%M%S.mp4"
+                f"{os.path.join(cache_dir, name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
         ffmpeg_cmd = (['ffmpeg'] +
                 ffmpeg_global_args +
@@ -296,7 +297,10 @@ def main():
         camera_process['process'].start()
         print(f"Camera_process started for {name}: {camera_process['process'].pid}")
 
-    event_processor = EventProcessor(CONFIG, camera_processes, '/cache', '/clips', event_queue, stop_event)
+
+    cache_dir = config.get('save_clips', {}).get('cache_dir', '/cache')
+    clips_dir = config.get('save_clips', {}).get('clips_dir', '/clips')
+    event_processor = EventProcessor(CONFIG, camera_processes, cache_dir, clips_dir, event_queue, stop_event)
     event_processor.start()
     
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
