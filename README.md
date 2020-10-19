@@ -115,7 +115,7 @@ sensor:
   - platform: template
     sensors:
       <camera_name>_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["fps"] }}'
+        value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["camera_fps"] }}'
         unit_of_measurement: 'FPS'
       <camera_name>_skipped_fps: 
         value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["skipped_fps"] }}'
