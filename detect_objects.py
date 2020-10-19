@@ -36,11 +36,11 @@ elif CONFIG_FILE.endswith(".json"):
         CONFIG = json.load(f)
 
 CACHE_DIR = CONFIG.get('save_clips', {}).get('cache_dir', '/cache')
-CLIPS_DIR = CONFIG.get('save_clips', {}).get('clips_dir', '/cache')
+CLIPS_DIR = CONFIG.get('save_clips', {}).get('clips_dir', '/clips')
 
-if not os.path.exists(CACHE_DIR):
+if not os.path.exists(CACHE_DIR) and not os.path.islink(CACHE_DIR):
     os.makedirs(CACHE_DIR)
-if not os.path.exists(CLIPS_DIR):
+if not os.path.exists(CLIPS_DIR) and not os.path.islink(CLIPS_DIR):
     os.makedirs(CLIPS_DIR)
 
 MQTT_HOST = CONFIG['mqtt']['host']
