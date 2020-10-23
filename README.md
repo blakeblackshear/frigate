@@ -279,18 +279,28 @@ Frigate can save video clips without any CPU overhead for encoding by simply cop
 Frigate attempts to detect your Coral device automatically. If you have multiple Coral devices or a version that is not detected automatically, you can specify using the `detectors` config option as shown in the example config.
 
 ## Masks and limiting detection to a certain area
+If you are experancing high dectection frame rate due to unwanted movment suck as trees, bushes etc a mask will help in reducing the CPU load hence the masked ares will be ignored from motion.
+
+Making a mask using an image
 The mask works by looking at the bottom center of any bounding box (first image, red dot below) and comparing that to your mask. If that red dot falls on an area of your mask that is black, the detection (and motion) will be ignored. The mask in the second image would limit detection on this camera to only objects that are in the front yard and not the street. 
 
 <a href="docs/example-mask-check-point.png"><img src="docs/example-mask-check-point.png" height="300"></a>
 <a href="docs/example-mask.bmp"><img src="docs/example-mask.bmp" height="300"></a>
 <a href="docs/example-mask-overlay.png"><img src="docs/example-mask-overlay.png" height="300"></a>
 
+Making a mask using coordinate points (polygon)
+Just like in the image examples above. Use a camera snapshot image with the same resolution as the camera feed.
+Upload the image to https://www.image-map.net/ - select "shape" poly - start in the lowest left corner and place the first  maker (point) and continue upwards and then to the right until the polygon shape covers the area that you want to mask out (ignore). When you are finished with the polygon click "Show me the code!" and copy all coordinates (point), ie. `"0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"` Adjust any -1 values to 0 and then add it all to the config indented under the camera/<name>/ffmpeg part of the configuration (see the example configuration for correct indentation and placement)
+Example of a finished row corresponding to the below example image: `mask: 'poly,0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432'`
+    
+<a href="docs/example-mask-poly.png"><img src="docs/example-mask-poly.png" height="300"></a>
+
 The following types of masks are supported:
 - `base64`: Base64 encoded image file
 - `poly`: List of x,y points like zone configuration
 - `image`: Path to an image file in the config directory
 
-`base64` and `image` masks must be the same aspect ratio as your camera. 
+`base64` and `image` masks must be the same aspect ratio and resolution as your camera. 
 
 ## Zones
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area. See the sample config for details on how to configure.
