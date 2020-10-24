@@ -127,34 +127,37 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             print(f"{camera_name}: stop event set. exiting capture thread...")
             break
 
-        frame_bytes = ffmpeg_process.stdout.read(frame_size)
         current_frame.value = datetime.datetime.now().timestamp()
+        frame_name = f"{camera_name}{current_frame.value}"
+        frame_buffer = frame_manager.create(frame_name, frame_size)
+        try:
+          frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+        except:
+          print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
 
-        if len(frame_bytes) < frame_size:
-            print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
-
-            if ffmpeg_process.poll() != None:
-                print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
-                break
-            else:
-                continue
+          if ffmpeg_process.poll() != None:
+              print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
+              frame_manager.delete(frame_name)
+              break
+          
+          continue
 
         fps.update()
 
         frame_num += 1
         if (frame_num % take_frame) != 0:
             skipped_fps.update()
+            frame_manager.delete(frame_name)
             continue
 
         # if the queue is full, skip this frame
         if frame_queue.full():
             skipped_fps.update()
+            frame_manager.delete(frame_name)
             continue
 
-        # put the frame in the frame manager
-        frame_buffer = frame_manager.create(f"{camera_name}{current_frame.value}", frame_size)
-        frame_buffer[:] = frame_bytes[:]
-        frame_manager.close(f"{camera_name}{current_frame.value}")
+        # close the frame
+        frame_manager.close(frame_name)
 
         # add to the queue
         frame_queue.put(current_frame.value)
@@ -281,9 +284,6 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         if frame is None:
             print(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
-        
-        fps_tracker.update()
-        fps.value = fps_tracker.eps()
 
         # look for motion
         motion_boxes = motion_detector.detect(frame)
@@ -355,9 +355,13 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         # now that we have refined our detections, we need to track objects
         object_tracker.match_and_update(frame_time, detections)
 
-        # add to the queue
-        detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
-
-        detection_fps.value = object_detector.fps.eps()
-
-        frame_manager.close(f"{camera_name}{frame_time}")
+        # add to the queue if not full
+        if(detected_objects_queue.full()):
+          frame_manager.delete(f"{camera_name}{frame_time}")
+          continue
+        else:
+          fps_tracker.update()
+          fps.value = fps_tracker.eps()
+          detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
+          detection_fps.value = object_detector.fps.eps()
+          frame_manager.close(f"{camera_name}{frame_time}")
