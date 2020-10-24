@@ -135,7 +135,16 @@ class EventProcessor(threading.Thread):
             return
         
         with open(f"{os.path.join(self.clip_dir, clip_name)}.json", 'w') as outfile:
-            json.dump(event_data, outfile)
+            json.dump({
+              'id': event_data['id'],
+              'label': event_data['label'],
+              'camera': camera,
+              'start_time': event_data['start_time'],
+              'end_time': event_data['end_time'],
+              'top_score': event_data['top_score'],
+              'false_positive': event_data['false_positive'],
+              'zones': list(event_data['entered_zones'])
+            }, outfile)
 
     def run(self):
         while True:
