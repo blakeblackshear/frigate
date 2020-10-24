@@ -135,12 +135,14 @@ class CameraState():
         for id in new_ids:
             self.tracked_objects[id] = tracked_objects[id]
             self.tracked_objects[id]['zones'] = []
+            self.tracked_objects[id]['entered_zones'] = set()
 
             # start the score history
             self.tracked_objects[id]['score_history'] = [self.tracked_objects[id]['score']]
 
             # calculate if this is a false positive
             self.tracked_objects[id]['computed_score'] = self.compute_score(self.tracked_objects[id])
+            self.tracked_objects[id]['top_score'] = self.tracked_objects[id]['computed_score']
             self.tracked_objects[id]['false_positive'] = self.false_positive(self.tracked_objects[id])
 
             # call event handlers
@@ -160,7 +162,10 @@ class CameraState():
                 self.tracked_objects[id]['score_history'] = self.tracked_objects[id]['score_history'][-10:]
 
             # calculate if this is a false positive
-            self.tracked_objects[id]['computed_score'] = self.compute_score(self.tracked_objects[id])
+            computed_score = self.compute_score(self.tracked_objects[id])
+            self.tracked_objects[id]['computed_score'] = computed_score
+            if computed_score > self.tracked_objects[id]['top_score']:
+              self.tracked_objects[id]['top_score'] = computed_score
             self.tracked_objects[id]['false_positive'] = self.false_positive(self.tracked_objects[id])
 
             # call event handlers
@@ -186,6 +191,8 @@ class CameraState():
                     # if the object passed the filters once, dont apply again
                     if name in obj.get('zones', []) or not zone_filtered(obj, zone.get('filters', {})):
                         current_zones.append(name)
+                        obj['entered_zones'].add(name)
+
                     
             obj['zones'] = current_zones
 
@@ -255,14 +262,33 @@ class TrackedObjectProcessor(threading.Thread):
 
         def start(camera, obj):
             # publish events to mqtt
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(obj), retain=False)
+            event_data = {
+              'id': obj['id'],
+              'label': obj['label'],
+              'camera': camera,
+              'start_time': obj['start_time'],
+              'top_score': obj['top_score'],
+              'false_positive': obj['false_positive'],
+              'zones': list(obj['entered_zones'])
+            }
+            self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(event_data), retain=False)
             self.event_queue.put(('start', camera, obj))
 
         def update(camera, obj):
             pass
 
         def end(camera, obj):
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj), retain=False)
+            event_data = {
+              'id': obj['id'],
+              'label': obj['label'],
+              'camera': camera,
+              'start_time': obj['start_time'],
+              'end_time': obj['end_time'],
+              'top_score': obj['top_score'],
+              'false_positive': obj['false_positive'],
+              'zones': list(obj['entered_zones'])
+            }
+            self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(event_data), retain=False)
             self.event_queue.put(('end', camera, obj))
         
         def snapshot(camera, obj):

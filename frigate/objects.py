@@ -23,7 +23,6 @@ class ObjectTracker():
         id = f"{obj['frame_time']}-{rand_id}"
         obj['id'] = id
         obj['start_time'] = obj['frame_time']
-        obj['top_score'] = obj['score']
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
@@ -34,8 +33,6 @@ class ObjectTracker():
     def update(self, id, new_obj):
         self.disappeared[id] = 0
         self.tracked_objects[id].update(new_obj)
-        if self.tracked_objects[id]['score'] > self.tracked_objects[id]['top_score']:
-            self.tracked_objects[id]['top_score'] = self.tracked_objects[id]['score']
 
     def match_and_update(self, frame_time, new_objects):
         # group by name
