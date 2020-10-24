@@ -185,7 +185,7 @@ def main():
         config['zones'] = config.get('zones', {})
 
     # Queue for cameras to push tracked objects to
-    tracked_objects_queue = mp.Queue()
+    tracked_objects_queue = mp.Queue(maxsize=len(CONFIG['cameras'].keys())*2)
 
     # Queue for clip processing
     event_queue = mp.Queue()

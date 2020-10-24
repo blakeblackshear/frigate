@@ -127,11 +127,11 @@ lxc.cap.drop:
 ```
 
 ### Calculating shm-size
-The default shm-size of 64m should be fine for most setups. If you start seeing segfault errors, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
+The default shm-size of 64m is fine for setups with 3 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
 
 You can calculate the necessary shm-size for each camera with the following formula:
 ```
-(width * height * 3 + 270480)/1048576 = <shm size in mb>
+(width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
 ```
 [Back to top](#documentation)
 
