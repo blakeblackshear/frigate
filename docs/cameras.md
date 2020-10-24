@@ -16,8 +16,6 @@ input_args:
     - experimental
     - -fflags
     - +genpts+discardcorrupt
-    - -vsync
-    - drop
     - -use_wallclock_as_timestamps
     - '1'
 ```
