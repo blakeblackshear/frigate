@@ -58,7 +58,7 @@ class CameraState():
         self.object_status = defaultdict(lambda: 'OFF')
         self.tracked_objects = {}
         self.zone_objects = defaultdict(lambda: [])
-        self._current_frame = np.zeros(self.config['frame_shape'], np.uint8)
+        self._current_frame = np.zeros((self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]), np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
         self.previous_frame_id = None
