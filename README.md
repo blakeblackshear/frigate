@@ -361,7 +361,7 @@ ffmpeg:
     - h264_v4l2m2m
 ```
 
-Intel-based CPUs via Quicksync (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
+Intel-based CPUs (<10th Generation) via Quicksync (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
 ```yaml
 ffmpeg:
   hwaccel_args:
@@ -371,6 +371,17 @@ ffmpeg:
     - /dev/dri/renderD128
     - -hwaccel_output_format
     - yuv420p
+```
+
+Intel-based CPUs (>=10th Generation) via Quicksync (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
+**Note:** You also need to set `LIBVA_DRIVER_NAME=iHD` as an environment variable on the container.
+```yaml
+ffmpeg:
+  hwaccel_args:
+    - -hwaccel
+    - vaapi
+    - -hwaccel_device
+    - /dev/dri/renderD128
 ```
 
 [Back to top](#documentation)
