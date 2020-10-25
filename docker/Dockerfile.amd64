@@ -1,13 +1,15 @@
 FROM frigate-base
 LABEL maintainer "blakeb@blakeshome.com"
 
+# By default, use the i965 driver
+ENV LIBVA_DRIVER_NAME=i965
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
         # ffmpeg dependencies
         libgomp1 \
         # VAAPI drivers for Intel hardware accel
-        libva-drm2 libva2 i965-va-driver vainfo \
+        libva-drm2 libva2 i965-va-driver vainfo intel-media-va-driver \
         ## Tensorflow lite
     && wget -q https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \
     && python3.8 -m pip install tflite_runtime-2.1.0.post1-cp38-cp38-linux_x86_64.whl \

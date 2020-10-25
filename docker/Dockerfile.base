@@ -12,7 +12,9 @@ COPY --from=wheels /wheels/. /wheels/
 ENV FLASK_ENV=development
 ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
-RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y \
+RUN apt-get -qq update \
+    && apt-get upgrade -y \
+    && apt-get -qq install --no-install-recommends -y \
     gnupg wget unzip tzdata \
     && apt-get -qq install --no-install-recommends -y \
         python3-pip \
