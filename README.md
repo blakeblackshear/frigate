@@ -477,14 +477,14 @@ mask: 'poly,0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375
     
 <a href="docs/example-mask-poly.png"><img src="docs/example-mask-poly.png" height="300"></a>
 
-You can test your mask by temporarily configuring it as a [zone](#zones) and enabling`draw_zones` in your config.
+You can test your mask by temporarily configuring it as a [zone](#zones) and enabling`draw_zones` in your config. The zones will be shown at the camera HTTP endpoint, ei `http://localhost:5000/back`
 
 [Back to top](#documentation)
 
 ## Zones
 Zones allow you to define a specific area of the frame and apply additional filters for object types so you can determine whether or not an object is within a particular area. Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area by configuring zones with the same name for each camera.
 
-During testing, `draw_zones` should be set in the config to draw the zone on the frames so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
+During testing, `draw_zones` should be set in the config to draw the zone on the frames so you can adjust as needed. The zone line will increase in thickness when any object enters the zone. The zones will be shown at the camera HTTP endpoint, ei `http://localhost:5000/back`
 
 ![Zone Example](docs/zone_example.jpg)
 
