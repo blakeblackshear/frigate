@@ -32,7 +32,8 @@ RUN pip3 wheel --wheel-dir=/wheels \
     paho-mqtt \
     PyYAML \
     matplotlib \
-    click
+    click \
+    tinydb
 
 FROM scratch
 
