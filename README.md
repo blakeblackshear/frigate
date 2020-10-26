@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="40%" align="center" alt="logo" src="docs/frigate.png">
+  <img align="center" alt="logo" src="docs/frigate.png">
 </p>
 
 # Frigate - NVR With Realtime Object Detection for IP Cameras
