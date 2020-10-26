@@ -122,6 +122,7 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
     frame_num = 0
     frame_size = frame_shape[0] * frame_shape[1] * 3 // 2
     frame_rate = EventsPerSecond()
+    frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
     while True:
