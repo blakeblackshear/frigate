@@ -167,7 +167,7 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
         frame_queue.put(current_frame.value)
 
 class CameraWatchdog(threading.Thread):
-    def __init__(self, name, config, frame_queue, camera_fps, stop_event):
+    def __init__(self, name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event):
         threading.Thread.__init__(self)
         self.name = name
         self.config = config
@@ -175,6 +175,7 @@ class CameraWatchdog(threading.Thread):
         self.ffmpeg_process = None
         self.stop_event = stop_event
         self.camera_fps = camera_fps
+        self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
         self.frame_shape = self.config['frame_shape']
         self.frame_size = self.frame_shape[0] * self.frame_shape[1] * 3 // 2
@@ -207,6 +208,7 @@ class CameraWatchdog(threading.Thread):
     
     def start_ffmpeg(self):
       self.ffmpeg_process = start_or_restart_ffmpeg(self.config['ffmpeg_cmd'], self.frame_size)
+      self.ffmpeg_pid.value = self.ffmpeg_process.pid
       self.capture_thread = CameraCapture(self.name, self.ffmpeg_process, self.frame_shape, self.frame_queue, 
           self.config['take_frame'], self.camera_fps, self.stop_event)
       self.capture_thread.start()
@@ -234,7 +236,7 @@ class CameraCapture(threading.Thread):
 
 def capture_camera(name, config, process_info, stop_event):
     frame_queue = process_info['frame_queue']
-    camera_watchdog = CameraWatchdog(name, config, frame_queue, process_info['camera_fps'], stop_event)
+    camera_watchdog = CameraWatchdog(name, config, frame_queue, process_info['camera_fps'], process_info['ffmpeg_pid'], stop_event)
     camera_watchdog.start()
     camera_watchdog.join()
 

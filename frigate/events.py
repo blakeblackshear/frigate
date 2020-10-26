@@ -26,7 +26,7 @@ class EventProcessor(threading.Thread):
         files_in_use = []
         for process_data in self.camera_processes.values():
             try:
-                ffmpeg_process = psutil.Process(pid=process_data['ffmpeg_process'].pid)
+                ffmpeg_process = psutil.Process(pid=process_data['ffmpeg_pid'].value)
                 flist = ffmpeg_process.open_files()
                 if flist:
                     for nt in flist:
