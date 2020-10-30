@@ -17,6 +17,10 @@ import numpy as np
 import logging
 from flask import Flask, Response, make_response, jsonify, request
 import paho.mqtt.client as mqtt
+from peewee import *
+from playhouse.shortcuts import model_to_dict
+from playhouse.sqlite_ext import *
+from playhouse.flask_utils import FlaskDB
 
 from frigate.video import capture_camera, track_camera, get_ffmpeg_input, get_frame_shape, CameraCapture, start_or_restart_ffmpeg
 from frigate.object_processing import TrackedObjectProcessor
@@ -42,6 +46,8 @@ if not os.path.exists(CACHE_DIR) and not os.path.islink(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 if not os.path.exists(CLIPS_DIR) and not os.path.islink(CLIPS_DIR):
     os.makedirs(CLIPS_DIR)
+
+DATABASE = f"sqliteext:///{os.path.join(CLIPS_DIR, 'frigate.db')}"
 
 MQTT_HOST = CONFIG['mqtt']['host']
 MQTT_PORT = CONFIG.get('mqtt', {}).get('port', 1883)
@@ -77,6 +83,27 @@ GLOBAL_OBJECT_CONFIG = CONFIG.get('objects', {})
 
 WEB_PORT = CONFIG.get('web_port', 5000)
 DETECTORS = CONFIG.get('detectors', {'coral': {'type': 'edgetpu', 'device': 'usb'}})
+
+# create a flask app
+app = Flask(__name__)
+app.config.from_object(__name__)
+flask_db = FlaskDB(app)
+db = flask_db.database
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+class Event(flask_db.Model):
+    id = CharField(null=False, primary_key=True, max_length=30)
+    label = CharField(index=True, max_length=20)
+    camera = CharField(index=True, max_length=20)
+    start_time = DateTimeField(),
+    end_time = DateTimeField(),
+    top_score = FloatField(),
+    false_positive = BooleanField(),
+    zones = JSONField()
+
+def init_db():
+    db.create_tables([Event], safe=True)
 
 class FrigateWatchdog(threading.Thread):
     def __init__(self, camera_processes, config, detectors, detection_queue, out_events, tracked_objects_queue, stop_event):
@@ -302,14 +329,9 @@ def main():
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
-    # create a flask app that encodes frames a mjpeg on demand
-    app = Flask(__name__)
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
-
     @app.route('/')
     def ishealthy():
-        # return a healh
+        # return a health
         return "Frigate is running. Alive and healthy!"
 
     @app.route('/debug/stack')
@@ -328,6 +350,13 @@ def main():
         else:
             os.kill(pid, signal.SIGUSR1)
             return "check logs", 200
+    
+    @app.route('/events')
+    def events():
+        events = Event.select().dicts()
+        # if events is None:
+        #     return jsonify([])
+        return jsonify([model_to_dict(e) for e in events])
 
     @app.route('/debug/stats')
     def stats():
@@ -438,4 +467,5 @@ def main():
     object_processor.join()
 
 if __name__ == '__main__':
+    init_db()
     main()
