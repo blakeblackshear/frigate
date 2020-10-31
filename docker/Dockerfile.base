@@ -37,8 +37,5 @@ RUN mkdir /cache /clips
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
-COPY detect_objects.py .
-COPY benchmark.py .
-COPY process_clip.py .
 
-CMD ["python3", "-u", "detect_objects.py"]
+CMD ["python3", "-u", "-m", "frigate"]

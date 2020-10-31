@@ -1,3 +1,13 @@
+# load config
+# init database
+# connect to mqtt
+# start detection processes
+# start frame processor
+# start camera processes
+# start event processor
+# start capture processes
+# start web app
+
 import faulthandler; faulthandler.enable()
 import os
 import signal
