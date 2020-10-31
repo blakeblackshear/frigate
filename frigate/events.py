@@ -7,10 +7,9 @@ import json
 import datetime
 import subprocess as sp
 import queue
-from tinydb import TinyDB
 
 class EventProcessor(threading.Thread):
-    def __init__(self, config, camera_processes, cache_dir, clip_dir, event_queue, stop_event):
+    def __init__(self, config, camera_processes, cache_dir, clip_dir, event_queue, stop_event, Event):
         threading.Thread.__init__(self)
         self.config = config
         self.camera_processes = camera_processes
@@ -20,7 +19,7 @@ class EventProcessor(threading.Thread):
         self.event_queue = event_queue
         self.events_in_process = {}
         self.stop_event = stop_event
-        self.db = TinyDB(f"{os.path.join(self.clip_dir, 'events')}.json")
+        self.Event = Event
     
     def refresh_cache(self):
         cached_files = os.listdir(self.cache_dir)
@@ -178,16 +177,17 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                self.db.insert({
-                  'id': event_data['id'],
-                  'label': event_data['label'],
-                  'camera': camera,
-                  'start_time': event_data['start_time'],
-                  'end_time': event_data['end_time'],
-                  'top_score': event_data['top_score'],
-                  'false_positive': event_data['false_positive'],
-                  'zones': list(event_data['entered_zones'])
-                })
+                self.Event.create(
+                    id=event_data['id'],
+                    label=event_data['label'],
+                    camera=camera,
+                    start_time=event_data['start_time'],
+                    end_time=event_data['end_time'],
+                    top_score=event_data['top_score'],
+                    false_positive=event_data['false_positive'],
+                    zones=list(event_data['entered_zones'])
+                )
+
                 if len(self.cached_clips) > 0 and not event_data['false_positive']:
                     self.create_clip(camera, event_data, save_clips_config.get('pre_capture', 30))
                 del self.events_in_process[event_data['id']]

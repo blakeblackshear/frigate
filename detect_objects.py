@@ -91,15 +91,18 @@ flask_db = FlaskDB(app)
 db = flask_db.database
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+peewee_log = logging.getLogger('peewee')
+peewee_log.addHandler(logging.StreamHandler())
+peewee_log.setLevel(logging.DEBUG)
 
 class Event(flask_db.Model):
     id = CharField(null=False, primary_key=True, max_length=30)
     label = CharField(index=True, max_length=20)
     camera = CharField(index=True, max_length=20)
-    start_time = DateTimeField(),
-    end_time = DateTimeField(),
-    top_score = FloatField(),
-    false_positive = BooleanField(),
+    start_time = DateTimeField()
+    end_time = DateTimeField()
+    top_score = FloatField()
+    false_positive = BooleanField()
     zones = JSONField()
 
 def init_db():
@@ -303,7 +306,7 @@ def main():
         camera_process['process'].start()
         print(f"Camera process started for {name}: {camera_process['process'].pid}")
 
-    event_processor = EventProcessor(CONFIG, camera_process_info, CACHE_DIR, CLIPS_DIR, event_queue, stop_event)
+    event_processor = EventProcessor(CONFIG, camera_process_info, CACHE_DIR, CLIPS_DIR, event_queue, stop_event, Event)
     event_processor.start()
     
     object_processor = TrackedObjectProcessor(CONFIG['cameras'], client, MQTT_TOPIC_PREFIX, tracked_objects_queue, event_queue, stop_event)
@@ -353,9 +356,7 @@ def main():
     
     @app.route('/events')
     def events():
-        events = Event.select().dicts()
-        # if events is None:
-        #     return jsonify([])
+        events = Event.select()
         return jsonify([model_to_dict(e) for e in events])
 
     @app.route('/debug/stats')
