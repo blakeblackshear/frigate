@@ -8,18 +8,19 @@ import datetime
 import subprocess as sp
 import queue
 
+from frigate.models import Event
+
 class EventProcessor(threading.Thread):
-    def __init__(self, config, camera_processes, cache_dir, clip_dir, event_queue, stop_event, Event):
+    def __init__(self, config, camera_processes, event_queue, stop_event):
         threading.Thread.__init__(self)
         self.config = config
+        self.cache_dir = self.config['save_clips']['cache_dir']
+        self.clips_dir = self.config['save_clips']['clips_dir']
         self.camera_processes = camera_processes
-        self.cache_dir = cache_dir
-        self.clip_dir = clip_dir
         self.cached_clips = {}
         self.event_queue = event_queue
         self.events_in_process = {}
         self.stop_event = stop_event
-        self.Event = Event
     
     def refresh_cache(self):
         cached_files = os.listdir(self.cache_dir)
@@ -76,7 +77,7 @@ class EventProcessor(threading.Thread):
             earliest_event = datetime.datetime.now().timestamp()
 
         # if the earliest event exceeds the max seconds, cap it
-        max_seconds = self.config.get('save_clips', {}).get('max_seconds', 300)
+        max_seconds = self.config['save_clips']['max_seconds']
         if datetime.datetime.now().timestamp()-earliest_event > max_seconds:
             earliest_event = datetime.datetime.now().timestamp()-max_seconds
         
@@ -127,7 +128,7 @@ class EventProcessor(threading.Thread):
             '-',
             '-c',
             'copy',
-            f"{os.path.join(self.clip_dir, clip_name)}.mp4"
+            f"{os.path.join(self.clips_dir, clip_name)}.mp4"
         ]
 
         p = sp.run(ffmpeg_cmd, input="\n".join(playlist_lines), encoding='ascii', capture_output=True)
@@ -135,7 +136,7 @@ class EventProcessor(threading.Thread):
             print(p.stderr)
             return
         
-        with open(f"{os.path.join(self.clip_dir, clip_name)}.json", 'w') as outfile:
+        with open(f"{os.path.join(self.clips_dir, clip_name)}.json", 'w') as outfile:
             json.dump({
               'id': event_data['id'],
               'label': event_data['label'],
@@ -177,7 +178,7 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                self.Event.create(
+                Event.create(
                     id=event_data['id'],
                     label=event_data['label'],
                     camera=camera,

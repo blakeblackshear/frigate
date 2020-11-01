@@ -9,6 +9,7 @@ from typing import Dict, List
 
 from frigate.config import FRIGATE_CONFIG_SCHEMA
 from frigate.edgetpu import EdgeTPUProcess
+from frigate.events import EventProcessor
 from frigate.http import create_app
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
@@ -23,6 +24,7 @@ class FrigateApp():
         self.detectors: Dict[str: EdgeTPUProcess] = {}
         self.detection_out_events: Dict[str: mp.Event] = {}
         self.detection_shms: List[mp.shared_memory.SharedMemory] = []
+        self.camera_metrics = {}
     
     def init_config(self):
         config_file = os.environ.get('CONFIG_FILE', '/config/config.yml')
@@ -37,6 +39,7 @@ class FrigateApp():
         self.config = FRIGATE_CONFIG_SCHEMA(config)
 
         for camera_name, camera_config in self.config['cameras'].items():
+            # set shape
             if 'width' in camera_config and 'height' in camera_config:
                 frame_shape = (camera_config['height'], camera_config['width'], 3)
             else:
@@ -44,6 +47,7 @@ class FrigateApp():
         
             camera_config['frame_shape'] = frame_shape
 
+            # build ffmpeg command
             ffmpeg = camera_config['ffmpeg']
             ffmpeg_input = ffmpeg['input']
             ffmpeg_global_args = ffmpeg.get('global_args', self.config['ffmpeg']['global_args'])
@@ -80,6 +84,18 @@ class FrigateApp():
                     ['pipe:'])
             
             camera_config['ffmpeg_cmd'] = ffmpeg_cmd
+
+            # create camera_metrics
+            self.camera_metrics[camera_name] = {
+                'camera_fps': mp.Value('d', 0.0),
+                'skipped_fps': mp.Value('d', 0.0),
+                'process_fps': mp.Value('d', 0.0),
+                'detection_fps': mp.Value('d', 0.0),
+                'detection_frame': mp.Value('d', 0.0),
+                'read_start': mp.Value('d', 0.0),
+                'ffmpeg_pid': mp.Value('i', 0),
+                'frame_queue': mp.Queue(maxsize=2)
+            }
 
         # TODO: sub in FRIGATE_ENV vars
 
@@ -131,34 +147,27 @@ class FrigateApp():
         self.detected_frames_processor.start()
 
     def start_camera_processors(self):
-        self.camera_process_info = {}
         for name, config in self.config['cameras'].items():
-            self.camera_process_info[name] = {
-                'camera_fps': mp.Value('d', 0.0),
-                'skipped_fps': mp.Value('d', 0.0),
-                'process_fps': mp.Value('d', 0.0),
-                'detection_fps': mp.Value('d', 0.0),
-                'detection_frame': mp.Value('d', 0.0),
-                'read_start': mp.Value('d', 0.0),
-                'ffmpeg_pid': mp.Value('i', 0),
-                'frame_queue': mp.Queue(maxsize=2)
-            }
             camera_process = mp.Process(target=track_camera, args=(name, config,
                 self.detection_queue, self.detection_out_events[name], self.detected_frames_queue, 
-                self.camera_process_info[name]))
+                self.camera_metrics[name]))
             camera_process.daemon = True
-            self.camera_process_info[name]['process'] = camera_process
+            self.camera_metrics[name]['process'] = camera_process
             camera_process.start()
-            print(f"Camera process started for {name}: {camera_process.pid}")
+            print(f"Camera processor started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self):
         for name, config in self.config['cameras'].items():
             capture_process = mp.Process(target=capture_camera, args=(name, config,
-                self.camera_process_info[name]))
+                self.camera_metrics[name]))
             capture_process.daemon = True
-            self.camera_process_info[name]['capture_process'] = capture_process
+            self.camera_metrics[name]['capture_process'] = capture_process
             capture_process.start()
-            print(f"Camera process started for {name}: {capture_process.pid}")
+            print(f"Capture process started for {name}: {capture_process.pid}")
+    
+    def start_event_processor(self):
+        self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.stop_event)
+        self.event_processor.start()
 
     def start_watchdog(self):
         pass
@@ -173,6 +182,7 @@ class FrigateApp():
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_event_processor()
         self.start_watchdog()
         self.flask_app.run(host='0.0.0.0', port=self.config['web_port'], debug=False)
         self.stop()
@@ -182,6 +192,7 @@ class FrigateApp():
         self.stop_event.set()
 
         self.detected_frames_processor.join()
+        self.event_processor.join()
 
         for detector in self.detectors.values():
             detector.stop()
