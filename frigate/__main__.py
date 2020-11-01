@@ -13,7 +13,7 @@ from frigate.http import create_app
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
-from frigate.video import get_frame_shape
+from frigate.video import get_frame_shape, track_camera
 
 class FrigateApp():
     def __init__(self):
@@ -93,8 +93,26 @@ class FrigateApp():
             self.detected_frames_queue, self.event_queue, self.stop_event)
         self.detected_frames_processor.start()
 
-    def start_frame_processors(self):
-        pass
+    def start_camera_processors(self):
+        self.camera_process_info = {}
+        for name, config in self.config['cameras'].items():
+            self.camera_process_info[name] = {
+                'camera_fps': mp.Value('d', 0.0),
+                'skipped_fps': mp.Value('d', 0.0),
+                'process_fps': mp.Value('d', 0.0),
+                'detection_fps': mp.Value('d', 0.0),
+                'detection_frame': mp.Value('d', 0.0),
+                'read_start': mp.Value('d', 0.0),
+                'ffmpeg_pid': mp.Value('i', 0),
+                'frame_queue': mp.Queue(maxsize=2)
+            }
+            camera_process = mp.Process(target=track_camera, args=(name, config,
+                self.detection_queue, self.detection_out_events[name], self.detected_frames_queue, 
+                self.camera_process_info[name]))
+            camera_process.daemon = True
+            self.camera_process_info[name]['process'] = camera_process
+            camera_process.start()
+            print(f"Camera process started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self):
         pass
@@ -110,13 +128,14 @@ class FrigateApp():
         self.init_mqtt()
         self.start_detectors()
         self.start_detected_frames_processor()
-        self.start_frame_processors()
+        self.start_camera_processors()
         self.start_camera_capture_processes()
         self.start_watchdog()
         self.flask_app.run(host='0.0.0.0', port=self.config['web_port'], debug=False)
         self.stop()
     
     def stop(self):
+        print(f"Stopping...")
         self.stop_event.set()
 
         self.detected_frames_processor.join()
