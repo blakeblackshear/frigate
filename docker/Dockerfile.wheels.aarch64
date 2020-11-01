@@ -43,7 +43,8 @@ RUN pip3 wheel --wheel-dir=/wheels \
     PyYAML \
     matplotlib \
     click \
-    tinydb
+    peewee \
+    voluptuous
 
 FROM scratch
 
