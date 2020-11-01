@@ -113,7 +113,7 @@ class FrigateApp():
         self.db.create_tables(models, safe=True)
 
     def init_web_server(self):
-        self.flask_app = create_app(self.db)
+        self.flask_app = create_app(self.config, self.db, self.camera_metrics, self.detectors, self.detected_frames_processor)
 
     def init_mqtt(self):
         # TODO: create config class
@@ -176,12 +176,12 @@ class FrigateApp():
         self.init_config()
         self.init_queues()
         self.init_database()
-        self.init_web_server()
         self.init_mqtt()
         self.start_detectors()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.init_web_server()
         self.start_event_processor()
         self.start_watchdog()
         self.flask_app.run(host='0.0.0.0', port=self.config['web_port'], debug=False)
