@@ -12,6 +12,9 @@ from frigate.edgetpu import EdgeTPUProcess
 from frigate.http import create_app
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
+from frigate.object_processing import TrackedObjectProcessor
+from frigate.video import get_frame_shape
+
 class FrigateApp():
     def __init__(self):
         self.stop_event = mp.Event()
@@ -33,7 +36,22 @@ class FrigateApp():
         
         self.config = FRIGATE_CONFIG_SCHEMA(config)
 
+        for camera_config in self.config['cameras'].values():
+            if 'width' in camera_config and 'height' in camera_config:
+                frame_shape = (camera_config['height'], camera_config['width'], 3)
+            else:
+                frame_shape = get_frame_shape(camera_config['ffmpeg']['input'])
+        
+            camera_config['frame_shape'] = frame_shape
+
         # TODO: sub in FRIGATE_ENV vars
+
+    def init_queues(self):
+        # Queue for clip processing
+        self.event_queue = mp.Queue()
+
+        # Queue for cameras to push tracked objects to
+        self.detected_frames_queue = mp.Queue(maxsize=len(self.config['cameras'].keys())*2)
 
     def init_database(self):
         self.db = SqliteExtDatabase(f"/{os.path.join(self.config['save_clips']['clips_dir'], 'frigate.db')}")
@@ -70,8 +88,10 @@ class FrigateApp():
             if detector['type'] == 'edgetpu':
                 self.detectors[name] = EdgeTPUProcess(self.detection_queue, out_events=self.detection_out_events, tf_device=detector['device'])
 
-    def start_detection_processor(self):
-        pass
+    def start_detected_frames_processor(self):
+        self.detected_frames_processor = TrackedObjectProcessor(self.config['cameras'], self.mqtt_client, self.config['mqtt']['topic_prefix'], 
+            self.detected_frames_queue, self.event_queue, self.stop_event)
+        self.detected_frames_processor.start()
 
     def start_frame_processors(self):
         pass
@@ -84,11 +104,12 @@ class FrigateApp():
 
     def start(self):
         self.init_config()
+        self.init_queues()
         self.init_database()
         self.init_web_server()
         self.init_mqtt()
         self.start_detectors()
-        self.start_detection_processor()
+        self.start_detected_frames_processor()
         self.start_frame_processors()
         self.start_camera_capture_processes()
         self.start_watchdog()
@@ -97,6 +118,8 @@ class FrigateApp():
     
     def stop(self):
         self.stop_event.set()
+
+        self.detected_frames_processor.join()
 
         for detector in self.detectors.values():
             detector.stop()
