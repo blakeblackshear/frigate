@@ -241,7 +241,7 @@ def capture_camera(name, config, process_info, stop_event):
     camera_watchdog.start()
     camera_watchdog.join()
 
-def track_camera(name, config, detection_queue, result_connection, detected_objects_queue, process_info, stop_event):
+def track_camera(name, config, detection_queue, result_connection, detected_objects_queue, process_info):
     listen()
 
     frame_queue = process_info['frame_queue']
@@ -282,7 +282,7 @@ def track_camera(name, config, detection_queue, result_connection, detected_obje
     frame_manager = SharedMemoryFrameManager()
 
     process_frames(name, frame_queue, frame_shape, frame_manager, motion_detector, object_detector,
-        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask, stop_event)
+        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask)
 
     print(f"{name}: exiting subprocess")
 
@@ -319,7 +319,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue, process_info: Dict,
-    objects_to_track: List[str], object_filters: Dict, mask, stop_event: mp.Event,
+    objects_to_track: List[str], object_filters: Dict, mask,
     exit_on_empty: bool = False):
     
     fps = process_info['process_fps']
@@ -330,9 +330,9 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
     fps_tracker.start()
 
     while True:
-        if stop_event.is_set() or (exit_on_empty and frame_queue.empty()):
-                print(f"Exiting track_objects...")
-                break
+        if exit_on_empty and frame_queue.empty():
+            print(f"Exiting track_objects...")
+            break
 
         try:
             frame_time = frame_queue.get(True, 10)
