@@ -4,7 +4,7 @@ import json
 import yaml
 import multiprocessing as mp
 
-from playhouse.sqlite_ext import *
+from playhouse.sqlite_ext import SqliteExtDatabase
 from typing import Dict, List
 
 from frigate.config import FRIGATE_CONFIG_SCHEMA
@@ -28,18 +28,33 @@ class FrigateApp():
         self.camera_metrics = {}
     
     def init_config(self):
+        # TODO: sub in FRIGATE_ENV vars
+        frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
         config_file = os.environ.get('CONFIG_FILE', '/config/config.yml')
 
-        if config_file.endswith(".yml"):
-            with open(config_file) as f:
-                config = yaml.safe_load(f)
+        with open(config_file) as f:
+            raw_config = f.read()
+        
+        if config_file.endswith(".yml"):    
+            config = yaml.load(raw_config)
         elif config_file.endswith(".json"):
-            with open(config_file) as f:
-                config = json.load(f)
+            config = json.loads(raw_config)
         
         self.config = FRIGATE_CONFIG_SCHEMA(config)
 
+        if 'password' in self.config['mqtt']:
+            self.config['mqtt']['password'] = self.config['mqtt']['password'].format(**frigate_env_vars)
+
+        cache_dir = self.config['save_clips']['cache_dir']
+        clips_dir = self.config['save_clips']['clips_dir']
+
+        if not os.path.exists(cache_dir) and not os.path.islink(cache_dir):
+            os.makedirs(cache_dir)
+        if not os.path.exists(clips_dir) and not os.path.islink(clips_dir):
+            os.makedirs(clips_dir)
+
         for camera_name, camera_config in self.config['cameras'].items():
+
             # set shape
             if 'width' in camera_config and 'height' in camera_config:
                 frame_shape = (camera_config['height'], camera_config['width'], 3)
@@ -50,7 +65,7 @@ class FrigateApp():
 
             # build ffmpeg command
             ffmpeg = camera_config['ffmpeg']
-            ffmpeg_input = ffmpeg['input']
+            ffmpeg_input = ffmpeg['input'].format(**frigate_env_vars)
             ffmpeg_global_args = ffmpeg.get('global_args', self.config['ffmpeg']['global_args'])
             ffmpeg_hwaccel_args = ffmpeg.get('hwaccel_args', self.config['ffmpeg']['hwaccel_args'])
             ffmpeg_input_args = ffmpeg.get('input_args', self.config['ffmpeg']['input_args'])
@@ -97,8 +112,6 @@ class FrigateApp():
                 'ffmpeg_pid': mp.Value('i', 0),
                 'frame_queue': mp.Queue(maxsize=2)
             }
-
-        # TODO: sub in FRIGATE_ENV vars
 
     def init_queues(self):
         # Queue for clip processing
