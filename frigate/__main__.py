@@ -15,6 +15,7 @@ from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.video import get_frame_shape, track_camera, get_ffmpeg_input, capture_camera
+from frigate.watchdog import FrigateWatchdog
 
 class FrigateApp():
     def __init__(self):
@@ -170,7 +171,8 @@ class FrigateApp():
         self.event_processor.start()
 
     def start_watchdog(self):
-        pass
+        self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+        self.frigate_watchdog.start()
 
     def start(self):
         self.init_config()
@@ -193,6 +195,7 @@ class FrigateApp():
 
         self.detected_frames_processor.join()
         self.event_processor.join()
+        self.frigate_watchdog.join()
 
         for detector in self.detectors.values():
             detector.stop()
