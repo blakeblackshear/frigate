@@ -99,7 +99,7 @@ class LocalObjectDetector(ObjectDetector):
         
         return detections
 
-def run_detector(detection_queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
+def run_detector(detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
     print(f"Starting detection process: {os.getpid()}")
     listen()
     frame_manager = SharedMemoryFrameManager()
