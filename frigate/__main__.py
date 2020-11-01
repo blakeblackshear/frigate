@@ -1,18 +1,25 @@
+import faulthandler; faulthandler.enable()
 import os 
 import json
 import yaml
 import multiprocessing as mp
 
 from playhouse.sqlite_ext import *
+from typing import Dict, List
 
 from frigate.config import FRIGATE_CONFIG_SCHEMA
+from frigate.edgetpu import EdgeTPUProcess
 from frigate.http import create_app
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 class FrigateApp():
-    def __init__(self, stop: mp.Event):
-        self.stop = stop
-        self.config = None
+    def __init__(self):
+        self.stop_event = mp.Event()
+        self.config: dict = None
+        self.detection_queue = mp.Queue()
+        self.detectors: Dict[str: EdgeTPUProcess] = {}
+        self.detection_out_events: Dict[str: mp.Event] = {}
+        self.detection_shms: List[mp.shared_memory.SharedMemory] = []
     
     def init_config(self):
         config_file = os.environ.get('CONFIG_FILE', '/config/config.yml')
@@ -50,7 +57,18 @@ class FrigateApp():
         )
 
     def start_detectors(self):
-        pass
+        for name in self.config['cameras'].keys():
+            self.detection_out_events[name] = mp.Event()
+            shm_in = mp.shared_memory.SharedMemory(name=name, create=True, size=300*300*3)
+            shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}", create=True, size=20*6*4)
+            self.detection_shms.append(shm_in)
+            self.detection_shms.append(shm_out)
+
+        for name, detector in self.config['detectors'].items():
+            if detector['type'] == 'cpu':
+                self.detectors[name] = EdgeTPUProcess(self.detection_queue, out_events=self.detection_out_events, tf_device='cpu')
+            if detector['type'] == 'edgetpu':
+                self.detectors[name] = EdgeTPUProcess(self.detection_queue, out_events=self.detection_out_events, tf_device=detector['device'])
 
     def start_detection_processor(self):
         pass
@@ -75,10 +93,20 @@ class FrigateApp():
         self.start_camera_capture_processes()
         self.start_watchdog()
         self.flask_app.run(host='0.0.0.0', port=self.config['web_port'], debug=False)
+        self.stop()
+    
+    def stop(self):
+        self.stop_event.set()
+
+        for detector in self.detectors.values():
+            detector.stop()
+
+        while len(self.detection_shms) > 0:
+            shm = self.detection_shms.pop()
+            shm.close()
+            shm.unlink()
 
 if __name__ == '__main__':
-    # register stop handler
-    stop_event = mp.Event()
-    frigate_app = FrigateApp(stop_event)
+    frigate_app = FrigateApp()
+
     frigate_app.start()
-    # main()
