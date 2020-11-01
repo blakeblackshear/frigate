@@ -1,13 +1,3 @@
-# load config
-# init database
-# connect to mqtt
-# start detection processes
-# start frame processor
-# start camera processes
-# start event processor
-# start capture processes
-# start web app
-
 import faulthandler; faulthandler.enable()
 import os
 import signal
@@ -37,6 +27,7 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.events import EventProcessor
 from frigate.util import EventsPerSecond
 from frigate.edgetpu import EdgeTPUProcess
+from frigate.config import FRIGATE_CONFIG_SCHEMA
 
 FRIGATE_VARS = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
 
@@ -326,7 +317,6 @@ def main():
     frigate_watchdog.start()
 
     def receiveSignal(signalNumber, frame):
-        print('Received:', signalNumber)
         stop_event.set()
         event_processor.join()
         object_processor.join()
@@ -477,6 +467,59 @@ def main():
 
     object_processor.join()
 
+class FrigateApp():
+    def __init__(self, stop: mp.Event):
+        self.stop = stop
+        self.config = None
+    
+    def init_config(self):
+        config_file = os.environ.get('CONFIG_FILE', '/config/config.yml')
+
+        if config_file.endswith(".yml"):
+            with open(config_file) as f:
+                config = yaml.safe_load(f)
+        elif config_file.endswith(".json"):
+            with open(config_file) as f:
+                config = json.load(f)
+        
+        self.config = FRIGATE_CONFIG_SCHEMA(config)
+
+    def init_web_server(self):
+        pass
+
+    def init_database(self):
+        pass
+
+    def init_mqtt(self):
+        pass
+
+    def start_detectors(self):
+        pass
+
+    def start_detection_processor(self):
+        pass
+
+    def start_frame_processors(self):
+        pass
+
+    def start_camera_capture_processes(self):
+        pass
+
+    def start_watchdog(self):
+        pass
+
+    def start(self):
+        self.init_config()
+        self.init_web_server()
+        self.init_database()
+        self.init_mqtt()
+        self.start_detectors()
+        self.start_detection_processor()
+        self.start_frame_processors()
+        self.start_camera_capture_processes()
+        self.start_watchdog()
+
 if __name__ == '__main__':
+    # register stop handler
     init_db()
     main()
