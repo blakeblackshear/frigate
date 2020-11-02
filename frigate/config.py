@@ -30,8 +30,8 @@ MQTT_SCHEMA = vol.Schema(
 SAVE_CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
-        vol.Optional('clips_dir', default='/clips'): str,
-        vol.Optional('cache_dir', default='/cache'): str
+        vol.Optional('clips_dir', default='/media/frigate/clips'): str,
+        vol.Optional('cache_dir', default='/tmp/cache'): str
     }
 )
 

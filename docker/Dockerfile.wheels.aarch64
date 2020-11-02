@@ -42,9 +42,7 @@ RUN pip3 wheel --wheel-dir=/wheels \
     paho-mqtt \
     PyYAML \
     matplotlib \
-    click \
-    peewee \
-    voluptuous
+    click
 
 FROM scratch
 

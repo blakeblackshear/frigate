@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update \
     && apt-get upgrade -y \
     && apt-get -qq install --no-install-recommends -y \
-    gnupg wget unzip tzdata \
+    gnupg wget unzip tzdata nginx \
     && apt-get -qq install --no-install-recommends -y \
         python3-pip \
     && pip3 install -U /wheels/*.whl \
@@ -26,6 +26,12 @@ RUN apt-get -qq update \
         libedgetpu1-max=15.0 \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
+
+RUN pip3 install \
+    peewee \
+    voluptuous
+
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # get model and labels
 ARG MODEL_REFS=7064b94dd5b996189242320359dbab8b52c94a84
@@ -38,4 +44,7 @@ RUN mkdir /cache /clips
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 
-CMD ["python3", "-u", "-m", "frigate"]
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
+
+CMD ["/run.sh"]
