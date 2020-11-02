@@ -36,7 +36,7 @@ class FrigateApp():
             raw_config = f.read()
         
         if config_file.endswith(".yml"):    
-            config = yaml.load(raw_config)
+            config = yaml.safe_load(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
         
