@@ -179,10 +179,10 @@ save_clips:
   #       will begin to expire and the resulting clip will be the last x seconds of the event.
   max_seconds: 300
   # Optional: Location to save event clips. (default: shown below)
-  clips_dir: /clips
+  clips_dir: /media/frigate/clips
   # Optional: Location to save cache files for creating clips. (default: shown below)
   # NOTE: To reduce wear on SSDs and SD cards, use a tmpfs volume.
-  cache_dir: /cache
+  cache_dir: /tmp/cache
 
 # Optional: Global ffmpeg args
 # "ffmpeg" + global_args + input_args + "-i" + input + output_args
