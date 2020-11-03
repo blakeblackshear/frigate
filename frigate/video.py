@@ -14,44 +14,11 @@ import json
 import base64
 from typing import Dict, List
 from collections import defaultdict
+from frigate.config import CameraConfig
 from frigate.util import draw_box_with_label, yuv_region_2_rgb, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, SharedMemoryFrameManager
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
-
-def get_frame_shape(source):
-    ffprobe_cmd = " ".join([
-        'ffprobe',
-        '-v',
-        'panic',
-        '-show_error',
-        '-show_streams',
-        '-of',
-        'json',
-        '"'+source+'"'
-    ])
-    print(ffprobe_cmd)
-    p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    info = json.loads(output)
-    print(info)
-
-    video_info = [s for s in info['streams'] if s['codec_type'] == 'video'][0]
-
-    if video_info['height'] != 0 and video_info['width'] != 0:
-        return (video_info['height'], video_info['width'], 3)
-    
-    # fallback to using opencv if ffprobe didnt succeed
-    video = cv2.VideoCapture(source)
-    ret, frame = video.read()
-    frame_shape = frame.shape
-    video.release()
-    return frame_shape
-
-def get_ffmpeg_input(ffmpeg_input):
-    frigate_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
-    return ffmpeg_input.format(**frigate_vars)
 
 def filtered(obj, objects_to_track, object_filters, mask=None):
     object_name = obj[0]
@@ -64,16 +31,16 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
 
         # if the min area is larger than the
         # detected object, don't add it to detected objects
-        if obj_settings.get('min_area',-1) > obj[3]:
+        if obj_settings.min_area > obj[3]:
             return True
         
         # if the detected object is larger than the
         # max area, don't add it to detected objects
-        if obj_settings.get('max_area', 24000000) < obj[3]:
+        if obj_settings.max_area < obj[3]:
             return True
 
         # if the score is lower than the min_score, skip
-        if obj_settings.get('min_score', 0) > obj[1]:
+        if obj_settings.min_score > obj[1]:
             return True
     
         # compute the coordinates of the object and make sure
@@ -118,7 +85,7 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
 def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
     frame_queue, fps:mp.Value, skipped_fps: mp.Value, current_frame: mp.Value):
 
-    frame_size = frame_shape[0] * frame_shape[1] * 3 // 2
+    frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
     frame_rate.start()
     skipped_eps = EventsPerSecond()
@@ -166,8 +133,8 @@ class CameraWatchdog(threading.Thread):
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
-        self.frame_shape = self.config['frame_shape']
-        self.frame_size = self.frame_shape[0] * self.frame_shape[1] * 3 // 2
+        self.frame_shape = self.config.frame_shape_yuv
+        self.frame_size = self.frame_shape[0] * self.frame_shape[1]
 
     def run(self):
         self.start_ffmpeg()
@@ -192,7 +159,7 @@ class CameraWatchdog(threading.Thread):
             time.sleep(10)
     
     def start_ffmpeg(self):
-        self.ffmpeg_process = start_or_restart_ffmpeg(self.config['ffmpeg_cmd'], self.frame_size)
+        self.ffmpeg_process = start_or_restart_ffmpeg(self.config.ffmpeg_cmd, self.frame_size)
         self.ffmpeg_pid.value = self.ffmpeg_process.pid
         self.capture_thread = CameraCapture(self.name, self.ffmpeg_process, self.frame_shape, self.frame_queue, 
             self.camera_fps)
@@ -203,7 +170,6 @@ class CameraCapture(threading.Thread):
         threading.Thread.__init__(self)
         self.name = name
         self.frame_shape = frame_shape
-        self.frame_size = frame_shape[0] * frame_shape[1] * frame_shape[2]
         self.frame_queue = frame_queue
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
@@ -217,44 +183,21 @@ class CameraCapture(threading.Thread):
         capture_frames(self.ffmpeg_process, self.name, self.frame_shape, self.frame_manager, self.frame_queue,
             self.fps, self.skipped_fps, self.current_frame)
 
-def capture_camera(name, config, process_info):
+def capture_camera(name, config: CameraConfig, process_info):
     frame_queue = process_info['frame_queue']
     camera_watchdog = CameraWatchdog(name, config, frame_queue, process_info['camera_fps'], process_info['ffmpeg_pid'])
     camera_watchdog.start()
     camera_watchdog.join()
 
-def track_camera(name, config, detection_queue, result_connection, detected_objects_queue, process_info):
+def track_camera(name, config: CameraConfig, detection_queue, result_connection, detected_objects_queue, process_info):
     listen()
 
     frame_queue = process_info['frame_queue']
 
-    frame_shape = config['frame_shape']
-
-    # Merge the tracked object config with the global config
-    camera_objects_config = config.get('objects', {})
-    objects_to_track = camera_objects_config.get('track', [])
-    object_filters = camera_objects_config.get('filters', {})
-
-    # load in the mask for object detection
-    if 'mask' in config:
-        if config['mask'].startswith('base64,'):
-            img = base64.b64decode(config['mask'][7:]) 
-            npimg = np.fromstring(img, dtype=np.uint8)
-            mask = cv2.imdecode(npimg, cv2.IMREAD_GRAYSCALE)
-        elif config['mask'].startswith('poly,'):
-            points = config['mask'].split(',')[1:]
-            contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
-            mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
-            mask[:] = 255
-            cv2.fillPoly(mask, pts=[contour], color=(0))
-        else:
-            mask = cv2.imread("/config/{}".format(config['mask']), cv2.IMREAD_GRAYSCALE)
-    else:
-        mask = None
-
-    if mask is None or mask.size == 0:
-        mask = np.zeros((frame_shape[0], frame_shape[1]), np.uint8)
-        mask[:] = 255
+    frame_shape = config.frame_shape
+    objects_to_track = config.objects.track
+    object_filters = config.objects.filters
+    mask = config.mask
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
     object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection)
@@ -301,7 +244,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue, process_info: Dict,
-    objects_to_track: List[str], object_filters: Dict, mask,
+    objects_to_track: List[str], object_filters, mask,
     exit_on_empty: bool = False):
     
     fps = process_info['process_fps']

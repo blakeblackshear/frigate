@@ -1,7 +1,9 @@
 import paho.mqtt.client as mqtt
 
-def create_mqtt_client(host: str, port: int, client_id: str, topic_prefix: str, user: str, password: str):
-    client = mqtt.Client(client_id=client_id)
+from frigate.config import MqttConfig
+
+def create_mqtt_client(config: MqttConfig):
+    client = mqtt.Client(client_id=config.client_id)
     def on_connect(client, userdata, flags, rc):
         # TODO: use logging library
         print("On connect called")
@@ -14,11 +16,11 @@ def create_mqtt_client(host: str, port: int, client_id: str, topic_prefix: str, 
                 print ("MQTT Not authorized")
             else:
                 print ("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
-        client.publish(topic_prefix+'/available', 'online', retain=True)       
+        client.publish(config.topic_prefix+'/available', 'online', retain=True)       
     client.on_connect = on_connect
-    client.will_set(topic_prefix+'/available', payload='offline', qos=1, retain=True)
-    if not user is None:
-        client.username_pw_set(user, password=password)
-    client.connect(host, port, 60)
+    client.will_set(config.topic_prefix+'/available', payload='offline', qos=1, retain=True)
+    if not config.user is None:
+        client.username_pw_set(config.user, password=config.password)
+    client.connect(config.host, config.port, 60)
     client.loop_start()
     return client
