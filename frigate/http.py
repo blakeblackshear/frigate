@@ -75,7 +75,7 @@ def stats():
 
 @bp.route('/<camera_name>/<label>/best.jpg')
 def best(camera_name, label):
-    if camera_name in current_app.frigate_config['cameras']:
+    if camera_name in current_app.frigate_config.cameras:
         best_object = current_app.detected_frames_processor.get_best(camera_name, label)
         best_frame = best_object.get('frame')
         if best_frame is None:
@@ -103,7 +103,7 @@ def best(camera_name, label):
 def mjpeg_feed(camera_name):
     fps = int(request.args.get('fps', '3'))
     height = int(request.args.get('h', '360'))
-    if camera_name in current_app.frigate_config['cameras']:
+    if camera_name in current_app.frigate_config.cameras:
         # return a multipart response
         return Response(imagestream(current_app.detected_frames_processor, camera_name, fps, height),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -112,7 +112,7 @@ def mjpeg_feed(camera_name):
 
 @bp.route('/<camera_name>/latest.jpg')
 def latest_frame(camera_name):
-    if camera_name in current_app.frigate_config['cameras']:
+    if camera_name in current_app.frigate_config.cameras:
         # max out at specified FPS
         frame = current_app.detected_frames_processor.get_current_frame(camera_name)
         if frame is None:

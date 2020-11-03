@@ -4,13 +4,45 @@ import time
 import signal
 import traceback
 import collections
+import json
 import numpy as np
+import subprocess as sp
 import cv2
 import threading
 import matplotlib.pyplot as plt
 import hashlib
 from multiprocessing import shared_memory
 from typing import AnyStr
+
+def get_frame_shape(source):
+    ffprobe_cmd = " ".join([
+        'ffprobe',
+        '-v',
+        'panic',
+        '-show_error',
+        '-show_streams',
+        '-of',
+        'json',
+        '"'+source+'"'
+    ])
+    print(ffprobe_cmd)
+    p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
+    (output, err) = p.communicate()
+    p_status = p.wait()
+    info = json.loads(output)
+    print(info)
+
+    video_info = [s for s in info['streams'] if s['codec_type'] == 'video'][0]
+
+    if video_info['height'] != 0 and video_info['width'] != 0:
+        return (video_info['height'], video_info['width'], 3)
+    
+    # fallback to using opencv if ffprobe didnt succeed
+    video = cv2.VideoCapture(source)
+    ret, frame = video.read()
+    frame_shape = frame.shape
+    video.release()
+    return frame_shape
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
