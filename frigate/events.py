@@ -14,8 +14,8 @@ class EventProcessor(threading.Thread):
     def __init__(self, config, camera_processes, event_queue, stop_event):
         threading.Thread.__init__(self)
         self.config = config
-        self.cache_dir = self.config['save_clips']['cache_dir']
-        self.clips_dir = self.config['save_clips']['clips_dir']
+        self.cache_dir = self.config.save_clips.cache_dir
+        self.clips_dir = self.config.save_clips.clips_dir
         self.camera_processes = camera_processes
         self.cached_clips = {}
         self.event_queue = event_queue
@@ -77,7 +77,7 @@ class EventProcessor(threading.Thread):
             earliest_event = datetime.datetime.now().timestamp()
 
         # if the earliest event exceeds the max seconds, cap it
-        max_seconds = self.config['save_clips']['max_seconds']
+        max_seconds = self.config.save_clips.max_seconds
         if datetime.datetime.now().timestamp()-earliest_event > max_seconds:
             earliest_event = datetime.datetime.now().timestamp()-max_seconds
         
@@ -163,15 +163,16 @@ class EventProcessor(threading.Thread):
 
             self.refresh_cache()
 
-            save_clips_config = self.config['cameras'][camera].get('save_clips', {})
+            save_clips_config = self.config.cameras[camera].save_clips
 
             # if save clips is not enabled for this camera, just continue
-            if not save_clips_config.get('enabled', False):
+            if not save_clips_config.enabled:
                 continue
 
             # if specific objects are listed for this camera, only save clips for them
-            if 'objects' in save_clips_config:
-                if not event_data['label'] in save_clips_config['objects']:
+            # TODO: default to all tracked objects rather than checking for None
+            if save_clips_config.objects:
+                if not event_data['label'] in save_clips_config.objects:
                     continue
 
             if event_type == 'start':
@@ -190,7 +191,7 @@ class EventProcessor(threading.Thread):
                 )
 
                 if len(self.cached_clips) > 0 and not event_data['false_positive']:
-                    self.create_clip(camera, event_data, save_clips_config.get('pre_capture', 30))
+                    self.create_clip(camera, event_data, save_clips_config.pre_capture)
                 del self.events_in_process[event_data['id']]
 
                 
