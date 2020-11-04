@@ -1,6 +1,7 @@
 import faulthandler; faulthandler.enable()
 import sys
 import threading
+
 threading.current_thread().name = "frigate"
 
 from frigate.app import FrigateApp

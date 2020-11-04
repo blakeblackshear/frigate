@@ -1,18 +1,20 @@
-from abc import ABC, abstractmethod
-import datetime
-import time
-import signal
-import traceback
 import collections
-import json
-import numpy as np
-import subprocess as sp
-import cv2
-import threading
-import matplotlib.pyplot as plt
+import datetime
 import hashlib
+import json
+import signal
+import subprocess as sp
+import threading
+import time
+import traceback
+from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from typing import AnyStr
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
