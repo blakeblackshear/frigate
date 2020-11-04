@@ -1,25 +1,30 @@
-import os
-import time
-import datetime
-import cv2
-import queue
-import threading
-import logging
-import ctypes
-import multiprocessing as mp
-import subprocess as sp
-import numpy as np
+import base64
 import copy
+import ctypes
+import datetime
 import itertools
 import json
-import base64
-from typing import Dict, List
+import logging
+import multiprocessing as mp
+import os
+import queue
+import subprocess as sp
+import threading
+import time
 from collections import defaultdict
+from typing import Dict, List
+
+import cv2
+import numpy as np
+
 from frigate.config import CameraConfig
-from frigate.util import draw_box_with_label, yuv_region_2_rgb, area, calculate_region, clipped, intersection_over_union, intersection, EventsPerSecond, listen, FrameManager, SharedMemoryFrameManager
-from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
+from frigate.objects import ObjectTracker
+from frigate.util import (EventsPerSecond, FrameManager,
+                          SharedMemoryFrameManager, area, calculate_region,
+                          clipped, draw_box_with_label, intersection,
+                          intersection_over_union, listen, yuv_region_2_rgb)
 
 logger = logging.getLogger(__name__)
 

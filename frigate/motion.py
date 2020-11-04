@@ -2,6 +2,7 @@ import cv2
 import imutils
 import numpy as np
 
+
 class MotionDetector():
     def __init__(self, frame_shape, mask, resize_factor=4):
         self.frame_shape = frame_shape

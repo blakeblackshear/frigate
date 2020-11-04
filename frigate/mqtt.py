@@ -1,6 +1,7 @@
 import logging
-import paho.mqtt.client as mqtt
 import threading
+
+import paho.mqtt.client as mqtt
 
 from frigate.config import MqttConfig
 

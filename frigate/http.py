@@ -3,10 +3,8 @@ import time
 
 import cv2
 import numpy as np
-
-from flask import (
-    Flask, Blueprint, jsonify, request, Response, current_app, make_response
-)
+from flask import (Blueprint, Flask, Response, current_app, jsonify,
+                   make_response, request)
 from peewee import SqliteDatabase
 from playhouse.shortcuts import model_to_dict
 
