@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import voluptuous as vol
 
-from frigate.util import get_frame_shape
-
 DETECTORS_SCHEMA = vol.Schema(
     {
         vol.Required(str): {

@@ -4,6 +4,7 @@ import datetime
 import cv2
 import queue
 import threading
+import logging
 import ctypes
 import multiprocessing as mp
 import subprocess as sp
@@ -19,6 +20,8 @@ from frigate.util import draw_box_with_label, yuv_region_2_rgb, area, calculate_
 from frigate.objects import ObjectTracker
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.motion import MotionDetector
+
+logger = logging.getLogger(__name__)
 
 def filtered(obj, objects_to_track, object_filters, mask=None):
     object_name = obj[0]
@@ -66,19 +69,19 @@ def create_tensor_input(frame, region):
 
 def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
     if not ffmpeg_process is None:
-        print("Terminating the existing ffmpeg process...")
+        logger.info("Terminating the existing ffmpeg process...")
         ffmpeg_process.terminate()
         try:
-            print("Waiting for ffmpeg to exit gracefully...")
+            logger.info("Waiting for ffmpeg to exit gracefully...")
             ffmpeg_process.communicate(timeout=30)
         except sp.TimeoutExpired:
-            print("FFmpeg didnt exit. Force killing...")
+            logger.info("FFmpeg didnt exit. Force killing...")
             ffmpeg_process.kill()
             ffmpeg_process.communicate()
         ffmpeg_process = None
 
-    print("Creating ffmpeg process...")
-    print(" ".join(ffmpeg_cmd))
+    logger.info("Creating ffmpeg process...")
+    logger.info(" ".join(ffmpeg_cmd))
     process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
     return process
 
@@ -100,10 +103,10 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
         try:
           frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except:
-          print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
+          logger.info(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
 
           if ffmpeg_process.poll() != None:
-              print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
+              logger.info(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
               frame_manager.delete(frame_name)
               break
           
@@ -145,13 +148,13 @@ class CameraWatchdog(threading.Thread):
             if not self.capture_thread.is_alive():
                 self.start_ffmpeg()
             elif now - self.capture_thread.current_frame.value > 5:
-                print(f"No frames received from {self.name} in 5 seconds. Exiting ffmpeg...")
+                logger.info(f"No frames received from {self.name} in 5 seconds. Exiting ffmpeg...")
                 self.ffmpeg_process.terminate()
                 try:
-                    print("Waiting for ffmpeg to exit gracefully...")
+                    logger.info("Waiting for ffmpeg to exit gracefully...")
                     self.ffmpeg_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
-                    print("FFmpeg didnt exit. Force killing...")
+                    logger.info("FFmpeg didnt exit. Force killing...")
                     self.ffmpeg_process.kill()
                     self.ffmpeg_process.communicate()
             
@@ -209,7 +212,7 @@ def track_camera(name, config: CameraConfig, detection_queue, result_connection,
     process_frames(name, frame_queue, frame_shape, frame_manager, motion_detector, object_detector,
         object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask)
 
-    print(f"{name}: exiting subprocess")
+    logger.info(f"{name}: exiting subprocess")
 
 def reduce_boxes(boxes):
     if len(boxes) == 0:
@@ -256,7 +259,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
 
     while True:
         if exit_on_empty and frame_queue.empty():
-            print(f"Exiting track_objects...")
+            logger.info(f"Exiting track_objects...")
             break
 
         try:
@@ -269,7 +272,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         frame = frame_manager.get(f"{camera_name}{frame_time}", (frame_shape[0]*3//2, frame_shape[1]))
 
         if frame is None:
-            print(f"{camera_name}: frame {frame_time} is not in memory store.")
+            logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
         # look for motion

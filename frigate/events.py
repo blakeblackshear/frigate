@@ -2,6 +2,7 @@ import os
 import time
 import psutil
 import threading
+import logging
 from collections import defaultdict
 import json
 import datetime
@@ -9,6 +10,8 @@ import subprocess as sp
 import queue
 
 from frigate.models import Event
+
+logger = logging.getLogger(__name__)
 
 class EventProcessor(threading.Thread):
     def __init__(self, config, camera_processes, event_queue, stop_event):
@@ -60,7 +63,7 @@ class EventProcessor(threading.Thread):
             if p_status == 0:
                 duration = float(output.decode('utf-8').strip())
             else:
-                print(f"bad file: {f}")
+                logger.info(f"bad file: {f}")
                 os.remove(os.path.join(self.cache_dir,f))
                 continue
 
@@ -133,7 +136,7 @@ class EventProcessor(threading.Thread):
 
         p = sp.run(ffmpeg_cmd, input="\n".join(playlist_lines), encoding='ascii', capture_output=True)
         if p.returncode != 0:
-            print(p.stderr)
+            logger.error(p.stderr)
             return
         
         with open(f"{os.path.join(self.clips_dir, clip_name)}.json", 'w') as outfile:
@@ -151,7 +154,7 @@ class EventProcessor(threading.Thread):
     def run(self):
         while True:
             if self.stop_event.is_set():
-                print(f"Exiting event processor...")
+                logger.info(f"Exiting event processor...")
                 break
 
             try:
