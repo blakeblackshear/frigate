@@ -5,6 +5,7 @@ import time
 import copy
 import cv2
 import threading
+import logging
 import queue
 import copy
 import numpy as np
@@ -16,6 +17,8 @@ from frigate.edgetpu import load_labels
 from frigate.config import CameraConfig
 from typing import Callable, Dict
 from statistics import mean, median
+
+logger = logging.getLogger(__name__)
 
 PATH_TO_LABELS = '/labelmap.txt'
 
@@ -366,7 +369,7 @@ class TrackedObjectProcessor(threading.Thread):
     def run(self):
         while True:
             if self.stop_event.is_set():
-                print(f"Exiting object processor...")
+                logger.info(f"Exiting object processor...")
                 break
 
             try:

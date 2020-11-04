@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import multiprocessing as mp
 import queue
+import logging
 from multiprocessing.connection import Connection
 from abc import ABC, abstractmethod
 from typing import Dict
@@ -10,6 +11,8 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 from frigate.util import EventsPerSecond, listen, SharedMemoryFrameManager
+
+logger = logging.getLogger(__name__)
 
 def load_labels(path, encoding='utf-8'):
   """Loads labels from file (with or without index numbers).
@@ -51,11 +54,11 @@ class LocalObjectDetector(ObjectDetector):
 
         if tf_device != 'cpu':
             try:
-                print(f"Attempting to load TPU as {device_config['device']}")
+                logging.info(f"Attempting to load TPU as {device_config['device']}")
                 edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', device_config)
-                print("TPU found")
+                logging.info("TPU found")
             except ValueError:
-                print("No EdgeTPU detected. Falling back to CPU.")
+                logging.info("No EdgeTPU detected. Falling back to CPU.")
         
         if edge_tpu_delegate is None:
             self.interpreter = tflite.Interpreter(
@@ -100,7 +103,7 @@ class LocalObjectDetector(ObjectDetector):
         return detections
 
 def run_detector(detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
-    print(f"Starting detection process: {os.getpid()}")
+    logging.info(f"Starting detection process: {os.getpid()}")
     listen()
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(tf_device=tf_device)
@@ -143,10 +146,10 @@ class EdgeTPUProcess():
     
     def stop(self):
         self.detect_process.terminate()
-        print("Waiting for detection process to exit gracefully...")
+        logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
         if self.detect_process.exitcode is None:
-            print("Detection process didnt exit. Force killing...")
+            logging.info("Detection process didnt exit. Force killing...")
             self.detect_process.kill()
             self.detect_process.join()
 

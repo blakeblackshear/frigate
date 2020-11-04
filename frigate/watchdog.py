@@ -1,6 +1,9 @@
 import datetime
+import logging
 import time
 import threading
+
+logger = logging.getLogger(__name__)
 
 class FrigateWatchdog(threading.Thread):
     def __init__(self, detectors, stop_event):
@@ -15,7 +18,7 @@ class FrigateWatchdog(threading.Thread):
             time.sleep(10)
 
             if self.stop_event.is_set():
-                print(f"Exiting watchdog...")
+                logger.info(f"Exiting watchdog...")
                 break
 
             now = datetime.datetime.now().timestamp()
@@ -25,8 +28,8 @@ class FrigateWatchdog(threading.Thread):
                 detection_start = detector.detection_start.value
                 if (detection_start > 0.0 and 
                     now - detection_start > 10):
-                    print("Detection appears to be stuck. Restarting detection process")
+                    logger.info("Detection appears to be stuck. Restarting detection process")
                     detector.start_or_restart()
                 elif not detector.detect_process.is_alive():
-                    print("Detection appears to have stopped. Restarting detection process")
+                    logger.info("Detection appears to have stopped. Restarting detection process")
                     detector.start_or_restart()
