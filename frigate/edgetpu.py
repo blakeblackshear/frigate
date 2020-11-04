@@ -1,16 +1,19 @@
-import os
 import datetime
 import hashlib
-import multiprocessing as mp
-import queue
 import logging
-from multiprocessing.connection import Connection
+import multiprocessing as mp
+import os
+import queue
+import threading
 from abc import ABC, abstractmethod
+from multiprocessing.connection import Connection
 from typing import Dict
+
 import numpy as np
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
-from frigate.util import EventsPerSecond, listen, SharedMemoryFrameManager
+
+from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +105,8 @@ class LocalObjectDetector(ObjectDetector):
         
         return detections
 
-def run_detector(detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
+def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
+    threading.current_thread().name = f"detector:{name}"
     logging.info(f"Starting detection process: {os.getpid()}")
     listen()
     frame_manager = SharedMemoryFrameManager()
@@ -135,7 +139,8 @@ def run_detector(detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg
         avg_speed.value = (avg_speed.value*9 + duration)/10
         
 class EdgeTPUProcess():
-    def __init__(self, detection_queue, out_events, tf_device=None):
+    def __init__(self, name, detection_queue, out_events, tf_device=None):
+        self.name = name
         self.out_events = out_events
         self.detection_queue = detection_queue
         self.avg_inference_speed = mp.Value('d', 0.01)
@@ -157,7 +162,7 @@ class EdgeTPUProcess():
         self.detection_start.value = 0.0
         if (not self.detect_process is None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = mp.Process(target=run_detector, args=(self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.tf_device))
+        self.detect_process = mp.Process(target=run_detector, name=f"detector:{self.name}", args=(self.name, self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.tf_device))
         self.detect_process.daemon = True
         self.detect_process.start()
 
