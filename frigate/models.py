@@ -1,6 +1,7 @@
 from peewee import *
 from playhouse.sqlite_ext import *
 
+
 class Event(Model):
     id = CharField(null=False, primary_key=True, max_length=30)
     label = CharField(index=True, max_length=20)

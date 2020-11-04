@@ -1,13 +1,14 @@
-import os
-import time
-import psutil
-import threading
-import logging
-from collections import defaultdict
-import json
 import datetime
-import subprocess as sp
+import json
+import logging
+import os
 import queue
+import subprocess as sp
+import threading
+import time
+from collections import defaultdict
+
+import psutil
 
 from frigate.models import Event
 

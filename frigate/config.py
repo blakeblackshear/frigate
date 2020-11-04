@@ -1,14 +1,13 @@
 import base64
 import json
 import os
-import yaml
-
 from typing import Dict
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import voluptuous as vol
+import yaml
 
 DETECTORS_SCHEMA = vol.Schema(
     {

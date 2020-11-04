@@ -1,16 +1,19 @@
-import time
-import datetime
-import threading
-import cv2
-import itertools
 import copy
-import numpy as np
+import datetime
+import itertools
+import multiprocessing as mp
 import random
 import string
-import multiprocessing as mp
+import threading
+import time
 from collections import defaultdict
+
+import cv2
+import numpy as np
 from scipy.spatial import distance as dist
-from frigate.util import draw_box_with_label, calculate_region
+
+from frigate.util import calculate_region, draw_box_with_label
+
 
 class ObjectTracker():
     def __init__(self, max_disappeared):

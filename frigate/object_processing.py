@@ -1,22 +1,23 @@
-import json
-import hashlib
-import datetime
-import time
 import copy
-import cv2
-import threading
+import datetime
+import hashlib
+import itertools
+import json
 import logging
 import queue
-import copy
-import numpy as np
+import threading
+import time
 from collections import Counter, defaultdict
-import itertools
-import matplotlib.pyplot as plt
-from frigate.util import draw_box_with_label, SharedMemoryFrameManager
-from frigate.edgetpu import load_labels
-from frigate.config import CameraConfig
-from typing import Callable, Dict
 from statistics import mean, median
+from typing import Callable, Dict
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+from frigate.config import CameraConfig
+from frigate.edgetpu import load_labels
+from frigate.util import SharedMemoryFrameManager, draw_box_with_label
 
 logger = logging.getLogger(__name__)
 
