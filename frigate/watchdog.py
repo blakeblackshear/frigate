@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 class FrigateWatchdog(threading.Thread):
     def __init__(self, detectors, stop_event):
         threading.Thread.__init__(self)
+        self.name = 'frigate_watchdog'
         self.detectors = detectors
         self.stop_event = stop_event
 

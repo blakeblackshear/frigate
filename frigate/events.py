@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class EventProcessor(threading.Thread):
     def __init__(self, config, camera_processes, event_queue, stop_event):
         threading.Thread.__init__(self)
+        self.name = 'event_processor'
         self.config = config
         self.cache_dir = self.config.save_clips.cache_dir
         self.clips_dir = self.config.save_clips.clips_dir

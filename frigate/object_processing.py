@@ -255,6 +255,7 @@ class CameraState():
 class TrackedObjectProcessor(threading.Thread):
     def __init__(self, camera_config: Dict[str, CameraConfig], client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
         threading.Thread.__init__(self)
+        self.name = "detected_frames_processor"
         self.camera_config = camera_config
         self.client = client
         self.topic_prefix = topic_prefix
