@@ -1,9 +1,12 @@
 import faulthandler; faulthandler.enable()
 import os 
 import json
+import logging
 import yaml
 import multiprocessing as mp
+import sys
 
+from logging.handlers import QueueHandler
 from playhouse.sqlite_ext import SqliteExtDatabase
 from typing import Dict, List
 
@@ -11,11 +14,17 @@ from frigate.config import FrigateConfig
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventProcessor
 from frigate.http import create_app
+from frigate.log import root_configurer, log_process
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.video import track_camera, capture_camera
 from frigate.watchdog import FrigateWatchdog
+
+logger = logging.getLogger(__name__)
+
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
 
 class FrigateApp():
     def __init__(self):
@@ -25,7 +34,13 @@ class FrigateApp():
         self.detectors: Dict[str, EdgeTPUProcess] = {}
         self.detection_out_events: Dict[str, mp.Event] = {}
         self.detection_shms: List[mp.shared_memory.SharedMemory] = []
+        self.log_queue = mp.Queue()
         self.camera_metrics = {}
+    
+    def init_logger(self):
+        self.log_process = mp.Process(target=log_process, args=(self.log_queue,))
+        self.log_process.start()
+        root_configurer(self.log_queue)
     
     def init_config(self):
         config_file = os.environ.get('CONFIG_FILE', '/config/config.yml')
@@ -90,7 +105,7 @@ class FrigateApp():
             camera_process.daemon = True
             self.camera_metrics[name]['process'] = camera_process
             camera_process.start()
-            print(f"Camera processor started for {name}: {camera_process.pid}")
+            logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self):
         for name, config in self.config.cameras.items():
@@ -99,7 +114,7 @@ class FrigateApp():
             capture_process.daemon = True
             self.camera_metrics[name]['capture_process'] = capture_process
             capture_process.start()
-            print(f"Capture process started for {name}: {capture_process.pid}")
+            logger.info(f"Capture process started for {name}: {capture_process.pid}")
     
     def start_event_processor(self):
         self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.stop_event)
@@ -110,6 +125,7 @@ class FrigateApp():
         self.frigate_watchdog.start()
 
     def start(self):
+        self.init_logger()
         self.init_config()
         self.init_queues()
         self.init_database()
@@ -125,7 +141,7 @@ class FrigateApp():
         self.stop()
     
     def stop(self):
-        print(f"Stopping...")
+        logger.info(f"Stopping...")
         self.stop_event.set()
 
         self.detected_frames_processor.join()
