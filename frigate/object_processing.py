@@ -52,6 +52,34 @@ def zone_filtered(obj, object_config):
         
     return False
 
+def on_edge(box, frame_shape):
+    if (
+        box[0] == 0 or
+        box[1] == 0 or
+        box[2] == frame_shape[1]-1 or
+        box[3] == frame_shape[0]-1
+    ):
+        return True
+
+def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
+    # larger is better
+    # cutoff images are less ideal, but they should also be smaller?
+    # better scores are obviously better too
+
+    # if the new_thumb is on an edge, and the current thumb is not
+    if on_edge(new_obj['box'], frame_shape) and not on_edge(current_thumb['box'], frame_shape):
+        return False
+
+    # if the score is better by more than 5%
+    if new_obj['score'] > current_thumb['score']+.05:
+        return True
+    
+    # if the area is 10% larger
+    if new_obj['area'] > current_thumb['area']*1.1:
+        return True
+    
+    return False
+
 # Maintains the state of a camera
 class CameraState():
     def __init__(self, name, config, frame_manager):
@@ -62,6 +90,7 @@ class CameraState():
         self.best_objects = {}
         self.object_status = defaultdict(lambda: 'OFF')
         self.tracked_objects = {}
+        self.thumbnail_frames = {}
         self.zone_objects = defaultdict(lambda: [])
         self._current_frame = np.zeros(self.config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
@@ -138,44 +167,63 @@ class CameraState():
         updated_ids = list(set(current_ids).intersection(previous_ids))
 
         for id in new_ids:
-            self.tracked_objects[id] = tracked_objects[id]
-            self.tracked_objects[id]['zones'] = []
-            self.tracked_objects[id]['entered_zones'] = set()
+            new_obj = self.tracked_objects[id] = tracked_objects[id]
+            new_obj['zones'] = []
+            new_obj['entered_zones'] = set()
+            new_obj['thumbnail'] = {
+                'frame': new_obj['frame_time'],
+                'box': new_obj['box'],
+                'area': new_obj['area'],
+                'region': new_obj['region'],
+                'score': new_obj['score']
+            }
 
             # start the score history
-            self.tracked_objects[id]['score_history'] = [self.tracked_objects[id]['score']]
+            new_obj['score_history'] = [self.tracked_objects[id]['score']]
 
             # calculate if this is a false positive
-            self.tracked_objects[id]['computed_score'] = self.compute_score(self.tracked_objects[id])
-            self.tracked_objects[id]['top_score'] = self.tracked_objects[id]['computed_score']
-            self.tracked_objects[id]['false_positive'] = self.false_positive(self.tracked_objects[id])
+            new_obj['computed_score'] = self.compute_score(self.tracked_objects[id])
+            new_obj['top_score'] = self.tracked_objects[id]['computed_score']
+            new_obj['false_positive'] = self.false_positive(self.tracked_objects[id])
 
             # call event handlers
             for c in self.callbacks['start']:
-                c(self.name, tracked_objects[id])
+                c(self.name, new_obj)
         
         for id in updated_ids:
             self.tracked_objects[id].update(tracked_objects[id])
 
+            updated_obj = self.tracked_objects[id]
+
             # if the object is not in the current frame, add a 0.0 to the score history
-            if self.tracked_objects[id]['frame_time'] != self.current_frame_time:
-                self.tracked_objects[id]['score_history'].append(0.0)
+            if updated_obj['frame_time'] != self.current_frame_time:
+                updated_obj['score_history'].append(0.0)
             else:
-                self.tracked_objects[id]['score_history'].append(self.tracked_objects[id]['score'])
+                updated_obj['score_history'].append(updated_obj['score'])
             # only keep the last 10 scores
-            if len(self.tracked_objects[id]['score_history']) > 10:
-                self.tracked_objects[id]['score_history'] = self.tracked_objects[id]['score_history'][-10:]
+            if len(updated_obj['score_history']) > 10:
+                updated_obj['score_history'] = updated_obj['score_history'][-10:]
 
             # calculate if this is a false positive
-            computed_score = self.compute_score(self.tracked_objects[id])
-            self.tracked_objects[id]['computed_score'] = computed_score
-            if computed_score > self.tracked_objects[id]['top_score']:
-              self.tracked_objects[id]['top_score'] = computed_score
-            self.tracked_objects[id]['false_positive'] = self.false_positive(self.tracked_objects[id])
+            computed_score = self.compute_score(updated_obj)
+            updated_obj['computed_score'] = computed_score
+            if computed_score > updated_obj['top_score']:
+                updated_obj['top_score'] = computed_score
+            updated_obj['false_positive'] = self.false_positive(updated_obj)
+
+            # determine if this frame is a better thumbnail
+            if is_better_thumbnail(updated_obj['thumbnail'], updated_obj, self.config.frame_shape):
+                updated_obj['thumbnail'] = {
+                    'frame': updated_obj['frame_time'],
+                    'box': updated_obj['box'],
+                    'area': updated_obj['area'],
+                    'region': updated_obj['region'],
+                    'score': updated_obj['score']
+                }
 
             # call event handlers
             for c in self.callbacks['update']:
-                c(self.name, self.tracked_objects[id])
+                c(self.name, updated_obj)
         
         for id in removed_ids:
             # publish events to mqtt
@@ -200,6 +248,13 @@ class CameraState():
 
                     
             obj['zones'] = current_zones
+
+        # update frame storage for thumbnails based on thumbnails for all tracked objects
+        current_thumb_frames = set([obj['thumbnail']['frame'] for obj in self.tracked_objects.values()])
+        if self.current_frame_time in current_thumb_frames:
+            self.thumbnail_frames[self.current_frame_time] = np.copy(current_frame)
+        thumb_frames_to_delete = [t for t in self.thumbnail_frames.keys() if not t in current_thumb_frames]
+        for t in thumb_frames_to_delete: del self.thumbnail_frames[t]
 
         # maintain best objects
         for obj in self.tracked_objects.values():
