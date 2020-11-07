@@ -12,6 +12,18 @@ amd64_frigate:
 
 amd64_all: amd64_wheels amd64_ffmpeg amd64_frigate
 
+amd64nvidia_wheels:
+	docker build --tag blakeblackshear/frigate-wheels:amd64nvidia --file docker/Dockerfile.wheels .
+
+amd64nvidia_ffmpeg:
+	docker build --tag blakeblackshear/frigate-ffmpeg:amd64nvidia --file docker/Dockerfile.ffmpeg.amd64 .
+
+amd64nvidia_frigate:
+	docker build --tag frigate-base --build-arg ARCH=amd64nvidia --file docker/Dockerfile.base .
+	docker build --tag frigate --file docker/Dockerfile.amd64nvidia .
+
+amd64nvidia_all: amd64nvidia_wheels amd64nvidia_ffmpeg amd64nvidia_frigate
+
 aarch64_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:aarch64 --file docker/Dockerfile.wheels.aarch64 .
 

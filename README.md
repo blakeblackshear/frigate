@@ -384,6 +384,8 @@ ffmpeg:
     - /dev/dri/renderD128
 ```
 
+Nvidia GPU based decoding via NVDEC is supported, but requires special configuration. See the [nvidia NVDEC documentation](docs/nvdec.md) for more details.
+
 [Back to top](#documentation)
 
 ## Detectors
