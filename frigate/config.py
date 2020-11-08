@@ -91,16 +91,14 @@ OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
     }
 ))
 
-DEFAULT_CAMERA_MQTT = {
-    'crop_to_region': True
-}
 DEFAULT_CAMERA_SAVE_CLIPS = {
     'enabled': False
 }
 DEFAULT_CAMERA_SNAPSHOTS = {
     'show_timestamp': True,
     'draw_zones': False,
-    'draw_bounding_boxes': True
+    'draw_bounding_boxes': True,
+    'crop_to_region': True
 }
 
 CAMERA_FFMPEG_SCHEMA = vol.Schema(
@@ -122,10 +120,6 @@ CAMERAS_SCHEMA = vol.Schema(
             'fps': int,
             'mask': str,
             vol.Optional('best_image_timeout', default=60): int,
-            vol.Optional('mqtt', default=DEFAULT_CAMERA_MQTT): {
-                vol.Optional('crop_to_region', default=True): bool,
-                'snapshot_height': int
-            },
             vol.Optional('zones', default={}):  {
                 str: {
                     vol.Required('coordinates'): vol.Any(str, [str]),
@@ -140,7 +134,9 @@ CAMERAS_SCHEMA = vol.Schema(
              vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
                 vol.Optional('show_timestamp', default=True): bool,
                 vol.Optional('draw_zones', default=False): bool,
-                vol.Optional('draw_bounding_boxes', default=True): bool
+                vol.Optional('draw_bounding_boxes', default=True): bool,
+                vol.Optional('crop_to_region', default=True): bool,
+                'height': int
              },
              'objects': OBJECTS_SCHEMA
         }
@@ -296,6 +292,8 @@ class CameraSnapshotsConfig():
         self._show_timestamp = config['show_timestamp']
         self._draw_zones = config['draw_zones']
         self._draw_bounding_boxes = config['draw_bounding_boxes']
+        self._crop_to_region = config['crop_to_region']
+        self._height = config.get('height')
     
     @property
     def show_timestamp(self):
@@ -308,6 +306,14 @@ class CameraSnapshotsConfig():
     @property
     def draw_bounding_boxes(self):
         return self._draw_bounding_boxes
+
+    @property
+    def crop_to_region(self):
+        return self._crop_to_region
+
+    @property
+    def height(self):
+        return self._height
 
 class CameraSaveClipsConfig():
     def __init__(self, config):
@@ -326,19 +332,6 @@ class CameraSaveClipsConfig():
     @property
     def objects(self):
         return self._objects
-
-class CameraMqttConfig():
-    def __init__(self, config):
-        self._crop_to_region = config['crop_to_region']
-        self._snapshot_height = config.get('snapshot_height')
-    
-    @property
-    def crop_to_region(self):
-        return self._crop_to_region
-    
-    @property
-    def snapshot_height(self):
-        return self._snapshot_height
 
 class ZoneConfig():
     def __init__(self, name, config):
@@ -391,7 +384,6 @@ class CameraConfig():
         self._fps = config.get('fps')
         self._mask = self._create_mask(config.get('mask'))
         self._best_image_timeout = config['best_image_timeout']
-        self._mqtt = CameraMqttConfig(config['mqtt'])
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
         self._save_clips = CameraSaveClipsConfig(config['save_clips'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
