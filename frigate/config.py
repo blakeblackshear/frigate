@@ -123,7 +123,7 @@ CAMERAS_SCHEMA = vol.Schema(
             vol.Optional('zones', default={}):  {
                 str: {
                     vol.Required('coordinates'): vol.Any(str, [str]),
-                    'filters': FILTER_SCHEMA
+                    vol.Optional('filters', default={}): FILTER_SCHEMA
                 }
              },
              vol.Optional('save_clips', default=DEFAULT_CAMERA_SAVE_CLIPS): {
@@ -145,7 +145,6 @@ CAMERAS_SCHEMA = vol.Schema(
 
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Optional('web_port', default=5000): int,
         vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
         'mqtt': MQTT_SCHEMA,
         vol.Optional('save_clips', default={}): SAVE_CLIPS_SCHEMA,
@@ -565,10 +564,6 @@ class FrigateConfig():
             config = json.loads(raw_config)
         
         return config
-    
-    @property
-    def web_port(self):
-        return self._web_port
     
     @property
     def detectors(self) -> Dict[str, DetectorConfig]:
