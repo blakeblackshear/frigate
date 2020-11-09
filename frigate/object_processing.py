@@ -404,7 +404,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         def end(camera, obj: TrackedObject):
             self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj.to_dict()), retain=False)
-            if self.config.cameras[camera].save_clips.enabled:
+            if self.config.cameras[camera].save_clips.enabled and not obj._false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.snapshot_jpg)
