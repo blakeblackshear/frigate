@@ -526,7 +526,6 @@ class FrigateConfig():
 
         config = self._sub_env_vars(config)
 
-        self._web_port = config['web_port']
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._save_clips = SaveClipsConfig(config['save_clips'])
