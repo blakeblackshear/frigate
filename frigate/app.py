@@ -121,6 +121,7 @@ class FrigateApp():
 
     def start(self):
         self.init_logger()
+        # TODO: exit if config doesnt parse
         self.init_config()
         self.init_queues()
         self.init_database()
@@ -132,7 +133,7 @@ class FrigateApp():
         self.init_web_server()
         self.start_event_processor()
         self.start_watchdog()
-        self.flask_app.run(host='0.0.0.0', port=self.config.web_port, debug=False)
+        self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
         self.stop()
     
     def stop(self):
