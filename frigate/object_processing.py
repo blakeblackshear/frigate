@@ -78,7 +78,8 @@ class TrackedObject():
         }
         self.frame = None
         self._snapshot_jpg_time = 0
-        self._snapshot_jpg = None
+        ret, jpg = cv2.imencode('.jpg', np.zeros((300,300,3), np.uint8))
+        self._snapshot_jpg = jpg.tobytes()
 
         # start the score history
         self.score_history = [self.obj_data['score']]
@@ -163,6 +164,12 @@ class TrackedObject():
     @property
     def snapshot_jpg(self):
         if self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
+            return self._snapshot_jpg
+        
+        if not self.thumbnail_data['frame_time'] in self.thumbnail_frames:
+            logger.error(f"Unable to create thumbnail for {self.obj_data['id']}")
+            logger.error(f"Looking for frame_time of {self.thumbnail_data['frame_time']}")
+            logger.error(f"Thumbnail frames: {','.join([str(k) for k in self.thumbnail_frames.keys()])}")
             return self._snapshot_jpg
 
         # TODO: crop first to avoid converting the entire frame?
