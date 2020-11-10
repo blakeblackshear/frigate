@@ -67,7 +67,7 @@ class TrackedObject():
         self.thumbnail_frames = thumbnail_frames
         self.current_zones = []
         self.entered_zones = set()
-        self._false_positive = True
+        self.false_positive = True
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data = {
             'frame_time': obj_data['frame_time'],
@@ -84,9 +84,9 @@ class TrackedObject():
         # start the score history
         self.score_history = [self.obj_data['score']]
 
-    def false_positive(self):
+    def _is_false_positive(self):
         # once a true positive, always a true positive
-        if not self._false_positive:
+        if not self.false_positive:
             return False
 
         threshold = self.camera_config.objects.filters[self.obj_data['label']].threshold
@@ -116,7 +116,7 @@ class TrackedObject():
         self.computed_score = self.compute_score()
         if self.computed_score > self.top_score:
             self.top_score = self.computed_score
-        self._false_positive = self.false_positive()
+        self.false_positive = self._is_false_positive()
 
         # determine if this frame is a better thumbnail
         if is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape):
@@ -150,7 +150,7 @@ class TrackedObject():
             'frame_time': self.obj_data['frame_time'],
             'label': self.obj_data['label'],
             'top_score': self.top_score,
-            'false_positive': self._false_positive,
+            'false_positive': self.false_positive,
             'start_time': self.obj_data['start_time'],
             'end_time': self.obj_data.get('end_time', None),
             'score': self.obj_data['score'],
@@ -309,7 +309,7 @@ class CameraState():
             updated_obj = self.tracked_objects[id]
             updated_obj.update(frame_time, tracked_objects[id])
 
-            if (not updated_obj._false_positive 
+            if (not updated_obj.false_positive 
                 and updated_obj.thumbnail_data['frame_time'] == frame_time 
                 and frame_time not in self.thumbnail_frames):
                 self.thumbnail_frames[frame_time] = np.copy(current_frame)
@@ -378,7 +378,7 @@ class CameraState():
                 c(self.name, self.best_objects[obj_name])
         
         # cleanup thumbnail frame cache
-        current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj._false_positive])
+        current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj.false_positive])
         thumb_frames_to_delete = [t for t in self.thumbnail_frames.keys() if not t in current_thumb_frames]
         for t in thumb_frames_to_delete:
             del self.thumbnail_frames[t]
@@ -411,7 +411,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         def end(camera, obj: TrackedObject):
             self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj.to_dict()), retain=False)
-            if self.config.cameras[camera].save_clips.enabled and not obj._false_positive:
+            if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.snapshot_jpg)
@@ -467,7 +467,7 @@ class TrackedObjectProcessor(threading.Thread):
             # update zone status for each label
             for zone in self.config.cameras[camera].zones.keys():
                 # get labels for current camera and all labels in current zone
-                labels_for_camera = set([obj.obj_data['label'] for obj in camera_state.tracked_objects.values() if zone in obj.current_zones and not obj._false_positive])
+                labels_for_camera = set([obj.obj_data['label'] for obj in camera_state.tracked_objects.values() if zone in obj.current_zones and not obj.false_positive])
                 labels_to_check = labels_for_camera | set(self.zone_data[zone].keys())
                 # for each label in zone
                 for label in labels_to_check:
