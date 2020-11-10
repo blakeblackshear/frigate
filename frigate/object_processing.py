@@ -236,7 +236,7 @@ class CameraState():
         self.config = config
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
-        self.best_objects = {}
+        self.best_objects: Dict[str, TrackedObject] = {}
         self.object_status = defaultdict(lambda: 'OFF')
         self.tracked_objects: Dict[str, TrackedObject] = {}
         self.thumbnail_frames = {}
@@ -339,18 +339,13 @@ class CameraState():
                 now = datetime.datetime.now().timestamp()
                 # if the object is a higher score than the current best score 
                 # or the current object is older than desired, use the new object
-                if is_better_thumbnail(current_best['thumbnail'], obj.thumbnail, self.camera_config.frame_shape) or (now - current_best['frame_time']) > self.config.best_image_timeout:
-                    obj_copy = copy.deepcopy(obj.obj_data)
-                    obj_copy['thumbnail'] = copy.deepcopy(obj.thumbnail_data)
-                    obj_copy['frame'] = np.copy(current_frame)
-                    self.best_objects[object_type] = obj_copy
+                if (is_better_thumbnail(current_best.thumbnail_data, obj.thumbnail_data, self.camera_config.frame_shape) 
+                    or (now - current_best.thumbnail_data['frame_time']) > self.camera_config.best_image_timeout):
+                    self.best_objects[object_type] = obj
                     for c in self.callbacks['snapshot']:
                         c(self.name, self.best_objects[object_type])
             else:
-                obj_copy = copy.deepcopy(obj)
-                obj_copy['thumbnail'] = copy.deepcopy(obj.thumbnail_data)
-                obj_copy['frame'] = np.copy(current_frame)
-                self.best_objects[object_type] = obj_copy
+                self.best_objects[object_type] = obj
                 for c in self.callbacks['snapshot']:
                     c(self.name, self.best_objects[object_type])
         
@@ -379,7 +374,8 @@ class CameraState():
         
         # cleanup thumbnail frame cache
         current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj.false_positive])
-        thumb_frames_to_delete = [t for t in self.thumbnail_frames.keys() if not t in current_thumb_frames]
+        current_best_frames = set(obj.thumbnail_data['frame_time'] for obj in self.best_objects.values())
+        thumb_frames_to_delete = [t for t in self.thumbnail_frames.keys() if not t in current_thumb_frames and not t in current_best_frames]
         for t in thumb_frames_to_delete:
             del self.thumbnail_frames[t]
         
@@ -418,7 +414,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.event_queue.put(('end', camera, obj.to_dict()))
         
         def snapshot(camera, obj: TrackedObject):
-            self.client.publish(f"{self.topic_prefix}/{camera}/{obj['label']}/snapshot", obj.snapshot_jpg, retain=True)
+            self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.snapshot_jpg, retain=True)
         
         def object_status(camera, object_name, status):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
