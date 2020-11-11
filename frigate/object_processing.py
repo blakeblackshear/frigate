@@ -60,11 +60,11 @@ def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
     return False
 
 class TrackedObject():
-    def __init__(self, camera, camera_config: CameraConfig, thumbnail_frames, obj_data):
+    def __init__(self, camera, camera_config: CameraConfig, frame_cache, obj_data):
         self.obj_data = obj_data
         self.camera = camera
         self.camera_config = camera_config
-        self.thumbnail_frames = thumbnail_frames
+        self.frame_cache = frame_cache
         self.current_zones = []
         self.entered_zones = set()
         self.false_positive = True
@@ -166,15 +166,15 @@ class TrackedObject():
         if self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
             return self._snapshot_jpg
         
-        if not self.thumbnail_data['frame_time'] in self.thumbnail_frames:
+        if not self.thumbnail_data['frame_time'] in self.frame_cache:
             logger.error(f"Unable to create thumbnail for {self.obj_data['id']}")
             logger.error(f"Looking for frame_time of {self.thumbnail_data['frame_time']}")
-            logger.error(f"Thumbnail frames: {','.join([str(k) for k in self.thumbnail_frames.keys()])}")
+            logger.error(f"Thumbnail frames: {','.join([str(k) for k in self.frame_cache.keys()])}")
             return self._snapshot_jpg
 
         # TODO: crop first to avoid converting the entire frame?
         snapshot_config = self.camera_config.snapshots
-        best_frame = cv2.cvtColor(self.thumbnail_frames[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
+        best_frame = cv2.cvtColor(self.frame_cache[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
 
         if snapshot_config.draw_bounding_boxes:
             thickness = 2
@@ -239,7 +239,7 @@ class CameraState():
         self.best_objects: Dict[str, TrackedObject] = {}
         self.object_status = defaultdict(lambda: 'OFF')
         self.tracked_objects: Dict[str, TrackedObject] = {}
-        self.thumbnail_frames = {}
+        self.frame_cache = {}
         self.zone_objects = defaultdict(lambda: [])
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
@@ -286,20 +286,20 @@ class CameraState():
     def on(self, event_type: str, callback: Callable[[Dict], None]):
         self.callbacks[event_type].append(callback)
 
-    def update(self, frame_time, tracked_objects):
+    def update(self, frame_time, current_detections):
         self.current_frame_time = frame_time
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
         current_frame = self.frame_manager.get(frame_id, self.camera_config.frame_shape_yuv)
 
-        current_ids = tracked_objects.keys()
+        current_ids = current_detections.keys()
         previous_ids = self.tracked_objects.keys()
         removed_ids = list(set(previous_ids).difference(current_ids))
         new_ids = list(set(current_ids).difference(previous_ids))
         updated_ids = list(set(current_ids).intersection(previous_ids))
 
         for id in new_ids:
-            new_obj = self.tracked_objects[id] = TrackedObject(self.name, self.camera_config, self.thumbnail_frames, tracked_objects[id])
+            new_obj = self.tracked_objects[id] = TrackedObject(self.name, self.camera_config, self.frame_cache, current_detections[id])
 
             # call event handlers
             for c in self.callbacks['start']:
@@ -307,12 +307,12 @@ class CameraState():
         
         for id in updated_ids:
             updated_obj = self.tracked_objects[id]
-            updated_obj.update(frame_time, tracked_objects[id])
+            updated_obj.update(frame_time, current_detections[id])
 
             if (not updated_obj.false_positive 
                 and updated_obj.thumbnail_data['frame_time'] == frame_time 
-                and frame_time not in self.thumbnail_frames):
-                self.thumbnail_frames[frame_time] = np.copy(current_frame)
+                and frame_time not in self.frame_cache):
+                self.frame_cache[frame_time] = np.copy(current_frame)
 
             # call event handlers
             for c in self.callbacks['update']:
@@ -374,10 +374,10 @@ class CameraState():
         
         # cleanup thumbnail frame cache
         current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj.false_positive])
-        current_best_frames = set(obj.thumbnail_data['frame_time'] for obj in self.best_objects.values())
-        thumb_frames_to_delete = [t for t in self.thumbnail_frames.keys() if not t in current_thumb_frames and not t in current_best_frames]
+        current_best_frames = set([obj.thumbnail_data['frame_time'] for obj in self.best_objects.values()])
+        thumb_frames_to_delete = [t for t in self.frame_cache.keys() if not t in current_thumb_frames and not t in current_best_frames]
         for t in thumb_frames_to_delete:
-            del self.thumbnail_frames[t]
+            del self.frame_cache[t]
         
         with self.current_frame_lock:
             self._current_frame = current_frame
