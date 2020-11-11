@@ -161,8 +161,7 @@ class TrackedObject():
             'entered_zones': list(self.entered_zones).copy()
         }
     
-    @property
-    def snapshot_jpg(self):
+    def get_jpg_bytes(self):
         if self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
             return self._snapshot_jpg
         
@@ -410,11 +409,11 @@ class TrackedObjectProcessor(threading.Thread):
             if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
-                    f.write(obj.snapshot_jpg)
+                    f.write(obj.get_jpg_bytes())
             self.event_queue.put(('end', camera, obj.to_dict()))
         
         def snapshot(camera, obj: TrackedObject):
-            self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.snapshot_jpg, retain=True)
+            self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
         
         def object_status(camera, object_name, status):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
@@ -436,9 +435,13 @@ class TrackedObjectProcessor(threading.Thread):
         self.zone_data = defaultdict(lambda: defaultdict(lambda: set()))
         
     def get_best(self, camera, label):
-        best_objects = self.camera_states[camera].best_objects
-        if label in best_objects:
-            return best_objects[label]
+        # TODO: need a lock here
+        camera_state = self.camera_states[camera]
+        if label in camera_state.best_objects:
+            best_obj = camera_state.best_objects[label]
+            best = best_obj.to_dict()
+            best['frame'] = camera_state.frame_cache[best_obj.thumbnail_data['frame_time']]
+            return best
         else:
             return {}
     
