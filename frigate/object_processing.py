@@ -69,13 +69,7 @@ class TrackedObject():
         self.entered_zones = set()
         self.false_positive = True
         self.top_score = self.computed_score = 0.0
-        self.thumbnail_data = {
-            'frame_time': obj_data['frame_time'],
-            'box': obj_data['box'],
-            'area': obj_data['area'],
-            'region': obj_data['region'],
-            'score': obj_data['score']
-        }
+        self.thumbnail_data = None
         self.frame = None
         self._snapshot_jpg_time = 0
         ret, jpg = cv2.imencode('.jpg', np.zeros((300,300,3), np.uint8))
@@ -118,15 +112,16 @@ class TrackedObject():
             self.top_score = self.computed_score
         self.false_positive = self._is_false_positive()
 
-        # determine if this frame is a better thumbnail
-        if is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape):
-            self.thumbnail_data = {
-                'frame_time': self.obj_data['frame_time'],
-                'box': self.obj_data['box'],
-                'area': self.obj_data['area'],
-                'region': self.obj_data['region'],
-                'score': self.obj_data['score']
-            }
+        if not self.false_positive:
+            # determine if this frame is a better thumbnail
+            if self.thumbnail_data is None or is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape):
+                self.thumbnail_data = {
+                    'frame_time': self.obj_data['frame_time'],
+                    'box': self.obj_data['box'],
+                    'area': self.obj_data['area'],
+                    'region': self.obj_data['region'],
+                    'score': self.obj_data['score']
+                }
         
         # check zones
         current_zones = []
@@ -311,7 +306,6 @@ class CameraState():
             if (not updated_obj.false_positive 
                 and updated_obj.thumbnail_data['frame_time'] == frame_time 
                 and frame_time not in self.frame_cache):
-                logging.info(f"Adding {frame_time} to cache.")
                 self.frame_cache[frame_time] = np.copy(current_frame)
 
             # call event handlers
@@ -377,7 +371,6 @@ class CameraState():
         current_best_frames = set([obj.thumbnail_data['frame_time'] for obj in self.best_objects.values()])
         thumb_frames_to_delete = [t for t in self.frame_cache.keys() if not t in current_thumb_frames and not t in current_best_frames]
         for t in thumb_frames_to_delete:
-            logging.info(f"Removing {t} from cache.")
             del self.frame_cache[t]
         
         with self.current_frame_lock:
