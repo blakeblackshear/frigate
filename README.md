@@ -183,6 +183,10 @@ save_clips:
   # Optional: Location to save cache files for creating clips. (default: shown below)
   # NOTE: To reduce wear on SSDs and SD cards, use a tmpfs volume.
   cache_dir: /cache
+  # Optional: Create a per camera directory for saved clips (default: false)
+  # set to true for per camera dir named after the camera, 
+  # false for clips all in the same directory
+  per_camera_dir: False
 
 # Optional: Global ffmpeg args
 # "ffmpeg" + global_args + input_args + "-i" + input + output_args

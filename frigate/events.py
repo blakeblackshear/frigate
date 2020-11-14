@@ -112,7 +112,12 @@ class EventProcessor(threading.Thread):
             if clip['start_time']+clip['duration'] > playlist_end:
                 playlist_lines.append(f"outpoint {int(playlist_end-clip['start_time'])}")
 
-        clip_name = f"{camera}-{event_data['id']}"
+        per_camera_dir = self.config.get('save_clips', {}).get('per_camera_dir', False)
+        if per_camera_dir:
+            os.makedirs(os.path.join(self.clip_dir, camera), exist_ok=True)
+        clip_name = os.path.join(camera, f"{event_data['id']}") if per_camera_dir else f"{camera}-{event_data['id']}"
+        clip_path = os.path.join(self.clip_dir, clip_name)
+
         ffmpeg_cmd = [
             'ffmpeg',
             '-y',
@@ -126,7 +131,7 @@ class EventProcessor(threading.Thread):
             '-',
             '-c',
             'copy',
-            f"{os.path.join(self.clip_dir, clip_name)}.mp4"
+            f"{clip_path}.mp4"
         ]
 
         p = sp.run(ffmpeg_cmd, input="\n".join(playlist_lines), encoding='ascii', capture_output=True)
@@ -134,7 +139,7 @@ class EventProcessor(threading.Thread):
             print(p.stderr)
             return
         
-        with open(f"{os.path.join(self.clip_dir, clip_name)}.json", 'w') as outfile:
+        with open(f"{clip_path}.json", 'w') as outfile:
             json.dump(event_data, outfile)
 
     def run(self):
