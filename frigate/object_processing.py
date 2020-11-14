@@ -157,7 +157,7 @@ class TrackedObject():
         }
     
     def get_jpg_bytes(self):
-        if self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
+        if self.thumbnail_data is None or self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
             return self._snapshot_jpg
         
         if not self.thumbnail_data['frame_time'] in self.frame_cache:
@@ -326,7 +326,7 @@ class CameraState():
         for obj in self.tracked_objects.values():
             object_type = obj.obj_data['label']
             # if the object's thumbnail is not from the current frame
-            if obj.thumbnail_data['frame_time'] != self.current_frame_time or obj.false_positive:
+            if obj.false_positive or obj.thumbnail_data['frame_time'] != self.current_frame_time:
                 continue
             if object_type in self.best_objects:
                 current_best = self.best_objects[object_type]
