@@ -311,6 +311,7 @@ class CameraState():
             if (not updated_obj.false_positive 
                 and updated_obj.thumbnail_data['frame_time'] == frame_time 
                 and frame_time not in self.frame_cache):
+                logging.info(f"Adding {frame_time} to cache.")
                 self.frame_cache[frame_time] = np.copy(current_frame)
 
             # call event handlers
@@ -376,6 +377,7 @@ class CameraState():
         current_best_frames = set([obj.thumbnail_data['frame_time'] for obj in self.best_objects.values()])
         thumb_frames_to_delete = [t for t in self.frame_cache.keys() if not t in current_thumb_frames and not t in current_best_frames]
         for t in thumb_frames_to_delete:
+            logging.info(f"Removing {t} from cache.")
             del self.frame_cache[t]
         
         with self.current_frame_lock:
