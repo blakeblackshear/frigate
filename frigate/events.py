@@ -180,7 +180,8 @@ class EventProcessor(threading.Thread):
                     end_time=event_data['end_time'],
                     top_score=event_data['top_score'],
                     false_positive=event_data['false_positive'],
-                    zones=list(event_data['entered_zones'])
+                    zones=list(event_data['entered_zones']),
+                    thumbnail=event_data['thumbnail']
                 )
 
                 if len(self.cached_clips) > 0 and not event_data['false_positive']:

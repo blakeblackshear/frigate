@@ -1,4 +1,5 @@
 import copy
+import base64
 import datetime
 import hashlib
 import itertools
@@ -138,7 +139,7 @@ class TrackedObject():
                 
         self.current_zones = current_zones
     
-    def to_dict(self):
+    def to_dict(self, include_thumbnail: bool = False):
         return {
             'id': self.obj_data['id'],
             'camera': self.camera,
@@ -153,7 +154,8 @@ class TrackedObject():
             'area': self.obj_data['area'],
             'region': self.obj_data['region'],
             'current_zones': self.current_zones.copy(),
-            'entered_zones': list(self.entered_zones).copy()
+            'entered_zones': list(self.entered_zones).copy(),
+            'thumbnail': base64.b64encode(self.get_jpg_bytes()).decode('utf-8') if include_thumbnail else None
         }
     
     def get_jpg_bytes(self):
@@ -405,7 +407,7 @@ class TrackedObjectProcessor(threading.Thread):
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.get_jpg_bytes())
-            self.event_queue.put(('end', camera, obj.to_dict()))
+            self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
         def snapshot(camera, obj: TrackedObject):
             self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
