@@ -14,8 +14,8 @@ A clear and concise description of what the bug is.
 What version are you using?
 
 **Config file**
-Include your full config file wrapped in back ticks.
-```
+Include your full config file wrapped in triple back ticks.
+```yaml
 config here
 ```
 
