@@ -11,3 +11,4 @@ class Event(Model):
     top_score = FloatField()
     false_positive = BooleanField()
     zones = JSONField()
+    thumbnail = TextField()
