@@ -172,20 +172,19 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                Event.create(
-                    id=event_data['id'],
-                    label=event_data['label'],
-                    camera=camera,
-                    start_time=event_data['start_time'],
-                    end_time=event_data['end_time'],
-                    top_score=event_data['top_score'],
-                    false_positive=event_data['false_positive'],
-                    zones=list(event_data['entered_zones']),
-                    thumbnail=event_data['thumbnail']
-                )
-
                 if len(self.cached_clips) > 0 and not event_data['false_positive']:
                     self.create_clip(camera, event_data, save_clips_config.pre_capture)
+                    Event.create(
+                        id=event_data['id'],
+                        label=event_data['label'],
+                        camera=camera,
+                        start_time=event_data['start_time'],
+                        end_time=event_data['end_time'],
+                        top_score=event_data['top_score'],
+                        false_positive=event_data['false_positive'],
+                        zones=list(event_data['entered_zones']),
+                        thumbnail=event_data['thumbnail']
+                    )
                 del self.events_in_process[event_data['id']]
 
                 
