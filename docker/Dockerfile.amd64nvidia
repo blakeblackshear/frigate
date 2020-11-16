@@ -31,7 +31,6 @@ ENV CUDA_VERSION 11.1.1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cuda-cudart-11-1=11.1.74-1 \
     cuda-compat-11-1 \
-    libnvidia-decode-455 \
     && ln -s cuda-11.1 /usr/local/cuda && \
     rm -rf /var/lib/apt/lists/*
 
@@ -44,5 +43,5 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/lib64
 
 # nvidia-container-runtime
 ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,video
 ENV NVIDIA_REQUIRE_CUDA "cuda>=11.1 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=440,driver<441 brand=tesla,driver>=450,driver<451"
