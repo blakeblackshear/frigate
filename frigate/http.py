@@ -1,12 +1,14 @@
+import datetime
 import logging
 import os
 import time
+from functools import reduce
 
 import cv2
 import numpy as np
 from flask import (Blueprint, Flask, Response, current_app, jsonify,
                    make_response, request)
-from peewee import SqliteDatabase
+from peewee import SqliteDatabase, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
@@ -42,7 +44,38 @@ def is_healthy():
 
 @bp.route('/events')
 def events():
-    events = Event.select()
+    limit = request.args.get('limit', 100)
+    camera = request.args.get('camera')
+    label = request.args.get('label')
+    zone = request.args.get('zone')
+    after = request.args.get('after', type=int)
+    before = request.args.get('before', type=int)
+
+    clauses = []
+    
+    if camera:
+        clauses.append((Event.camera == camera))
+    
+    if label:
+        clauses.append((Event.label == label))
+    
+    if zone:
+        clauses.append((Event.zones.cast('text') % f"*\"{zone}\"*"))
+    
+    if after:
+        clauses.append((Event.start_time >= after))
+    
+    if before:
+        clauses.append((Event.start_time <= before))
+
+    if len(clauses) == 0:
+        clauses.append((1 == 1))
+
+    events =    (Event.select()
+                .where(reduce(operator.and_, clauses))
+                .order_by(Event.start_time.desc())
+                .limit(limit))
+
     return jsonify([model_to_dict(e) for e in events])
 
 @bp.route('/debug/stats')
