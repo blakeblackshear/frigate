@@ -166,6 +166,12 @@ class DetectorConfig():
     @property
     def device(self):
         return self._device
+    
+    def to_dict(self):
+        return {
+            'type': self.type,
+            'device': self.device
+        }
 
 
 class MqttConfig():
@@ -201,6 +207,15 @@ class MqttConfig():
     def password(self):
         return self._password
 
+    def to_dict(self):
+        return {
+            'host': self.host,
+            'port': self.port,
+            'topic_prefix': self.topic_prefix,
+            'client_id': self.client_id,
+            'user': self.user
+        }
+
 class SaveClipsConfig():
     def __init__(self, config):
         self._max_seconds = config['max_seconds']
@@ -218,6 +233,13 @@ class SaveClipsConfig():
     @property
     def cache_dir(self):
         return self._cache_dir
+    
+    def to_dict(self):
+        return {
+            'max_seconds': self.max_seconds,
+            'clips_dir': self.clips_dir,
+            'cache_dir': self.cache_dir
+        }
 
 class FfmpegConfig():
     def __init__(self, global_config, config):
@@ -269,6 +291,14 @@ class FilterConfig():
     @property
     def min_score(self):
         return self._min_score
+    
+    def to_dict(self):
+        return {
+            'min_area': self.min_area,
+            'max_area': self.max_area,
+            'threshold': self.threshold,
+            'min_score': self.min_score
+        }
 
 class ObjectConfig():
     def __init__(self, global_config, config):
@@ -285,6 +315,12 @@ class ObjectConfig():
     @property
     def filters(self) -> Dict[str, FilterConfig]:
         return self._filters
+
+    def to_dict(self):
+        return {
+            'track': self.track,
+            'filters': { k: f.to_dict() for k, f in self.filters.items() }
+        }
 
 class CameraSnapshotsConfig():
     def __init__(self, config):
@@ -313,6 +349,15 @@ class CameraSnapshotsConfig():
     @property
     def height(self):
         return self._height
+    
+    def to_dict(self):
+        return {
+            'show_timestamp': self.show_timestamp,
+            'draw_zones': self.draw_zones,
+            'draw_bounding_boxes': self.draw_bounding_boxes,
+            'crop_to_region': self.crop_to_region,
+            'height': self.height
+        }
 
 class CameraSaveClipsConfig():
     def __init__(self, config):
@@ -331,6 +376,13 @@ class CameraSaveClipsConfig():
     @property
     def objects(self):
         return self._objects
+    
+    def to_dict(self):
+        return {
+            'enabled': self.enabled,
+            'pre_capture': self.pre_capture,
+            'objects': self.objects
+        }
 
 class ZoneConfig():
     def __init__(self, name, config):
@@ -371,6 +423,11 @@ class ZoneConfig():
     @property
     def filters(self):
         return self._filters
+    
+    def to_dict(self):
+        return {
+            'filters': {k: f.to_dict() for k, f in self.filters.items()}
+        }
 
 class CameraConfig():
     def __init__(self, name, config, cache_dir, global_ffmpeg, global_objects):
@@ -484,10 +541,6 @@ class CameraConfig():
         return self._best_image_timeout
     
     @property
-    def mqtt(self):
-        return self._mqtt
-    
-    @property
     def zones(self)-> Dict[str, ZoneConfig]:
         return self._zones
     
@@ -514,6 +567,22 @@ class CameraConfig():
     @property
     def ffmpeg_cmd(self):
         return self._ffmpeg_cmd
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'height': self.height,
+            'width': self.width,
+            'fps': self.fps,
+            'best_image_timeout': self.best_image_timeout,
+            'zones': {k: z.to_dict() for k, z in self.zones.items()},
+            'save_clips': self.save_clips.to_dict(),
+            'snapshots': self.snapshots.to_dict(),
+            'objects': self.objects.to_dict(),
+            'frame_shape': self.frame_shape,
+            'ffmpeg_cmd': " ".join(self.ffmpeg_cmd),
+        }
+
 
 class FrigateConfig():
     def __init__(self, config_file=None, config=None):
@@ -563,6 +632,14 @@ class FrigateConfig():
             config = json.loads(raw_config)
         
         return config
+    
+    def to_dict(self):
+        return {
+            'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
+            'mqtt': self.mqtt.to_dict(),
+            'save_clips': self.save_clips.to_dict(),
+            'cameras': {k: c.to_dict() for k, c in self.cameras.items()}
+        }
     
     @property
     def detectors(self) -> Dict[str, DetectorConfig]:

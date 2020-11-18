@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from flask import (Blueprint, Flask, Response, current_app, jsonify,
                    make_response, request)
-from peewee import SqliteDatabase, operator
+from peewee import SqliteDatabase, operator, fn
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
@@ -41,6 +41,25 @@ def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detecto
 @bp.route('/')
 def is_healthy():
     return "Frigate is running. Alive and healthy!"
+
+@bp.route('/events/summary')
+def events_summary():
+    groups = (
+        Event
+            .select(
+                Event.camera, 
+                Event.label, 
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch')).alias('day'), 
+                fn.COUNT(Event.id).alias('count')
+            )
+            .group_by(
+                Event.camera, 
+                Event.label, 
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch'))
+            )
+        )
+
+    return jsonify([e for e in groups.dicts()])
 
 @bp.route('/events')
 def events():
@@ -78,7 +97,11 @@ def events():
 
     return jsonify([model_to_dict(e) for e in events])
 
-@bp.route('/debug/stats')
+@bp.route('/config')
+def config():
+    return jsonify(current_app.frigate_config.to_dict())
+
+@bp.route('/stats')
 def stats():
     camera_metrics = current_app.camera_metrics
     stats = {}
