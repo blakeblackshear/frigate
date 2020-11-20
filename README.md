@@ -104,7 +104,7 @@ docker run -d \
 --health-interval=30s \
 --health-timeout=10s \
 --health-retries=5 \
---health-start_period=3m \
+--health-start-period=3m \
 blakeblackshear/frigate:stable-amd64
 ```
 
