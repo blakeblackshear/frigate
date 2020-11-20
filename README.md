@@ -89,7 +89,7 @@ It is recommended to run with docker-compose:
 
 If you can't use docker compose, you can run the container with:
 ```bash
-docker run --rm \
+docker run -d \
 --name frigate \
 --restart unless-stopped \
 --privileged \
