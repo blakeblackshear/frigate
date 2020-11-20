@@ -91,12 +91,20 @@ If you can't use docker compose, you can run the container with:
 ```bash
 docker run --rm \
 --name frigate \
+--restart unless-stopped \
 --privileged \
 -v /dev/bus/usb:/dev/bus/usb \
--v <path_to_config_dir>:/config:ro \
 -v /etc/localtime:/etc/localtime:ro \
+-v <path_to_config_dir>:/config \
+-v <path_to_directory_for_clips>:/clips \
+--mount type=tmpfs,target=/cache,tmpfs-size=100000000 \
 -p 5000:5000 \
 -e FRIGATE_RTSP_PASSWORD='password' \
+--health-cmd='wget -q -O- http://localhost:5000' \
+--health-interval=30s \
+--health-timeout=10s \
+--health-retries=5 \
+--health-start_period=3m \
 blakeblackshear/frigate:stable-amd64
 ```
 
