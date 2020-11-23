@@ -36,11 +36,21 @@ MQTT_SCHEMA = vol.Schema(
     }
 )
 
+SAVE_CLIPS_RETAIN_SCHEMA = vol.Schema(
+    {
+        vol.Required('default',default=10): int,
+        'objects': {
+            str: int
+        }
+    }
+)
+
 SAVE_CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
         vol.Optional('clips_dir', default='/media/frigate/clips'): str,
-        vol.Optional('cache_dir', default='/tmp/cache'): str
+        vol.Optional('cache_dir', default='/tmp/cache'): str,
+        vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
     }
 )
 
@@ -130,6 +140,7 @@ CAMERAS_SCHEMA = vol.Schema(
                 vol.Optional('enabled', default=False): bool,
                 vol.Optional('pre_capture', default=30): int,
                 'objects': [str],
+                vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
              },
              vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
                 vol.Optional('show_timestamp', default=True): bool,
@@ -214,6 +225,25 @@ class MqttConfig():
             'topic_prefix': self.topic_prefix,
             'client_id': self.client_id,
             'user': self.user
+        }
+
+class SaveClipsRetainConfig():
+    def __init__(self, global_config, config):
+        self._default = config.get('default', global_config.get('default'))
+        self._objects = config.get('objects', global_config.get('objects'))
+    
+    @property
+    def default(self):
+        return self._default
+    
+    @property
+    def objects(self):
+        return self._objects
+    
+    def to_dict(self):
+        return {
+            'default': self.default,
+            'objects': self.objects
         }
 
 class SaveClipsConfig():
@@ -360,10 +390,11 @@ class CameraSnapshotsConfig():
         }
 
 class CameraSaveClipsConfig():
-    def __init__(self, config):
+    def __init__(self, global_config, config):
         self._enabled = config['enabled']
         self._pre_capture = config['pre_capture']
         self._objects = config.get('objects')
+        self._retain = SaveClipsRetainConfig(global_config['retain'], config['retain'])
     
     @property
     def enabled(self):
@@ -377,11 +408,16 @@ class CameraSaveClipsConfig():
     def objects(self):
         return self._objects
     
+    @property
+    def retain(self):
+        return self._retain
+    
     def to_dict(self):
         return {
             'enabled': self.enabled,
             'pre_capture': self.pre_capture,
-            'objects': self.objects
+            'objects': self.objects,
+            'retain': self.retain.to_dict()
         }
 
 class ZoneConfig():
@@ -430,9 +466,9 @@ class ZoneConfig():
         }
 
 class CameraConfig():
-    def __init__(self, name, config, cache_dir, global_ffmpeg, global_objects):
+    def __init__(self, name, config, cache_dir, global_config):
         self._name = name
-        self._ffmpeg = FfmpegConfig(global_ffmpeg, config['ffmpeg'])
+        self._ffmpeg = FfmpegConfig(global_config['ffmpeg'], config['ffmpeg'])
         self._height = config.get('height')
         self._width = config.get('width')
         self._frame_shape = (self._height, self._width)
@@ -441,9 +477,9 @@ class CameraConfig():
         self._mask = self._create_mask(config.get('mask'))
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
-        self._save_clips = CameraSaveClipsConfig(config['save_clips'])
+        self._save_clips = CameraSaveClipsConfig(global_config['save_clips'], config['save_clips'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
-        self._objects = ObjectConfig(global_objects, config.get('objects', {}))
+        self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
 
         self._ffmpeg_cmd = self._get_ffmpeg_cmd(cache_dir)
 
@@ -598,7 +634,7 @@ class FrigateConfig():
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._save_clips = SaveClipsConfig(config['save_clips'])
-        self._cameras = { name: CameraConfig(name, c, self._save_clips.cache_dir, config['ffmpeg'], config['objects']) for name, c in config['cameras'].items() }
+        self._cameras = { name: CameraConfig(name, c, self._save_clips.cache_dir, config) for name, c in config['cameras'].items() }
 
         self._ensure_dirs()
 
