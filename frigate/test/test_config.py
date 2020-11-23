@@ -176,6 +176,33 @@ class TestConfig(TestCase):
         }
         frigate_config = FrigateConfig(config=config)
         assert('-re' in frigate_config.cameras['back'].ffmpeg_cmd)
+    
+    def test_inherit_save_clips_retention(self):
+        config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'save_clips': {
+                'retain': {
+                    'default': 20,
+                    'objects': {
+                        'person': 30
+                    }
+                }
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'input': 'rtsp://10.0.0.1:554/video'
+                    },
+                    'height': 1080,
+                    'width': 1920
+                }
+            }
+        }
+        frigate_config = FrigateConfig(config=config)
+        print(json.dumps(frigate_config.to_dict(), indent=2))
+        assert(frigate_config.cameras['back'].save_clips.retain.objects['person'] == 30)
 
 if __name__ == '__main__':
     main(verbosity=2)
