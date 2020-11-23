@@ -18,7 +18,7 @@ bp = Blueprint('frigate', __name__)
 def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detectors, detected_frames_processor):
     app = Flask(__name__)
     log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
+    log.setLevel(logging.INFO)
 
     @app.before_request
     def _db_connect():
@@ -49,13 +49,13 @@ def events_summary():
             .select(
                 Event.camera, 
                 Event.label, 
-                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch')).alias('day'), 
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')).alias('day'), 
                 fn.COUNT(Event.id).alias('count')
             )
             .group_by(
                 Event.camera, 
                 Event.label, 
-                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch'))
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime'))
             )
         )
 
