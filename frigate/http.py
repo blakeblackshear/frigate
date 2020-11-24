@@ -50,12 +50,14 @@ def events_summary():
                 Event.camera, 
                 Event.label, 
                 fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')).alias('day'), 
+                Event.zones,
                 fn.COUNT(Event.id).alias('count')
             )
             .group_by(
                 Event.camera, 
                 Event.label, 
-                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime'))
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')),
+                Event.zones
             )
         )
 
