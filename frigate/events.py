@@ -14,6 +14,8 @@ import psutil
 from frigate.config import FrigateConfig
 from frigate.models import Event
 
+from peewee import fn
+
 logger = logging.getLogger(__name__)
 
 class EventProcessor(threading.Thread):
@@ -204,6 +206,48 @@ class EventCleanup(threading.Thread):
                 logger.info(f"Exiting event cleanup...")
                 break
 
+            # only expire events every 10 minutes, but check for stop events every 10 seconds
+            counter = counter + 1
+            if counter < 60:
+                continue
+            counter = 0
+
+            camera_keys = list(self.config.cameras.keys())
+
+            # Expire events from unlisted cameras based on the global config
+            retain_config = self.config.save_clips.retain
+            
+            distinct_labels = (Event.select(Event.label)
+                        .where(Event.camera.not_in(camera_keys))
+                        .distinct())
+            
+            # loop over object types in db
+            for l in distinct_labels:
+                # get expiration time for this label
+                expire_days = retain_config.objects.get(l.label, retain_config.default)
+                expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
+                # grab all events after specific time
+                expired_events = (
+                    Event.select()
+                        .where(Event.camera.not_in(camera_keys), 
+                            Event.start_time < expire_after, 
+                            Event.label == l.label)
+                )
+                # delete the grabbed clips from disk
+                for event in expired_events:
+                    clip_name = f"{event.camera}-{event.id}"
+                    clip = Path(f"{os.path.join(self.clips_dir, clip_name)}.mp4")
+                    clip.unlink(missing_ok=True)
+                # delete the event for this type from the db
+                delete_query = (
+                    Event.delete()
+                        .where(Event.camera.not_in(camera_keys), 
+                            Event.start_time < expire_after, 
+                            Event.label == l.label)
+                )
+                delete_query.execute()
+
+            # Expire events from cameras based on the camera config
             for name, camera in self.config.cameras.items():
                 retain_config = camera.save_clips.retain
                 # get distinct objects in database for this camera
@@ -215,11 +259,11 @@ class EventCleanup(threading.Thread):
                 for l in distinct_labels:
                     # get expiration time for this label
                     expire_days = retain_config.objects.get(l.label, retain_config.default)
-                    expire_after = datetime.datetime.now() - datetime.timedelta(days=expire_days)
+                    expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
                     # grab all events after specific time
                     expired_events = (
                         Event.select()
-                            .where( Event.camera == name, 
+                            .where(Event.camera == name, 
                                 Event.start_time < expire_after, 
                                 Event.label == l.label)
                     )
@@ -238,9 +282,3 @@ class EventCleanup(threading.Thread):
                     delete_query.execute()
             
             time.sleep(10)
-
-            # only expire events every 10 minutes, but check for stop events every 10 seconds
-            counter += 1
-            if counter < 60:
-                continue
-            counter = 0
