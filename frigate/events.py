@@ -7,9 +7,11 @@ import subprocess as sp
 import threading
 import time
 from collections import defaultdict
+from pathlib import Path
 
 import psutil
 
+from frigate.config import FrigateConfig
 from frigate.models import Event
 
 logger = logging.getLogger(__name__)
@@ -187,4 +189,58 @@ class EventProcessor(threading.Thread):
                     )
                 del self.events_in_process[event_data['id']]
 
-                
+class EventCleanup(threading.Thread):
+    def __init__(self, config: FrigateConfig, stop_event):
+        threading.Thread.__init__(self)
+        self.name = 'event_cleanup'
+        self.config = config
+        self.clips_dir = self.config.save_clips.clips_dir
+        self.stop_event = stop_event
+
+    def run(self):
+        counter = 0
+        while(True):
+            if self.stop_event.is_set():
+                logger.info(f"Exiting event cleanup...")
+                break
+
+            for name, camera in self.config.cameras.items():
+                retain_config = camera.save_clips.retain
+                # get distinct objects in database for this camera
+                distinct_labels = (Event.select(Event.label)
+                        .where(Event.camera == name)
+                        .distinct())
+
+                # loop over object types in db
+                for l in distinct_labels:
+                    # get expiration time for this label
+                    expire_days = retain_config.objects.get(l.label, retain_config.default)
+                    expire_after = datetime.datetime.now() - datetime.timedelta(days=expire_days)
+                    # grab all events after specific time
+                    expired_events = (
+                        Event.select()
+                            .where( Event.camera == name, 
+                                Event.start_time < expire_after, 
+                                Event.label == l.label)
+                    )
+                    # delete the grabbed clips from disk
+                    for event in expired_events:
+                        clip_name = f"{event.camera}-{event.id}"
+                        clip = Path(f"{os.path.join(self.clips_dir, clip_name)}.mp4")
+                        clip.unlink(missing_ok=True)
+                    # delete the event for this type from the db
+                    delete_query = (
+                        Event.delete()
+                            .where( Event.camera == name, 
+                                Event.start_time < expire_after, 
+                                Event.label == l.label)
+                    )
+                    delete_query.execute()
+            
+            time.sleep(10)
+
+            # only expire events every 10 minutes, but check for stop events every 10 seconds
+            counter += 1
+            if counter < 60:
+                continue
+            counter = 0

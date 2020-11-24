@@ -10,7 +10,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import FrigateConfig
 from frigate.edgetpu import EdgeTPUProcess
-from frigate.events import EventProcessor
+from frigate.events import EventProcessor, EventCleanup
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event
@@ -115,6 +115,10 @@ class FrigateApp():
         self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.stop_event)
         self.event_processor.start()
 
+    def start_event_cleanup(self):
+        self.event_cleanup = EventCleanup(self.config, self.stop_event)
+        self.event_cleanup.start()
+
     def start_watchdog(self):
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
@@ -132,6 +136,7 @@ class FrigateApp():
         self.start_camera_capture_processes()
         self.init_web_server()
         self.start_event_processor()
+        self.start_event_cleanup()
         self.start_watchdog()
         self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
         self.stop()
@@ -142,6 +147,7 @@ class FrigateApp():
 
         self.detected_frames_processor.join()
         self.event_processor.join()
+        self.event_cleanup.join()
         self.frigate_watchdog.join()
 
         for detector in self.detectors.values():
