@@ -201,7 +201,6 @@ class TestConfig(TestCase):
             }
         }
         frigate_config = FrigateConfig(config=config)
-        print(json.dumps(frigate_config.to_dict(), indent=2))
         assert(frigate_config.cameras['back'].save_clips.retain.objects['person'] == 30)
 
 if __name__ == '__main__':
