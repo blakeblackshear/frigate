@@ -63,6 +63,10 @@ def events_summary():
 
     return jsonify([e for e in groups.dicts()])
 
+@bp.route('/events/<id>')
+def event(id):
+    return model_to_dict(Event.get(Event.id == id))
+
 @bp.route('/events')
 def events():
     limit = request.args.get('limit', 100)
