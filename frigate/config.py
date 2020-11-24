@@ -251,6 +251,7 @@ class SaveClipsConfig():
         self._max_seconds = config['max_seconds']
         self._clips_dir = config['clips_dir']
         self._cache_dir = config['cache_dir']
+        self._retain = SaveClipsRetainConfig(config['retain'], config['retain'])
     
     @property
     def max_seconds(self):
@@ -264,11 +265,16 @@ class SaveClipsConfig():
     def cache_dir(self):
         return self._cache_dir
     
+    @property
+    def retain(self):
+        return self._retain
+    
     def to_dict(self):
         return {
             'max_seconds': self.max_seconds,
             'clips_dir': self.clips_dir,
-            'cache_dir': self.cache_dir
+            'cache_dir': self.cache_dir,
+            'retain': self.retain.to_dict()
         }
 
 class FfmpegConfig():
