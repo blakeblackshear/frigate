@@ -207,6 +207,7 @@ class EventCleanup(threading.Thread):
                 break
 
             # only expire events every 10 minutes, but check for stop events every 10 seconds
+            time.sleep(10)
             counter = counter + 1
             if counter < 60:
                 continue
@@ -280,5 +281,3 @@ class EventCleanup(threading.Thread):
                                 Event.label == l.label)
                     )
                     delete_query.execute()
-            
-            time.sleep(10)
