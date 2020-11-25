@@ -1,3 +1,4 @@
+import base64
 import datetime
 import logging
 import os
@@ -8,7 +9,7 @@ import cv2
 import numpy as np
 from flask import (Blueprint, Flask, Response, current_app, jsonify,
                    make_response, request)
-from peewee import SqliteDatabase, operator, fn
+from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
@@ -65,7 +66,20 @@ def events_summary():
 
 @bp.route('/events/<id>')
 def event(id):
-    return model_to_dict(Event.get(Event.id == id))
+    try:
+        return model_to_dict(Event.get(Event.id == id))
+    except DoesNotExist:
+        return "Event not found", 404
+
+@bp.route('/events/<id>/snapshot.jpg')
+def event_snapshot(id):
+    try:
+        event = Event.get(Event.id == id)
+        response = make_response(base64.b64decode(event.thumbnail))
+        response.headers['Content-Type'] = 'image/jpg'
+        return response
+    except DoesNotExist:
+        return "Event not found", 404
 
 @bp.route('/events')
 def events():
