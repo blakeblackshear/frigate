@@ -419,7 +419,8 @@ class TrackedObjectProcessor(threading.Thread):
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.get_jpg_bytes())
-            self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
+            if not obj.false_positive:
+                self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
