@@ -55,8 +55,9 @@ class FrigateApp():
             }
 
     def init_queues(self):
-        # Queue for clip processing
+        # Queues for clip processing
         self.event_queue = mp.Queue()
+        self.event_processed_queue = mp.Queue()
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue = mp.Queue(maxsize=len(self.config.cameras.keys())*2)
@@ -89,7 +90,7 @@ class FrigateApp():
 
     def start_detected_frames_processor(self):
         self.detected_frames_processor = TrackedObjectProcessor(self.config, self.mqtt_client, self.config.mqtt.topic_prefix, 
-            self.detected_frames_queue, self.event_queue, self.stop_event)
+            self.detected_frames_queue, self.event_queue, self.event_processed_queue, self.stop_event)
         self.detected_frames_processor.start()
 
     def start_camera_processors(self):
@@ -112,7 +113,7 @@ class FrigateApp():
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
     
     def start_event_processor(self):
-        self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.stop_event)
+        self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.event_processed_queue, self.stop_event)
         self.event_processor.start()
 
     def start_event_cleanup(self):

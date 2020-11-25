@@ -19,7 +19,7 @@ from peewee import fn
 logger = logging.getLogger(__name__)
 
 class EventProcessor(threading.Thread):
-    def __init__(self, config, camera_processes, event_queue, stop_event):
+    def __init__(self, config, camera_processes, event_queue, event_processed_queue, stop_event):
         threading.Thread.__init__(self)
         self.name = 'event_processor'
         self.config = config
@@ -28,6 +28,7 @@ class EventProcessor(threading.Thread):
         self.camera_processes = camera_processes
         self.cached_clips = {}
         self.event_queue = event_queue
+        self.event_processed_queue = event_processed_queue
         self.events_in_process = {}
         self.stop_event = stop_event
     
@@ -190,6 +191,7 @@ class EventProcessor(threading.Thread):
                         thumbnail=event_data['thumbnail']
                     )
                 del self.events_in_process[event_data['id']]
+                self.event_processed_queue.put((event_data['id'], camera))
 
 class EventCleanup(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event):
