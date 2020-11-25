@@ -165,12 +165,14 @@ class EventProcessor(threading.Thread):
 
             # if save clips is not enabled for this camera, just continue
             if not save_clips_config.enabled:
+                self.event_processed_queue.put((event_data['id'], camera))
                 continue
 
             # if specific objects are listed for this camera, only save clips for them
             # TODO: default to all tracked objects rather than checking for None
             if save_clips_config.objects:
                 if not event_data['label'] in save_clips_config.objects:
+                    self.event_processed_queue.put((event_data['id'], camera))
                     continue
 
             if event_type == 'start':
