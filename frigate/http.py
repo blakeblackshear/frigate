@@ -14,6 +14,8 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
 
+logger = logging.getLogger(__name__)
+
 bp = Blueprint('frigate', __name__)
 
 def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detectors, detected_frames_processor):
@@ -79,6 +81,17 @@ def event_snapshot(id):
         response.headers['Content-Type'] = 'image/jpg'
         return response
     except DoesNotExist:
+        # see if the object is currently being tracked
+        try:
+            for camera_state in current_app.detected_frames_processor.camera_states.values():
+                if id in camera_state.tracked_objects:
+                    tracked_obj = camera_state.tracked_objects.get(id)
+                    if not tracked_obj is None:
+                        response = make_response(tracked_obj.get_jpg_bytes())
+                        response.headers['Content-Type'] = 'image/jpg'
+                        return response
+        except:
+            return "Event not found", 404
         return "Event not found", 404
 
 @bp.route('/events')

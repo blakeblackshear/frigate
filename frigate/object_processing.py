@@ -279,6 +279,9 @@ class CameraState():
         
         return frame_copy
 
+    def finished(self, obj_id):
+        del self.tracked_objects[obj_id]
+
     def on(self, event_type: str, callback: Callable[[Dict], None]):
         self.callbacks[event_type].append(callback)
 
@@ -317,10 +320,10 @@ class CameraState():
         for id in removed_ids:
             # publish events to mqtt
             removed_obj = self.tracked_objects[id]
-            removed_obj.obj_data['end_time'] = frame_time
-            for c in self.callbacks['end']:
-                c(self.name, removed_obj)
-            del self.tracked_objects[id]
+            if not 'end_time' in removed_obj.obj_data:
+                removed_obj.obj_data['end_time'] = frame_time
+                for c in self.callbacks['end']:
+                    c(self.name, removed_obj)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         #       maybe make an api endpoint that pulls the thumbnail from the file system?
@@ -382,7 +385,7 @@ class CameraState():
             self.previous_frame_id = frame_id
 
 class TrackedObjectProcessor(threading.Thread):
-    def __init__(self, config: FrigateConfig, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
+    def __init__(self, config: FrigateConfig, client, topic_prefix, tracked_objects_queue, event_queue, event_processed_queue, stop_event):
         threading.Thread.__init__(self)
         self.name = "detected_frames_processor"
         self.config = config
@@ -390,6 +393,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.topic_prefix = topic_prefix
         self.tracked_objects_queue = tracked_objects_queue
         self.event_queue = event_queue
+        self.event_processed_queue = event_processed_queue
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
@@ -480,3 +484,8 @@ class TrackedObjectProcessor(threading.Thread):
                         self.client.publish(f"{self.topic_prefix}/{zone}/{label}", 'ON', retain=False)
                     elif previous_state == True and new_state == False:
                         self.client.publish(f"{self.topic_prefix}/{zone}/{label}", 'OFF', retain=False)
+
+            # cleanup event finished queue
+            while not self.event_processed_queue.empty():
+                event_id, camera = self.event_processed_queue.get()
+                self.camera_states[camera].finished(event_id)
