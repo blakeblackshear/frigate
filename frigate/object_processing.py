@@ -72,6 +72,7 @@ class TrackedObject():
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data = None
         self.frame = None
+        self.previous = None
         self._snapshot_jpg_time = 0
         ret, jpg = cv2.imencode('.jpg', np.zeros((300,300,3), np.uint8))
         self._snapshot_jpg = jpg.tobytes()
@@ -97,6 +98,7 @@ class TrackedObject():
         return median(scores)
     
     def update(self, current_frame_time, obj_data):
+        previous = self.to_dict()
         self.obj_data.update(obj_data)
         # if the object is not in the current frame, add a 0.0 to the score history
         if self.obj_data['frame_time'] != current_frame_time:
@@ -115,7 +117,10 @@ class TrackedObject():
 
         if not self.false_positive:
             # determine if this frame is a better thumbnail
-            if self.thumbnail_data is None or is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape):
+            if (
+                self.thumbnail_data is None 
+                or is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape)
+            ):
                 self.thumbnail_data = {
                     'frame_time': self.obj_data['frame_time'],
                     'box': self.obj_data['box'],
@@ -123,6 +128,7 @@ class TrackedObject():
                     'region': self.obj_data['region'],
                     'score': self.obj_data['score']
                 }
+                self.previous = previous
         
         # check zones
         current_zones = []
@@ -302,7 +308,7 @@ class CameraState():
 
             # call event handlers
             for c in self.callbacks['start']:
-                c(self.name, new_obj)
+                c(self.name, new_obj, frame_time)
         
         for id in updated_ids:
             updated_obj = self.tracked_objects[id]
@@ -315,7 +321,7 @@ class CameraState():
 
             # call event handlers
             for c in self.callbacks['update']:
-                c(self.name, updated_obj)
+                c(self.name, updated_obj, frame_time)
         
         for id in removed_ids:
             # publish events to mqtt
@@ -323,7 +329,7 @@ class CameraState():
             if not 'end_time' in removed_obj.obj_data:
                 removed_obj.obj_data['end_time'] = frame_time
                 for c in self.callbacks['end']:
-                    c(self.name, removed_obj)
+                    c(self.name, removed_obj, frame_time)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         #       maybe make an api endpoint that pulls the thumbnail from the file system?
@@ -342,11 +348,11 @@ class CameraState():
                     or (now - current_best.thumbnail_data['frame_time']) > self.camera_config.best_image_timeout):
                     self.best_objects[object_type] = obj
                     for c in self.callbacks['snapshot']:
-                        c(self.name, self.best_objects[object_type])
+                        c(self.name, self.best_objects[object_type], frame_time)
             else:
                 self.best_objects[object_type] = obj
                 for c in self.callbacks['snapshot']:
-                    c(self.name, self.best_objects[object_type])
+                    c(self.name, self.best_objects[object_type], frame_time)
         
         # update overall camera state for each object type
         obj_counter = Counter()
@@ -369,7 +375,7 @@ class CameraState():
             for c in self.callbacks['object_status']:
                 c(self.name, obj_name, 'OFF')
             for c in self.callbacks['snapshot']:
-                c(self.name, self.best_objects[obj_name])
+                c(self.name, self.best_objects[obj_name], frame_time)
         
         # cleanup thumbnail frame cache
         current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj.false_positive])
@@ -398,22 +404,24 @@ class TrackedObjectProcessor(threading.Thread):
         self.camera_states: Dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
 
-        def start(camera, obj: TrackedObject):
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/start", json.dumps(obj.to_dict()), retain=False)
+        def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(('start', camera, obj.to_dict()))
 
-        def update(camera, obj: TrackedObject):
-            pass
+        def update(camera, obj: TrackedObject, current_frame_time):
+            if not obj.thumbnail_data is None and obj.thumbnail_data['frame_time'] == current_frame_time:
+                message = { 'before': obj.previous, 'after': obj.to_dict() }
+                self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
 
-        def end(camera, obj: TrackedObject):
-            self.client.publish(f"{self.topic_prefix}/{camera}/events/end", json.dumps(obj.to_dict()), retain=False)
+        def end(camera, obj: TrackedObject, current_frame_time):
+            message = { 'before': obj.previous, 'after': obj.to_dict() }
+            self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
             if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.get_jpg_bytes())
             self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
-        def snapshot(camera, obj: TrackedObject):
+        def snapshot(camera, obj: TrackedObject, current_frame_time):
             self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
         
         def object_status(camera, object_name, status):
