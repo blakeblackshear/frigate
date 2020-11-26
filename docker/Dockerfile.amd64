@@ -9,7 +9,7 @@ RUN apt-get -qq update \
         # ffmpeg dependencies
         libgomp1 \
         # VAAPI drivers for Intel hardware accel
-        libva-drm2 libva2 i965-va-driver vainfo intel-media-va-driver \
+        libva-drm2 libva2 i965-va-driver vainfo intel-media-va-driver mesa-va-drivers \
         ## Tensorflow lite
     && wget -q https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
     && python3.8 -m pip install tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
