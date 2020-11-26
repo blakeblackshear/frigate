@@ -230,7 +230,7 @@ class MqttConfig():
 class SaveClipsRetainConfig():
     def __init__(self, global_config, config):
         self._default = config.get('default', global_config.get('default'))
-        self._objects = config.get('objects', global_config.get('objects'))
+        self._objects = config.get('objects', global_config.get('objects', {}))
     
     @property
     def default(self):
