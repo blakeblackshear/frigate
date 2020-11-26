@@ -21,7 +21,7 @@ bp = Blueprint('frigate', __name__)
 def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detectors, detected_frames_processor):
     app = Flask(__name__)
     log = logging.getLogger('werkzeug')
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.ERROR)
 
     @app.before_request
     def _db_connect():
