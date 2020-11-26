@@ -413,14 +413,14 @@ class TrackedObjectProcessor(threading.Thread):
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
 
         def end(camera, obj: TrackedObject, current_frame_time):
-            message = { 'before': obj.previous, 'after': obj.to_dict() }
-            self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
+            if not obj.false_positive:
+                message = { 'before': obj.previous, 'after': obj.to_dict() }
+                self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
             if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
                 with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
                     f.write(obj.get_jpg_bytes())
-            if not obj.false_positive:
-                self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
+            self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
