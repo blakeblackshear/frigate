@@ -48,7 +48,7 @@ class MotionDetector():
 
             # black out everything in the avg_delta where there isnt motion in the current frame
             avg_delta_image = cv2.convertScaleAbs(self.avg_delta)
-            avg_delta_image[np.where(current_thresh==[0])] = [0]
+            avg_delta_image = cv2.bitwise_and(avg_delta_image, current_thresh)
 
             # then look for deltas above the threshold, but only in areas where there is a delta
             # in the current frame. this prevents deltas from previous frames from being included
