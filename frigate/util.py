@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import datetime
+from io import UnsupportedOperation
 import time
 import signal
 import traceback
@@ -10,7 +11,7 @@ import threading
 import matplotlib.pyplot as plt
 import hashlib
 from multiprocessing import shared_memory
-from typing import AnyStr
+from typing import AnyStr, Optional, Tuple
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
     if color is None:
@@ -216,28 +217,128 @@ class DictFrameManager(FrameManager):
         del self.frames[name]
 
 class SharedMemoryFrameManager(FrameManager):
-    def __init__(self):
-        self.shm_store = {}
+
+    """Initialize a SharedMemoryFrameManager.
+        Frames are stored as SharedMemory segments, named <name>_<slot>
+        The first byte of each slot represents whether the segment is "freed".
+        0 means the segment is free and available for use
+        Any other value means the segment is in use.
     
-    def create(self, name, size) -> AnyStr:
-        shm = shared_memory.SharedMemory(name=name, create=True, size=size)
-        self.shm_store[name] = shm
-        return shm.buf
+    Args:
+        name: The name of the instance to open.
+            If not set, a name argument *must* be passed in to each operation.
+        size: The size of frames created by this frame manager. 
+            If not set, the frame manager will be read only.
+    """ 
+    def __init__(self, name: Optional[str] = None, size : Optional[int]= None):
+        # list of opened shms
+        self.shm_lists = {}
+        # If name is set, create the dict for the default namespace
+        self.shm_lists[name] = {}
+        self.name = name
+        self.size = size
+    
+    """Create a new frame.
 
-    def get(self, name, shape):
-        if name in self.shm_store:
-            shm = self.shm_store[name]
+    Returns:
+        A tuple containing the allocated frame id and the frame itself.
+
+    Raises:
+        UnsupportedOperation: If the size of the frame manager is not set.
+    """
+    def create(self, name = None) -> Tuple[int, AnyStr]:
+
+        if name is None:
+            name = self.name
+
+        if name is None:
+            raise UnsupportedOperation("Cannot create without name")
+
+        if self.size is None:
+            raise UnsupportedOperation("Cannot create new frame without size set")
+        
+        if name not in self.shm_lists:
+            self.shm_lists[name] = {}
+
+        shm_list = self.shm_lists[name]
+        # Check if we have any free SHMs in our list
+        for idx in shm_list:
+            shm = shm_list[idx]
+            if shm.buf[0] == 0:
+                shm.buf[0] = 1
+                return idx, shm.buf[1:]
+
+        # No free SHMs. Try to create a new SHM.
+        # We'll start after the maximum index, but this may create a sparse list.
+        # Having a sparse list shouldn't really matter though.
+        idx = 0 if not shm_list else max(shm_list) + 1
+
+        while True:
+            try:
+                shm = shared_memory.SharedMemory(name=f"{self.name}_{idx}", create=True, size=self.size+1)
+                shm.buf[0] = 1
+                shm_list[idx] = shm
+                return idx, shm.buf[1:]
+            except FileExistsError:
+                # The SHM already exists. Return it if it is free.
+                shm = shared_memory.SharedMemory(name=f"{self.name}_{idx}")
+                if (shm.buf[0] == 0):
+                    shm.buf[0] = 1
+                    shm_list[idx] = shm
+                    return idx, shm.buf[1:]
+                # It's locked, so we move to the next idx.
+                idx = idx + 1
+
+    """ Get an existing frame.
+
+    Args:
+        shape: The shape of the resulting numpy array
+        index: The index number of the frame to get.
+               If the index is not set, fetches the shm with <name>.
+
+    Returns:
+        A numpy array with the frame.
+    """
+    def get(self, shape, index : Optional[int] = None, name : Optional[str] = None):
+        if name is None:
+            name = self.name
+
+        if name is None:
+            raise UnsupportedOperation("Cannot get without name")
+
+        # If the shm isn't already open
+        if name not in self.shm_lists:
+            self.shm_lists[name] = {}
+        shm_list = self.shm_lists[name]
+
+        if index is None:
+            index = -1  # special value for "root" index
+        if index not in shm_list:
+            # The shm isn't open yet, so open it and cache it in our list
+            memory_name = name if index == -1 else f"{name}_{index}"
+            shm = shared_memory.SharedMemory(name=memory_name)
+            shm_list[index] = shm
         else:
-            shm = shared_memory.SharedMemory(name=name)
-            self.shm_store[name] = shm
-        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+            shm = shm_list[index]
+        
+        buffer = shm.buf if index is -1 else shm.buf[1:]
+        return np.ndarray(shape, dtype=np.uint8, buffer=buffer)
 
-    def close(self, name):
-        if name in self.shm_store:
-            self.shm_store[name].close()
-            del self.shm_store[name]
+    """ Close the frame, freeing it for reuse.
+    
+    Args:
+        index: The index number of the frame to free.
+    """
+    def close(self, index : int, name : Optional[str] = None):
+        if name is None:
+            name = self.name
+
+        if name is None:
+            raise UnsupportedOperation("Cannot close without name")
+        self.shm_lists[name][index].buf[0] = 0
 
     def delete(self, name):
+        ### will be deprecated
         if name in self.shm_store:
             self.shm_store[name].close()
             self.shm_store[name].unlink()

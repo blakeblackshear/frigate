@@ -61,7 +61,7 @@ class CameraState():
         self._current_frame = np.zeros((self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]), np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
-        self.previous_frame_id = None
+        self.previous_frame_idx = None
         self.callbacks = defaultdict(lambda: [])
 
     def get_current_frame(self, draw=False):
@@ -120,11 +120,11 @@ class CameraState():
     def on(self, event_type: str, callback: Callable[[Dict], None]):
         self.callbacks[event_type].append(callback)
 
-    def update(self, frame_time, tracked_objects):
+    def update(self, idx, frame_time, tracked_objects):
         self.current_frame_time = frame_time
         # get the new frame and delete the old frame
         frame_id = f"{self.name}{frame_time}"
-        current_frame = self.frame_manager.get(frame_id, (self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]))
+        current_frame = self.frame_manager.get((self.config['frame_shape'][0]*3//2, self.config['frame_shape'][1]), idx)
 
         current_ids = tracked_objects.keys()
         previous_ids = self.tracked_objects.keys()
@@ -237,9 +237,9 @@ class CameraState():
         
         with self.current_frame_lock:
             self._current_frame = current_frame
-            if not self.previous_frame_id is None:
-                self.frame_manager.delete(self.previous_frame_id)
-            self.previous_frame_id = frame_id
+            if not self.previous_frame_idx is None:
+                self.frame_manager.close(self.previous_frame_idx)
+            self.previous_frame_idx = idx
 
 class TrackedObjectProcessor(threading.Thread):
     def __init__(self, camera_config, client, topic_prefix, tracked_objects_queue, event_queue, stop_event):
@@ -251,7 +251,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_queue = event_queue
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
-        self.frame_manager = SharedMemoryFrameManager()
 
         def start(camera, obj):
             # publish events to mqtt
@@ -303,7 +302,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
 
         for camera in self.camera_config.keys():
-            camera_state = CameraState(camera, self.camera_config[camera], self.frame_manager)
+            camera_state = CameraState(camera, self.camera_config[camera], SharedMemoryFrameManager(camera))
             camera_state.on('start', start)
             camera_state.on('update', update)
             camera_state.on('end', end)
@@ -363,13 +362,13 @@ class TrackedObjectProcessor(threading.Thread):
                 break
 
             try:
-                camera, frame_time, current_tracked_objects = self.tracked_objects_queue.get(True, 10)
+                camera, idx, frame_time, current_tracked_objects = self.tracked_objects_queue.get(True, 10)
             except queue.Empty:
                 continue
 
             camera_state = self.camera_states[camera]
 
-            camera_state.update(frame_time, current_tracked_objects)
+            camera_state.update(idx, frame_time, current_tracked_objects)
 
             # update zone status for each label
             for zone in camera_state.config['zones'].keys():

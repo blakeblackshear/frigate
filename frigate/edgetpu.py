@@ -116,8 +116,7 @@ def run_detector(detection_queue, out_events: Dict[str, mp.Event], avg_speed, st
     
     while True:
         connection_id = detection_queue.get()
-        input_frame = frame_manager.get(connection_id, (1,300,300,3))
-
+        input_frame = frame_manager.get((1,300,300,3), name=connection_id)
         if input_frame is None:
             continue
 

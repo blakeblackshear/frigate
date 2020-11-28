@@ -11,6 +11,7 @@ import numpy as np
 import copy
 import itertools
 import json
+import traceback
 import base64
 from typing import Dict, List
 from collections import defaultdict
@@ -133,16 +134,15 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
             break
 
         current_frame.value = datetime.datetime.now().timestamp()
-        frame_name = f"{camera_name}{current_frame.value}"
-        frame_buffer = frame_manager.create(frame_name, frame_size)
+        #frame_name = f"{camera_name}{current_frame.value}"
+        idx, frame_buffer = frame_manager.create()
         try:
           frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except:
           print(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
-
           if ffmpeg_process.poll() != None:
               print(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
-              frame_manager.delete(frame_name)
+              frame_manager.close(idx)
               break
           
           continue
@@ -152,20 +152,17 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
         frame_num += 1
         if (frame_num % take_frame) != 0:
             skipped_eps.update()
-            frame_manager.delete(frame_name)
+            frame_manager.close(idx)
             continue
 
         # if the queue is full, skip this frame
         if frame_queue.full():
             skipped_eps.update()
-            frame_manager.delete(frame_name)
+            frame_manager.close(idx)
             continue
 
-        # close the frame
-        frame_manager.close(frame_name)
-
         # add to the queue
-        frame_queue.put(current_frame.value)
+        frame_queue.put((idx, current_frame.value))
 
 class CameraWatchdog(threading.Thread):
     def __init__(self, name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event):
@@ -224,7 +221,7 @@ class CameraCapture(threading.Thread):
         self.take_frame = take_frame
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
-        self.frame_manager = SharedMemoryFrameManager()
+        self.frame_manager = SharedMemoryFrameManager(name, frame_shape[0] * frame_shape[1] * 3 // 2)
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value('d', 0.0)
         self.last_frame = 0
@@ -279,7 +276,7 @@ def track_camera(name, config, detection_queue, result_connection, detected_obje
 
     object_tracker = ObjectTracker(10)
 
-    frame_manager = SharedMemoryFrameManager()
+    frame_manager = SharedMemoryFrameManager(name)
 
     process_frames(name, frame_queue, frame_shape, frame_manager, motion_detector, object_detector,
         object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask, stop_event)
@@ -335,16 +332,16 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
                 break
 
         try:
-            frame_time = frame_queue.get(True, 10)
+            idx, frame_time = frame_queue.get(True, 10)
         except queue.Empty:
             continue
 
         current_frame_time.value = frame_time
 
-        frame = frame_manager.get(f"{camera_name}{frame_time}", (frame_shape[0]*3//2, frame_shape[1]))
+        frame = frame_manager.get((frame_shape[0]*3//2, frame_shape[1]), idx)
 
         if frame is None:
-            print(f"{camera_name}: frame {frame_time} is not in memory store.")
+            print(f"{camera_name}: frame {frame_time} (index {idx}) is not in memory store.")
             continue
 
         # look for motion
@@ -419,11 +416,11 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
 
         # add to the queue if not full
         if(detected_objects_queue.full()):
-          frame_manager.delete(f"{camera_name}{frame_time}")
+          frame_manager.close(idx)
           continue
         else:
           fps_tracker.update()
           fps.value = fps_tracker.eps()
-          detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
+          detected_objects_queue.put((camera_name, idx, frame_time, object_tracker.tracked_objects))
           detection_fps.value = object_detector.fps.eps()
-          frame_manager.close(f"{camera_name}{frame_time}")
+          frame_manager.close(idx)
