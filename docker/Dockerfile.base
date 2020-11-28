@@ -10,6 +10,7 @@ COPY --from=ffmpeg /usr/local /usr/local/
 COPY --from=wheels /wheels/. /wheels/
 
 ENV FLASK_ENV=development
+ENV FONTCONFIG_PATH=/etc/fonts
 ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt-get -qq update \
