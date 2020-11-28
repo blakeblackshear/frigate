@@ -142,6 +142,9 @@ CAMERAS_SCHEMA = vol.Schema(
                 'objects': [str],
                 vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
              },
+             vol.Optional('rtmp', default={}): {
+                 vol.Required('enabled', default=True): bool
+             },
              vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
                 vol.Optional('show_timestamp', default=True): bool,
                 vol.Optional('draw_zones', default=False): bool,
@@ -425,6 +428,18 @@ class CameraSaveClipsConfig():
             'objects': self.objects,
             'retain': self.retain.to_dict()
         }
+class CameraRtmpConfig():
+    def __init__(self, config):
+        self._enabled = config['enabled']
+    
+    @property
+    def enabled(self):
+        return self._enabled
+    
+    def to_dict(self):
+        return {
+            'enabled': self.enabled
+        }
 
 class ZoneConfig():
     def __init__(self, name, config):
@@ -484,6 +499,7 @@ class CameraConfig():
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
         self._save_clips = CameraSaveClipsConfig(global_config['save_clips'], config['save_clips'])
+        self._rtmp = CameraRtmpConfig(config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
         self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
 
@@ -518,6 +534,14 @@ class CameraConfig():
         ffmpeg_output_args = self.ffmpeg.output_args
         if self.fps:
             ffmpeg_output_args = ["-r", str(self.fps)] + ffmpeg_output_args
+        if self.rtmp.enabled:
+            ffmpeg_output_args = [
+                "-c",
+                "copy",
+                "-f",
+                "flv",
+                f"rtmp://127.0.0.1/live/{self.name}"
+            ] + ffmpeg_output_args
         if self.save_clips.enabled:
             ffmpeg_output_args = [
                 "-f",
@@ -591,6 +615,10 @@ class CameraConfig():
         return self._save_clips
     
     @property
+    def rtmp(self):
+        return self._rtmp
+    
+    @property
     def snapshots(self):
         return self._snapshots
     
@@ -619,6 +647,7 @@ class CameraConfig():
             'best_image_timeout': self.best_image_timeout,
             'zones': {k: z.to_dict() for k, z in self.zones.items()},
             'save_clips': self.save_clips.to_dict(),
+            'rtmp': self.rtmp.to_dict(),
             'snapshots': self.snapshots.to_dict(),
             'objects': self.objects.to_dict(),
             'frame_shape': self.frame_shape,
@@ -656,13 +685,9 @@ class FrigateConfig():
         return config
     
     def _ensure_dirs(self):
-        cache_dir = self.save_clips.cache_dir
-        clips_dir = self.save_clips.clips_dir
-
-        if not os.path.exists(cache_dir) and not os.path.islink(cache_dir):
-            os.makedirs(cache_dir)
-        if not os.path.exists(clips_dir) and not os.path.islink(clips_dir):
-            os.makedirs(clips_dir)
+        for d in [self.save_clips.cache_dir, self.save_clips.clips_dir]:
+            if not os.path.exists(d) and not os.path.islink(d):
+                os.makedirs(d)
 
     def _load_file(self, config_file):
         with open(config_file) as f:
