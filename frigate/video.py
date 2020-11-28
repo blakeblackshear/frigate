@@ -241,7 +241,7 @@ def capture_camera(name, config, process_info, stop_event):
     camera_watchdog.start()
     camera_watchdog.join()
 
-def track_camera(name, config, detection_queue, result_connection, detected_objects_queue, process_info, stop_event):
+def track_camera(name, config, detection_queue, result_connection, detected_objects_queue, process_info, stop_event, global_config):
     listen()
 
     frame_queue = process_info['frame_queue']
@@ -275,7 +275,7 @@ def track_camera(name, config, detection_queue, result_connection, detected_obje
         mask[:] = 255
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
-    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection)
+    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection, global_config)
 
     object_tracker = ObjectTracker(10)
 

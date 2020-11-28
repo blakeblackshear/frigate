@@ -10,6 +10,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 from frigate.util import EventsPerSecond, listen, SharedMemoryFrameManager
+import cv2
 
 def load_labels(path, encoding='utf-8'):
   """Loads labels from file (with or without index numbers).
@@ -159,7 +160,7 @@ class EdgeTPUProcess():
         self.detect_process.start()
 
 class RemoteObjectDetector():
-    def __init__(self, name, labels, detection_queue, event):
+    def __init__(self, name, labels, detection_queue, event, config):
         self.labels = load_labels(labels)
         self.name = name
         self.fps = EventsPerSecond()
@@ -169,6 +170,7 @@ class RemoteObjectDetector():
         self.np_shm = np.ndarray((1,300,300,3), dtype=np.uint8, buffer=self.shm.buf)
         self.out_shm = mp.shared_memory.SharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm = np.ndarray((20,6), dtype=np.float32, buffer=self.out_shm.buf)
+        self.config = config
     
     def detect(self, tensor_input, threshold=.4):
         detections = []
@@ -177,6 +179,14 @@ class RemoteObjectDetector():
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
+
+        if self.config["saveTensorInputs"]:
+            root_path = self.config['saveTensorPath']
+            os.makedirs(root_path, exist_ok=True)
+
+            file_path = os.path.join(root_path, f"{self.name}.{datetime.datetime.now().timestamp()}.jpg")
+            cv2.imwrite(file_path, tensor_input[0])
+
         result = self.event.wait(timeout=10.0)
 
         # if it timed out

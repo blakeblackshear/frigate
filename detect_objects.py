@@ -15,8 +15,9 @@ import multiprocessing as mp
 import subprocess as sp
 import numpy as np
 import logging
-from flask import Flask, Response, make_response, jsonify, request
+from flask import Flask, Response, make_response, jsonify, request, send_from_directory
 import paho.mqtt.client as mqtt
+import shutil
 
 from frigate.video import capture_camera, track_camera, get_ffmpeg_input, get_frame_shape, CameraCapture, start_or_restart_ffmpeg
 from frigate.object_processing import TrackedObjectProcessor
@@ -121,8 +122,9 @@ class FrigateWatchdog(threading.Thread):
                     camera_process['process_fps'].value = 0.0
                     camera_process['detection_fps'].value = 0.0
                     camera_process['read_start'].value = 0.0
-                    process = mp.Process(target=track_camera, args=(name, self.config,
-                        self.detection_queue, self.out_events[name], self.tracked_objects_queue, camera_process, self.stop_event))
+                    process = mp.Process(target=track_camera, args=(name, self.config[name],
+                        self.detection_queue, self.out_events[name], self.tracked_objects_queue, camera_process, 
+                        self.stop_event, CONFIG))
                     process.daemon = True
                     camera_process['process'] = process
                     process.start()
@@ -265,7 +267,7 @@ def main():
         camera_process_info[name]['capture_process'] = capture_process
 
         camera_process = mp.Process(target=track_camera, args=(name, config,
-            detection_queue, out_events[name], tracked_objects_queue, camera_process_info[name], stop_event))
+            detection_queue, out_events[name], tracked_objects_queue, camera_process_info[name], stop_event, CONFIG))
         camera_process.daemon = True
         camera_process_info[name]['process'] = camera_process
 
@@ -417,7 +419,7 @@ def main():
             return response
         else:
             return "Camera named {} not found".format(camera_name), 404
-            
+        
     def imagestream(camera_name, fps, height):
         while True:
             # max out at specified FPS
@@ -432,6 +434,110 @@ def main():
             ret, jpg = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+
+    @app.route('/tensorInput/<path:path>')
+    def send_tensor_image(path):
+        return send_from_directory(CONFIG["saveTensorPath"], path)
+
+    @app.route('/tensorInputClassify/<path:path>/<category>')
+    def classify_tensor_image(path, category):
+        if category == "delete":
+            os.unlink(os.path.join(CONFIG["saveTensorPath"], path))
+            return "deleted"
+        else:
+            category_path = os.path.join(CONFIG["saveTensorCategorizedPath"], category)
+            os.makedirs(category_path, exist_ok=True)
+            shutil.move(os.path.join(CONFIG["saveTensorPath"], path), os.path.join(category_path, path))
+            return "ok"
+
+    @app.route('/tensorInputNext')
+    def get_next_tensor_image():
+        file = None
+        for root, dirs, files in os.walk(CONFIG["saveTensorPath"]):
+            for name in files:
+                file = name
+                break
+        return "No more inputs" if file is None else file
+
+    @app.route('/tensorInputUi')
+    def get_tensor_ui():
+        return """<html>
+<head>
+<title>Simple classification UI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+
+<script type="text/javascript">
+var current = ""
+let categories = {}
+
+const getNext = async () => {
+	let response = await fetch('./tensorInputNext')
+  current = await response.text()
+  if (current === "No more inputs") {
+      // probably make this nicer in the future
+      alert("All done, no more inputs");
+  }
+  document.getElementById("image").src = `./tensorInput/${current}`
+}
+
+const addCategory = (name) => {
+	let row = document.getElementById("categories").insertRow(-1);
+  let i = -1;
+	let letter = ""
+  while (letter in categories || i == -1) {
+  	i++;
+    if (i < name.length) {
+    	letter = name.toLowerCase().charAt(i);
+    } else {
+    	//out of letters, pick some random key until it works
+       const alphabet = "abcdefghijklmnopqrstuvwxyz1234567890,./;'[]\-=`'"
+       letter = alphabet[Math.floor(Math.random() * alphabet.length)]
+    }
+  }
+  
+  categories[letter] = name
+  row.insertCell().appendChild(document.createTextNode(letter));
+  row.insertCell().appendChild(document.createTextNode(name));
+}
+
+const classify = async (key) => {
+	await fetch(`./tensorInputClassify/${current}/${categories[key].toLowerCase()}`)
+  await getNext()
+}
+
+window.onload=()=> {
+	getNext();
+  // add default delete category
+  addCategory("Delete");
+  document.getElementById("add_category").onclick = () => {
+    addCategory(document.getElementById("category").value)
+    document.getElementById("category").value = ""
+    return false;
+  }
+}
+
+document.addEventListener('keypress', event => {
+		if (event.key in categories && document.getElementById("category") != document.activeElement) {
+    	classify(event.key);
+    }
+  });
+</script>
+
+<img style="height:300px;width:300px;" id="image"/>
+<hr>
+<form>
+ <label for="category">New Category</label>
+ <input type="text" id="category"> 
+ <button id="add_category">Add Category</button>
+</form>
+<table id="categories"> 
+<thead> 
+<tr> <th>Key</th> <th>Category</th></thead><tbody> 
+</tbody> </table>
+
+</html>
+        """
 
     app.run(host='0.0.0.0', port=WEB_PORT, debug=False)
 

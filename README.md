@@ -238,6 +238,15 @@ objects:
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
       threshold: 0.85
 
+# Configuraiton for saving data for training.
+# Set to TRUE to save inputs to tensorflow. Note that every input is saved, so this will generate a lot of data.
+saveTensorInputs: false
+# Path to save tensor inputs to.
+saveTensorPath: /clips/tensorInputs
+# Path the categorizer UI will save categorized inputs to.
+# The categorizer UI can be accessed at http://<frigate url>/tensorInputUi
+saveTensorCategorizedPath: /clips/tensorCategorized
+
 # Required: configuration section for cameras
 cameras:
   # Required: name of the camera
