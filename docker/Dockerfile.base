@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update \
     && apt-get upgrade -y \
     && apt-get -qq install --no-install-recommends -y \
-    gnupg wget unzip tzdata nginx \
+    gnupg wget unzip tzdata nginx libnginx-mod-rtmp \
     && apt-get -qq install --no-install-recommends -y \
         python3-pip \
     && pip3 install -U /wheels/*.whl \
@@ -44,5 +44,8 @@ ADD frigate frigate/
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
+
+EXPOSE 5000
+EXPOSE 1935
 
 CMD ["/run.sh"]
