@@ -36,10 +36,11 @@ class EventProcessor(threading.Thread):
         cached_files = os.listdir(self.cache_dir)
 
         files_in_use = []
-        for process_data in self.camera_processes.values():
+        for process in psutil.process_iter():
+            if process.name() != 'ffmpeg':
+                continue
             try:
-                ffmpeg_process = psutil.Process(pid=process_data['ffmpeg_pid'].value)
-                flist = ffmpeg_process.open_files()
+                flist = process.open_files()
                 if flist:
                     for nt in flist:
                         if nt.path.startswith(self.cache_dir):

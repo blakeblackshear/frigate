@@ -12,7 +12,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920
@@ -39,7 +41,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920
@@ -60,7 +64,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920,
@@ -84,7 +90,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920
@@ -110,7 +118,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920
@@ -129,7 +139,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920,
@@ -159,7 +171,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920,
@@ -175,7 +189,7 @@ class TestConfig(TestCase):
             }
         }
         frigate_config = FrigateConfig(config=config)
-        assert('-re' in frigate_config.cameras['back'].ffmpeg_cmd)
+        assert('-re' in frigate_config.cameras['back'].ffmpeg_cmds[0]['cmd'])
     
     def test_inherit_save_clips_retention(self):
         config = {
@@ -193,7 +207,9 @@ class TestConfig(TestCase):
             'cameras': {
                 'back': {
                     'ffmpeg': {
-                        'input': 'rtsp://10.0.0.1:554/video'
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
                     },
                     'height': 1080,
                     'width': 1920
@@ -202,6 +218,34 @@ class TestConfig(TestCase):
         }
         frigate_config = FrigateConfig(config=config)
         assert(frigate_config.cameras['back'].save_clips.retain.objects['person'] == 30)
+    
+    def test_roles_listed_twice_throws_error(self):
+        config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'save_clips': {
+                'retain': {
+                    'default': 20,
+                    'objects': {
+                        'person': 30
+                    }
+                }
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] },
+                            { 'path': 'rtsp://10.0.0.1:554/video2', 'roles': ['detect'] }
+                        ]
+                    },
+                    'height': 1080,
+                    'width': 1920
+                }
+            }
+        }
+        self.assertRaises(vol.MultipleInvalid, lambda: FrigateConfig(config=config))
 
 if __name__ == '__main__':
     main(verbosity=2)
