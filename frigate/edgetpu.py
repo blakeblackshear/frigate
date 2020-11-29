@@ -5,6 +5,7 @@ import multiprocessing as mp
 import os
 import queue
 import threading
+import signal
 from abc import ABC, abstractmethod
 from multiprocessing.connection import Connection
 from typing import Dict
@@ -109,6 +110,14 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
     threading.current_thread().name = f"detector:{name}"
     logging.info(f"Starting detection process: {os.getpid()}")
     listen()
+
+    stop_event = mp.Event()
+    def receiveSignal(signalNumber, frame):
+        stop_event.set()
+    
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(tf_device=tf_device)
 
@@ -122,7 +131,13 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
         }
     
     while True:
-        connection_id = detection_queue.get()
+        if stop_event.is_set():
+            break
+
+        try:
+            connection_id = detection_queue.get(timeout=5)
+        except queue.Empty:
+            continue
         input_frame = frame_manager.get(connection_id, (1,300,300,3))
 
         if input_frame is None:
