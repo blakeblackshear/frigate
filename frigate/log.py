@@ -1,6 +1,8 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
 import threading
+import signal
+import multiprocessing as mp
 from logging import handlers
 
 
@@ -19,9 +21,21 @@ def root_configurer(queue):
     root.setLevel(logging.INFO)
 
 def log_process(queue):
+    stop_event = mp.Event()
+    def receiveSignal(signalNumber, frame):
+        stop_event.set()
+    
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     threading.current_thread().name = f"logger"
     listener_configurer()
     while True:
-        record = queue.get()
+        if stop_event.is_set() and queue.empty():
+            break
+        try:
+            record = queue.get(timeout=5)
+        except queue.Empty:
+            continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
