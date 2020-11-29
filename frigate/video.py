@@ -72,7 +72,7 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
+def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size=None, ffmpeg_process=None):
     if not ffmpeg_process is None:
         logger.info("Terminating the existing ffmpeg process...")
         ffmpeg_process.terminate()
@@ -85,9 +85,10 @@ def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size, ffmpeg_process=None):
             ffmpeg_process.communicate()
         ffmpeg_process = None
 
-    logger.info("Creating ffmpeg process...")
-    logger.info(" ".join(ffmpeg_cmd))
-    process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
+    if frame_size is None:
+        process = sp.Popen(ffmpeg_cmd, stdout = sp.DEVNULL, stdin = sp.DEVNULL, start_new_session=True)
+    else:
+        process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
     return process
 
 def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
@@ -138,7 +139,8 @@ class CameraWatchdog(threading.Thread):
         self.camera_name = camera_name
         self.config = config
         self.capture_thread = None
-        self.ffmpeg_process = None
+        self.ffmpeg_detect_process = None
+        self.ffmpeg_other_processes = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
@@ -146,31 +148,47 @@ class CameraWatchdog(threading.Thread):
         self.frame_size = self.frame_shape[0] * self.frame_shape[1]
 
     def run(self):
-        self.start_ffmpeg()
+        self.start_ffmpeg_detect()
+
+        for c in self.config.ffmpeg_cmds:
+            if 'detect' in c['roles']:
+                continue
+            self.ffmpeg_other_processes.append({
+                'cmd': c['cmd'],
+                'process': start_or_restart_ffmpeg(c['cmd'])
+            })
+        
         time.sleep(10)
         while True:
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
-                self.start_ffmpeg()
-            elif now - self.capture_thread.current_frame.value > 5:
-                logger.info(f"No frames received from {self.camera_name} in 5 seconds. Exiting ffmpeg...")
-                self.ffmpeg_process.terminate()
+                self.start_ffmpeg_detect()
+            elif now - self.capture_thread.current_frame.value > 20:
+                logger.info(f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg...")
+                self.ffmpeg_detect_process.terminate()
                 try:
                     logger.info("Waiting for ffmpeg to exit gracefully...")
-                    self.ffmpeg_process.communicate(timeout=30)
+                    self.ffmpeg_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
                     logger.info("FFmpeg didnt exit. Force killing...")
-                    self.ffmpeg_process.kill()
-                    self.ffmpeg_process.communicate()
+                    self.ffmpeg_detect_process.kill()
+                    self.ffmpeg_detect_process.communicate()
+            
+            for p in self.ffmpeg_other_processes:
+                poll = p['process'].poll()
+                if poll == None:
+                    continue
+                p['process'] = start_or_restart_ffmpeg(p['cmd'], ffmpeg_process=p['process'])
             
             # wait a bit before checking again
             time.sleep(10)
     
-    def start_ffmpeg(self):
-        self.ffmpeg_process = start_or_restart_ffmpeg(self.config.ffmpeg_cmd, self.frame_size)
-        self.ffmpeg_pid.value = self.ffmpeg_process.pid
-        self.capture_thread = CameraCapture(self.camera_name, self.ffmpeg_process, self.frame_shape, self.frame_queue, 
+    def start_ffmpeg_detect(self):
+        ffmpeg_cmd = [c['cmd'] for c in self.config.ffmpeg_cmds if 'detect' in c['roles']][0]
+        self.ffmpeg_detect_process = start_or_restart_ffmpeg(ffmpeg_cmd, self.frame_size)
+        self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
+        self.capture_thread = CameraCapture(self.camera_name, self.ffmpeg_detect_process, self.frame_shape, self.frame_queue, 
             self.camera_fps)
         self.capture_thread.start()
 
