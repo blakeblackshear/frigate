@@ -104,7 +104,6 @@ def filters_for_all_tracked_objects(object_config):
 OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
     {
         vol.Optional('track', default=['person']): [str],
-        # TODO: this should populate filters for all tracked objects
         vol.Optional('filters', default = {}): FILTER_SCHEMA.extend({ str: {vol.Optional('min_score', default=0.5): float}})
     }
 ))
@@ -617,7 +616,6 @@ class CameraConfig():
 
     def _get_ffmpeg_cmd(self, ffmpeg_input, cache_dir):
         ffmpeg_output_args = []
-        # TODO: ensure output args exist for each role and each role is only used once
         if 'detect' in ffmpeg_input.roles:
             ffmpeg_output_args = self.ffmpeg.output_args['detect'] + ffmpeg_output_args + ['pipe:']
             if self.fps:
@@ -630,10 +628,10 @@ class CameraConfig():
             ffmpeg_output_args = self.ffmpeg.output_args['clips'] + [
                 f"{os.path.join(cache_dir, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
-        # if 'record' in ffmpeg_input.roles and self.save_clips.enabled:
-        #     ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
-        #         f"{os.path.join(cache_dir, self.name)}-%Y%m%d%H%M%S.mp4"
-        #     ] + ffmpeg_output_args
+        if 'record' in ffmpeg_input.roles and self.record.enabled:
+            ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
+                f"{os.path.join(self.record.record_dir, self.name)}-%Y%m%d%H%M%S.mp4"
+            ] + ffmpeg_output_args
         return (['ffmpeg'] +
                 ffmpeg_input.global_args +
                 ffmpeg_input.hwaccel_args +

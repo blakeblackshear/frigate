@@ -16,6 +16,7 @@ from frigate.log import log_process, root_configurer
 from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
+from frigate.record import RecordingMaintainer
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
 
@@ -120,6 +121,10 @@ class FrigateApp():
         self.event_cleanup = EventCleanup(self.config, self.stop_event)
         self.event_cleanup.start()
 
+    def start_recording_maintainer(self):
+        self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
+        self.recording_maintainer.start()
+
     def start_watchdog(self):
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
@@ -138,6 +143,7 @@ class FrigateApp():
         self.init_web_server()
         self.start_event_processor()
         self.start_event_cleanup()
+        self.start_recording_maintainer()
         self.start_watchdog()
         self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
         self.stop()
@@ -149,6 +155,7 @@ class FrigateApp():
         self.detected_frames_processor.join()
         self.event_processor.join()
         self.event_cleanup.join()
+        self.recording_maintainer.join()
         self.frigate_watchdog.join()
 
         for detector in self.detectors.values():
