@@ -2,6 +2,7 @@
 import logging
 import threading
 import signal
+import queue
 import multiprocessing as mp
 from logging import handlers
 
@@ -20,7 +21,7 @@ def root_configurer(queue):
     root.addHandler(h)
     root.setLevel(logging.INFO)
 
-def log_process(queue):
+def log_process(log_queue):
     stop_event = mp.Event()
     def receiveSignal(signalNumber, frame):
         stop_event.set()
@@ -31,10 +32,10 @@ def log_process(queue):
     threading.current_thread().name = f"logger"
     listener_configurer()
     while True:
-        if stop_event.is_set() and queue.empty():
+        if stop_event.is_set() and log_queue.empty():
             break
         try:
-            record = queue.get(timeout=5)
+            record = log_queue.get(timeout=5)
         except queue.Empty:
             continue
         logger = logging.getLogger(record.name)
