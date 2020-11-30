@@ -165,24 +165,28 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                     vol.Required('coordinates'): vol.Any(str, [str]),
                     vol.Optional('filters', default={}): FILTER_SCHEMA
                 }
-             },
-             vol.Optional('save_clips', default=DEFAULT_CAMERA_SAVE_CLIPS): {
+            },
+            vol.Optional('save_clips', default=DEFAULT_CAMERA_SAVE_CLIPS): {
                 vol.Optional('enabled', default=False): bool,
                 vol.Optional('pre_capture', default=30): int,
                 'objects': [str],
                 vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA,
-             },
-             vol.Optional('rtmp', default={}): {
-                 vol.Required('enabled', default=True): bool,
-             },
-             vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
+            },
+            vol.Optional('record', default={}): {
+                'enabled': bool,
+                'retain_days': int,
+            },
+            vol.Optional('rtmp', default={}): {
+                vol.Required('enabled', default=True): bool,
+            },
+            vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
                 vol.Optional('show_timestamp', default=True): bool,
                 vol.Optional('draw_zones', default=False): bool,
                 vol.Optional('draw_bounding_boxes', default=True): bool,
                 vol.Optional('crop_to_region', default=True): bool,
                 'height': int
-             },
-             'objects': OBJECTS_SCHEMA
+            },
+            'objects': OBJECTS_SCHEMA
         }
     }, vol.Msg(ensure_zones_and_cameras_have_different_names, msg='Zones cannot share names with cameras'))
 )
@@ -192,6 +196,11 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
         'mqtt': MQTT_SCHEMA,
         vol.Optional('save_clips', default={}): SAVE_CLIPS_SCHEMA,
+        vol.Optional('record', default={}): {
+            vol.Optional('enabled', default=False): bool,
+            vol.Optional('retain_days', default=30): int,
+            vol.Optional('record_dir', default='/media/frigate/recordings'): str
+        },
         vol.Optional('ffmpeg', default={}): GLOBAL_FFMPEG_SCHEMA,
         vol.Optional('objects', default={}): OBJECTS_SCHEMA,
         vol.Required('cameras', default={}): CAMERAS_SCHEMA
@@ -349,6 +358,31 @@ class SaveClipsConfig():
             'clips_dir': self.clips_dir,
             'cache_dir': self.cache_dir,
             'retain': self.retain.to_dict()
+        }
+
+class RecordConfig():
+    def __init__(self, global_config, config):
+        self._enabled = config.get('enabled', global_config['enabled'])
+        self._retain_days = config.get('retain_days', global_config['retain_days'])
+        self._record_dir = global_config['record_dir']
+
+    @property
+    def enabled(self):
+        return self._enabled
+    
+    @property
+    def retain_days(self):
+        return self._retain_days
+    
+    @property
+    def record_dir(self):
+        return self._record_dir
+    
+    def to_dict(self):
+        return {
+            'enabled': self.enabled,
+            'retain_days': self.retain_days,
+            'record_dir': self.record_dir,
         }
 
 class FilterConfig():
@@ -543,6 +577,7 @@ class CameraConfig():
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
         self._save_clips = CameraSaveClipsConfig(global_config, config['save_clips'])
+        self._record = RecordConfig(global_config['record'], config['record'])
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
         self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
@@ -654,6 +689,10 @@ class CameraConfig():
         return self._save_clips
     
     @property
+    def record(self):
+        return self._record
+    
+    @property
     def rtmp(self):
         return self._rtmp
     
@@ -686,6 +725,7 @@ class CameraConfig():
             'best_image_timeout': self.best_image_timeout,
             'zones': {k: z.to_dict() for k, z in self.zones.items()},
             'save_clips': self.save_clips.to_dict(),
+            'record': self.record.to_dict(),
             'rtmp': self.rtmp.to_dict(),
             'snapshots': self.snapshots.to_dict(),
             'objects': self.objects.to_dict(),
@@ -725,7 +765,8 @@ class FrigateConfig():
         return config
     
     def _ensure_dirs(self):
-        for d in [self.save_clips.cache_dir, self.save_clips.clips_dir]:
+        record_dirs = list(set([camera.record.record_dir for camera in self.cameras.values()]))
+        for d in [self.save_clips.cache_dir, self.save_clips.clips_dir] + record_dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 os.makedirs(d)
 
