@@ -144,7 +144,14 @@ CAMERA_FFMPEG_SCHEMA = vol.Schema(
     }
 )
 
-CAMERAS_SCHEMA = vol.Schema(
+def ensure_zones_and_cameras_have_different_names(cameras):
+    zones = [zone for camera in cameras.values() for zone in camera['zones'].keys()]
+    for zone in zones:
+        if zone in cameras.keys():
+            raise ValueError
+    return cameras
+
+CAMERAS_SCHEMA = vol.Schema(vol.All(
     {
         str: {
             vol.Required('ffmpeg'): CAMERA_FFMPEG_SCHEMA,
@@ -177,7 +184,7 @@ CAMERAS_SCHEMA = vol.Schema(
              },
              'objects': OBJECTS_SCHEMA
         }
-    }
+    }, vol.Msg(ensure_zones_and_cameras_have_different_names, msg='Zones cannot share names with cameras'))
 )
 
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
