@@ -246,6 +246,38 @@ class TestConfig(TestCase):
             }
         }
         self.assertRaises(vol.MultipleInvalid, lambda: FrigateConfig(config=config))
+    
+    def test_zone_matching_camera_name_throws_error(self):
+        config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'save_clips': {
+                'retain': {
+                    'default': 20,
+                    'objects': {
+                        'person': 30
+                    }
+                }
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
+                    },
+                    'height': 1080,
+                    'width': 1920,
+                    'zones': {
+                        'back': {
+                            'coordinates': '1,1,1,1,1,1'
+                        }
+                    }
+                }
+            }
+        }
+        self.assertRaises(vol.MultipleInvalid, lambda: FrigateConfig(config=config))
 
 if __name__ == '__main__':
     main(verbosity=2)
