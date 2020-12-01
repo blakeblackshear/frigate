@@ -17,6 +17,18 @@ logger = logging.getLogger(__name__)
 
 SECONDS_IN_DAY = 60 * 60 * 24
 
+def remove_empty_directories(directory):
+  # list all directories recursively and sort them by path,
+  # longest first
+  paths = sorted(
+      [x[0] for x in os.walk('/media/frigate/recordings/')],
+      key=lambda p: len(str(p)),
+      reverse=True,
+  )
+  for path in paths:
+      if len(os.listdir(path)) == 0:
+          os.rmdir(path)
+
 class RecordingMaintainer(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event):
         threading.Thread.__init__(self)
@@ -103,9 +115,10 @@ class RecordingMaintainer(threading.Thread):
             # only expire events every 10 minutes, but check for new files every 10 seconds
             time.sleep(10)
             counter = counter + 1
-            if counter < 60:
+            if counter > 60:
                 self.expire_files()
-            counter = 0
+                remove_empty_directories(self.record_dir)
+                counter = 0
 
             self.move_files()
 

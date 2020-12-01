@@ -116,11 +116,11 @@ class FrigateApp():
     def start_event_processor(self):
         self.event_processor = EventProcessor(self.config, self.camera_metrics, self.event_queue, self.event_processed_queue, self.stop_event)
         self.event_processor.start()
-
+    
     def start_event_cleanup(self):
         self.event_cleanup = EventCleanup(self.config, self.stop_event)
         self.event_cleanup.start()
-
+    
     def start_recording_maintainer(self):
         self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
         self.recording_maintainer.start()
