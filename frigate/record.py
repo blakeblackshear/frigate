@@ -12,6 +12,7 @@ from pathlib import Path
 import psutil
 
 from frigate.config import FrigateConfig
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +35,10 @@ class RecordingMaintainer(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'recording_maint'
         self.config = config
-        record_dirs = list(set([camera.record.record_dir for camera in self.config.cameras.values()]))
-        self.record_dir = None if len(record_dirs) == 0 else record_dirs[0]
         self.stop_event = stop_event
 
     def move_files(self):
-        if self.record_dir is None:
-            return
-
-        recordings = [d for d in os.listdir(self.record_dir) if os.path.isfile(os.path.join(self.record_dir, d)) and d.endswith(".mp4")]
+        recordings = [d for d in os.listdir(RECORD_DIR) if os.path.isfile(os.path.join(RECORD_DIR, d)) and d.endswith(".mp4")]
 
         files_in_use = []
         for process in psutil.process_iter():
@@ -52,7 +48,7 @@ class RecordingMaintainer(threading.Thread):
                 flist = process.open_files()
                 if flist:
                     for nt in flist:
-                        if nt.path.startswith(self.record_dir):
+                        if nt.path.startswith(RECORD_DIR):
                             files_in_use.append(nt.path.split('/')[-1])
             except:
                 continue
@@ -72,7 +68,7 @@ class RecordingMaintainer(threading.Thread):
                 'format=duration',
                 '-of',
                 'default=noprint_wrappers=1:nokey=1',
-                f"{os.path.join(self.record_dir,f)}"
+                f"{os.path.join(RECORD_DIR,f)}"
             ])
             p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
             (output, err) = p.communicate()
@@ -81,17 +77,17 @@ class RecordingMaintainer(threading.Thread):
                 duration = float(output.decode('utf-8').strip())
             else:
                 logger.info(f"bad file: {f}")
-                os.remove(os.path.join(self.record_dir,f))
+                os.remove(os.path.join(RECORD_DIR,f))
                 continue
 
-            directory = os.path.join(self.record_dir, start_time.strftime('%Y-%m/%d/%H'), camera)
+            directory = os.path.join(RECORD_DIR, start_time.strftime('%Y-%m/%d/%H'), camera)
 
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
             file_name = f"{start_time.strftime('%M.%S.mp4')}"
 
-            os.rename(os.path.join(self.record_dir,f), os.path.join(directory,file_name))
+            os.rename(os.path.join(RECORD_DIR,f), os.path.join(directory,file_name))
 
     def expire_files(self):
         delete_before = {}
@@ -117,7 +113,7 @@ class RecordingMaintainer(threading.Thread):
             counter = counter + 1
             if counter > 60:
                 self.expire_files()
-                remove_empty_directories(self.record_dir)
+                remove_empty_directories(RECORD_DIR)
                 counter = 0
 
             self.move_files()

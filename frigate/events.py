@@ -12,6 +12,7 @@ from pathlib import Path
 import psutil
 
 from frigate.config import FrigateConfig
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.models import Event
 
 from peewee import fn
@@ -23,8 +24,6 @@ class EventProcessor(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'event_processor'
         self.config = config
-        self.cache_dir = self.config.save_clips.cache_dir
-        self.clips_dir = self.config.save_clips.clips_dir
         self.camera_processes = camera_processes
         self.cached_clips = {}
         self.event_queue = event_queue
@@ -33,7 +32,7 @@ class EventProcessor(threading.Thread):
         self.stop_event = stop_event
     
     def refresh_cache(self):
-        cached_files = os.listdir(self.cache_dir)
+        cached_files = os.listdir(CACHE_DIR)
 
         files_in_use = []
         for process in psutil.process_iter():
@@ -43,7 +42,7 @@ class EventProcessor(threading.Thread):
                 flist = process.open_files()
                 if flist:
                     for nt in flist:
-                        if nt.path.startswith(self.cache_dir):
+                        if nt.path.startswith(CACHE_DIR):
                             files_in_use.append(nt.path.split('/')[-1])
             except:
                 continue
@@ -63,7 +62,7 @@ class EventProcessor(threading.Thread):
                 'format=duration',
                 '-of',
                 'default=noprint_wrappers=1:nokey=1',
-                f"{os.path.join(self.cache_dir,f)}"
+                f"{os.path.join(CACHE_DIR,f)}"
             ])
             p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
             (output, err) = p.communicate()
@@ -72,7 +71,7 @@ class EventProcessor(threading.Thread):
                 duration = float(output.decode('utf-8').strip())
             else:
                 logger.info(f"bad file: {f}")
-                os.remove(os.path.join(self.cache_dir,f))
+                os.remove(os.path.join(CACHE_DIR,f))
                 continue
 
             self.cached_clips[f] = {
@@ -95,7 +94,7 @@ class EventProcessor(threading.Thread):
         for f, data in list(self.cached_clips.items()):
             if earliest_event-90 > data['start_time']+data['duration']:
                 del self.cached_clips[f]
-                os.remove(os.path.join(self.cache_dir,f))
+                os.remove(os.path.join(CACHE_DIR,f))
 
     def create_clip(self, camera, event_data, pre_capture):
         # get all clips from the camera with the event sorted
@@ -117,7 +116,7 @@ class EventProcessor(threading.Thread):
             # clip starts after playlist ends, finish
             if clip['start_time'] > playlist_end:
                 break
-            playlist_lines.append(f"file '{os.path.join(self.cache_dir,clip['path'])}'")
+            playlist_lines.append(f"file '{os.path.join(CACHE_DIR,clip['path'])}'")
             # if this is the starting clip, add an inpoint
             if clip['start_time'] < playlist_start:
                 playlist_lines.append(f"inpoint {int(playlist_start-clip['start_time'])}")
@@ -139,7 +138,7 @@ class EventProcessor(threading.Thread):
             '-',
             '-c',
             'copy',
-            f"{os.path.join(self.clips_dir, clip_name)}.mp4"
+            f"{os.path.join(CLIPS_DIR, clip_name)}.mp4"
         ]
 
         p = sp.run(ffmpeg_cmd, input="\n".join(playlist_lines), encoding='ascii', capture_output=True)
@@ -203,7 +202,6 @@ class EventCleanup(threading.Thread):
         threading.Thread.__init__(self)
         self.name = 'event_cleanup'
         self.config = config
-        self.clips_dir = self.config.save_clips.clips_dir
         self.stop_event = stop_event
 
     def run(self):
@@ -244,7 +242,7 @@ class EventCleanup(threading.Thread):
                 # delete the grabbed clips from disk
                 for event in expired_events:
                     clip_name = f"{event.camera}-{event.id}"
-                    clip = Path(f"{os.path.join(self.clips_dir, clip_name)}.mp4")
+                    clip = Path(f"{os.path.join(CLIPS_DIR, clip_name)}.mp4")
                     clip.unlink(missing_ok=True)
                 # delete the event for this type from the db
                 delete_query = (
@@ -278,7 +276,7 @@ class EventCleanup(threading.Thread):
                     # delete the grabbed clips from disk
                     for event in expired_events:
                         clip_name = f"{event.camera}-{event.id}"
-                        clip = Path(f"{os.path.join(self.clips_dir, clip_name)}.mp4")
+                        clip = Path(f"{os.path.join(CLIPS_DIR, clip_name)}.mp4")
                         clip.unlink(missing_ok=True)
                     # delete the event for this type from the db
                     delete_query = (

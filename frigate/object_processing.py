@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from frigate.config import FrigateConfig, CameraConfig
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import SharedMemoryFrameManager, draw_box_with_label
 
@@ -418,7 +419,7 @@ class TrackedObjectProcessor(threading.Thread):
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
             if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
                 thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
-                with open(os.path.join(self.config.save_clips.clips_dir, thumbnail_file_name), 'wb') as f:
+                with open(os.path.join(CLIPS_DIR, thumbnail_file_name), 'wb') as f:
                     f.write(obj.get_jpg_bytes())
             self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         

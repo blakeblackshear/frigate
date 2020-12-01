@@ -9,6 +9,8 @@ import numpy as np
 import voluptuous as vol
 import yaml
 
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+
 DETECTORS_SCHEMA = vol.Schema(
     {
         vol.Required(str): {
@@ -48,8 +50,6 @@ SAVE_CLIPS_RETAIN_SCHEMA = vol.Schema(
 SAVE_CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
-        vol.Optional('clips_dir', default='/media/frigate/clips'): str,
-        vol.Optional('cache_dir', default='/tmp/cache'): str,
         vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
     }
 )
@@ -198,7 +198,6 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional('record', default={}): {
             vol.Optional('enabled', default=False): bool,
             vol.Optional('retain_days', default=30): int,
-            vol.Optional('record_dir', default='/media/frigate/recordings'): str
         },
         vol.Optional('ffmpeg', default={}): GLOBAL_FFMPEG_SCHEMA,
         vol.Optional('objects', default={}): OBJECTS_SCHEMA,
@@ -331,22 +330,12 @@ class SaveClipsRetainConfig():
 class SaveClipsConfig():
     def __init__(self, config):
         self._max_seconds = config['max_seconds']
-        self._clips_dir = config['clips_dir']
-        self._cache_dir = config['cache_dir']
         self._retain = SaveClipsRetainConfig(config['retain'], config['retain'])
     
     @property
     def max_seconds(self):
         return self._max_seconds
-    
-    @property
-    def clips_dir(self):
-        return self._clips_dir
-    
-    @property
-    def cache_dir(self):
-        return self._cache_dir
-    
+
     @property
     def retain(self):
         return self._retain
@@ -354,8 +343,6 @@ class SaveClipsConfig():
     def to_dict(self):
         return {
             'max_seconds': self.max_seconds,
-            'clips_dir': self.clips_dir,
-            'cache_dir': self.cache_dir,
             'retain': self.retain.to_dict()
         }
 
@@ -363,7 +350,6 @@ class RecordConfig():
     def __init__(self, global_config, config):
         self._enabled = config.get('enabled', global_config['enabled'])
         self._retain_days = config.get('retain_days', global_config['retain_days'])
-        self._record_dir = global_config['record_dir']
 
     @property
     def enabled(self):
@@ -373,15 +359,10 @@ class RecordConfig():
     def retain_days(self):
         return self._retain_days
     
-    @property
-    def record_dir(self):
-        return self._record_dir
-    
     def to_dict(self):
         return {
             'enabled': self.enabled,
             'retain_days': self.retain_days,
-            'record_dir': self.record_dir,
         }
 
 class FilterConfig():
@@ -564,7 +545,7 @@ class ZoneConfig():
         }
 
 class CameraConfig():
-    def __init__(self, name, config, cache_dir, global_config):
+    def __init__(self, name, config, global_config):
         self._name = name
         self._ffmpeg = CameraFfmpegConfig(global_config['ffmpeg'], config['ffmpeg'])
         self._height = config.get('height')
@@ -585,7 +566,7 @@ class CameraConfig():
         for ffmpeg_input in self._ffmpeg.inputs:
             self._ffmpeg_cmds.append({
                 'roles': ffmpeg_input.roles,
-                'cmd': self._get_ffmpeg_cmd(ffmpeg_input, cache_dir)
+                'cmd': self._get_ffmpeg_cmd(ffmpeg_input)
             })
 
 
@@ -614,7 +595,7 @@ class CameraConfig():
         
         return mask_img
 
-    def _get_ffmpeg_cmd(self, ffmpeg_input, cache_dir):
+    def _get_ffmpeg_cmd(self, ffmpeg_input):
         ffmpeg_output_args = []
         if 'detect' in ffmpeg_input.roles:
             ffmpeg_output_args = self.ffmpeg.output_args['detect'] + ffmpeg_output_args + ['pipe:']
@@ -626,11 +607,11 @@ class CameraConfig():
             ] + ffmpeg_output_args
         if 'clips' in ffmpeg_input.roles and self.save_clips.enabled:
             ffmpeg_output_args = self.ffmpeg.output_args['clips'] + [
-                f"{os.path.join(cache_dir, self.name)}-%Y%m%d%H%M%S.mp4"
+                f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
         if 'record' in ffmpeg_input.roles and self.record.enabled:
             ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
-                f"{os.path.join(self.record.record_dir, self.name)}-%Y%m%d%H%M%S.mp4"
+                f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
         return (['ffmpeg'] +
                 ffmpeg_input.global_args +
@@ -746,9 +727,7 @@ class FrigateConfig():
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._save_clips = SaveClipsConfig(config['save_clips'])
-        self._cameras = { name: CameraConfig(name, c, self._save_clips.cache_dir, config) for name, c in config['cameras'].items() }
-
-        self._ensure_dirs()
+        self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
 
     def _sub_env_vars(self, config):
         frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
@@ -761,12 +740,6 @@ class FrigateConfig():
                 i['path'] = i['path'].format(**frigate_env_vars)
         
         return config
-    
-    def _ensure_dirs(self):
-        record_dirs = list(set([camera.record.record_dir for camera in self.cameras.values()]))
-        for d in [self.save_clips.cache_dir, self.save_clips.clips_dir] + record_dirs:
-            if not os.path.exists(d) and not os.path.islink(d):
-                os.makedirs(d)
 
     def _load_file(self, config_file):
         with open(config_file) as f:
