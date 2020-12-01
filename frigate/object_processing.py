@@ -240,7 +240,7 @@ class CameraState():
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
         self.best_objects: Dict[str, TrackedObject] = {}
-        self.object_status = defaultdict(lambda: 'OFF')
+        self.object_counts = defaultdict(lambda: 0)
         self.tracked_objects: Dict[str, TrackedObject] = {}
         self.frame_cache = {}
         self.zone_objects = defaultdict(lambda: [])
@@ -363,18 +363,17 @@ class CameraState():
                 
         # report on detected objects
         for obj_name, count in obj_counter.items():
-            new_status = 'ON' if count > 0 else 'OFF'
-            if new_status != self.object_status[obj_name]:
-                self.object_status[obj_name] = new_status
+            if count != self.object_counts[obj_name]:
+                self.object_counts[obj_name] = count
                 for c in self.callbacks['object_status']:
-                    c(self.name, obj_name, new_status)
+                    c(self.name, obj_name, count)
 
-        # expire any objects that are ON and no longer detected
-        expired_objects = [obj_name for obj_name, status in self.object_status.items() if status == 'ON' and not obj_name in obj_counter]
+        # expire any objects that are >0 and no longer detected
+        expired_objects = [obj_name for obj_name, count in self.object_counts.items() if count > 0 and not obj_name in obj_counter]
         for obj_name in expired_objects:
-            self.object_status[obj_name] = 'OFF'
+            self.object_counts[obj_name] = 0
             for c in self.callbacks['object_status']:
-                c(self.name, obj_name, 'OFF')
+                c(self.name, obj_name, 0)
             for c in self.callbacks['snapshot']:
                 c(self.name, self.best_objects[obj_name], frame_time)
         
@@ -440,10 +439,13 @@ class TrackedObjectProcessor(threading.Thread):
 
         # {
         #   'zone_name': {
-        #       'person': ['camera_1', 'camera_2']
+        #       'person': {
+        #           'camera_1': 2,
+        #           'camera_2': 1
+        #       }
         #   }
         # }
-        self.zone_data = defaultdict(lambda: defaultdict(lambda: set()))
+        self.zone_data = defaultdict(lambda: defaultdict(lambda: {}))
         
     def get_best(self, camera, label):
         # TODO: need a lock here
@@ -474,26 +476,30 @@ class TrackedObjectProcessor(threading.Thread):
 
             camera_state.update(frame_time, current_tracked_objects)
 
-            # update zone status for each label
+            # update zone counts for each label
+            # for each zone in the current camera
             for zone in self.config.cameras[camera].zones.keys():
-                # get labels for current camera and all labels in current zone
-                labels_for_camera = set([obj.obj_data['label'] for obj in camera_state.tracked_objects.values() if zone in obj.current_zones and not obj.false_positive])
-                labels_to_check = labels_for_camera | set(self.zone_data[zone].keys())
-                # for each label in zone
-                for label in labels_to_check:
-                    camera_list = self.zone_data[zone][label]
-                    # remove or add the camera to the list for the current label
-                    previous_state = len(camera_list) > 0
-                    if label in labels_for_camera:
-                        camera_list.add(camera_state.name)
-                    elif camera_state.name in camera_list:
-                        camera_list.remove(camera_state.name)
-                    new_state = len(camera_list) > 0
-                    # if the value is changing, send over MQTT
-                    if previous_state == False and new_state == True:
-                        self.client.publish(f"{self.topic_prefix}/{zone}/{label}", 'ON', retain=False)
-                    elif previous_state == True and new_state == False:
-                        self.client.publish(f"{self.topic_prefix}/{zone}/{label}", 'OFF', retain=False)
+                # count labels for the camera in the zone
+                obj_counter = Counter()
+                for obj in camera_state.tracked_objects.values():
+                    if zone in obj.current_zones and not obj.false_positive:
+                        obj_counter[obj.obj_data['label']] += 1
+                
+                # update counts and publish status
+                for label in set(list(self.zone_data[zone].keys()) + list(obj_counter.keys())):
+                    # if we have previously published a count for this zone/label
+                    zone_label = self.zone_data[zone][label]
+                    if camera in zone_label:
+                        current_count = sum(zone_label.values())
+                        zone_label[camera] = obj_counter[label] if label in obj_counter else 0
+                        new_count = sum(zone_label.values())
+                        if new_count != current_count:
+                            self.client.publish(f"{self.topic_prefix}/{zone}/{label}", new_count, retain=False)
+                    # if this is a new zone/label combo for this camera
+                    else:
+                        if label in obj_counter:
+                            zone_label[camera] = obj_counter[label]
+                            self.client.publish(f"{self.topic_prefix}/{zone}/{label}", obj_counter[label], retain=False)
 
             # cleanup event finished queue
             while not self.event_processed_queue.empty():
