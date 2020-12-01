@@ -9,6 +9,7 @@ import yaml
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import FrigateConfig
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventProcessor, EventCleanup
 from frigate.http import create_app
@@ -32,6 +33,11 @@ class FrigateApp():
         self.detection_shms: List[mp.shared_memory.SharedMemory] = []
         self.log_queue = mp.Queue()
         self.camera_metrics = {}
+
+    def ensure_dirs(self):
+        for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
+            if not os.path.exists(d) and not os.path.islink(d):
+                os.makedirs(d)
     
     def init_logger(self):
         self.log_process = mp.Process(target=log_process, args=(self.log_queue,), name='log_process')
@@ -64,7 +70,7 @@ class FrigateApp():
         self.detected_frames_queue = mp.Queue(maxsize=len(self.config.cameras.keys())*2)
 
     def init_database(self):
-        self.db = SqliteExtDatabase(f"/{os.path.join(self.config.save_clips.clips_dir, 'frigate.db')}")
+        self.db = SqliteExtDatabase(f"/{os.path.join(CLIPS_DIR, 'frigate.db')}")
         models = [Event]
         self.db.bind(models)
         self.db.create_tables(models, safe=True)
@@ -131,6 +137,7 @@ class FrigateApp():
 
     def start(self):
         self.init_logger()
+        self.ensure_dirs()
         # TODO: exit if config doesnt parse
         self.init_config()
         self.init_queues()
