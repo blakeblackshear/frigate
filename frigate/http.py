@@ -75,11 +75,11 @@ def event(id):
 
 @bp.route('/events/<id>/snapshot.jpg')
 def event_snapshot(id):
+    format = request.args.get('format', 'ios')
+    thumbnail_bytes = None
     try:
         event = Event.get(Event.id == id)
-        response = make_response(base64.b64decode(event.thumbnail))
-        response.headers['Content-Type'] = 'image/jpg'
-        return response
+        thumbnail_bytes = base64.b64decode(event.thumbnail)
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
@@ -87,12 +87,24 @@ def event_snapshot(id):
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
                     if not tracked_obj is None:
-                        response = make_response(tracked_obj.get_jpg_bytes())
-                        response.headers['Content-Type'] = 'image/jpg'
-                        return response
+                        thumbnail_bytes = tracked_obj.get_jpg_bytes()
         except:
             return "Event not found", 404
+    
+    if thumbnail_bytes is None:
         return "Event not found", 404
+    
+    # android notifications prefer a 2:1 ratio
+    if format == 'android':
+        jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+        img = cv2.imdecode(jpg_as_np, flags=1)
+        thumbnail = cv2.copyMakeBorder(img, 0, 0, int(img.shape[1]*0.5), int(img.shape[1]*0.5), cv2.BORDER_CONSTANT, (0,0,0))
+        ret, jpg = cv2.imencode('.jpg', thumbnail)    
+        thumbnail_bytes = jpg.tobytes()
+    
+    response = make_response(thumbnail_bytes)
+    response.headers['Content-Type'] = 'image/jpg'
+    return response
 
 @bp.route('/events')
 def events():
