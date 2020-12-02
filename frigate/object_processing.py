@@ -199,7 +199,7 @@ class TrackedObject():
             time_to_show = datetime.datetime.fromtimestamp(self.thumbnail_data['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
             size = cv2.getTextSize(time_to_show, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2)
             text_width = size[0][0]
-            desired_size = max(200, 0.33*best_frame.shape[1])
+            desired_size = max(150, 0.33*best_frame.shape[1])
             font_scale = desired_size/text_width
             cv2.putText(best_frame, time_to_show, (5, best_frame.shape[0]-7), cv2.FONT_HERSHEY_SIMPLEX, 
                 fontScale=font_scale, color=(255, 255, 255), thickness=2)
