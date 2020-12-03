@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 from logging.handlers import QueueHandler
 from typing import Dict, List
+import sys
 
 import yaml
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -139,8 +140,12 @@ class FrigateApp():
     def start(self):
         self.init_logger()
         self.ensure_dirs()
-        # TODO: exit if config doesnt parse
-        self.init_config()
+        try:
+            self.init_config()
+        except Exception as e:
+            logger.error(f"Error parsing config: {e}")
+            self.log_process.terminate()
+            sys.exit(1)
         self.init_queues()
         self.init_database()
         self.init_mqtt()
