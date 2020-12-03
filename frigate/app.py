@@ -20,6 +20,7 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.record import RecordingMaintainer
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
+from frigate.zeroconf import broadcast_zeroconf
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +153,7 @@ class FrigateApp():
         self.start_event_cleanup()
         self.start_recording_maintainer()
         self.start_watchdog()
+        self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
         self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
         self.stop()
     
