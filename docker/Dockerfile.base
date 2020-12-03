@@ -30,6 +30,7 @@ RUN apt-get -qq update \
 
 RUN pip3 install \
     peewee \
+    zeroconf \
     voluptuous
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
