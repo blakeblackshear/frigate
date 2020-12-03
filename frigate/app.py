@@ -39,7 +39,10 @@ class FrigateApp():
     def ensure_dirs(self):
         for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
+                logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
+            else:
+                logger.debug(f"Skipping directory: {d}")
     
     def init_logger(self):
         self.log_process = mp.Process(target=log_process, args=(self.log_queue,), name='log_process')
