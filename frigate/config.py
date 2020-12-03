@@ -459,7 +459,7 @@ class CameraSaveClipsConfig():
     def __init__(self, global_config, config):
         self._enabled = config['enabled']
         self._pre_capture = config['pre_capture']
-        self._objects = config.get('objects')
+        self._objects = config.get('objects', global_config['objects']['track'])
         self._retain = SaveClipsRetainConfig(global_config['save_clips']['retain'], config['retain'])
     
     @property
