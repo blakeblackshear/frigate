@@ -278,6 +278,42 @@ class TestConfig(TestCase):
             }
         }
         self.assertRaises(vol.MultipleInvalid, lambda: FrigateConfig(config=config))
+    
+    def test_save_clips_should_default_to_global_objects(self):
+        config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'save_clips': {
+                'retain': {
+                    'default': 20,
+                    'objects': {
+                        'person': 30
+                    }
+                }
+            },
+            'objects': {
+                'track': ['person', 'dog']
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
+                    },
+                    'height': 1080,
+                    'width': 1920,
+                    'save_clips': {
+                        'enabled': True
+                    }
+                }
+            }
+        }
+        config = FrigateConfig(config=config)
+        assert(len(config.cameras['back'].save_clips.objects) == 2)
+        assert('dog' in config.cameras['back'].save_clips.objects)
+        assert('person' in config.cameras['back'].save_clips.objects)
 
 if __name__ == '__main__':
     main(verbosity=2)
