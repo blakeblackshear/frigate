@@ -58,11 +58,11 @@ class LocalObjectDetector(ObjectDetector):
 
         if tf_device != 'cpu':
             try:
-                logging.info(f"Attempting to load TPU as {device_config['device']}")
+                logger.info(f"Attempting to load TPU as {device_config['device']}")
                 edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', device_config)
-                logging.info("TPU found")
+                logger.info("TPU found")
             except ValueError:
-                logging.info("No EdgeTPU detected. Falling back to CPU.")
+                logger.info("No EdgeTPU detected. Falling back to CPU.")
         
         if edge_tpu_delegate is None:
             self.interpreter = tflite.Interpreter(
@@ -108,7 +108,8 @@ class LocalObjectDetector(ObjectDetector):
 
 def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
     threading.current_thread().name = f"detector:{name}"
-    logging.info(f"Starting detection process: {os.getpid()}")
+    logger = logging.getLogger(f"detector.{name}")
+    logger.info(f"Starting detection process: {os.getpid()}")
     listen()
 
     stop_event = mp.Event()

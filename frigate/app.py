@@ -65,6 +65,11 @@ class FrigateApp():
                 'ffmpeg_pid': mp.Value('i', 0),
                 'frame_queue': mp.Queue(maxsize=2)
             }
+    
+    def set_log_levels(self):
+        logging.getLogger().setLevel(self.config.logger.default)
+        for log, level in self.config.logger.logs.items():
+            logging.getLogger(log).setLevel(level)
 
     def init_queues(self):
         # Queues for clip processing
@@ -149,6 +154,7 @@ class FrigateApp():
             logger.error(f"Error parsing config: {e}")
             self.log_process.terminate()
             sys.exit(1)
+        self.set_log_levels()
         self.init_queues()
         self.init_database()
         self.init_mqtt()
