@@ -333,7 +333,6 @@ class CameraState():
                     c(self.name, removed_obj, frame_time)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
-        #       maybe make an api endpoint that pulls the thumbnail from the file system?
         # maintain best objects
         for obj in self.tracked_objects.values():
             object_type = obj.obj_data['label']
@@ -416,10 +415,6 @@ class TrackedObjectProcessor(threading.Thread):
             if not obj.false_positive:
                 message = { 'before': obj.previous, 'after': obj.to_dict() }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
-            if self.config.cameras[camera].save_clips.enabled and not obj.false_positive:
-                thumbnail_file_name = f"{camera}-{obj.obj_data['id']}.jpg"
-                with open(os.path.join(CLIPS_DIR, thumbnail_file_name), 'wb') as f:
-                    f.write(obj.get_jpg_bytes())
             self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
