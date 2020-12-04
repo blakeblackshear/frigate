@@ -194,6 +194,10 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
         vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
         'mqtt': MQTT_SCHEMA,
+        vol.Optional('logger', default={'default': 'info', 'logs': {}}): {
+            vol.Optional('default', default='info'): vol.In(['info', 'debug', 'warning', 'error', 'critical']),
+            vol.Optional('logs', default={}): {str: vol.In(['info', 'debug', 'warning', 'error', 'critical']) }
+        },
         vol.Optional('save_clips', default={}): SAVE_CLIPS_SCHEMA,
         vol.Optional('record', default={}): {
             vol.Optional('enabled', default=False): bool,
@@ -224,6 +228,24 @@ class DetectorConfig():
             'device': self.device
         }
 
+class LoggerConfig():
+    def __init__(self, config):
+        self._default = config['default'].upper()
+        self._logs = {k: v.upper() for k, v in config['logs'].items()}
+    
+    @property
+    def default(self):
+        return self._default
+    
+    @property
+    def logs(self):
+        return self._logs
+    
+    def to_dict(self):
+        return {
+            'default': self.default,
+            'logs': self.logs
+        }
 
 class MqttConfig():
     def __init__(self, config):
@@ -728,6 +750,7 @@ class FrigateConfig():
         self._mqtt = MqttConfig(config['mqtt'])
         self._save_clips = SaveClipsConfig(config['save_clips'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
+        self._logger = LoggerConfig(config['logger'])
 
     def _sub_env_vars(self, config):
         frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
@@ -757,13 +780,18 @@ class FrigateConfig():
             'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
             'mqtt': self.mqtt.to_dict(),
             'save_clips': self.save_clips.to_dict(),
-            'cameras': {k: c.to_dict() for k, c in self.cameras.items()}
+            'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
+            'logger': self.logger.to_dict()
         }
     
     @property
     def detectors(self) -> Dict[str, DetectorConfig]:
         return self._detectors
     
+    @property
+    def logger(self):
+        return self._logger
+
     @property
     def mqtt(self):
         return self._mqtt

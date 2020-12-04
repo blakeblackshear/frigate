@@ -1,6 +1,7 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
 import threading
+import os
 import signal
 import queue
 import multiprocessing as mp
@@ -10,7 +11,7 @@ from logging import handlers
 def listener_configurer():
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(threadName)-25s %(name)-16s %(levelname)-8s: %(message)s')
+    formatter = logging.Formatter('%(name)-30s %(levelname)-8s: %(message)s')
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
@@ -40,3 +41,35 @@ def log_process(log_queue):
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
+
+# based on https://codereview.stackexchange.com/a/17959
+class LogPipe(threading.Thread):
+    def __init__(self, log_name, level):
+        """Setup the object with a logger and a loglevel
+        and start the thread
+        """
+        threading.Thread.__init__(self)
+        self.daemon = False
+        self.logger = logging.getLogger(log_name)
+        self.level = level
+        self.fdRead, self.fdWrite = os.pipe()
+        self.pipeReader = os.fdopen(self.fdRead)
+        self.start()
+
+    def fileno(self):
+        """Return the write file descriptor of the pipe
+        """
+        return self.fdWrite
+
+    def run(self):
+        """Run the thread, logging everything.
+        """
+        for line in iter(self.pipeReader.readline, ''):
+            self.logger.log(self.level, line.strip('\n'))
+
+        self.pipeReader.close()
+
+    def close(self):
+        """Close the write end of the pipe.
+        """
+        os.close(self.fdWrite)

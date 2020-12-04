@@ -20,6 +20,7 @@ import numpy as np
 
 from frigate.config import CameraConfig
 from frigate.edgetpu import RemoteObjectDetector
+from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.objects import ObjectTracker
 from frigate.util import (EventsPerSecond, FrameManager,
@@ -73,7 +74,7 @@ def create_tensor_input(frame, region):
     # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-def stop_ffmpeg(ffmpeg_process):
+def stop_ffmpeg(ffmpeg_process, logger):
     logger.info("Terminating the existing ffmpeg process...")
     ffmpeg_process.terminate()
     try:
@@ -85,14 +86,14 @@ def stop_ffmpeg(ffmpeg_process):
         ffmpeg_process.communicate()
     ffmpeg_process = None
 
-def start_or_restart_ffmpeg(ffmpeg_cmd, frame_size=None, ffmpeg_process=None):
+def start_or_restart_ffmpeg(ffmpeg_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None):
     if not ffmpeg_process is None:
-        stop_ffmpeg(ffmpeg_process)
+        stop_ffmpeg(ffmpeg_process, logger)
 
     if frame_size is None:
-        process = sp.Popen(ffmpeg_cmd, stdout = sp.DEVNULL, stdin = sp.DEVNULL, start_new_session=True)
+        process = sp.Popen(ffmpeg_cmd, stdout = sp.DEVNULL, stderr=logpipe, stdin = sp.DEVNULL, start_new_session=True)
     else:
-        process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
+        process = sp.Popen(ffmpeg_cmd, stdout = sp.PIPE, stderr=logpipe, stdin = sp.DEVNULL, bufsize=frame_size*10, start_new_session=True)
     return process
 
 def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: FrameManager, 
@@ -139,11 +140,12 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
 class CameraWatchdog(threading.Thread):
     def __init__(self, camera_name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event):
         threading.Thread.__init__(self)
-        self.name = f"watchdog:{camera_name}"
+        self.logger = logging.getLogger(f"watchdog.{camera_name}")
         self.camera_name = camera_name
         self.config = config
         self.capture_thread = None
         self.ffmpeg_detect_process = None
+        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
         self.ffmpeg_other_processes = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -158,17 +160,21 @@ class CameraWatchdog(threading.Thread):
         for c in self.config.ffmpeg_cmds:
             if 'detect' in c['roles']:
                 continue
+            logpipe = LogPipe(f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}", logging.ERROR)
             self.ffmpeg_other_processes.append({
                 'cmd': c['cmd'],
-                'process': start_or_restart_ffmpeg(c['cmd'])
+                'logpipe': logpipe,
+                'process': start_or_restart_ffmpeg(c['cmd'], self.logger, logpipe)
             })
         
         time.sleep(10)
         while True:
             if self.stop_event.is_set():
-                stop_ffmpeg(self.ffmpeg_detect_process)
+                stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
                 for p in self.ffmpeg_other_processes:
-                    stop_ffmpeg(p['process'])
+                    stop_ffmpeg(p['process'], self.logger)
+                    p['logpipe'].close()
+                self.logpipe.close()
                 break
 
             now = datetime.datetime.now().timestamp()
@@ -176,13 +182,13 @@ class CameraWatchdog(threading.Thread):
             if not self.capture_thread.is_alive():
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
-                logger.info(f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg...")
+                self.logger.info(f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg...")
                 self.ffmpeg_detect_process.terminate()
                 try:
-                    logger.info("Waiting for ffmpeg to exit gracefully...")
+                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
                     self.ffmpeg_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
-                    logger.info("FFmpeg didnt exit. Force killing...")
+                    self.logger.info("FFmpeg didnt exit. Force killing...")
                     self.ffmpeg_detect_process.kill()
                     self.ffmpeg_detect_process.communicate()
             
@@ -190,14 +196,14 @@ class CameraWatchdog(threading.Thread):
                 poll = p['process'].poll()
                 if poll == None:
                     continue
-                p['process'] = start_or_restart_ffmpeg(p['cmd'], ffmpeg_process=p['process'])
+                p['process'] = start_or_restart_ffmpeg(p['cmd'], self.logger, p['logpipe'], ffmpeg_process=p['process'])
             
             # wait a bit before checking again
             time.sleep(10)
     
     def start_ffmpeg_detect(self):
         ffmpeg_cmd = [c['cmd'] for c in self.config.ffmpeg_cmds if 'detect' in c['roles']][0]
-        self.ffmpeg_detect_process = start_or_restart_ffmpeg(ffmpeg_cmd, self.frame_size)
+        self.ffmpeg_detect_process = start_or_restart_ffmpeg(ffmpeg_cmd, self.logger, self.logpipe, self.frame_size)
         self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
         self.capture_thread = CameraCapture(self.camera_name, self.ffmpeg_detect_process, self.frame_shape, self.frame_queue, 
             self.camera_fps)
