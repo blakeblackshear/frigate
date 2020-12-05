@@ -3,26 +3,38 @@
 </p>
 
 # Frigate - NVR With Realtime Object Detection for IP Cameras
-Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras. Designed for integration with HomeAssistant or others via MQTT.
+A complete and local NVR designed for HomeAssistant with AI object detection. Uses OpenCV and Tensorflow to perform realtime object detection locally for IP cameras.
 
 Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but highly recommended. The Coral will outperform even the best CPUs and can process 100+ FPS with very little overhead.
 
+- Tight integration with HomeAssistant via a [custom component](https://github.com/blakeblackshear/frigate-hass-integration)
 - Designed to minimize resource use and maximize performance by only looking for objects when and where it is necessary
 - Leverages multiprocessing heavily with an emphasis on realtime over processing every frame
 - Uses a very low overhead motion detection to determine where to run object detection
 - Object detection with TensorFlow runs in separate processes for maximum FPS
 - Communicates over MQTT for easy integration into other systems
+- 24/7 recording
+- Re-streaming via RTMP to reduce the number of connections to your camera
+
+## Screenshots
+Media Browser Integration
+Entities
+Live Detection View
 
 ## Documentation
 - [How Frigate Works](docs/how-frigate-works.md)
 - [Recommended Hardware](#recommended-hardware)
 - [Installing](#installing)
 - [Configuration File](#configuration)
+- [Setting Up Camera Inputs](#setting-up-camera-inputs)
 - [Optimizing Performance](#optimizing-performance)
 - [Detectors](#detectors)
 - [Object Filters](#object-filters)
 - [Masks](#masks)
 - [Zones](#zones)
+- [Recording Clips](#recording-clips)
+- [24/7 Recordings](#247-recordings)
+- [RTMP Streams](#rtmp-streams)
 - [Integration with HomeAssistant](#integration-with-homeassistant)
 - [MQTT Topics](#mqtt-topics)
 - [HTTP Endpoints](#http-endpoints)
@@ -70,13 +82,15 @@ It is recommended to run with docker-compose:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - <path_to_config>:/config
-      - <path_to_directory_for_clips>:/clips      
-      - type: tmpfs # 1GB of memory, reduces SSD/SD Card wear
-        target: /cache
+      - <path_to_directory_for_clips>:/media/frigate/clips      
+      - <path_to_directory_for_recordings>:/media/frigate/recordings      
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
         tmpfs:
           size: 100000000
     ports:
       - "5000:5000"
+      - "1935:1935" # RTMP feeds
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
     healthcheck:
@@ -87,7 +101,7 @@ It is recommended to run with docker-compose:
       start_period: 3m
 ```
 
-If you can't use docker compose, you can run the container with:
+If you can't use docker compose, you can run the container with something similar to this:
 ```bash
 docker run --rm \
 --name frigate \
@@ -138,9 +152,31 @@ You can calculate the necessary shm-size for each camera with the following form
 ## Configuration
 HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/config.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](docs/cameras.md).
 
+It is recommended to start with a minimal configuration and add to it:
 ```yaml
-# Optional: port for http server (default: shown below)
-web_port: 5000
+mqtt:
+  host: mqtt.server.com
+cameras:
+  back:
+    ffmpeg:
+      inputs:
+        - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          roles:
+            - detect
+            - rtmp
+    height: 720
+    width: 1280
+    fps: 5
+```
+Here are all the configuration options:
+```yaml
+# Optional: Logging configuration
+logger:
+  # Optional: default log level (default: shown below)
+  default: info
+  # Optional: module by module log level configuration
+  logs:
+    frigate.mqtt: error
 
 # Optional: detectors configuration
 # USB Coral devices will be auto detected with CPU fallback
@@ -178,47 +214,35 @@ save_clips:
   # NOTE: If an object is being tracked for longer than this amount of time, the cache
   #       will begin to expire and the resulting clip will be the last x seconds of the event.
   max_seconds: 300
-  # Optional: Location to save event clips. (default: shown below)
-  clips_dir: /media/frigate/clips
-  # Optional: Location to save cache files for creating clips. (default: shown below)
-  # NOTE: To reduce wear on SSDs and SD cards, use a tmpfs volume.
-  cache_dir: /tmp/cache
+  # Optional: Retention settings for clips (default: shown below)
+  retain:
+    # Required: Default retention days (default: shown below)
+    default: 10
+    # Optional: Per object retention days
+    objects:
+      person: 15
 
 # Optional: Global ffmpeg args
+# Args may be provided as a string or an array
 # "ffmpeg" + global_args + input_args + "-i" + input + output_args
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args:
-    - -hide_banner
-    - -loglevel
-    - panic
+  global_args: -hide_banner -loglevel fatal
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
   # Optional: global input args (default: shown below)
-  input_args:
-    - -avoid_negative_ts
-    - make_zero
-    - -fflags
-    - nobuffer
-    - -flags
-    - low_delay
-    - -strict
-    - experimental
-    - -fflags
-    - +genpts+discardcorrupt
-    - -rtsp_transport
-    - tcp
-    - -stimeout
-    - '5000000'
-    - -use_wallclock_as_timestamps
-    - '1'
-  # Optional: global output args (default: shown below)
-  output_args:
-    - -f
-    - rawvideo
-    - -pix_fmt
-    - yuv420p
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  # Optional: global output args
+  output_args: 
+    # Optional: output args for detect streams (default: shown below)
+    detect: -f rawvideo -pix_fmt yuv420p
+    # Optional: output args for record streams (default: shown below)
+    record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
+    # Optional: output args for clips streams (default: shown below)
+    clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
+    # Optional: output args for rtmp streams (default: shown below)
+    rtmp: -c copy -f flv
 
 # Optional: Global object filters for all cameras.
 # NOTE: can be overridden at the camera level
@@ -244,9 +268,22 @@ cameras:
   back:
     # Required: ffmpeg settings for the camera
     ffmpeg:
-      # Required: Source passed to ffmpeg after the -i parameter.
-      # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
-      input: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+      # Required: A list of input streams for the camera. See documentation for more information.
+      inputs: 
+          # Required: the path to the stream
+          # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
+        - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          # Required: list of roles for this stream. valid values are: detect,record,clips,rtmp
+          roles:
+            - detect
+            - rtmp
+          # Optional: stream specific global args (default: inherit)
+          global_args:
+          # Optional: stream specific hwaccel args (default: inherit)
+          hwaccel_args:
+          # Optional: stream specific input args (default: inherit)
+          input_args:
+        
       # Optional: camera specific global args (default: inherit)
       global_args:
       # Optional: camera specific hwaccel args (default: inherit)
@@ -256,10 +293,10 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       output_args:
     
-    # Optional: height of the frame
+    # Required: height of the frame
     # NOTE: Recommended to set this value, but frigate will attempt to autodetect.
     height: 720
-    # Optional: width of the frame
+    # Required: width of the frame
     # NOTE: Recommended to set this value, but frigate will attempt to autodetect.
     width: 1280
     # Optional: desired fps for your camera
@@ -280,7 +317,7 @@ cameras:
       # Optional: crop the camera frame to the detection region of the object (default: False)
       crop_to_region: True
       # Optional: resize the image before publishing over mqtt
-      snapshot_height: 300
+      snapshot_height: 175
 
     # Optional: zones for this camera
     zones:
@@ -310,7 +347,26 @@ cameras:
       pre_capture: 30
       # Optional: Objects to save clips for. (default: all tracked objects)
       objects:
-        - person      
+        - person
+      # Optional: Camera override for retention settings (default: global values)
+      retain:
+        # Required: Default retention days (default: shown below)
+        default: 10
+        # Optional: Per object retention days
+        objects:
+          person: 15  
+
+    # Optional: 24/7 recording configuration
+    record:
+      # Optional: Enable recording (default: global setting)
+      enabled: False
+      # Optional: Number of days to retain (default: global setting)
+      retain_days: 30
+    
+    # Optional: RTMP re-stream configuration
+    rtmp:
+      # Required: Enable the live stream (default: True)
+      enabled: True
 
     # Optional: Configuration for the snapshots in the debug view and mqtt
     snapshots:
@@ -320,6 +376,11 @@ cameras:
       draw_zones: False
       # Optional: draw bounding boxes on the mqtt snapshots (default: shown below)
       draw_bounding_boxes: True
+      # Optional: crop the snapshot to the detection region (default: shown below)
+      crop_to_region: True
+      # Optional: height to resize the snapshot to (default: shown below)
+      # NOTE: 175px is optimized for thumbnails in the homeassistant media browser
+      height: 175
 
     # Optional: Camera level object filters config. If defined, this is used instead of the global config.
     objects:
@@ -335,9 +396,44 @@ cameras:
 ```
 [Back to top](#documentation)
 
+## Setting Up Camera Inputs
+Up to 4 inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create clips from a higher resolution stream, or vice versa.
+
+Each role can only be assigned to one input per camera. The options for roles are as follows:
+|Role|Description|
+|----|-----|
+|`detect`|Main feed for object detection|
+|`clips`|Clips of events from objects detected in the `detect` feed. [docs](#recording-clips)|
+|`record`|Saves 60 second segments of the video feed. [docs](#247-recordings)|
+|`rtmp`|Broadcast as an RTMP feed for other services to consume. [docs](#rtmp-streams)|
+
+Example:
+```yaml
+mqtt:
+  host: mqtt.server.com
+cameras:
+  back:
+    ffmpeg:
+      inputs:
+        - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          roles:
+            - detect
+            - rtmp
+        - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
+          roles:
+            - clips
+            - record
+    height: 720
+    width: 1280
+    fps: 5
+```
+
+
+[Back to top](#documentation)
+
 ## Optimizing Performance
 - **Google Coral**: It is strongly recommended to use a Google Coral, but Frigate will fall back to CPU in the event one is not found. Offloading TensorFlow to the Google Coral is an order of magnitude faster and will reduce your CPU load dramatically. A $60 device will outperform $2000 CPU.
-- **Resolution**: Choose a camera resolution where the smallest object you want to detect barely fits inside a 300x300px square. The model used by Frigate is trained on 300x300px images, so you will get worse performance and no improvement in accuracy by using a larger resolution since Frigate resizes the area where it is looking for objects to 300x300 anyway.
+- **Resolution**: For the `detect` input, choose a camera resolution where the smallest object you want to detect barely fits inside a 300x300px square. The model used by Frigate is trained on 300x300px images, so you will get worse performance and no improvement in accuracy by using a larger resolution since Frigate resizes the area where it is looking for objects to 300x300 anyway.
 - **FPS**: 5 frames per second should be adequate. Higher frame rates will require more CPU usage without improving detections or accuracy. Reducing the frame rate on your camera will have the greatest improvement on system resources.
 - **Hardware Acceleration**: Make sure you configure the `hwaccel_args` for your hardware. They provide a significant reduction in CPU usage if they are available.
 - **Masks**: Masks can be used to ignore motion and reduce your idle CPU load. If you have areas with regular motion such as timestamps or trees blowing in the wind, frigate will constantly try to determine if that motion is from a person or other object you are tracking. Those detections not only increase your average CPU usage, but also clog the pipeline for detecting objects elsewhere. If you are experiencing high values for `detection_fps` when no objects of interest are in the cameras, you should use masks to tell frigate to ignore movement from trees, bushes, timestamps, or any part of the image where detections should not be wasted looking for objects.
@@ -495,7 +591,7 @@ During testing, `draw_zones` should be set in the config to draw the zone on the
 ## Recording Clips
 **Note**: Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
 
-Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `cache_dir` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to the `clips_dir` directory along with a json file containing the current information about the tracked object.
+Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `/tmp/cache` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to `/media/frigate/clips`. Clips are retained according to the retention settings defined on the config for each object type.
 
 ### Global Configuration Options
 - `max_seconds`: This limits the size of the cache when an object is being tracked. If an object is stationary and being tracked for a long time, the cache files will expire and this value will be the maximum clip length for the *end* of the event. For example, if this is set to 300 seconds and an object is being tracked for 600 seconds, the clip will end up being the last 300 seconds. Defaults to 300 seconds.
@@ -504,75 +600,60 @@ Frigate can save video clips without any CPU overhead for encoding by simply cop
 - `pre_capture`: Defines how much time should be included in the clip prior to the beginning of the event. Defaults to 30 seconds.
 - `objects`: List of object types to save clips for. Object types here must be listed for tracking at the camera or global configuration. Defaults to all tracked objects.
 
+
+[Back to top](#documentation)
+
+## 24/7 Recordings
+**Note**: Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
+
+24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in HomeAssistant's media browser. Each camera supports a configurable retention policy in the config.
+
+[Back to top](#documentation)
+
+## RTMP Streams
+Frigate can re-stream your video feed as a RTMP feed for other applications such as HomeAssistant to utilize it. This allows you to use a video feed for detection in frigate and HomeAssistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
+
 [Back to top](#documentation)
 
 ## Integration with HomeAssistant
-Setup a camera, binary_sensor, sensor and optionally automation as shown for each camera you define in frigate. Replace <camera_name> with the camera name as defined in the frigate `config.yml` (The `frigate_coral_fps` and `frigate_coral_inference` sensors only need to be defined once)
+The best way to integrate with HomeAssistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration). The integration will attempt to auto-discover your running frigate instance. Some setups may require manual configuration. HomeAssistant needs access to port 5000 (api) and 1935 (rtmp) for all features. The integration will setup the following entities within HomeAssistant:
 
+Sensors:
+- Stats to monitor frigate performance
+- Object counts for all zones and cameras
+
+Cameras:
+- Cameras for image of the last detected object for each camera
+- Camera entities with stream support (requires RTMP)
+
+Media Browser:
+- Rich UI with thumbnails for browsing event clips
+- Rich UI for browsing 24/7 recordings by month, day, camera, time
+
+API:
+- Notification API with public facing endpoints for images in notifications
+
+### Notifications
+Frigate publishes event information in the form of a change feed via MQTT. This allows lots of customization for notifications to meet your needs. Event changes are published with `before` and `after` information as shown [here](#frigateevents).
+
+Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image.
 ```yaml
-camera:
-  - name: <camera_name> Last Person
-    platform: mqtt
-    topic: frigate/<camera_name>/person/snapshot
-  - name: <camera_name> Last Car
-    platform: mqtt
-    topic: frigate/<camera_name>/car/snapshot
-
-binary_sensor:
-  - name: <camera_name> Person
-    platform: mqtt
-    state_topic: "frigate/<camera_name>/person"
-    device_class: motion
-    availability_topic: "frigate/available"
-
-sensor:
-  - platform: rest
-    name: Frigate Debug
-    resource: http://localhost:5000/debug/stats
-    scan_interval: 5
-    json_attributes:
-      - <camera_name>
-      - detection_fps
-      - detectors
-    value_template: 'OK'  
-  - platform: template
-    sensors:
-      <camera_name>_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["camera_fps"] }}'
-        unit_of_measurement: 'FPS'
-      <camera_name>_skipped_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["skipped_fps"] }}'
-        unit_of_measurement: 'FPS'
-      <camera_name>_detection_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["<camera_name>"]["detection_fps"] }}'
-        unit_of_measurement: 'FPS'
-      frigate_detection_fps: 
-        value_template: '{{ states.sensor.frigate_debug.attributes["detection_fps"] }}'
-        unit_of_measurement: 'FPS'
-      frigate_coral_inference:
-        value_template: '{{ states.sensor.frigate_debug.attributes["detectors"]["coral"]["inference_speed"] }}' 
-        unit_of_measurement: 'ms'
-        
 automation:
-  - alias: Alert me if a person is detected while armed away
-    trigger: 
-      platform: state
-      entity_id: binary_sensor.camera_person
-      from: 'off'
-      to: 'on'
-    condition:
-      - condition: state
-        entity_id: alarm_control_panel.home_alarm
-        state: armed_away
+  - alias: Notify of events
+    trigger:
+      platform: mqtt
+      topic: frigate/events
     action:
-      - service: notify.user_telegram
-        data:
-          message: "A person was detected."
+      - service: notify.mobile_app_pixel_3
+        data_template:
+          message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
           data:
-            photo:
-              - url: http://<ip>:5000/<camera_name>/person/best.jpg
-                caption: A person was detected.        
+            image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}.jpg?format=android'
+            tag: '{{trigger.payload_json["after"]["id"]}}'
 ```
+Note that the image url has `?format=android`. This adjusts the aspect ratio to be idea for android notifications. For iOS optimized snapshots, no format parameter needs to be passed.
+
+You can find some additional examples for notifications [here](docs/notification-examples.md).
 
 [Back to top](#documentation)
 
@@ -597,7 +678,7 @@ The most recent frame that frigate has finished processing. It is a full resolut
 Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
 
-### `/debug/stats`
+### `/stats`
 Contains some granular debug info that can be used for sensors in HomeAssistant.
 
 Sample response:
@@ -620,25 +701,7 @@ Sample response:
         /***************
         * PID for the ffmpeg process that consumes this camera
         ***************/
-        "ffmpeg_pid": 27,
-        /***************
-        * Timestamps of frames in various parts of processing
-        ***************/
-        "frame_info": {
-            /***************
-            * Timestamp of the frame frigate is running object detection on.
-            ***************/
-            "detect": 1596994991.91426,
-            /***************
-            * Timestamp of the frame frigate is processing detected objects on.
-            * This is where MQTT messages are sent, zones are checked, etc.
-            ***************/
-            "process": 1596994991.91426,
-            /***************
-            * Timestamp of the frame frigate last read from ffmpeg.
-            ***************/
-            "read": 1596994991.91426
-        },
+        "capture_pid": 27,
         /***************
         * PID for the process that runs detection for this camera
         ***************/
@@ -647,11 +710,6 @@ Sample response:
         * Frames per second being processed by frigate.
         ***************/
         "process_fps": 5.1,
-        /***************
-        * Timestamp when the detection process started looking for a frame. If this value stays constant
-        * for a long time, that means there aren't any frames in the frame queue.
-        ***************/
-        "read_start": 1596994991.943814,
         /***************
         * Frames per second skip for processing by frigate.
         ***************/
@@ -683,6 +741,28 @@ Sample response:
 }
 ```
 
+### `/config`
+A json representation of your configuration
+
+### `/events`
+Events from the database. Accepts the following query string parameters:
+|param|Type|Description|
+|----|-----|--|
+|`before`|int|Epoch time|
+|`after`|int|Epoch time|
+|`camera`|str|Camera name|
+|`label`|str|Label name|
+|`zone`|str|Zone name|
+|`limit`|int|Limit the number of events returned|
+
+### `/events/summary`
+Returns summary data for events in the database. Used by the HomeAssistant integration.
+
+### `/events/<id>`
+Returns data for a single event.
+### `/events/<id>/snapshot.jpg`
+Returns a snapshot for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
+
 [Back to top](#documentation)
 
 ## MQTT Topics
@@ -694,7 +774,10 @@ Designed to be used as an availability topic with HomeAssistant. Possible messag
 "offline": published right before frigate stops
 
 ### `frigate/<camera_name>/<object_name>`
-Publishes `ON` or `OFF` and is designed to be used a as a binary sensor in HomeAssistant for whether or not that object type is detected.
+Publishes the count of objects for the camera for use as a sensor in HomeAssistant.
+
+### `frigate/<zone_name>/<object_name>`
+Publishes the count of objects for the zone for use as a sensor in HomeAssistant.
 
 ### `frigate/<camera_name>/<object_name>/snapshot`
 Publishes a jpeg encoded frame of the detected object type. When the object is no longer detected, the highest confidence image is published or the original image
@@ -702,47 +785,77 @@ is published again.
 
 The height and crop of snapshots can be configured in the config.
 
-### `frigate/<camera_name>/events/start`
-Message published at the start of any tracked object. JSON looks as follows:
+### `frigate/events`
+Message published for each changed event:
 ```json
 {
-    "label": "person",
-    "score": 0.87890625,
-    "box": [
-        95,
-        155,
-        581,
-        1182
-    ],
-    "area": 499122,
-    "region": [
-        0,
-        132,
-        1080,
-        1212
-    ],
-    "frame_time": 1600208805.60284,
-    "centroid": [
-        338,
-        668
-    ],
-    "id": "1600208805.60284-k1l43p",
-    "start_time": 1600208805.60284,
-    "top_score": 0.87890625,
-    "zones": [],
-    "score_history": [
-        0.87890625
-    ],
-    "computed_score": 0.0,
-    "false_positive": true
+    "before": {
+        "id": "1607123955.475377-mxklsc",
+        "camera": "front_door",
+        "frame_time": 1607123961.837752,
+        "label": "person",
+        "top_score": 0.958984375,
+        "false_positive": false,
+        "start_time": 1607123955.475377,
+        "end_time": null,
+        "score": 0.7890625,
+        "box": [
+            424,
+            500,
+            536,
+            712
+        ],
+        "area": 23744,
+        "region": [
+            264,
+            450,
+            667,
+            853
+        ],
+        "current_zones": [
+            "driveway"
+        ],
+        "entered_zones": [
+            "yard",
+            "driveway"
+        ],
+        "thumbnail": null
+    },
+    "after": {
+        "id": "1607123955.475377-mxklsc",
+        "camera": "front_door",
+        "frame_time": 1607123962.082975,
+        "label": "person",
+        "top_score": 0.958984375,
+        "false_positive": false,
+        "start_time": 1607123955.475377,
+        "end_time": null,
+        "score": 0.87890625,
+        "box": [
+            432,
+            496,
+            544,
+            854
+        ],
+        "area": 40096,
+        "region": [
+            218,
+            440,
+            693,
+            915
+        ],
+        "current_zones": [
+            "yard",
+            "driveway"
+        ],
+        "entered_zones": [
+            "yard",
+            "driveway"
+        ],
+        "thumbnail": null
+    }
 }
 ```
-
-### `frigate/<camera_name>/events/end`
-Same as `frigate/<camera_name>/events/start`, but with an `end_time` property as well.
-
-### `frigate/<zone_name>/<object_name>`
-Publishes `ON` when the object enters the zone and `OFF` when the object disappears or exits the zone. Designed to be used a as a binary sensor in HomeAssistant for whether or not that object type is detected in the zone.
 
 [Back to top](#documentation)
 
@@ -763,6 +876,18 @@ The labelmap can be customized to your needs. A common reason to do this is to c
   ```
 
 [Back to top](#documentation)
+
+## Logging
+Available log levels are: `debug`, `info`, `warning`, `error`, `critical`
+
+Examples of available modules are:
+- `frigate.app`
+- `frigate.mqtt`
+- `frigate.edgetpu`
+- `frigate.zeroconf`
+- `detector.<detector_name>`
+- `watchdog.<camera_name>`
+- `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
 
 ## Troubleshooting
 
