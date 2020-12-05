@@ -72,6 +72,9 @@ class FrigateApp():
         logging.getLogger().setLevel(self.config.logger.default)
         for log, level in self.config.logger.logs.items():
             logging.getLogger(log).setLevel(level)
+        
+        if not 'werkzeug' in self.config.logger.logs:
+            logging.getLogger('werkzeug').setLevel('ERROR')
 
     def init_queues(self):
         # Queues for clip processing
