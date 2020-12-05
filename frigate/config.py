@@ -56,7 +56,7 @@ SAVE_CLIPS_SCHEMA = vol.Schema(
 
 FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','fatal']
 FFMPEG_INPUT_ARGS_DEFAULT = ['-avoid_negative_ts', 'make_zero',
-    '-fflags', '+genpts+discardcorrupt'
+    '-fflags', '+genpts+discardcorrupt',
     '-rtsp_transport', 'tcp',
     '-stimeout', '5000000',
     '-use_wallclock_as_timestamps', '1']
