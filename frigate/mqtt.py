@@ -27,6 +27,10 @@ def create_mqtt_client(config: MqttConfig):
     client.will_set(config.topic_prefix+'/available', payload='offline', qos=1, retain=True)
     if not config.user is None:
         client.username_pw_set(config.user, password=config.password)
-    client.connect(config.host, config.port, 60)
+    try:
+        client.connect(config.host, config.port, 60)
+    except Exception as e:
+        logger.error(f"Unable to connect to MQTT server: {e}")
+        raise
     client.loop_start()
     return client
