@@ -147,17 +147,22 @@ class FrigateApp():
 
     def start(self):
         self.init_logger()
-        self.ensure_dirs()
         try:
-            self.init_config()
+            self.ensure_dirs()
+            try:
+                self.init_config()
+            except Exception as e:
+                logger.error(f"Error parsing config: {e}")
+                self.log_process.terminate()
+                sys.exit(1)
+            self.set_log_levels()
+            self.init_queues()
+            self.init_database()
+            self.init_mqtt()
         except Exception as e:
-            logger.error(f"Error parsing config: {e}")
+            logger.error(e)
             self.log_process.terminate()
             sys.exit(1)
-        self.set_log_levels()
-        self.init_queues()
-        self.init_database()
-        self.init_mqtt()
         self.start_detectors()
         self.start_detected_frames_processor()
         self.start_camera_processors()
