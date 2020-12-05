@@ -54,8 +54,9 @@ SAVE_CLIPS_SCHEMA = vol.Schema(
     }
 )
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','panic']
+FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','fatal']
 FFMPEG_INPUT_ARGS_DEFAULT = ['-avoid_negative_ts', 'make_zero',
+    '-fflags', '+genpts+discardcorrupt'
     '-rtsp_transport', 'tcp',
     '-stimeout', '5000000',
     '-use_wallclock_as_timestamps', '1']
@@ -183,7 +184,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('draw_zones', default=False): bool,
                 vol.Optional('draw_bounding_boxes', default=True): bool,
                 vol.Optional('crop_to_region', default=True): bool,
-                'height': int
+                vol.Optional('height', default=175): int
             },
             'objects': OBJECTS_SCHEMA
         }
