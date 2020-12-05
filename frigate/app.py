@@ -5,6 +5,7 @@ import os
 from logging.handlers import QueueHandler
 from typing import Dict, List
 import sys
+import signal
 
 import yaml
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -46,6 +47,7 @@ class FrigateApp():
     
     def init_logger(self):
         self.log_process = mp.Process(target=log_process, args=(self.log_queue,), name='log_process')
+        self.log_process.daemon = True
         self.log_process.start()
         root_configurer(self.log_queue)
     
@@ -173,6 +175,13 @@ class FrigateApp():
         self.start_recording_maintainer()
         self.start_watchdog()
         self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
+
+        def receiveSignal(signalNumber, frame):
+            self.stop()
+            sys.exit()
+        
+        signal.signal(signal.SIGTERM, receiveSignal)
+
         self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
         self.stop()
     
