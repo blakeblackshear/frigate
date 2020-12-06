@@ -18,8 +18,8 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 
 ## Screenshots
 <div>
-<a href="docs/media_browser.png"><img src="docs/media_browser.png" height=500></a>
-<a href="docs/notification.png"><img src="docs/notification.png" height=500></a>
+<a href="docs/media_browser.png"><img src="docs/media_browser.png" height=400></a>
+<a href="docs/notification.png"><img src="docs/notification.png" height=400></a>
 </div>
 
 ## Documentation
