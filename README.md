@@ -17,9 +17,10 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - Re-streaming via RTMP to reduce the number of connections to your camera
 
 ## Screenshots
-Media Browser Integration
-Entities
-Live Detection View
+<div>
+<a href="docs/media_browser.png"><img src="docs/media_browser.png" height=500></a>
+<a href="docs/notification.png"><img src="docs/notification.png" height=500></a>
+</div>
 
 ## Documentation
 - [How Frigate Works](docs/how-frigate-works.md)
@@ -593,6 +594,9 @@ During testing, `draw_zones` should be set in the config to draw the zone on the
 
 Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `/tmp/cache` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to `/media/frigate/clips`. Clips are retained according to the retention settings defined on the config for each object type.
 
+### Database
+Event and clip information is managed in a sqlite database at `/media/frigate/clips/frigate.db`. If that database is deleted, clips will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within HomeAssistant.
+
 ### Global Configuration Options
 - `max_seconds`: This limits the size of the cache when an object is being tracked. If an object is stationary and being tracked for a long time, the cache files will expire and this value will be the maximum clip length for the *end* of the event. For example, if this is set to 300 seconds and an object is being tracked for 600 seconds, the clip will end up being the last 300 seconds. Defaults to 300 seconds.
 
@@ -616,7 +620,7 @@ Frigate can re-stream your video feed as a RTMP feed for other applications such
 [Back to top](#documentation)
 
 ## Integration with HomeAssistant
-The best way to integrate with HomeAssistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration). The integration will attempt to auto-discover your running frigate instance. Some setups may require manual configuration. HomeAssistant needs access to port 5000 (api) and 1935 (rtmp) for all features. The integration will setup the following entities within HomeAssistant:
+The best way to integrate with HomeAssistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration). When configuring the integration, you will be asked for the `Host` of your frigate instance. This value should be the url you use to access Frigate in the browser and will look like `http://<host>:5000/`. If you are using HassOS with the addon, the host should be `http://ccab4aaf-frigate:5000`. HomeAssistant needs access to port 5000 (api) and 1935 (rtmp) for all features. The integration will setup the following entities within HomeAssistant:
 
 Sensors:
 - Stats to monitor frigate performance
