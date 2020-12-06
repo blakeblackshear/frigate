@@ -177,7 +177,7 @@ class FrigateApp():
         self.start_event_cleanup()
         self.start_recording_maintainer()
         self.start_watchdog()
-        self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
+        # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
         def receiveSignal(signalNumber, frame):
             self.stop()
