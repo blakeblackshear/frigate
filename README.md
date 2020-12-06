@@ -295,10 +295,8 @@ cameras:
       output_args:
     
     # Required: height of the frame
-    # NOTE: Recommended to set this value, but frigate will attempt to autodetect.
     height: 720
     # Required: width of the frame
-    # NOTE: Recommended to set this value, but frigate will attempt to autodetect.
     width: 1280
     # Optional: desired fps for your camera
     # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
@@ -472,6 +470,17 @@ ffmpeg:
 
 Intel-based CPUs (>=10th Generation) via Quicksync (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
 **Note:** You also need to set `LIBVA_DRIVER_NAME=iHD` as an environment variable on the container.
+```yaml
+ffmpeg:
+  hwaccel_args:
+    - -hwaccel
+    - vaapi
+    - -hwaccel_device
+    - /dev/dri/renderD128
+```
+
+AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
+**Note:** You also need to set `LIBVA_DRIVER_NAME=radeonsi` as an environment variable on the container.
 ```yaml
 ffmpeg:
   hwaccel_args:
