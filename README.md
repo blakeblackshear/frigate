@@ -43,6 +43,11 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - [Troubleshooting](#troubleshooting)
 
 ## Recommended Hardware
+
+### Cameras
+Cameras that output H.264 video and AAC audio will offer the most compatibility with all features of Frigate and HomeAssistant. It is also helpful if your camera supports multiple substreams to allow different resolutions to be used for detection, streaming, clips, and recordings without re-encoding.
+
+### Computer
 |Name|Inference Speed|Notes|
 |----|---------------|-----|
 |Atomic Pi|16ms|Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding.|
