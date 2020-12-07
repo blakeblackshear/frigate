@@ -314,6 +314,31 @@ class TestConfig(TestCase):
         assert(len(config.cameras['back'].save_clips.objects) == 2)
         assert('dog' in config.cameras['back'].save_clips.objects)
         assert('person' in config.cameras['back'].save_clips.objects)
+    
+    def test_role_assigned_but_not_enabled(self):
+        json_config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect', 'rtmp'] },
+                            { 'path': 'rtsp://10.0.0.1:554/clips', 'roles': ['clips'] }
+                        ]
+                    },
+                    'height': 1080,
+                    'width': 1920
+                }
+            }
+        }
+
+        config = FrigateConfig(config=json_config)
+        ffmpeg_cmds = config.cameras['back'].ffmpeg_cmds
+        assert(len(ffmpeg_cmds) == 1)
+        assert(not 'clips' in ffmpeg_cmds[0]['roles'])
+
 
 if __name__ == '__main__':
     main(verbosity=2)

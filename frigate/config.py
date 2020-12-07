@@ -587,9 +587,13 @@ class CameraConfig():
 
         self._ffmpeg_cmds = []
         for ffmpeg_input in self._ffmpeg.inputs:
+            ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
+            if ffmpeg_cmd is None:
+                continue
+
             self._ffmpeg_cmds.append({
                 'roles': ffmpeg_input.roles,
-                'cmd': self._get_ffmpeg_cmd(ffmpeg_input)
+                'cmd': ffmpeg_cmd
             })
 
 
@@ -636,6 +640,11 @@ class CameraConfig():
             ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
                 f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
+        
+        # if there arent any outputs enabled for this input
+        if len(ffmpeg_output_args) == 0:
+            return None
+
         return (['ffmpeg'] +
                 ffmpeg_input.global_args +
                 ffmpeg_input.hwaccel_args +
