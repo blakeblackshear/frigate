@@ -316,13 +316,6 @@ cameras:
     # to be replaced by a newer image. (default: shown below)
     best_image_timeout: 60
 
-    # Optional: camera specific mqtt settings
-    mqtt:
-      # Optional: crop the camera frame to the detection region of the object (default: False)
-      crop_to_region: True
-      # Optional: resize the image before publishing over mqtt
-      snapshot_height: 175
-
     # Optional: zones for this camera
     zones:
       # Required: name of the zone
