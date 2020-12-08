@@ -45,6 +45,14 @@ class FrigateApp():
             else:
                 logger.debug(f"Skipping directory: {d}")
     
+    def create_cache_tmpfs(self):
+        tmpfs_size = self.config.cache_tmpfs_size
+        if tmpfs_size is not None and tmpfs_size.strip():
+             logger.info(f"Creating tmpfs of size {tmpfs_size}")
+             rc = os.system(f"mount -t tmpfs -o size={tmpfs_size} tmpfs /tmp/cache")
+             if rc != 0:
+                 logger.error(f"Failed to create tmpfs, error code: {rc}")
+
     def init_logger(self):
         self.log_process = mp.Process(target=log_process, args=(self.log_queue,), name='log_process')
         self.log_process.daemon = True
@@ -180,6 +188,7 @@ class FrigateApp():
                 sys.exit(1)
             self.check_config()
             self.set_log_levels()
+            self.create_cache_tmpfs()
             self.init_queues()
             self.init_database()
             self.init_mqtt()

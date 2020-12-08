@@ -206,7 +206,8 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         },
         vol.Optional('ffmpeg', default={}): GLOBAL_FFMPEG_SCHEMA,
         vol.Optional('objects', default={}): OBJECTS_SCHEMA,
-        vol.Required('cameras', default={}): CAMERAS_SCHEMA
+        vol.Required('cameras', default={}): CAMERAS_SCHEMA,
+        vol.Optional('cache_tmpfs_size', default=None): str
     }
 )
 
@@ -761,6 +762,7 @@ class FrigateConfig():
         self._save_clips = SaveClipsConfig(config['save_clips'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
         self._logger = LoggerConfig(config['logger'])
+        self._cache_tmpfs_size = config['cache_tmpfs_size']
 
     def _sub_env_vars(self, config):
         frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
@@ -813,3 +815,7 @@ class FrigateConfig():
     @property
     def cameras(self) -> Dict[str, CameraConfig]:
         return self._cameras
+
+    @property
+    def cache_tmpfs_size(self):
+        return self._cache_tmpfs_size
