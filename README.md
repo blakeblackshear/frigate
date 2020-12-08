@@ -112,7 +112,6 @@ If you can't use docker compose, you can run the container with something simila
 docker run --rm \
 --name frigate \
 --privileged \
---shm-size=50m \
 --mount type=tmpfs,target=/tmp/cache,tmpfs-size=100000000 \
 -v /dev/bus/usb:/dev/bus/usb \
 -v <path_to_directory_for_clips>:/media/frigate/clips \
