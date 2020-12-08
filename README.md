@@ -112,12 +112,17 @@ If you can't use docker compose, you can run the container with something simila
 docker run --rm \
 --name frigate \
 --privileged \
+--shm-size=50m \
+--mount type=tmpfs,target=/tmp/cache,tmpfs-size=100000000 \
 -v /dev/bus/usb:/dev/bus/usb \
--v <path_to_config_dir>:/config:ro \
+-v <path_to_directory_for_clips>:/media/frigate/clips \
+-v <path_to_directory_for_recordings>:/media/frigate/recordings \
+-v <path_to_config>:/config:ro \
 -v /etc/localtime:/etc/localtime:ro \
--p 5000:5000 \
 -e FRIGATE_RTSP_PASSWORD='password' \
-blakeblackshear/frigate:stable-amd64
+-p 5000:5000 \
+-p 1935:1935 \
+blakeblackshear/frigate:0.8.0-beta1-amd64
 ```
 
 ### Kubernetes
