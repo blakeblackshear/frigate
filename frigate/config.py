@@ -193,6 +193,10 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
 
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
+        vol.Optional('model', default={'width': 300, 'height': 300}): {
+            vol.Required('width'): int,
+            vol.Required('height'): int
+        },
         vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
         'mqtt': MQTT_SCHEMA,
         vol.Optional('logger', default={'default': 'info', 'logs': {}}): {
@@ -209,6 +213,25 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Required('cameras', default={}): CAMERAS_SCHEMA
     }
 )
+
+class ModelConfig():
+    def __init__(self, config):
+        self._width = config['width']
+        self._height = config['height']
+    
+    @property
+    def width(self):
+        return self._width
+    
+    @property
+    def height(self):
+        return self._height
+    
+    def to_dict(self):
+        return {
+            'width': self.width,
+            'height': self.height
+        }
 
 class DetectorConfig():
     def __init__(self, config):
@@ -756,6 +779,7 @@ class FrigateConfig():
 
         config = self._sub_env_vars(config)
 
+        self._model = ModelConfig(config['model'])
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._save_clips = SaveClipsConfig(config['save_clips'])
@@ -787,12 +811,17 @@ class FrigateConfig():
     
     def to_dict(self):
         return {
+            'model': self.model.to_dict(),
             'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
             'mqtt': self.mqtt.to_dict(),
             'save_clips': self.save_clips.to_dict(),
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
             'logger': self.logger.to_dict()
         }
+    
+    @property
+    def model(self):
+        return self._model
     
     @property
     def detectors(self) -> Dict[str, DetectorConfig]:
