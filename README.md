@@ -199,6 +199,13 @@ detectors:
     # Optional: device name as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
     device: usb
 
+# Optional: model configuration
+model:
+  # Required: height of the trained model
+  height: 320
+  # Required: width of the trained model
+  width: 320
+
 # Required: mqtt configuration
 mqtt:
   # Required: host name
@@ -879,6 +886,8 @@ Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use yo
 - CPU Model: `/cpu_model.tflite`
 - EdgeTPU Model: `/edgetpu_model.tflite`
 - Labels: `/labelmap.txt`
+
+You also need to update the model width/height in the config if they differ from the defaults.
 
 ### Customizing the Labelmap
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. You must retain the same number of labels, but you can change the names. To change:
