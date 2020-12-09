@@ -64,14 +64,14 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
         
     return False
 
-def create_tensor_input(frame, region):
+def create_tensor_input(frame, model_shape, region):
     cropped_frame = yuv_region_2_rgb(frame, region)
 
     # Resize to 300x300 if needed
-    if cropped_frame.shape != (300, 300, 3):
-        cropped_frame = cv2.resize(cropped_frame, dsize=(300, 300), interpolation=cv2.INTER_LINEAR)
+    if cropped_frame.shape != (model_shape[0], model_shape[1], 3):
+        cropped_frame = cv2.resize(cropped_frame, dsize=model_shape, interpolation=cv2.INTER_LINEAR)
     
-    # Expand dimensions since the model expects images to have shape: [1, 300, 300, 3]
+    # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
 def stop_ffmpeg(ffmpeg_process, logger):
@@ -241,7 +241,7 @@ def capture_camera(name, config: CameraConfig, process_info):
     camera_watchdog.start()
     camera_watchdog.join()
 
-def track_camera(name, config: CameraConfig, detection_queue, result_connection, detected_objects_queue, process_info):
+def track_camera(name, config: CameraConfig, model_shape, detection_queue, result_connection, detected_objects_queue, process_info):
     stop_event = mp.Event()
     def receiveSignal(signalNumber, frame):
         stop_event.set()
@@ -260,13 +260,13 @@ def track_camera(name, config: CameraConfig, detection_queue, result_connection,
     mask = config.mask
 
     motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
-    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection)
+    object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection, model_shape)
 
     object_tracker = ObjectTracker(10)
 
     frame_manager = SharedMemoryFrameManager()
 
-    process_frames(name, frame_queue, frame_shape, frame_manager, motion_detector, object_detector,
+    process_frames(name, frame_queue, frame_shape, model_shape, frame_manager, motion_detector, object_detector,
         object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask, stop_event)
 
     logger.info(f"{name}: exiting subprocess")
@@ -277,8 +277,8 @@ def reduce_boxes(boxes):
     reduced_boxes = cv2.groupRectangles([list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2)[0]
     return [tuple(b) for b in reduced_boxes]
 
-def detect(object_detector, frame, region, objects_to_track, object_filters, mask):
-    tensor_input = create_tensor_input(frame, region)
+def detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask):
+    tensor_input = create_tensor_input(frame, model_shape, region)
 
     detections = []
     region_detections = object_detector.detect(tensor_input)
@@ -300,7 +300,7 @@ def detect(object_detector, frame, region, objects_to_track, object_filters, mas
         detections.append(det)
     return detections
 
-def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, 
+def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_shape,
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue, process_info: Dict,
@@ -357,7 +357,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
         # resize regions and detect
         detections = []
         for region in regions:
-            detections.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
+            detections.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask))
         
         #########
         # merge objects, check for clipped objects and look again up to 4 times
@@ -390,7 +390,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape,
                             box[0], box[1],
                             box[2], box[3])
                         
-                        selected_objects.extend(detect(object_detector, frame, region, objects_to_track, object_filters, mask))
+                        selected_objects.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask))
 
                         refining = True
                     else:
