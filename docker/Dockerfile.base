@@ -36,10 +36,9 @@ RUN pip3 install \
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 # get model and labels
-ARG MODEL_REFS=7064b94dd5b996189242320359dbab8b52c94a84
 COPY labelmap.txt /labelmap.txt
-RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
-RUN wget -q https://github.com/google-coral/edgetpu/raw/$MODEL_REFS/test_data/ssd_mobilenet_v2_coco_quant_postprocess.tflite -O /cpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
