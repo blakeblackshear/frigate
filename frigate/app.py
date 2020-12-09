@@ -115,18 +115,19 @@ class FrigateApp():
         self.mqtt_client = create_mqtt_client(self.config.mqtt)
 
     def start_detectors(self):
+        model_shape = (self.config.model.height, self.config.model.width)
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
-            shm_in = mp.shared_memory.SharedMemory(name=name, create=True, size=300*300*3)
+            shm_in = mp.shared_memory.SharedMemory(name=name, create=True, size=self.config.model.height*self.config.model.width*3)
             shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}", create=True, size=20*6*4)
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
         for name, detector in self.config.detectors.items():
             if detector.type == 'cpu':
-                self.detectors[name] = EdgeTPUProcess(name, self.detection_queue, out_events=self.detection_out_events, tf_device='cpu')
+                self.detectors[name] = EdgeTPUProcess(name, self.detection_queue, self.detection_out_events, model_shape, tf_device='cpu')
             if detector.type == 'edgetpu':
-                self.detectors[name] = EdgeTPUProcess(name, self.detection_queue, out_events=self.detection_out_events, tf_device=detector.device)
+                self.detectors[name] = EdgeTPUProcess(name, self.detection_queue, self.detection_out_events, model_shape, tf_device=detector.device)
 
     def start_detected_frames_processor(self):
         self.detected_frames_processor = TrackedObjectProcessor(self.config, self.mqtt_client, self.config.mqtt.topic_prefix, 
@@ -134,8 +135,9 @@ class FrigateApp():
         self.detected_frames_processor.start()
 
     def start_camera_processors(self):
+        model_shape = (self.config.model.height, self.config.model.width)
         for name, config in self.config.cameras.items():
-            camera_process = mp.Process(target=track_camera, name=f"camera_processor:{name}", args=(name, config,
+            camera_process = mp.Process(target=track_camera, name=f"camera_processor:{name}", args=(name, config, model_shape,
                 self.detection_queue, self.detection_out_events[name], self.detected_frames_queue, 
                 self.camera_metrics[name]))
             camera_process.daemon = True

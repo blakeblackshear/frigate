@@ -106,7 +106,7 @@ class LocalObjectDetector(ObjectDetector):
         
         return detections
 
-def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, tf_device):
+def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, model_shape, tf_device):
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
     logger.info(f"Starting detection process: {os.getpid()}")
@@ -139,7 +139,7 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
             connection_id = detection_queue.get(timeout=5)
         except queue.Empty:
             continue
-        input_frame = frame_manager.get(connection_id, (1,300,300,3))
+        input_frame = frame_manager.get(connection_id, (1,model_shape[0],model_shape[1],3))
 
         if input_frame is None:
             continue
@@ -155,13 +155,14 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
         avg_speed.value = (avg_speed.value*9 + duration)/10
         
 class EdgeTPUProcess():
-    def __init__(self, name, detection_queue, out_events, tf_device=None):
+    def __init__(self, name, detection_queue, out_events, model_shape, tf_device=None):
         self.name = name
         self.out_events = out_events
         self.detection_queue = detection_queue
         self.avg_inference_speed = mp.Value('d', 0.01)
         self.detection_start = mp.Value('d', 0.0)
         self.detect_process = None
+        self.model_shape = model_shape
         self.tf_device = tf_device
         self.start_or_restart()
     
@@ -178,19 +179,19 @@ class EdgeTPUProcess():
         self.detection_start.value = 0.0
         if (not self.detect_process is None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = mp.Process(target=run_detector, name=f"detector:{self.name}", args=(self.name, self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.tf_device))
+        self.detect_process = mp.Process(target=run_detector, name=f"detector:{self.name}", args=(self.name, self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.model_shape, self.tf_device))
         self.detect_process.daemon = True
         self.detect_process.start()
 
 class RemoteObjectDetector():
-    def __init__(self, name, labels, detection_queue, event):
+    def __init__(self, name, labels, detection_queue, event, model_shape):
         self.labels = load_labels(labels)
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue
         self.event = event
         self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
-        self.np_shm = np.ndarray((1,300,300,3), dtype=np.uint8, buffer=self.shm.buf)
+        self.np_shm = np.ndarray((1,model_shape[0],model_shape[1],3), dtype=np.uint8, buffer=self.shm.buf)
         self.out_shm = mp.shared_memory.SharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm = np.ndarray((20,6), dtype=np.float32, buffer=self.out_shm.buf)
     

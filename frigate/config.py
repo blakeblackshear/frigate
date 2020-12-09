@@ -193,7 +193,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
 
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Optional('model', default={'width': 300, 'height': 300}): {
+        vol.Optional('model', default={'width': 320, 'height': 320}): {
             vol.Required('width'): int,
             vol.Required('height'): int
         },
