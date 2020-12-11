@@ -170,8 +170,8 @@ cameras:
           roles:
             - detect
             - rtmp
-    height: 720
     width: 1280
+    height: 720
     fps: 5
 ```
 Here are all the configuration options:
@@ -306,10 +306,10 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       output_args:
     
-    # Required: height of the frame for the input with the detect role
-    height: 720
     # Required: width of the frame for the input with the detect role
     width: 1280
+    # Required: height of the frame for the input with the detect role
+    height: 720
     # Optional: desired fps for your camera for the input with the detect role
     # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
     #       Frigate will attempt to autodetect if not specified.
@@ -427,8 +427,8 @@ cameras:
           roles:
             - clips
             - record
-    height: 720
     width: 1280
+    height: 720
     fps: 5
 ```
 
