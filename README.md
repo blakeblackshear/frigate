@@ -79,11 +79,13 @@ Make sure you choose the right image for your architecture:
 
 It is recommended to run with docker-compose:
 ```yaml
+version: "3.6"
+services:
   frigate:
     container_name: frigate
     restart: unless-stopped
     privileged: true
-    image: blakeblackshear/frigate:stable-amd64
+    image: blakeblackshear/frigate:0.8.0-beta1-amd64
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
@@ -99,12 +101,6 @@ It is recommended to run with docker-compose:
       - "1935:1935" # RTMP feeds
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
-    healthcheck:
-      test: ["CMD", "wget" , "-q", "-O-", "http://localhost:5000"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 3m
 ```
 
 If you can't use docker compose, you can run the container with something similar to this:
