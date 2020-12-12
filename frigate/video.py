@@ -112,16 +112,15 @@ def capture_frames(ffmpeg_process, camera_name, frame_shape, frame_manager: Fram
         frame_name = f"{camera_name}{current_frame.value}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
-          frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
-        except:
-          logger.info(f"{camera_name}: ffmpeg sent a broken frame. something is wrong.")
+            frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+        except Exception as e:
+            logger.info(f"{camera_name}: ffmpeg sent a broken frame. {e}")
 
-          if ffmpeg_process.poll() != None:
-              logger.info(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
-              frame_manager.delete(frame_name)
-              break
-          
-          continue
+            if ffmpeg_process.poll() != None:
+                logger.info(f"{camera_name}: ffmpeg process is not running. exiting capture thread...")
+                frame_manager.delete(frame_name)
+                break
+            continue
 
         frame_rate.update()
 
