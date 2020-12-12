@@ -668,12 +668,14 @@ class CameraConfig():
         if len(ffmpeg_output_args) == 0:
             return None
 
-        return (['ffmpeg'] +
+        cmd = (['ffmpeg'] +
                 ffmpeg_input.global_args +
                 ffmpeg_input.hwaccel_args +
                 ffmpeg_input.input_args +
                 ['-i', ffmpeg_input.path] +
                 ffmpeg_output_args)
+        
+        return [part for part in cmd if part != '']
     
     def _set_zone_colors(self, zones: Dict[str, ZoneConfig]):
         # set colors for zones
