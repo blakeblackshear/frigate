@@ -65,12 +65,12 @@ It is recommended to run with docker-compose:
     container_name: frigate
     restart: unless-stopped
     privileged: true
-    image: blakeblackshear/frigate:stable-amd64
+    image: blakeblackshear/frigate:0.8.0-beta1-amd64
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - <path_to_config>:/config
-      - <path_to_directory_for_clips>:/clips      
+      - <path_to_directory_for_clips>:/medi/frigate
       - type: tmpfs # 1GB of memory, reduces SSD/SD Card wear
         target: /cache
         tmpfs:
