@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
-from frigate.util import calculate_region, draw_box_with_label
+from frigate.util import draw_box_with_label
 
 
 class ObjectTracker():
