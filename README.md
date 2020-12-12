@@ -70,7 +70,7 @@ It is recommended to run with docker-compose:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
       - <path_to_config>:/config
-      - <path_to_directory_for_clips>:/medi/frigate
+      - <path_to_directory_for_clips>:/media/frigate
       - type: tmpfs # 1GB of memory, reduces SSD/SD Card wear
         target: /cache
         tmpfs:
