@@ -193,6 +193,9 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
 
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
+        vol.Optional('database', default={}): {
+            vol.Optional('path', default=os.path.join(CLIPS_DIR, 'frigate.db')): str
+        },
         vol.Optional('model', default={'width': 320, 'height': 320}): {
             vol.Required('width'): int,
             vol.Required('height'): int
@@ -213,6 +216,19 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Required('cameras', default={}): CAMERAS_SCHEMA
     }
 )
+
+class DatabaseConfig():
+    def __init__(self, config):
+        self._path = config['path']
+
+    @property
+    def path(self):
+        return self._path
+    
+    def to_dict(self):
+        return {
+            'path': self.path
+        }
 
 class ModelConfig():
     def __init__(self, config):
@@ -781,6 +797,7 @@ class FrigateConfig():
 
         config = self._sub_env_vars(config)
 
+        self._database = DatabaseConfig(config['database'])
         self._model = ModelConfig(config['model'])
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
@@ -813,6 +830,7 @@ class FrigateConfig():
     
     def to_dict(self):
         return {
+            'database': self.database.to_dict(),
             'model': self.model.to_dict(),
             'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
             'mqtt': self.mqtt.to_dict(),
@@ -820,6 +838,10 @@ class FrigateConfig():
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
             'logger': self.logger.to_dict()
         }
+    
+    @property
+    def database(self):
+        return self._database
     
     @property
     def model(self):
