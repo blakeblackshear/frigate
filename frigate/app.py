@@ -103,7 +103,7 @@ class FrigateApp():
         self.detected_frames_queue = mp.Queue(maxsize=len(self.config.cameras.keys())*2)
 
     def init_database(self):
-        self.db = SqliteExtDatabase(f"/{os.path.join(CLIPS_DIR, 'frigate.db')}")
+        self.db = SqliteExtDatabase(self.config.database.path)
         models = [Event]
         self.db.bind(models)
         self.db.create_tables(models, safe=True)

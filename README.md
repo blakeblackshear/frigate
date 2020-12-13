@@ -184,6 +184,12 @@ logger:
   logs:
     frigate.mqtt: error
 
+# Optional: database configuration
+database:
+  # Optional: database path
+  # This may need to be in a custom location if network storage is used for clips
+  path: /media/frigate/clips/frigate.db
+
 # Optional: detectors configuration
 # USB Coral devices will be auto detected with CPU fallback
 detectors:
