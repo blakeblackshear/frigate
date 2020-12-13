@@ -1,5 +1,6 @@
 # Notification examples
 
+Here are some examples of notifications for the HomeAssistant android companion app:
 ```yaml
 automation:
 
@@ -49,4 +50,22 @@ automation:
           data:
             image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}.jpg"
             tag: "{{trigger.payload_json['after']['id']}}"
+```
+
+If you are using telegram, you can fetch the image directly from Frigate:
+```yaml
+automation:
+  - alias: Notify of events
+    trigger:
+      platform: mqtt
+      topic: frigate/events
+    action:
+      - service: notify.telegram_full
+        data_template:
+          message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
+          data:
+            photo:
+              # this url should work for addon users
+              - url: 'http://ccab4aaf-frigate:5000/events/{{trigger.payload_json["after"]["id"]}}/snapshot.jpg'
+                caption : 'A {{trigger.payload_json["after"]["label"]}} was detected on {{ trigger.payload_json["after"]["camera"] }} camera'
 ```
