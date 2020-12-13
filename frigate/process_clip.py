@@ -98,7 +98,7 @@ class ProcessClip():
             self.detected_objects_queue, process_info, 
             objects_to_track, object_filters, mask, stop_event, exit_on_empty=True)
     
-    def objects_found(self, debug_path=None):
+    def top_object(self, debug_path=None):
         obj_detected = False
         top_computed_score = 0.0
         def handle_event(name, obj, frame_time):
@@ -117,9 +117,9 @@ class ProcessClip():
                 self.save_debug_frame(debug_path, frame_time, current_tracked_objects.values())
 
             self.camera_state.update(frame_time, current_tracked_objects)
-            for obj in self.camera_state.tracked_objects.values():
-                obj_data = obj.to_dict()
-                print(f"{frame_time}: {obj_data['id']} - {obj_data['label']} - {obj_data['score']} - {obj.score_history}")
+            # for obj in self.camera_state.tracked_objects.values():
+            #     obj_data = obj.to_dict()
+            #     print(f"{frame_time}: {obj_data['id']} - {obj_data['label']} - {obj_data['score']} - {obj.score_history}")
         
         self.frame_manager.delete(self.camera_state.previous_frame_id)
         
@@ -154,8 +154,9 @@ class ProcessClip():
 @click.option("-p", "--path", required=True, help="Path to clip or directory to test.")
 @click.option("-l", "--label", default='person', help="Label name to detect.")
 @click.option("-t", "--threshold", default=0.85, help="Threshold value for objects.")
+@click.option("-s", "--scores", default=None, help="File to save csv of top scores")
 @click.option("--debug-path", default=None, help="Path to output frames for debugging.")
-def process(path, label, threshold, debug_path):
+def process(path, label, threshold, scores, debug_path):
     clips = []
     if os.path.isdir(path):
         files = os.listdir(path)
@@ -196,10 +197,12 @@ def process(path, label, threshold, debug_path):
         process_clip.load_frames()
         process_clip.process_frames(objects_to_track=[label])
 
-        results.append((c, process_clip.objects_found(debug_path)))
+        results.append((c, process_clip.top_object(debug_path)))
 
-    for result in results:
-        print(f"{result[0]}: {result[1]}")
+    if not scores is None:
+        with open(scores, 'w') as writer:
+            for result in results:
+                writer.write(f"{result[0]},{result[1]['top_score']}\n")
     
     positive_count = sum(1 for result in results if result[1]['object_detected'])
     print(f"Objects were detected in {positive_count}/{len(results)}({positive_count/len(results)*100:.2f}%) clip(s).")
