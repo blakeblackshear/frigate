@@ -32,7 +32,7 @@ class TestYuvRegion2RGB(TestCase):
         # cv2.imwrite(f"bgr_frame.jpg", self.bgr_frame)
         yuv_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2YUV_I420)
 
-        cropped = yuv_region_2_rgb(yuv_frame, (0, 852, 650, 1502))
+        cropped = yuv_region_2_rgb(yuv_frame, (0, 852, 648, 1500))
         # cv2.imwrite(f"cropped.jpg", cv2.cvtColor(cropped, cv2.COLOR_RGB2BGR))
 
 if __name__ == '__main__':
