@@ -89,7 +89,7 @@ FILTER_SCHEMA = vol.Schema(
         str: {
                 vol.Optional('min_area', default=0): int,
                 vol.Optional('max_area', default=24000000): int,
-                vol.Optional('threshold', default=0.85): float
+                vol.Optional('threshold', default=0.7): float
             }
     }
 )

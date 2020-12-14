@@ -279,7 +279,7 @@ objects:
       # Optional: minimum score for the object to initiate tracking (default: shown below)
       min_score: 0.5
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
-      threshold: 0.85
+      threshold: 0.7
 
 # Required: configuration section for cameras
 cameras:
@@ -344,7 +344,7 @@ cameras:
           person:
             min_area: 5000
             max_area: 100000
-            threshold: 0.8
+            threshold: 0.7
 
     # Optional: save clips configuration
     # NOTE: This feature does not work if you have added "-vsync drop" in your input params. 
@@ -402,7 +402,7 @@ cameras:
           min_area: 5000
           max_area: 100000
           min_score: 0.5
-          threshold: 0.85
+          threshold: 0.7
 ```
 [Back to top](#documentation)
 
