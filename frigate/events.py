@@ -101,7 +101,7 @@ class EventProcessor(threading.Thread):
         # get all clips from the camera with the event sorted
         sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
 
-        while sorted_clips[-1]['start_time'] + sorted_clips[-1]['duration'] < event_data['end_time']+post_capture:
+        while len(sorted_clips) == 0 or sorted_clips[-1]['start_time'] + sorted_clips[-1]['duration'] < event_data['end_time']+post_capture:
             time.sleep(5)
             self.refresh_cache()
             # get all clips from the camera with the event sorted
