@@ -20,7 +20,7 @@ import numpy as np
 from frigate.config import FrigateConfig, CameraConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
-from frigate.util import SharedMemoryFrameManager, draw_box_with_label
+from frigate.util import SharedMemoryFrameManager, draw_box_with_label, calculate_region
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +187,8 @@ class TrackedObject():
                 f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}", thickness=thickness, color=color)
             
         if snapshot_config.crop_to_region:
-            region = self.thumbnail_data['region']
+            box = self.thumbnail_data['box']
+            region = calculate_region(best_frame.shape, box[0], box[1], box[2], box[3], 1.1)
             best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
 
         if snapshot_config.height: 
@@ -460,8 +461,8 @@ class TrackedObjectProcessor(threading.Thread):
         camera_state = self.camera_states[camera]
         if label in camera_state.best_objects:
             best_obj = camera_state.best_objects[label]
-            best = best_obj.to_dict()
-            best['frame'] = camera_state.frame_cache[best_obj.thumbnail_data['frame_time']]
+            best = best_obj.thumbnail_data.copy()
+            best['frame'] = camera_state.frame_cache.get(best_obj.thumbnail_data['frame_time'])
             return best
         else:
             return {}
