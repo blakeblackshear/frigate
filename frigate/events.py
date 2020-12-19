@@ -139,6 +139,8 @@ class EventProcessor(threading.Thread):
             '-',
             '-c',
             'copy',
+            '-movflags',
+            '+faststart',
             f"{os.path.join(CLIPS_DIR, clip_name)}.mp4"
         ]
 
