@@ -43,7 +43,7 @@ class ObjectDetector(ABC):
         pass
 
 class LocalObjectDetector(ObjectDetector):
-    def __init__(self, tf_device=None, labels=None):
+    def __init__(self, tf_device=None, num_threads=3, labels=None):
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
@@ -66,7 +66,7 @@ class LocalObjectDetector(ObjectDetector):
         
         if edge_tpu_delegate is None:
             self.interpreter = tflite.Interpreter(
-                model_path='/cpu_model.tflite')
+                model_path='/cpu_model.tflite', num_threads=num_threads)
         else:
             self.interpreter = tflite.Interpreter(
                 model_path='/edgetpu_model.tflite',
@@ -106,7 +106,7 @@ class LocalObjectDetector(ObjectDetector):
         
         return detections
 
-def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, model_shape, tf_device):
+def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.Event], avg_speed, start, model_shape, tf_device, num_threads):
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
     logger.info(f"Starting detection process: {os.getpid()}")
@@ -120,7 +120,7 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    object_detector = LocalObjectDetector(tf_device=tf_device)
+    object_detector = LocalObjectDetector(tf_device=tf_device, num_threads=num_threads)
 
     outputs = {}
     for name in out_events.keys():
@@ -155,7 +155,7 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
         avg_speed.value = (avg_speed.value*9 + duration)/10
         
 class EdgeTPUProcess():
-    def __init__(self, name, detection_queue, out_events, model_shape, tf_device=None):
+    def __init__(self, name, detection_queue, out_events, model_shape, tf_device=None, num_threads=3):
         self.name = name
         self.out_events = out_events
         self.detection_queue = detection_queue
@@ -164,6 +164,7 @@ class EdgeTPUProcess():
         self.detect_process = None
         self.model_shape = model_shape
         self.tf_device = tf_device
+        self.num_threads = num_threads
         self.start_or_restart()
     
     def stop(self):
@@ -179,7 +180,7 @@ class EdgeTPUProcess():
         self.detection_start.value = 0.0
         if (not self.detect_process is None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = mp.Process(target=run_detector, name=f"detector:{self.name}", args=(self.name, self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.model_shape, self.tf_device))
+        self.detect_process = mp.Process(target=run_detector, name=f"detector:{self.name}", args=(self.name, self.detection_queue, self.out_events, self.avg_inference_speed, self.detection_start, self.model_shape, self.tf_device, self.num_threads))
         self.detect_process.daemon = True
         self.detect_process.start()
 

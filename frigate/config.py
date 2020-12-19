@@ -15,7 +15,8 @@ DETECTORS_SCHEMA = vol.Schema(
     {
         vol.Required(str): {
             vol.Required('type', default='edgetpu'): vol.In(['cpu', 'edgetpu']), 
-            vol.Optional('device', default='usb'): str
+            vol.Optional('device', default='usb'): str,
+            vol.Optional('num_threads', default=3): int
         }
     }
 )
@@ -264,6 +265,7 @@ class DetectorConfig():
     def __init__(self, config):
         self._type = config['type']
         self._device = config['device']
+        self._num_threads = config['num_threads']
     
     @property
     def type(self):
@@ -273,10 +275,15 @@ class DetectorConfig():
     def device(self):
         return self._device
     
+    @property
+    def num_threads(self):
+        return self._num_threads
+    
     def to_dict(self):
         return {
             'type': self.type,
-            'device': self.device
+            'device': self.device,
+            'num_threads': self.num_threads
         }
 
 class LoggerConfig():
