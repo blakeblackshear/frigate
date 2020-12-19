@@ -12,14 +12,15 @@ import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
+from frigate.config import DetectConfig
 from frigate.util import draw_box_with_label
 
 
 class ObjectTracker():
-    def __init__(self, max_disappeared):
+    def __init__(self, config: DetectConfig):
         self.tracked_objects = {}
         self.disappeared = {}
-        self.max_disappeared = max_disappeared
+        self.max_disappeared = config.max_disappeared
 
     def register(self, index, obj):
         rand_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))

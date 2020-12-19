@@ -81,10 +81,10 @@ class ProcessClip():
     def process_frames(self, objects_to_track=['person'], object_filters={}):
         mask = np.zeros((self.frame_shape[0], self.frame_shape[1], 1), np.uint8)
         mask[:] = 255
-        motion_detector = MotionDetector(self.frame_shape, mask)
+        motion_detector = MotionDetector(self.frame_shape, mask, self.camera_config.motion)
 
         object_detector = LocalObjectDetector(labels='/labelmap.txt')
-        object_tracker = ObjectTracker(10)
+        object_tracker = ObjectTracker(self.camera_config.detect)
         process_info = {
             'process_fps': mp.Value('d', 0.0),
             'detection_fps': mp.Value('d', 0.0),
