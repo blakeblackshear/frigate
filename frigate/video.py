@@ -258,10 +258,10 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     object_filters = config.objects.filters
     mask = config.mask
 
-    motion_detector = MotionDetector(frame_shape, mask, resize_factor=6)
+    motion_detector = MotionDetector(frame_shape, mask, config.motion)
     object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection, model_shape)
 
-    object_tracker = ObjectTracker(10)
+    object_tracker = ObjectTracker(config.detect)
 
     frame_manager = SharedMemoryFrameManager()
 

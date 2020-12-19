@@ -84,6 +84,22 @@ GLOBAL_FFMPEG_SCHEMA = vol.Schema(
     }
 )
 
+MOTION_SCHEMA = vol.Schema(
+    {
+        'threshold': vol.Range(min=1, max=255),
+        'contour_area': int,
+        'delta_alpha': float,
+        'frame_alpha': float,
+        'frame_height': int
+    }
+)
+
+DETECT_SCHEMA = vol.Schema(
+    {
+        'max_disappeared': int
+    }
+)
+
 FILTER_SCHEMA = vol.Schema(
     { 
         str: {
@@ -108,16 +124,6 @@ OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
         vol.Optional('filters', default = {}): FILTER_SCHEMA.extend({ str: {vol.Optional('min_score', default=0.5): float}})
     }
 ))
-
-DEFAULT_CAMERA_SAVE_CLIPS = {
-    'enabled': False
-}
-DEFAULT_CAMERA_SNAPSHOTS = {
-    'show_timestamp': True,
-    'draw_zones': False,
-    'draw_bounding_boxes': True,
-    'crop_to_region': True
-}
 
 def each_role_used_once(inputs):
     roles = [role for i in inputs for role in i['roles']]
@@ -166,7 +172,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                     vol.Optional('filters', default={}): FILTER_SCHEMA
                 }
             },
-            vol.Optional('save_clips', default=DEFAULT_CAMERA_SAVE_CLIPS): {
+            vol.Optional('save_clips', default={}): {
                 vol.Optional('enabled', default=False): bool,
                 vol.Optional('pre_capture', default=30): int,
                 'objects': [str],
@@ -179,14 +185,16 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
             vol.Optional('rtmp', default={}): {
                 vol.Required('enabled', default=True): bool,
             },
-            vol.Optional('snapshots', default=DEFAULT_CAMERA_SNAPSHOTS): {
+            vol.Optional('snapshots', default={}): {
                 vol.Optional('show_timestamp', default=True): bool,
                 vol.Optional('draw_zones', default=False): bool,
                 vol.Optional('draw_bounding_boxes', default=True): bool,
                 vol.Optional('crop_to_region', default=True): bool,
                 vol.Optional('height', default=175): int
             },
-            'objects': OBJECTS_SCHEMA
+            'objects': OBJECTS_SCHEMA,
+            vol.Optional('motion', default={}): MOTION_SCHEMA,
+            vol.Optional('detect', default={}): DETECT_SCHEMA
         }
     }, vol.Msg(ensure_zones_and_cameras_have_different_names, msg='Zones cannot share names with cameras'))
 )
@@ -213,6 +221,8 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         },
         vol.Optional('ffmpeg', default={}): GLOBAL_FFMPEG_SCHEMA,
         vol.Optional('objects', default={}): OBJECTS_SCHEMA,
+        vol.Optional('motion', default={}): MOTION_SCHEMA,
+        vol.Optional('detect', default={}): DETECT_SCHEMA,
         vol.Required('cameras', default={}): CAMERAS_SCHEMA
     }
 )
@@ -561,6 +571,58 @@ class CameraRtmpConfig():
             'enabled': self.enabled,
         }
 
+class MotionConfig():
+    def __init__(self, global_config, config, camera_height: int):
+        self._threshold = config.get('threshold', global_config.get('threshold', 25))
+        self._contour_area = config.get('contour_area', global_config.get('contour_area', 100))
+        self._delta_alpha = config.get('delta_alpha', global_config.get('delta_alpha', 0.2))
+        self._frame_alpha = config.get('frame_alpha', global_config.get('frame_alpha', 0.2))
+        self._frame_height = config.get('frame_height', global_config.get('frame_height', camera_height//6))
+    
+    @property
+    def threshold(self):
+        return self._threshold
+
+    @property
+    def contour_area(self):
+        return self._contour_area
+
+    @property
+    def delta_alpha(self):
+        return self._delta_alpha
+
+    @property
+    def frame_alpha(self):
+        return self._frame_alpha
+
+    @property
+    def frame_height(self):
+        return self._frame_height
+    
+    def to_dict(self):
+        return {
+            'threshold': self.threshold,
+            'contour_area': self.contour_area,
+            'delta_alpha': self.delta_alpha,
+            'frame_alpha': self.frame_alpha,
+            'frame_height': self.frame_height,
+        }
+
+
+
+class DetectConfig():
+    def __init__(self, global_config, config, camera_fps):
+        self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*2))
+    
+    @property
+    def max_disappeared(self):
+        return self._max_disappeared
+    
+    def to_dict(self):
+        return {
+            'max_disappeared': self._max_disappeared,
+        }
+
 class ZoneConfig():
     def __init__(self, name, config):
         self._coordinates = config['coordinates']
@@ -623,6 +685,8 @@ class CameraConfig():
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
         self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
+        self._motion = MotionConfig(global_config['motion'], config['motion'], self._height)
+        self._detect = DetectConfig(global_config['detect'], config['detect'], config.get('fps', 5))
 
         self._ffmpeg_cmds = []
         for ffmpeg_input in self._ffmpeg.inputs:
@@ -755,6 +819,14 @@ class CameraConfig():
     @property
     def objects(self):
         return self._objects
+    
+    @property
+    def motion(self):
+        return self._motion
+    
+    @property
+    def detect(self):
+        return self._detect
 
     @property
     def frame_shape(self):
@@ -781,6 +853,8 @@ class CameraConfig():
             'rtmp': self.rtmp.to_dict(),
             'snapshots': self.snapshots.to_dict(),
             'objects': self.objects.to_dict(),
+            'motion': self.motion.to_dict(),
+            'detect': self.detect.to_dict(),
             'frame_shape': self.frame_shape,
             'ffmpeg_cmds': [{'roles': c['roles'], 'cmd': ' '.join(c['cmd'])} for c in self.ffmpeg_cmds],
         }
