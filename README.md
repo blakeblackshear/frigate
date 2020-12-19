@@ -281,6 +281,38 @@ objects:
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
       threshold: 0.7
 
+# Optional: Global motion detection config. These may also be defined at the camera level.
+# ADVANCED: Most users will not need to set these values in their config
+motion:
+  # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
+  # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
+  # The value should be between 1 and 255.
+  threshold: 25
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion
+  # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will make motion detection more sensitive to smaller
+  # moving objects.
+  contour_area: 100
+  # Optional: Alpha value passed to cv2.accumulateWeighted when averaging the motion delta across multiple frames (default: shown below)
+  # Higher values mean the current frame impacts the delta a lot, and a single raindrop may register as motion.
+  # Too low and a fast moving person wont be detected as motion.
+  delta_alpha: 0.2
+  # Optional: Alpha value passed to cv2.accumulateWeighted when averaging frames to determine the background (default: shown below)
+  # Higher values mean the current frame impacts the average a lot, and a new object will be averaged into the background faster.
+  # Low values will cause things like moving shadows to be detected as motion for longer.
+  # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
+  frame_alpha: 0.2
+  # Optional: Height of the resized motion frame  (default: 1/6th of the original frame height)
+  # This operates as an efficient blur alternative. Higher values will result in more granular motion detection at the expense of higher CPU usage.
+  # Lower values result in less CPU, but small changes may not register as motion.
+  frame_height: 180
+
+# Optional: Global detecttion settings. These may also be defined at the camera level.
+# ADVANCED: Most users will not need to set these values in their config
+detect:
+  # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: double the frame rate)
+  max_disappeared: 10
+
+
 # Required: configuration section for cameras
 cameras:
   # Required: name of the camera
