@@ -200,6 +200,9 @@ detectors:
     type: edgetpu
     # Optional: device name as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
     device: usb
+    # Optional: num_threads value passed to the tflite.Interpreter (default: shown below)
+    # This value is only used for CPU types
+    num_threads: 3
 
 # Optional: model configuration
 model:
