@@ -70,7 +70,7 @@ class MotionDetector():
                 contour_area = cv2.contourArea(c)
                 if contour_area > self.config.contour_area:
                     x, y, w, h = cv2.boundingRect(c)
-                    motion_boxes.append((x*self.resize_factor, y*self.resize_factor, (x+w)*self.resize_factor, (y+h)*self.resize_factor))
+                    motion_boxes.append((int(x*self.resize_factor), int(y*self.resize_factor), int((x+w)*self.resize_factor), int((y+h)*self.resize_factor)))
         
         if len(motion_boxes) > 0:
             self.motion_frame_count += 1

@@ -388,6 +388,8 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
                         region = calculate_region(frame_shape, 
                             box[0], box[1],
                             box[2], box[3])
+
+                        regions.append(region)
                         
                         selected_objects.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask))
 
@@ -411,6 +413,6 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
         else:
           fps_tracker.update()
           fps.value = fps_tracker.eps()
-          detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects))
+          detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects, motion_boxes, regions))
           detection_fps.value = object_detector.fps.eps()
           frame_manager.close(f"{camera_name}{frame_time}")
