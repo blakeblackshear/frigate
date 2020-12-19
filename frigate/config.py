@@ -174,7 +174,8 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
             },
             vol.Optional('save_clips', default={}): {
                 vol.Optional('enabled', default=False): bool,
-                vol.Optional('pre_capture', default=30): int,
+                vol.Optional('pre_capture', default=5): int,
+                vol.Optional('post_capture', default=5): int,
                 'objects': [str],
                 vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA,
             },
@@ -531,6 +532,7 @@ class CameraSaveClipsConfig():
     def __init__(self, global_config, config):
         self._enabled = config['enabled']
         self._pre_capture = config['pre_capture']
+        self._post_capture = config['post_capture']
         self._objects = config.get('objects', global_config['objects']['track'])
         self._retain = SaveClipsRetainConfig(global_config['save_clips']['retain'], config['retain'])
     
@@ -541,6 +543,10 @@ class CameraSaveClipsConfig():
     @property
     def pre_capture(self):
         return self._pre_capture
+    
+    @property
+    def post_capture(self):
+        return self._post_capture
 
     @property
     def objects(self):
@@ -554,6 +560,7 @@ class CameraSaveClipsConfig():
         return {
             'enabled': self.enabled,
             'pre_capture': self.pre_capture,
+            'post_capture': self.post_capture,
             'objects': self.objects,
             'retain': self.retain.to_dict()
         }
