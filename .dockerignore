@@ -4,3 +4,4 @@ docs/
 debug
 config/
 *.pyc
+.git
