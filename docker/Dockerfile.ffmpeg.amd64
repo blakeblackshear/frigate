@@ -79,6 +79,7 @@ RUN      buildDeps="autoconf \
                     libssl-dev \
                     yasm \
                     libva-dev \
+                    libmfx-dev \
                     zlib1g-dev" && \
         apt-get -yqq update && \
         apt-get install -yq --no-install-recommends ${buildDeps}
@@ -404,6 +405,7 @@ RUN \
         --enable-gpl \
         --enable-libfreetype \
         --enable-libvidstab \
+        --enable-libmfx \
         --enable-libmp3lame \
         --enable-libopus \
         --enable-libtheora \
