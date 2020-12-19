@@ -1,6 +1,7 @@
 ARG ARCH=amd64
+ARG FFMPEG_VERSION
 FROM blakeblackshear/frigate-wheels:${ARCH} as wheels
-FROM blakeblackshear/frigate-ffmpeg:1.0.0-${ARCH} as ffmpeg
+FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
 
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
