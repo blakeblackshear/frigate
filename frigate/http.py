@@ -13,6 +13,7 @@ from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,10 @@ def events():
 @bp.route('/config')
 def config():
     return jsonify(current_app.frigate_config.to_dict())
+
+@bp.route('/version')
+def version():
+    return VERSION
 
 @bp.route('/stats')
 def stats():

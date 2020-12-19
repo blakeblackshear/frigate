@@ -5,3 +5,4 @@ config/config.yml
 models
 *.mp4
 *.db
+frigate/version.py
