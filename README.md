@@ -386,7 +386,9 @@ cameras:
       # Required: enables clips for the camera (default: shown below)
       enabled: False
       # Optional: Number of seconds before the event to include in the clips (default: shown below)
-      pre_capture: 30
+      pre_capture: 5
+      # Optional: Number of seconds after the event to include in the clips (default: shown below)
+      post_capture: 5
       # Optional: Objects to save clips for. (default: all tracked objects)
       objects:
         - person
@@ -653,7 +655,8 @@ Event and clip information is managed in a sqlite database at `/media/frigate/cl
 - `max_seconds`: This limits the size of the cache when an object is being tracked. If an object is stationary and being tracked for a long time, the cache files will expire and this value will be the maximum clip length for the *end* of the event. For example, if this is set to 300 seconds and an object is being tracked for 600 seconds, the clip will end up being the last 300 seconds. Defaults to 300 seconds.
 
 ### Per-camera Configuration Options
-- `pre_capture`: Defines how much time should be included in the clip prior to the beginning of the event. Defaults to 30 seconds.
+- `pre_capture`: Defines how much time should be included in the clip prior to the beginning of the event. Defaults to 5 seconds.
+- `post_capture`: Defines how much time should be included in the clip after the end of the event. Defaults to 5 seconds.
 - `objects`: List of object types to save clips for. Object types here must be listed for tracking at the camera or global configuration. Defaults to all tracked objects.
 
 
