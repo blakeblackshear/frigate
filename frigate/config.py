@@ -164,7 +164,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
             vol.Required('height'): int,
             vol.Required('width'): int,
             'fps': int,
-            'mask': str,
+            'mask': vol.Any(str, [str]),
             vol.Optional('best_image_timeout', default=60): int,
             vol.Optional('zones', default={}):  {
                 str: {
@@ -703,28 +703,28 @@ class CameraConfig():
         self._set_zone_colors(self._zones)
 
     def _create_mask(self, mask):
-        if mask:
-            if mask.startswith('base64,'):
-                img = base64.b64decode(mask[7:]) 
-                np_img = np.fromstring(img, dtype=np.uint8)
-                mask_img = cv2.imdecode(np_img, cv2.IMREAD_GRAYSCALE)
-            elif mask.startswith('poly,'):
-                points = mask.split(',')[1:]
-                contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
-                mask_img = np.zeros(self.frame_shape, np.uint8)
-                mask_img[:] = 255
-                cv2.fillPoly(mask_img, pts=[contour], color=(0))
-            else:
-                mask_img = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
-        else:
-            mask_img = None
+        mask_img = np.zeros(self.frame_shape, np.uint8)
+        mask_img[:] = 255
 
-        if mask_img is None or mask_img.size == 0:
-            mask_img = np.zeros(self.frame_shape, np.uint8)
-            mask_img[:] = 255
+        if isinstance(mask, list):
+            for m in mask:
+                self._add_mask(m, mask_img)
+
+        elif isinstance(mask, str):
+            self._add_mask(mask, mask_img)
         
         return mask_img
-
+    
+    def _add_mask(self, mask, mask_img):
+        if mask.startswith('poly,'):
+            points = mask.split(',')[1:]
+            contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+            cv2.fillPoly(mask_img, pts=[contour], color=(0))
+        else:
+            mask_file = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
+            if not mask_file.size == 0:
+                mask_img[np.where(mask_file==[0])] = [0]
+    
     def _get_ffmpeg_cmd(self, ffmpeg_input):
         ffmpeg_output_args = []
         if 'detect' in ffmpeg_input.roles:
