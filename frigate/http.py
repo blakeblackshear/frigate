@@ -208,18 +208,34 @@ def best(camera_name, label):
 def mjpeg_feed(camera_name):
     fps = int(request.args.get('fps', '3'))
     height = int(request.args.get('h', '360'))
+    draw_options = {
+        'bounding_boxes': request.args.get('bbox', type=int),
+        'timestamp': request.args.get('timestamp', type=int),
+        'zones': request.args.get('zones', type=int),
+        'mask': request.args.get('mask', type=int),
+        'motion_boxes': request.args.get('motion', type=int),
+        'regions': request.args.get('regions', type=int),
+    }
     if camera_name in current_app.frigate_config.cameras:
         # return a multipart response
-        return Response(imagestream(current_app.detected_frames_processor, camera_name, fps, height),
+        return Response(imagestream(current_app.detected_frames_processor, camera_name, fps, height, draw_options),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         return "Camera named {} not found".format(camera_name), 404
 
 @bp.route('/<camera_name>/latest.jpg')
 def latest_frame(camera_name):
+    draw_options = {
+        'bounding_boxes': request.args.get('bbox', type=int),
+        'timestamp': request.args.get('timestamp', type=int),
+        'zones': request.args.get('zones', type=int),
+        'mask': request.args.get('mask', type=int),
+        'motion_boxes': request.args.get('motion', type=int),
+        'regions': request.args.get('regions', type=int),
+    }
     if camera_name in current_app.frigate_config.cameras:
         # max out at specified FPS
-        frame = current_app.detected_frames_processor.get_current_frame(camera_name)
+        frame = current_app.detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((720,1280,3), np.uint8)
 
@@ -235,11 +251,11 @@ def latest_frame(camera_name):
     else:
         return "Camera named {} not found".format(camera_name), 404
         
-def imagestream(detected_frames_processor, camera_name, fps, height):
+def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
     while True:
         # max out at specified FPS
         time.sleep(1/fps)
-        frame = detected_frames_processor.get_current_frame(camera_name, draw=True)
+        frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((height,int(height*16/9),3), np.uint8)
 

@@ -250,15 +250,17 @@ class CameraState():
         self.previous_frame_id = None
         self.callbacks = defaultdict(lambda: [])
 
-    def get_current_frame(self, draw=False):
+    def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
             tracked_objects = {k: v.to_dict() for k,v in self.tracked_objects.items()}
+            motion_boxes = self.motion_boxes.copy()
+            regions = self.regions.copy()
         
         frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
         # draw on the frame
-        if draw:
+        if draw_options.get('bounding_boxes'):
             # draw the bounding boxes on the frame
             for obj in tracked_objects.values():
                 thickness = 2
@@ -271,19 +273,28 @@ class CameraState():
                 # draw the bounding boxes on the frame
                 box = obj['box']
                 draw_box_with_label(frame_copy, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
-                # draw the regions on the frame
-                region = obj['region']
-                cv2.rectangle(frame_copy, (region[0], region[1]), (region[2], region[3]), (0,255,0), 1)
-            
-            if self.camera_config.snapshots.show_timestamp:
-                time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
-                cv2.putText(frame_copy, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
-
-            if self.camera_config.snapshots.draw_zones:
-                for name, zone in self.camera_config.zones.items():
-                    thickness = 8 if any([name in obj['current_zones'] for obj in tracked_objects.values()]) else 2
-                    cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
         
+        if draw_options.get('regions'):
+            for region in regions:
+                cv2.rectangle(frame_copy, (region[0], region[1]), (region[2], region[3]), (0,255,0), 2)
+        
+        if draw_options.get('timestamp'):
+            time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+            cv2.putText(frame_copy, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
+
+        if draw_options.get('zones'):
+            for name, zone in self.camera_config.zones.items():
+                thickness = 8 if any([name in obj['current_zones'] for obj in tracked_objects.values()]) else 2
+                cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
+        
+        if draw_options.get('mask'):
+            mask_overlay = np.where(self.camera_config.mask==[0])
+            frame_copy[mask_overlay] = [0,0,0]
+        
+        if draw_options.get('motion_boxes'):
+            for m_box in motion_boxes:
+                cv2.rectangle(frame_copy, (m_box[0], m_box[1]), (m_box[2], m_box[3]), (0,0,255), 2)
+
         return frame_copy
 
     def finished(self, obj_id):
@@ -292,8 +303,10 @@ class CameraState():
     def on(self, event_type: str, callback: Callable[[Dict], None]):
         self.callbacks[event_type].append(callback)
 
-    def update(self, frame_time, current_detections):
+    def update(self, frame_time, current_detections, motion_boxes, regions):
         self.current_frame_time = frame_time
+        self.motion_boxes = motion_boxes
+        self.regions = regions
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
         current_frame = self.frame_manager.get(frame_id, self.camera_config.frame_shape_yuv)
@@ -453,8 +466,8 @@ class TrackedObjectProcessor(threading.Thread):
         else:
             return {}
     
-    def get_current_frame(self, camera, draw=False):
-        return self.camera_states[camera].get_current_frame(draw)
+    def get_current_frame(self, camera, draw_options={}):
+        return self.camera_states[camera].get_current_frame(draw_options)
 
     def run(self):
         while True:
@@ -463,13 +476,13 @@ class TrackedObjectProcessor(threading.Thread):
                 break
 
             try:
-                camera, frame_time, current_tracked_objects = self.tracked_objects_queue.get(True, 10)
+                camera, frame_time, current_tracked_objects, motion_boxes, regions = self.tracked_objects_queue.get(True, 10)
             except queue.Empty:
                 continue
 
             camera_state = self.camera_states[camera]
 
-            camera_state.update(frame_time, current_tracked_objects)
+            camera_state.update(frame_time, current_tracked_objects, motion_boxes, regions)
 
             # update zone counts for each label
             # for each zone in the current camera

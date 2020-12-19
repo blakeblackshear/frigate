@@ -719,7 +719,19 @@ A web server is available on port 5000 with the following endpoints.
 ### `/<camera_name>`
 An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use. 
 
-You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`
+Accepts the following query string parameters:
+|param|Type|Description|
+|----|-----|--|
+|`fps`|int|Frame rate|
+|`h`|int|Height in pixels|
+|`bbox`|int|Show bounding boxes for detected objects (0 or 1)|
+|`timestamp`|int|Print the timestamp in the upper left (0 or 1)|
+|`zones`|int|Draw the zones on the image (0 or 1)|
+|`mask`|int|Overlay the mask on the image (0 or 1)|
+|`motion`|int|Draw blue boxes for areas with detected motion (0 or 1)|
+|`regions`|int|Draw green boxes for areas where object detection was run (0 or 1)|
+
+You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`.
 
 ### `/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
 The best snapshot for any object type. It is a full resolution image by default.
@@ -730,6 +742,17 @@ Example parameters:
 
 ### `/<camera_name>/latest.jpg[?h=300]`
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
+
+Accepts the following query string parameters:
+|param|Type|Description|
+|----|-----|--|
+|`h`|int|Height in pixels|
+|`bbox`|int|Show bounding boxes for detected objects (0 or 1)|
+|`timestamp`|int|Print the timestamp in the upper left (0 or 1)|
+|`zones`|int|Draw the zones on the image (0 or 1)|
+|`mask`|int|Overlay the mask on the image (0 or 1)|
+|`motion`|int|Draw blue boxes for areas with detected motion (0 or 1)|
+|`regions`|int|Draw green boxes for areas where object detection was run (0 or 1)|
 
 Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
