@@ -33,9 +33,9 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - [Object Filters](#object-filters)
 - [Masks](#masks)
 - [Zones](#zones)
-- [Recording Clips](#recording-clips)
-- [24/7 Recordings](#247-recordings)
-- [RTMP Streams](#rtmp-streams)
+- [Recording Clips (save_clips)](#recording-clips)
+- [24/7 Recordings (record)](#247-recordings)
+- [RTMP Streams (rtmp)](#rtmp-streams)
 - [Integration with HomeAssistant](#integration-with-homeassistant)
 - [MQTT Topics](#mqtt-topics)
 - [HTTP Endpoints](#http-endpoints)
@@ -61,9 +61,14 @@ Cameras that output H.264 video and AAC audio will offer the most compatibility 
 [Back to top](#documentation)
 
 ## Installing
+Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). See instructions below for installing the HassOS addon.
+
+For HomeAssistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with HomeAssistant by automatically setting up camera entities, sensors, media browser for clips and recordings, and a public API to simplify notifications.
+
+Note that HassOS Addons and custom components are different things. If you are already running Frigate with Docker directly, you do not need the Addon since the Addon would run another instance of Frigate.
 
 ### HassOS Addon
-HassOS users can install via the addon repository. Frigate requires that an MQTT server be running.
+HassOS users can install via the addon repository. Frigate requires an MQTT server.
 1. Navigate to Supervisor > Add-on Store > Repositories
 1. Add https://github.com/blakeblackshear/frigate-hass-addons
 1. Setup your configuration in the `Configuration` tab
@@ -74,6 +79,7 @@ Make sure you choose the right image for your architecture:
 |Arch|Image Name|
 |-|-|
 |amd64|blakeblackshear/frigate:stable-amd64|
+|amd64nvidia|blakeblackshear/frigate:stable-amd64nvidia|
 |armv7|blakeblackshear/frigate:stable-armv7|
 |aarch64|blakeblackshear/frigate:stable-aarch64|
 
@@ -85,7 +91,7 @@ services:
     container_name: frigate
     restart: unless-stopped
     privileged: true
-    image: blakeblackshear/frigate:0.8.0-beta1-amd64
+    image: blakeblackshear/frigate:0.8.0-beta2-amd64
     volumes:
       - /dev/bus/usb:/dev/bus/usb
       - /etc/localtime:/etc/localtime:ro
@@ -117,7 +123,7 @@ docker run --rm \
 -e FRIGATE_RTSP_PASSWORD='password' \
 -p 5000:5000 \
 -p 1935:1935 \
-blakeblackshear/frigate:0.8.0-beta1-amd64
+blakeblackshear/frigate:0.8.0-beta2-amd64
 ```
 
 ### Kubernetes
@@ -328,6 +334,8 @@ cameras:
           # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           # Required: list of roles for this stream. valid values are: detect,record,clips,rtmp
+          # NOTICE: In addition to assigning the record, clips, and rtmp roles,
+          # they must also be enabled in the camera config.
           roles:
             - detect
             - rtmp
@@ -356,9 +364,10 @@ cameras:
     #       Frigate will attempt to autodetect if not specified.
     fps: 5
 
-    # Optional: motion mask
+    # Optional: list of motion masks
     # NOTE: see docs for more detailed info on creating masks
-    mask: poly,0,900,1080,900,1080,1920,0,1920
+    mask: 
+      - poly,0,900,1080,900,1080,1920,0,1920
 
     # Optional: timeout for highest scoring image before allowing it
     # to be replaced by a newer image. (default: shown below)
@@ -479,7 +488,7 @@ cameras:
 [Back to top](#documentation)
 
 ## Optimizing Performance
-- **Google Coral**: It is strongly recommended to use a Google Coral, but Frigate will fall back to CPU in the event one is not found. Offloading TensorFlow to the Google Coral is an order of magnitude faster and will reduce your CPU load dramatically. A $60 device will outperform $2000 CPU.
+- **Google Coral**: It is strongly recommended to use a Google Coral, but Frigate will fall back to CPU in the event one is not found. Offloading TensorFlow to the Google Coral is an order of magnitude faster and will reduce your CPU load dramatically. A $60 device will outperform $2000 CPU. Frigate should work with any supported Coral device from https://coral.ai
 - **Resolution**: For the `detect` input, choose a camera resolution where the smallest object you want to detect barely fits inside a 300x300px square. The model used by Frigate is trained on 300x300px images, so you will get worse performance and no improvement in accuracy by using a larger resolution since Frigate resizes the area where it is looking for objects to 300x300 anyway.
 - **FPS**: 5 frames per second should be adequate. Higher frame rates will require more CPU usage without improving detections or accuracy. Reducing the frame rate on your camera will have the greatest improvement on system resources.
 - **Hardware Acceleration**: Make sure you configure the `hwaccel_args` for your hardware. They provide a significant reduction in CPU usage if they are available.
@@ -488,7 +497,8 @@ cameras:
 ### FFmpeg Hardware Acceleration
 Frigate works on Raspberry Pi 3b/4 and x86 machines. It is recommended to update your configuration to enable hardware accelerated decoding in ffmpeg. Depending on your system, these parameters may not be compatible.
 
-Raspberry Pi 3/4 (32-bit OS):
+Raspberry Pi 3/4 (32-bit OS)
+**NOTICE**: If you are using the addon, ensure you turn off `Protection mode` for hardware acceleration.
 ```yaml
 ffmpeg:
   hwaccel_args:
@@ -497,6 +507,7 @@ ffmpeg:
 ```
 
 Raspberry Pi 3/4 (64-bit OS)
+**NOTICE**: If you are using the addon, ensure you turn off `Protection mode` for hardware acceleration.
 ```yaml
 ffmpeg:
   hwaccel_args:
@@ -517,13 +528,12 @@ ffmpeg:
 ```
 
 Intel-based CPUs (>=10th Generation) via Quicksync (https://trac.ffmpeg.org/wiki/Hardware/QuickSync)
-**Note:** You also need to set `LIBVA_DRIVER_NAME=iHD` as an environment variable on the container.
 ```yaml
 ffmpeg:
   hwaccel_args:
     - -hwaccel
-    - vaapi
-    - -hwaccel_device
+    - qsv
+    - -qsv_device
     - /dev/dri/renderD128
 ```
 
@@ -546,6 +556,8 @@ Nvidia GPU based decoding via NVDEC is supported, but requires special configura
 By default Frigate will look for a USB Coral device and fall back to the CPU if it cannot be found. If you have PCI or multiple Coral devices, you need to configure your detector devices in the config file. When using multiple detectors, they run in dedicated processes, but pull from a common queue of requested detections across all cameras.
 
 Frigate supports `edgetpu` and `cpu` as detector types. The device value should be specified according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api).
+
+**Note**: There is no support for Nvidia GPUs to perform object detection with tensorflow. It can be used for ffmpeg decoding, but not object detection.  
 
 Single USB Coral:
 ```yaml
@@ -654,6 +666,8 @@ Frigate can save video clips without any CPU overhead for encoding by simply cop
 ### Database
 Event and clip information is managed in a sqlite database at `/media/frigate/clips/frigate.db`. If that database is deleted, clips will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within HomeAssistant.
 
+If you are storing your clips on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
+
 ### Global Configuration Options
 - `max_seconds`: This limits the size of the cache when an object is being tracked. If an object is stationary and being tracked for a long time, the cache files will expire and this value will be the maximum clip length for the *end* of the event. For example, if this is set to 300 seconds and an object is being tracked for 600 seconds, the clip will end up being the last 300 seconds. Defaults to 300 seconds.
 
@@ -673,7 +687,9 @@ Event and clip information is managed in a sqlite database at `/media/frigate/cl
 [Back to top](#documentation)
 
 ## RTMP Streams
-Frigate can re-stream your video feed as a RTMP feed for other applications such as HomeAssistant to utilize it. This allows you to use a video feed for detection in frigate and HomeAssistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
+Frigate can re-stream your video feed as a RTMP feed for other applications such as HomeAssistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and HomeAssistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
+
+Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
 
 [Back to top](#documentation)
 
@@ -871,8 +887,9 @@ is published again.
 The height and crop of snapshots can be configured in the config.
 
 ### `frigate/events`
-Message published for each changed event:
-```json
+Message published for each changed event. The first message is published when the tracked object is no longer marked as a false_positive. When frigate finds a better snapshot of the tracked object or when a zone change occurs, it will publish a message with the same id. When the event ends, a final message is published with `end_time` set.
+
+```jsonc
 {
     "before": {
         "id": "1607123955.475377-mxklsc",
@@ -978,14 +995,14 @@ Examples of available modules are:
 
 ## Troubleshooting
 
+### "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5639eeb6e140] moov atom not found"
+These messages in the logs are expected in certain situations. Frigate checks the integrity of the video cache before assembling clips. Occasionally these cached files will be invalid and cleaned up automatically.
+
 ### "ffmpeg didnt return a frame. something is wrong"
-Turn on logging for the camera by overriding the global_args and setting the log level to `info`:
+Turn on logging for the ffmpeg process by overriding the global_args and setting the log level to `info` (the default is `fatal`). Note that all ffmpeg logs show up in the Frigate logs as `ERROR` level. This does not mean they are actually errors.
 ```yaml
 ffmpeg:
-  global_args:
-    - -hide_banner
-    - -loglevel
-    - info
+  global_args: -hide_banner -loglevel info
 ```
 
 ### "On connect called"
