@@ -112,14 +112,11 @@ class ProcessClip():
         self.camera_state.on('update', handle_event)
 
         while(not self.detected_objects_queue.empty()):
-            camera_name, frame_time, current_tracked_objects = self.detected_objects_queue.get()
+            camera_name, frame_time, current_tracked_objects, motion_boxes, regions = self.detected_objects_queue.get()
             if not debug_path is None:
                 self.save_debug_frame(debug_path, frame_time, current_tracked_objects.values())
 
-            self.camera_state.update(frame_time, current_tracked_objects)
-            # for obj in self.camera_state.tracked_objects.values():
-            #     obj_data = obj.to_dict()
-            #     print(f"{frame_time}: {obj_data['id']} - {obj_data['label']} - {obj_data['score']} - {obj.score_history}")
+            self.camera_state.update(frame_time, current_tracked_objects, motion_boxes, regions)
         
         self.frame_manager.delete(self.camera_state.previous_frame_id)
         
