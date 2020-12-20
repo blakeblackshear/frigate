@@ -845,6 +845,9 @@ Sample response:
 ### `/config`
 A json representation of your configuration
 
+### `/version`
+Version info
+
 ### `/events`
 Events from the database. Accepts the following query string parameters:
 |param|Type|Description|
