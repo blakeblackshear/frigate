@@ -73,7 +73,7 @@ class TrackedObject():
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data = None
         self.frame = None
-        self.previous = None
+        self.previous = self.to_dict()
         self._snapshot_jpg_time = 0
         ret, jpg = cv2.imencode('.jpg', np.zeros((300,300,3), np.uint8))
         self._snapshot_jpg = jpg.tobytes()
@@ -99,7 +99,7 @@ class TrackedObject():
         return median(scores)
     
     def update(self, current_frame_time, obj_data):
-        previous = self.to_dict()
+        significant_update = False
         self.obj_data.update(obj_data)
         # if the object is not in the current frame, add a 0.0 to the score history
         if self.obj_data['frame_time'] != current_frame_time:
@@ -129,7 +129,7 @@ class TrackedObject():
                     'region': self.obj_data['region'],
                     'score': self.obj_data['score']
                 }
-                self.previous = previous
+                significant_update = True
         
         # check zones
         current_zones = []
@@ -143,8 +143,13 @@ class TrackedObject():
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
                     current_zones.append(name)
                     self.entered_zones.add(name)
-                
+        
+        # if the zones changed, signal an update
+        if not self.false_positive and set(self.current_zones) != set(current_zones):
+            significant_update = True
+
         self.current_zones = current_zones
+        return significant_update
     
     def to_dict(self, include_thumbnail: bool = False):
         return {
@@ -327,16 +332,16 @@ class CameraState():
         
         for id in updated_ids:
             updated_obj = self.tracked_objects[id]
-            updated_obj.update(frame_time, current_detections[id])
+            significant_update = updated_obj.update(frame_time, current_detections[id])
 
-            if (not updated_obj.false_positive 
-                and updated_obj.thumbnail_data['frame_time'] == frame_time 
-                and frame_time not in self.frame_cache):
-                self.frame_cache[frame_time] = np.copy(current_frame)
+            if significant_update:
+                # ensure this frame is stored in the cache
+                if updated_obj.thumbnail_data['frame_time'] == frame_time and frame_time not in self.frame_cache:
+                    self.frame_cache[frame_time] = np.copy(current_frame)
 
-            # call event handlers
-            for c in self.callbacks['update']:
-                c(self.name, updated_obj, frame_time)
+                # call event handlers
+                for c in self.callbacks['update']:
+                    c(self.name, updated_obj, frame_time)
         
         for id in removed_ids:
             # publish events to mqtt
@@ -421,9 +426,10 @@ class TrackedObjectProcessor(threading.Thread):
             self.event_queue.put(('start', camera, obj.to_dict()))
 
         def update(camera, obj: TrackedObject, current_frame_time):
-            if not obj.thumbnail_data is None and obj.thumbnail_data['frame_time'] == current_frame_time:
-                message = { 'before': obj.previous, 'after': obj.to_dict() }
-                self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
+            after = obj.to_dict()
+            message = { 'before': obj.previous, 'after': after }
+            self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
+            obj.previous = after
 
         def end(camera, obj: TrackedObject, current_frame_time):
             if not obj.false_positive:
