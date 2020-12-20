@@ -194,7 +194,6 @@ class FrigateApp():
             self.init_mqtt()
         except Exception as e:
             print(e)
-            logger.error(e)
             self.log_process.terminate()
             sys.exit(1)
         self.start_detectors()
