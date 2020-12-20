@@ -51,6 +51,7 @@ SAVE_CLIPS_RETAIN_SCHEMA = vol.Schema(
 SAVE_CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
+        'tmpfs_cache_size': str,
         vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
     }
 )
@@ -410,11 +411,16 @@ class SaveClipsRetainConfig():
 class SaveClipsConfig():
     def __init__(self, config):
         self._max_seconds = config['max_seconds']
+        self._tmpfs_cache_size = config.get('tmpfs_cache_size', '').strip()
         self._retain = SaveClipsRetainConfig(config['retain'], config['retain'])
     
     @property
     def max_seconds(self):
         return self._max_seconds
+    
+    @property
+    def tmpfs_cache_size(self):
+        return self._tmpfs_cache_size
 
     @property
     def retain(self):
@@ -423,6 +429,7 @@ class SaveClipsConfig():
     def to_dict(self):
         return {
             'max_seconds': self.max_seconds,
+            'tmpfs_cache_size': self.tmpfs_cache_size,
             'retain': self.retain.to_dict()
         }
 

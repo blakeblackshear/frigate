@@ -38,6 +38,13 @@ class FrigateApp():
         self.camera_metrics = {}
 
     def ensure_dirs(self):
+        tmpfs_size = self.config.save_clips.tmpfs_cache_size
+        if tmpfs_size:
+             logger.info(f"Creating tmpfs of size {tmpfs_size}")
+             rc = os.system(f"mount -t tmpfs -o size={tmpfs_size} tmpfs /tmp/cache")
+             if rc != 0:
+                 logger.error(f"Failed to create tmpfs, error code: {rc}")
+
         for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
@@ -173,19 +180,20 @@ class FrigateApp():
     def start(self):
         self.init_logger()
         try:
-            self.ensure_dirs()
             try:
                 self.init_config()
             except Exception as e:
                 logger.error(f"Error parsing config: {e}")
                 self.log_process.terminate()
                 sys.exit(1)
+            self.ensure_dirs()
             self.check_config()
             self.set_log_levels()
             self.init_queues()
             self.init_database()
             self.init_mqtt()
         except Exception as e:
+            print(e)
             logger.error(e)
             self.log_process.terminate()
             sys.exit(1)
