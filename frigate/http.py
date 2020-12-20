@@ -211,6 +211,7 @@ def mjpeg_feed(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 @bp.route('/<camera_name>/latest.jpg')
+@bp.route('/<camera_name>/masked.jpg')
 def latest_frame(camera_name):
     if camera_name in current_app.frigate_config.cameras:
         # max out at specified FPS
@@ -223,7 +224,11 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, jpg = cv2.imencode('.jpg', frame)
+        if '/masked.jpg' in request.path:
+            mask = cv2.addWeighted(frame, 0.5, cv2.cvtColor(cv2.resize(current_app.frigate_config.cameras[camera_name].mask,
+                                   dsize=(width, height), interpolation=cv2.INTER_AREA), cv2.COLOR_GRAY2RGB), 0.5, 0)
+
+        ret, jpg = cv2.imencode('.jpg', frame if mask is None else mask)
         response = make_response(jpg.tobytes())
         response.headers['Content-Type'] = 'image/jpg'
         return response
