@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import os
 from typing import Dict
 
@@ -10,6 +11,8 @@ import voluptuous as vol
 import yaml
 
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+
+logger = logging.getLogger(__name__)
 
 DETECTORS_SCHEMA = vol.Schema(
     {
@@ -743,7 +746,9 @@ class CameraConfig():
             cv2.fillPoly(mask_img, pts=[contour], color=(0))
         else:
             mask_file = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
-            if not mask_file.size == 0:
+            if mask_file is None or mask_file.size == 0:
+                logger.warning(f"Could not read mask file {mask}")
+            else:
                 mask_img[np.where(mask_file==[0])] = [0]
     
     def _get_ffmpeg_cmd(self, ffmpeg_input):
