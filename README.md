@@ -871,6 +871,9 @@ Returns data for a single event.
 ### `/events/<id>/snapshot.jpg`
 Returns a snapshot for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
+### `/clips/<camera>-<id>.mp4`
+Video clip for the given camera and event id.
+
 [Back to top](#documentation)
 
 ## MQTT Topics
