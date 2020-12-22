@@ -34,6 +34,7 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - [Masks](#masks)
 - [Zones](#zones)
 - [Recording Clips (save_clips)](#recording-clips)
+- [Snapshots (snapshots)](#snapshots)
 - [24/7 Recordings (record)](#247-recordings)
 - [RTMP Streams (rtmp)](#rtmp-streams)
 - [Integration with HomeAssistant](#integration-with-homeassistant)
@@ -428,19 +429,33 @@ cameras:
       # Required: Enable the live stream (default: True)
       enabled: True
 
-    # Optional: Configuration for the snapshots in the debug view and mqtt
+    # Optional: Configuration for the jpg snapshots written to the clips directory for each event
     snapshots:
+      # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
+      enabled: False
       # Optional: print a timestamp on the snapshots (default: shown below)
-      show_timestamp: True
-      # Optional: draw zones on the debug mjpeg feed (default: shown below)
-      draw_zones: False
-      # Optional: draw bounding boxes on the mqtt snapshots (default: shown below)
-      draw_bounding_boxes: True
-      # Optional: crop the snapshot to the detection region (default: shown below)
-      crop_to_region: True
-      # Optional: height to resize the snapshot to (default: shown below)
-      # NOTE: 175px is optimized for thumbnails in the homeassistant media browser
+      timestamp: False
+      # Optional: draw bounding box on the snapshots (default: shown below)
+      bounding_box: False
+      # Optional: crop the snapshot (default: shown below)
+      crop: False
+      # Optional: height to resize the snapshot to (default: original size)
       height: 175
+
+    # Optional: Configuration for the jpg snapshots published via MQTT
+    mqtt:
+      # Optional: Enable publishing snapshot via mqtt for camera (default: shown below)
+      # NOTE: Only applies to publishing image data to MQTT via 'frigate/<camera_name>/<object_name>/snapshot'. 
+      # All other messages will still be published.
+      enabled: True
+      # Optional: print a timestamp on the snapshots (default: shown below)
+      timestamp: True
+      # Optional: draw bounding box on the snapshots (default: shown below)
+      bounding_box: True
+      # Optional: crop the snapshot (default: shown below)
+      crop: True
+      # Optional: height to resize the snapshot to (default: shown below)
+      height: 270
 
     # Optional: Camera level object filters config. If defined, this is used instead of the global config.
     objects:
@@ -680,6 +695,10 @@ If you are storing your clips on a network share (SMB, NFS, etc), you may get a 
 - `post_capture`: Defines how much time should be included in the clip after the end of the event. Defaults to 5 seconds.
 - `objects`: List of object types to save clips for. Object types here must be listed for tracking at the camera or global configuration. Defaults to all tracked objects.
 
+[Back to top](#documentation)
+
+## Snapshots
+Frigate can save a snapshot image to `/media/frigate/clips` for each event named as `<camera>-<id>.jpg`.
 
 [Back to top](#documentation)
 
@@ -873,6 +892,9 @@ Returns a snapshot for the event id optimized for notifications. Works while the
 
 ### `/clips/<camera>-<id>.mp4`
 Video clip for the given camera and event id.
+
+### `/clips/<camera>-<id>.jpg`
+JPG snapshot for the given camera and event id.
 
 [Back to top](#documentation)
 
