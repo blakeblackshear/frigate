@@ -192,11 +192,18 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Required('enabled', default=True): bool,
             },
             vol.Optional('snapshots', default={}): {
-                vol.Optional('show_timestamp', default=True): bool,
-                vol.Optional('draw_zones', default=False): bool,
-                vol.Optional('draw_bounding_boxes', default=True): bool,
-                vol.Optional('crop_to_region', default=True): bool,
-                vol.Optional('height', default=175): int
+                vol.Optional('enabled', default=False): bool,
+                vol.Optional('timestamp', default=False): bool,
+                vol.Optional('bounding_box', default=False): bool,
+                vol.Optional('crop', default=False): bool,
+                'height': int
+            },
+            vol.Optional('mqtt', default={}): {
+                vol.Optional('enabled', default=True): bool,
+                vol.Optional('timestamp', default=True): bool,
+                vol.Optional('bounding_box', default=True): bool,
+                vol.Optional('crop', default=True): bool,
+                vol.Optional('height', default=270): int
             },
             'objects': OBJECTS_SCHEMA,
             vol.Optional('motion', default={}): MOTION_SCHEMA,
@@ -510,27 +517,27 @@ class ObjectConfig():
 
 class CameraSnapshotsConfig():
     def __init__(self, config):
-        self._show_timestamp = config['show_timestamp']
-        self._draw_zones = config['draw_zones']
-        self._draw_bounding_boxes = config['draw_bounding_boxes']
-        self._crop_to_region = config['crop_to_region']
+        self._enabled = config['enabled']
+        self._timestamp = config['timestamp']
+        self._bounding_box = config['bounding_box']
+        self._crop = config['crop']
         self._height = config.get('height')
     
     @property
-    def show_timestamp(self):
-        return self._show_timestamp
+    def enabled(self):
+        return self._enabled
     
     @property
-    def draw_zones(self):
-        return self._draw_zones
+    def timestamp(self):
+        return self._timestamp
 
     @property
-    def draw_bounding_boxes(self):
-        return self._draw_bounding_boxes
+    def bounding_box(self):
+        return self._bounding_box
 
     @property
-    def crop_to_region(self):
-        return self._crop_to_region
+    def crop(self):
+        return self._crop
 
     @property
     def height(self):
@@ -538,10 +545,47 @@ class CameraSnapshotsConfig():
     
     def to_dict(self):
         return {
-            'show_timestamp': self.show_timestamp,
-            'draw_zones': self.draw_zones,
-            'draw_bounding_boxes': self.draw_bounding_boxes,
-            'crop_to_region': self.crop_to_region,
+            'enabled': self.enabled,
+            'timestamp': self.timestamp,
+            'bounding_box': self.bounding_box,
+            'crop': self.crop,
+            'height': self.height
+        }
+
+class CameraMqttConfig():
+    def __init__(self, config):
+        self._enabled = config['enabled']
+        self._timestamp = config['timestamp']
+        self._bounding_box = config['bounding_box']
+        self._crop = config['crop']
+        self._height = config.get('height')
+    
+    @property
+    def enabled(self):
+        return self._enabled
+    
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @property
+    def bounding_box(self):
+        return self._bounding_box
+
+    @property
+    def crop(self):
+        return self._crop
+
+    @property
+    def height(self):
+        return self._height
+    
+    def to_dict(self):
+        return {
+            'enabled': self.enabled,
+            'timestamp': self.timestamp,
+            'bounding_box': self.bounding_box,
+            'crop': self.crop,
             'height': self.height
         }
 
@@ -708,6 +752,7 @@ class CameraConfig():
         self._record = RecordConfig(global_config['record'], config['record'])
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
+        self._mqtt = CameraMqttConfig(config['mqtt'])
         self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
         self._motion = MotionConfig(global_config['motion'], config['motion'], self._height)
         self._detect = DetectConfig(global_config['detect'], config['detect'], config.get('fps', 5))
@@ -843,6 +888,10 @@ class CameraConfig():
         return self._snapshots
     
     @property
+    def mqtt(self):
+        return self._mqtt
+    
+    @property
     def objects(self):
         return self._objects
     
@@ -878,6 +927,7 @@ class CameraConfig():
             'record': self.record.to_dict(),
             'rtmp': self.rtmp.to_dict(),
             'snapshots': self.snapshots.to_dict(),
+            'mqtt': self.mqtt.to_dict(),
             'objects': self.objects.to_dict(),
             'motion': self.motion.to_dict(),
             'detect': self.detect.to_dict(),
