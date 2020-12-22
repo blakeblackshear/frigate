@@ -98,9 +98,9 @@ class RecordingMaintainer(threading.Thread):
             delete_before[name] = datetime.datetime.now().timestamp() - SECONDS_IN_DAY*camera.record.retain_days
 
         for p in Path('/media/frigate/recordings').rglob("*.mp4"):
-            if not p.parent in delete_before:
+            if not p.parent.name in delete_before:
                 continue
-            if p.stat().st_mtime < delete_before[p.parent]:
+            if p.stat().st_mtime < delete_before[p.parent.name]:
                 p.unlink(missing_ok=True)
 
     def run(self):
