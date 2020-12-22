@@ -74,9 +74,6 @@ class TrackedObject():
         self.thumbnail_data = None
         self.frame = None
         self.previous = self.to_dict()
-        self._snapshot_jpg_time = 0
-        ret, jpg = cv2.imencode('.jpg', np.zeros((300,300,3), np.uint8))
-        self._snapshot_jpg = jpg.tobytes()
 
         # start the score history
         self.score_history = [self.obj_data['score']]
@@ -167,41 +164,50 @@ class TrackedObject():
             'region': self.obj_data['region'],
             'current_zones': self.current_zones.copy(),
             'entered_zones': list(self.entered_zones).copy(),
-            'thumbnail': base64.b64encode(self.get_jpg_bytes()).decode('utf-8') if include_thumbnail else None
+            'thumbnail': base64.b64encode(self.get_thumbnail()).decode('utf-8') if include_thumbnail else None
         }
     
-    def get_jpg_bytes(self):
-        if self.thumbnail_data is None or self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
-            return self._snapshot_jpg
-        
+    def get_thumbnail(self):
+        if self.thumbnail_data is None:
+            ret, jpg = cv2.imencode('.jpg', np.zeros((175,175,3), np.uint8))
+            return jpg.tobytes()
+
         if not self.thumbnail_data['frame_time'] in self.frame_cache:
             logger.error(f"Unable to create thumbnail for {self.obj_data['id']}")
             logger.error(f"Looking for frame_time of {self.thumbnail_data['frame_time']}")
             logger.error(f"Thumbnail frames: {','.join([str(k) for k in self.frame_cache.keys()])}")
-            return self._snapshot_jpg
+            ret, jpg = cv2.imencode('.jpg', np.zeros((175,175,3), np.uint8))
+            return jpg.tobytes()
 
-        # TODO: crop first to avoid converting the entire frame?
-        snapshot_config = self.camera_config.snapshots
+        jpg_bytes = self.get_jpg_bytes(timestamp=False, bounding_box=False, crop=True, height=175)
+
+        if jpg_bytes:
+            return jpg_bytes
+        else:
+            ret, jpg = cv2.imencode('.jpg', np.zeros((175,175,3), np.uint8))
+            return jpg.tobytes()
+    
+    def get_jpg_bytes(self, timestamp=False, bounding_box=False, crop=False, height=None):
         best_frame = cv2.cvtColor(self.frame_cache[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
-
-        if snapshot_config.draw_bounding_boxes:
+ 
+        if bounding_box:
             thickness = 2
             color = COLOR_MAP[self.obj_data['label']]
+
+            # draw the bounding boxes on the frame
             box = self.thumbnail_data['box']
-            draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], self.obj_data['label'], 
-                f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}", thickness=thickness, color=color)
-            
-        if snapshot_config.crop_to_region:
+            draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], self.obj_data['label'], f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}", thickness=thickness, color=color)
+
+        if crop:
             box = self.thumbnail_data['box']
             region = calculate_region(best_frame.shape, box[0], box[1], box[2], box[3], 1.1)
             best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
 
-        if snapshot_config.height: 
-            height = snapshot_config.height
+        if height:
             width = int(height*best_frame.shape[1]/best_frame.shape[0])
             best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
-        
-        if snapshot_config.show_timestamp:
+
+        if timestamp:
             time_to_show = datetime.datetime.fromtimestamp(self.thumbnail_data['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
             size = cv2.getTextSize(time_to_show, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2)
             text_width = size[0][0]
@@ -212,9 +218,9 @@ class TrackedObject():
 
         ret, jpg = cv2.imencode('.jpg', best_frame)
         if ret:
-            self._snapshot_jpg = jpg.tobytes()
-        
-        return self._snapshot_jpg
+            return jpg.tobytes()
+        else:
+            return None
 
 def zone_filtered(obj: TrackedObject, object_config):
     object_name = obj.obj_data['label']
@@ -432,13 +438,32 @@ class TrackedObjectProcessor(threading.Thread):
             obj.previous = after
 
         def end(camera, obj: TrackedObject, current_frame_time):
+            snapshot_config = self.config.cameras[camera].snapshots
             if not obj.false_positive:
                 message = { 'before': obj.previous, 'after': obj.to_dict() }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
+                # write snapshot to disk if enabled
+                if snapshot_config.enabled:
+                    jpg_bytes = obj.get_jpg_bytes(
+                        timestamp=snapshot_config.timestamp,
+                        bounding_box=snapshot_config.bounding_box,
+                        crop=snapshot_config.crop,
+                        height=snapshot_config.height
+                    )
+                    with open(os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"), 'wb') as j:
+                        j.write(jpg_bytes)
             self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
-            self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
+            mqtt_config = self.config.cameras[camera].mqtt
+            if mqtt_config.enabled:
+                jpg_bytes = obj.get_jpg_bytes(
+                    timestamp=mqtt_config.timestamp,
+                    bounding_box=mqtt_config.bounding_box,
+                    crop=mqtt_config.crop,
+                    height=mqtt_config.height
+                )
+                self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", jpg_bytes, retain=True)
         
         def object_status(camera, object_name, status):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
