@@ -88,7 +88,7 @@ class EventProcessor(threading.Thread):
             earliest_event = datetime.datetime.now().timestamp()
 
         # if the earliest event exceeds the max seconds, cap it
-        max_seconds = self.config.save_clips.max_seconds
+        max_seconds = self.config.clips.max_seconds
         if datetime.datetime.now().timestamp()-earliest_event > max_seconds:
             earliest_event = datetime.datetime.now().timestamp()-max_seconds
         
@@ -164,16 +164,16 @@ class EventProcessor(threading.Thread):
 
             self.refresh_cache()
 
-            save_clips_config = self.config.cameras[camera].save_clips
+            clips_config = self.config.cameras[camera].clips
 
             # if save clips is not enabled for this camera, just continue
-            if not save_clips_config.enabled:
+            if not clips_config.enabled:
                 if event_type == 'end':
                     self.event_processed_queue.put((event_data['id'], camera))
                 continue
 
             # if specific objects are listed for this camera, only save clips for them
-            if not event_data['label'] in save_clips_config.objects:
+            if not event_data['label'] in clips_config.objects:
                 if event_type == 'end':
                     self.event_processed_queue.put((event_data['id'], camera))
                 continue
@@ -183,7 +183,7 @@ class EventProcessor(threading.Thread):
 
             if event_type == 'end':
                 if len(self.cached_clips) > 0 and not event_data['false_positive']:
-                    self.create_clip(camera, event_data, save_clips_config.pre_capture, save_clips_config.post_capture)
+                    self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
                     Event.create(
                         id=event_data['id'],
                         label=event_data['label'],
@@ -222,7 +222,7 @@ class EventCleanup(threading.Thread):
             camera_keys = list(self.config.cameras.keys())
 
             # Expire events from unlisted cameras based on the global config
-            retain_config = self.config.save_clips.retain
+            retain_config = self.config.clips.retain
             
             distinct_labels = (Event.select(Event.label)
                         .where(Event.camera.not_in(camera_keys))
@@ -256,7 +256,7 @@ class EventCleanup(threading.Thread):
 
             # Expire events from cameras based on the camera config
             for name, camera in self.config.cameras.items():
-                retain_config = camera.save_clips.retain
+                retain_config = camera.clips.retain
                 # get distinct objects in database for this camera
                 distinct_labels = (Event.select(Event.label)
                         .where(Event.camera == name)

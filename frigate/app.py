@@ -45,7 +45,7 @@ class FrigateApp():
             else:
                 logger.debug(f"Skipping directory: {d}")
 
-        tmpfs_size = self.config.save_clips.tmpfs_cache_size
+        tmpfs_size = self.config.clips.tmpfs_cache_size
         if tmpfs_size:
              logger.info(f"Creating tmpfs of size {tmpfs_size}")
              rc = os.system(f"mount -t tmpfs -o size={tmpfs_size} tmpfs {CACHE_DIR}")
@@ -78,10 +78,10 @@ class FrigateApp():
     def check_config(self):
         for name, camera in self.config.cameras.items():
             assigned_roles = list(set([r for i in camera.ffmpeg.inputs for r in i.roles]))
-            if not camera.save_clips.enabled and 'clips' in assigned_roles:
-                logger.warning(f"Camera {name} has clips assigned to an input, but save_clips is not enabled.")
-            elif camera.save_clips.enabled and not 'clips' in assigned_roles:
-                logger.warning(f"Camera {name} has save_clips enabled, but clips is not assigned to an input.")
+            if not camera.clips.enabled and 'clips' in assigned_roles:
+                logger.warning(f"Camera {name} has clips assigned to an input, but clips is not enabled.")
+            elif camera.clips.enabled and not 'clips' in assigned_roles:
+                logger.warning(f"Camera {name} has clips enabled, but clips is not assigned to an input.")
 
             if not camera.record.enabled and 'record' in assigned_roles:
                 logger.warning(f"Camera {name} has record assigned to an input, but record is not enabled.")

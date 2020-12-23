@@ -33,7 +33,7 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - [Object Filters](#object-filters)
 - [Masks](#masks)
 - [Zones](#zones)
-- [Recording Clips (save_clips)](#recording-clips)
+- [Recording Clips (clips)](#recording-clips)
 - [Snapshots (snapshots)](#snapshots)
 - [24/7 Recordings (record)](#247-recordings)
 - [RTMP Streams (rtmp)](#rtmp-streams)
@@ -238,7 +238,7 @@ mqtt:
   password: password
 
 # Optional: Global configuration for saving clips
-save_clips:
+clips:
   # Optional: Maximum length of time to retain video during long events. (default: shown below)
   # NOTE: If an object is being tracked for longer than this amount of time, the cache
   #       will begin to expire and the resulting clip will be the last x seconds of the event.
@@ -399,7 +399,7 @@ cameras:
     # NOTE: This feature does not work if you have added "-vsync drop" in your input params. 
     #       This will only work for camera feeds that can be copied into the mp4 container format without
     #       encoding such as h264. It may not work for some types of streams.
-    save_clips:
+    clips:
       # Required: enables clips for the camera (default: shown below)
       enabled: False
       # Optional: Number of seconds before the event to include in the clips (default: shown below)
