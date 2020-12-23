@@ -806,7 +806,7 @@ class CameraConfig():
             ffmpeg_output_args = self.ffmpeg.output_args['rtmp'] + [
                 f"rtmp://127.0.0.1/live/{self.name}"
             ] + ffmpeg_output_args
-        if 'clips' in ffmpeg_input.roles and self.clips.enabled:
+        if 'clips' in ffmpeg_input.roles:
             ffmpeg_output_args = self.ffmpeg.output_args['clips'] + [
                 f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args

@@ -119,7 +119,7 @@ class FrigateApp():
         self.flask_app = create_app(self.config, self.db, self.camera_metrics, self.detectors, self.detected_frames_processor)
 
     def init_mqtt(self):
-        self.mqtt_client = create_mqtt_client(self.config.mqtt)
+        self.mqtt_client = create_mqtt_client(self.config)
 
     def start_detectors(self):
         model_shape = (self.config.model.height, self.config.model.width)
