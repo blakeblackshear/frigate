@@ -191,12 +191,12 @@ class TestConfig(TestCase):
         frigate_config = FrigateConfig(config=config)
         assert('-re' in frigate_config.cameras['back'].ffmpeg_cmds[0]['cmd'])
     
-    def test_inherit_save_clips_retention(self):
+    def test_inherit_clips_retention(self):
         config = {
             'mqtt': {
                 'host': 'mqtt'
             },
-            'save_clips': {
+            'clips': {
                 'retain': {
                     'default': 20,
                     'objects': {
@@ -217,14 +217,14 @@ class TestConfig(TestCase):
             }
         }
         frigate_config = FrigateConfig(config=config)
-        assert(frigate_config.cameras['back'].save_clips.retain.objects['person'] == 30)
+        assert(frigate_config.cameras['back'].clips.retain.objects['person'] == 30)
     
     def test_roles_listed_twice_throws_error(self):
         config = {
             'mqtt': {
                 'host': 'mqtt'
             },
-            'save_clips': {
+            'clips': {
                 'retain': {
                     'default': 20,
                     'objects': {
@@ -252,7 +252,7 @@ class TestConfig(TestCase):
             'mqtt': {
                 'host': 'mqtt'
             },
-            'save_clips': {
+            'clips': {
                 'retain': {
                     'default': 20,
                     'objects': {
@@ -279,12 +279,12 @@ class TestConfig(TestCase):
         }
         self.assertRaises(vol.MultipleInvalid, lambda: FrigateConfig(config=config))
     
-    def test_save_clips_should_default_to_global_objects(self):
+    def test_clips_should_default_to_global_objects(self):
         config = {
             'mqtt': {
                 'host': 'mqtt'
             },
-            'save_clips': {
+            'clips': {
                 'retain': {
                     'default': 20,
                     'objects': {
@@ -304,16 +304,16 @@ class TestConfig(TestCase):
                     },
                     'height': 1080,
                     'width': 1920,
-                    'save_clips': {
+                    'clips': {
                         'enabled': True
                     }
                 }
             }
         }
         config = FrigateConfig(config=config)
-        assert(len(config.cameras['back'].save_clips.objects) == 2)
-        assert('dog' in config.cameras['back'].save_clips.objects)
-        assert('person' in config.cameras['back'].save_clips.objects)
+        assert(len(config.cameras['back'].clips.objects) == 2)
+        assert('dog' in config.cameras['back'].clips.objects)
+        assert('person' in config.cameras['back'].clips.objects)
     
     def test_role_assigned_but_not_enabled(self):
         json_config = {
