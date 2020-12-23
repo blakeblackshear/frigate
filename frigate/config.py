@@ -42,7 +42,7 @@ MQTT_SCHEMA = vol.Schema(
     }
 )
 
-SAVE_CLIPS_RETAIN_SCHEMA = vol.Schema(
+CLIPS_RETAIN_SCHEMA = vol.Schema(
     {
         vol.Required('default',default=10): int,
         'objects': {
@@ -51,11 +51,11 @@ SAVE_CLIPS_RETAIN_SCHEMA = vol.Schema(
     }
 )
 
-SAVE_CLIPS_SCHEMA = vol.Schema(
+CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
         'tmpfs_cache_size': str,
-        vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA
+        vol.Optional('retain', default={}): CLIPS_RETAIN_SCHEMA
     }
 )
 
@@ -177,12 +177,12 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                     vol.Optional('filters', default={}): FILTER_SCHEMA
                 }
             },
-            vol.Optional('save_clips', default={}): {
+            vol.Optional('clips', default={}): {
                 vol.Optional('enabled', default=False): bool,
                 vol.Optional('pre_capture', default=5): int,
                 vol.Optional('post_capture', default=5): int,
                 'objects': [str],
-                vol.Optional('retain', default={}): SAVE_CLIPS_RETAIN_SCHEMA,
+                vol.Optional('retain', default={}): CLIPS_RETAIN_SCHEMA,
             },
             vol.Optional('record', default={}): {
                 'enabled': bool,
@@ -227,7 +227,7 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
             vol.Optional('default', default='info'): vol.In(['info', 'debug', 'warning', 'error', 'critical']),
             vol.Optional('logs', default={}): {str: vol.In(['info', 'debug', 'warning', 'error', 'critical']) }
         },
-        vol.Optional('save_clips', default={}): SAVE_CLIPS_SCHEMA,
+        vol.Optional('clips', default={}): CLIPS_SCHEMA,
         vol.Optional('record', default={}): {
             vol.Optional('enabled', default=False): bool,
             vol.Optional('retain_days', default=30): int,
@@ -399,7 +399,7 @@ class CameraFfmpegConfig():
     def output_args(self):
         return {k: v if isinstance(v, list) else v.split(' ') for k, v in self._output_args.items()}
 
-class SaveClipsRetainConfig():
+class ClipsRetainConfig():
     def __init__(self, global_config, config):
         self._default = config.get('default', global_config.get('default'))
         self._objects = config.get('objects', global_config.get('objects', {}))
@@ -418,11 +418,11 @@ class SaveClipsRetainConfig():
             'objects': self.objects
         }
 
-class SaveClipsConfig():
+class ClipsConfig():
     def __init__(self, config):
         self._max_seconds = config['max_seconds']
         self._tmpfs_cache_size = config.get('tmpfs_cache_size', '').strip()
-        self._retain = SaveClipsRetainConfig(config['retain'], config['retain'])
+        self._retain = ClipsRetainConfig(config['retain'], config['retain'])
     
     @property
     def max_seconds(self):
@@ -589,13 +589,13 @@ class CameraMqttConfig():
             'height': self.height
         }
 
-class CameraSaveClipsConfig():
+class CameraClipsConfig():
     def __init__(self, global_config, config):
         self._enabled = config['enabled']
         self._pre_capture = config['pre_capture']
         self._post_capture = config['post_capture']
         self._objects = config.get('objects', global_config['objects']['track'])
-        self._retain = SaveClipsRetainConfig(global_config['save_clips']['retain'], config['retain'])
+        self._retain = ClipsRetainConfig(global_config['clips']['retain'], config['retain'])
     
     @property
     def enabled(self):
@@ -748,7 +748,7 @@ class CameraConfig():
         self._mask = self._create_mask(config.get('mask'))
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
-        self._save_clips = CameraSaveClipsConfig(global_config, config['save_clips'])
+        self._clips = CameraClipsConfig(global_config, config['clips'])
         self._record = RecordConfig(global_config['record'], config['record'])
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(config['snapshots'])
@@ -806,7 +806,7 @@ class CameraConfig():
             ffmpeg_output_args = self.ffmpeg.output_args['rtmp'] + [
                 f"rtmp://127.0.0.1/live/{self.name}"
             ] + ffmpeg_output_args
-        if 'clips' in ffmpeg_input.roles and self.save_clips.enabled:
+        if 'clips' in ffmpeg_input.roles and self.clips.enabled:
             ffmpeg_output_args = self.ffmpeg.output_args['clips'] + [
                 f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
@@ -872,8 +872,8 @@ class CameraConfig():
         return self._zones
     
     @property
-    def save_clips(self):
-        return self._save_clips
+    def clips(self):
+        return self._clips
     
     @property
     def record(self):
@@ -923,7 +923,7 @@ class CameraConfig():
             'fps': self.fps,
             'best_image_timeout': self.best_image_timeout,
             'zones': {k: z.to_dict() for k, z in self.zones.items()},
-            'save_clips': self.save_clips.to_dict(),
+            'clips': self.clips.to_dict(),
             'record': self.record.to_dict(),
             'rtmp': self.rtmp.to_dict(),
             'snapshots': self.snapshots.to_dict(),
@@ -951,7 +951,7 @@ class FrigateConfig():
         self._model = ModelConfig(config['model'])
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
-        self._save_clips = SaveClipsConfig(config['save_clips'])
+        self._clips = ClipsConfig(config['clips'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
         self._logger = LoggerConfig(config['logger'])
 
@@ -984,7 +984,7 @@ class FrigateConfig():
             'model': self.model.to_dict(),
             'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
             'mqtt': self.mqtt.to_dict(),
-            'save_clips': self.save_clips.to_dict(),
+            'clips': self.clips.to_dict(),
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
             'logger': self.logger.to_dict()
         }
@@ -1010,8 +1010,8 @@ class FrigateConfig():
         return self._mqtt
     
     @property
-    def save_clips(self):
-        return self._save_clips
+    def clips(self):
+        return self._clips
 
     @property
     def cameras(self) -> Dict[str, CameraConfig]:
