@@ -102,6 +102,7 @@ class EventProcessor(threading.Thread):
         sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
 
         while len(sorted_clips) == 0 or sorted_clips[-1]['start_time'] + sorted_clips[-1]['duration'] < event_data['end_time']+post_capture:
+            logger.debug(f"No cache clips for {camera}. Waiting...")
             time.sleep(5)
             self.refresh_cache()
             # get all clips from the camera with the event sorted
@@ -162,12 +163,14 @@ class EventProcessor(threading.Thread):
                     self.refresh_cache()
                 continue
 
+            logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
             self.refresh_cache()
 
             clips_config = self.config.cameras[camera].clips
 
             # if save clips is not enabled for this camera, just continue
             if not clips_config.enabled:
+                logger.debug(f"Clips not enabled for {camera}. Not making a clip.")
                 if event_type == 'end':
                     self.event_processed_queue.put((event_data['id'], camera))
                 continue
