@@ -148,7 +148,8 @@ class EventProcessor(threading.Thread):
         p = sp.run(ffmpeg_cmd, input="\n".join(playlist_lines), encoding='ascii', capture_output=True)
         if p.returncode != 0:
             logger.error(p.stderr)
-            return
+            return False
+        return True
 
     def run(self):
         while True:
@@ -166,27 +167,17 @@ class EventProcessor(threading.Thread):
             logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
             self.refresh_cache()
 
-            clips_config = self.config.cameras[camera].clips
-
-            # if save clips is not enabled for this camera, just continue
-            if not clips_config.enabled:
-                logger.debug(f"Clips not enabled for {camera}. Not making a clip.")
-                if event_type == 'end':
-                    self.event_processed_queue.put((event_data['id'], camera))
-                continue
-
-            # if specific objects are listed for this camera, only save clips for them
-            if not event_data['label'] in clips_config.objects:
-                if event_type == 'end':
-                    self.event_processed_queue.put((event_data['id'], camera))
-                continue
-
             if event_type == 'start':
                 self.events_in_process[event_data['id']] = event_data
 
             if event_type == 'end':
-                if len(self.cached_clips) > 0 and not event_data['false_positive']:
-                    self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
+                clips_config = self.config.cameras[camera].clips
+
+                if not event_data['false_positive']:
+                    clip_created = False
+                    if clips_config.enabled and event_data['label'] in clips_config.objects:
+                        clip_created = self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
+                    
                     Event.create(
                         id=event_data['id'],
                         label=event_data['label'],
@@ -196,7 +187,9 @@ class EventProcessor(threading.Thread):
                         top_score=event_data['top_score'],
                         false_positive=event_data['false_positive'],
                         zones=list(event_data['entered_zones']),
-                        thumbnail=event_data['thumbnail']
+                        thumbnail=event_data['thumbnail'],
+                        has_clip=clip_created,
+                        has_snapshot=event_data['has_snapshot'],
                     )
                 del self.events_in_process[event_data['id']]
                 self.event_processed_queue.put((event_data['id'], camera))
