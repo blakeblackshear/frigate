@@ -432,6 +432,8 @@ class TrackedObjectProcessor(threading.Thread):
 
         def end(camera, obj: TrackedObject, current_frame_time):
             snapshot_config = self.config.cameras[camera].snapshots
+            event_data = obj.to_dict(include_thumbnail=True)
+            event_data['has_snapshot'] = False
             if not obj.false_positive:
                 message = { 'before': obj.previous, 'after': obj.to_dict() }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
@@ -445,8 +447,9 @@ class TrackedObjectProcessor(threading.Thread):
                     )
                     with open(os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"), 'wb') as j:
                         j.write(jpg_bytes)
-            self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
-
+                    event_data['has_snapshot'] = True
+            self.event_queue.put(('end', camera, event_data))
+        
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config = self.config.cameras[camera].mqtt
             if mqtt_config.enabled:
