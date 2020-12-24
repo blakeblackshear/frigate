@@ -17,10 +17,40 @@ def create_mqtt_client(config: FrigateConfig):
         camera_name = message.topic.split('/')[-3]
         command = message.topic.split('/')[-1]
 
+        clips_settings = config.cameras[camera_name].clips
+
         if payload == 'ON':
-            config.cameras[camera_name].clips._enabled = True
+            if not clips_settings.enabled:
+                logger.info(f"Turning on clips for {camera_name} via mqtt")
+                clips_settings._enabled = True
         elif payload == 'OFF':
-            config.cameras[camera_name].clips._enabled = False
+            if clips_settings.enabled:
+                logger.info(f"Turning off clips for {camera_name} via mqtt")
+                clips_settings._enabled = False
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+        if command == "set":
+            state_topic = f"{message.topic[:-4]}/state"
+            client.publish(state_topic, payload, retain=True)
+
+    def on_snapshots_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_snapshots_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split('/')[-3]
+        command = message.topic.split('/')[-1]
+
+        snapshots_settings = config.cameras[camera_name].snapshots
+
+        if payload == 'ON':
+            if not snapshots_settings.enabled:
+                logger.info(f"Turning on snapshots for {camera_name} via mqtt")
+                snapshots_settings._enabled = True
+        elif payload == 'OFF':
+            if snapshots_settings.enabled:
+                logger.info(f"Turning off snapshots for {camera_name} via mqtt")
+                snapshots_settings._enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
@@ -49,8 +79,8 @@ def create_mqtt_client(config: FrigateConfig):
     
     # register callbacks
     for name in config.cameras.keys():
-        clips_topic = f"{mqtt_config.topic_prefix}/{name}/clips/#"
-        client.message_callback_add(clips_topic, on_clips_command)
+        client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/clips/#", on_clips_command)
+        client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/snapshots/#", on_snapshots_command)
 
     if not mqtt_config.user is None:
         client.username_pw_set(mqtt_config.user, password=mqtt_config.password)
@@ -61,8 +91,7 @@ def create_mqtt_client(config: FrigateConfig):
         raise
 
     client.loop_start()
-
-    clips_topic = f"{mqtt_config.topic_prefix}/+/clips/#"
-    client.subscribe(clips_topic)
+    client.subscribe(f"{mqtt_config.topic_prefix}/+/clips/#")
+    client.subscribe(f"{mqtt_config.topic_prefix}/+/snapshots/#")
 
     return client
