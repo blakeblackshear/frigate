@@ -8,6 +8,7 @@ import sys
 import signal
 
 import yaml
+from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import FrigateConfig
@@ -112,9 +113,13 @@ class FrigateApp():
 
     def init_database(self):
         self.db = SqliteExtDatabase(self.config.database.path)
+
+        # Run migrations
+        router = Router(self.db)
+        router.run()
+
         models = [Event]
         self.db.bind(models)
-        self.db.create_tables(models, safe=True)
 
     def init_stats(self):
         self.stats_tracking = stats_init(self.camera_metrics, self.detectors)
