@@ -12,3 +12,5 @@ class Event(Model):
     false_positive = BooleanField()
     zones = JSONField()
     thumbnail = TextField()
+    has_clip = BooleanField(default=True)
+    has_snapshot = BooleanField(default=True)
