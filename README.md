@@ -101,7 +101,7 @@ services:
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
         tmpfs:
-          size: 100000000
+          size: 1000000000
     ports:
       - "5000:5000"
       - "1935:1935" # RTMP feeds
@@ -114,7 +114,7 @@ If you can't use docker compose, you can run the container with something simila
 docker run --rm \
 --name frigate \
 --privileged \
---mount type=tmpfs,target=/tmp/cache,tmpfs-size=100000000 \
+--mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
 -v /dev/bus/usb:/dev/bus/usb \
 -v <path_to_directory_for_clips>:/media/frigate/clips \
 -v <path_to_directory_for_recordings>:/media/frigate/recordings \
