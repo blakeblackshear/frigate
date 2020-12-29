@@ -246,7 +246,7 @@ cameras:
     ffmpeg:
       # Required: Source passed to ffmpeg after the -i parameter.
       # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
-      input: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+      inputs: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
       # Optional: camera specific global args (default: inherit)
       global_args:
       # Optional: camera specific hwaccel args (default: inherit)
