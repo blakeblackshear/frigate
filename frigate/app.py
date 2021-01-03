@@ -20,6 +20,7 @@ from frigate.models import Event
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.record import RecordingMaintainer
+from frigate.stats import StatsEmitter, stats_init
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
 from frigate.zeroconf import broadcast_zeroconf
@@ -115,8 +116,11 @@ class FrigateApp():
         self.db.bind(models)
         self.db.create_tables(models, safe=True)
 
+    def init_stats(self):
+        self.stats_tracking = stats_init(self.camera_metrics, self.detectors)
+
     def init_web_server(self):
-        self.flask_app = create_app(self.config, self.db, self.camera_metrics, self.detectors, self.detected_frames_processor)
+        self.flask_app = create_app(self.config, self.db, self.stats_tracking, self.detected_frames_processor)
 
     def init_mqtt(self):
         self.mqtt_client = create_mqtt_client(self.config)
@@ -173,6 +177,10 @@ class FrigateApp():
         self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
         self.recording_maintainer.start()
 
+    def start_stats_emitter(self):
+        self.stats_emitter = StatsEmitter(self.config, self.stats_tracking, self.mqtt_client, self.config.mqtt.topic_prefix, self.stop_event)
+        self.stats_emitter.start()
+
     def start_watchdog(self):
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
@@ -200,10 +208,12 @@ class FrigateApp():
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.init_stats()
         self.init_web_server()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
+        self.start_stats_emitter()
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
@@ -224,6 +234,7 @@ class FrigateApp():
         self.event_processor.join()
         self.event_cleanup.join()
         self.recording_maintainer.join()
+        self.stats_emitter.join()
         self.frigate_watchdog.join()
 
         for detector in self.detectors.values():
