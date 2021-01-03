@@ -13,6 +13,7 @@ from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
+from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
 from frigate.version import VERSION
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('frigate', __name__)
 
-def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detectors, detected_frames_processor):
+def create_app(frigate_config, database: SqliteDatabase, stats_tracking, detected_frames_processor):
     app = Flask(__name__)
 
     @app.before_request
@@ -33,8 +34,7 @@ def create_app(frigate_config, database: SqliteDatabase, camera_metrics, detecto
             database.close()
 
     app.frigate_config = frigate_config
-    app.camera_metrics = camera_metrics
-    app.detectors = detectors
+    app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
     
     app.register_blueprint(bp)
@@ -152,31 +152,7 @@ def version():
 
 @bp.route('/stats')
 def stats():
-    camera_metrics = current_app.camera_metrics
-    stats = {}
-
-    total_detection_fps = 0
-
-    for name, camera_stats in camera_metrics.items():
-        total_detection_fps += camera_stats['detection_fps'].value
-        stats[name] = {
-            'camera_fps': round(camera_stats['camera_fps'].value, 2),
-            'process_fps': round(camera_stats['process_fps'].value, 2),
-            'skipped_fps': round(camera_stats['skipped_fps'].value, 2),
-            'detection_fps': round(camera_stats['detection_fps'].value, 2),
-            'pid': camera_stats['process'].pid,
-            'capture_pid': camera_stats['capture_process'].pid
-        }
-    
-    stats['detectors'] = {}
-    for name, detector in current_app.detectors.items():
-        stats['detectors'][name] = {
-            'inference_speed': round(detector.avg_inference_speed.value*1000, 2),
-            'detection_start': detector.detection_start.value,
-            'pid': detector.detect_process.pid
-        }
-    stats['detection_fps'] = round(total_detection_fps, 2)
-
+    stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
 
 @bp.route('/<camera_name>/<label>/best.jpg')
