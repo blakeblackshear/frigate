@@ -13,6 +13,7 @@ import signal
 import threading
 import time
 from collections import defaultdict
+from setproctitle import setproctitle
 from typing import Dict, List
 
 import cv2
@@ -249,6 +250,7 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     signal.signal(signal.SIGINT, receiveSignal)
 
     threading.current_thread().name = f"process:{name}"
+    setproctitle(f"frigate.process:{name}")
     listen()
 
     frame_queue = process_info['frame_queue']
