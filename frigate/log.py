@@ -6,6 +6,7 @@ import signal
 import queue
 import multiprocessing as mp
 from logging import handlers
+from setproctitle import setproctitle
 
 
 def listener_configurer():
@@ -31,6 +32,7 @@ def log_process(log_queue):
     signal.signal(signal.SIGINT, receiveSignal)
 
     threading.current_thread().name = f"logger"
+    setproctitle("frigate.logger")
     listener_configurer()
     while True:
         if stop_event.is_set() and log_queue.empty():

@@ -8,6 +8,7 @@ import threading
 import signal
 from abc import ABC, abstractmethod
 from multiprocessing.connection import Connection
+from setproctitle import setproctitle
 from typing import Dict
 
 import numpy as np
@@ -110,6 +111,7 @@ def run_detector(name: str, detection_queue: mp.Queue, out_events: Dict[str, mp.
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
     logger.info(f"Starting detection process: {os.getpid()}")
+    setproctitle(f"frigate.detector.{name}")
     listen()
 
     stop_event = mp.Event()
