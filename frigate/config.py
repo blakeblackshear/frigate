@@ -37,6 +37,7 @@ MQTT_SCHEMA = vol.Schema(
         vol.Optional('port', default=1883): int,
         vol.Optional('topic_prefix', default='frigate'): str,
         vol.Optional('client_id', default='frigate'): str,
+        vol.Optional('stats_interval', default=60): int,
         'user': str,
         'password': str
     }
@@ -324,6 +325,7 @@ class MqttConfig():
         self._client_id = config['client_id']
         self._user = config.get('user')
         self._password = config.get('password')
+        self._stats_interval = config.get('stats_interval')
     
     @property
     def host(self):
@@ -349,13 +351,18 @@ class MqttConfig():
     def password(self):
         return self._password
 
+    @property
+    def stats_interval(self):
+        return self._stats_interval
+
     def to_dict(self):
         return {
             'host': self.host,
             'port': self.port,
             'topic_prefix': self.topic_prefix,
             'client_id': self.client_id,
-            'user': self.user
+            'user': self.user,
+            'stats_interval': self.stats_interval
         }
 
 class CameraInput():
