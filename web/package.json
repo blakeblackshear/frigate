@@ -1,0 +1,19 @@
+{
+  "name": "frigate",
+  "private": true,
+  "scripts": {
+    "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://localhost:5000 snowpack dev",
+    "build": "snowpack build"
+  },
+  "dependencies": {
+    "@prefresh/snowpack": "^3.0.1",
+    "@snowpack/plugin-optimize": "^0.2.10",
+    "@snowpack/plugin-postcss": "^1.0.11",
+    "autoprefixer": "^10.2.1",
+    "cross-env": "^7.0.3",
+    "preact": "^10.5.9",
+    "preact-router": "^3.2.1",
+    "snowpack": "^2.18.5",
+    "tailwindcss": "^2.0.2"
+  }
+}
