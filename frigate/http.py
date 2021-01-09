@@ -36,7 +36,7 @@ def create_app(frigate_config, database: SqliteDatabase, stats_tracking, detecte
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
-    
+
     app.register_blueprint(bp)
 
     return app
@@ -50,15 +50,15 @@ def events_summary():
     groups = (
         Event
             .select(
-                Event.camera, 
-                Event.label, 
-                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')).alias('day'), 
+                Event.camera,
+                Event.label,
+                fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')).alias('day'),
                 Event.zones,
                 fn.COUNT(Event.id).alias('count')
             )
             .group_by(
-                Event.camera, 
-                Event.label, 
+                Event.camera,
+                Event.label,
                 fn.strftime('%Y-%m-%d', fn.datetime(Event.start_time, 'unixepoch', 'localtime')),
                 Event.zones
             )
@@ -90,18 +90,18 @@ def event_snapshot(id):
                         thumbnail_bytes = tracked_obj.get_jpg_bytes()
         except:
             return "Event not found", 404
-    
+
     if thumbnail_bytes is None:
         return "Event not found", 404
-    
+
     # android notifications prefer a 2:1 ratio
     if format == 'android':
         jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
         img = cv2.imdecode(jpg_as_np, flags=1)
         thumbnail = cv2.copyMakeBorder(img, 0, 0, int(img.shape[1]*0.5), int(img.shape[1]*0.5), cv2.BORDER_CONSTANT, (0,0,0))
-        ret, jpg = cv2.imencode('.jpg', thumbnail)    
+        ret, jpg = cv2.imencode('.jpg', thumbnail)
         thumbnail_bytes = jpg.tobytes()
-    
+
     response = make_response(thumbnail_bytes)
     response.headers['Content-Type'] = 'image/jpg'
     return response
@@ -118,19 +118,19 @@ def events():
     has_snapshot = request.args.get('has_snapshot', type=int)
 
     clauses = []
-    
+
     if camera:
         clauses.append((Event.camera == camera))
-    
+
     if label:
         clauses.append((Event.label == label))
-    
+
     if zone:
         clauses.append((Event.zones.cast('text') % f"*\"{zone}\"*"))
-    
+
     if after:
         clauses.append((Event.start_time >= after))
-    
+
     if before:
         clauses.append((Event.start_time <= before))
 
@@ -172,13 +172,13 @@ def best(camera_name, label):
             best_frame = np.zeros((720,1280,3), np.uint8)
         else:
             best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
-        
+
         crop = bool(request.args.get('crop', 0, type=int))
         if crop:
             box = best_object.get('box', (0,0,300,300))
             region = calculate_region(best_frame.shape, box[0], box[1], box[2], box[3], 1.1)
             best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
-        
+
         height = int(request.args.get('h', str(best_frame.shape[0])))
         width = int(height*best_frame.shape[1]/best_frame.shape[0])
 
@@ -236,7 +236,7 @@ def latest_frame(camera_name):
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
-        
+
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
     while True:
         # max out at specified FPS
