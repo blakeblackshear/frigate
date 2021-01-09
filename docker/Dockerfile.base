@@ -44,6 +44,7 @@ RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiled
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
+ADD web/build web/
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh

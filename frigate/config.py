@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 DETECTORS_SCHEMA = vol.Schema(
     {
         vol.Required(str): {
-            vol.Required('type', default='edgetpu'): vol.In(['cpu', 'edgetpu']), 
+            vol.Required('type', default='edgetpu'): vol.In(['cpu', 'edgetpu']),
             vol.Optional('device', default='usb'): str,
             vol.Optional('num_threads', default=3): int
         }
@@ -77,7 +77,7 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "segment", "-segment_time",
     "1", "-c", "copy", "-an"]
 
 GLOBAL_FFMPEG_SCHEMA = vol.Schema(
-    { 
+    {
         vol.Optional('global_args', default=FFMPEG_GLOBAL_ARGS_DEFAULT):  vol.Any(str, [str]),
         vol.Optional('hwaccel_args', default=[]): vol.Any(str, [str]),
         vol.Optional('input_args', default=FFMPEG_INPUT_ARGS_DEFAULT): vol.Any(str, [str]),
@@ -107,7 +107,7 @@ DETECT_SCHEMA = vol.Schema(
 )
 
 FILTER_SCHEMA = vol.Schema(
-    { 
+    {
         str: {
                 vol.Optional('min_area', default=0): int,
                 vol.Optional('max_area', default=24000000): int,
@@ -139,14 +139,14 @@ def each_role_used_once(inputs):
     return inputs
 
 CAMERA_FFMPEG_SCHEMA = vol.Schema(
-    { 
+    {
         vol.Required('inputs'): vol.All([{
             vol.Required('path'): str,
             vol.Required('roles'): ['detect', 'clips', 'record', 'rtmp'],
             'global_args':  vol.Any(str, [str]),
             'hwaccel_args': vol.Any(str, [str]),
             'input_args': vol.Any(str, [str]),
-        }], vol.Msg(each_role_used_once, msg="Each input role may only be used once")), 
+        }], vol.Msg(each_role_used_once, msg="Each input role may only be used once")),
         'output_args': {
             vol.Optional('detect', default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
             vol.Optional('record', default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
@@ -252,7 +252,7 @@ class DatabaseConfig():
     @property
     def path(self):
         return self._path
-    
+
     def to_dict(self):
         return {
             'path': self.path
@@ -262,15 +262,15 @@ class ModelConfig():
     def __init__(self, config):
         self._width = config['width']
         self._height = config['height']
-    
+
     @property
     def width(self):
         return self._width
-    
+
     @property
     def height(self):
         return self._height
-    
+
     def to_dict(self):
         return {
             'width': self.width,
@@ -282,19 +282,19 @@ class DetectorConfig():
         self._type = config['type']
         self._device = config['device']
         self._num_threads = config['num_threads']
-    
+
     @property
     def type(self):
         return self._type
-    
+
     @property
     def device(self):
         return self._device
-    
+
     @property
     def num_threads(self):
         return self._num_threads
-    
+
     def to_dict(self):
         return {
             'type': self.type,
@@ -306,15 +306,15 @@ class LoggerConfig():
     def __init__(self, config):
         self._default = config['default'].upper()
         self._logs = {k: v.upper() for k, v in config['logs'].items()}
-    
+
     @property
     def default(self):
         return self._default
-    
+
     @property
     def logs(self):
         return self._logs
-    
+
     def to_dict(self):
         return {
             'default': self.default,
@@ -334,23 +334,23 @@ class MqttConfig():
     @property
     def host(self):
         return self._host
-    
+
     @property
     def port(self):
         return self._port
-    
+
     @property
     def topic_prefix(self):
         return self._topic_prefix
-    
+
     @property
     def client_id(self):
         return self._client_id
-    
+
     @property
     def user(self):
         return self._user
-    
+
     @property
     def password(self):
         return self._password
@@ -376,19 +376,19 @@ class CameraInput():
         self._global_args = ffmpeg_input.get('global_args', global_config['global_args'])
         self._hwaccel_args = ffmpeg_input.get('hwaccel_args', global_config['hwaccel_args'])
         self._input_args = ffmpeg_input.get('input_args', global_config['input_args'])
-    
+
     @property
     def path(self):
         return self._path
-    
+
     @property
     def roles(self):
         return self._roles
-    
+
     @property
     def global_args(self):
         return self._global_args if isinstance(self._global_args, list) else self._global_args.split(' ')
-    
+
     @property
     def hwaccel_args(self):
         return self._hwaccel_args if isinstance(self._hwaccel_args, list) else self._hwaccel_args.split(' ')
@@ -401,11 +401,11 @@ class CameraFfmpegConfig():
     def __init__(self, global_config, config):
         self._inputs = [CameraInput(global_config, i) for i in config['inputs']]
         self._output_args = config.get('output_args', global_config['output_args'])
-    
+
     @property
     def inputs(self):
         return self._inputs
-    
+
     @property
     def output_args(self):
         return {k: v if isinstance(v, list) else v.split(' ') for k, v in self._output_args.items()}
@@ -414,15 +414,15 @@ class RetainConfig():
     def __init__(self, global_config, config):
         self._default = config.get('default', global_config.get('default'))
         self._objects = config.get('objects', global_config.get('objects', {}))
-    
+
     @property
     def default(self):
         return self._default
-    
+
     @property
     def objects(self):
         return self._objects
-    
+
     def to_dict(self):
         return {
             'default': self.default,
@@ -438,7 +438,7 @@ class ClipsConfig():
     @property
     def max_seconds(self):
         return self._max_seconds
-    
+
     @property
     def tmpfs_cache_size(self):
         return self._tmpfs_cache_size
@@ -446,7 +446,7 @@ class ClipsConfig():
     @property
     def retain(self):
         return self._retain
-    
+
     def to_dict(self):
         return {
             'max_seconds': self.max_seconds,
@@ -462,11 +462,11 @@ class RecordConfig():
     @property
     def enabled(self):
         return self._enabled
-    
+
     @property
     def retain_days(self):
         return self._retain_days
-    
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
@@ -479,7 +479,7 @@ class FilterConfig():
         self._max_area = config['max_area']
         self._threshold = config['threshold']
         self._min_score = config.get('min_score')
-    
+
     @property
     def min_area(self):
         return self._min_area
@@ -491,11 +491,11 @@ class FilterConfig():
     @property
     def threshold(self):
         return self._threshold
-    
+
     @property
     def min_score(self):
         return self._min_score
-    
+
     def to_dict(self):
         return {
             'min_area': self.min_area,
@@ -511,11 +511,11 @@ class ObjectConfig():
             self._filters = { name: FilterConfig(c) for name, c in config['filters'].items() }
         else:
             self._filters = { name: FilterConfig(c) for name, c in global_config['filters'].items() }
-    
+
     @property
     def track(self):
         return self._track
-    
+
     @property
     def filters(self) -> Dict[str, FilterConfig]:
         return self._filters
@@ -538,7 +538,7 @@ class CameraSnapshotsConfig():
     @property
     def enabled(self):
         return self._enabled
-    
+
     @property
     def timestamp(self):
         return self._timestamp
@@ -576,11 +576,11 @@ class CameraMqttConfig():
         self._bounding_box = config['bounding_box']
         self._crop = config['crop']
         self._height = config.get('height')
-    
+
     @property
     def enabled(self):
         return self._enabled
-    
+
     @property
     def timestamp(self):
         return self._timestamp
@@ -596,7 +596,7 @@ class CameraMqttConfig():
     @property
     def height(self):
         return self._height
-    
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
@@ -617,11 +617,11 @@ class CameraClipsConfig():
     @property
     def enabled(self):
         return self._enabled
-    
+
     @property
     def pre_capture(self):
         return self._pre_capture
-    
+
     @property
     def post_capture(self):
         return self._post_capture
@@ -629,11 +629,11 @@ class CameraClipsConfig():
     @property
     def objects(self):
         return self._objects
-    
+
     @property
     def retain(self):
         return self._retain
-    
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
@@ -646,11 +646,11 @@ class CameraClipsConfig():
 class CameraRtmpConfig():
     def __init__(self, global_config, config):
         self._enabled = config['enabled']
-    
+
     @property
     def enabled(self):
         return self._enabled
-    
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
@@ -663,7 +663,7 @@ class MotionConfig():
         self._delta_alpha = config.get('delta_alpha', global_config.get('delta_alpha', 0.2))
         self._frame_alpha = config.get('frame_alpha', global_config.get('frame_alpha', 0.2))
         self._frame_height = config.get('frame_height', global_config.get('frame_height', camera_height//6))
-    
+
     @property
     def threshold(self):
         return self._threshold
@@ -683,7 +683,7 @@ class MotionConfig():
     @property
     def frame_height(self):
         return self._frame_height
-    
+
     def to_dict(self):
         return {
             'threshold': self.threshold,
@@ -698,11 +698,11 @@ class MotionConfig():
 class DetectConfig():
     def __init__(self, global_config, config, camera_fps):
         self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*2))
-    
+
     @property
     def max_disappeared(self):
         return self._max_disappeared
-    
+
     def to_dict(self):
         return {
             'max_disappeared': self._max_disappeared,
@@ -721,36 +721,37 @@ class ZoneConfig():
         else:
             print(f"Unable to parse zone coordinates for {name}")
             self._contour = np.array([])
-        
+
         self._color = (0,0,0)
-    
+
     @property
     def coordinates(self):
         return self._coordinates
-    
+
     @property
     def contour(self):
         return self._contour
-    
+
     @contour.setter
     def contour(self, val):
         self._contour = val
-    
+
     @property
     def color(self):
         return self._color
-    
+
     @color.setter
     def color(self, val):
         self._color = val
-    
+
     @property
     def filters(self):
         return self._filters
-    
+
     def to_dict(self):
         return {
-            'filters': {k: f.to_dict() for k, f in self.filters.items()}
+            'filters': {k: f.to_dict() for k, f in self.filters.items()},
+            'coordinates': self._coordinates
         }
 
 class CameraConfig():
@@ -763,6 +764,7 @@ class CameraConfig():
         self._frame_shape_yuv = (self._frame_shape[0]*3//2, self._frame_shape[1])
         self._fps = config.get('fps')
         self._mask = self._create_mask(config.get('mask'))
+        self._raw_mask = config.get('mask')
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
         self._clips = CameraClipsConfig(global_config, config['clips'])
@@ -798,9 +800,9 @@ class CameraConfig():
 
         elif isinstance(mask, str):
             self._add_mask(mask, mask_img)
-        
+
         return mask_img
-    
+
     def _add_mask(self, mask, mask_img):
         if mask.startswith('poly,'):
             points = mask.split(',')[1:]
@@ -812,7 +814,7 @@ class CameraConfig():
                 logger.warning(f"Could not read mask file {mask}")
             else:
                 mask_img[np.where(mask_file==[0])] = [0]
-    
+
     def _get_ffmpeg_cmd(self, ffmpeg_input):
         ffmpeg_output_args = []
         if 'detect' in ffmpeg_input.roles:
@@ -831,7 +833,7 @@ class CameraConfig():
             ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
                 f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
             ] + ffmpeg_output_args
-        
+
         # if there arent any outputs enabled for this input
         if len(ffmpeg_output_args) == 0:
             return None
@@ -842,9 +844,9 @@ class CameraConfig():
                 ffmpeg_input.input_args +
                 ['-i', ffmpeg_input.path] +
                 ffmpeg_output_args)
-        
+
         return [part for part in cmd if part != '']
-    
+
     def _set_zone_colors(self, zones: Dict[str, ZoneConfig]):
         # set colors for zones
         all_zone_names = zones.keys()
@@ -852,10 +854,10 @@ class CameraConfig():
         colors = plt.cm.get_cmap('tab10', len(all_zone_names))
         for i, zone in enumerate(all_zone_names):
             zone_colors[zone] = tuple(int(round(255 * c)) for c in colors(i)[:3])
-        
+
         for name, zone in zones.items():
             zone.color = zone_colors[name]
-    
+
     @property
     def name(self):
         return self._name
@@ -863,59 +865,59 @@ class CameraConfig():
     @property
     def ffmpeg(self):
         return self._ffmpeg
-    
+
     @property
     def height(self):
         return self._height
-    
+
     @property
     def width(self):
         return self._width
-    
+
     @property
     def fps(self):
         return self._fps
-    
+
     @property
     def mask(self):
         return self._mask
-    
+
     @property
     def best_image_timeout(self):
         return self._best_image_timeout
-    
+
     @property
     def zones(self)-> Dict[str, ZoneConfig]:
         return self._zones
-    
+
     @property
     def clips(self):
         return self._clips
-    
+
     @property
     def record(self):
         return self._record
-    
+
     @property
     def rtmp(self):
         return self._rtmp
-    
+
     @property
     def snapshots(self):
         return self._snapshots
-    
+
     @property
     def mqtt(self):
         return self._mqtt
-    
+
     @property
     def objects(self):
         return self._objects
-    
+
     @property
     def motion(self):
         return self._motion
-    
+
     @property
     def detect(self):
         return self._detect
@@ -948,6 +950,7 @@ class CameraConfig():
             'objects': self.objects.to_dict(),
             'motion': self.motion.to_dict(),
             'detect': self.detect.to_dict(),
+            'mask': self._raw_mask,
             'frame_shape': self.frame_shape,
             'ffmpeg_cmds': [{'roles': c['roles'], 'cmd': ' '.join(c['cmd'])} for c in self.ffmpeg_cmds],
         }
@@ -959,7 +962,7 @@ class FrigateConfig():
             raise ValueError('config or config_file must be defined')
         elif not config_file is None:
             config = self._load_file(config_file)
-        
+
         config = FRIGATE_CONFIG_SCHEMA(config)
 
         config = self._sub_env_vars(config)
@@ -976,25 +979,25 @@ class FrigateConfig():
         frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
 
         if 'password' in config['mqtt']:
-            config['mqtt']['password'] = config['mqtt']['password'].format(**frigate_env_vars) 
-        
+            config['mqtt']['password'] = config['mqtt']['password'].format(**frigate_env_vars)
+
         for camera in config['cameras'].values():
             for i in camera['ffmpeg']['inputs']:
                 i['path'] = i['path'].format(**frigate_env_vars)
-        
+
         return config
 
     def _load_file(self, config_file):
         with open(config_file) as f:
             raw_config = f.read()
-        
-        if config_file.endswith(".yml"):    
+
+        if config_file.endswith(".yml"):
             config = yaml.safe_load(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
-        
+
         return config
-    
+
     def to_dict(self):
         return {
             'database': self.database.to_dict(),
@@ -1005,19 +1008,19 @@ class FrigateConfig():
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
             'logger': self.logger.to_dict()
         }
-    
+
     @property
     def database(self):
         return self._database
-    
+
     @property
     def model(self):
         return self._model
-    
+
     @property
     def detectors(self) -> Dict[str, DetectorConfig]:
         return self._detectors
-    
+
     @property
     def logger(self):
         return self._logger
@@ -1025,7 +1028,7 @@ class FrigateConfig():
     @property
     def mqtt(self):
         return self._mqtt
-    
+
     @property
     def clips(self):
         return self._clips
