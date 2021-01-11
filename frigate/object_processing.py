@@ -54,11 +54,11 @@ def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
     # if the score is better by more than 5%
     if new_obj['score'] > current_thumb['score']+.05:
         return True
-    
+
     # if the area is 10% larger
     if new_obj['area'] > current_thumb['area']*1.1:
         return True
-    
+
     return False
 
 class TrackedObject():
@@ -97,7 +97,7 @@ class TrackedObject():
         if len(scores) < 3:
             scores += [0.0]*(3 - len(scores))
         return median(scores)
-    
+
     def update(self, current_frame_time, obj_data):
         significant_update = False
         self.obj_data.update(obj_data)
@@ -119,7 +119,7 @@ class TrackedObject():
         if not self.false_positive:
             # determine if this frame is a better thumbnail
             if (
-                self.thumbnail_data is None 
+                self.thumbnail_data is None
                 or is_better_thumbnail(self.thumbnail_data, self.obj_data, self.camera_config.frame_shape)
             ):
                 self.thumbnail_data = {
@@ -130,7 +130,7 @@ class TrackedObject():
                     'score': self.obj_data['score']
                 }
                 significant_update = True
-        
+
         # check zones
         current_zones = []
         bottom_center = (self.obj_data['centroid'][0], self.obj_data['box'][3])
@@ -143,14 +143,14 @@ class TrackedObject():
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
                     current_zones.append(name)
                     self.entered_zones.add(name)
-        
+
         # if the zones changed, signal an update
         if not self.false_positive and set(self.current_zones) != set(current_zones):
             significant_update = True
 
         self.current_zones = current_zones
         return significant_update
-    
+
     def to_dict(self, include_thumbnail: bool = False):
         return {
             'id': self.obj_data['id'],
@@ -169,11 +169,11 @@ class TrackedObject():
             'entered_zones': list(self.entered_zones).copy(),
             'thumbnail': base64.b64encode(self.get_jpg_bytes()).decode('utf-8') if include_thumbnail else None
         }
-    
+
     def get_jpg_bytes(self):
         if self.thumbnail_data is None or self._snapshot_jpg_time == self.thumbnail_data['frame_time']:
             return self._snapshot_jpg
-        
+
         if not self.thumbnail_data['frame_time'] in self.frame_cache:
             logger.error(f"Unable to create thumbnail for {self.obj_data['id']}")
             logger.error(f"Looking for frame_time of {self.thumbnail_data['frame_time']}")
@@ -188,32 +188,32 @@ class TrackedObject():
             thickness = 2
             color = COLOR_MAP[self.obj_data['label']]
             box = self.thumbnail_data['box']
-            draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], self.obj_data['label'], 
+            draw_box_with_label(best_frame, box[0], box[1], box[2], box[3], self.obj_data['label'],
                 f"{int(self.thumbnail_data['score']*100)}% {int(self.thumbnail_data['area'])}", thickness=thickness, color=color)
-            
+
         if snapshot_config.crop_to_region:
             box = self.thumbnail_data['box']
             region = calculate_region(best_frame.shape, box[0], box[1], box[2], box[3], 1.1)
             best_frame = best_frame[region[1]:region[3], region[0]:region[2]]
 
-        if snapshot_config.height: 
+        if snapshot_config.height:
             height = snapshot_config.height
             width = int(height*best_frame.shape[1]/best_frame.shape[0])
             best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
-        
+
         if snapshot_config.show_timestamp:
             time_to_show = datetime.datetime.fromtimestamp(self.thumbnail_data['frame_time']).strftime("%m/%d/%Y %H:%M:%S")
             size = cv2.getTextSize(time_to_show, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2)
             text_width = size[0][0]
             desired_size = max(150, 0.33*best_frame.shape[1])
             font_scale = desired_size/text_width
-            cv2.putText(best_frame, time_to_show, (5, best_frame.shape[0]-7), cv2.FONT_HERSHEY_SIMPLEX, 
+            cv2.putText(best_frame, time_to_show, (5, best_frame.shape[0]-7), cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=font_scale, color=(255, 255, 255), thickness=2)
 
         ret, jpg = cv2.imencode('.jpg', best_frame)
         if ret:
             self._snapshot_jpg = jpg.tobytes()
-        
+
         return self._snapshot_jpg
 
 def zone_filtered(obj: TrackedObject, object_config):
@@ -226,7 +226,7 @@ def zone_filtered(obj: TrackedObject, object_config):
         # detected object, don't add it to detected objects
         if obj_settings.min_area > obj.obj_data['area']:
             return True
-        
+
         # if the detected object is larger than the
         # max area, don't add it to detected objects
         if obj_settings.max_area < obj.obj_data['area']:
@@ -235,7 +235,7 @@ def zone_filtered(obj: TrackedObject, object_config):
         # if the score is lower than the threshold, skip
         if obj_settings.threshold > obj.computed_score:
             return True
-        
+
     return False
 
 # Maintains the state of a camera
@@ -263,7 +263,7 @@ class CameraState():
             tracked_objects = {k: v.to_dict() for k,v in self.tracked_objects.items()}
             motion_boxes = self.motion_boxes.copy()
             regions = self.regions.copy()
-        
+
         frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
         # draw on the frame
         if draw_options.get('bounding_boxes'):
@@ -271,7 +271,7 @@ class CameraState():
             for obj in tracked_objects.values():
                 thickness = 2
                 color = COLOR_MAP[obj['label']]
-                
+
                 if obj['frame_time'] != frame_time:
                     thickness = 1
                     color = (255,0,0)
@@ -279,27 +279,27 @@ class CameraState():
                 # draw the bounding boxes on the frame
                 box = obj['box']
                 draw_box_with_label(frame_copy, box[0], box[1], box[2], box[3], obj['label'], f"{int(obj['score']*100)}% {int(obj['area'])}", thickness=thickness, color=color)
-        
+
         if draw_options.get('regions'):
             for region in regions:
                 cv2.rectangle(frame_copy, (region[0], region[1]), (region[2], region[3]), (0,255,0), 2)
-        
-        if draw_options.get('timestamp'):
-            time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
-            cv2.putText(frame_copy, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
 
         if draw_options.get('zones'):
             for name, zone in self.camera_config.zones.items():
                 thickness = 8 if any([name in obj['current_zones'] for obj in tracked_objects.values()]) else 2
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
-        
+
         if draw_options.get('mask'):
             mask_overlay = np.where(self.camera_config.mask==[0])
             frame_copy[mask_overlay] = [0,0,0]
-        
+
         if draw_options.get('motion_boxes'):
             for m_box in motion_boxes:
                 cv2.rectangle(frame_copy, (m_box[0], m_box[1]), (m_box[2], m_box[3]), (0,0,255), 2)
+
+        if draw_options.get('timestamp'):
+            time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime("%m/%d/%Y %H:%M:%S")
+            cv2.putText(frame_copy, time_to_show, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, fontScale=.8, color=(255, 255, 255), thickness=2)
 
         return frame_copy
 
@@ -329,7 +329,7 @@ class CameraState():
             # call event handlers
             for c in self.callbacks['start']:
                 c(self.name, new_obj, frame_time)
-        
+
         for id in updated_ids:
             updated_obj = self.tracked_objects[id]
             significant_update = updated_obj.update(frame_time, current_detections[id])
@@ -342,7 +342,7 @@ class CameraState():
                 # call event handlers
                 for c in self.callbacks['update']:
                     c(self.name, updated_obj, frame_time)
-        
+
         for id in removed_ids:
             # publish events to mqtt
             removed_obj = self.tracked_objects[id]
@@ -361,9 +361,9 @@ class CameraState():
             if object_type in self.best_objects:
                 current_best = self.best_objects[object_type]
                 now = datetime.datetime.now().timestamp()
-                # if the object is a higher score than the current best score 
+                # if the object is a higher score than the current best score
                 # or the current object is older than desired, use the new object
-                if (is_better_thumbnail(current_best.thumbnail_data, obj.thumbnail_data, self.camera_config.frame_shape) 
+                if (is_better_thumbnail(current_best.thumbnail_data, obj.thumbnail_data, self.camera_config.frame_shape)
                     or (now - current_best.thumbnail_data['frame_time']) > self.camera_config.best_image_timeout):
                     self.best_objects[object_type] = obj
                     for c in self.callbacks['snapshot']:
@@ -372,13 +372,13 @@ class CameraState():
                 self.best_objects[object_type] = obj
                 for c in self.callbacks['snapshot']:
                     c(self.name, self.best_objects[object_type], frame_time)
-        
+
         # update overall camera state for each object type
         obj_counter = Counter()
         for obj in self.tracked_objects.values():
             if not obj.false_positive:
                 obj_counter[obj.obj_data['label']] += 1
-                
+
         # report on detected objects
         for obj_name, count in obj_counter.items():
             if count != self.object_counts[obj_name]:
@@ -394,14 +394,14 @@ class CameraState():
                 c(self.name, obj_name, 0)
             for c in self.callbacks['snapshot']:
                 c(self.name, self.best_objects[obj_name], frame_time)
-        
+
         # cleanup thumbnail frame cache
         current_thumb_frames = set([obj.thumbnail_data['frame_time'] for obj in self.tracked_objects.values() if not obj.false_positive])
         current_best_frames = set([obj.thumbnail_data['frame_time'] for obj in self.best_objects.values()])
         thumb_frames_to_delete = [t for t in self.frame_cache.keys() if not t in current_thumb_frames and not t in current_best_frames]
         for t in thumb_frames_to_delete:
             del self.frame_cache[t]
-        
+
         with self.current_frame_lock:
             self._current_frame = current_frame
             if not self.previous_frame_id is None:
@@ -436,10 +436,10 @@ class TrackedObjectProcessor(threading.Thread):
                 message = { 'before': obj.previous, 'after': obj.to_dict() }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
             self.event_queue.put(('end', camera, obj.to_dict(include_thumbnail=True)))
-        
+
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", obj.get_jpg_bytes(), retain=True)
-        
+
         def object_status(camera, object_name, status):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
 
@@ -461,7 +461,7 @@ class TrackedObjectProcessor(threading.Thread):
         #   }
         # }
         self.zone_data = defaultdict(lambda: defaultdict(lambda: {}))
-        
+
     def get_best(self, camera, label):
         # TODO: need a lock here
         camera_state = self.camera_states[camera]
@@ -472,7 +472,7 @@ class TrackedObjectProcessor(threading.Thread):
             return best
         else:
             return {}
-    
+
     def get_current_frame(self, camera, draw_options={}):
         return self.camera_states[camera].get_current_frame(draw_options)
 
@@ -499,7 +499,7 @@ class TrackedObjectProcessor(threading.Thread):
                 for obj in camera_state.tracked_objects.values():
                     if zone in obj.current_zones and not obj.false_positive:
                         obj_counter[obj.obj_data['label']] += 1
-                
+
                 # update counts and publish status
                 for label in set(list(self.zone_data[zone].keys()) + list(obj_counter.keys())):
                     # if we have previously published a count for this zone/label
