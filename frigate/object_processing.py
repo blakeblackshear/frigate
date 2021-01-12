@@ -252,6 +252,8 @@ class CameraState():
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
+        self.motion_boxes = []
+        self.regions = []
         self.previous_frame_id = None
         self.callbacks = defaultdict(lambda: [])
 
