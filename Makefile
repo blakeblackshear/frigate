@@ -1,6 +1,6 @@
 default_target: amd64_frigate
 
-COMMIT_HASH := $(shell git log -1 --pretty=format:"%h")
+COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 
 version:
 	echo "VERSION='0.8.0-$(COMMIT_HASH)'" > frigate/version.py
