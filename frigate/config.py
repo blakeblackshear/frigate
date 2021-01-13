@@ -43,7 +43,7 @@ MQTT_SCHEMA = vol.Schema(
     }
 )
 
-CLIPS_RETAIN_SCHEMA = vol.Schema(
+RETAIN_SCHEMA = vol.Schema(
     {
         vol.Required('default',default=10): int,
         'objects': {
@@ -56,7 +56,7 @@ CLIPS_SCHEMA = vol.Schema(
     {
         vol.Optional('max_seconds', default=300): int,
         'tmpfs_cache_size': str,
-        vol.Optional('retain', default={}): CLIPS_RETAIN_SCHEMA
+        vol.Optional('retain', default={}): RETAIN_SCHEMA
     }
 )
 
@@ -183,7 +183,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('pre_capture', default=5): int,
                 vol.Optional('post_capture', default=5): int,
                 'objects': [str],
-                vol.Optional('retain', default={}): CLIPS_RETAIN_SCHEMA,
+                vol.Optional('retain', default={}): RETAIN_SCHEMA,
             },
             vol.Optional('record', default={}): {
                 'enabled': bool,
@@ -197,7 +197,8 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('timestamp', default=False): bool,
                 vol.Optional('bounding_box', default=False): bool,
                 vol.Optional('crop', default=False): bool,
-                'height': int
+                'height': int,
+                vol.Optional('retain', default={}): RETAIN_SCHEMA,
             },
             vol.Optional('mqtt', default={}): {
                 vol.Optional('enabled', default=True): bool,
@@ -227,6 +228,9 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional('logger', default={'default': 'info', 'logs': {}}): {
             vol.Optional('default', default='info'): vol.In(['info', 'debug', 'warning', 'error', 'critical']),
             vol.Optional('logs', default={}): {str: vol.In(['info', 'debug', 'warning', 'error', 'critical']) }
+        },
+        vol.Optional('snapshots', default={}): {
+            vol.Optional('retain', default={}): RETAIN_SCHEMA
         },
         vol.Optional('clips', default={}): CLIPS_SCHEMA,
         vol.Optional('record', default={}): {
@@ -406,7 +410,7 @@ class CameraFfmpegConfig():
     def output_args(self):
         return {k: v if isinstance(v, list) else v.split(' ') for k, v in self._output_args.items()}
 
-class ClipsRetainConfig():
+class RetainConfig():
     def __init__(self, global_config, config):
         self._default = config.get('default', global_config.get('default'))
         self._objects = config.get('objects', global_config.get('objects', {}))
@@ -429,7 +433,7 @@ class ClipsConfig():
     def __init__(self, config):
         self._max_seconds = config['max_seconds']
         self._tmpfs_cache_size = config.get('tmpfs_cache_size', '').strip()
-        self._retain = ClipsRetainConfig(config['retain'], config['retain'])
+        self._retain = RetainConfig(config['retain'], config['retain'])
     
     @property
     def max_seconds(self):
@@ -523,12 +527,13 @@ class ObjectConfig():
         }
 
 class CameraSnapshotsConfig():
-    def __init__(self, config):
+    def __init__(self, global_config, config):
         self._enabled = config['enabled']
         self._timestamp = config['timestamp']
         self._bounding_box = config['bounding_box']
         self._crop = config['crop']
         self._height = config.get('height')
+        self._retain = RetainConfig(global_config['snapshots']['retain'], config['retain'])
     
     @property
     def enabled(self):
@@ -550,13 +555,18 @@ class CameraSnapshotsConfig():
     def height(self):
         return self._height
     
+    @property
+    def retain(self):
+        return self._retain
+    
     def to_dict(self):
         return {
             'enabled': self.enabled,
             'timestamp': self.timestamp,
             'bounding_box': self.bounding_box,
             'crop': self.crop,
-            'height': self.height
+            'height': self.height,
+            'retain': self.retain.to_dict()
         }
 
 class CameraMqttConfig():
@@ -602,7 +612,7 @@ class CameraClipsConfig():
         self._pre_capture = config['pre_capture']
         self._post_capture = config['post_capture']
         self._objects = config.get('objects', global_config['objects']['track'])
-        self._retain = ClipsRetainConfig(global_config['clips']['retain'], config['retain'])
+        self._retain = RetainConfig(global_config['clips']['retain'], config['retain'])
     
     @property
     def enabled(self):
@@ -758,7 +768,7 @@ class CameraConfig():
         self._clips = CameraClipsConfig(global_config, config['clips'])
         self._record = RecordConfig(global_config['record'], config['record'])
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
-        self._snapshots = CameraSnapshotsConfig(config['snapshots'])
+        self._snapshots = CameraSnapshotsConfig(global_config, config['snapshots'])
         self._mqtt = CameraMqttConfig(config['mqtt'])
         self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
         self._motion = MotionConfig(global_config['motion'], config['motion'], self._height)

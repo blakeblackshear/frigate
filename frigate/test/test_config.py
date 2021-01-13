@@ -325,7 +325,7 @@ class TestConfig(TestCase):
                     'ffmpeg': {
                         'inputs': [
                             { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect', 'rtmp'] },
-                            { 'path': 'rtsp://10.0.0.1:554/clips', 'roles': ['clips'] }
+                            { 'path': 'rtsp://10.0.0.1:554/record', 'roles': ['record'] }
                         ]
                     },
                     'height': 1080,
