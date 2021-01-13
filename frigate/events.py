@@ -200,7 +200,86 @@ class EventCleanup(threading.Thread):
         self.name = 'event_cleanup'
         self.config = config
         self.stop_event = stop_event
+        self.camera_keys = list(self.config.cameras.keys())
 
+    def expire(self, media):
+        ## Expire events from unlisted cameras based on the global config
+        if media == 'clips':
+            retain_config = self.config.clips.retain
+            file_extension = 'mp4'
+            update_params = {'has_clip': False}
+        else:
+            retain_config = self.config.snapshots.retain
+            file_extension = 'jpg'
+            update_params = {'has_snapshot': False}
+        
+        distinct_labels = (Event.select(Event.label)
+                    .where(Event.camera.not_in(self.camera_keys))
+                    .distinct())
+        
+        # loop over object types in db
+        for l in distinct_labels:
+            # get expiration time for this label
+            expire_days = retain_config.objects.get(l.label, retain_config.default)
+            expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
+            # grab all events after specific time
+            expired_events = (
+                Event.select()
+                    .where(Event.camera.not_in(self.camera_keys), 
+                        Event.start_time < expire_after, 
+                        Event.label == l.label)
+            )
+            # delete the media from disk
+            for event in expired_events:
+                media_name = f"{event.camera}-{event.id}"
+                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                media.unlink(missing_ok=True)
+            # update the clips attribute for the db entry
+            update_query = (
+                Event.update(update_params)
+                    .where(Event.camera.not_in(self.camera_keys), 
+                        Event.start_time < expire_after, 
+                        Event.label == l.label)
+            )
+            update_query.execute()
+
+        ## Expire events from cameras based on the camera config
+        for name, camera in self.config.cameras.items():
+            if media == 'clips':
+                retain_config = camera.clips.retain
+            else:
+                retain_config = camera.snapshots.retain
+            # get distinct objects in database for this camera
+            distinct_labels = (Event.select(Event.label)
+                    .where(Event.camera == name)
+                    .distinct())
+
+            # loop over object types in db
+            for l in distinct_labels:
+                # get expiration time for this label
+                expire_days = retain_config.objects.get(l.label, retain_config.default)
+                expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
+                # grab all events after specific time
+                expired_events = (
+                    Event.select()
+                        .where(Event.camera == name, 
+                            Event.start_time < expire_after, 
+                            Event.label == l.label)
+                )
+                # delete the grabbed clips from disk
+                for event in expired_events:
+                    media_name = f"{event.camera}-{event.id}"
+                    media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                    media.unlink(missing_ok=True)
+                # update the clips attribute for the db entry
+                update_query = (
+                    Event.update(update_params)
+                        .where( Event.camera == name, 
+                            Event.start_time < expire_after, 
+                            Event.label == l.label)
+                )
+                update_query.execute()
+    
     def run(self):
         counter = 0
         while(True):
@@ -215,71 +294,13 @@ class EventCleanup(threading.Thread):
                 continue
             counter = 0
 
-            camera_keys = list(self.config.cameras.keys())
+            self.expire('clips')
+            self.expire('snapshots')
 
-            # Expire events from unlisted cameras based on the global config
-            retain_config = self.config.clips.retain
-            
-            distinct_labels = (Event.select(Event.label)
-                        .where(Event.camera.not_in(camera_keys))
-                        .distinct())
-            
-            # loop over object types in db
-            for l in distinct_labels:
-                # get expiration time for this label
-                expire_days = retain_config.objects.get(l.label, retain_config.default)
-                expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
-                # grab all events after specific time
-                expired_events = (
-                    Event.select()
-                        .where(Event.camera.not_in(camera_keys), 
-                            Event.start_time < expire_after, 
-                            Event.label == l.label)
-                )
-                # delete the grabbed clips from disk
-                for event in expired_events:
-                    clip_name = f"{event.camera}-{event.id}"
-                    clip = Path(f"{os.path.join(CLIPS_DIR, clip_name)}.mp4")
-                    clip.unlink(missing_ok=True)
-                # delete the event for this type from the db
-                delete_query = (
-                    Event.delete()
-                        .where(Event.camera.not_in(camera_keys), 
-                            Event.start_time < expire_after, 
-                            Event.label == l.label)
-                )
-                delete_query.execute()
-
-            # Expire events from cameras based on the camera config
-            for name, camera in self.config.cameras.items():
-                retain_config = camera.clips.retain
-                # get distinct objects in database for this camera
-                distinct_labels = (Event.select(Event.label)
-                        .where(Event.camera == name)
-                        .distinct())
-
-                # loop over object types in db
-                for l in distinct_labels:
-                    # get expiration time for this label
-                    expire_days = retain_config.objects.get(l.label, retain_config.default)
-                    expire_after = (datetime.datetime.now() - datetime.timedelta(days=expire_days)).timestamp()
-                    # grab all events after specific time
-                    expired_events = (
-                        Event.select()
-                            .where(Event.camera == name, 
-                                Event.start_time < expire_after, 
-                                Event.label == l.label)
-                    )
-                    # delete the grabbed clips from disk
-                    for event in expired_events:
-                        clip_name = f"{event.camera}-{event.id}"
-                        clip = Path(f"{os.path.join(CLIPS_DIR, clip_name)}.mp4")
-                        clip.unlink(missing_ok=True)
-                    # delete the event for this type from the db
-                    delete_query = (
-                        Event.delete()
-                            .where( Event.camera == name, 
-                                Event.start_time < expire_after, 
-                                Event.label == l.label)
-                    )
-                    delete_query.execute()
+            # drop events from db where has_clip and has_snapshot are false
+            delete_query = (
+                Event.delete()
+                    .where( Event.has_clip == False, 
+                        Event.has_snapshot == False)
+            )
+            delete_query.execute()
