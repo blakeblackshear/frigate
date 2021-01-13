@@ -11,6 +11,8 @@
     "@snowpack/plugin-postcss": "^1.0.11",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
+    "postcss": "^8.2.2",
+    "postcss-cli": "^8.3.1",
     "preact": "^10.5.9",
     "preact-router": "^3.2.1",
     "snowpack": "^2.18.5",
