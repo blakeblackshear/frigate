@@ -115,6 +115,7 @@ class FrigateApp():
         self.db = SqliteExtDatabase(self.config.database.path)
 
         # Run migrations
+        del(logging.getLogger('peewee_migrate').handlers[:])
         router = Router(self.db)
         router.run()
 
