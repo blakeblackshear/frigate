@@ -2,6 +2,7 @@ import collections
 import datetime
 import hashlib
 import json
+import logging
 import signal
 import subprocess as sp
 import threading
@@ -14,6 +15,8 @@ from typing import AnyStr
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 def draw_box_with_label(frame, x_min, y_min, x_max, y_max, label, info, thickness=2, color=None, position='ul'):
@@ -287,6 +290,31 @@ def print_stack(sig, frame):
 
 def listen():
     signal.signal(signal.SIGUSR1, print_stack)
+
+def create_mask(frame_shape, mask):
+    mask_img = np.zeros(frame_shape, np.uint8)
+    mask_img[:] = 255
+
+    if isinstance(mask, list):
+        for m in mask:
+            add_mask(m, mask_img)
+
+    elif isinstance(mask, str):
+        add_mask(mask, mask_img)
+
+    return mask_img
+
+def add_mask(mask, mask_img):
+    if mask.startswith('poly,'):
+        points = mask.split(',')[1:]
+        contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+        cv2.fillPoly(mask_img, pts=[contour], color=(0))
+    else:
+        mask_file = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
+        if mask_file is None or mask_file.size == 0:
+            logger.warning(f"Could not read mask file {mask}")
+        else:
+            mask_img[np.where(mask_file==[0])] = [0]
 
 class FrameManager(ABC):
     @abstractmethod

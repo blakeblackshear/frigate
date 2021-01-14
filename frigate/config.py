@@ -11,6 +11,7 @@ import voluptuous as vol
 import yaml
 
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.util import create_mask
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,7 @@ GLOBAL_FFMPEG_SCHEMA = vol.Schema(
 
 MOTION_SCHEMA = vol.Schema(
     {
+        'mask': vol.Any(str, [str]),
         'threshold': vol.Range(min=1, max=255),
         'contour_area': int,
         'delta_alpha': float,
@@ -127,7 +129,13 @@ def filters_for_all_tracked_objects(object_config):
 OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
     {
         vol.Optional('track', default=['person']): [str],
-        vol.Optional('filters', default = {}): FILTER_SCHEMA.extend({ str: {vol.Optional('min_score', default=0.5): float}})
+        vol.Optional('filters', default = {}): FILTER_SCHEMA.extend(
+            { 
+                str: {
+                        vol.Optional('min_score', default=0.5): float,
+                        'mask': vol.Any(str, [str]),
+                    }
+            })
     }
 ))
 
@@ -170,7 +178,6 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
             vol.Required('height'): int,
             vol.Required('width'): int,
             'fps': int,
-            'mask': vol.Any(str, [str]),
             vol.Optional('best_image_timeout', default=60): int,
             vol.Optional('zones', default={}):  {
                 str: {
@@ -487,11 +494,13 @@ class RecordConfig():
         }
 
 class FilterConfig():
-    def __init__(self, config):
+    def __init__(self, config, frame_shape=None):
         self._min_area = config['min_area']
         self._max_area = config['max_area']
         self._threshold = config['threshold']
         self._min_score = config.get('min_score')
+        self._raw_mask = config.get('mask')
+        self._mask = create_mask(frame_shape, self._raw_mask) if frame_shape else None
 
     @property
     def min_area(self):
@@ -509,21 +518,26 @@ class FilterConfig():
     def min_score(self):
         return self._min_score
 
+    @property
+    def mask(self):
+        return self._mask
+
     def to_dict(self):
         return {
             'min_area': self.min_area,
             'max_area': self.max_area,
             'threshold': self.threshold,
-            'min_score': self.min_score
+            'min_score': self.min_score,
+            'mask': self._raw_mask
         }
 
 class ObjectConfig():
-    def __init__(self, global_config, config):
+    def __init__(self, global_config, config, frame_shape):
         self._track = config.get('track', global_config['track'])
         if 'filters' in config:
-            self._filters = { name: FilterConfig(c) for name, c in config['filters'].items() }
+            self._filters = { name: FilterConfig(c, frame_shape) for name, c in config['filters'].items() }
         else:
-            self._filters = { name: FilterConfig(c) for name, c in global_config['filters'].items() }
+            self._filters = { name: FilterConfig(c, frame_shape) for name, c in global_config['filters'].items() }
 
     @property
     def track(self):
@@ -670,12 +684,18 @@ class CameraRtmpConfig():
         }
 
 class MotionConfig():
-    def __init__(self, global_config, config, camera_height: int):
+    def __init__(self, global_config, config, frame_shape):
+        self._raw_mask = config.get('mask')
+        self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
         self._threshold = config.get('threshold', global_config.get('threshold', 25))
         self._contour_area = config.get('contour_area', global_config.get('contour_area', 100))
         self._delta_alpha = config.get('delta_alpha', global_config.get('delta_alpha', 0.2))
         self._frame_alpha = config.get('frame_alpha', global_config.get('frame_alpha', 0.2))
-        self._frame_height = config.get('frame_height', global_config.get('frame_height', camera_height//6))
+        self._frame_height = config.get('frame_height', global_config.get('frame_height', frame_shape[0]//6))
+
+    @property
+    def mask(self):
+        return self._mask
 
     @property
     def threshold(self):
@@ -699,6 +719,7 @@ class MotionConfig():
 
     def to_dict(self):
         return {
+            'mask': self._raw_mask,
             'threshold': self.threshold,
             'contour_area': self.contour_area,
             'delta_alpha': self.delta_alpha,
@@ -776,8 +797,6 @@ class CameraConfig():
         self._frame_shape = (self._height, self._width)
         self._frame_shape_yuv = (self._frame_shape[0]*3//2, self._frame_shape[1])
         self._fps = config.get('fps')
-        self._mask = self._create_mask(config.get('mask'))
-        self._raw_mask = config.get('mask')
         self._best_image_timeout = config['best_image_timeout']
         self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
         self._clips = CameraClipsConfig(global_config, config['clips'])
@@ -785,8 +804,8 @@ class CameraConfig():
         self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
         self._snapshots = CameraSnapshotsConfig(global_config, config['snapshots'])
         self._mqtt = CameraMqttConfig(config['mqtt'])
-        self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}))
-        self._motion = MotionConfig(global_config['motion'], config['motion'], self._height)
+        self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}), self._frame_shape)
+        self._motion = MotionConfig(global_config['motion'], config['motion'], self._frame_shape)
         self._detect = DetectConfig(global_config['detect'], config['detect'], config.get('fps', 5))
 
         self._ffmpeg_cmds = []
@@ -802,31 +821,6 @@ class CameraConfig():
 
 
         self._set_zone_colors(self._zones)
-
-    def _create_mask(self, mask):
-        mask_img = np.zeros(self.frame_shape, np.uint8)
-        mask_img[:] = 255
-
-        if isinstance(mask, list):
-            for m in mask:
-                self._add_mask(m, mask_img)
-
-        elif isinstance(mask, str):
-            self._add_mask(mask, mask_img)
-
-        return mask_img
-
-    def _add_mask(self, mask, mask_img):
-        if mask.startswith('poly,'):
-            points = mask.split(',')[1:]
-            contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
-            cv2.fillPoly(mask_img, pts=[contour], color=(0))
-        else:
-            mask_file = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
-            if mask_file is None or mask_file.size == 0:
-                logger.warning(f"Could not read mask file {mask}")
-            else:
-                mask_img[np.where(mask_file==[0])] = [0]
 
     def _get_ffmpeg_cmd(self, ffmpeg_input):
         ffmpeg_output_args = []
@@ -890,10 +884,6 @@ class CameraConfig():
     @property
     def fps(self):
         return self._fps
-
-    @property
-    def mask(self):
-        return self._mask
 
     @property
     def best_image_timeout(self):
@@ -963,7 +953,6 @@ class CameraConfig():
             'objects': self.objects.to_dict(),
             'motion': self.motion.to_dict(),
             'detect': self.detect.to_dict(),
-            'mask': self._raw_mask,
             'frame_shape': self.frame_shape,
             'ffmpeg_cmds': [{'roles': c['roles'], 'cmd': ' '.join(c['cmd'])} for c in self.ffmpeg_cmds],
         }
