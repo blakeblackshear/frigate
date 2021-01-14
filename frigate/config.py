@@ -454,6 +454,19 @@ class ClipsConfig():
             'retain': self.retain.to_dict()
         }
 
+class SnapshotsConfig():
+    def __init__(self, config):
+        self._retain = RetainConfig(config['retain'], config['retain'])
+
+    @property
+    def retain(self):
+        return self._retain
+
+    def to_dict(self):
+        return {
+            'retain': self.retain.to_dict()
+        }
+
 class RecordConfig():
     def __init__(self, global_config, config):
         self._enabled = config.get('enabled', global_config['enabled'])
@@ -972,6 +985,7 @@ class FrigateConfig():
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._clips = ClipsConfig(config['clips'])
+        self._snapshots = SnapshotsConfig(config['clips'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
         self._logger = LoggerConfig(config['logger'])
 
@@ -1005,6 +1019,7 @@ class FrigateConfig():
             'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
             'mqtt': self.mqtt.to_dict(),
             'clips': self.clips.to_dict(),
+            'snapshots': self.snapshots.to_dict(),
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
             'logger': self.logger.to_dict()
         }
@@ -1032,6 +1047,10 @@ class FrigateConfig():
     @property
     def clips(self):
         return self._clips
+
+    @property
+    def snapshots(self):
+        return self._snapshots
 
     @property
     def cameras(self) -> Dict[str, CameraConfig]:
