@@ -28,7 +28,7 @@ export default function App() {
         <Sidebar />
         <div className="p-4">
           <Router>
-            <CameraMap path="/cameras/:camera/map-editor" />
+            <CameraMap path="/cameras/:camera/editor" />
             <Camera path="/cameras/:camera" />
             <Event path="/events/:eventId" />
             <Events path="/events" />
