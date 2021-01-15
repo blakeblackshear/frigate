@@ -166,10 +166,9 @@ class TrackedObject():
             'entered_zones': list(self.entered_zones).copy(),
             'thumbnail': base64.b64encode(self.get_thumbnail()).decode('utf-8') if include_thumbnail else None
         }
-        if not self.thumbnail_data['frame_time'] in self.frame_cache:
-            logger.error(f"Unable to create thumbnail for {self.obj_data['id']}")
-            logger.error(f"Looking for frame_time of {self.thumbnail_data['frame_time']}")
-            logger.error(f"Thumbnail frames: {','.join([str(k) for k in self.frame_cache.keys()])}")
+
+    def get_thumbnail(self):
+        if self.thumbnail_data is None or not self.thumbnail_data['frame_time'] in self.frame_cache:
             ret, jpg = cv2.imencode('.jpg', np.zeros((175,175,3), np.uint8))
 
         jpg_bytes = self.get_jpg_bytes(timestamp=False, bounding_box=False, crop=True, height=175)
@@ -181,6 +180,9 @@ class TrackedObject():
             return jpg.tobytes()
     
     def get_jpg_bytes(self, timestamp=False, bounding_box=False, crop=False, height=None):
+        if self.thumbnail_data is None:
+            return None
+            
         best_frame = cv2.cvtColor(self.frame_cache[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
  
         if bounding_box:
