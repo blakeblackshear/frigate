@@ -2,6 +2,7 @@ ARG ARCH=amd64
 ARG FFMPEG_VERSION
 FROM blakeblackshear/frigate-wheels:${ARCH} as wheels
 FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
+FROM frigate-web as web
 
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
@@ -45,7 +46,8 @@ RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiled
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
-ADD web/build web/
+
+COPY --from=web /opt/frigate/build web/
 
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
