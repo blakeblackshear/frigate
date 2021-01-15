@@ -6,7 +6,7 @@ version:
 	echo "VERSION='0.8.0-$(COMMIT_HASH)'" > frigate/version.py
 
 web:
-	cd web && npm install && npm run build
+	docker build --tag frigate-web --file docker/Dockerfile.web web/
 
 amd64_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:amd64 --file docker/Dockerfile.wheels .
