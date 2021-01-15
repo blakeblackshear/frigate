@@ -291,7 +291,7 @@ class CameraState():
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
 
         if draw_options.get('mask'):
-            mask_overlay = np.where(self.camera_config.mask==[0])
+            mask_overlay = np.where(self.camera_config.motion.mask==[0])
             frame_copy[mask_overlay] = [0,0,0]
 
         if draw_options.get('motion_boxes'):

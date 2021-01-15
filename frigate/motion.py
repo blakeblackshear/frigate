@@ -5,7 +5,7 @@ from frigate.config import MotionConfig
 
 
 class MotionDetector():
-    def __init__(self, frame_shape, mask, config: MotionConfig):
+    def __init__(self, frame_shape, config: MotionConfig):
         self.config = config
         self.frame_shape = frame_shape
         self.resize_factor = frame_shape[0]/config.frame_height
@@ -14,7 +14,7 @@ class MotionDetector():
         self.avg_delta = np.zeros(self.motion_frame_size, np.float)
         self.motion_frame_count = 0
         self.frame_counter = 0
-        resized_mask = cv2.resize(mask, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
+        resized_mask = cv2.resize(config.mask, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
         self.mask = np.where(resized_mask==[0])
 
     def detect(self, frame):
