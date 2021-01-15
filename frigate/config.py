@@ -500,7 +500,7 @@ class FilterConfig():
         self._threshold = config['threshold']
         self._min_score = config.get('min_score')
         self._raw_mask = config.get('mask')
-        self._mask = create_mask(frame_shape, self._raw_mask) if frame_shape else None
+        self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
 
     @property
     def min_area(self):
@@ -686,7 +686,12 @@ class CameraRtmpConfig():
 class MotionConfig():
     def __init__(self, global_config, config, frame_shape):
         self._raw_mask = config.get('mask')
-        self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
+        if self._raw_mask:
+            self._mask = create_mask(frame_shape, self._raw_mask)
+        else:
+            default_mask = np.zeros(frame_shape, np.uint8)
+            default_mask[:] = 255
+            self._mask = default_mask
         self._threshold = config.get('threshold', global_config.get('threshold', 25))
         self._contour_area = config.get('contour_area', global_config.get('contour_area', 100))
         self._delta_alpha = config.get('delta_alpha', global_config.get('delta_alpha', 0.2))

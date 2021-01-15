@@ -31,7 +31,7 @@ from frigate.util import (EventsPerSecond, FrameManager,
 
 logger = logging.getLogger(__name__)
 
-def filtered(obj, objects_to_track, object_filters, mask=None):
+def filtered(obj, objects_to_track, object_filters):
     object_name = obj[0]
 
     if not object_name in objects_to_track:
@@ -54,14 +54,15 @@ def filtered(obj, objects_to_track, object_filters, mask=None):
         if obj_settings.min_score > obj[1]:
             return True
     
-        # compute the coordinates of the object and make sure
-        # the location isnt outside the bounds of the image (can happen from rounding)
-        y_location = min(int(obj[2][3]), len(mask)-1)
-        x_location = min(int((obj[2][2]-obj[2][0])/2.0)+obj[2][0], len(mask[0])-1)
+        if not obj_settings.mask is None:
+            # compute the coordinates of the object and make sure
+            # the location isnt outside the bounds of the image (can happen from rounding)
+            y_location = min(int(obj[2][3]), len(obj_settings.mask)-1)
+            x_location = min(int((obj[2][2]-obj[2][0])/2.0)+obj[2][0], len(obj_settings.mask[0])-1)
 
-        # if the object is in a masked location, don't add it to detected objects
-        if (not mask is None) and (mask[y_location][x_location] == 0):
-            return True
+            # if the object is in a masked location, don't add it to detected objects
+            if obj_settings.mask[y_location][x_location] == 0:
+                return True
         
     return False
 
@@ -258,9 +259,8 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
-    mask = config.mask
 
-    motion_detector = MotionDetector(frame_shape, mask, config.motion)
+    motion_detector = MotionDetector(frame_shape, config.motion)
     object_detector = RemoteObjectDetector(name, '/labelmap.txt', detection_queue, result_connection, model_shape)
 
     object_tracker = ObjectTracker(config.detect)
@@ -268,7 +268,7 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     frame_manager = SharedMemoryFrameManager()
 
     process_frames(name, frame_queue, frame_shape, model_shape, frame_manager, motion_detector, object_detector,
-        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, mask, stop_event)
+        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, stop_event)
 
     logger.info(f"{name}: exiting subprocess")
 
@@ -278,7 +278,7 @@ def reduce_boxes(boxes):
     reduced_boxes = cv2.groupRectangles([list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2)[0]
     return [tuple(b) for b in reduced_boxes]
 
-def detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask):
+def detect(object_detector, frame, model_shape, region, objects_to_track, object_filters):
     tensor_input = create_tensor_input(frame, model_shape, region)
 
     detections = []
@@ -296,7 +296,7 @@ def detect(object_detector, frame, model_shape, region, objects_to_track, object
             (x_max-x_min)*(y_max-y_min),
             region)
         # apply object filters
-        if filtered(det, objects_to_track, object_filters, mask):
+        if filtered(det, objects_to_track, object_filters):
             continue
         detections.append(det)
     return detections
@@ -305,7 +305,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue, process_info: Dict,
-    objects_to_track: List[str], object_filters, mask, stop_event,
+    objects_to_track: List[str], object_filters, stop_event,
     exit_on_empty: bool = False):
     
     fps = process_info['process_fps']
@@ -358,7 +358,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
         # resize regions and detect
         detections = []
         for region in regions:
-            detections.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask))
+            detections.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters))
         
         #########
         # merge objects, check for clipped objects and look again up to 4 times
@@ -393,7 +393,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
 
                         regions.append(region)
                         
-                        selected_objects.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters, mask))
+                        selected_objects.extend(detect(object_detector, frame, model_shape, region, objects_to_track, object_filters))
 
                         refining = True
                     else:
