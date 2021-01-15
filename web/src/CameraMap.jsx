@@ -6,7 +6,7 @@ import { route } from 'preact-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { ApiHost, Config } from './context';
 
-export default function Camera({ camera, url }) {
+export default function CameraMasks({ camera, url }) {
   const config = useContext(Config);
   const apiHost = useContext(ApiHost);
   const imageRef = useRef(null);
@@ -17,8 +17,13 @@ export default function Camera({ camera, url }) {
   }
 
   const cameraConfig = config.cameras[camera];
-  const { width, height, mask, zones } = cameraConfig;
-  const [editing, setEditing] = useState('mask');
+  const {
+    width,
+    height,
+    motion: { mask: motionMask },
+    objects: { filters: objectFilters },
+    zones,
+  } = cameraConfig;
 
   useEffect(() => {
     if (!imageRef.current) {
@@ -29,22 +34,50 @@ export default function Camera({ camera, url }) {
     setImageScale(scale);
   }, [imageRef.current, setImageScale]);
 
-  const initialZonePoints = {};
-  if (mask) {
-    initialZonePoints.mask = getPolylinePoints(mask);
-  }
+  const [motionMaskPoints, setMotionMaskPoints] = useState(
+    Array.isArray(motionMask)
+      ? motionMask.map((mask) => getPolylinePoints(mask))
+      : motionMask
+      ? [getPolylinePoints(motionMask)]
+      : []
+  );
+
   const [zonePoints, setZonePoints] = useState(
-    Object.keys(zones).reduce(
-      (memo, zone) => ({ ...memo, [zone]: getPolylinePoints(zones[zone].coordinates) }),
-      initialZonePoints
+    Object.keys(zones).reduce((memo, zone) => ({ ...memo, [zone]: getPolylinePoints(zones[zone].coordinates) }), {})
+  );
+
+  const [objectMaskPoints, setObjectMaskPoints] = useState(
+    Object.keys(objectFilters).reduce(
+      (memo, name) => ({
+        ...memo,
+        [name]: Array.isArray(objectFilters[name].mask)
+          ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
+          : objectFilters[name].mask
+          ? [getPolylinePoints(objectFilters[name].mask)]
+          : [],
+      }),
+      {}
     )
   );
 
+  const [editing, setEditing] = useState({ set: motionMaskPoints, key: 0, fn: setMotionMaskPoints });
+
   const handleUpdateEditable = useCallback(
     (newPoints) => {
-      setZonePoints({ ...zonePoints, [editing]: newPoints });
+      let newSet;
+      if (Array.isArray(editing.set)) {
+        newSet = [...editing.set];
+        newSet[editing.key] = newPoints;
+      } else if (editing.subkey !== undefined) {
+        newSet = { ...editing.set };
+        newSet[editing.key][editing.subkey] = newPoints;
+      } else {
+        newSet = { ...editing.set, [editing.key]: newPoints };
+      }
+      editing.set = newSet;
+      editing.fn(newSet);
     },
-    [editing, setZonePoints, zonePoints]
+    [editing]
   );
 
   const handleSelectEditable = useCallback(
@@ -54,49 +87,199 @@ export default function Camera({ camera, url }) {
     [setEditing]
   );
 
+  const handleRemoveEditable = useCallback(
+    (name) => {
+      const filteredZonePoints = Object.keys(zonePoints)
+        .filter((zoneName) => zoneName !== name)
+        .reduce((memo, name) => {
+          memo[name] = zonePoints[name];
+          return memo;
+        }, {});
+      setZonePoints(filteredZonePoints);
+    },
+    [zonePoints, setZonePoints]
+  );
+
+  // Motion mask methods
   const handleAddMask = useCallback(() => {
-    setZonePoints({ mask: [], ...zonePoints });
-  }, [zonePoints, setZonePoints]);
+    const newMotionMaskPoints = [...motionMaskPoints, []];
+    setMotionMaskPoints(newMotionMaskPoints);
+    setEditing({ set: newMotionMaskPoints, key: newMotionMaskPoints.length - 1, fn: setMotionMaskPoints });
+  }, [motionMaskPoints, setMotionMaskPoints]);
+
+  const handleEditMask = useCallback(
+    (key) => {
+      setEditing({ set: motionMaskPoints, key, fn: setMotionMaskPoints });
+    },
+    [setEditing, motionMaskPoints, setMotionMaskPoints]
+  );
+
+  const handleRemoveMask = useCallback(
+    (key) => {
+      const newMotionMaskPoints = [...motionMaskPoints];
+      newMotionMaskPoints.splice(key, 1);
+      setMotionMaskPoints(newMotionMaskPoints);
+    },
+    [motionMaskPoints, setMotionMaskPoints]
+  );
+
+  const handleCopyMotionMasks = useCallback(async () => {
+    await window.navigator.clipboard.writeText(`  motion:
+    mask:
+${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`);
+  }, [motionMaskPoints]);
+
+  // Zone methods
+  const handleEditZone = useCallback(
+    (key) => {
+      setEditing({ set: zonePoints, key, fn: setZonePoints });
+    },
+    [setEditing, zonePoints, setZonePoints]
+  );
 
   const handleAddZone = useCallback(() => {
-    const n = Object.keys(zonePoints).length;
-    const zoneName = `zone-${n}`;
-    setZonePoints({ ...zonePoints, [zoneName]: [] });
-    setEditing(zoneName);
+    const n = Object.keys(zonePoints).filter((name) => name.startsWith('zone_')).length;
+    const zoneName = `zone_${n}`;
+    const newZonePoints = { ...zonePoints, [zoneName]: [] };
+    setZonePoints(newZonePoints);
+    setEditing({ set: newZonePoints, key: zoneName, fn: setZonePoints });
   }, [zonePoints, setZonePoints]);
 
+  const handleRemoveZone = useCallback(
+    (key) => {
+      const newZonePoints = { ...zonePoints };
+      delete newZonePoints[key];
+      setZonePoints(newZonePoints);
+    },
+    [zonePoints, setZonePoints]
+  );
+
+  const handleCopyZones = useCallback(async () => {
+    await window.navigator.clipboard.writeText(`  zones:
+${Object.keys(zonePoints)
+  .map(
+    (zoneName) => `    ${zoneName}:
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
+  )
+  .join('\n')}`);
+  }, [zonePoints]);
+
+  // Object methods
+  const handleEditObjectMask = useCallback(
+    (key, subkey) => {
+      setEditing({ set: objectMaskPoints, key, subkey, fn: setObjectMaskPoints });
+    },
+    [setEditing, objectMaskPoints, setObjectMaskPoints]
+  );
+
+  const handleAddObjectMask = useCallback(() => {
+    const n = Object.keys(objectMaskPoints).filter((name) => name.startsWith('object_')).length;
+    const newObjectName = `object_${n}`;
+    const newObjectMaskPoints = { ...objectMaskPoints, [newObjectName]: [] };
+    setObjectMaskPoints(newObjectMaskPoints);
+    setEditing({ set: newObjectMaskPoints, key: newObjectName, subkey: 0, fn: setObjectMaskPoints });
+  }, [objectMaskPoints, setObjectMaskPoints, setEditing]);
+
+  const handleRemoveObjectMask = useCallback(
+    (key, subkey) => {
+      const newObjectMaskPoints = { ...objectMaskPoints };
+      delete newObjectMaskPoints[key];
+      setObjectMaskPoints(newObjectMaskPoints);
+    },
+    [objectMaskPoints, setObjectMaskPoints]
+  );
+
+  const handleCopyObjectMasks = useCallback(async () => {
+    await window.navigator.clipboard.writeText(`  objects:
+    filters:
+${Object.keys(objectMaskPoints)
+  .map((objectName) =>
+    objectMaskPoints[objectName].length
+      ? `      ${objectName}:
+        mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n')}`);
+  }, [objectMaskPoints]);
+
   return (
-    <div>
-      <Heading size="2xl">{camera}</Heading>
+    <div class="flex-col space-y-4" style={`max-width: ${width}px`}>
+      <Heading size="2xl">{camera} mask & zone creator</Heading>
+      <p>
+        This tool can help you create masks & zones for your {camera} camera. When done, copy each mask configuration
+        into your <code className="font-mono">config.yml</code> file restart your Frigate instance to save your changes.
+      </p>
       <div className="relative">
         <img ref={imageRef} width={width} height={height} src={`${apiHost}/api/${camera}/latest.jpg`} />
         <EditableMask
           onChange={handleUpdateEditable}
-          points={zonePoints[editing]}
+          points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
           scale={imageScale}
           width={width}
           height={height}
         />
       </div>
-      <div class="flex-column space-y-4 overflow-hidden">
-        {Object.keys(zonePoints).map((zone) => (
-          <MaskValues
-            editing={editing === zone}
-            onSelect={handleSelectEditable}
-            points={zonePoints[zone]}
-            name={zone}
-          />
-        ))}
-      </div>
-      <div class="flex flex-grow-0 space-x-4">
-        {!mask ? <Button onClick={handleAddMask}>Add Mask</Button> : null}
-        <Button onClick={handleAddZone}>Add Zone</Button>
+
+      <div class="flex-col space-y-4">
+        <MaskValues
+          editing={editing}
+          title="Motion masks"
+          onCopy={handleCopyMotionMasks}
+          onCreate={handleAddMask}
+          onEdit={handleEditMask}
+          onRemove={handleRemoveMask}
+          points={motionMaskPoints}
+          yamlPrefix={'motion:\n  mask:'}
+          yamlKeyPrefix={maskYamlKeyPrefix}
+        />
+
+        <MaskValues
+          editing={editing}
+          title="Zones"
+          onCopy={handleCopyZones}
+          onCreate={handleAddZone}
+          onEdit={handleEditZone}
+          onRemove={handleRemoveZone}
+          points={zonePoints}
+          yamlPrefix="zones:"
+          yamlKeyPrefix={zoneYamlKeyPrefix}
+        />
+
+        <MaskValues
+          isMulti
+          editing={editing}
+          title="Object masks"
+          onCopy={handleCopyObjectMasks}
+          onCreate={handleAddObjectMask}
+          onEdit={handleEditObjectMask}
+          onRemove={handleRemoveObjectMask}
+          points={objectMaskPoints}
+          yamlPrefix={'objects:\n  filters:'}
+          yamlKeyPrefix={objectYamlKeyPrefix}
+        />
       </div>
     </div>
   );
 }
 
+function maskYamlKeyPrefix(points) {
+  return `    - `;
+}
+
+function zoneYamlKeyPrefix(points, key) {
+  return `  ${key}:
+    coordinates: `;
+}
+
+function objectYamlKeyPrefix(points, key, subkey) {
+  return `        - `;
+}
+
 function EditableMask({ onChange, points, scale, width, height }) {
+  if (!points) {
+    return null;
+  }
   const boundingRef = useRef(null);
 
   function boundedSize(value, maxValue) {
@@ -133,6 +316,7 @@ function EditableMask({ onChange, points, scale, width, height }) {
       const index = points.indexOf(closest);
       const newPoints = [...points];
       newPoints.splice(index, 0, newPoint);
+      console.log(points, newPoints);
       onChange(newPoints);
     },
     [scale, points, onChange]
@@ -180,26 +364,128 @@ function EditableMask({ onChange, points, scale, width, height }) {
   );
 }
 
-function MaskValues({ editing, name, onSelect, points }) {
-  const handleClick = useCallback(() => {
-    onSelect(name);
-  }, [name, onSelect]);
+function MaskValues({
+  isMulti = false,
+  editing,
+  title,
+  onCopy,
+  onCreate,
+  onEdit,
+  onRemove,
+  points,
+  yamlPrefix,
+  yamlKeyPrefix,
+}) {
+  const [showButtons, setShowButtons] = useState(false);
+
+  const handleMousein = useCallback(() => {
+    setShowButtons(true);
+  }, [setShowButtons]);
+
+  const handleMouseout = useCallback(
+    (event) => {
+      const el = event.toElement || event.relatedTarget;
+      if (!el || el.parentNode === event.target) {
+        return;
+      }
+      setShowButtons(false);
+    },
+    [setShowButtons]
+  );
+
+  const handleEdit = useCallback(
+    (event) => {
+      const { key, subkey } = event.target.dataset;
+      onEdit(key, subkey);
+    },
+    [onEdit]
+  );
+
+  const handleRemove = useCallback(
+    (event) => {
+      const { key, subkey } = event.target.dataset;
+      onRemove(key, subkey);
+    },
+    [onRemove]
+  );
 
   return (
     <div
-      className={`rounded border-gray-500 border-solid border p-2 hover:bg-gray-400 cursor-pointer ${
-        editing ? 'bg-gray-300' : ''
-      }`}
-      onclick={handleClick}
+      className="overflow-hidden rounded border-gray-500 border-solid border p-2"
+      onmouseover={handleMousein}
+      onmouseout={handleMouseout}
     >
-      <Heading className="mb-4" size="sm">
-        {name}
-      </Heading>
-      <textarea className="select-all font-mono border-gray-300 text-gray-900 dark:text-gray-100 w-full" readonly>
-        {name === 'mask' ? 'poly,' : null}
-        {polylinePointsToPolyline(points)}
-      </textarea>
+      <div class="flex space-x-4">
+        <Heading className="flex-grow self-center" size="base">
+          {title}
+        </Heading>
+        <Button onClick={onCopy}>Copy</Button>
+        <Button onClick={onCreate}>Add</Button>
+      </div>
+      <pre class="overflow-hidden font-mono text-gray-900 dark:text-gray-100">
+        {yamlPrefix}
+        {Object.keys(points).map((mainkey) => {
+          if (isMulti) {
+            return (
+              <div>
+                {`    ${mainkey}:\n      mask:\n`}
+                {points[mainkey].map((item, subkey) => (
+                  <Item
+                    mainkey={mainkey}
+                    subkey={subkey}
+                    editing={editing}
+                    handleEdit={handleEdit}
+                    points={item}
+                    showButtons={showButtons}
+                    handleRemove={handleRemove}
+                    yamlKeyPrefix={yamlKeyPrefix}
+                  />
+                ))}
+              </div>
+            );
+          } else {
+            return (
+              <Item
+                mainkey={mainkey}
+                editing={editing}
+                handleEdit={handleEdit}
+                points={points[mainkey]}
+                showButtons={showButtons}
+                handleRemove={handleRemove}
+                yamlKeyPrefix={yamlKeyPrefix}
+              />
+            );
+          }
+        })}
+      </pre>
     </div>
+  );
+}
+
+function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handleRemove, yamlKeyPrefix }) {
+  return (
+    <span
+      data-key={mainkey}
+      data-subkey={subkey}
+      className={`block hover:text-blue-400 cursor-pointer relative ${
+        editing.key === mainkey && editing.subkey === subkey ? 'text-blue-800 dark:text-blue-600' : ''
+      }`}
+      onClick={handleEdit}
+      title="Click to edit"
+    >
+      {`${yamlKeyPrefix(points, mainkey, subkey)}${polylinePointsToPolyline(points)}`}
+      {showButtons ? (
+        <Button
+          className="absolute top-0 right-0"
+          color="red"
+          data-key={mainkey}
+          data-subkey={subkey}
+          onClick={handleRemove}
+        >
+          Remove
+        </Button>
+      ) : null}
+    </span>
   );
 }
 
@@ -212,17 +498,14 @@ function getPolylinePoints(polyline) {
     return;
   }
 
-  return polyline
-    .replace('poly,', '')
-    .split(',')
-    .reduce((memo, point, i) => {
-      if (i % 2) {
-        memo[memo.length - 1].push(parseInt(point, 10));
-      } else {
-        memo.push([parseInt(point, 10)]);
-      }
-      return memo;
-    }, []);
+  return polyline.split(',').reduce((memo, point, i) => {
+    if (i % 2) {
+      memo[memo.length - 1].push(parseInt(point, 10));
+    } else {
+      memo.push([parseInt(point, 10)]);
+    }
+    return memo;
+  }, []);
 }
 
 function scalePolylinePoints(polylinePoints, scale) {

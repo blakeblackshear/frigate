@@ -30,10 +30,15 @@ export default function Event({ eventId }) {
         {data.camera} {data.label} <span className="text-sm">{datetime.toLocaleString()}</span>
       </Heading>
       <img
-        src={`data:image/jpeg;base64,${data.thumbnail}`}
+        src={`${apiHost}/clips/${data.camera}-${eventId}.jpg`}
         alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
       />
-      <video className="w-96" src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} controls />
+      {data.has_clip ? (
+        <video className="w-96" src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} controls />
+      ) : (
+        <p>No clip available</p>
+      )}
+
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );

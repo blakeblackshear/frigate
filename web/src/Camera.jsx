@@ -68,7 +68,7 @@ export default function Camera({ camera, url }) {
         <Heading size="sm">Options</Heading>
         <ul>
           <li>
-            <Link href={`/cameras/${camera}/map-editor`}>Mask & Zone editor</Link>
+            <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
           </li>
         </ul>
       </div>
