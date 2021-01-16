@@ -38,6 +38,7 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - [24/7 Recordings (record)](#247-recordings)
 - [RTMP Streams (rtmp)](#rtmp-streams)
 - [Integration with HomeAssistant](#integration-with-homeassistant)
+- [Web UI](#web-ui)
 - [MQTT Topics](#mqtt-topics)
 - [HTTP Endpoints](#http-endpoints)
 - [Custom Models](#custom-models)
@@ -181,7 +182,9 @@ cameras:
     height: 720
     fps: 5
 ```
-Here are all the configuration options:
+Here are all configuration options. 
+
+**Please do not copy all of this as your starting configuration. Optional configuration options should not be included in your config unless you need to change from the default values.**
 ```yaml
 # Optional: Logging configuration
 logger:
@@ -191,6 +194,12 @@ logger:
   logs:
     frigate.mqtt: error
 
+# Optional: Environment variables
+# This section can be used to set environment variables for those unable to modify the environment
+# of the container (ie. within Hass.io)
+environment_vars:
+  EXAMPLE_VAR: value
+
 # Optional: database configuration
 database:
   # Optional: database path
@@ -198,7 +207,6 @@ database:
   path: /media/frigate/clips/frigate.db
 
 # Optional: detectors configuration
-# USB Coral devices will be auto detected with CPU fallback
 detectors:
   # Required: name of the detector
   coral:
@@ -236,6 +244,18 @@ mqtt:
   # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}. 
   #       eg. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
+  # Optional: interval in seconds for publishing stats (default: shown below)
+  stats_interval: 60
+
+# Optional: Global configuration for the jpg snapshots written to the clips directory for each event
+snapshots:
+  # Optional: Retention settings (default: shown below)
+  retain:
+    # Required: Default retention days (default: shown below)
+    default: 10
+    # Optional: Per object retention days
+    objects:
+      person: 15
 
 # Optional: Global configuration for saving clips
 clips:
@@ -320,7 +340,7 @@ motion:
   # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 180
 
-# Optional: Global detecttion settings. These may also be defined at the camera level.
+# Optional: Global detection settings. These may also be defined at the camera level.
 # ADVANCED: Most users will not need to set these values in their config
 detect:
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: double the frame rate)
@@ -369,10 +389,11 @@ cameras:
     #       Frigate will attempt to autodetect if not specified.
     fps: 5
 
-    # Optional: list of motion masks
-    # NOTE: see docs for more detailed info on creating masks
-    mask: 
-      - poly,0,900,1080,900,1080,1920,0,1920
+    # Optional: camera level motion config
+    motion:
+      # Optional: motion mask
+      # NOTE: see docs for more detailed info on creating masks
+      mask: 0,900,1080,900,1080,1920,0,1920
 
     # Optional: timeout for highest scoring image before allowing it
     # to be replaced by a newer image. (default: shown below)
@@ -395,12 +416,21 @@ cameras:
             max_area: 100000
             threshold: 0.7
 
+    # Optional: Camera level detect settings
+    detect:
+      # Optional: enables detection for the camera (default: True)
+      # This value can be set via MQTT and will be updated in startup based on retained value
+      enabled: True
+      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: double the frame rate)
+      max_disappeared: 10
+
     # Optional: save clips configuration
     # NOTE: This feature does not work if you have added "-vsync drop" in your input params. 
     #       This will only work for camera feeds that can be copied into the mp4 container format without
     #       encoding such as h264. It may not work for some types of streams.
     clips:
       # Required: enables clips for the camera (default: shown below)
+      # This value can be set via MQTT and will be updated in startup based on retained value
       enabled: False
       # Optional: Number of seconds before the event to include in the clips (default: shown below)
       pre_capture: 5
@@ -432,6 +462,7 @@ cameras:
     # Optional: Configuration for the jpg snapshots written to the clips directory for each event
     snapshots:
       # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
+      # This value can be set via MQTT and will be updated in startup based on retained value
       enabled: False
       # Optional: print a timestamp on the snapshots (default: shown below)
       timestamp: False
@@ -441,6 +472,13 @@ cameras:
       crop: False
       # Optional: height to resize the snapshot to (default: original size)
       height: 175
+      # Optional: Camera override for retention settings (default: global values)
+      retain:
+        # Required: Default retention days (default: shown below)
+        default: 10
+        # Optional: Per object retention days
+        objects:
+          person: 15
 
     # Optional: Configuration for the jpg snapshots published via MQTT
     mqtt:
@@ -457,7 +495,7 @@ cameras:
       # Optional: height to resize the snapshot to (default: shown below)
       height: 270
 
-    # Optional: Camera level object filters config. If defined, this is used instead of the global config.
+    # Optional: Camera level object filters config.
     objects:
       track:
         - person
@@ -468,6 +506,9 @@ cameras:
           max_area: 100000
           min_score: 0.5
           threshold: 0.7
+          # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
+          # Checks based on the bottom center of the bounding box of the object
+          mask: 0,0,1000,0,1000,200,0,200
 ```
 [Back to top](#documentation)
 
@@ -572,7 +613,7 @@ Nvidia GPU based decoding via NVDEC is supported, but requires special configura
 [Back to top](#documentation)
 
 ## Detectors
-By default Frigate will look for a USB Coral device and fall back to the CPU if it cannot be found. If you have PCI or multiple Coral devices, you need to configure your detector devices in the config file. When using multiple detectors, they run in dedicated processes, but pull from a common queue of requested detections across all cameras.
+The default config will look for a USB Coral device. If you do not have a Coral, you will need to configure a CPU detector. If you have PCI or multiple Coral devices, you need to configure your detector devices in the config file. When using multiple detectors, they run in dedicated processes, but pull from a common queue of requested detections across all cameras.
 
 Frigate supports `edgetpu` and `cpu` as detector types. The device value should be specified according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api).
 
@@ -758,10 +799,16 @@ You can find some additional examples for notifications [here](docs/notification
 
 [Back to top](#documentation)
 
+## Web UI
+Frigate comes bundled with a simple web ui that supports the following:
+- Show cameras
+- Browse events
+- Mask helper
+
 ## HTTP Endpoints
 A web server is available on port 5000 with the following endpoints.
 
-### `/<camera_name>`
+### `/api/<camera_name>`
 An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use. 
 
 Accepts the following query string parameters:
@@ -778,14 +825,14 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
+### `/api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
 The best snapshot for any object type. It is a full resolution image by default.
 
 Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
 - `crop=1`: crops the image to the region of the detection rather than returning the entire image
 
-### `/<camera_name>/latest.jpg[?h=300]`
+### `/api/<camera_name>/latest.jpg[?h=300]`
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
 
 Accepts the following query string parameters:
@@ -802,7 +849,7 @@ Accepts the following query string parameters:
 Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
 
-### `/stats`
+### `/api/stats`
 Contains some granular debug info that can be used for sensors in HomeAssistant.
 
 Sample response:
@@ -861,17 +908,22 @@ Sample response:
           ***************/
           "pid": 25321
       }
+    },
+    "service": {
+      /* Uptime in seconds */
+      "uptime": 10,
+      "version": "0.8.0-8883709"
     }
 }
 ```
 
-### `/config`
+### `/api/config`
 A json representation of your configuration
 
-### `/version`
+### `/api/version`
 Version info
 
-### `/events`
+### `/api/events`
 Events from the database. Accepts the following query string parameters:
 |param|Type|Description|
 |----|-----|--|
@@ -881,13 +933,15 @@ Events from the database. Accepts the following query string parameters:
 |`label`|str|Label name|
 |`zone`|str|Zone name|
 |`limit`|int|Limit the number of events returned|
+|`has_snapshot`|int|Filter to events that have snapshots (0 or 1)|
+|`has_clip`|int|Filter to events that have clips (0 or 1)|
 
-### `/events/summary`
+### `/api/events/summary`
 Returns summary data for events in the database. Used by the HomeAssistant integration.
 
-### `/events/<id>`
+### `/api/events/<id>`
 Returns data for a single event.
-### `/events/<id>/snapshot.jpg`
+### `/api/events/<id>/snapshot.jpg`
 Returns a snapshot for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
 ### `/clips/<camera>-<id>.mp4`
@@ -923,6 +977,7 @@ Message published for each changed event. The first message is published when th
 
 ```jsonc
 {
+    "type": "update", // new, update, or end
     "before": {
         "id": "1607123955.475377-mxklsc",
         "camera": "front_door",
@@ -990,6 +1045,26 @@ Message published for each changed event. The first message is published when th
     }
 }
 ```
+
+### `frigate/stats`
+Same data available at `/api/stats` published at a configurable interval.
+
+### `frigate/<camera_name>/detect/set`
+Topic to turn detection for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/detect/state`
+Topic with current state of detection for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/clips/set`
+Topic to turn clips for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/clips/state`
+Topic with current state of clips for a camera. Published values are `ON` and `OFF`.
+### `frigate/<camera_name>/snapshots/set`
+Topic to turn snapshots for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/snapshots/state`
+Topic with current state of snapshots for a camera. Published values are `ON` and `OFF`.
 
 [Back to top](#documentation)
 
