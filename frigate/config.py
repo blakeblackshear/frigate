@@ -146,6 +146,12 @@ def each_role_used_once(inputs):
         raise ValueError
     return inputs
 
+def detect_is_required(inputs):
+    roles = [role for i in inputs for role in i['roles']]
+    if not 'detect' in roles:
+        raise ValueError
+    return inputs
+
 CAMERA_FFMPEG_SCHEMA = vol.Schema(
     {
         vol.Required('inputs'): vol.All([{
@@ -154,7 +160,8 @@ CAMERA_FFMPEG_SCHEMA = vol.Schema(
             'global_args':  vol.Any(str, [str]),
             'hwaccel_args': vol.Any(str, [str]),
             'input_args': vol.Any(str, [str]),
-        }], vol.Msg(each_role_used_once, msg="Each input role may only be used once")),
+        }], vol.Msg(each_role_used_once, msg="Each input role may only be used once"), 
+            vol.Msg(detect_is_required, msg="The detect role is required")),
         'output_args': {
             vol.Optional('detect', default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
             vol.Optional('record', default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
