@@ -216,7 +216,9 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
             },
             'objects': OBJECTS_SCHEMA,
             vol.Optional('motion', default={}): MOTION_SCHEMA,
-            vol.Optional('detect', default={}): DETECT_SCHEMA
+            vol.Optional('detect', default={}): DETECT_SCHEMA.extend({
+                vol.Optional('enabled', default=True): bool
+            })
         }
     }, vol.Msg(ensure_zones_and_cameras_have_different_names, msg='Zones cannot share names with cameras'))
 )
@@ -737,7 +739,12 @@ class MotionConfig():
 
 class DetectConfig():
     def __init__(self, global_config, config, camera_fps):
+        self._enabled = config['enabled']
         self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*2))
+
+    @property
+    def enabled(self):
+        return self._enabled
 
     @property
     def max_disappeared(self):
@@ -745,6 +752,7 @@ class DetectConfig():
 
     def to_dict(self):
         return {
+            'enabled': self.enabled,
             'max_disappeared': self._max_disappeared,
         }
 
