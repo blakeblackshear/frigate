@@ -39,6 +39,10 @@ class FrigateApp():
         self.log_queue = mp.Queue()
         self.camera_metrics = {}
 
+    def set_environment_vars(self):
+        for key, value in self.config.environment_vars.items():
+            os.environ[key] = value
+
     def ensure_dirs(self):
         for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
@@ -201,6 +205,7 @@ class FrigateApp():
                 logger.error(f"Error parsing config: {e}")
                 self.log_process.terminate()
                 sys.exit(1)
+            self.set_environment_vars()
             self.ensure_dirs()
             self.check_config()
             self.set_log_levels()
