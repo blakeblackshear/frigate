@@ -62,16 +62,15 @@ class LocalObjectDetector(ObjectDetector):
                 logger.info(f"Attempting to load TPU as {device_config['device']}")
                 edge_tpu_delegate = load_delegate('libedgetpu.so.1.0', device_config)
                 logger.info("TPU found")
+                self.interpreter = tflite.Interpreter(
+                    model_path='/edgetpu_model.tflite',
+                    experimental_delegates=[edge_tpu_delegate])
             except ValueError:
-                logger.info("No EdgeTPU detected. Falling back to CPU.")
-        
-        if edge_tpu_delegate is None:
-            self.interpreter = tflite.Interpreter(
-                model_path='/cpu_model.tflite', num_threads=num_threads)
+                logger.info("No EdgeTPU detected.")
+                raise
         else:
             self.interpreter = tflite.Interpreter(
-                model_path='/edgetpu_model.tflite',
-                experimental_delegates=[edge_tpu_delegate])
+                model_path='/cpu_model.tflite', num_threads=num_threads)
         
         self.interpreter.allocate_tensors()
 
