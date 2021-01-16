@@ -96,18 +96,14 @@ export default function Camera({ camera, url }) {
   );
 }
 
-function EditableMask({ onChange, points: initialPoints, scale, width, height }) {
-  const [points, setPoints] = useState(initialPoints);
-
-  useEffect(() => {
-    setPoints(initialPoints);
-  }, [setPoints, initialPoints]);
+function EditableMask({ onChange, points, scale, width, height }) {
+  const boundingRef = useRef(null);
 
   function boundedSize(value, maxValue) {
     return Math.min(Math.max(0, Math.round(value)), maxValue);
   }
 
-  const handleDragEnd = useCallback(
+  const handleMovePoint = useCallback(
     (index, newX, newY) => {
       if (newX < 0 && newY < 0) {
         return;
@@ -116,10 +112,9 @@ function EditableMask({ onChange, points: initialPoints, scale, width, height })
       const y = boundedSize(newY / scale, height);
       const newPoints = [...points];
       newPoints[index] = [x, y];
-      setPoints(newPoints);
       onChange(newPoints);
     },
-    [scale, points, setPoints]
+    [scale, points]
   );
 
   // Add a new point between the closest two other points
@@ -138,20 +133,18 @@ function EditableMask({ onChange, points: initialPoints, scale, width, height })
       const index = points.indexOf(closest);
       const newPoints = [...points];
       newPoints.splice(index, 0, newPoint);
-      setPoints(newPoints);
       onChange(newPoints);
     },
-    [scale, points, setPoints, onChange]
+    [scale, points, onChange]
   );
 
   const handleRemovePoint = useCallback(
     (index) => {
       const newPoints = [...points];
       newPoints.splice(index, 1);
-      setPoints(newPoints);
       onChange(newPoints);
     },
-    [points, setPoints, onChange]
+    [points, onChange]
   );
 
   const scaledPoints = useMemo(() => scalePolylinePoints(points, scale), [points, scale]);
@@ -161,9 +154,22 @@ function EditableMask({ onChange, points: initialPoints, scale, width, height })
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-            <PolyPoint index={i} onDragend={handleDragEnd} onRemove={handleRemovePoint} x={x} y={y} />
+            <PolyPoint
+              boundingRef={boundingRef}
+              index={i}
+              onMove={handleMovePoint}
+              onRemove={handleRemovePoint}
+              x={x}
+              y={y}
+            />
           ))}
-      <svg width="100%" height="100%" className="absolute" style="top: 0; left: 0; right: 0; bottom: 0;">
+      <svg
+        ref={boundingRef}
+        width="100%"
+        height="100%"
+        className="absolute"
+        style="top: 0; left: 0; right: 0; bottom: 0;"
+      >
         {!scaledPoints ? null : (
           <g>
             <polyline points={polylinePointsToPolyline(scaledPoints)} fill="rgba(244,0,0,0.5)" />
@@ -235,21 +241,28 @@ function polylinePointsToPolyline(polylinePoints) {
 }
 
 const PolyPointRadius = 10;
-function PolyPoint({ index, x, y, onDragend, onRemove }) {
+function PolyPoint({ boundingRef, index, x, y, onMove, onRemove }) {
   const [hidden, setHidden] = useState(false);
-  const handleDragStart = useCallback(() => {
-    setHidden(true);
-  }, [setHidden]);
-  const handleDrag = useCallback(
+
+  const handleDragOver = useCallback(
     (event) => {
-      const { offsetX, offsetY } = event;
-      onDragend(index, event.offsetX + x - PolyPointRadius, event.offsetY + y - PolyPointRadius);
+      if (event.target !== boundingRef.current && !boundingRef.current.contains(event.target)) {
+        return;
+      }
+      onMove(index, event.layerX, event.layerY - PolyPointRadius);
     },
-    [onDragend, index]
+    [onMove, index, boundingRef.current]
   );
+
+  const handleDragStart = useCallback(() => {
+    boundingRef.current && boundingRef.current.addEventListener('dragover', handleDragOver, false);
+    setHidden(true);
+  }, [setHidden, boundingRef.current, handleDragOver]);
+
   const handleDragEnd = useCallback(() => {
+    boundingRef.current && boundingRef.current.removeEventListener('dragover', handleDragOver);
     setHidden(false);
-  }, [setHidden]);
+  }, [setHidden, boundingRef.current, handleDragOver]);
 
   const handleRightClick = useCallback(
     (event) => {
@@ -272,7 +285,6 @@ function PolyPoint({ index, x, y, onDragend, onRemove }) {
       onclick={handleClick}
       oncontextmenu={handleRightClick}
       ondragstart={handleDragStart}
-      ondrag={handleDrag}
       ondragend={handleDragEnd}
     />
   );
