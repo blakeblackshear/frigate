@@ -248,7 +248,8 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional('objects', default={}): OBJECTS_SCHEMA,
         vol.Optional('motion', default={}): MOTION_SCHEMA,
         vol.Optional('detect', default={}): DETECT_SCHEMA,
-        vol.Required('cameras', default={}): CAMERAS_SCHEMA
+        vol.Required('cameras', default={}): CAMERAS_SCHEMA,
+        vol.Optional('environment_vars', default={}): { str: str }
     }
 )
 
@@ -982,6 +983,7 @@ class FrigateConfig():
         self._snapshots = SnapshotsConfig(config['clips'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
         self._logger = LoggerConfig(config['logger'])
+        self._environment_vars = config['environment_vars']
 
     def _sub_env_vars(self, config):
         frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
@@ -1015,7 +1017,8 @@ class FrigateConfig():
             'clips': self.clips.to_dict(),
             'snapshots': self.snapshots.to_dict(),
             'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
-            'logger': self.logger.to_dict()
+            'logger': self.logger.to_dict(),
+            'environment_vars': self._environment_vars
         }
 
     @property
@@ -1049,3 +1052,7 @@ class FrigateConfig():
     @property
     def cameras(self) -> Dict[str, CameraConfig]:
         return self._cameras
+
+    @property
+    def environment_vars(self):
+        return self._environment_vars
