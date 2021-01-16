@@ -88,7 +88,7 @@ def event(id):
     except DoesNotExist:
         return "Event not found", 404
 
-@bp.route('/events/<id>/snapshot.jpg')
+@bp.route('/events/<id>/thumbnail.jpg')
 def event_snapshot(id):
     format = request.args.get('format', 'ios')
     thumbnail_bytes = None
