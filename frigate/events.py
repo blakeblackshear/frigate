@@ -175,7 +175,7 @@ class EventProcessor(threading.Thread):
 
                 if not event_data['false_positive']:
                     clip_created = False
-                    if clips_config.enabled and event_data['label'] in clips_config.objects:
+                    if clips_config.enabled and (clips_config.objects is None or event_data['label'] in clips_config.objects):
                         clip_created = self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
                     
                     Event.create(
