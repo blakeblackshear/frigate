@@ -15,6 +15,8 @@ from frigate.util import create_mask
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_TRACKED_OBJECTS = ['person']
+
 DETECTORS_SCHEMA = vol.Schema(
     {
         vol.Required(str): {
@@ -111,15 +113,15 @@ DETECT_SCHEMA = vol.Schema(
 FILTER_SCHEMA = vol.Schema(
     {
         str: {
-                vol.Optional('min_area', default=0): int,
-                vol.Optional('max_area', default=24000000): int,
-                vol.Optional('threshold', default=0.7): float
+                'min_area': int,
+                'max_area': int,
+                'threshold': float,
             }
     }
 )
 
 def filters_for_all_tracked_objects(object_config):
-    for tracked_object in object_config.get('track', ['person']):
+    for tracked_object in object_config.get('track', DEFAULT_TRACKED_OBJECTS):
         if not 'filters' in object_config:
             object_config['filters'] = {}
         if not tracked_object in object_config['filters']:
@@ -128,11 +130,11 @@ def filters_for_all_tracked_objects(object_config):
 
 OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
     {
-        vol.Optional('track', default=['person']): [str],
+        'track': [str],
         vol.Optional('filters', default = {}): FILTER_SCHEMA.extend(
             { 
                 str: {
-                        vol.Optional('min_score', default=0.5): float,
+                        'min_score': float,
                         'mask': vol.Any(str, [str]),
                     }
             })
@@ -221,7 +223,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('crop', default=True): bool,
                 vol.Optional('height', default=270): int
             },
-            'objects': OBJECTS_SCHEMA,
+            vol.Optional('objects', default={}): OBJECTS_SCHEMA,
             vol.Optional('motion', default={}): MOTION_SCHEMA,
             vol.Optional('detect', default={}): DETECT_SCHEMA.extend({
                 vol.Optional('enabled', default=True): bool
@@ -504,11 +506,11 @@ class RecordConfig():
         }
 
 class FilterConfig():
-    def __init__(self, config, frame_shape=None):
-        self._min_area = config['min_area']
-        self._max_area = config['max_area']
-        self._threshold = config['threshold']
-        self._min_score = config.get('min_score')
+    def __init__(self, global_config, config, frame_shape=None):
+        self._min_area = config.get('min_area', global_config.get('min_area', 0))
+        self._max_area = config.get('max_area', global_config.get('max_area', 24000000))
+        self._threshold = config.get('threshold', global_config.get('threshold', 0.7))
+        self._min_score = config.get('min_score', global_config.get('min_score', 0.5))
         self._raw_mask = config.get('mask')
         self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
 
@@ -543,11 +545,8 @@ class FilterConfig():
 
 class ObjectConfig():
     def __init__(self, global_config, config, frame_shape):
-        self._track = config.get('track', global_config['track'])
-        if 'filters' in config:
-            self._filters = { name: FilterConfig(c, frame_shape) for name, c in config['filters'].items() }
-        else:
-            self._filters = { name: FilterConfig(c, frame_shape) for name, c in global_config['filters'].items() }
+        self._track = config.get('track', global_config.get('track', DEFAULT_TRACKED_OBJECTS))
+        self._filters = { name: FilterConfig(global_config.get('filters').get(name, {}), config.get('filters').get(name, {}), frame_shape) for name in self._track }
 
     @property
     def track(self):
@@ -648,7 +647,7 @@ class CameraClipsConfig():
         self._enabled = config['enabled']
         self._pre_capture = config['pre_capture']
         self._post_capture = config['post_capture']
-        self._objects = config.get('objects', global_config['objects']['track'])
+        self._objects = config.get('objects')
         self._retain = RetainConfig(global_config['clips']['retain'], config['retain'])
     
     @property

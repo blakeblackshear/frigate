@@ -311,9 +311,7 @@ class TestConfig(TestCase):
             }
         }
         config = FrigateConfig(config=config)
-        assert(len(config.cameras['back'].clips.objects) == 2)
-        assert('dog' in config.cameras['back'].clips.objects)
-        assert('person' in config.cameras['back'].clips.objects)
+        assert(config.cameras['back'].clips.objects is None)
     
     def test_role_assigned_but_not_enabled(self):
         json_config = {
