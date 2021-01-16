@@ -70,11 +70,12 @@ class FrigateApp():
                 'camera_fps': mp.Value('d', 0.0),
                 'skipped_fps': mp.Value('d', 0.0),
                 'process_fps': mp.Value('d', 0.0),
+                'detection_enabled': mp.Value('i', 1),
                 'detection_fps': mp.Value('d', 0.0),
                 'detection_frame': mp.Value('d', 0.0),
                 'read_start': mp.Value('d', 0.0),
                 'ffmpeg_pid': mp.Value('i', 0),
-                'frame_queue': mp.Queue(maxsize=2)
+                'frame_queue': mp.Queue(maxsize=2),
             }
         
     def check_config(self):
@@ -129,7 +130,7 @@ class FrigateApp():
         self.flask_app = create_app(self.config, self.db, self.stats_tracking, self.detected_frames_processor)
 
     def init_mqtt(self):
-        self.mqtt_client = create_mqtt_client(self.config)
+        self.mqtt_client = create_mqtt_client(self.config, self.camera_metrics)
 
     def start_detectors(self):
         model_shape = (self.config.model.height, self.config.model.width)
