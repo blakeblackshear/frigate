@@ -65,14 +65,18 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         camera_name = message.topic.split('/')[-3]
         command = message.topic.split('/')[-1]
 
+        detect_settings = config.cameras[camera_name].detect
+
         if payload == 'ON':
             if not camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning on detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = True
+                detect_settings._enabled = True
         elif payload == 'OFF':
             if camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning off detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = False
+                detect_settings._enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
