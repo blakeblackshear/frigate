@@ -255,6 +255,7 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     listen()
 
     frame_queue = process_info['frame_queue']
+    detection_enabled = process_info['detection_enabled']
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
@@ -268,7 +269,7 @@ def track_camera(name, config: CameraConfig, model_shape, detection_queue, resul
     frame_manager = SharedMemoryFrameManager()
 
     process_frames(name, frame_queue, frame_shape, model_shape, frame_manager, motion_detector, object_detector,
-        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, stop_event)
+        object_tracker, detected_objects_queue, process_info, objects_to_track, object_filters, detection_enabled, stop_event)
 
     logger.info(f"{name}: exiting subprocess")
 
@@ -305,7 +306,7 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
     frame_manager: FrameManager, motion_detector: MotionDetector, 
     object_detector: RemoteObjectDetector, object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue, process_info: Dict,
-    objects_to_track: List[str], object_filters, stop_event,
+    objects_to_track: List[str], object_filters, detection_enabled: mp.Value, stop_event,
     exit_on_empty: bool = False):
     
     fps = process_info['process_fps']
@@ -334,6 +335,14 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
 
         if frame is None:
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
+            continue
+
+        if not detection_enabled.value:
+            fps.value = fps_tracker.eps()
+            object_tracker.match_and_update(frame_time, [])
+            detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects, [], []))
+            detection_fps.value = object_detector.fps.eps()
+            frame_manager.close(f"{camera_name}{frame_time}")
             continue
 
         # look for motion
@@ -410,11 +419,11 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
 
         # add to the queue if not full
         if(detected_objects_queue.full()):
-          frame_manager.delete(f"{camera_name}{frame_time}")
-          continue
+            frame_manager.delete(f"{camera_name}{frame_time}")
+            continue
         else:
-          fps_tracker.update()
-          fps.value = fps_tracker.eps()
-          detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects, motion_boxes, regions))
-          detection_fps.value = object_detector.fps.eps()
-          frame_manager.close(f"{camera_name}{frame_time}")
+            fps_tracker.update()
+            fps.value = fps_tracker.eps()
+            detected_objects_queue.put((camera_name, frame_time, object_tracker.tracked_objects, motion_boxes, regions))
+            detection_fps.value = object_detector.fps.eps()
+            frame_manager.close(f"{camera_name}{frame_time}")

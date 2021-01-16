@@ -7,7 +7,7 @@ from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
 
-def create_mqtt_client(config: FrigateConfig):
+def create_mqtt_client(config: FrigateConfig, camera_metrics):
     mqtt_config = config.mqtt
 
     def on_clips_command(client, userdata, message):
@@ -57,6 +57,28 @@ def create_mqtt_client(config: FrigateConfig):
         if command == "set":
             state_topic = f"{message.topic[:-4]}/state"
             client.publish(state_topic, payload, retain=True)
+    
+    def on_detect_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_detect_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split('/')[-3]
+        command = message.topic.split('/')[-1]
+
+        if payload == 'ON':
+            if not camera_metrics[camera_name]["detection_enabled"].value:
+                logger.info(f"Turning on detection for {camera_name} via mqtt")
+                camera_metrics[camera_name]["detection_enabled"].value = True
+        elif payload == 'OFF':
+            if camera_metrics[camera_name]["detection_enabled"].value:
+                logger.info(f"Turning off detection for {camera_name} via mqtt")
+                camera_metrics[camera_name]["detection_enabled"].value = False
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+        if command == "set":
+            state_topic = f"{message.topic[:-4]}/state"
+            client.publish(state_topic, payload, retain=True)
 
     def on_connect(client, userdata, flags, rc):
         threading.current_thread().name = "mqtt"
@@ -81,6 +103,7 @@ def create_mqtt_client(config: FrigateConfig):
     for name in config.cameras.keys():
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/clips/#", on_clips_command)
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/snapshots/#", on_snapshots_command)
+        client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/detection/#", on_detect_command)
 
     if not mqtt_config.user is None:
         client.username_pw_set(mqtt_config.user, password=mqtt_config.password)
@@ -93,5 +116,6 @@ def create_mqtt_client(config: FrigateConfig):
     client.loop_start()
     client.subscribe(f"{mqtt_config.topic_prefix}/+/clips/#")
     client.subscribe(f"{mqtt_config.topic_prefix}/+/snapshots/#")
+    client.subscribe(f"{mqtt_config.topic_prefix}/+/detection/#")
 
     return client
