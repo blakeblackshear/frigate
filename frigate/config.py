@@ -994,7 +994,7 @@ class FrigateConfig():
         self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
         self._mqtt = MqttConfig(config['mqtt'])
         self._clips = ClipsConfig(config['clips'])
-        self._snapshots = SnapshotsConfig(config['clips'])
+        self._snapshots = SnapshotsConfig(config['snapshots'])
         self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
         self._logger = LoggerConfig(config['logger'])
         self._environment_vars = config['environment_vars']
