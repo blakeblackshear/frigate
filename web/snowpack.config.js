@@ -14,11 +14,17 @@ module.exports = {
         preloadModules: true,
       },
     ],
+    [
+      '@snowpack/plugin-webpack',
+      {
+        sourceMap: true,
+      },
+    ],
   ],
-  installOptions: {
-    sourceMaps: false,
+  packageOptions: {
+    sourcemap: false,
   },
   buildOptions: {
-    sourceMaps: true,
+    sourcemap: true,
   },
 };

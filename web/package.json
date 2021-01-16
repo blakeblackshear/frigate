@@ -3,19 +3,22 @@
   "private": true,
   "scripts": {
     "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://localhost:5000 snowpack dev",
+    "prebuild": "rimraf build",
     "build": "snowpack build"
   },
   "dependencies": {
     "@prefresh/snowpack": "^3.0.1",
-    "@snowpack/plugin-optimize": "^0.2.10",
-    "@snowpack/plugin-postcss": "^1.0.11",
+    "@snowpack/plugin-optimize": "^0.2.13",
+    "@snowpack/plugin-postcss": "^1.1.0",
+    "@snowpack/plugin-webpack": "^2.3.0",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
     "postcss": "^8.2.2",
     "postcss-cli": "^8.3.1",
     "preact": "^10.5.9",
     "preact-router": "^3.2.1",
-    "snowpack": "^2.18.5",
+    "rimraf": "^3.0.2",
+    "snowpack": "^3.0.0",
     "tailwindcss": "^2.0.2"
   }
 }
