@@ -107,7 +107,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
     for name in config.cameras.keys():
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/clips/#", on_clips_command)
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/snapshots/#", on_snapshots_command)
-        client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/detection/#", on_detect_command)
+        client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/detect/#", on_detect_command)
 
     if not mqtt_config.user is None:
         client.username_pw_set(mqtt_config.user, password=mqtt_config.password)
@@ -118,8 +118,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         raise
 
     client.loop_start()
+
+    for name in config.cameras.keys():
+        client.publish(f"{mqtt_config.topic_prefix}/{name}/clips/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
+        client.publish(f"{mqtt_config.topic_prefix}/{name}/snapshots/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
+        client.publish(f"{mqtt_config.topic_prefix}/{name}/detect/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
+        
     client.subscribe(f"{mqtt_config.topic_prefix}/+/clips/#")
     client.subscribe(f"{mqtt_config.topic_prefix}/+/snapshots/#")
-    client.subscribe(f"{mqtt_config.topic_prefix}/+/detection/#")
+    client.subscribe(f"{mqtt_config.topic_prefix}/+/detect/#")
 
     return client
