@@ -790,7 +790,7 @@ automation:
         data_template:
           message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
           data:
-            image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}.jpg?format=android'
+            image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
             tag: '{{trigger.payload_json["after"]["id"]}}'
 ```
 Note that the image url has `?format=android`. This adjusts the aspect ratio to be idea for android notifications. For iOS optimized snapshots, no format parameter needs to be passed.
@@ -941,8 +941,8 @@ Returns summary data for events in the database. Used by the HomeAssistant integ
 
 ### `/api/events/<id>`
 Returns data for a single event.
-### `/api/events/<id>/snapshot.jpg`
-Returns a snapshot for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
+### `/api/events/<id>/thumbnail.jpg`
+Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
 ### `/clips/<camera>-<id>.mp4`
 Video clip for the given camera and event id.

@@ -32,7 +32,7 @@ automation:
         data_template:
           message: "A {{trigger.payload_json['after']['label']}} has left the yard."
           data:
-            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}.jpg"
+            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
             tag: "{{trigger.payload_json['after']['id']}}"
 
   - alias: Notify for dogs in the front with a high top score
@@ -48,7 +48,7 @@ automation:
         data_template:
           message: 'High confidence dog detection.'
           data:
-            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}.jpg"
+            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
             tag: "{{trigger.payload_json['after']['id']}}"
 ```
 
@@ -66,6 +66,6 @@ automation:
           data:
             photo:
               # this url should work for addon users
-              - url: 'http://ccab4aaf-frigate:5000/events/{{trigger.payload_json["after"]["id"]}}/snapshot.jpg'
+              - url: 'http://ccab4aaf-frigate:5000/api/events/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg'
                 caption : 'A {{trigger.payload_json["after"]["label"]}} was detected on {{ trigger.payload_json["after"]["camera"] }} camera'
 ```
