@@ -305,16 +305,9 @@ def create_mask(frame_shape, mask):
     return mask_img
 
 def add_mask(mask, mask_img):
-    if mask.startswith('poly,'):
-        points = mask.split(',')[1:]
-        contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
-        cv2.fillPoly(mask_img, pts=[contour], color=(0))
-    else:
-        mask_file = cv2.imread(f"/config/{mask}", cv2.IMREAD_GRAYSCALE)
-        if mask_file is None or mask_file.size == 0:
-            logger.warning(f"Could not read mask file {mask}")
-        else:
-            mask_img[np.where(mask_file==[0])] = [0]
+    points = mask.split(',')
+    contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
+    cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
 class FrameManager(ABC):
     @abstractmethod
