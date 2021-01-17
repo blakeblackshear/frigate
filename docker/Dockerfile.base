@@ -31,11 +31,9 @@ RUN apt-get -qq update \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
 RUN pip3 install \
-    peewee \
     peewee_migrate \
     zeroconf \
-    voluptuous \
-    setproctitle
+    voluptuous
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
