@@ -32,7 +32,9 @@ RUN pip3 wheel --wheel-dir=/wheels \
     paho-mqtt \
     PyYAML \
     matplotlib \
-    click
+    click \
+    setproctitle \
+    peewee
 
 FROM scratch
 
