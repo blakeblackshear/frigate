@@ -1,6 +1,7 @@
 ARG ARCH=amd64
+ARG WHEELS_VERSION
 ARG FFMPEG_VERSION
-FROM blakeblackshear/frigate-wheels:${ARCH} as wheels
+FROM blakeblackshear/frigate-wheels:${WHEELS_VERSION}-${ARCH} as wheels
 FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
 FROM frigate-web as web
 
