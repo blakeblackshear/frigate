@@ -765,7 +765,7 @@ class DetectConfig():
 class ZoneConfig():
     def __init__(self, name, config):
         self._coordinates = config['coordinates']
-        self._filters = { name: FilterConfig(c) for name, c in config['filters'].items() }
+        self._filters = { name: FilterConfig(c, c) for name, c in config['filters'].items() }
 
         if isinstance(self._coordinates, list):
             self._contour =  np.array([[int(p.split(',')[0]), int(p.split(',')[1])] for p in self._coordinates])
