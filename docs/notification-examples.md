@@ -16,7 +16,7 @@ automation:
         data_template:
           message: "A {{trigger.payload_json['after']['label']}} has entered the yard."
           data:
-            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}.jpg"
+            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
             tag: "{{trigger.payload_json['after']['id']}}"
 
   - alias: When a person leaves a zone named yard
