@@ -24,7 +24,8 @@ RUN pip3 install scikit-build
 
 RUN pip3 wheel --wheel-dir=/wheels \
     opencv-python-headless \
-    numpy \
+    # pinning due to issue in 1.19.5 https://github.com/numpy/numpy/issues/18131
+    numpy==1.19.4 \
     imutils \
     scipy \
     psutil \
