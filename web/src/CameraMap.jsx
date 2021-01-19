@@ -1,4 +1,5 @@
 import { h } from 'preact';
+import Box from './components/Box';
 import Button from './components/Button';
 import Heading from './components/Heading';
 import Switch from './components/Switch';
@@ -11,6 +12,7 @@ export default function CameraMasks({ camera, url }) {
   const apiHost = useContext(ApiHost);
   const imageRef = useRef(null);
   const [imageScale, setImageScale] = useState(1);
+  const [snap, setSnap] = useState(true);
 
   if (!(camera in config.cameras)) {
     return <div>{`No camera named ${camera}`}</div>;
@@ -203,23 +205,39 @@ ${Object.keys(objectMaskPoints)
   .join('\n')}`);
   }, [objectMaskPoints]);
 
+  const handleChangeSnap = useCallback(
+    (id, value) => {
+      setSnap(value);
+    },
+    [setSnap]
+  );
+
   return (
     <div class="flex-col space-y-4" style={`max-width: ${width}px`}>
       <Heading size="2xl">{camera} mask & zone creator</Heading>
-      <p>
-        This tool can help you create masks & zones for your {camera} camera. When done, copy each mask configuration
-        into your <code className="font-mono">config.yml</code> file restart your Frigate instance to save your changes.
-      </p>
-      <div className="relative">
-        <img ref={imageRef} width={width} height={height} src={`${apiHost}/api/${camera}/latest.jpg`} />
-        <EditableMask
-          onChange={handleUpdateEditable}
-          points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
-          scale={imageScale}
-          width={width}
-          height={height}
-        />
-      </div>
+
+      <Box>
+        <p>
+          This tool can help you create masks & zones for your {camera} camera. When done, copy each mask configuration
+          into your <code className="font-mono">config.yml</code> file restart your Frigate instance to save your
+          changes.
+        </p>
+      </Box>
+
+      <Box className="space-y-4">
+        <div className="relative">
+          <img ref={imageRef} width={width} height={height} src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <EditableMask
+            onChange={handleUpdateEditable}
+            points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
+            scale={imageScale}
+            snap={snap}
+            width={width}
+            height={height}
+          />
+        </div>
+        <Switch checked={snap} label="Snap to edges" onChange={handleChangeSnap} />
+      </Box>
 
       <div class="flex-col space-y-4">
         <MaskValues
@@ -276,14 +294,25 @@ function objectYamlKeyPrefix(points, key, subkey) {
   return `        - `;
 }
 
-function EditableMask({ onChange, points, scale, width, height }) {
+const MaskInset = 20;
+
+function EditableMask({ onChange, points, scale, snap, width, height }) {
   if (!points) {
     return null;
   }
   const boundingRef = useRef(null);
 
   function boundedSize(value, maxValue) {
-    return Math.min(Math.max(0, Math.round(value)), maxValue);
+    const newValue = Math.min(Math.max(0, Math.round(value)), maxValue);
+    if (snap) {
+      if (newValue <= MaskInset) {
+        return 0;
+      } else if (maxValue - newValue <= MaskInset) {
+        return maxValue;
+      }
+    }
+
+    return newValue;
   }
 
   const handleMovePoint = useCallback(
@@ -291,35 +320,40 @@ function EditableMask({ onChange, points, scale, width, height }) {
       if (newX < 0 && newY < 0) {
         return;
       }
-      const x = boundedSize(newX / scale, width);
-      const y = boundedSize(newY / scale, height);
+      let x = boundedSize(newX / scale, width, snap);
+      let y = boundedSize(newY / scale, height, snap);
+
       const newPoints = [...points];
       newPoints[index] = [x, y];
       onChange(newPoints);
     },
-    [scale, points]
+    [scale, points, snap]
   );
 
   // Add a new point between the closest two other points
   const handleAddPoint = useCallback(
     (event) => {
       const { offsetX, offsetY } = event;
-      const scaledX = boundedSize(offsetX / scale, width);
-      const scaledY = boundedSize(offsetY / scale, height);
+      const scaledX = boundedSize((offsetX - MaskInset) / scale, width, snap);
+      const scaledY = boundedSize((offsetY - MaskInset) / scale, height, snap);
       const newPoint = [scaledX, scaledY];
-      const closest = points.reduce((a, b, i) => {
-        if (!a) {
-          return b;
-        }
-        return distance(a, newPoint) < distance(b, newPoint) ? a : b;
-      }, null);
-      const index = points.indexOf(closest);
+
+      let closest;
+      const { index } = points.reduce(
+        (result, point, i) => {
+          const nextPoint = points.length === i + 1 ? points[0] : points[i + 1];
+          const distance0 = Math.sqrt(Math.pow(point[0] - newPoint[0], 2) + Math.pow(point[1] - newPoint[1], 2));
+          const distance1 = Math.sqrt(Math.pow(point[0] - nextPoint[0], 2) + Math.pow(point[1] - nextPoint[1], 2));
+          const distance = distance0 + distance1;
+          return distance < result.distance ? { distance, index: i } : result;
+        },
+        { distance: Infinity, index: -1 }
+      );
       const newPoints = [...points];
       newPoints.splice(index, 0, newPoint);
-      console.log(points, newPoints);
       onChange(newPoints);
     },
-    [scale, points, onChange]
+    [scale, points, onChange, snap]
   );
 
   const handleRemovePoint = useCallback(
@@ -334,7 +368,7 @@ function EditableMask({ onChange, points, scale, width, height }) {
   const scaledPoints = useMemo(() => scalePolylinePoints(points, scale), [points, scale]);
 
   return (
-    <div onclick={handleAddPoint}>
+    <div className="absolute" style={`inset: -${MaskInset}px`}>
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
@@ -343,17 +377,12 @@ function EditableMask({ onChange, points, scale, width, height }) {
               index={i}
               onMove={handleMovePoint}
               onRemove={handleRemovePoint}
-              x={x}
-              y={y}
+              x={x + MaskInset}
+              y={y + MaskInset}
             />
           ))}
-      <svg
-        ref={boundingRef}
-        width="100%"
-        height="100%"
-        className="absolute"
-        style="top: 0; left: 0; right: 0; bottom: 0;"
-      >
+      <div className="absolute inset-0 right-0 bottom-0" onclick={handleAddPoint} ref={boundingRef} />
+      <svg width="100%" height="100%" className="absolute pointer-events-none" style={`inset: ${MaskInset}px`}>
         {!scaledPoints ? null : (
           <g>
             <polyline points={polylinePointsToPolyline(scaledPoints)} fill="rgba(244,0,0,0.5)" />
@@ -410,11 +439,7 @@ function MaskValues({
   );
 
   return (
-    <div
-      className="overflow-hidden rounded border-gray-500 border-solid border p-2"
-      onmouseover={handleMousein}
-      onmouseout={handleMouseout}
-    >
+    <Box className="overflow-hidden" onmouseover={handleMousein} onmouseout={handleMouseout}>
       <div class="flex space-x-4">
         <Heading className="flex-grow self-center" size="base">
           {title}
@@ -422,7 +447,7 @@ function MaskValues({
         <Button onClick={onCopy}>Copy</Button>
         <Button onClick={onCreate}>Add</Button>
       </div>
-      <pre class="overflow-hidden font-mono text-gray-900 dark:text-gray-100">
+      <pre class="relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2">
         {yamlPrefix}
         {Object.keys(points).map((mainkey) => {
           if (isMulti) {
@@ -458,7 +483,7 @@ function MaskValues({
           }
         })}
       </pre>
-    </div>
+    </Box>
   );
 }
 
@@ -487,10 +512,6 @@ function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handl
       ) : null}
     </span>
   );
-}
-
-function distance([x0, y0], [x1, y1]) {
-  return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
 }
 
 function getPolylinePoints(polyline) {
@@ -529,10 +550,13 @@ function PolyPoint({ boundingRef, index, x, y, onMove, onRemove }) {
 
   const handleDragOver = useCallback(
     (event) => {
-      if (event.target !== boundingRef.current && !boundingRef.current.contains(event.target)) {
+      if (
+        !boundingRef.current ||
+        (event.target !== boundingRef.current && !boundingRef.current.contains(event.target))
+      ) {
         return;
       }
-      onMove(index, event.layerX, event.layerY - PolyPointRadius);
+      onMove(index, event.layerX - PolyPointRadius * 2, event.layerY - PolyPointRadius * 2);
     },
     [onMove, index, boundingRef.current]
   );
