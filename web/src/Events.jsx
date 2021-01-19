@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { ApiHost } from './context';
+import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import { route } from 'preact-router';
@@ -19,71 +20,82 @@ export default function Events({ url } = {}) {
     setEvents(data);
   }, [searchParamsString]);
 
+  const searchKeys = Array.from(searchParams.keys());
+
   return (
-    <div>
+    <div className="space-y-4">
       <Heading>Events</Heading>
-      <div className="flex flex-wrap space-x-2">
-        {Array.from(searchParams.keys()).map((filterKey) => (
-          <UnFilterable
-            paramName={filterKey}
-            searchParams={searchParamsString}
-            name={`${filterKey}: ${searchParams.get(filterKey)}`}
-          />
-        ))}
-      </div>
-      <Table>
-        <Thead>
-          <Tr>
-            <Th></Th>
-            <Th>Camera</Th>
-            <Th>Label</Th>
-            <Th>Score</Th>
-            <Th>Zones</Th>
-            <Th>Date</Th>
-            <Th>Start</Th>
-            <Th>End</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {events.map(
-            (
-              { camera, id, label, start_time: startTime, end_time: endTime, thumbnail, top_score: score, zones },
-              i
-            ) => {
-              const start = new Date(parseInt(startTime * 1000, 10));
-              const end = new Date(parseInt(endTime * 1000, 10));
-              return (
-                <Tr key={id} index={i}>
-                  <Td>
-                    <a href={`/events/${id}`}>
-                      <img className="w-32" src={`data:image/jpeg;base64,${thumbnail}`} />
-                    </a>
-                  </Td>
-                  <Td>
-                    <Filterable searchParams={searchParamsString} paramName="camera" name={camera} />
-                  </Td>
-                  <Td>
-                    <Filterable searchParams={searchParamsString} paramName="label" name={label} />
-                  </Td>
-                  <Td>{(score * 100).toFixed(2)}%</Td>
-                  <Td>
-                    <ul>
-                      {zones.map((zone) => (
-                        <li>
-                          <Filterable searchParams={searchParamsString} paramName="zone" name={zone} />
-                        </li>
-                      ))}
-                    </ul>
-                  </Td>
-                  <Td>{start.toLocaleDateString()}</Td>
-                  <Td>{start.toLocaleTimeString()}</Td>
-                  <Td>{end.toLocaleTimeString()}</Td>
-                </Tr>
-              );
-            }
-          )}
-        </Tbody>
-      </Table>
+
+      {searchKeys.length ? (
+        <Box>
+          <Heading size="sm">Filters</Heading>
+          <div className="flex flex-wrap space-x-2">
+            {searchKeys.map((filterKey) => (
+              <UnFilterable
+                paramName={filterKey}
+                searchParams={searchParamsString}
+                name={`${filterKey}: ${searchParams.get(filterKey)}`}
+              />
+            ))}
+          </div>
+        </Box>
+      ) : null}
+
+      <Box className="min-w-0 overflow-auto">
+        <Table>
+          <Thead>
+            <Tr>
+              <Th></Th>
+              <Th>Camera</Th>
+              <Th>Label</Th>
+              <Th>Score</Th>
+              <Th>Zones</Th>
+              <Th>Date</Th>
+              <Th>Start</Th>
+              <Th>End</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {events.map(
+              (
+                { camera, id, label, start_time: startTime, end_time: endTime, thumbnail, top_score: score, zones },
+                i
+              ) => {
+                const start = new Date(parseInt(startTime * 1000, 10));
+                const end = new Date(parseInt(endTime * 1000, 10));
+                return (
+                  <Tr key={id} index={i}>
+                    <Td>
+                      <a href={`/events/${id}`}>
+                        <img className="w-32 max-w-none" src={`data:image/jpeg;base64,${thumbnail}`} />
+                      </a>
+                    </Td>
+                    <Td>
+                      <Filterable searchParams={searchParamsString} paramName="camera" name={camera} />
+                    </Td>
+                    <Td>
+                      <Filterable searchParams={searchParamsString} paramName="label" name={label} />
+                    </Td>
+                    <Td>{(score * 100).toFixed(2)}%</Td>
+                    <Td>
+                      <ul>
+                        {zones.map((zone) => (
+                          <li>
+                            <Filterable searchParams={searchParamsString} paramName="zone" name={zone} />
+                          </li>
+                        ))}
+                      </ul>
+                    </Td>
+                    <Td>{start.toLocaleDateString()}</Td>
+                    <Td>{start.toLocaleTimeString()}</Td>
+                    <Td>{end.toLocaleTimeString()}</Td>
+                  </Tr>
+                );
+              }
+            )}
+          </Tbody>
+        </Table>
+      </Box>
     </div>
   );
 }

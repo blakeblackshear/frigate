@@ -24,7 +24,7 @@ export default function App() {
     <div />
   ) : (
     <Config.Provider value={config}>
-      <div className="flex md:min-h-screen w-full bg-gray-100 dark:bg-gray-800">
+      <div className="md:flex flex-col md:flex-row md:min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
         <Sidebar />
         <div className="p-4 min-w-0">
           <Router>
