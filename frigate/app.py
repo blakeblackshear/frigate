@@ -74,7 +74,7 @@ class FrigateApp():
                 'camera_fps': mp.Value('d', 0.0),
                 'skipped_fps': mp.Value('d', 0.0),
                 'process_fps': mp.Value('d', 0.0),
-                'detection_enabled': mp.Value('i', 1),
+                'detection_enabled': mp.Value('i', self.config.cameras[camera_name].detect.enabled),
                 'detection_fps': mp.Value('d', 0.0),
                 'detection_frame': mp.Value('d', 0.0),
                 'read_start': mp.Value('d', 0.0),
