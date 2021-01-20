@@ -33,7 +33,7 @@ export default function App() {
             <Event path="/events/:eventId" />
             <Events path="/events" />
             <Debug path="/debug" />
-            <Cameras path="/" />
+            <Cameras default path="/" />
           </Router>
         </div>
       </div>
