@@ -213,7 +213,7 @@ ${Object.keys(objectMaskPoints)
   );
 
   return (
-    <div class="flex-col space-y-4" style={`max-width: ${width}px`}>
+    <div class="flex-col space-y-4">
       <Heading size="2xl">{camera} mask & zone creator</Heading>
 
       <Box>
@@ -226,7 +226,7 @@ ${Object.keys(objectMaskPoints)
 
       <Box className="space-y-4">
         <div className="relative">
-          <img ref={imageRef} width={width} height={height} src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <img ref={imageRef} className="w-full" src={`${apiHost}/api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
