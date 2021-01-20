@@ -115,8 +115,8 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
 
     for name in config.cameras.keys():
         client.publish(f"{mqtt_config.topic_prefix}/{name}/clips/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
-        client.publish(f"{mqtt_config.topic_prefix}/{name}/snapshots/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
-        client.publish(f"{mqtt_config.topic_prefix}/{name}/detect/state", 'ON' if config.cameras[name].clips.enabled else 'OFF', retain=True)
+        client.publish(f"{mqtt_config.topic_prefix}/{name}/snapshots/state", 'ON' if config.cameras[name].snapshots.enabled else 'OFF', retain=True)
+        client.publish(f"{mqtt_config.topic_prefix}/{name}/detect/state", 'ON' if config.cameras[name].detect.enabled else 'OFF', retain=True)
 
     client.subscribe(f"{mqtt_config.topic_prefix}/+/clips/set")
     client.subscribe(f"{mqtt_config.topic_prefix}/+/snapshots/set")
