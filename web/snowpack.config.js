@@ -26,6 +26,7 @@ module.exports = {
     sourcemap: false,
   },
   buildOptions: {
+    baseUrl: '/foobar/',
     sourcemap: true,
   },
 };
