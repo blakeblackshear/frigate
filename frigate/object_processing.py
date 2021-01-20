@@ -183,7 +183,11 @@ class TrackedObject():
         if self.thumbnail_data is None:
             return None
             
-        best_frame = cv2.cvtColor(self.frame_cache[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
+        try:
+            best_frame = cv2.cvtColor(self.frame_cache[self.thumbnail_data['frame_time']], cv2.COLOR_YUV2BGR_I420)
+        except KeyError:
+            logger.warning(f"Unable to create jpg because frame {self.thumbnail_data['frame_time']} is not in the cache")
+            return None
  
         if bounding_box:
             thickness = 2
