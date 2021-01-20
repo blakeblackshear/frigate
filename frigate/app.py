@@ -202,7 +202,7 @@ class FrigateApp():
             try:
                 self.init_config()
             except Exception as e:
-                logger.error(f"Error parsing config: {e}")
+                print(f"Error parsing config: {e}")
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
