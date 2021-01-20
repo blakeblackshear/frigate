@@ -1,4 +1,5 @@
 import { h } from 'preact';
+import AutoUpdatingCameraImage from './components/AutoUpdatingCameraImage';
 import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
@@ -36,12 +37,7 @@ export default function Camera({ camera, url }) {
     <div className="space-y-4">
       <Heading size="2xl">{camera}</Heading>
       <Box>
-        <img
-          width={cameraConfig.width}
-          height={cameraConfig.height}
-          key={searchParamsString}
-          src={`${apiHost}/api/${camera}?${searchParamsString}`}
-        />
+        <AutoUpdatingCameraImage camera={camera} searchParams={searchParamsString} />
       </Box>
 
       <Box className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
