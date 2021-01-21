@@ -1,0 +1,28 @@
+name: On push
+
+on:
+  push:
+    branches:
+      - master
+      - release-0.8.0
+
+jobs:
+  deploy-docs:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./docs
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 12.x
+      - run: npm install
+      - name: Build docs
+        run: npm run build
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
