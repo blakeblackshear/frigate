@@ -102,7 +102,7 @@ def event_snapshot(id):
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
                     if not tracked_obj is None:
-                        thumbnail_bytes = tracked_obj.get_jpg_bytes()
+                        thumbnail_bytes = tracked_obj.get_thumbnail()
         except:
             return "Event not found", 404
 
