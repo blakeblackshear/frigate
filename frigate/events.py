@@ -101,12 +101,18 @@ class EventProcessor(threading.Thread):
         # get all clips from the camera with the event sorted
         sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
 
+        # if there are no clips in the cache or we are still waiting on a needed file check every 5 seconds
+        wait_count = 0
         while len(sorted_clips) == 0 or sorted_clips[-1]['start_time'] + sorted_clips[-1]['duration'] < event_data['end_time']+post_capture:
+            if wait_count > 4:
+                logger.warning(f"Unable to create clip for {camera} and event {event_data['id']}. There were no cache files for this event.")
+                return False
             logger.debug(f"No cache clips for {camera}. Waiting...")
             time.sleep(5)
             self.refresh_cache()
             # get all clips from the camera with the event sorted
             sorted_clips = sorted([c for c in self.cached_clips.values() if c['camera'] == camera], key = lambda i: i['start_time'])
+            wait_count += 1
         
         playlist_start = event_data['start_time']-pre_capture
         playlist_end = event_data['end_time']+post_capture
