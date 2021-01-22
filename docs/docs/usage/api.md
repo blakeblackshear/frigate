@@ -158,6 +158,17 @@ Returns data for a single event.
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
+### `/api/events/<id>/snapshot.jpg`
+Returns the snapshot image for the event id. Works while the event is in progress and after completion.
+
+Accepts the following query string parameters, but they are only applied when an event is in progress. After the event is completed, the saved snapshot is returned from disk without modification:
+|param|Type|Description|
+|----|-----|--|
+|`h`|int|Height in pixels|
+|`bbox`|int|Show bounding boxes for detected objects (0 or 1)|
+|`timestamp`|int|Print the timestamp in the upper left (0 or 1)|
+|`crop`|int|Crop the snapshot to the  (0 or 1)|
+
 ### `/clips/<camera>-<id>.mp4`
 
 Video clip for the given camera and event id.

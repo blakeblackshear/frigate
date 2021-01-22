@@ -3,6 +3,12 @@ id: troubleshooting
 title: Troubleshooting
 ---
 
+### My mjpeg stream or snapshots look green and crazy
+This almost always means that the width/height defined for your camera are not correct. Double check the resolution with vlc or another player. Also make sure you don't have the width and height values backwards.
+
+Example:
+![mismatched-resolution](/img/mismatched-resolution.jpg)
+
 ## "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5639eeb6e140] moov atom not found"
 
 These messages in the logs are expected in certain situations. Frigate checks the integrity of the video cache before assembling clips. Occasionally these cached files will be invalid and cleaned up automatically.
