@@ -95,6 +95,7 @@ class EventProcessor(threading.Thread):
         for f, data in list(self.cached_clips.items()):
             if earliest_event-90 > data['start_time']+data['duration']:
                 del self.cached_clips[f]
+                logger.debug(f"Cleaning up cached file {f}")
                 os.remove(os.path.join(CACHE_DIR,f))
 
     def create_clip(self, camera, event_data, pre_capture, post_capture):
