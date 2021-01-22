@@ -162,6 +162,7 @@ Returns a thumbnail for the event id optimized for notifications. Works while th
 Returns the snapshot image for the event id. Works while the event is in progress and after completion.
 
 Accepts the following query string parameters, but they are only applied when an event is in progress. After the event is completed, the saved snapshot is returned from disk without modification:
+
 |param|Type|Description|
 |----|-----|--|
 |`h`|int|Height in pixels|
