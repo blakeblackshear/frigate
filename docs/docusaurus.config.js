@@ -1,8 +1,8 @@
 module.exports = {
   title: 'Frigate',
   tagline: 'NVR With Realtime Object Detection for IP Cameras',
-  url: 'https://blakeblackshear.github.io/frigate',
-  baseUrl: '/',
+  url: 'https://blakeblackshear.github.io',
+  baseUrl: '/frigate/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
