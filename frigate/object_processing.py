@@ -72,6 +72,8 @@ class TrackedObject():
         self.false_positive = True
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data = None
+        self.last_updated = 0
+        self.last_published = 0
         self.frame = None
         self.previous = self.to_dict()
 
@@ -345,10 +347,16 @@ class CameraState():
                 # ensure this frame is stored in the cache
                 if updated_obj.thumbnail_data['frame_time'] == frame_time and frame_time not in self.frame_cache:
                     self.frame_cache[frame_time] = np.copy(current_frame)
-
+                
+                updated_obj.last_updated = frame_time
+                
+            # if it has been more than 5 seconds since the last publish
+            # and the last update is greater than the last publish
+            if frame_time - updated_obj.last_published > 5 and updated_obj.last_updated > updated_obj.last_published:
                 # call event handlers
                 for c in self.callbacks['update']:
                     c(self.name, updated_obj, frame_time)
+                updated_obj.last_published = frame_time
 
         for id in removed_ids:
             # publish events to mqtt
