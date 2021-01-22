@@ -12,6 +12,7 @@ from flask import (Blueprint, Flask, Response, current_app, jsonify,
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
+from frigate.const import CLIPS_DIR
 from frigate.models import Event
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
@@ -89,7 +90,7 @@ def event(id):
         return "Event not found", 404
 
 @bp.route('/events/<id>/thumbnail.jpg')
-def event_snapshot(id):
+def event_thumbnail(id):
     format = request.args.get('format', 'ios')
     thumbnail_bytes = None
     try:
@@ -118,6 +119,38 @@ def event_snapshot(id):
         thumbnail_bytes = jpg.tobytes()
 
     response = make_response(thumbnail_bytes)
+    response.headers['Content-Type'] = 'image/jpg'
+    return response
+
+@bp.route('/events/<id>/snapshot.jpg')
+def event_snapshot(id):
+    jpg_bytes = None
+    try:
+        event = Event.get(Event.id == id)
+        if not event.has_snapshot:
+            return "Snapshot not available", 404
+        # read snapshot from disk
+        with open(os.path.join(CLIPS_DIR, f"{event.camera}-{id}.jpg"), 'rb') as image_file:
+            jpg_bytes = image_file.read()
+    except DoesNotExist:
+        # see if the object is currently being tracked
+        try:
+            for camera_state in current_app.detected_frames_processor.camera_states.values():
+                if id in camera_state.tracked_objects:
+                    tracked_obj = camera_state.tracked_objects.get(id)
+                    if not tracked_obj is None:
+                        jpg_bytes = tracked_obj.get_jpg_bytes(
+                            timestamp=request.args.get('timestamp', type=int),
+                            bounding_box=request.args.get('bbox', type=int),
+                            crop=request.args.get('crop', type=int),
+                            height=request.args.get('h', type=int)
+                        )
+        except:
+            return "Event not found", 404
+    except:
+        return "Event not found", 404
+
+    response = make_response(jpg_bytes)
     response.headers['Content-Type'] = 'image/jpg'
     return response
 
