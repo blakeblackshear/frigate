@@ -2,6 +2,8 @@ import datetime
 import logging
 import threading
 import time
+import os
+import signal
 
 logger = logging.getLogger(__name__)
 
@@ -32,5 +34,5 @@ class FrigateWatchdog(threading.Thread):
                     logger.info("Detection appears to be stuck. Restarting detection process")
                     detector.start_or_restart()
                 elif not detector.detect_process.is_alive():
-                    logger.info("Detection appears to have stopped. Restarting detection process")
-                    detector.start_or_restart()
+                    logger.info("Detection appears to have stopped. Restarting frigate")
+                    os.kill(os.getpid(), signal.SIGTERM)
