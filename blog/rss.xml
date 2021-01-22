@@ -2,7 +2,7 @@
 <rss version="2.0">
     <channel>
         <title>Frigate Blog</title>
-        <link>https://blakeblackshear.github.io/frigate/blog</link>
+        <link>https://blakeblackshear.github.io/blog</link>
         <description>Frigate Blog</description>
         <lastBuildDate>Sun, 25 Oct 2015 23:29:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>

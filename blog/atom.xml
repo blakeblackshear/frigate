@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://blakeblackshear.github.io/frigate/blog</id>
+    <id>https://blakeblackshear.github.io/blog</id>
     <title>Frigate Blog</title>
     <updated>2015-10-25T23:29:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://blakeblackshear.github.io/frigate/blog"/>
+    <link rel="alternate" href="https://blakeblackshear.github.io/blog"/>
     <subtitle>Frigate Blog</subtitle>
-    <icon>https://blakeblackshear.github.io/frigate/img/favicon.ico</icon>
+    <icon>https://blakeblackshear.github.io/img/favicon.ico</icon>
 </feed>
