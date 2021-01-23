@@ -77,7 +77,7 @@ export default function Sidebar() {
         <hr className="border-solid border-gray-500 mt-2" />
         <NavLink
           className="self-end"
-          href="https://github.com/blakeblackshear/frigate/blob/master/README.md"
+          href="https://blakeblackshear.github.io/frigate"
           text="Documentation"
         />
         <NavLink className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
