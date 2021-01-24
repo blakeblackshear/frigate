@@ -21,6 +21,7 @@ HassOS users can install via the addon repository. Frigate requires an MQTT serv
 ## Docker
 
 Make sure you choose the right image for your architecture:
+
 |Arch|Image Name|
 |-|-|
 |amd64|blakeblackshear/frigate:stable-amd64|
