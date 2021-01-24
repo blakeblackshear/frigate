@@ -10,6 +10,7 @@ import signal
 import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
+from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -117,13 +118,16 @@ class FrigateApp():
         self.detected_frames_queue = mp.Queue(maxsize=len(self.config.cameras.keys())*2)
 
     def init_database(self):
-        self.db = SqliteExtDatabase(self.config.database.path)
+        migrate_db = SqliteExtDatabase(self.config.database.path)
 
         # Run migrations
         del(logging.getLogger('peewee_migrate').handlers[:])
-        router = Router(self.db)
+        router = Router(migrate_db)
         router.run()
 
+        migrate_db.close()
+
+        self.db = SqliteQueueDatabase(self.config.database.path)
         models = [Event]
         self.db.bind(models)
 
