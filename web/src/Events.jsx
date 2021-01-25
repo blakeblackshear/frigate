@@ -11,7 +11,7 @@ export default function Events({ url } = {}) {
   const apiHost = useContext(ApiHost);
   const [events, setEvents] = useState([]);
 
-  const searchParams = new URL(`${window.location.protocol}//${window.location.host}${url || '/events'}`).searchParams;
+  const { pathname, searchParams } = new URL(`${window.location.protocol}//${window.location.host}${url || '/events'}`);
   const searchParamsString = searchParams.toString();
 
   useEffect(async () => {
@@ -32,9 +32,10 @@ export default function Events({ url } = {}) {
           <div className="flex flex-wrap space-x-2">
             {searchKeys.map((filterKey) => (
               <UnFilterable
-                paramName={filterKey}
-                searchParams={searchParamsString}
                 name={`${filterKey}: ${searchParams.get(filterKey)}`}
+                paramName={filterKey}
+                pathname={pathname}
+                searchParams={searchParamsString}
               />
             ))}
           </div>
@@ -71,17 +72,32 @@ export default function Events({ url } = {}) {
                       </a>
                     </Td>
                     <Td>
-                      <Filterable searchParams={searchParamsString} paramName="camera" name={camera} />
+                      <Filterable
+                        pathname={pathname}
+                        searchParams={searchParamsString}
+                        paramName="camera"
+                        name={camera}
+                      />
                     </Td>
                     <Td>
-                      <Filterable searchParams={searchParamsString} paramName="label" name={label} />
+                      <Filterable
+                        pathname={pathname}
+                        searchParams={searchParamsString}
+                        paramName="label"
+                        name={label}
+                      />
                     </Td>
                     <Td>{(score * 100).toFixed(2)}%</Td>
                     <Td>
                       <ul>
                         {zones.map((zone) => (
                           <li>
-                            <Filterable searchParams={searchParamsString} paramName="zone" name={zone} />
+                            <Filterable
+                              pathname={pathname}
+                              searchParams={searchParamsString}
+                              paramName="zone"
+                              name={zone}
+                            />
                           </li>
                         ))}
                       </ul>
@@ -100,19 +116,19 @@ export default function Events({ url } = {}) {
   );
 }
 
-function Filterable({ searchParams, paramName, name }) {
+function Filterable({ pathname, searchParams, paramName, name }) {
   const params = new URLSearchParams(searchParams);
   params.set(paramName, name);
-  return <Link href={`?${params.toString()}`}>{name}</Link>;
+  return <Link href={`${pathname}?${params.toString()}`}>{name}</Link>;
 }
 
-function UnFilterable({ searchParams, paramName, name }) {
+function UnFilterable({ pathname, searchParams, paramName, name }) {
   const params = new URLSearchParams(searchParams);
   params.delete(paramName);
   return (
     <a
       className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-300 hover:text-gray-900 dark:bg-gray-300 dark:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-      href={`?${params.toString()}`}
+      href={`${pathname}?${params.toString()}`}
     >
       {name}
     </a>
