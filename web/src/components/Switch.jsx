@@ -2,13 +2,9 @@ import { h } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
 
 export default function Switch({ checked, label, id, onChange }) {
-  const handleChange = useCallback(
-    (event) => {
-      console.log(event.target.checked, !checked);
-      onChange(id, !checked);
-    },
-    [id, onChange, checked]
-  );
+  const handleChange = useCallback(() => {
+    onChange(id, !checked);
+  }, [id, onChange, checked]);
 
   return (
     <label for={id} className="flex items-center cursor-pointer">

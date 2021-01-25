@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import Box from './components/Box';
+import CameraImage from './components/CameraImage';
 import Events from './Events';
 import Heading from './components/Heading';
 import { route } from 'preact-router';
@@ -23,7 +24,6 @@ export default function Cameras() {
 }
 
 function Camera({ name }) {
-  const apiHost = useContext(ApiHost);
   const href = `/cameras/${name}`;
 
   return (
@@ -32,7 +32,7 @@ function Camera({ name }) {
       href={href}
     >
       <Heading size="base">{name}</Heading>
-      <img className="w-full" src={`${apiHost}/api/${name}/latest.jpg`} />
+      <CameraImage camera={name} />
     </Box>
   );
 }

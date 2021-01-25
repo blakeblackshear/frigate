@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import Box from './components/Box';
 import Button from './components/Button';
+import CameraImage from './components/CameraImage';
 import Heading from './components/Heading';
 import Switch from './components/Switch';
 import { route } from 'preact-router';
@@ -27,14 +28,26 @@ export default function CameraMasks({ camera, url }) {
     zones,
   } = cameraConfig;
 
+  const resizeObserver = useMemo(
+    () =>
+      new ResizeObserver((entries) => {
+        window.requestAnimationFrame(() => {
+          if (Array.isArray(entries) && entries.length) {
+            const scaledWidth = entries[0].contentRect.width;
+            const scale = scaledWidth / width;
+            setImageScale(scale);
+          }
+        });
+      }),
+    [camera, width, setImageScale]
+  );
+
   useEffect(() => {
     if (!imageRef.current) {
       return;
     }
-    const scaledWidth = imageRef.current.width;
-    const scale = scaledWidth / width;
-    setImageScale(scale);
-  }, [imageRef.current, setImageScale]);
+    resizeObserver.observe(imageRef.current);
+  }, [resizeObserver, imageRef.current]);
 
   const [motionMaskPoints, setMotionMaskPoints] = useState(
     Array.isArray(motionMask)
@@ -226,7 +239,7 @@ ${Object.keys(objectMaskPoints)
 
       <Box className="space-y-4">
         <div className="relative">
-          <img ref={imageRef} className="w-full" src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <CameraImage imageRef={imageRef} camera={camera} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
