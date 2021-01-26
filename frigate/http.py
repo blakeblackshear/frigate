@@ -55,7 +55,7 @@ def events_summary():
 
     if not has_clip is None:
         clauses.append((Event.has_clip == has_clip))
-    
+
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
@@ -160,8 +160,8 @@ def events():
     camera = request.args.get('camera')
     label = request.args.get('label')
     zone = request.args.get('zone')
-    after = request.args.get('after', type=int)
-    before = request.args.get('before', type=int)
+    after = request.args.get('after', type=float)
+    before = request.args.get('before', type=float)
     has_clip = request.args.get('has_clip', type=int)
     has_snapshot = request.args.get('has_snapshot', type=int)
     include_thumbnails = request.args.get('include_thumbnails', default=1, type=int)
@@ -186,7 +186,7 @@ def events():
 
     if not has_clip is None:
         clauses.append((Event.has_clip == has_clip))
-    
+
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
 

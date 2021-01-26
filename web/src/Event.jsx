@@ -1,20 +1,13 @@
 import { h, Fragment } from 'preact';
-import { ApiHost } from './context';
 import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
-import { useContext, useEffect, useState } from 'preact/hooks';
+import { useApiHost, useEvent } from './api';
 
 export default function Event({ eventId }) {
-  const apiHost = useContext(ApiHost);
-  const [data, setData] = useState(null);
-
-  useEffect(async () => {
-    const response = await fetch(`${apiHost}/api/events/${eventId}`);
-    const data = response.ok ? await response.json() : null;
-    setData(data);
-  }, [apiHost, eventId]);
+  const apiHost = useApiHost();
+  const { data } = useEvent(eventId);
 
   if (!data) {
     return (
@@ -57,34 +50,36 @@ export default function Event({ eventId }) {
         />
       </Box>
 
-      <Table>
-        <Thead>
-          <Th>Key</Th>
-          <Th>Value</Th>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td>Camera</Td>
-            <Td>
-              <Link href={`/cameras/${data.camera}`}>{data.camera}</Link>
-            </Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Timeframe</Td>
-            <Td>
-              {startime.toLocaleString()} – {endtime.toLocaleString()}
-            </Td>
-          </Tr>
-          <Tr>
-            <Td>Score</Td>
-            <Td>{(data.top_score * 100).toFixed(2)}%</Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Zones</Td>
-            <Td>{data.zones.join(', ')}</Td>
-          </Tr>
-        </Tbody>
-      </Table>
+      <Box>
+        <Table>
+          <Thead>
+            <Th>Key</Th>
+            <Th>Value</Th>
+          </Thead>
+          <Tbody>
+            <Tr>
+              <Td>Camera</Td>
+              <Td>
+                <Link href={`/cameras/${data.camera}`}>{data.camera}</Link>
+              </Td>
+            </Tr>
+            <Tr index={1}>
+              <Td>Timeframe</Td>
+              <Td>
+                {startime.toLocaleString()} – {endtime.toLocaleString()}
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>Score</Td>
+              <Td>{(data.top_score * 100).toFixed(2)}%</Td>
+            </Tr>
+            <Tr index={1}>
+              <Td>Zones</Td>
+              <Td>{data.zones.join(', ')}</Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </Box>
     </div>
   );
 }

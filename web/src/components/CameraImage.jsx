@@ -1,10 +1,10 @@
 import { h } from 'preact';
-import { ApiHost, Config } from '../context';
+import { useApiHost, useConfig } from '../api';
 import { useCallback, useEffect, useContext, useMemo, useRef, useState } from 'preact/hooks';
 
 export default function CameraImage({ camera, onload, searchParams = '' }) {
-  const config = useContext(Config);
-  const apiHost = useContext(ApiHost);
+  const { data: config } = useConfig();
+  const apiHost = useApiHost();
   const [availableWidth, setAvailableWidth] = useState(0);
   const [loadedSrc, setLoadedSrc] = useState(null);
   const containerRef = useRef(null);

@@ -1,6 +1,5 @@
 import { h } from 'preact';
 import CameraImage from './CameraImage';
-import { ApiHost, Config } from '../context';
 import { useCallback, useState } from 'preact/hooks';
 
 const MIN_LOAD_TIMEOUT_MS = 200;
