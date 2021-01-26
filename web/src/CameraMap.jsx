@@ -185,7 +185,7 @@ ${Object.keys(zonePoints)
   const handleRemoveObjectMask = useCallback(
     (key, subkey) => {
       const newObjectMaskPoints = { ...objectMaskPoints };
-      delete newObjectMaskPoints[key];
+      delete newObjectMaskPoints[key][subkey];
       setObjectMaskPoints(newObjectMaskPoints);
     },
     [objectMaskPoints, setObjectMaskPoints]
@@ -204,6 +204,20 @@ ${Object.keys(objectMaskPoints)
   .filter(Boolean)
   .join('\n')}`);
   }, [objectMaskPoints]);
+
+  const handleAddToObjectMask = useCallback(
+    (key) => {
+      const newObjectMaskPoints = { ...objectMaskPoints, [key]: [...objectMaskPoints[key], []] };
+      setObjectMaskPoints(newObjectMaskPoints);
+      setEditing({
+        set: newObjectMaskPoints,
+        key,
+        subkey: newObjectMaskPoints[key].length - 1,
+        fn: setObjectMaskPoints,
+      });
+    },
+    [objectMaskPoints, setObjectMaskPoints, setEditing]
+  );
 
   const handleChangeSnap = useCallback(
     (id, value) => {
@@ -268,6 +282,7 @@ ${Object.keys(objectMaskPoints)
           isMulti
           editing={editing}
           title="Object masks"
+          onAdd={handleAddToObjectMask}
           onCopy={handleCopyObjectMasks}
           onCreate={handleAddObjectMask}
           onEdit={handleEditObjectMask}
@@ -397,6 +412,7 @@ function MaskValues({
   isMulti = false,
   editing,
   title,
+  onAdd,
   onCopy,
   onCreate,
   onEdit,
@@ -438,6 +454,14 @@ function MaskValues({
     [onRemove]
   );
 
+  const handleAdd = useCallback(
+    (event) => {
+      const { key } = event.target.dataset;
+      onAdd(key);
+    },
+    [onAdd]
+  );
+
   return (
     <Box className="overflow-hidden" onmouseover={handleMousein} onmouseout={handleMouseout}>
       <div class="flex space-x-4">
@@ -454,15 +478,20 @@ function MaskValues({
             return (
               <div>
                 {`    ${mainkey}:\n      mask:\n`}
+                {onAdd && showButtons ? (
+                  <Button className="absolute -mt-12 right-0 font-sans" data-key={mainkey} onClick={handleAdd}>
+                    {`Add to ${mainkey}`}
+                  </Button>
+                ) : null}
                 {points[mainkey].map((item, subkey) => (
                   <Item
                     mainkey={mainkey}
                     subkey={subkey}
                     editing={editing}
                     handleEdit={handleEdit}
+                    handleRemove={handleRemove}
                     points={item}
                     showButtons={showButtons}
-                    handleRemove={handleRemove}
                     yamlKeyPrefix={yamlKeyPrefix}
                   />
                 ))}
@@ -473,10 +502,11 @@ function MaskValues({
               <Item
                 mainkey={mainkey}
                 editing={editing}
+                handleAdd={onAdd ? handleAdd : undefined}
                 handleEdit={handleEdit}
+                handleRemove={handleRemove}
                 points={points[mainkey]}
                 showButtons={showButtons}
-                handleRemove={handleRemove}
                 yamlKeyPrefix={yamlKeyPrefix}
               />
             );
@@ -487,7 +517,7 @@ function MaskValues({
   );
 }
 
-function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handleRemove, yamlKeyPrefix }) {
+function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handleAdd, handleRemove, yamlKeyPrefix }) {
   return (
     <span
       data-key={mainkey}
