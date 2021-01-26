@@ -8,12 +8,11 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'blakeblackshear',
   projectName: 'frigate',
-  algolia: {
-    apiKey: '81ec882db78f7fed05c51daf973f0362',
-    indexName: 'frigate',
-    algoliaOptions: { 'facetFilters': ["type:$TYPE"] }
-  },
   themeConfig: {
+    algolia: {
+      apiKey: '81ec882db78f7fed05c51daf973f0362',
+      indexName: 'frigate'
+    },
     navbar: {
       title: 'Frigate',
       logo: {
