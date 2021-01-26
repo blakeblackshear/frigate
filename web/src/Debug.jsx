@@ -3,25 +3,21 @@ import Box from './components/Box';
 import Button from './components/Button';
 import Heading from './components/Heading';
 import Link from './components/Link';
-import { ApiHost, Config } from './context';
+import { useConfig, useStats } from './api';
 import { Table, Tbody, Thead, Tr, Th, Td } from './components/Table';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 
 export default function Debug() {
-  const apiHost = useContext(ApiHost);
-  const config = useContext(Config);
-  const [stats, setStats] = useState({});
+  const config = useConfig();
+
   const [timeoutId, setTimeoutId] = useState(null);
 
-  const fetchStats = useCallback(async () => {
-    const statsResponse = await fetch(`${apiHost}/api/stats`);
-    const stats = statsResponse.ok ? await statsResponse.json() : {};
-    setStats(stats);
-    setTimeoutId(setTimeout(fetchStats, 1000));
-  }, [setStats]);
+  const forceUpdate = useCallback(async () => {
+    setTimeoutId(setTimeout(forceUpdate, 1000));
+  }, []);
 
   useEffect(() => {
-    fetchStats();
+    forceUpdate();
   }, []);
 
   useEffect(() => {
@@ -29,11 +25,13 @@ export default function Debug() {
       clearTimeout(timeoutId);
     };
   }, [timeoutId]);
+  const { data: stats, status } = useStats(null, timeoutId);
 
-  const { detectors, detection_fps, service, ...cameras } = stats;
-  if (!service) {
+  if (!stats) {
     return 'loading…';
   }
+
+  const { detectors, detection_fps, service, ...cameras } = stats;
 
   const detectorNames = Object.keys(detectors);
   const detectorDataKeys = Object.keys(detectors[detectorNames[0]]);

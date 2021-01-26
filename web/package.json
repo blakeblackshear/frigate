@@ -12,6 +12,7 @@
     "@snowpack/plugin-webpack": "^2.3.0",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
+    "immer": "^8.0.1",
     "postcss": "^8.2.2",
     "postcss-cli": "^8.3.1",
     "preact": "^10.5.9",
