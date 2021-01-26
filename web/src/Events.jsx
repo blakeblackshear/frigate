@@ -1,49 +1,122 @@
 import { h } from 'preact';
-import { ApiHost } from './context';
 import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
+import produce from 'immer';
 import { route } from 'preact-router';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useApiHost, useConfig, useEvents } from './api';
+import { useCallback, useContext, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
 
-export default function Events({ url } = {}) {
-  const apiHost = useContext(ApiHost);
-  const [events, setEvents] = useState([]);
+const API_LIMIT = 25;
 
-  const { pathname, searchParams } = new URL(`${window.location.protocol}//${window.location.host}${url || '/events'}`);
-  const searchParamsString = searchParams.toString();
+const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'APPEND_EVENTS': {
+      const {
+        meta: { searchString },
+        payload,
+      } = action;
+      return produce(state, (draftState) => {
+        draftState.searchStrings[searchString] = true;
+        draftState.events.push(...payload);
+      });
+    }
 
-  useEffect(async () => {
-    const response = await fetch(`${apiHost}/api/events?${searchParamsString}`);
-    const data = response.ok ? await response.json() : {};
-    setEvents(data);
-  }, [searchParamsString]);
+    case 'REACHED_END': {
+      const {
+        meta: { searchString },
+      } = action;
+      return produce(state, (draftState) => {
+        draftState.reachedEnd = true;
+        draftState.searchStrings[searchString] = true;
+      });
+    }
 
-  const searchKeys = Array.from(searchParams.keys());
+    case 'RESET':
+      return initialState;
+
+    default:
+      return state;
+  }
+};
+
+const defaultSearchString = `include_thumbnails=0&limit=${API_LIMIT}`;
+function removeDefaultSearchKeys(searchParams) {
+  searchParams.delete('limit');
+  searchParams.delete('include_thumbnails');
+  searchParams.delete('before');
+}
+
+export default function Events({ path: pathname } = {}) {
+  const apiHost = useApiHost();
+  const [{ events, reachedEnd, searchStrings }, dispatch] = useReducer(reducer, initialState);
+  const { searchParams: initialSearchParams } = new URL(window.location);
+  const [searchString, setSearchString] = useState(`${defaultSearchString}&${initialSearchParams.toString()}`);
+  const { data, status } = useEvents(searchString);
+
+  useEffect(() => {
+    if (data && !(searchString in searchStrings)) {
+      dispatch({ type: 'APPEND_EVENTS', payload: data, meta: { searchString } });
+    }
+    if (Array.isArray(data) && data.length < API_LIMIT) {
+      dispatch({ type: 'REACHED_END', meta: { searchString } });
+    }
+  }, [data]);
+
+  const observer = useRef(
+    new IntersectionObserver((entries, observer) => {
+      window.requestAnimationFrame(() => {
+        if (entries.length === 0) {
+          return;
+        }
+        // under certain edge cases, a ref may be applied / in memory twice
+        // avoid fetching twice by grabbing the last observed entry only
+        const entry = entries[entries.length - 1];
+        if (entry.isIntersecting) {
+          const { startTime } = entry.target.dataset;
+          const { searchParams } = new URL(window.location);
+          searchParams.set('before', parseFloat(startTime) - 0.0001);
+
+          setSearchString(`${defaultSearchString}&${searchParams.toString()}`);
+        }
+      });
+    })
+  );
+
+  const lastCellRef = useCallback(
+    (node) => {
+      if (node !== null) {
+        observer.current.disconnect();
+        if (!reachedEnd) {
+          observer.current.observe(node);
+        }
+      }
+    },
+    [observer.current, reachedEnd]
+  );
+
+  const handleFilter = useCallback(
+    (searchParams) => {
+      dispatch({ type: 'RESET' });
+      removeDefaultSearchKeys(searchParams);
+      setSearchString(`${defaultSearchString}&${searchParams.toString()}`);
+      route(`${pathname}?${searchParams.toString()}`);
+    },
+    [pathname, setSearchString]
+  );
+
+  const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
 
-      {searchKeys.length ? (
-        <Box>
-          <Heading size="sm">Filters</Heading>
-          <div className="flex flex-wrap space-x-2">
-            {searchKeys.map((filterKey) => (
-              <UnFilterable
-                name={`${filterKey}: ${searchParams.get(filterKey)}`}
-                paramName={filterKey}
-                pathname={pathname}
-                searchParams={searchParamsString}
-              />
-            ))}
-          </div>
-        </Box>
-      ) : null}
+      <Filters onChange={handleFilter} searchParams={searchParams} />
 
       <Box className="min-w-0 overflow-auto">
-        <Table className="w-full">
+        <Table className="min-w-full table-fixed">
           <Thead>
             <Tr>
               <Th></Th>
@@ -64,25 +137,33 @@ export default function Events({ url } = {}) {
               ) => {
                 const start = new Date(parseInt(startTime * 1000, 10));
                 const end = new Date(parseInt(endTime * 1000, 10));
+                const ref = i === events.length - 1 ? lastCellRef : undefined;
                 return (
                   <Tr key={id} index={i}>
-                    <Td>
-                      <a href={`/events/${id}`}>
-                        <img className="w-32 max-w-none" src={`data:image/jpeg;base64,${thumbnail}`} />
+                    <Td className="w-40">
+                      <a href={`/events/${id}`} ref={ref} data-start-time={startTime} data-reached-end={reachedEnd}>
+                        <img
+                          width="150"
+                          height="150"
+                          style="min-height: 48px; min-width: 48px;"
+                          src={`${apiHost}/api/events/${id}/thumbnail.jpg`}
+                        />
                       </a>
                     </Td>
                     <Td>
                       <Filterable
+                        onFilter={handleFilter}
                         pathname={pathname}
-                        searchParams={searchParamsString}
+                        searchParams={searchParams}
                         paramName="camera"
                         name={camera}
                       />
                     </Td>
                     <Td>
                       <Filterable
+                        onFilter={handleFilter}
                         pathname={pathname}
-                        searchParams={searchParamsString}
+                        searchParams={searchParams}
                         paramName="label"
                         name={label}
                       />
@@ -93,8 +174,9 @@ export default function Events({ url } = {}) {
                         {zones.map((zone) => (
                           <li>
                             <Filterable
+                              onFilter={handleFilter}
                               pathname={pathname}
-                              searchParams={searchParamsString}
+                              searchParams={searchString}
                               paramName="zone"
                               name={zone}
                             />
@@ -110,27 +192,108 @@ export default function Events({ url } = {}) {
               }
             )}
           </Tbody>
+          <Tfoot>
+            <Tr>
+              <Td className="text-center" colspan="8">
+                {status === 'loading' ? 'Loading…' : reachedEnd ? 'No more events' : null}
+              </Td>
+            </Tr>
+          </Tfoot>
         </Table>
       </Box>
     </div>
   );
 }
 
-function Filterable({ pathname, searchParams, paramName, name }) {
-  const params = new URLSearchParams(searchParams);
-  params.set(paramName, name);
-  return <Link href={`${pathname}?${params.toString()}`}>{name}</Link>;
+function Filterable({ onFilter, pathname, searchParams, paramName, name }) {
+  const href = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(paramName, name);
+    removeDefaultSearchKeys(params);
+    return `${pathname}?${params.toString()}`;
+  }, [searchParams]);
+
+  const handleClick = useCallback(
+    (event) => {
+      event.preventDefault();
+      route(href, true);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(paramName, name);
+      onFilter(params);
+    },
+    [href, searchParams]
+  );
+
+  return (
+    <Link href={href} onclick={handleClick}>
+      {name}
+    </Link>
+  );
 }
 
-function UnFilterable({ pathname, searchParams, paramName, name }) {
-  const params = new URLSearchParams(searchParams);
-  params.delete(paramName);
+function Filters({ onChange, searchParams }) {
+  const { data } = useConfig();
+
+  const cameras = useMemo(() => Object.keys(data.cameras), [data]);
+
+  const zones = useMemo(
+    () =>
+      Object.values(data.cameras)
+        .reduce((memo, camera) => {
+          memo = memo.concat(Object.keys(camera.zones));
+          return memo;
+        }, [])
+        .filter((value, i, self) => self.indexOf(value) === i),
+    [data]
+  );
+
+  const labels = useMemo(() => {
+    return Object.values(data.cameras)
+      .reduce((memo, camera) => {
+        memo = memo.concat(camera.objects?.track || []);
+        return memo;
+      }, data.objects?.track || [])
+      .filter((value, i, self) => self.indexOf(value) === i);
+  }, [data]);
+
   return (
-    <a
-      className="bg-gray-700 text-white px-3 py-1 rounded-md hover:bg-gray-300 hover:text-gray-900 dark:bg-gray-300 dark:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white"
-      href={`${pathname}?${params.toString()}`}
-    >
-      {name}
-    </a>
+    <Box className="flex space-y-0 space-x-8 flex-wrap">
+      <Filter onChange={onChange} options={cameras} paramName="camera" searchParams={searchParams} />
+      <Filter onChange={onChange} options={zones} paramName="zone" searchParams={searchParams} />
+      <Filter onChange={onChange} options={labels} paramName="label" searchParams={searchParams} />
+    </Box>
+  );
+}
+
+function Filter({ onChange, searchParams, paramName, options }) {
+  const handleSelect = useCallback(
+    (event) => {
+      const newParams = new URLSearchParams(searchParams.toString());
+      const value = event.target.value;
+      if (value) {
+        newParams.set(paramName, event.target.value);
+      } else {
+        newParams.delete(paramName);
+      }
+
+      onChange(newParams);
+    },
+    [searchParams, paramName, onChange]
+  );
+
+  return (
+    <label>
+      <span className="block uppercase text-sm">{paramName}</span>
+      <select className="border-solid border border-gray-500 rounded dark:text-gray-900" onChange={handleSelect}>
+        <option>All</option>
+        {options.map((opt) => {
+          return (
+            <option value={opt} selected={searchParams.get(paramName) === opt}>
+              {opt}
+            </option>
+          );
+        })}
+      </select>
+    </label>
   );
 }

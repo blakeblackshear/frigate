@@ -4,13 +4,12 @@ import CameraImage from './components/CameraImage';
 import Events from './Events';
 import Heading from './components/Heading';
 import { route } from 'preact-router';
-import { useContext } from 'preact/hooks';
-import { ApiHost, Config } from './context';
+import { useConfig } from './api';
 
 export default function Cameras() {
-  const config = useContext(Config);
+  const { data: config, status } = useConfig();
 
-  if (!config.cameras) {
+  if (!config) {
     return <p>loading…</p>;
   }
 

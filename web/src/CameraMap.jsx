@@ -5,11 +5,11 @@ import Heading from './components/Heading';
 import Switch from './components/Switch';
 import { route } from 'preact-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { ApiHost, Config } from './context';
+import { useApiHost, useConfig } from './api';
 
 export default function CameraMasks({ camera, url }) {
-  const config = useContext(Config);
-  const apiHost = useContext(ApiHost);
+  const { data: config } = useConfig();
+  const apiHost = useApiHost();
   const imageRef = useRef(null);
   const [imageScale, setImageScale] = useState(1);
   const [snap, setSnap] = useState(true);

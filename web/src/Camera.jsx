@@ -6,13 +6,13 @@ import Link from './components/Link';
 import Switch from './components/Switch';
 import { route } from 'preact-router';
 import { useCallback, useContext } from 'preact/hooks';
-import { ApiHost, Config } from './context';
+import { useApiHost, useConfig } from './api';
 
 export default function Camera({ camera, url }) {
-  const config = useContext(Config);
-  const apiHost = useContext(ApiHost);
+  const { data: config } = useConfig();
+  const apiHost = useApiHost();
 
-  if (!(camera in config.cameras)) {
+  if (!config) {
     return <div>{`No camera named ${camera}`}</div>;
   }
 
