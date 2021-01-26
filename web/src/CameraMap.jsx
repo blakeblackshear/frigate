@@ -190,7 +190,7 @@ ${Object.keys(zonePoints)
   const handleAddObjectMask = useCallback(() => {
     const n = Object.keys(objectMaskPoints).filter((name) => name.startsWith('object_')).length;
     const newObjectName = `object_${n}`;
-    const newObjectMaskPoints = { ...objectMaskPoints, [newObjectName]: [] };
+    const newObjectMaskPoints = { ...objectMaskPoints, [newObjectName]: [[]] };
     setObjectMaskPoints(newObjectMaskPoints);
     setEditing({ set: newObjectMaskPoints, key: newObjectName, subkey: 0, fn: setObjectMaskPoints });
   }, [objectMaskPoints, setObjectMaskPoints, setEditing]);
@@ -242,7 +242,7 @@ ${Object.keys(objectMaskPoints)
           <CameraImage imageRef={imageRef} camera={camera} />
           <EditableMask
             onChange={handleUpdateEditable}
-            points={editing.subkey ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
+            points={'subkey' in editing ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
             scale={imageScale}
             snap={snap}
             width={width}
