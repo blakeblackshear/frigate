@@ -38,7 +38,7 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   const img = useMemo(() => new Image(), [camera]);
   img.onload = useCallback(
     (event) => {
-      const src = event.path[0].currentSrc;
+      const src = event.srcElement.currentSrc;
       setLoadedSrc(src);
       onload && onload(event);
     },
