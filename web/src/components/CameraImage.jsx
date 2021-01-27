@@ -1,38 +1,60 @@
 import { h } from 'preact';
 import { ApiHost, Config } from '../context';
-import { useCallback, useEffect, useContext, useState } from 'preact/hooks';
+import { useCallback, useEffect, useContext, useMemo, useRef, useState } from 'preact/hooks';
 
-export default function CameraImage({ camera, searchParams = '', imageRef }) {
+export default function CameraImage({ camera, onload, searchParams = '' }) {
   const config = useContext(Config);
   const apiHost = useContext(ApiHost);
+  const [availableWidth, setAvailableWidth] = useState(0);
+  const [loadedSrc, setLoadedSrc] = useState(null);
+  const containerRef = useRef(null);
+
   const { name, width, height } = config.cameras[camera];
-
   const aspectRatio = width / height;
-  const innerWidth = parseInt(window.innerWidth, 10);
 
-  const responsiveWidths = [640, 768, 1024, 1280];
-  if (innerWidth > responsiveWidths[responsiveWidths.length - 1]) {
-    responsiveWidths.push(innerWidth);
-  }
+  const resizeObserver = useMemo(() => {
+    return new ResizeObserver((entries) => {
+      window.requestAnimationFrame(() => {
+        if (Array.isArray(entries) && entries.length) {
+          setAvailableWidth(entries[0].contentRect.width);
+        }
+      });
+    });
+  }, [setAvailableWidth, width]);
 
-  const src = `${apiHost}/api/${camera}/latest.jpg`;
-  const { srcset, sizes } = responsiveWidths.reduce(
-    (memo, w, i) => {
-      memo.srcset.push(`${src}?h=${Math.ceil(w / aspectRatio)}&${searchParams} ${w}w`);
-      memo.sizes.push(`(max-width: ${w}) ${Math.ceil((w / innerWidth) * 100)}vw`);
-      return memo;
+  useEffect(() => {
+    if (!containerRef.current) {
+      return;
+    }
+    resizeObserver.observe(containerRef.current);
+  }, [resizeObserver, containerRef.current]);
+
+  const scaledHeight = useMemo(() => Math.min(Math.ceil(availableWidth / aspectRatio), height), [
+    availableWidth,
+    aspectRatio,
+    height,
+  ]);
+
+  const img = useMemo(() => new Image(), [camera]);
+  img.onload = useCallback(
+    (event) => {
+      const src = event.path[0].currentSrc;
+      setLoadedSrc(src);
+      onload && onload(event);
     },
-    { srcset: [], sizes: [] }
+    [searchParams, onload]
   );
 
+  useEffect(() => {
+    if (!scaledHeight) {
+      return;
+    }
+    img.src = `${apiHost}/api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;
+  }, [apiHost, name, img, searchParams, scaledHeight]);
+
   return (
-    <img
-      className="w-full"
-      srcset={srcset.join(', ')}
-      sizes={sizes.join(', ')}
-      src={`${srcset[srcset.length - 1]}`}
-      alt={name}
-      ref={imageRef}
-    />
+    <div ref={containerRef}>
+      {loadedSrc ? <img width={scaledHeight * aspectRatio} height={scaledHeight} src={loadedSrc} alt={name} /> : null}
+    </div>
   );
 }
