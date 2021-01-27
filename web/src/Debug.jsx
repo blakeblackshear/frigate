@@ -1,4 +1,6 @@
 import { h } from 'preact';
+import Box from './components/Box';
+import Button from './components/Button';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import { ApiHost, Config } from './context';
@@ -39,59 +41,73 @@ export default function Debug() {
   const cameraNames = Object.keys(cameras);
   const cameraDataKeys = Object.keys(cameras[cameraNames[0]]);
 
+  const handleCopyConfig = useCallback(async () => {
+    await window.navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+  }, [config]);
+
   return (
-    <div>
+    <div class="space-y-4">
       <Heading>
         Debug <span className="text-sm">{service.version}</span>
       </Heading>
-      <Table className="w-full">
-        <Thead>
-          <Tr>
-            <Th>detector</Th>
-            {detectorDataKeys.map((name) => (
-              <Th>{name.replace('_', ' ')}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {detectorNames.map((detector, i) => (
-            <Tr index={i}>
-              <Td>{detector}</Td>
+
+      <Box>
+        <Table className="w-full">
+          <Thead>
+            <Tr>
+              <Th>detector</Th>
               {detectorDataKeys.map((name) => (
-                <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                <Th>{name.replace('_', ' ')}</Th>
               ))}
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
-
-      <Table className="w-full">
-        <Thead>
-          <Tr>
-            <Th>camera</Th>
-            {cameraDataKeys.map((name) => (
-              <Th>{name.replace('_', ' ')}</Th>
+          </Thead>
+          <Tbody>
+            {detectorNames.map((detector, i) => (
+              <Tr index={i}>
+                <Td>{detector}</Td>
+                {detectorDataKeys.map((name) => (
+                  <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                ))}
+              </Tr>
             ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {cameraNames.map((camera, i) => (
-            <Tr index={i}>
-              <Td>
-                <Link href={`/cameras/${camera}`}>{camera}</Link>
-              </Td>
+          </Tbody>
+        </Table>
+      </Box>
+
+      <Box>
+        <Table className="w-full">
+          <Thead>
+            <Tr>
+              <Th>camera</Th>
               {cameraDataKeys.map((name) => (
-                <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
+                <Th>{name.replace('_', ' ')}</Th>
               ))}
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {cameraNames.map((camera, i) => (
+              <Tr index={i}>
+                <Td>
+                  <Link href={`/cameras/${camera}`}>{camera}</Link>
+                </Td>
+                {cameraDataKeys.map((name) => (
+                  <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
+                ))}
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
 
-      <Heading size="sm">Config</Heading>
-      <pre className="font-mono overflow-y-scroll overflow-x-scroll max-h-96 rounded bg-white dark:bg-gray-900">
-        {JSON.stringify(config, null, 2)}
-      </pre>
+      <Box className="relative">
+        <Heading size="sm">Config</Heading>
+        <Button className="absolute top-4 right-8" onClick={handleCopyConfig}>
+          Copy to Clipboard
+        </Button>
+        <pre className="overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 max-h-96">
+          {JSON.stringify(config, null, 2)}
+        </pre>
+      </Box>
     </div>
   );
 }

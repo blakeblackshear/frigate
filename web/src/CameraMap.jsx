@@ -1,7 +1,6 @@
 import { h } from 'preact';
 import Box from './components/Box';
 import Button from './components/Button';
-import CameraImage from './components/CameraImage';
 import Heading from './components/Heading';
 import Switch from './components/Switch';
 import { route } from 'preact-router';
@@ -253,7 +252,7 @@ ${Object.keys(objectMaskPoints)
 
       <Box className="space-y-4">
         <div className="relative">
-          <CameraImage imageRef={imageRef} camera={camera} />
+          <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={'subkey' in editing ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}

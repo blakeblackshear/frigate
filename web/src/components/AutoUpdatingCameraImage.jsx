@@ -1,20 +1,29 @@
 import { h } from 'preact';
 import CameraImage from './CameraImage';
 import { ApiHost, Config } from '../context';
-import { useCallback, useEffect, useContext, useState } from 'preact/hooks';
+import { useCallback, useState } from 'preact/hooks';
 
-export default function AutoUpdatingCameraImage({ camera, searchParams }) {
-  const apiHost = useContext(ApiHost);
+const MIN_LOAD_TIMEOUT_MS = 200;
 
+export default function AutoUpdatingCameraImage({ camera, searchParams, showFps = true }) {
   const [key, setKey] = useState(Date.now());
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setKey(Date.now());
-    }, 500);
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [key, searchParams]);
+  const [fps, setFps] = useState(0);
 
-  return <CameraImage camera={camera} searchParams={`cache=${key}&${searchParams}`} />;
+  const handleLoad = useCallback(() => {
+    const loadTime = Date.now() - key;
+    setFps((1000 / Math.max(loadTime, MIN_LOAD_TIMEOUT_MS)).toFixed(1));
+    setTimeout(
+      () => {
+        setKey(Date.now());
+      },
+      loadTime > MIN_LOAD_TIMEOUT_MS ? 1 : MIN_LOAD_TIMEOUT_MS
+    );
+  }, [key, searchParams, setFps]);
+
+  return (
+    <div>
+      <CameraImage camera={camera} onload={handleLoad} searchParams={`cache=${key}&${searchParams}`} />
+      {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
+    </div>
+  );
 }

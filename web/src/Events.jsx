@@ -23,7 +23,7 @@ export default function Events({ url } = {}) {
   const searchKeys = Array.from(searchParams.keys());
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <Heading>Events</Heading>
 
       {searchKeys.length ? (
@@ -43,7 +43,7 @@ export default function Events({ url } = {}) {
       ) : null}
 
       <Box className="min-w-0 overflow-auto">
-        <Table>
+        <Table className="w-full">
           <Thead>
             <Tr>
               <Th></Th>
