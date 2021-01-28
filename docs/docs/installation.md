@@ -75,6 +75,18 @@ docker run --rm \
 blakeblackshear/frigate:0.8.0-beta2-amd64
 ```
 
+### Calculating shm-size
+
+The default shm-size of 64m is fine for setups with 3 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
+
+You can calculate the necessary shm-size for each camera with the following formula:
+
+```
+(width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
+```
+
+The shm size cannot be set per container for HomeAssistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+
 ## Kubernetes
 
 Use the [helm chart](https://github.com/k8s-at-home/charts/tree/master/charts/frigate).
@@ -83,7 +95,7 @@ Use the [helm chart](https://github.com/k8s-at-home/charts/tree/master/charts/fr
 
 For ideal performance, Frigate needs access to underlying hardware for the Coral and GPU devices for ffmpeg decoding. Running Frigate in a VM on top of Proxmox, ESXi, Virtualbox, etc. is not recommended. The virtualization layer typically introduces a sizable amount of overhead for communication with Coral devices.
 
-## Proxmox
+### Proxmox
 
 Some people have had success running Frigate in LXC directly with the following config:
 
@@ -105,14 +117,6 @@ lxc.cgroup.devices.allow: a
 lxc.cap.drop:
 ```
 
-### Calculating shm-size
+### ESX
+For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
 
-The default shm-size of 64m is fine for setups with 3 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
-
-You can calculate the necessary shm-size for each camera with the following formula:
-
-```
-(width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
-```
-
-The shm size cannot be set per container for HomeAssistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
