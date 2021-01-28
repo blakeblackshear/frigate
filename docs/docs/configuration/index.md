@@ -3,7 +3,7 @@ id: index
 title: Configuration
 ---
 
-HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/config.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](/configuration/cameras.md).
+HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/config.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](cameras.md).
 
 It is recommended to start with a minimal configuration and add to it:
 
@@ -51,7 +51,7 @@ mqtt:
 
 ## `cameras`
 
-Each of your cameras must be configured. The following is the minimum required to register a camera in Frigate. Check the [camera configuration page](cameras) for a complete list of options.
+Each of your cameras must be configured. The following is the minimum required to register a camera in Frigate. Check the [camera configuration page](cameras.md) for a complete list of options.
 
 ```yaml
 cameras:
