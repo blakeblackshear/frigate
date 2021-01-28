@@ -17,6 +17,7 @@ HassOS users can install via the addon repository. Frigate requires an MQTT serv
 1. Add https://github.com/blakeblackshear/frigate-hass-addons
 1. Setup your configuration in the `Configuration` tab
 1. Start the addon container
+1. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
 
 ## Docker
 
@@ -113,3 +114,5 @@ You can calculate the necessary shm-size for each camera with the following form
 ```
 (width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
 ```
+
+The shm size cannot be set per container for HomeAssistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file

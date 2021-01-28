@@ -22,6 +22,9 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 
 View the documentation at https://blakeblackshear.github.io/frigate
 
+## Donations
+If you would like to make a donation to support development, please use [Github Sponsors](https://github.com/sponsors/blakeblackshear).
+
 ## Screenshots
 Integration into HomeAssistant
 <div>
