@@ -386,6 +386,29 @@ ffmpeg:
     - '1'
 ```
 
+### Reolink 410/520 (possibly others)
+Several users have reported success with the rtmp video from Reolink cameras.
+
+```yaml
+ffmpeg:
+  input_args:
+    - -avoid_negative_ts
+    - make_zero
+    - -fflags
+    - nobuffer
+    - -flags
+    - low_delay
+    - -strict
+    - experimental
+    - -fflags
+    - +genpts+discardcorrupt
+    - -rw_timeout
+    - '5000000'
+    - -use_wallclock_as_timestamps
+    - '1'
+```
+
+
 ### Blue Iris RTSP Cameras
 
 You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
