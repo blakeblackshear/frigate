@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@prefresh/snowpack": "^3.0.1",
-    "@snowpack/plugin-optimize": "^0.2.13",
     "@snowpack/plugin-postcss": "^1.1.0",
     "@snowpack/plugin-webpack": "^2.3.0",
     "autoprefixer": "^10.2.1",
@@ -18,7 +17,7 @@
     "preact": "^10.5.9",
     "preact-router": "^3.2.1",
     "rimraf": "^3.0.2",
-    "snowpack": "^3.0.0",
+    "snowpack": "^3.0.11",
     "tailwindcss": "^2.0.2"
   }
 }
