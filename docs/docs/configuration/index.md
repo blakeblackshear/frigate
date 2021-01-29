@@ -80,7 +80,8 @@ clips:
   max_seconds: 300
   # Optional: size of tmpfs mount to create for cache files (default: not set)
   # mount -t tmpfs -o size={tmpfs_cache_size} tmpfs /tmp/cache
-  # Notice: If you have mounted a tmpfs volume through docker, this value should not be set in your config
+  # NOTICE: Addon users must have Protection mode disabled for the addon when using this setting.
+  # Also, if you have mounted a tmpfs volume through docker, this value should not be set in your config.
   tmpfs_cache_size: 256m
   # Optional: Retention settings for clips (default: shown below)
   retain:
