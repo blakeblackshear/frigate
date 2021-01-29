@@ -9,12 +9,6 @@ module.exports = {
     '@snowpack/plugin-postcss',
     '@prefresh/snowpack',
     [
-      '@snowpack/plugin-optimize',
-      {
-        preloadModules: true,
-      },
-    ],
-    [
       '@snowpack/plugin-webpack',
       {
         sourceMap: true,
