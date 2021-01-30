@@ -181,6 +181,7 @@ class CameraWatchdog(threading.Thread):
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
+                self.logpipe.dump()
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
                 self.logger.info(f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg...")
@@ -197,6 +198,7 @@ class CameraWatchdog(threading.Thread):
                 poll = p['process'].poll()
                 if poll == None:
                     continue
+                p['logpipe'].dump()
                 p['process'] = start_or_restart_ffmpeg(p['cmd'], self.logger, p['logpipe'], ffmpeg_process=p['process'])
             
             # wait a bit before checking again
