@@ -1,11 +1,12 @@
 import { h } from 'preact';
+import ActivityIndicator from './components/ActivityIndicator';
 import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import produce from 'immer';
 import { route } from 'preact-router';
+import { FetchStatus, useApiHost, useConfig, useEvents } from './api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
-import { useApiHost, useConfig, useEvents } from './api';
 import { useCallback, useContext, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
 
 const API_LIMIT = 25;
@@ -194,8 +195,8 @@ export default function Events({ path: pathname } = {}) {
           </Tbody>
           <Tfoot>
             <Tr>
-              <Td className="text-center" colspan="8">
-                {status === 'loading' ? 'Loading…' : reachedEnd ? 'No more events' : null}
+              <Td className="text-center p-4" colspan="8">
+                {status === FetchStatus.LOADING ? <ActivityIndicator /> : reachedEnd ? 'No more events' : null}
               </Td>
             </Tr>
           </Tfoot>
