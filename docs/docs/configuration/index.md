@@ -97,7 +97,7 @@ clips:
 ```yaml
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel fatal
+  global_args: -hide_banner -loglevel warning
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
