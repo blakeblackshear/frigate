@@ -63,7 +63,7 @@ CLIPS_SCHEMA = vol.Schema(
     }
 )
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','fatal']
+FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','warning']
 FFMPEG_INPUT_ARGS_DEFAULT = ['-avoid_negative_ts', 'make_zero',
     '-fflags', '+genpts+discardcorrupt',
     '-rtsp_transport', 'tcp',
