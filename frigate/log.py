@@ -7,6 +7,7 @@ import queue
 import multiprocessing as mp
 from logging import handlers
 from setproctitle import setproctitle
+from collections import deque
 
 
 def listener_configurer():
@@ -54,6 +55,7 @@ class LogPipe(threading.Thread):
         self.daemon = False
         self.logger = logging.getLogger(log_name)
         self.level = level
+        self.deque = deque(maxlen=100)
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
@@ -67,9 +69,13 @@ class LogPipe(threading.Thread):
         """Run the thread, logging everything.
         """
         for line in iter(self.pipeReader.readline, ''):
-            self.logger.log(self.level, line.strip('\n'))
+            self.deque.append(line.strip('\n'))
 
         self.pipeReader.close()
+    
+    def dump(self):
+        while len(self.deque) > 0:
+            self.logger.log(self.level, self.deque.popleft())
 
     def close(self):
         """Close the write end of the pipe.
