@@ -1,21 +1,17 @@
 import { h, Fragment } from 'preact';
+import ActivityIndicator from './components/ActivityIndicator';
 import Box from './components/Box';
 import Heading from './components/Heading';
 import Link from './components/Link';
+import { FetchStatus, useApiHost, useEvent } from './api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
-import { useApiHost, useEvent } from './api';
 
 export default function Event({ eventId }) {
   const apiHost = useApiHost();
-  const { data } = useEvent(eventId);
+  const { data, status } = useEvent(eventId);
 
-  if (!data) {
-    return (
-      <div>
-        <Heading>{eventId}</Heading>
-        <p>loading…</p>
-      </div>
-    );
+  if (status !== FetchStatus.LOADED) {
+    return <ActivityIndicator />;
   }
 
   const startime = new Date(data.start_time * 1000);

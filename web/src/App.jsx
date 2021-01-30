@@ -1,4 +1,5 @@
 import { h } from 'preact';
+import ActivityIndicator from './components/ActivityIndicator';
 import Camera from './Camera';
 import CameraMap from './CameraMap';
 import Cameras from './Cameras';
@@ -7,12 +8,14 @@ import Event from './Event';
 import Events from './Events';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import Api, { useConfig } from './api';
+import Api, { FetchStatus, useConfig } from './api';
 
 export default function App() {
   const { data, status } = useConfig();
-  return !data ? (
-    <div />
+  return status !== FetchStatus.LOADED ? (
+    <div className="flex flex-grow-1 min-h-screen justify-center items-center">
+      <ActivityIndicator />
+    </div>
   ) : (
     <div className="md:flex flex-col md:flex-row md:min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
       <Sidebar />

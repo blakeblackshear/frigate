@@ -1,4 +1,5 @@
 import { h } from 'preact';
+import ActivityIndicator from './components/ActivityIndicator';
 import Box from './components/Box';
 import CameraImage from './components/CameraImage';
 import Events from './Events';
