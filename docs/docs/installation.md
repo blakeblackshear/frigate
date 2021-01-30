@@ -89,7 +89,7 @@ The shm size cannot be set per container for HomeAssistant Addons. You must set 
 
 ## Kubernetes
 
-Use the [helm chart](https://github.com/k8s-at-home/charts/tree/master/charts/frigate).
+Use the [helm chart](https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate).
 
 ## Virtualization
 
