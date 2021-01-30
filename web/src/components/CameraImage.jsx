@@ -1,4 +1,5 @@
 import { h } from 'preact';
+import ActivityIndicator from './ActivityIndicator';
 import { useApiHost, useConfig } from '../api';
 import { useCallback, useEffect, useContext, useMemo, useRef, useState } from 'preact/hooks';
 
@@ -54,7 +55,11 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
 
   return (
     <div ref={containerRef}>
-      {loadedSrc ? <img width={scaledHeight * aspectRatio} height={scaledHeight} src={loadedSrc} alt={name} /> : null}
+      {loadedSrc ? (
+        <img width={scaledHeight * aspectRatio} height={scaledHeight} src={loadedSrc} alt={name} />
+      ) : (
+        <ActivityIndicator />
+      )}
     </div>
   );
 }

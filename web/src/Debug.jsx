@@ -1,9 +1,10 @@
 import { h } from 'preact';
+import ActivityIndicator from './components/ActivityIndicator';
 import Box from './components/Box';
 import Button from './components/Button';
 import Heading from './components/Heading';
 import Link from './components/Link';
-import { useConfig, useStats } from './api';
+import { FetchStatus, useConfig, useStats } from './api';
 import { Table, Tbody, Thead, Tr, Th, Td } from './components/Table';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 
@@ -27,8 +28,8 @@ export default function Debug() {
   }, [timeoutId]);
   const { data: stats, status } = useStats(null, timeoutId);
 
-  if (!stats) {
-    return 'loading…';
+  if (stats === null && (status === FetchStatus.LOADING || status === FetchStatus.NONE)) {
+    return <ActivityIndicator />;
   }
 
   const { detectors, detection_fps, service, ...cameras } = stats;
