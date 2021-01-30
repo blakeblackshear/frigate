@@ -164,8 +164,10 @@ def events():
     before = request.args.get('before', type=int)
     has_clip = request.args.get('has_clip', type=int)
     has_snapshot = request.args.get('has_snapshot', type=int)
+    include_thumbnails = request.args.get('include_thumbnails', default=1, type=int)
 
     clauses = []
+    excluded_fields = []
 
     if camera:
         clauses.append((Event.camera == camera))
@@ -188,6 +190,9 @@ def events():
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
+    if not include_thumbnails:
+        excluded_fields.append(Event.thumbnail)
+
     if len(clauses) == 0:
         clauses.append((1 == 1))
 
@@ -196,7 +201,7 @@ def events():
                 .order_by(Event.start_time.desc())
                 .limit(limit))
 
-    return jsonify([model_to_dict(e) for e in events])
+    return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
 
 @bp.route('/config')
 def config():
