@@ -236,7 +236,7 @@ def best(camera_name, label):
         width = int(height*best_frame.shape[1]/best_frame.shape[0])
 
         best_frame = cv2.resize(best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
-        ret, jpg = cv2.imencode('.jpg', best_frame)
+        ret, jpg = cv2.imencode('.jpg', best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         response = make_response(jpg.tobytes())
         response.headers['Content-Type'] = 'image/jpg'
         return response
@@ -283,7 +283,7 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, jpg = cv2.imencode('.jpg', frame)
+        ret, jpg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         response = make_response(jpg.tobytes())
         response.headers['Content-Type'] = 'image/jpg'
         return response
@@ -301,6 +301,6 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
         width = int(height*frame.shape[1]/frame.shape[0])
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
-        ret, jpg = cv2.imencode('.jpg', frame)
+        ret, jpg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
