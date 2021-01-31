@@ -40,8 +40,9 @@ services:
     restart: unless-stopped
     privileged: true
     image: blakeblackshear/frigate:0.8.0-beta2-amd64
-    volumes:
+    devices:
       - /dev/bus/usb:/dev/bus/usb
+    volumes:
       - /etc/localtime:/etc/localtime:ro
       - <path_to_config>:/config
       - <path_to_directory_for_clips>:/media/frigate/clips
