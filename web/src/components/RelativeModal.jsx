@@ -76,13 +76,15 @@ export default function RelativeModal({ className, role = 'dialog', children, on
     <Fragment>
       <div className="absolute inset-0" onClick={handleDismiss} />
       <div
-        className={`bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto max-h-48 transition-all duration-75 transform scale-90 opacity-0 ${
+        className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto max-h-48 transition-all duration-75 transform scale-90 opacity-0 ${
           show ? 'scale-100 opacity-100' : ''
         } ${className}`}
         onkeydown={handleKeydown}
         role={role}
         ref={ref}
-        style={position.width > 0 ? `width: ${position.width}px; top: ${position.top}px; left: ${position.left}px` : ''}
+        style={
+          position.width > 0 ? `min-width: ${position.width}px; top: ${position.top}px; left: ${position.left}px` : ''
+        }
       >
         {children}
       </div>
