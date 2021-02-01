@@ -7,8 +7,9 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [loadedSrc, setLoadedSrc] = useState(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const { name, width, height } = config.cameras[camera];
   const aspectRatio = width / height;
@@ -35,15 +36,17 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
     aspectRatio,
     height,
   ]);
+  const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio), [scaledHeight, aspectRatio]);
 
   const img = useMemo(() => new Image(), [camera]);
   img.onload = useCallback(
     (event) => {
-      const src = event.srcElement.currentSrc;
-      setLoadedSrc(src);
+      setHasLoaded(true);
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
       onload && onload(event);
     },
-    [searchParams, onload]
+    [setHasLoaded, onload, canvasRef.current]
   );
 
   useEffect(() => {
@@ -54,12 +57,13 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   }, [apiHost, name, img, searchParams, scaledHeight]);
 
   return (
-    <div ref={containerRef}>
-      {loadedSrc ? (
-        <img width={scaledHeight * aspectRatio} height={scaledHeight} src={loadedSrc} alt={name} />
-      ) : (
-        <ActivityIndicator />
-      )}
+    <div className="relative" ref={containerRef}>
+      <canvas height={scaledHeight} ref={canvasRef} width={scaledWidth} />
+      {!hasLoaded ? (
+        <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>
+          <ActivityIndicator />
+        </div>
+      ) : null}
     </div>
   );
 }
