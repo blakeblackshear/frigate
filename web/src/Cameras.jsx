@@ -1,11 +1,12 @@
 import { h } from 'preact';
 import ActivityIndicator from './components/ActivityIndicator';
-import Box from './components/Box';
+import Card from './components/Card';
 import CameraImage from './components/CameraImage';
 import Events from './Events';
 import Heading from './components/Heading';
 import { route } from 'preact-router';
 import { useConfig } from './api';
+import { useMemo } from 'preact/hooks';
 
 export default function Cameras() {
   const { data: config, status } = useConfig();
@@ -25,14 +26,7 @@ export default function Cameras() {
 
 function Camera({ name }) {
   const href = `/cameras/${name}`;
+  const buttons = useMemo(() => [{ name: 'Events', href: `/events?camera=${name}` }], [name]);
 
-  return (
-    <Box
-      className="bg-white dark:bg-gray-700 shadow-lg rounded-lg p-4 hover:bg-gray-300 hover:dark:bg-gray-500 dark:hover:text-gray-900 dark:hover:text-gray-900"
-      href={href}
-    >
-      <Heading size="base">{name}</Heading>
-      <CameraImage camera={name} />
-    </Box>
-  );
+  return <Card buttons={buttons} href={href} header={name} media={<CameraImage camera={name} />} />;
 }

@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import Link from './components/Link';
+import LinkedLogo from './components/LinkedLogo';
 import { Link as RouterLink } from 'preact-router/match';
 import { useCallback, useState } from 'preact/hooks';
 
@@ -51,14 +52,11 @@ export default function Sidebar() {
   }, [open, setOpen]);
 
   return (
-    <div className="flex flex-col w-full md:w-64 text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-700 flex-shrink-0">
-      <div className="flex-shrink-0 px-8 py-4 flex flex-row items-center justify-between">
-        <a
-          href="#"
-          className="text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg dark:text-white focus:outline-none focus:shadow-outline"
-        >
-          Frigate
-        </a>
+    <div className="sticky top-0 max-h-screen flex flex-col w-full md:w-64 text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-700 flex-shrink-0 border-r border-gray-200 shadow lg:shadow-none z-20 lg:z-0">
+      <div className="flex-shrink-0 p-4 flex flex-row items-center justify-between">
+        <div class="text-gray-500">
+          <LinkedLogo />
+        </div>
         <button
           className="rounded-lg md:hidden rounded-lg focus:outline-none focus:shadow-outline"
           onClick={handleToggle}
@@ -75,11 +73,7 @@ export default function Sidebar() {
         <NavLink href="/events" text="Events" />
         <NavLink href="/debug" text="Debug" />
         <hr className="border-solid border-gray-500 mt-2" />
-        <NavLink
-          className="self-end"
-          href="https://blakeblackshear.github.io/frigate"
-          text="Documentation"
-        />
+        <NavLink className="self-end" href="https://blakeblackshear.github.io/frigate" text="Documentation" />
         <NavLink className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
       </nav>
     </div>
