@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import AutoUpdatingCameraImage from './components/AutoUpdatingCameraImage';
-import Box from './components/Box';
+import Card from './components/Card';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import Switch from './components/Switch';
@@ -17,6 +17,7 @@ export default function Camera({ camera, url }) {
   }
 
   const cameraConfig = config.cameras[camera];
+  const objectCount = cameraConfig.objects.track.length;
 
   const { pathname, searchParams } = new URL(`${window.location.protocol}//${window.location.host}${url}`);
   const searchParamsString = searchParams.toString();
@@ -36,31 +37,50 @@ export default function Camera({ camera, url }) {
   return (
     <div className="space-y-4">
       <Heading size="2xl">{camera}</Heading>
-      <Box>
+      <div>
         <AutoUpdatingCameraImage camera={camera} searchParams={searchParamsString} />
-      </Box>
+      </div>
 
-      <Box className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        <Switch checked={getBoolean('bbox')} id="bbox" label="Bounding box" onChange={handleSetOption} />
-        <Switch checked={getBoolean('timestamp')} id="timestamp" label="Timestamp" onChange={handleSetOption} />
-        <Switch checked={getBoolean('zones')} id="zones" label="Zones" onChange={handleSetOption} />
-        <Switch checked={getBoolean('mask')} id="mask" label="Masks" onChange={handleSetOption} />
-        <Switch checked={getBoolean('motion')} id="motion" label="Motion boxes" onChange={handleSetOption} />
-        <Switch checked={getBoolean('regions')} id="regions" label="Regions" onChange={handleSetOption} />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('bbox')} id="bbox" onChange={handleSetOption} />
+          <span class="inline-flex">Bounding box</span>
+        </div>
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('timestamp')} id="timestamp" onChange={handleSetOption} />
+          <span class="inline-flex">Timestamp</span>
+        </div>
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('zones')} id="zones" onChange={handleSetOption} />
+          <span class="inline-flex">Zones</span>
+        </div>
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('mask')} id="mask" onChange={handleSetOption} />
+          <span class="inline-flex">Masks</span>
+        </div>
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('motion')} id="motion" onChange={handleSetOption} />
+          <span class="inline-flex">Motion boxes</span>
+        </div>
+        <div className="flex space-x-3">
+          <Switch checked={getBoolean('regions')} id="regions" onChange={handleSetOption} />
+          <span class="inline-flex">Regions</span>
+        </div>
         <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
-      </Box>
+      </div>
 
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-          {cameraConfig.objects.track.map((objectType) => {
-            return (
-              <Box key={objectType} hover href={`/events?camera=${camera}&label=${objectType}`}>
-                <Heading size="sm">{objectType}</Heading>
-                <img src={`${apiHost}/api/${camera}/${objectType}/best.jpg?crop=1&h=150`} />
-              </Box>
-            );
-          })}
+        <div className="flex flex-wrap justify-start">
+          {cameraConfig.objects.track.map((objectType) => (
+            <Card
+              className="mb-4 mr-4"
+              key={objectType}
+              header={objectType}
+              href={`/events?camera=${camera}&label=${objectType}`}
+              media={<img src={`${apiHost}/api/${camera}/${objectType}/best.jpg?crop=1&h=150`} />}
+            />
+          ))}
         </div>
       </div>
     </div>

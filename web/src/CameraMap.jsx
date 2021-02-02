@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import Box from './components/Box';
+import Card from './components/Card';
 import Button from './components/Button';
 import Heading from './components/Heading';
 import Switch from './components/Switch';
@@ -242,15 +242,18 @@ ${Object.keys(objectMaskPoints)
     <div class="flex-col space-y-4">
       <Heading size="2xl">{camera} mask & zone creator</Heading>
 
-      <Box>
-        <p>
-          This tool can help you create masks & zones for your {camera} camera. When done, copy each mask configuration
-          into your <code className="font-mono">config.yml</code> file restart your Frigate instance to save your
-          changes.
-        </p>
-      </Box>
+      <Card
+        content={
+          <p>
+            This tool can help you create masks & zones for your {camera} camera. When done, copy each mask
+            configuration into your <code className="font-mono">config.yml</code> file restart your Frigate instance to
+            save your changes.
+          </p>
+        }
+        header="Warning"
+      />
 
-      <Box className="space-y-4">
+      <div className="space-y-4">
         <div className="relative">
           <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
           <EditableMask
@@ -262,8 +265,10 @@ ${Object.keys(objectMaskPoints)
             height={height}
           />
         </div>
-        <Switch checked={snap} label="Snap to edges" onChange={handleChangeSnap} />
-      </Box>
+        <div class="flex space-x-4">
+          <span>Snap to edges</span> <Switch checked={snap} onChange={handleChangeSnap} />
+        </div>
+      </div>
 
       <div class="flex-col space-y-4">
         <MaskValues
@@ -475,7 +480,7 @@ function MaskValues({
   );
 
   return (
-    <Box className="overflow-hidden" onmouseover={handleMousein} onmouseout={handleMouseout}>
+    <div className="overflow-hidden" onmouseover={handleMousein} onmouseout={handleMouseout}>
       <div class="flex space-x-4">
         <Heading className="flex-grow self-center" size="base">
           {title}
@@ -525,7 +530,7 @@ function MaskValues({
           }
         })}
       </pre>
-    </Box>
+    </div>
   );
 }
 

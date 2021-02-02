@@ -1,8 +1,9 @@
 import { h } from 'preact';
 import ActivityIndicator from './components/ActivityIndicator';
-import Box from './components/Box';
+import Card from './components/Card';
 import Heading from './components/Heading';
 import Link from './components/Link';
+import Select from './components/Select';
 import produce from 'immer';
 import { route } from 'preact-router';
 import { FetchStatus, useApiHost, useConfig, useEvents } from './api';
@@ -116,7 +117,7 @@ export default function Events({ path: pathname } = {}) {
 
       <Filters onChange={handleFilter} searchParams={searchParams} />
 
-      <Box className="min-w-0 overflow-auto">
+      <div className="min-w-0 overflow-auto">
         <Table className="min-w-full table-fixed">
           <Thead>
             <Tr>
@@ -201,7 +202,7 @@ export default function Events({ path: pathname } = {}) {
             </Tr>
           </Tfoot>
         </Table>
-      </Box>
+      </div>
     </div>
   );
 }
@@ -258,21 +259,20 @@ function Filters({ onChange, searchParams }) {
   }, [data]);
 
   return (
-    <Box className="flex space-y-0 space-x-8 flex-wrap">
+    <div className="flex space-x-8">
       <Filter onChange={onChange} options={cameras} paramName="camera" searchParams={searchParams} />
       <Filter onChange={onChange} options={zones} paramName="zone" searchParams={searchParams} />
       <Filter onChange={onChange} options={labels} paramName="label" searchParams={searchParams} />
-    </Box>
+    </div>
   );
 }
 
 function Filter({ onChange, searchParams, paramName, options }) {
   const handleSelect = useCallback(
-    (event) => {
+    (key) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      const value = event.target.value;
-      if (value) {
-        newParams.set(paramName, event.target.value);
+      if (key !== 'all') {
+        newParams.set(paramName, key);
       } else {
         newParams.delete(paramName);
       }
@@ -282,19 +282,14 @@ function Filter({ onChange, searchParams, paramName, options }) {
     [searchParams, paramName, onChange]
   );
 
+  const selectOptions = useMemo(() => ['all', ...options], [options]);
+
   return (
-    <label>
-      <span className="block uppercase text-sm">{paramName}</span>
-      <select className="border-solid border border-gray-500 rounded dark:text-gray-900" onChange={handleSelect}>
-        <option>All</option>
-        {options.map((opt) => {
-          return (
-            <option value={opt} selected={searchParams.get(paramName) === opt}>
-              {opt}
-            </option>
-          );
-        })}
-      </select>
-    </label>
+    <Select
+      label={`${paramName.charAt(0).toUpperCase()}${paramName.substr(1)}`}
+      onChange={handleSelect}
+      options={selectOptions}
+      selected={searchParams.get(paramName) || 'all'}
+    />
   );
 }
