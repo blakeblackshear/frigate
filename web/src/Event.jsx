@@ -1,6 +1,6 @@
 import { h, Fragment } from 'preact';
 import ActivityIndicator from './components/ActivityIndicator';
-import Box from './components/Box';
+import Card from './components/Card';
 import Heading from './components/Heading';
 import Link from './components/Link';
 import { FetchStatus, useApiHost, useEvent } from './api';
@@ -23,7 +23,7 @@ export default function Event({ eventId }) {
         {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
       </Heading>
 
-      <Box>
+      <Card>
         {data.has_clip ? (
           <Fragment>
             <Heading size="sm">Clip</Heading>
@@ -32,9 +32,9 @@ export default function Event({ eventId }) {
         ) : (
           <p>No clip available</p>
         )}
-      </Box>
+      </Card>
 
-      <Box>
+      <Card>
         <Heading size="sm">{data.has_snapshot ? 'Best image' : 'Thumbnail'}</Heading>
         <img
           src={
@@ -44,9 +44,9 @@ export default function Event({ eventId }) {
           }
           alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
         />
-      </Box>
+      </Card>
 
-      <Box>
+      <Card>
         <Table>
           <Thead>
             <Th>Key</Th>
@@ -75,7 +75,7 @@ export default function Event({ eventId }) {
             </Tr>
           </Tbody>
         </Table>
-      </Box>
+      </Card>
     </div>
   );
 }

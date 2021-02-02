@@ -1,26 +1,62 @@
 import { h } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
 
-export default function Switch({ checked, label, id, onChange }) {
-  const handleChange = useCallback(() => {
-    onChange(id, !checked);
-  }, [id, onChange, checked]);
+export default function Switch({ checked, id, onChange }) {
+  const [internalState, setInternalState] = useState(checked);
+  const [isFocused, setFocused] = useState(false);
+  const [isHovered, setHovered] = useState(false);
+
+  const handleChange = useCallback(
+    (event) => {
+      if (onChange) {
+        onChange(id, !checked);
+      }
+    },
+    [id, onChange, checked]
+  );
+
+  const handleFocus = useCallback(() => {
+    onChange && setFocused(true);
+  }, [onChange, setFocused]);
+
+  const handleBlur = useCallback(() => {
+    onChange && setFocused(false);
+  }, [onChange, setFocused]);
 
   return (
-    <label for={id} className="flex items-center cursor-pointer">
-      <div className="relative">
-        <input id={id} type="checkbox" className="hidden" onChange={handleChange} checked={checked} />
+    <label
+      for={id}
+      className={`flex items-center justify-center ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+    >
+      <div
+        onmouseover={handleFocus}
+        onmouseout={handleBlur}
+        className={`w-8 h-5 relative ${!onChange ? 'opacity-60' : ''}`}
+      >
+        <div className="relative overflow-hidden">
+          <input
+            className="absolute left-48"
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            tabindex="0"
+            id={id}
+            type="checkbox"
+            onChange={handleChange}
+            checked={checked}
+          />
+        </div>
         <div
-          className={`transition-colors toggle__line w-12 h-6 ${
-            !checked ? 'bg-gray-400' : 'bg-blue-400'
+          className={`w-8 h-3 absolute top-1 left-1 ${
+            !checked ? 'bg-gray-300' : 'bg-blue-300'
           } rounded-full shadow-inner`}
         />
         <div
-          className="transition-transform absolute w-6 h-6 bg-white rounded-full shadow-md inset-y-0 left-0"
+          className={`transition-all absolute w-5 h-5 rounded-full shadow-md inset-y-0 left-0  ring-opacity-30 ${
+            isFocused ? 'ring-4 ring-gray-500' : ''
+          } ${checked ? 'bg-blue-600' : 'bg-white'} ${isFocused && checked ? 'ring-blue-500' : ''}`}
           style={checked ? 'transform: translateX(100%);' : 'transform: translateX(0%);'}
         />
       </div>
-      <div className="ml-3 text-gray-700 font-medium dark:text-gray-200">{label}</div>
     </label>
   );
 }
