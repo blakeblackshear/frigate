@@ -1,6 +1,8 @@
 import { h, Fragment } from 'preact';
 import { createPortal } from 'preact/compat';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+
+const WINDOW_PADDING = 20;
 
 export default function RelativeModal({ className, role = 'dialog', children, onDismiss, portalRootID, relativeTo }) {
   const [position, setPosition] = useState({ top: -999, left: 0, width: 0 });
@@ -37,7 +39,7 @@ export default function RelativeModal({ className, role = 'dialog', children, on
     [ref.current]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref && ref.current && relativeTo && relativeTo.current) {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
@@ -46,15 +48,15 @@ export default function RelativeModal({ className, role = 'dialog', children, on
       let top = y + height;
       let left = x;
       // too far right
-      if (left + menuWidth > windowWidth) {
-        left = windowWidth - menuWidth;
+      if (left + menuWidth >= windowWidth - WINDOW_PADDING) {
+        left = windowWidth - menuWidth - WINDOW_PADDING;
       }
       // too far left
-      else if (left < 0) {
-        left = 0;
+      else if (left < WINDOW_PADDING) {
+        left = WINDOW_PADDING;
       }
       // too close to bottom
-      if (top + menuHeight > windowHeight) {
+      if (top + menuHeight > windowHeight - WINDOW_PADDING) {
         top = y - menuHeight;
       }
       setPosition({ left, top, width });
