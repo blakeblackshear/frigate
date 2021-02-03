@@ -52,7 +52,7 @@ automation:
     trigger:
       platform: mqtt
       topic: frigate/events
-    conditions:
+    condition:
       - "{{ trigger.payload_json['after']['label'] == 'person' }}"
       - "{{ 'yard' in trigger.payload_json['after']['entered_zones'] }}"
     action:
@@ -69,7 +69,7 @@ automation:
   trigger:
     platform: mqtt
     topic: frigate/events
-  conditions:
+  condition:
     - "{{ trigger.payload_json['after']['label'] == 'person' }}"
     - "{{ 'yard' in trigger.payload_json['before']['current_zones'] }}"
     - "{{ not 'yard' in trigger.payload_json['after']['current_zones'] }}"
@@ -87,7 +87,7 @@ automation:
   trigger:
     platform: mqtt
     topic: frigate/events
-  conditions:
+  condition:
     - "{{ trigger.payload_json['after']['label'] == 'dog' }}"
     - "{{ trigger.payload_json['after']['camera'] == 'front' }}"
     - "{{ trigger.payload_json['after']['top_score'] > 0.98 }}"
