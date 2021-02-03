@@ -24,6 +24,11 @@ const ButtonColors = {
     outlined: '',
     text: '',
   },
+  black: {
+    contained: '',
+    outlined: '',
+    text: 'text-black dark:text-white',
+  },
 };
 
 const ButtonTypes = {

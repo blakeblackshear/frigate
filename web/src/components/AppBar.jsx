@@ -68,19 +68,19 @@ export default function AppBar({ title }) {
 
   return (
     <div
-      className={`w-full border-b border-gray-100 dark:border-gray-700 flex items-center align-middle p-4 space-x-2 fixed left-0 right-0 z-10 bg-white dark:bg-gray-900 transform transition-all duration-200 translate-y-0 ${
+      className={`w-full border-b border-gray-200 dark:border-gray-700 flex items-center align-middle p-4 space-x-2 fixed left-0 right-0 z-10 bg-white dark:bg-gray-900 transform transition-all duration-200 translate-y-0 ${
         !show ? '-translate-y-full' : ''
       } ${!atZero ? 'shadow' : ''}`}
     >
       <div className="lg:hidden">
-        <Button className="rounded-full w-12 h-12" onClick={handleShowSidebar} type="text">
+        <Button color="black" className="rounded-full w-12 h-12" onClick={handleShowSidebar} type="text">
           <MenuIcon />
         </Button>
       </div>
       <LinkedLogo />
       <div className="flex-grow-1 flex justify-end w-full">
         <div ref={moreRef}>
-          <Button className="rounded-full w-12 h-12" onClick={handleShowMenu} type="text">
+          <Button color="black" className="rounded-full w-12 h-12" onClick={handleShowMenu} type="text">
             <MoreIcon />
           </Button>
         </div>
