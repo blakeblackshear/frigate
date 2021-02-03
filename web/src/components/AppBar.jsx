@@ -4,7 +4,7 @@ import LinkedLogo from './LinkedLogo';
 import Menu, { MenuItem } from './Menu';
 import MenuIcon from '../icons/Menu';
 import MoreIcon from '../icons/More';
-import { useDarkMode } from '../context';
+import { useDarkMode, useSidebar } from '../context';
 import { useLayoutEffect, useCallback, useRef, useState } from 'preact/hooks';
 
 // We would typically preserve these in component state
@@ -18,6 +18,7 @@ export default function AppBar({ title }) {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const { currentMode, persistedMode, setDarkMode } = useDarkMode();
+  const { showSidebar, setShowSidebar } = useSidebar();
 
   const handleSelectDarkMode = useCallback(
     (value, label) => {
@@ -61,6 +62,10 @@ export default function AppBar({ title }) {
     setShowMoreMenu(false);
   }, [setShowMoreMenu]);
 
+  const handleShowSidebar = useCallback(() => {
+    setShowSidebar(true);
+  }, [setShowSidebar]);
+
   return (
     <div
       className={`w-full border-b border-gray-100 dark:border-gray-700 flex items-center align-middle p-4 space-x-2 fixed left-0 right-0 z-10 bg-white dark:bg-gray-900 transform transition-all duration-200 translate-y-0 ${
@@ -68,7 +73,7 @@ export default function AppBar({ title }) {
       } ${!atZero ? 'shadow' : ''}`}
     >
       <div className="lg:hidden">
-        <Button className="rounded-full w-12 h-12 -ml-4 -mt-4 -mb-4" type="text">
+        <Button className="rounded-full w-12 h-12" onClick={handleShowSidebar} type="text">
           <MenuIcon />
         </Button>
       </div>

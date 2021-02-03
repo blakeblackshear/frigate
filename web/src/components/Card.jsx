@@ -20,7 +20,7 @@ export default function Box({
     <div className={`bg-white dark:bg-gray-800 shadow-md hover:shadow-xl rounded-lg overflow-hidden ${className}`}>
       <Element href={href} {...props}>
         {media}
-        <div class="p-2 pb-2 lg:p-4 lg:pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
+        <div class="p-4 pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
       </Element>
       {buttons.length || content ? (
         <div class="pl-4 pb-2">
