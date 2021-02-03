@@ -16,7 +16,7 @@ export default function Cameras() {
   }
 
   return (
-    <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
       {Object.keys(config.cameras).map((camera) => (
         <Camera name={camera} />
       ))}
