@@ -64,3 +64,15 @@ export function DarkModeProvider({ children }) {
 export function useDarkMode() {
   return useContext(DarkMode);
 }
+
+const Sidebar = createContext(null);
+
+export function SidebarProvider({ children }) {
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  return <Sidebar.Provider value={{ showSidebar, setShowSidebar }}>{children}</Sidebar.Provider>;
+}
+
+export function useSidebar() {
+  return useContext(Sidebar);
+}
