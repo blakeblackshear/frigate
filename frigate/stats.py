@@ -2,8 +2,11 @@ import json
 import logging
 import threading
 import time
+import psutil
+import shutil
 
 from frigate.config import FrigateConfig
+from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -15,6 +18,15 @@ def stats_init(camera_metrics, detectors):
         'started': int(time.time())
     }
     return stats_tracking
+
+def get_fs_type(path):
+    bestMatch = ""
+    fsType = ""
+    for part in psutil.disk_partitions(all=True):
+        if path.startswith(part.mountpoint) and len(bestMatch) < len(part.mountpoint):
+            fsType = part.fstype
+            bestMatch = part.mountpoint
+    return fsType
 
 def stats_snapshot(stats_tracking):
     camera_metrics = stats_tracking['camera_metrics']
@@ -44,8 +56,18 @@ def stats_snapshot(stats_tracking):
 
     stats['service'] = {
         'uptime': (int(time.time()) - stats_tracking['started']),
-        'version': VERSION
+        'version': VERSION,
+        'storage': {}
     }
+
+    for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
+        storage_stats = shutil.disk_usage(path)
+        stats['service']['storage'][path] = {
+            'total': round(storage_stats.total/1000000, 1),
+            'used': round(storage_stats.used/1000000, 1),
+            'free': round(storage_stats.free/1000000, 1),
+            'mount_type': get_fs_type(path)
+        }
 
     return stats
 
