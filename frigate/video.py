@@ -281,6 +281,13 @@ def reduce_boxes(boxes):
     reduced_boxes = cv2.groupRectangles([list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2)[0]
     return [tuple(b) for b in reduced_boxes]
 
+# modified from https://stackoverflow.com/a/40795835
+def intersects_any(box_a, boxes):
+    for box in boxes:
+        if box_a[2] < box[0] or box_a[0] > box[2] or box_a[1] < box[3] or box_a[3] > box[1]:
+            continue
+        return True
+
 def detect(object_detector, frame, model_shape, region, objects_to_track, object_filters):
     tensor_input = create_tensor_input(frame, model_shape, region)
 
@@ -350,7 +357,8 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
         # look for motion
         motion_boxes = motion_detector.detect(frame)
 
-        tracked_object_boxes = [obj['box'] for obj in object_tracker.tracked_objects.values()]
+        # only get the tracked object boxes that intersect with motion
+        tracked_object_boxes = [obj['box'] for obj in object_tracker.tracked_objects.values() if intersects_any(obj['box'], motion_boxes)]
 
         # combine motion boxes with known locations of existing objects
         combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
