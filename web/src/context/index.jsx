@@ -80,3 +80,37 @@ export function DrawerProvider({ children }) {
 export function useDrawer() {
   return useContext(Drawer);
 }
+
+export function usePersistence(key, defaultValue = undefined) {
+  const [value, setInternalValue] = useState(defaultValue);
+  const [loaded, setLoaded] = useState(false);
+
+  const setValue = useCallback(
+    (value) => {
+      setInternalValue(value);
+      async function update() {
+        await setData(key, value);
+      }
+
+      update();
+    },
+    [key]
+  );
+
+  useEffect(() => {
+    setLoaded(false);
+    setInternalValue(defaultValue);
+
+    async function load() {
+      const value = await getData(key);
+      if (typeof value !== 'undefined') {
+        setValue(value);
+      }
+      setLoaded(true);
+    }
+
+    load();
+  }, [key]);
+
+  return [value, setValue, loaded];
+}
