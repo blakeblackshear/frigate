@@ -17,7 +17,9 @@ export default function Box({
   const Element = href ? 'a' : 'div';
 
   return (
-    <div className={`bg-white dark:bg-gray-800 shadow-md hover:shadow-xl rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow rounded-lg overflow-hidden ${className}`}
+    >
       <Element href={href} {...props}>
         {media}
         <div class="p-4 pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
