@@ -31,14 +31,22 @@ export function MenuItem({ focus, icon: Icon, label, onSelect, value }) {
 
   return (
     <div
-      className={`flex space-x-2 p-2 pl-4 pr-4 hover:bg-gray-200 dark:hover:bg-gray-800 dark:hover:text-white cursor-pointer ${
+      className={`flex space-x-2 p-2 px-5 hover:bg-gray-200 dark:hover:bg-gray-800 dark:hover:text-white cursor-pointer ${
         focus ? 'bg-gray-200 dark:bg-gray-800 dark:text-white' : ''
       }`}
       onclick={handleClick}
       role="option"
     >
-      {Icon ? <Icon /> : null}
+      {Icon ? (
+        <div className="w-6 h-6 self-center mr-4 text-gray-500">
+          <Icon />
+        </div>
+      ) : null}
       {label}
     </div>
   );
+}
+
+export function MenuSeparator() {
+  return <div className="border-b border-gray-200 my-2" />;
 }
