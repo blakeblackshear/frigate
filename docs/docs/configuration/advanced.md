@@ -41,8 +41,8 @@ Global object detection settings. These may also be defined at the camera level.
 
 ```yaml
 detect:
-  # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: double the frame rate)
-  max_disappeared: 10
+  # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+  max_disappeared: 25
 ```
 
 ### `logger`

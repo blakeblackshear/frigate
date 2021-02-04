@@ -746,7 +746,7 @@ class MotionConfig():
 class DetectConfig():
     def __init__(self, global_config, config, camera_fps):
         self._enabled = config['enabled']
-        self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*2))
+        self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*5))
 
     @property
     def enabled(self):
