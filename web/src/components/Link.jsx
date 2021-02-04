@@ -1,9 +1,16 @@
 import { h } from 'preact';
+import { Link as RouterLink } from 'preact-router/match';
 
-export default function Link({ className, children, href, ...props }) {
+export default function Link({
+  activeClassName = '',
+  className = 'text-blue-500 hover:underline',
+  children,
+  href,
+  ...props
+}) {
   return (
-    <a className={`text-blue-500 dark:text-blue-400 hover:underline ${className}`} href={href} {...props}>
+    <RouterLink activeClassName={activeClassName} className={className} href={href} {...props}>
       {children}
-    </a>
+    </RouterLink>
   );
 }
