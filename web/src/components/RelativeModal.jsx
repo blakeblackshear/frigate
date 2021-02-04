@@ -59,7 +59,7 @@ export default function RelativeModal({ className, role = 'dialog', children, on
       if (top + menuHeight > windowHeight - WINDOW_PADDING) {
         top = y - menuHeight;
       }
-      setPosition({ left, top, width });
+      setPosition({ left, top: top + window.scrollY, width });
       const focusable = ref.current.querySelector('[tabindex]');
       focusable && console.log('focusing');
       focusable && focusable.focus();
