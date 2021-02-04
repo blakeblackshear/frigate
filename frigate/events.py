@@ -10,6 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import psutil
+import shutil
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -97,6 +98,18 @@ class EventProcessor(threading.Thread):
                 del self.cached_clips[f]
                 logger.debug(f"Cleaning up cached file {f}")
                 os.remove(os.path.join(CACHE_DIR,f))
+        
+        # if we are still using more than 90% of the cache, proactively cleanup
+        cache_usage = shutil.disk_usage("/tmp/cache")
+        if cache_usage.used/cache_usage.total > .9:
+            logger.warning("More than 90% of the cache is used.")
+            logger.warning("Consider increasing space available at /tmp/cache or reducing max_seconds in your clips config.")
+            logger.warning("Proactively cleaning up the cache...")
+            while cache_usage.used/cache_usage.total > .9:
+                oldest_clip = min(self.cached_clips.values(), key=lambda x:x['start_time'])
+                del self.cached_clips[oldest_clip['path']]
+                os.remove(os.path.join(CACHE_DIR,oldest_clip['path']))
+                cache_usage = shutil.disk_usage("/tmp/cache")
 
     def create_clip(self, camera, event_data, pre_capture, post_capture):
         # get all clips from the camera with the event sorted
