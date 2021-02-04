@@ -1,9 +1,12 @@
 import { h } from 'preact';
 import Button from './Button';
 import LinkedLogo from './LinkedLogo';
-import Menu, { MenuItem } from './Menu';
+import Menu, { MenuItem, MenuSeparator } from './Menu';
 import MenuIcon from '../icons/Menu';
 import MoreIcon from '../icons/More';
+import AutoAwesomeIcon from '../icons/AutoAwesome';
+import LightModeIcon from '../icons/LightMode';
+import DarkModeIcon from '../icons/DarkMode';
 import { useDarkMode, useSidebar } from '../context';
 import { useLayoutEffect, useCallback, useRef, useState } from 'preact/hooks';
 
@@ -87,9 +90,10 @@ export default function AppBar({ title }) {
       </div>
       {showMoreMenu ? (
         <Menu onDismiss={handleDismissMoreMenu} relativeTo={moreRef}>
-          <MenuItem label="Auto" value="media" onSelect={handleSelectDarkMode} />
-          <MenuItem label="Light" value="light" onSelect={handleSelectDarkMode} />
-          <MenuItem label="Dark" value="dark" onSelect={handleSelectDarkMode} />
+          <MenuItem icon={AutoAwesomeIcon} label="Auto dark mode" value="media" onSelect={handleSelectDarkMode} />
+          <MenuSeparator />
+          <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
+          <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
         </Menu>
       ) : null}
     </div>
