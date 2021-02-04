@@ -65,14 +65,14 @@ export function useDarkMode() {
   return useContext(DarkMode);
 }
 
-const Sidebar = createContext(null);
+const Drawer = createContext(null);
 
-export function SidebarProvider({ children }) {
-  const [showSidebar, setShowSidebar] = useState(false);
+export function DrawerProvider({ children }) {
+  const [showDrawer, setShowDrawer] = useState(false);
 
-  return <Sidebar.Provider value={{ showSidebar, setShowSidebar }}>{children}</Sidebar.Provider>;
+  return <Drawer.Provider value={{ showDrawer, setShowDrawer }}>{children}</Drawer.Provider>;
 }
 
-export function useSidebar() {
-  return useContext(Sidebar);
+export function useDrawer() {
+  return useContext(Drawer);
 }

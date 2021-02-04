@@ -7,7 +7,7 @@ import MoreIcon from '../icons/More';
 import AutoAwesomeIcon from '../icons/AutoAwesome';
 import LightModeIcon from '../icons/LightMode';
 import DarkModeIcon from '../icons/DarkMode';
-import { useDarkMode, useSidebar } from '../context';
+import { useDarkMode, useDrawer } from '../context';
 import { useLayoutEffect, useCallback, useRef, useState } from 'preact/hooks';
 
 // We would typically preserve these in component state
@@ -18,10 +18,10 @@ let lastScrollY = window.scrollY;
 export default function AppBar({ title }) {
   const [show, setShow] = useState(true);
   const [atZero, setAtZero] = useState(window.scrollY === 0);
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [_, setDrawerVisible] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const { currentMode, persistedMode, setDarkMode } = useDarkMode();
-  const { showSidebar, setShowSidebar } = useSidebar();
+  const { showDrawer, setShowDrawer } = useDrawer();
 
   const handleSelectDarkMode = useCallback(
     (value, label) => {
@@ -65,9 +65,9 @@ export default function AppBar({ title }) {
     setShowMoreMenu(false);
   }, [setShowMoreMenu]);
 
-  const handleShowSidebar = useCallback(() => {
-    setShowSidebar(true);
-  }, [setShowSidebar]);
+  const handleShowDrawer = useCallback(() => {
+    setShowDrawer(true);
+  }, [setShowDrawer]);
 
   return (
     <div
@@ -76,7 +76,7 @@ export default function AppBar({ title }) {
       } ${!atZero ? 'shadow' : ''}`}
     >
       <div className="lg:hidden">
-        <Button color="black" className="rounded-full w-12 h-12" onClick={handleShowSidebar} type="text">
+        <Button color="black" className="rounded-full w-12 h-12" onClick={handleShowDrawer} type="text">
           <MenuIcon />
         </Button>
       </div>
