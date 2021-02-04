@@ -28,6 +28,30 @@ export default function StyleGuide() {
         <Button color="green">Save</Button>
         <Button disabled>Disabled</Button>
       </div>
+      <div class="flex space-x-4 mb-4">
+        <Button type="text">Default</Button>
+        <Button color="red" type="text">
+          Danger
+        </Button>
+        <Button color="green" type="text">
+          Save
+        </Button>
+        <Button disabled type="text">
+          Disabled
+        </Button>
+      </div>
+      <div class="flex space-x-4 mb-4">
+        <Button type="outlined">Default</Button>
+        <Button color="red" type="outlined">
+          Danger
+        </Button>
+        <Button color="green" type="outlined">
+          Save
+        </Button>
+        <Button disabled type="outlined">
+          Disabled
+        </Button>
+      </div>
 
       <Heading size="md">Switch</Heading>
       <div class="flex">
