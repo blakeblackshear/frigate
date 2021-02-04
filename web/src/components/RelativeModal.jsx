@@ -1,6 +1,5 @@
 import { h, Fragment } from 'preact';
 import { createPortal } from 'preact/compat';
-import { DarkModeProvider } from '../context';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 const WINDOW_PADDING = 20;
@@ -76,7 +75,7 @@ export default function RelativeModal({ className, role = 'dialog', children, on
   }, [show, position.width, ref.current]);
 
   const menu = (
-    <DarkModeProvider>
+    <Fragment>
       <div className="absolute inset-0" onClick={handleDismiss} />
       <div
         className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto max-h-48 transition-all duration-75 transform scale-90 opacity-0 ${
@@ -91,7 +90,7 @@ export default function RelativeModal({ className, role = 'dialog', children, on
       >
         {children}
       </div>
-    </DarkModeProvider>
+    </Fragment>
   );
 
   return portalRoot ? createPortal(menu, portalRoot) : menu;

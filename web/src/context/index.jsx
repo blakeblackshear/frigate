@@ -1,7 +1,7 @@
 import { h, createContext } from 'preact';
 import { get as getData, set as setData } from 'idb-keyval';
 import produce from 'immer';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'preact/hooks';
 
 const DarkMode = createContext(null);
 
@@ -54,11 +54,15 @@ export function DarkModeProvider({ children }) {
     handleMediaMatch(query);
   }, [persistedMode]);
 
-  return (
-    <DarkMode.Provider value={{ currentMode, persistedMode, setDarkMode }}>
-      <div className={`${currentMode === 'dark' ? 'dark' : ''}`}>{children}</div>
-    </DarkMode.Provider>
-  );
+  useLayoutEffect(() => {
+    if (currentMode === 'dark') {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [currentMode]);
+
+  return <DarkMode.Provider value={{ currentMode, persistedMode, setDarkMode }}>{children}</DarkMode.Provider>;
 }
 
 export function useDarkMode() {
