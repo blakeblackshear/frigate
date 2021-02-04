@@ -55,7 +55,7 @@ export default function Button({
   type = 'contained',
   ...attrs
 }) {
-  let classes = `${className} ${ButtonTypes[type]} ${
+  let classes = `whitespace-nowrap flex items-center space-x-1 ${className} ${ButtonTypes[type]} ${
     ButtonColors[disabled ? 'disabled' : color][type]
   } font-sans inline-flex font-bold uppercase text-xs px-2 py-2 rounded outline-none focus:outline-none ring-opacity-50 transition-shadow transition-colors ${
     disabled ? 'cursor-not-allowed' : 'focus:ring-2 cursor-pointer'

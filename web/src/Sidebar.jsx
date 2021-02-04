@@ -13,7 +13,7 @@ export default function Sidebar() {
   return (
     <NavigationDrawer header={<Header />}>
       <Destination href="/" text="Cameras" />
-      <Match path="/cameras/:camera">
+      <Match path="/cameras/:camera/:other?">
         {({ matches }) =>
           matches ? (
             <Fragment>
