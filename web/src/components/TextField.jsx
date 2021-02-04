@@ -60,8 +60,12 @@ export default function TextField({
         }`}
         ref={inputRef}
       >
-        <label className="flex space-x-2">
-          {LeadingIcon ? <LeadingIcon /> : null}
+        <label className="flex space-x-2 items-center">
+          {LeadingIcon ? (
+            <div class="w-10 h-full">
+              <LeadingIcon />
+            </div>
+          ) : null}
           <div className="relative w-full">
             <input
               className="h-6 mt-6 w-full bg-transparent focus:outline-none focus:ring-0"
@@ -82,7 +86,11 @@ export default function TextField({
               {label}
             </div>
           </div>
-          {TrailingIcon ? <TrailingIcon /> : null}
+          {TrailingIcon ? (
+            <div class="w-10 h-10">
+              <TrailingIcon />
+            </div>
+          ) : null}
         </label>
       </div>
       {helpText ? <div className="text-xs pl-3 pt-1">{helpText}</div> : null}

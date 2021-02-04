@@ -400,7 +400,10 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
   const scaledPoints = useMemo(() => scalePolylinePoints(points, scale), [points, scale]);
 
   return (
-    <div className="absolute" style={`inset: -${MaskInset}px`}>
+    <div
+      className="absolute"
+      style={`top: -${MaskInset}px; right: -${MaskInset}px; bottom: -${MaskInset}px; left: -${MaskInset}px`}
+    >
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
@@ -414,7 +417,12 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
             />
           ))}
       <div className="absolute inset-0 right-0 bottom-0" onclick={handleAddPoint} ref={boundingRef} />
-      <svg width="100%" height="100%" className="absolute pointer-events-none" style={`inset: ${MaskInset}px`}>
+      <svg
+        width="100%"
+        height="100%"
+        className="absolute pointer-events-none"
+        style={`top: ${MaskInset}px; right: ${MaskInset}px; bottom: ${MaskInset}px; left: ${MaskInset}px`}
+      >
         {!scaledPoints ? null : (
           <g>
             <polyline points={polylinePointsToPolyline(scaledPoints)} fill="rgba(244,0,0,0.5)" />
