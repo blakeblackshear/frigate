@@ -6,7 +6,7 @@ export default function Menu({ className, children, onDismiss, relativeTo }) {
   return relativeTo ? (
     <RelativeModal
       children={children}
-      className={`${className || ''} pt-2 pb-2`}
+      className={`${className || ''} py-2`}
       role="listbox"
       onDismiss={onDismiss}
       portalRootID="menus"
@@ -48,5 +48,5 @@ export function MenuItem({ focus, icon: Icon, label, onSelect, value }) {
 }
 
 export function MenuSeparator() {
-  return <div className="border-b border-gray-200 my-2" />;
+  return <div className="border-b border-gray-200 dark:border-gray-800 my-2" />;
 }

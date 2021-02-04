@@ -11,13 +11,13 @@ import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
 import StyleGuide from './StyleGuide';
 import Api, { FetchStatus, useConfig } from './api';
-import { DarkModeProvider, SidebarProvider } from './context';
+import { DarkModeProvider, DrawerProvider } from './context';
 
 export default function App() {
   const { data, status } = useConfig();
   return (
     <DarkModeProvider>
-      <SidebarProvider>
+      <DrawerProvider>
         <div class="w-full">
           <AppBar title="Frigate" />
           {status !== FetchStatus.LOADED ? (
@@ -41,7 +41,7 @@ export default function App() {
             </div>
           )}
         </div>
-      </SidebarProvider>
+      </DrawerProvider>
     </DarkModeProvider>
   );
 }
