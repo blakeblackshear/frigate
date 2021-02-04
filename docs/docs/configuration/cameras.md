@@ -276,8 +276,8 @@ cameras:
       # Optional: enables detection for the camera (default: True)
       # This value can be set via MQTT and will be updated in startup based on retained value
       enabled: True
-      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: double the frame rate)
-      max_disappeared: 10
+      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+      max_disappeared: 25
 
     # Optional: save clips configuration
     clips:
