@@ -141,7 +141,7 @@ export default function Events({ path: pathname } = {}) {
                 const end = new Date(parseInt(endTime * 1000, 10));
                 const ref = i === events.length - 1 ? lastCellRef : undefined;
                 return (
-                  <Tr key={id} index={i}>
+                  <Tr key={id}>
                     <Td className="w-40">
                       <a href={`/events/${id}`} ref={ref} data-start-time={startTime} data-reached-end={reachedEnd}>
                         <img
