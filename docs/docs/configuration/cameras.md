@@ -139,6 +139,8 @@ clips:
   # Optional: Objects to save clips for. (default: all tracked objects)
   objects:
     - person
+  # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
+  required_zones: []
   # Optional: Camera override for retention settings (default: global values)
   retain:
     # Required: Default retention days (default: shown below)
@@ -166,6 +168,8 @@ snapshots:
   crop: False
   # Optional: height to resize the snapshot to (default: original size)
   height: 175
+  # Optional: Restrict snapshots to objects that entered any of the listed zones (default: no required zones)
+  required_zones: []
   # Optional: Camera override for retention settings (default: global values)
   retain:
     # Required: Default retention days (default: shown below)
@@ -226,12 +230,6 @@ cameras:
           # Optional: stream specific input args (default: inherit)
           input_args:
 
-      # Optional: camera specific global args (default: inherit)
-      global_args:
-      # Optional: camera specific hwaccel args (default: inherit)
-      hwaccel_args:
-      # Optional: camera specific input args (default: inherit)
-      input_args:
       # Optional: camera specific output args (default: inherit)
       output_args:
 
@@ -291,6 +289,8 @@ cameras:
       # Optional: Objects to save clips for. (default: all tracked objects)
       objects:
         - person
+      # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
+      required_zones: []
       # Optional: Camera override for retention settings (default: global values)
       retain:
         # Required: Default retention days (default: shown below)
@@ -324,6 +324,8 @@ cameras:
       crop: False
       # Optional: height to resize the snapshot to (default: original size)
       height: 175
+      # Optional: Restrict snapshots to objects that entered any of the listed zones (default: no required zones)
+      required_zones: []
       # Optional: Camera override for retention settings (default: global values)
       retain:
         # Required: Default retention days (default: shown below)
@@ -346,6 +348,8 @@ cameras:
       crop: True
       # Optional: height to resize the snapshot to (default: shown below)
       height: 270
+      # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
+      required_zones: []
 
     # Optional: Camera level object filters config.
     objects:
