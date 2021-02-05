@@ -164,6 +164,9 @@ CAMERA_FFMPEG_SCHEMA = vol.Schema(
             'input_args': vol.Any(str, [str]),
         }], vol.Msg(each_role_used_once, msg="Each input role may only be used once"), 
             vol.Msg(detect_is_required, msg="The detect role is required")),
+        'global_args':  vol.Any(str, [str]),
+        'hwaccel_args': vol.Any(str, [str]),
+        'input_args': vol.Any(str, [str]),
         'output_args': {
             vol.Optional('detect', default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
             vol.Optional('record', default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
@@ -392,12 +395,12 @@ class MqttConfig():
         }
 
 class CameraInput():
-    def __init__(self, global_config, ffmpeg_input):
+    def __init__(self, camera_config, global_config, ffmpeg_input):
         self._path = ffmpeg_input['path']
         self._roles = ffmpeg_input['roles']
-        self._global_args = ffmpeg_input.get('global_args', global_config['global_args'])
-        self._hwaccel_args = ffmpeg_input.get('hwaccel_args', global_config['hwaccel_args'])
-        self._input_args = ffmpeg_input.get('input_args', global_config['input_args'])
+        self._global_args = ffmpeg_input.get('global_args', camera_config.get('global_args', global_config['global_args']))
+        self._hwaccel_args = ffmpeg_input.get('hwaccel_args', camera_config.get('hwaccel_args', global_config['hwaccel_args']))
+        self._input_args = ffmpeg_input.get('input_args', camera_config.get('input_args', global_config['input_args']))
 
     @property
     def path(self):
@@ -421,7 +424,7 @@ class CameraInput():
 
 class CameraFfmpegConfig():
     def __init__(self, global_config, config):
-        self._inputs = [CameraInput(global_config, i) for i in config['inputs']]
+        self._inputs = [CameraInput(config, global_config, i) for i in config['inputs']]
         self._output_args = config.get('output_args', global_config['output_args'])
 
     @property
