@@ -82,8 +82,9 @@ export default function RelativeModal({ className, role = 'dialog', children, on
 
   const menu = (
     <Fragment>
-      <div className="absolute inset-0 z-10" onClick={handleDismiss} />
+      <div key="scrim" className="absolute inset-0 z-10" onClick={handleDismiss} />
       <div
+        key="menu"
         className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto h-auto transition-all duration-75 transform scale-90 opacity-0 overflow-scroll ${
           show ? 'scale-100 opacity-100' : ''
         } ${className}`}
