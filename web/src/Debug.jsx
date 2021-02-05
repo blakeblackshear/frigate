@@ -49,49 +49,53 @@ export default function Debug() {
         Debug <span className="text-sm">{service.version}</span>
       </Heading>
 
-      <Table className="w-full">
-        <Thead>
-          <Tr>
-            <Th>detector</Th>
-            {detectorDataKeys.map((name) => (
-              <Th>{name.replace('_', ' ')}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {detectorNames.map((detector, i) => (
-            <Tr index={i}>
-              <Td>{detector}</Td>
+      <div class="min-w-0 overflow-auto">
+        <Table className="w-full">
+          <Thead>
+            <Tr>
+              <Th>detector</Th>
               {detectorDataKeys.map((name) => (
-                <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                <Th>{name.replace('_', ' ')}</Th>
               ))}
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
-
-      <Table className="w-full">
-        <Thead>
-          <Tr>
-            <Th>camera</Th>
-            {cameraDataKeys.map((name) => (
-              <Th>{name.replace('_', ' ')}</Th>
+          </Thead>
+          <Tbody>
+            {detectorNames.map((detector, i) => (
+              <Tr index={i}>
+                <Td>{detector}</Td>
+                {detectorDataKeys.map((name) => (
+                  <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                ))}
+              </Tr>
             ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {cameraNames.map((camera, i) => (
-            <Tr index={i}>
-              <Td>
-                <Link href={`/cameras/${camera}`}>{camera}</Link>
-              </Td>
+          </Tbody>
+        </Table>
+      </div>
+
+      <div class="min-w-0 overflow-auto">
+        <Table className="w-full">
+          <Thead>
+            <Tr>
+              <Th>camera</Th>
               {cameraDataKeys.map((name) => (
-                <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
+                <Th>{name.replace('_', ' ')}</Th>
               ))}
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {cameraNames.map((camera, i) => (
+              <Tr index={i}>
+                <Td>
+                  <Link href={`/cameras/${camera}`}>{camera}</Link>
+                </Td>
+                {cameraDataKeys.map((name) => (
+                  <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
+                ))}
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </div>
 
       <div className="relative">
         <Heading size="sm">Config</Heading>
