@@ -17,7 +17,9 @@ export default function Box({
 }) {
   const Element = href ? 'a' : 'div';
 
-  const typeClasses = elevated ? 'shadow-md hover:shadow-lg transition-shadow' : 'border border-gray-200';
+  const typeClasses = elevated
+    ? 'shadow-md hover:shadow-lg transition-shadow'
+    : 'border border-gray-200 dark:border-gray-700';
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg overflow-hidden ${typeClasses} ${className}`}>
