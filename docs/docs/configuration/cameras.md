@@ -229,7 +229,12 @@ cameras:
           hwaccel_args:
           # Optional: stream specific input args (default: inherit)
           input_args:
-
+      # Optional: camera specific global args (default: inherit)
+      global_args:
+      # Optional: camera specific hwaccel args (default: inherit)
+      hwaccel_args:
+      # Optional: camera specific input args (default: inherit)
+      input_args:
       # Optional: camera specific output args (default: inherit)
       output_args:
 
