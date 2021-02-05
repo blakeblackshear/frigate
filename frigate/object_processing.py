@@ -217,7 +217,7 @@ class TrackedObject():
             cv2.putText(best_frame, time_to_show, (5, best_frame.shape[0]-7), cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=font_scale, color=(255, 255, 255), thickness=2)
 
-        ret, jpg = cv2.imencode('.jpg', best_frame)
+        ret, jpg = cv2.imencode('.jpg', best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         if ret:
             return jpg.tobytes()
         else:

@@ -115,7 +115,7 @@ def event_thumbnail(id):
         jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
         img = cv2.imdecode(jpg_as_np, flags=1)
         thumbnail = cv2.copyMakeBorder(img, 0, 0, int(img.shape[1]*0.5), int(img.shape[1]*0.5), cv2.BORDER_CONSTANT, (0,0,0))
-        ret, jpg = cv2.imencode('.jpg', thumbnail)
+        ret, jpg = cv2.imencode('.jpg', thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         thumbnail_bytes = jpg.tobytes()
 
     response = make_response(thumbnail_bytes)
