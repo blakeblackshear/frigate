@@ -4,12 +4,11 @@
   "scripts": {
     "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://localhost:5000 snowpack dev",
     "prebuild": "rimraf build",
-    "build": "snowpack build"
+    "build": "cross-env NODE_ENV=production snowpack build"
   },
   "dependencies": {
     "@prefresh/snowpack": "^3.0.1",
     "@snowpack/plugin-postcss": "^1.1.0",
-    "@snowpack/plugin-webpack": "^2.3.0",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
     "immer": "^8.0.1",
@@ -19,6 +18,7 @@
     "preact-router": "^3.2.1",
     "rimraf": "^3.0.2",
     "snowpack": "^3.0.11",
+    "snowpack-plugin-hash": "^0.14.2",
     "tailwindcss": "^2.0.2"
   }
 }
