@@ -198,6 +198,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('enabled', default=False): bool,
                 vol.Optional('pre_capture', default=5): int,
                 vol.Optional('post_capture', default=5): int,
+                vol.Optional('required_zones', default=[]): [str],
                 'objects': [str],
                 vol.Optional('retain', default={}): RETAIN_SCHEMA,
             },
@@ -213,6 +214,7 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('timestamp', default=False): bool,
                 vol.Optional('bounding_box', default=False): bool,
                 vol.Optional('crop', default=False): bool,
+                vol.Optional('required_zones', default=[]): [str],
                 'height': int,
                 vol.Optional('retain', default={}): RETAIN_SCHEMA,
             },
@@ -221,7 +223,8 @@ CAMERAS_SCHEMA = vol.Schema(vol.All(
                 vol.Optional('timestamp', default=True): bool,
                 vol.Optional('bounding_box', default=True): bool,
                 vol.Optional('crop', default=True): bool,
-                vol.Optional('height', default=270): int
+                vol.Optional('height', default=270): int,
+                vol.Optional('required_zones', default=[]): [str],
             },
             vol.Optional('objects', default={}): OBJECTS_SCHEMA,
             vol.Optional('motion', default={}): MOTION_SCHEMA,
@@ -570,6 +573,7 @@ class CameraSnapshotsConfig():
         self._crop = config['crop']
         self._height = config.get('height')
         self._retain = RetainConfig(global_config['snapshots']['retain'], config['retain'])
+        self._required_zones = config['required_zones']
     
     @property
     def enabled(self):
@@ -594,6 +598,10 @@ class CameraSnapshotsConfig():
     @property
     def retain(self):
         return self._retain
+
+    @property
+    def required_zones(self):
+        return self._required_zones
     
     def to_dict(self):
         return {
@@ -602,7 +610,8 @@ class CameraSnapshotsConfig():
             'bounding_box': self.bounding_box,
             'crop': self.crop,
             'height': self.height,
-            'retain': self.retain.to_dict()
+            'retain': self.retain.to_dict(),
+            'required_zones': self.required_zones
         }
 
 class CameraMqttConfig():
@@ -612,6 +621,7 @@ class CameraMqttConfig():
         self._bounding_box = config['bounding_box']
         self._crop = config['crop']
         self._height = config.get('height')
+        self._required_zones = config['required_zones']
 
     @property
     def enabled(self):
@@ -633,13 +643,18 @@ class CameraMqttConfig():
     def height(self):
         return self._height
 
+    @property
+    def required_zones(self):
+        return self._required_zones
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
             'timestamp': self.timestamp,
             'bounding_box': self.bounding_box,
             'crop': self.crop,
-            'height': self.height
+            'height': self.height,
+            'required_zones': self.required_zones
         }
 
 class CameraClipsConfig():
@@ -649,6 +664,7 @@ class CameraClipsConfig():
         self._post_capture = config['post_capture']
         self._objects = config.get('objects')
         self._retain = RetainConfig(global_config['clips']['retain'], config['retain'])
+        self._required_zones = config['required_zones']
     
     @property
     def enabled(self):
@@ -670,13 +686,18 @@ class CameraClipsConfig():
     def retain(self):
         return self._retain
 
+    @property
+    def required_zones(self):
+        return self._required_zones
+
     def to_dict(self):
         return {
             'enabled': self.enabled,
             'pre_capture': self.pre_capture,
             'post_capture': self.post_capture,
             'objects': self.objects,
-            'retain': self.retain.to_dict()
+            'retain': self.retain.to_dict(),
+            'required_zones': self.required_zones
         }
 
 class CameraRtmpConfig():
