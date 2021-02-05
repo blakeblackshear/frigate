@@ -454,7 +454,7 @@ class TrackedObjectProcessor(threading.Thread):
                 message = { 'before': obj.previous, 'after': obj.to_dict(), 'type': 'end' }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
                 # write snapshot to disk if enabled
-                if snapshot_config.enabled:
+                if snapshot_config.enabled and self.should_save_snapshot(camera, obj):
                     jpg_bytes = obj.get_jpg_bytes(
                         timestamp=snapshot_config.timestamp,
                         bounding_box=snapshot_config.bounding_box,
@@ -468,7 +468,7 @@ class TrackedObjectProcessor(threading.Thread):
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config = self.config.cameras[camera].mqtt
-            if mqtt_config.enabled:
+            if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=mqtt_config.timestamp,
                     bounding_box=mqtt_config.bounding_box,
@@ -498,6 +498,24 @@ class TrackedObjectProcessor(threading.Thread):
         #   }
         # }
         self.zone_data = defaultdict(lambda: defaultdict(lambda: {}))
+
+    def should_save_snapshot(self, camera, obj: TrackedObject):
+        # if there are required zones and there is no overlap
+        required_zones = self.config.cameras[camera].snapshots.required_zones
+        if len(required_zones) > 0 and not obj.entered_zones & set(required_zones):
+            logger.debug(f"Not creating snapshot for {obj.obj_data['id']} because it did not enter required zones")
+            return False
+
+        return True
+
+    def should_mqtt_snapshot(self, camera, obj: TrackedObject):
+        # if there are required zones and there is no overlap
+        required_zones = self.config.cameras[camera].mqtt.required_zones
+        if len(required_zones) > 0 and not obj.entered_zones & set(required_zones):
+            logger.debug(f"Not sending mqtt for {obj.obj_data['id']} because it did not enter required zones")
+            return False
+
+        return True
 
     def get_best(self, camera, label):
         # TODO: need a lock here

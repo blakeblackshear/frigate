@@ -31,6 +31,18 @@ class EventProcessor(threading.Thread):
         self.event_processed_queue = event_processed_queue
         self.events_in_process = {}
         self.stop_event = stop_event
+
+    def should_create_clip(self, camera, event_data):
+        if event_data['false_positive']:
+            return False
+        
+        # if there are required zones and there is no overlap
+        required_zones = self.config.cameras[camera].clips.required_zones
+        if len(required_zones) > 0 and not set(event_data['entered_zones']) & set(required_zones):
+            logger.debug(f"Not creating clip for {event_data['id']} because it did not enter required zones")
+            return False
+
+        return True
     
     def refresh_cache(self):
         cached_files = os.listdir(CACHE_DIR)
@@ -193,7 +205,7 @@ class EventProcessor(threading.Thread):
             if event_type == 'end':
                 clips_config = self.config.cameras[camera].clips
 
-                if not event_data['false_positive']:
+                if self.should_create_clip(camera, event_data):
                     clip_created = False
                     if clips_config.enabled and (clips_config.objects is None or event_data['label'] in clips_config.objects):
                         clip_created = self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
