@@ -160,6 +160,39 @@ class TestConfig(TestCase):
         assert('dog' in frigate_config.cameras['back'].objects.filters)
         assert(frigate_config.cameras['back'].objects.filters['dog'].threshold == 0.7)
     
+    def test_global_object_mask(self):
+        config = {
+            'mqtt': {
+                'host': 'mqtt'
+            },
+            'objects': {
+                'track': ['person', 'dog']
+            },
+            'cameras': {
+                'back': {
+                    'ffmpeg': {
+                        'inputs': [
+                            { 'path': 'rtsp://10.0.0.1:554/video', 'roles': ['detect'] }
+                        ]
+                    },
+                    'height': 1080,
+                    'width': 1920,
+                    'objects': {
+                        'mask': '0,0,1,1,0,1',
+                        'filters': {
+                            'dog': {
+                                'mask': '1,1,1,1,1,1'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        frigate_config = FrigateConfig(config=config)
+        assert('dog' in frigate_config.cameras['back'].objects.filters)
+        assert(len(frigate_config.cameras['back'].objects.filters['dog']._raw_mask) == 2)
+        assert(len(frigate_config.cameras['back'].objects.filters['person']._raw_mask) == 1)
+    
     def test_ffmpeg_params_global(self):
         config = {
             'ffmpeg': {

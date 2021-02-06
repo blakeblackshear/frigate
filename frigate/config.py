@@ -131,6 +131,7 @@ def filters_for_all_tracked_objects(object_config):
 OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
     {
         'track': [str],
+        'mask': vol.Any(str, [str]),
         vol.Optional('filters', default = {}): FILTER_SCHEMA.extend(
             { 
                 str: {
@@ -512,12 +513,25 @@ class RecordConfig():
         }
 
 class FilterConfig():
-    def __init__(self, global_config, config, frame_shape=None):
+    def __init__(self, global_config, config, global_mask=None, frame_shape=None):
         self._min_area = config.get('min_area', global_config.get('min_area', 0))
         self._max_area = config.get('max_area', global_config.get('max_area', 24000000))
         self._threshold = config.get('threshold', global_config.get('threshold', 0.7))
         self._min_score = config.get('min_score', global_config.get('min_score', 0.5))
-        self._raw_mask = config.get('mask')
+
+        self._raw_mask = []
+        if global_mask:
+            if isinstance(global_mask, list):
+                self._raw_mask += global_mask
+            elif isinstance(global_mask, str):
+                self._raw_mask += [global_mask]
+
+        mask = config.get('mask')
+        if mask:
+            if isinstance(mask, list):
+                self._raw_mask += mask
+            elif isinstance(mask, str):
+                self._raw_mask += [mask]
         self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
 
     @property
@@ -552,7 +566,8 @@ class FilterConfig():
 class ObjectConfig():
     def __init__(self, global_config, config, frame_shape):
         self._track = config.get('track', global_config.get('track', DEFAULT_TRACKED_OBJECTS))
-        self._filters = { name: FilterConfig(global_config.get('filters').get(name, {}), config.get('filters').get(name, {}), frame_shape) for name in self._track }
+        self._raw_mask = config.get('mask')
+        self._filters = { name: FilterConfig(global_config['filters'].get(name, {}), config['filters'].get(name, {}), self._raw_mask, frame_shape) for name in self._track }
 
     @property
     def track(self):
@@ -565,6 +580,7 @@ class ObjectConfig():
     def to_dict(self):
         return {
             'track': self.track,
+            'mask': self._raw_mask,
             'filters': { k: f.to_dict() for k, f in self.filters.items() }
         }
 
