@@ -108,6 +108,10 @@ objects:
   track:
     - person
     - car
+  # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
+  # Checks based on the bottom center of the bounding box of the object. 
+  # NOTE: This mask is COMBINED with the object type specific mask below
+  mask: 0,0,1000,0,1000,200,0,200
   filters:
     person:
       min_area: 5000
@@ -361,6 +365,10 @@ cameras:
       track:
         - person
         - car
+      # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
+      # Checks based on the bottom center of the bounding box of the object. 
+      # NOTE: This mask is COMBINED with the object type specific mask below
+      mask: 0,0,1000,0,1000,200,0,200
       filters:
         person:
           min_area: 5000
