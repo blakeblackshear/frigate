@@ -50,7 +50,7 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   );
 
   useEffect(() => {
-    if (!scaledHeight) {
+    if (!scaledHeight || !canvasRef.current) {
       return;
     }
     img.src = `${apiHost}/api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;

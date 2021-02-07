@@ -1,12 +1,12 @@
 import { h } from 'preact';
-import ArrowDropdown from './icons/ArrowDropdown';
-import ArrowDropup from './icons/ArrowDropup';
-import Card from './components/Card';
-import Button from './components/Button';
-import Heading from './components/Heading';
-import Select from './components/Select';
-import Switch from './components/Switch';
-import TextField from './components/TextField';
+import ArrowDropdown from '../icons/ArrowDropdown';
+import ArrowDropup from '../icons/ArrowDropup';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Heading from '../components/Heading';
+import Select from '../components/Select';
+import Switch from '../components/Switch';
+import TextField from '../components/TextField';
 import { useCallback, useState } from 'preact/hooks';
 
 export default function StyleGuide() {

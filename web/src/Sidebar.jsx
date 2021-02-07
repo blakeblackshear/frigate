@@ -30,6 +30,12 @@ export default function Sidebar() {
       <Destination href="/debug" text="Debug" />
       <Separator />
       <div className="flex flex-grow" />
+      {import.meta.env.MODE !== 'production' ? (
+        <Fragment>
+          <Destination href="/styleguide" text="Style Guide" />
+          <Separator />
+        </Fragment>
+      ) : null}
       <Destination className="self-end" href="https://blakeblackshear.github.io/frigate" text="Documentation" />
       <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
     </NavigationDrawer>

@@ -1,11 +1,10 @@
 import { h } from 'preact';
-import ActivityIndicator from './components/ActivityIndicator';
-import Card from './components/Card';
-import CameraImage from './components/CameraImage';
-import Events from './Events';
-import Heading from './components/Heading';
+import ActivityIndicator from '../components/ActivityIndicator';
+import Card from '../components/Card';
+import CameraImage from '../components/CameraImage';
+import Heading from '../components/Heading';
 import { route } from 'preact-router';
-import { useConfig } from './api';
+import { useConfig } from '../api';
 import { useMemo } from 'preact/hooks';
 
 export default function Cameras() {
