@@ -1,6 +1,7 @@
 import { h } from 'preact';
+import { memo } from 'preact/compat';
 
-export default function ArrowDropdown() {
+export function LightMode() {
   return (
     <svg className="fill-current" viewBox="0 0 24 24">
       <rect fill="none" height="24" width="24" />
@@ -8,3 +9,5 @@ export default function ArrowDropdown() {
     </svg>
   );
 }
+
+export default memo(LightMode);
