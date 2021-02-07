@@ -311,6 +311,38 @@ class EventCleanup(threading.Thread):
                             Event.label == l.label)
                 )
                 update_query.execute()
+
+    def purge_duplicates(self):
+        duplicate_query = """with grouped_events as (
+          select id,
+            label, 
+            camera, 
+          	has_snapshot,
+          	has_clip,
+          	row_number() over (
+              partition by label, camera, round(start_time/5,0)*5
+              order by end_time-start_time desc
+            ) as copy_number
+          from event
+        )
+
+        select distinct id, camera, has_snapshot, has_clip from grouped_events 
+        where copy_number > 1;"""
+
+        duplicate_events = Event.raw(duplicate_query)
+        for event in duplicate_events:
+            logger.debug(f"Removing duplicate: {event.id}")
+            media_name = f"{event.camera}-{event.id}"
+            if event.has_snapshot:
+                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+                media.unlink(missing_ok=True)
+            if event.has_clip:
+                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+                media.unlink(missing_ok=True)
+
+        (Event.delete()
+            .where( Event.id << [event.id for event in duplicate_events] )
+            .execute())
     
     def run(self):
         counter = 0
@@ -319,15 +351,16 @@ class EventCleanup(threading.Thread):
                 logger.info(f"Exiting event cleanup...")
                 break
 
-            # only expire events every 10 minutes, but check for stop events every 10 seconds
+            # only expire events every 5 minutes, but check for stop events every 10 seconds
             time.sleep(10)
             counter = counter + 1
-            if counter < 60:
+            if counter < 30:
                 continue
             counter = 0
 
             self.expire('clips')
             self.expire('snapshots')
+            self.purge_duplicates()
 
             # drop events from db where has_clip and has_snapshot are false
             delete_query = (
