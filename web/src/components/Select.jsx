@@ -95,7 +95,7 @@ export default function Select({ label, onChange, options: inputOptions = [], se
         value={options[selected]?.label}
       />
       {showMenu ? (
-        <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref}>
+        <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref} widthRelative>
           {options.map(({ value, label }, i) => (
             <MenuItem key={value} label={label} focus={focused === i} onSelect={handleSelect} value={value} />
           ))}
