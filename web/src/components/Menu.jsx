@@ -2,7 +2,7 @@ import { h } from 'preact';
 import RelativeModal from './RelativeModal';
 import { useCallback, useEffect } from 'preact/hooks';
 
-export default function Menu({ className, children, onDismiss, relativeTo }) {
+export default function Menu({ className, children, onDismiss, relativeTo, widthRelative }) {
   return relativeTo ? (
     <RelativeModal
       children={children}
@@ -11,6 +11,7 @@ export default function Menu({ className, children, onDismiss, relativeTo }) {
       onDismiss={onDismiss}
       portalRootID="menus"
       relativeTo={relativeTo}
+      widthRelative={widthRelative}
     />
   ) : null;
 }
@@ -38,11 +39,11 @@ export function MenuItem({ focus, icon: Icon, label, onSelect, value }) {
       role="option"
     >
       {Icon ? (
-        <div className="w-6 h-6 self-center mr-4 text-gray-500">
+        <div className="w-6 h-6 self-center mr-4 text-gray-500 flex-shrink-0">
           <Icon />
         </div>
       ) : null}
-      {label}
+      <div class="whitespace-nowrap">{label}</div>
     </div>
   );
 }

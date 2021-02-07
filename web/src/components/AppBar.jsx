@@ -82,7 +82,7 @@ export default function AppBar({ title }) {
       </div>
       <LinkedLogo />
       <div className="flex-grow-1 flex justify-end w-full">
-        <div ref={moreRef}>
+        <div className="w-auto" ref={moreRef}>
           <Button color="black" className="rounded-full w-12 h-12" onClick={handleShowMenu} type="text">
             <MoreIcon />
           </Button>
