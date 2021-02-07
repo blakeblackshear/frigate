@@ -1,6 +1,7 @@
 import { h } from 'preact';
+import { memo } from 'preact/compat';
 
-export default function MenuOpen() {
+export function MenuOpen() {
   return (
     <svg className="fill-current" viewBox="0 0 24 24">
       <path d="M0 0h24v24H0V0z" fill="none" />
@@ -8,3 +9,5 @@ export default function MenuOpen() {
     </svg>
   );
 }
+
+export default memo(MenuOpen);
