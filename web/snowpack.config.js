@@ -8,7 +8,7 @@ module.exports = {
   plugins: ['@snowpack/plugin-postcss', '@prefresh/snowpack', 'snowpack-plugin-hash'],
   routes: [{ match: 'routes', src: '.*', dest: '/index.html' }],
   optimize: {
-    bundle: true,
+    bundle: false,
     minify: true,
     treeshake: true,
   },

@@ -2,9 +2,9 @@
   "name": "frigate",
   "private": true,
   "scripts": {
-    "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://10.0.1.210:5000 snowpack dev",
+    "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://localhost:5000 snowpack dev",
     "prebuild": "rimraf build",
-    "build": "cross-env NODE_ENV=production snowpack build"
+    "build": "cross-env NODE_ENV=production SNOWPACK_MODE=production SNOWPACK_PUBLIC_API_HOST='' snowpack build"
   },
   "dependencies": {
     "@prefresh/snowpack": "^3.0.1",

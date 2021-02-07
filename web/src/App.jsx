@@ -34,7 +34,7 @@ export default function App() {
                   <Event path="/events/:eventId" />
                   <Events path="/events" />
                   <Debug path="/debug" />
-                  {import.meta.env.SNOWPACK_MODE !== 'development' ? <StyleGuide path="/styleguide" /> : null}
+                  {import.meta.env.NODE_ENV !== 'development' ? <StyleGuide path="/styleguide" /> : null}
                   <Cameras default path="/" />
                 </Router>
               </div>
