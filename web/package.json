@@ -16,6 +16,7 @@
     "postcss": "^8.2.2",
     "postcss-cli": "^8.3.1",
     "preact": "^10.5.9",
+    "preact-async-route": "^2.2.1",
     "preact-router": "^3.2.1",
     "rimraf": "^3.0.2",
     "snowpack": "^3.0.11",

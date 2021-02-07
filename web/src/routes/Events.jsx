@@ -1,13 +1,13 @@
 import { h } from 'preact';
-import ActivityIndicator from './components/ActivityIndicator';
-import Card from './components/Card';
-import Heading from './components/Heading';
-import Link from './components/Link';
-import Select from './components/Select';
+import ActivityIndicator from '../components/ActivityIndicator';
+import Card from '../components/Card';
+import Heading from '../components/Heading';
+import Link from '../components/Link';
+import Select from '../components/Select';
 import produce from 'immer';
 import { route } from 'preact-router';
-import { FetchStatus, useApiHost, useConfig, useEvents } from './api';
-import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
+import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
+import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
 import { useCallback, useContext, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
 
 const API_LIMIT = 25;
