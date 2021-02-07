@@ -1,15 +1,11 @@
+import * as Routes from './routes';
 import { h } from 'preact';
 import ActivityIndicator from './components/ActivityIndicator';
+import AsyncRoute from 'preact-async-route';
 import AppBar from './components/AppBar';
-import Camera from './Camera';
-import CameraMap from './CameraMap';
-import Cameras from './Cameras';
-import Debug from './Debug';
-import Event from './Event';
-import Events from './Events';
+import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import StyleGuide from './StyleGuide';
 import Api, { FetchStatus, useConfig } from './api';
 import { DarkModeProvider, DrawerProvider } from './context';
 
@@ -29,12 +25,12 @@ export default function App() {
               <Sidebar />
               <div className="w-full flex-auto p-2 mt-24 px-4 min-w-0">
                 <Router>
-                  <CameraMap path="/cameras/:camera/editor" />
-                  <Camera path="/cameras/:camera" />
-                  <Event path="/events/:eventId" />
-                  <Events path="/events" />
-                  <Debug path="/debug" />
-                  {import.meta.env.NODE_ENV !== 'development' ? <StyleGuide path="/styleguide" /> : null}
+                  <AsyncRoute path="/cameras/:camera/editor" getComponent={Routes.getCameraMap} />
+                  <AsyncRoute path="/cameras/:camera" getComponent={Routes.getCamera} />
+                  <AsyncRoute path="/events/:eventId" getComponent={Routes.getEvent} />
+                  <AsyncRoute path="/events" getComponent={Routes.getEvents} />
+                  <AsyncRoute path="/debug" getComponent={Routes.getDebug} />
+                  <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
                   <Cameras default path="/" />
                 </Router>
               </div>

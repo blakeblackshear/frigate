@@ -1,9 +1,9 @@
 import { h, Fragment } from 'preact';
-import ActivityIndicator from './components/ActivityIndicator';
-import Heading from './components/Heading';
-import Link from './components/Link';
-import { FetchStatus, useApiHost, useEvent } from './api';
-import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from './components/Table';
+import ActivityIndicator from '../components/ActivityIndicator';
+import Heading from '../components/Heading';
+import Link from '../components/Link';
+import { FetchStatus, useApiHost, useEvent } from '../api';
+import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
 
 export default function Event({ eventId }) {
   const apiHost = useApiHost();

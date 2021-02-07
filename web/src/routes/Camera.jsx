@@ -1,15 +1,15 @@
 import { h } from 'preact';
-import AutoUpdatingCameraImage from './components/AutoUpdatingCameraImage';
-import Button from './components/Button';
-import Card from './components/Card';
-import Heading from './components/Heading';
-import Link from './components/Link';
-import SettingsIcon from './icons/Settings';
-import Switch from './components/Switch';
+import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
+import Button from '../components/Button';
+import Card from '../components/Card';
+import Heading from '../components/Heading';
+import Link from '../components/Link';
+import SettingsIcon from '../icons/Settings';
+import Switch from '../components/Switch';
 import { route } from 'preact-router';
-import { usePersistence } from './context';
+import { usePersistence } from '../context';
 import { useCallback, useContext, useMemo, useState } from 'preact/hooks';
-import { useApiHost, useConfig } from './api';
+import { useApiHost, useConfig } from '../api';
 
 export default function Camera({ camera }) {
   const { data: config } = useConfig();

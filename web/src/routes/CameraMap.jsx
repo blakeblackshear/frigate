@@ -1,8 +1,8 @@
 import { h } from 'preact';
-import Card from './components/Card';
-import Button from './components/Button';
-import Heading from './components/Heading';
-import Switch from './components/Switch';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Heading from '../components/Heading';
+import Switch from '../components/Switch';
 import { route } from 'preact-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost, useConfig } from './api';
