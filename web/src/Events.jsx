@@ -259,7 +259,7 @@ function Filters({ onChange, searchParams }) {
   }, [data]);
 
   return (
-    <div className="flex space-x-8">
+    <div className="flex space-x-4">
       <Filter onChange={onChange} options={cameras} paramName="camera" searchParams={searchParams} />
       <Filter onChange={onChange} options={zones} paramName="zone" searchParams={searchParams} />
       <Filter onChange={onChange} options={labels} paramName="label" searchParams={searchParams} />

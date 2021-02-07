@@ -1,6 +1,7 @@
 import { h } from 'preact';
+import { memo } from 'preact/compat';
 
-export default function ArrowDropdown() {
+export function AutoAwesome() {
   return (
     <svg className="fill-current" viewBox="0 0 24 24">
       <path d="M0 0h24v24H0z" fill="none" />
@@ -8,3 +9,5 @@ export default function ArrowDropdown() {
     </svg>
   );
 }
+
+export default memo(AutoAwesome);

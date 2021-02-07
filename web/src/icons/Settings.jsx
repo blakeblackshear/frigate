@@ -1,6 +1,7 @@
 import { h } from 'preact';
+import { memo } from 'preact/compat';
 
-export default function DarkMode() {
+export function Settings() {
   return (
     <svg className="fill-current" viewBox="0 0 24 24">
       <g>
@@ -10,3 +11,5 @@ export default function DarkMode() {
     </svg>
   );
 }
+
+export default memo(Settings);
