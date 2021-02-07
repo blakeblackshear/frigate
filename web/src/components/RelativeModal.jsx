@@ -2,10 +2,18 @@ import { h, Fragment } from 'preact';
 import { createPortal } from 'preact/compat';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 
-const WINDOW_PADDING = 20;
+const WINDOW_PADDING = 10;
 
-export default function RelativeModal({ className, role = 'dialog', children, onDismiss, portalRootID, relativeTo }) {
-  const [position, setPosition] = useState({ top: -999, left: 0, width: 0 });
+export default function RelativeModal({
+  className,
+  role = 'dialog',
+  children,
+  onDismiss,
+  portalRootID,
+  relativeTo,
+  widthRelative = false,
+}) {
+  const [position, setPosition] = useState({ top: -999, left: -999 });
   const [show, setShow] = useState(false);
   const portalRoot = portalRootID && document.getElementById(portalRootID);
   const ref = useRef(null);
@@ -44,12 +52,15 @@ export default function RelativeModal({ className, role = 'dialog', children, on
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       const { width: menuWidth, height: menuHeight } = ref.current.getBoundingClientRect();
-      const { x, y, width, height } = relativeTo.current.getBoundingClientRect();
+      const { x, y, width: relativeWidth, height } = relativeTo.current.getBoundingClientRect();
+
+      const width = widthRelative ? relativeWidth : menuWidth;
+
       let top = y + height;
       let left = x;
       // too far right
-      if (left + menuWidth >= windowWidth - WINDOW_PADDING) {
-        left = windowWidth - menuWidth - WINDOW_PADDING;
+      if (left + width >= windowWidth - WINDOW_PADDING) {
+        left = windowWidth - width - WINDOW_PADDING;
       }
       // too far left
       else if (left < WINDOW_PADDING) {
@@ -65,20 +76,23 @@ export default function RelativeModal({ className, role = 'dialog', children, on
       }
 
       const maxHeight = windowHeight - WINDOW_PADDING * 2 > menuHeight ? null : windowHeight - WINDOW_PADDING * 2;
-      setPosition({ left, top: top + window.scrollY, width, height: maxHeight });
+      const newPosition = { left: left + window.scrollX, top: top + window.scrollY, maxHeight };
+      if (widthRelative) {
+        newPosition.width = relativeWidth;
+      }
+      setPosition(newPosition);
       const focusable = ref.current.querySelector('[tabindex]');
-      focusable && console.log('focusing');
       focusable && focusable.focus();
     }
-  }, [relativeTo && relativeTo.current, ref && ref.current]);
+  }, [relativeTo && relativeTo.current, ref && ref.current, widthRelative]);
 
   useEffect(() => {
-    if (position.width) {
+    if (position.top >= 0) {
       setShow(true);
     } else {
       setShow(false);
     }
-  }, [show, position.width, ref.current]);
+  }, [show, position.top, ref.current]);
 
   const menu = (
     <Fragment>
@@ -91,13 +105,7 @@ export default function RelativeModal({ className, role = 'dialog', children, on
         onkeydown={handleKeydown}
         role={role}
         ref={ref}
-        style={
-          position.width > 0
-            ? `min-width: ${position.width}px; ${position.height ? `max-height: ${position.height}px;` : ''} top: ${
-                position.top
-              }px; left: ${position.left}px`
-            : ''
-        }
+        style={position.top >= 0 ? position : null}
       >
         {children}
       </div>
