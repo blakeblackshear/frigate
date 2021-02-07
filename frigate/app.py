@@ -252,6 +252,7 @@ class FrigateApp():
         self.recording_maintainer.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
+        self.db.stop()
 
         for detector in self.detectors.values():
             detector.stop()
