@@ -30,3 +30,17 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: ./web
+
+  web_test:
+    name: Web - Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 14.x
+      - run: npm install
+        working-directory: ./web
+      - name: Test
+        run: npm run test
+        working-directory: ./web

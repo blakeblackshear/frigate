@@ -9,8 +9,14 @@ module.exports = {
     },
   },
 
-  extends: ['prettier', 'preact', 'plugin:import/react'],
-  plugins: ['import'],
+  extends: [
+    'prettier',
+    'preact',
+    'plugin:import/react',
+    'plugin:testing-library/recommended',
+    'plugin:jest/recommended',
+  ],
+  plugins: ['import', 'testing-library', 'jest'],
 
   env: {
     es6: true,
@@ -113,6 +119,15 @@ module.exports = {
     'import/no-unresolved': 'error',
 
     'react-hooks/exhaustive-deps': 'error',
+
+    'jest/consistent-test-it': ['error', { fn: 'test' }],
+    'jest/no-test-prefixes': 'error',
+    'jest/no-restricted-matchers': [
+      'error',
+      { toMatchSnapshot: 'Use `toMatchInlineSnapshot()` and ensure you only snapshot very small elements' },
+    ],
+    'jest/valid-describe': 'error',
+    'jest/valid-expect-in-promise': 'error',
   },
 
   settings: {

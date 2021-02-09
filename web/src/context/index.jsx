@@ -12,9 +12,7 @@ export function DarkModeProvider({ children }) {
     (value) => {
       setPersistedMode(value);
       setData('darkmode', value);
-      if (value !== 'media') {
-        setCurrentMode(value);
-      }
+      setCurrentMode(value);
     },
     [setPersistedMode]
   );
