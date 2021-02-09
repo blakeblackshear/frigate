@@ -424,8 +424,12 @@ def process_frames(camera_name: str, frame_queue: mp.Queue, frame_shape, model_s
             if refining:
                 refine_count += 1
 
+        # Limit to the detections overlapping with motion areas
+        # to avoid picking up stationary background objects
+        detections_with_motion = [d for d in detections if intersects_any(d[2], motion_boxes)]
+
         # now that we have refined our detections, we need to track objects
-        object_tracker.match_and_update(frame_time, detections)
+        object_tracker.match_and_update(frame_time, detections_with_motion)
 
         # add to the queue if not full
         if(detected_objects_queue.full()):
