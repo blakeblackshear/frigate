@@ -3,53 +3,56 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
-import { FetchStatus, useConfig, useStats } from '../api';
+import { useConfig, useStats } from '../api';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useCallback, useEffect, useState } from 'preact/hooks';
+
+const emptyObject = Object.freeze({});
 
 export default function Debug() {
   const config = useConfig();
 
   const [timeoutId, setTimeoutId] = useState(null);
+  const { data: stats } = useStats(null, timeoutId);
 
-  const forceUpdate = useCallback(async () => {
-    setTimeoutId(setTimeout(forceUpdate, 1000));
+  const forceUpdate = useCallback(() => {
+    const timeoutId = setTimeout(forceUpdate, 1000);
+    setTimeoutId(timeoutId);
   }, []);
 
   useEffect(() => {
     forceUpdate();
-  }, []);
+  }, [forceUpdate]);
 
   useEffect(() => {
     return () => {
       clearTimeout(timeoutId);
     };
   }, [timeoutId]);
-  const { data: stats, status } = useStats(null, timeoutId);
 
-  if (stats === null && (status === FetchStatus.LOADING || status === FetchStatus.NONE)) {
-    return <ActivityIndicator />;
-  }
+  const { detectors, service, detection_fps, ...cameras } = stats || emptyObject;
 
-  const { detectors, detection_fps, service, ...cameras } = stats;
+  const detectorNames = Object.keys(detectors || emptyObject);
+  const detectorDataKeys = Object.keys(detectors ? detectors[detectorNames[0]] : emptyObject);
+  const cameraNames = Object.keys(cameras || emptyObject);
+  const cameraDataKeys = Object.keys(cameras[cameraNames[0]] || emptyObject);
 
-  const detectorNames = Object.keys(detectors);
-  const detectorDataKeys = Object.keys(detectors[detectorNames[0]]);
-
-  const cameraNames = Object.keys(cameras);
-  const cameraDataKeys = Object.keys(cameras[cameraNames[0]]);
-
-  const handleCopyConfig = useCallback(async () => {
-    await window.navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+  const handleCopyConfig = useCallback(() => {
+    async function copy() {
+      await window.navigator.clipboard.writeText(JSON.stringify(config, null, 2));
+    }
+    copy();
   }, [config]);
 
-  return (
-    <div class="space-y-4">
+  return stats === null ? (
+    <ActivityIndicator />
+  ) : (
+    <div className="space-y-4">
       <Heading>
         Debug <span className="text-sm">{service.version}</span>
       </Heading>
 
-      <div class="min-w-0 overflow-auto">
+      <div className="min-w-0 overflow-auto">
         <Table className="w-full">
           <Thead>
             <Tr>
@@ -72,7 +75,7 @@ export default function Debug() {
         </Table>
       </div>
 
-      <div class="min-w-0 overflow-auto">
+      <div className="min-w-0 overflow-auto">
         <Table className="w-full">
           <Thead>
             <Tr>

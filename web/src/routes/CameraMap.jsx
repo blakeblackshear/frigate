@@ -1,10 +1,9 @@
 import { h } from 'preact';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Heading from '../components/Heading';
-import Switch from '../components/Switch';
-import { route } from 'preact-router';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import Card from '../components/Card.jsx';
+import Button from '../components/Button.jsx';
+import Heading from '../components/Heading.jsx';
+import Switch from '../components/Switch.jsx';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost, useConfig } from '../api';
 
 export default function CameraMasks({ camera, url }) {
@@ -13,10 +12,6 @@ export default function CameraMasks({ camera, url }) {
   const imageRef = useRef(null);
   const [imageScale, setImageScale] = useState(1);
   const [snap, setSnap] = useState(true);
-
-  if (!(camera in config.cameras)) {
-    return <div>{`No camera named ${camera}`}</div>;
-  }
 
   const cameraConfig = config.cameras[camera];
   const {
@@ -38,7 +33,7 @@ export default function CameraMasks({ camera, url }) {
           }
         });
       }),
-    [camera, width, setImageScale]
+    [width, setImageScale]
   );
 
   useEffect(() => {
@@ -46,14 +41,14 @@ export default function CameraMasks({ camera, url }) {
       return;
     }
     resizeObserver.observe(imageRef.current);
-  }, [resizeObserver, imageRef.current]);
+  }, [resizeObserver, imageRef]);
 
   const [motionMaskPoints, setMotionMaskPoints] = useState(
     Array.isArray(motionMask)
       ? motionMask.map((mask) => getPolylinePoints(mask))
       : motionMask
-      ? [getPolylinePoints(motionMask)]
-      : []
+        ? [getPolylinePoints(motionMask)]
+        : []
   );
 
   const [zonePoints, setZonePoints] = useState(
@@ -67,8 +62,8 @@ export default function CameraMasks({ camera, url }) {
         [name]: Array.isArray(objectFilters[name].mask)
           ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
           : objectFilters[name].mask
-          ? [getPolylinePoints(objectFilters[name].mask)]
-          : [],
+            ? [getPolylinePoints(objectFilters[name].mask)]
+            : [],
       }),
       {}
     )
@@ -92,26 +87,6 @@ export default function CameraMasks({ camera, url }) {
       editing.fn(newSet);
     },
     [editing]
-  );
-
-  const handleSelectEditable = useCallback(
-    (name) => {
-      setEditing(name);
-    },
-    [setEditing]
-  );
-
-  const handleRemoveEditable = useCallback(
-    (name) => {
-      const filteredZonePoints = Object.keys(zonePoints)
-        .filter((zoneName) => zoneName !== name)
-        .reduce((memo, name) => {
-          memo[name] = zonePoints[name];
-          return memo;
-        }, {});
-      setZonePoints(filteredZonePoints);
-    },
-    [zonePoints, setZonePoints]
   );
 
   // Motion mask methods
@@ -171,11 +146,11 @@ ${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`)
   const handleCopyZones = useCallback(async () => {
     await window.navigator.clipboard.writeText(`  zones:
 ${Object.keys(zonePoints)
-  .map(
-    (zoneName) => `    ${zoneName}:
+    .map(
+      (zoneName) => `    ${zoneName}:
       coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
-  )
-  .join('\n')}`);
+    )
+    .join('\n')}`);
   }, [zonePoints]);
 
   // Object methods
@@ -207,14 +182,14 @@ ${Object.keys(zonePoints)
     await window.navigator.clipboard.writeText(`  objects:
     filters:
 ${Object.keys(objectMaskPoints)
-  .map((objectName) =>
-    objectMaskPoints[objectName].length
-      ? `      ${objectName}:
+    .map((objectName) =>
+      objectMaskPoints[objectName].length
+        ? `      ${objectName}:
         mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
-      : ''
-  )
-  .filter(Boolean)
-  .join('\n')}`);
+        : ''
+    )
+    .filter(Boolean)
+    .join('\n')}`);
   }, [objectMaskPoints]);
 
   const handleAddToObjectMask = useCallback(
@@ -239,7 +214,7 @@ ${Object.keys(objectMaskPoints)
   );
 
   return (
-    <div class="flex-col space-y-4">
+    <div className="flex-col space-y-4">
       <Heading size="2xl">{camera} mask & zone creator</Heading>
 
       <Card
@@ -265,12 +240,12 @@ ${Object.keys(objectMaskPoints)
             height={height}
           />
         </div>
-        <div class="flex space-x-4">
+        <div className="flex space-x-4">
           <span>Snap to edges</span> <Switch checked={snap} onChange={handleChangeSnap} />
         </div>
       </div>
 
-      <div class="flex-col space-y-4">
+      <div className="flex-col space-y-4">
         <MaskValues
           editing={editing}
           title="Motion masks"
@@ -314,7 +289,7 @@ ${Object.keys(objectMaskPoints)
 }
 
 function maskYamlKeyPrefix(points) {
-  return `    - `;
+  return '    - ';
 }
 
 function zoneYamlKeyPrefix(points, key) {
@@ -323,43 +298,40 @@ function zoneYamlKeyPrefix(points, key) {
 }
 
 function objectYamlKeyPrefix(points, key, subkey) {
-  return `        - `;
+  return '        - ';
 }
 
 const MaskInset = 20;
 
-function EditableMask({ onChange, points, scale, snap, width, height }) {
-  if (!points) {
-    return null;
-  }
-  const boundingRef = useRef(null);
-
-  function boundedSize(value, maxValue) {
-    const newValue = Math.min(Math.max(0, Math.round(value)), maxValue);
-    if (snap) {
-      if (newValue <= MaskInset) {
-        return 0;
-      } else if (maxValue - newValue <= MaskInset) {
-        return maxValue;
-      }
+function boundedSize(value, maxValue, snap) {
+  const newValue = Math.min(Math.max(0, Math.round(value)), maxValue);
+  if (snap) {
+    if (newValue <= MaskInset) {
+      return 0;
+    } else if (maxValue - newValue <= MaskInset) {
+      return maxValue;
     }
-
-    return newValue;
   }
+
+  return newValue;
+}
+
+function EditableMask({ onChange, points, scale, snap, width, height }) {
+  const boundingRef = useRef(null);
 
   const handleMovePoint = useCallback(
     (index, newX, newY) => {
       if (newX < 0 && newY < 0) {
         return;
       }
-      let x = boundedSize(newX / scale, width, snap);
-      let y = boundedSize(newY / scale, height, snap);
+      const x = boundedSize(newX / scale, width, snap);
+      const y = boundedSize(newY / scale, height, snap);
 
       const newPoints = [...points];
       newPoints[index] = [x, y];
       onChange(newPoints);
     },
-    [scale, points, snap]
+    [height, width, onChange, scale, points, snap]
   );
 
   // Add a new point between the closest two other points
@@ -370,7 +342,6 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       const scaledY = boundedSize((offsetY - MaskInset) / scale, height, snap);
       const newPoint = [scaledX, scaledY];
 
-      let closest;
       const { index } = points.reduce(
         (result, point, i) => {
           const nextPoint = points.length === i + 1 ? points[0] : points[i + 1];
@@ -385,7 +356,7 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       newPoints.splice(index, 0, newPoint);
       onChange(newPoints);
     },
-    [scale, points, onChange, snap]
+    [height, width, scale, points, onChange, snap]
   );
 
   const handleRemovePoint = useCallback(
@@ -407,16 +378,16 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-            <PolyPoint
-              boundingRef={boundingRef}
-              index={i}
-              onMove={handleMovePoint}
-              onRemove={handleRemovePoint}
-              x={x + MaskInset}
-              y={y + MaskInset}
-            />
-          ))}
-      <div className="absolute inset-0 right-0 bottom-0" onclick={handleAddPoint} ref={boundingRef} />
+          <PolyPoint
+            boundingRef={boundingRef}
+            index={i}
+            onMove={handleMovePoint}
+            onRemove={handleRemovePoint}
+            x={x + MaskInset}
+            y={y + MaskInset}
+          />
+        ))}
+      <div className="absolute inset-0 right-0 bottom-0" onClick={handleAddPoint} ref={boundingRef} />
       <svg
         width="100%"
         height="100%"
@@ -488,15 +459,15 @@ function MaskValues({
   );
 
   return (
-    <div className="overflow-hidden" onmouseover={handleMousein} onmouseout={handleMouseout}>
-      <div class="flex space-x-4">
+    <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>
+      <div className="flex space-x-4">
         <Heading className="flex-grow self-center" size="base">
           {title}
         </Heading>
         <Button onClick={onCopy}>Copy</Button>
         <Button onClick={onCreate}>Add</Button>
       </div>
-      <pre class="relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2">
+      <pre className="relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2">
         {yamlPrefix}
         {Object.keys(points).map((mainkey) => {
           if (isMulti) {
@@ -522,20 +493,19 @@ function MaskValues({
                 ))}
               </div>
             );
-          } else {
-            return (
-              <Item
-                mainkey={mainkey}
-                editing={editing}
-                handleAdd={onAdd ? handleAdd : undefined}
-                handleEdit={handleEdit}
-                handleRemove={handleRemove}
-                points={points[mainkey]}
-                showButtons={showButtons}
-                yamlKeyPrefix={yamlKeyPrefix}
-              />
-            );
           }
+          return (
+            <Item
+              mainkey={mainkey}
+              editing={editing}
+              handleAdd={onAdd ? handleAdd : undefined}
+              handleEdit={handleEdit}
+              handleRemove={handleRemove}
+              points={points[mainkey]}
+              showButtons={showButtons}
+              yamlKeyPrefix={yamlKeyPrefix}
+            />
+          );
         })}
       </pre>
     </div>
@@ -613,18 +583,18 @@ function PolyPoint({ boundingRef, index, x, y, onMove, onRemove }) {
       }
       onMove(index, event.layerX - PolyPointRadius * 2, event.layerY - PolyPointRadius * 2);
     },
-    [onMove, index, boundingRef.current]
+    [onMove, index, boundingRef]
   );
 
   const handleDragStart = useCallback(() => {
     boundingRef.current && boundingRef.current.addEventListener('dragover', handleDragOver, false);
     setHidden(true);
-  }, [setHidden, boundingRef.current, handleDragOver]);
+  }, [setHidden, boundingRef, handleDragOver]);
 
   const handleDragEnd = useCallback(() => {
     boundingRef.current && boundingRef.current.removeEventListener('dragover', handleDragOver);
     setHidden(false);
-  }, [setHidden, boundingRef.current, handleDragOver]);
+  }, [setHidden, boundingRef, handleDragOver]);
 
   const handleRightClick = useCallback(
     (event) => {
@@ -644,10 +614,10 @@ function PolyPoint({ boundingRef, index, x, y, onMove, onRemove }) {
       className={`${hidden ? 'opacity-0' : ''} bg-gray-900 rounded-full absolute z-20`}
       style={`top: ${y - PolyPointRadius}px; left: ${x - PolyPointRadius}px; width: 20px; height: 20px;`}
       draggable
-      onclick={handleClick}
-      oncontextmenu={handleRightClick}
-      ondragstart={handleDragStart}
-      ondragend={handleDragEnd}
+      onClick={handleClick}
+      onContextMenu={handleRightClick}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     />
   );
 }

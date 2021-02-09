@@ -1,0 +1,32 @@
+name: On pull request
+
+on: pull_request
+
+jobs:
+  web_lint:
+    name: Web - Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 14.x
+      - run: npm install
+        working-directory: ./web
+      - name: Lint
+        run: npm run lint:cmd
+        working-directory: ./web
+
+  web_build:
+    name: Web - Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 14.x
+      - run: npm install
+        working-directory: ./web
+      - name: Build
+        run: npm run build
+        working-directory: ./web

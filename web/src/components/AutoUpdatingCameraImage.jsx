@@ -17,7 +17,7 @@ export default function AutoUpdatingCameraImage({ camera, searchParams, showFps 
       },
       loadTime > MIN_LOAD_TIMEOUT_MS ? 1 : MIN_LOAD_TIMEOUT_MS
     );
-  }, [key, searchParams, setFps]);
+  }, [key, setFps]);
 
   return (
     <div>

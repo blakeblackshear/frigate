@@ -12,16 +12,14 @@ import { useLayoutEffect, useCallback, useRef, useState } from 'preact/hooks';
 
 // We would typically preserve these in component state
 // But need to avoid too many re-renders
-let ticking = false;
 let lastScrollY = window.scrollY;
 
 export default function AppBar({ title }) {
   const [show, setShow] = useState(true);
   const [atZero, setAtZero] = useState(window.scrollY === 0);
-  const [_, setDrawerVisible] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const { currentMode, persistedMode, setDarkMode } = useDarkMode();
-  const { showDrawer, setShowDrawer } = useDrawer();
+  const { setDarkMode } = useDarkMode();
+  const { setShowDrawer } = useDrawer();
 
   const handleSelectDarkMode = useCallback(
     (value, label) => {
@@ -37,15 +35,11 @@ export default function AppBar({ title }) {
     (event) => {
       const scrollY = window.scrollY;
 
-      // if (!ticking) {
       window.requestAnimationFrame(() => {
         setShow(scrollY <= 0 || lastScrollY > scrollY);
         setAtZero(scrollY === 0);
-        ticking = false;
         lastScrollY = scrollY;
       });
-      ticking = true;
-      // }
     },
     [setShow]
   );
@@ -55,7 +49,7 @@ export default function AppBar({ title }) {
     return () => {
       document.removeEventListener('scroll', scrollListener);
     };
-  }, []);
+  }, [scrollListener]);
 
   const handleShowMenu = useCallback(() => {
     setShowMoreMenu(true);

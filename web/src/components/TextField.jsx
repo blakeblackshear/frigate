@@ -43,12 +43,12 @@ export default function TextField({
     [onChangeText, setValue]
   );
 
-  // Reset the state if the prop value changes
   useEffect(() => {
     if (propValue !== value) {
       setValue(propValue);
     }
-  }, [propValue, setValue]);
+    // DO NOT include `value`
+  }, [propValue, setValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const labelMoved = isFocused || value !== '';
 
@@ -62,7 +62,7 @@ export default function TextField({
       >
         <label className="flex space-x-2 items-center">
           {LeadingIcon ? (
-            <div class="w-10 h-full">
+            <div className="w-10 h-full">
               <LeadingIcon />
             </div>
           ) : null}
@@ -72,8 +72,8 @@ export default function TextField({
               onBlur={handleBlur}
               onFocus={handleFocus}
               onInput={handleChange}
-              readonly={readonly}
-              tabindex="0"
+              readOnly={readonly}
+              tabIndex="0"
               type={keyboardType}
               value={value}
               {...props}
@@ -87,7 +87,7 @@ export default function TextField({
             </div>
           </div>
           {TrailingIcon ? (
-            <div class="w-10 h-10">
+            <div className="w-10 h-10">
               <TrailingIcon />
             </div>
           ) : null}
