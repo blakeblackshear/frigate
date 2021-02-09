@@ -44,7 +44,7 @@ export default function RelativeModal({
         return;
       }
     },
-    [ref.current]
+    [ref]
   );
 
   useLayoutEffect(() => {
@@ -84,7 +84,7 @@ export default function RelativeModal({
       const focusable = ref.current.querySelector('[tabindex]');
       focusable && focusable.focus();
     }
-  }, [relativeTo && relativeTo.current, ref && ref.current, widthRelative]);
+  }, [relativeTo, ref, widthRelative]);
 
   useEffect(() => {
     if (position.top >= 0) {
@@ -92,7 +92,7 @@ export default function RelativeModal({
     } else {
       setShow(false);
     }
-  }, [show, position.top, ref.current]);
+  }, [show, position, ref]);
 
   const menu = (
     <Fragment>
@@ -102,7 +102,7 @@ export default function RelativeModal({
         className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto h-auto transition-all duration-75 transform scale-90 opacity-0 overflow-scroll ${
           show ? 'scale-100 opacity-100' : ''
         } ${className}`}
-        onkeydown={handleKeydown}
+        onKeyDown={handleKeydown}
         role={role}
         ref={ref}
         style={position.top >= 0 ? position : null}

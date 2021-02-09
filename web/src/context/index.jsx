@@ -1,6 +1,5 @@
 import { h, createContext } from 'preact';
 import { get as getData, set as setData } from 'idb-keyval';
-import produce from 'immer';
 import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'preact/hooks';
 
 const DarkMode = createContext(null);
@@ -27,11 +26,7 @@ export function DarkModeProvider({ children }) {
     }
 
     load();
-  }, []);
-
-  if (persistedMode === null) {
-    return null;
-  }
+  }, [setDarkMode]);
 
   const handleMediaMatch = useCallback(
     ({ matches }) => {
@@ -52,7 +47,7 @@ export function DarkModeProvider({ children }) {
     const query = window.matchMedia('(prefers-color-scheme: dark)');
     query.addEventListener('change', handleMediaMatch);
     handleMediaMatch(query);
-  }, [persistedMode]);
+  }, [persistedMode, handleMediaMatch]);
 
   useLayoutEffect(() => {
     if (currentMode === 'dark') {
@@ -62,7 +57,9 @@ export function DarkModeProvider({ children }) {
     }
   }, [currentMode]);
 
-  return <DarkMode.Provider value={{ currentMode, persistedMode, setDarkMode }}>{children}</DarkMode.Provider>;
+  return !persistedMode ? null : (
+    <DarkMode.Provider value={{ currentMode, persistedMode, setDarkMode }}>{children}</DarkMode.Provider>
+  );
 }
 
 export function useDarkMode() {
@@ -110,7 +107,7 @@ export function usePersistence(key, defaultValue = undefined) {
     }
 
     load();
-  }, [key]);
+  }, [key, defaultValue, setValue]);
 
   return [value, setValue, loaded];
 }

@@ -2,19 +2,15 @@ import { h } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Card from '../components/Card';
 import CameraImage from '../components/CameraImage';
-import Heading from '../components/Heading';
-import { route } from 'preact-router';
-import { useConfig } from '../api';
+import { useConfig, FetchStatus } from '../api';
 import { useMemo } from 'preact/hooks';
 
 export default function Cameras() {
   const { data: config, status } = useConfig();
 
-  if (!config) {
-    return <p>loading…</p>;
-  }
-
-  return (
+  return status !== FetchStatus.LOADED ? (
+    <ActivityIndicator />
+  ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
       {Object.keys(config.cameras).map((camera) => (
         <Camera name={camera} />

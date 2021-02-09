@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import RelativeModal from './RelativeModal';
-import { useCallback, useEffect } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 
 export default function Menu({ className, children, onDismiss, relativeTo, widthRelative }) {
   return relativeTo ? (
@@ -21,21 +21,12 @@ export function MenuItem({ focus, icon: Icon, label, onSelect, value }) {
     onSelect && onSelect(value, label);
   }, [onSelect, value, label]);
 
-  const handleKeydown = useCallback(
-    (event) => {
-      if (event.key === 'Enter') {
-        onSelect && onSelect(value, label);
-      }
-    },
-    [onSelect, value, label]
-  );
-
   return (
     <div
       className={`flex space-x-2 p-2 px-5 hover:bg-gray-200 dark:hover:bg-gray-800 dark:hover:text-white cursor-pointer ${
         focus ? 'bg-gray-200 dark:bg-gray-800 dark:text-white' : ''
       }`}
-      onclick={handleClick}
+      onClick={handleClick}
       role="option"
     >
       {Icon ? (
@@ -43,7 +34,7 @@ export function MenuItem({ focus, icon: Icon, label, onSelect, value }) {
           <Icon />
         </div>
       ) : null}
-      <div class="whitespace-nowrap">{label}</div>
+      <div className="whitespace-nowrap">{label}</div>
     </div>
   );
 }

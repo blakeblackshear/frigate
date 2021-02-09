@@ -1,6 +1,5 @@
 import { h } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
-import Card from '../components/Card';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import Select from '../components/Select';
@@ -8,39 +7,39 @@ import produce from 'immer';
 import { route } from 'preact-router';
 import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
-import { useCallback, useContext, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
 
 const API_LIMIT = 25;
 
 const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'APPEND_EVENTS': {
-      const {
-        meta: { searchString },
-        payload,
-      } = action;
-      return produce(state, (draftState) => {
-        draftState.searchStrings[searchString] = true;
-        draftState.events.push(...payload);
-      });
-    }
+  case 'APPEND_EVENTS': {
+    const {
+      meta: { searchString },
+      payload,
+    } = action;
+    return produce(state, (draftState) => {
+      draftState.searchStrings[searchString] = true;
+      draftState.events.push(...payload);
+    });
+  }
 
-    case 'REACHED_END': {
-      const {
-        meta: { searchString },
-      } = action;
-      return produce(state, (draftState) => {
-        draftState.reachedEnd = true;
-        draftState.searchStrings[searchString] = true;
-      });
-    }
+  case 'REACHED_END': {
+    const {
+      meta: { searchString },
+    } = action;
+    return produce(state, (draftState) => {
+      draftState.reachedEnd = true;
+      draftState.searchStrings[searchString] = true;
+    });
+  }
 
-    case 'RESET':
-      return initialState;
+  case 'RESET':
+    return initialState;
 
-    default:
-      return state;
+  default:
+    return state;
   }
 };
 
@@ -65,7 +64,7 @@ export default function Events({ path: pathname } = {}) {
     if (Array.isArray(data) && data.length < API_LIMIT) {
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
-  }, [data]);
+  }, [data, searchString, searchStrings]);
 
   const observer = useRef(
     new IntersectionObserver((entries, observer) => {
@@ -96,7 +95,7 @@ export default function Events({ path: pathname } = {}) {
         }
       }
     },
-    [observer.current, reachedEnd]
+    [observer, reachedEnd]
   );
 
   const handleFilter = useCallback(
@@ -121,7 +120,7 @@ export default function Events({ path: pathname } = {}) {
         <Table className="min-w-full table-fixed">
           <Thead>
             <Tr>
-              <Th></Th>
+              <Th />
               <Th>Camera</Th>
               <Th>Label</Th>
               <Th>Score</Th>
@@ -213,7 +212,7 @@ function Filterable({ onFilter, pathname, searchParams, paramName, name }) {
     params.set(paramName, name);
     removeDefaultSearchKeys(params);
     return `${pathname}?${params.toString()}`;
-  }, [searchParams]);
+  }, [searchParams, paramName, pathname, name]);
 
   const handleClick = useCallback(
     (event) => {
@@ -223,7 +222,7 @@ function Filterable({ onFilter, pathname, searchParams, paramName, name }) {
       params.set(paramName, name);
       onFilter(params);
     },
-    [href, searchParams]
+    [href, searchParams, onFilter, paramName, name]
   );
 
   return (
