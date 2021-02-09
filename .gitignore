@@ -9,3 +9,4 @@ models
 frigate/version.py
 web/build
 web/node_modules
+web/coverage
