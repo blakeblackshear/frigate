@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   mount: {
     public: { url: '/', static: true },

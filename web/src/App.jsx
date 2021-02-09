@@ -6,15 +6,15 @@ import AppBar from './components/AppBar';
 import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import Api, { FetchStatus, useConfig } from './api';
 import { DarkModeProvider, DrawerProvider } from './context';
+import { FetchStatus, useConfig } from './api';
 
 export default function App() {
-  const { data, status } = useConfig();
+  const { status } = useConfig();
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <div class="w-full">
+        <div className="w-full">
           <AppBar title="Frigate" />
           {status !== FetchStatus.LOADED ? (
             <div className="flex flex-grow-1 min-h-screen justify-center items-center">

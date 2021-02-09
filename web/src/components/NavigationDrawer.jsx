@@ -1,6 +1,6 @@
 import { h, Fragment } from 'preact';
 import { Link } from 'preact-router/match';
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 import { useDrawer } from '../context';
 
 export default function NavigationDrawer({ children, header }) {

@@ -28,7 +28,7 @@ export default function Select({ label, onChange, options: inputOptions = [], se
       onChange && onChange(value, label);
       setShowMenu(false);
     },
-    [onChange]
+    [onChange, options]
   );
 
   const handleClick = useCallback(() => {
@@ -38,32 +38,34 @@ export default function Select({ label, onChange, options: inputOptions = [], se
   const handleKeydown = useCallback(
     (event) => {
       switch (event.key) {
-        case 'Enter': {
-          if (!showMenu) {
-            setShowMenu(true);
-            setFocused(selected);
-          } else {
-            setSelected(focused);
-            onChange && onChange(options[focused].value, options[focused].label);
-            setShowMenu(false);
-          }
-          break;
+      case 'Enter': {
+        if (!showMenu) {
+          setShowMenu(true);
+          setFocused(selected);
+        } else {
+          setSelected(focused);
+          onChange && onChange(options[focused].value, options[focused].label);
+          setShowMenu(false);
         }
+        break;
+      }
 
-        case 'ArrowDown': {
-          const newIndex = focused + 1;
-          newIndex < options.length && setFocused(newIndex);
-          break;
-        }
+      case 'ArrowDown': {
+        const newIndex = focused + 1;
+        newIndex < options.length && setFocused(newIndex);
+        break;
+      }
 
-        case 'ArrowUp': {
-          const newIndex = focused - 1;
-          newIndex > -1 && setFocused(newIndex);
-          break;
-        }
+      case 'ArrowUp': {
+        const newIndex = focused - 1;
+        newIndex > -1 && setFocused(newIndex);
+        break;
+      }
+
+        // no default
       }
     },
-    [setShowMenu, setFocused, focused, selected]
+    [onChange, options, showMenu, setShowMenu, setFocused, focused, selected]
   );
 
   const handleDismiss = useCallback(() => {
@@ -80,7 +82,8 @@ export default function Select({ label, onChange, options: inputOptions = [], se
       setSelected(selectedIndex);
       setFocused(selectedIndex);
     }
-  }, [propSelected]);
+    // DO NOT include `selected`
+  }, [options, propSelected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Fragment>

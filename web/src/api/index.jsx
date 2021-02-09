@@ -1,6 +1,6 @@
 import { h, createContext } from 'preact';
 import produce from 'immer';
-import { useCallback, useContext, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
+import { useContext, useEffect, useReducer } from 'preact/hooks';
 
 export const ApiHost = createContext(import.meta.env.SNOWPACK_PUBLIC_API_HOST || window.baseUrl || '');
 
@@ -20,23 +20,23 @@ export default Api;
 
 function reducer(state, { type, payload, meta }) {
   switch (type) {
-    case 'REQUEST': {
-      const { url, request } = payload;
-      const data = state.queries[url]?.data || null;
-      return produce(state, (draftState) => {
-        draftState.queries[url] = { status: FetchStatus.LOADING, data };
-      });
-    }
+  case 'REQUEST': {
+    const { url, fetchId } = payload;
+    const data = state.queries[url]?.data || null;
+    return produce(state, (draftState) => {
+      draftState.queries[url] = { status: FetchStatus.LOADING, data, fetchId };
+    });
+  }
 
-    case 'RESPONSE': {
-      const { url, ok, data } = payload;
-      return produce(state, (draftState) => {
-        draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data };
-      });
-    }
+  case 'RESPONSE': {
+    const { url, ok, data, fetchId } = payload;
+    return produce(state, (draftState) => {
+      draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
+    });
+  }
 
-    default:
-      return state;
+  default:
+    return state;
   }
 }
 
@@ -45,8 +45,8 @@ export const ApiProvider = ({ children }) => {
   return <Api.Provider value={{ state, dispatch }}>{children}</Api.Provider>;
 };
 
-function shouldFetch(state, url, forceRefetch = false) {
-  if (forceRefetch || !(url in state.queries)) {
+function shouldFetch(state, url, fetchId = null) {
+  if ((fetchId && url in state.queries && state.queries[url].fetchId !== fetchId) || !(url in state.queries)) {
     return true;
   }
   const { status } = state.queries[url];
@@ -54,23 +54,23 @@ function shouldFetch(state, url, forceRefetch = false) {
   return status !== FetchStatus.LOADING && status !== FetchStatus.LOADED;
 }
 
-export function useFetch(url, forceRefetch) {
+export function useFetch(url, fetchId) {
   const { state, dispatch } = useContext(Api);
 
   useEffect(() => {
-    if (!shouldFetch(state, url, forceRefetch)) {
+    if (!shouldFetch(state, url, fetchId)) {
       return;
     }
 
-    async function fetchConfig() {
-      await dispatch({ type: 'REQUEST', payload: { url } });
+    async function fetchData() {
+      await dispatch({ type: 'REQUEST', payload: { url, fetchId } });
       const response = await fetch(`${state.host}${url}`);
       const data = await response.json();
-      await dispatch({ type: 'RESPONSE', payload: { url, ok: response.ok, data } });
+      await dispatch({ type: 'RESPONSE', payload: { url, ok: response.ok, data, fetchId } });
     }
 
-    fetchConfig();
-  }, [url, forceRefetch]);
+    fetchData();
+  }, [url, fetchId, state, dispatch]);
 
   if (!(url in state.queries)) {
     return { data: null, status: FetchStatus.NONE };
@@ -83,26 +83,26 @@ export function useFetch(url, forceRefetch) {
 }
 
 export function useApiHost() {
-  const { state, dispatch } = useContext(Api);
+  const { state } = useContext(Api);
   return state.host;
 }
 
-export function useEvents(searchParams, forceRefetch) {
+export function useEvents(searchParams, fetchId) {
   const url = `/api/events${searchParams ? `?${searchParams.toString()}` : ''}`;
-  return useFetch(url, forceRefetch);
+  return useFetch(url, fetchId);
 }
 
-export function useEvent(eventId, forceRefetch) {
+export function useEvent(eventId, fetchId) {
   const url = `/api/events/${eventId}`;
-  return useFetch(url, forceRefetch);
+  return useFetch(url, fetchId);
 }
 
-export function useConfig(searchParams, forceRefetch) {
+export function useConfig(searchParams, fetchId) {
   const url = `/api/config${searchParams ? `?${searchParams.toString()}` : ''}`;
-  return useFetch(url, forceRefetch);
+  return useFetch(url, fetchId);
 }
 
-export function useStats(searchParams, forceRefetch) {
+export function useStats(searchParams, fetchId) {
   const url = `/api/stats${searchParams ? `?${searchParams.toString()}` : ''}`;
-  return useFetch(url, forceRefetch);
+  return useFetch(url, fetchId);
 }

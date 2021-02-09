@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import ActivityIndicator from './ActivityIndicator';
 import { useApiHost, useConfig } from '../api';
-import { useCallback, useEffect, useContext, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 export default function CameraImage({ camera, onload, searchParams = '' }) {
   const { data: config } = useConfig();
@@ -22,14 +22,11 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
         }
       });
     });
-  }, [setAvailableWidth, width]);
+  }, []);
 
   useEffect(() => {
-    if (!containerRef.current) {
-      return;
-    }
     resizeObserver.observe(containerRef.current);
-  }, [resizeObserver, containerRef.current]);
+  }, [resizeObserver, containerRef]);
 
   const scaledHeight = useMemo(() => Math.min(Math.ceil(availableWidth / aspectRatio), height), [
     availableWidth,
@@ -38,26 +35,28 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   ]);
   const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio), [scaledHeight, aspectRatio]);
 
-  const img = useMemo(() => new Image(), [camera]);
+  const img = useMemo(() => new Image(), []);
   img.onload = useCallback(
     (event) => {
       setHasLoaded(true);
-      const ctx = canvasRef.current.getContext('2d');
-      ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+      }
       onload && onload(event);
     },
-    [setHasLoaded, onload, canvasRef.current]
+    [img, scaledHeight, scaledWidth, setHasLoaded, onload, canvasRef]
   );
 
   useEffect(() => {
-    if (!scaledHeight || !canvasRef.current) {
+    if (scaledHeight === 0 || !canvasRef.current) {
       return;
     }
     img.src = `${apiHost}/api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;
-  }, [apiHost, name, img, searchParams, scaledHeight]);
+  }, [apiHost, canvasRef, name, img, searchParams, scaledHeight]);
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative w-full" ref={containerRef}>
       <canvas height={scaledHeight} ref={canvasRef} width={scaledWidth} />
       {!hasLoaded ? (
         <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>

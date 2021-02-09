@@ -3,8 +3,8 @@ import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { useConfig } from './api';
+import { useMemo } from 'preact/hooks';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
-import { useCallback, useMemo } from 'preact/hooks';
 
 export default function Sidebar() {
   const { data: config } = useConfig();
@@ -42,9 +42,9 @@ export default function Sidebar() {
   );
 }
 
-const Header = memo(function Header() {
+const Header = memo(() => {
   return (
-    <div class="text-gray-500">
+    <div className="text-gray-500">
       <LinkedLogo />
     </div>
   );

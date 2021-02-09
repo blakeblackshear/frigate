@@ -2,9 +2,7 @@ import { h } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
 
 export default function Switch({ checked, id, onChange }) {
-  const [internalState, setInternalState] = useState(checked);
   const [isFocused, setFocused] = useState(false);
-  const [isHovered, setHovered] = useState(false);
 
   const handleChange = useCallback(
     (event) => {
@@ -25,12 +23,12 @@ export default function Switch({ checked, id, onChange }) {
 
   return (
     <label
-      for={id}
+      htmlFor={id}
       className={`flex items-center justify-center ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
     >
       <div
-        onmouseover={handleFocus}
-        onmouseout={handleBlur}
+        onMouseOver={handleFocus}
+        onMouseOut={handleBlur}
         className={`w-8 h-5 relative ${!onChange ? 'opacity-60' : ''}`}
       >
         <div className="relative overflow-hidden">
@@ -38,7 +36,7 @@ export default function Switch({ checked, id, onChange }) {
             className="absolute left-48"
             onBlur={handleBlur}
             onFocus={handleFocus}
-            tabindex="0"
+            tabIndex="0"
             id={id}
             type="checkbox"
             onChange={handleChange}

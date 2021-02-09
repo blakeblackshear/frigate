@@ -30,7 +30,7 @@ export function Tr({ children, className = '' }) {
 
 export function Th({ children, className = '', colspan }) {
   return (
-    <th className={`border-b border-gray-400 p-2 px-1 lg:p-4 text-left ${className}`} colspan={colspan}>
+    <th className={`border-b border-gray-400 p-2 px-1 lg:p-4 text-left ${className}`} colSpan={colspan}>
       {children}
     </th>
   );
@@ -38,7 +38,7 @@ export function Th({ children, className = '', colspan }) {
 
 export function Td({ children, className = '', colspan }) {
   return (
-    <td className={`p-2 px-1 lg:p-4 ${className}`} colspan={colspan}>
+    <td className={`p-2 px-1 lg:p-4 ${className}`} colSpan={colspan}>
       {children}
     </td>
   );

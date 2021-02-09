@@ -26,14 +26,14 @@ export default function Box({
       {media || header ? (
         <Element href={href} {...props}>
           {media}
-          <div class="p-4 pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
+          <div className="p-4 pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
         </Element>
       ) : null}
       {buttons.length || content ? (
-        <div class="pl-4 pb-2">
+        <div className="pl-4 pb-2">
           {content || null}
           {buttons.length ? (
-            <div class="flex space-x-4 -ml-2">
+            <div className="flex space-x-4 -ml-2">
               {buttons.map(({ name, href }) => (
                 <Button key={name} href={href} type="text">
                   {name}
