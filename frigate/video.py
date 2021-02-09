@@ -284,7 +284,7 @@ def reduce_boxes(boxes):
 # modified from https://stackoverflow.com/a/40795835
 def intersects_any(box_a, boxes):
     for box in boxes:
-        if box_a[2] < box[0] or box_a[0] > box[2] or box_a[1] < box[3] or box_a[3] > box[1]:
+        if box_a[2] < box[0] or box_a[0] > box[2] or box_a[1] > box[3] or box_a[3] < box[1]:
             continue
         return True
 
