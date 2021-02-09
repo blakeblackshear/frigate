@@ -461,9 +461,12 @@ class TrackedObjectProcessor(threading.Thread):
                         crop=snapshot_config.crop,
                         height=snapshot_config.height
                     )
-                    with open(os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"), 'wb') as j:
-                        j.write(jpg_bytes)
-                    event_data['has_snapshot'] = True
+                    if jpg_bytes is None:
+                        logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
+                    else:
+                        with open(os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"), 'wb') as j:
+                            j.write(jpg_bytes)
+                        event_data['has_snapshot'] = True
             self.event_queue.put(('end', camera, event_data))
         
         def snapshot(camera, obj: TrackedObject, current_frame_time):
@@ -475,7 +478,11 @@ class TrackedObjectProcessor(threading.Thread):
                     crop=mqtt_config.crop,
                     height=mqtt_config.height
                 )
-                self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", jpg_bytes, retain=True)
+
+                if jpg_bytes is None:
+                    logger.warning(f"Unable to send mqtt snapshot for {obj.obj_data['id']}.")
+                else:
+                    self.client.publish(f"{self.topic_prefix}/{camera}/{obj.obj_data['label']}/snapshot", jpg_bytes, retain=True)
         
         def object_status(camera, object_name, status):
             self.client.publish(f"{self.topic_prefix}/{camera}/{object_name}", status, retain=False)
