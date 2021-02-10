@@ -172,7 +172,7 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 
-### `/clips/<camera>-<id>.mp4`
+### `/api/frigate/notifications/<id>/<camera>/clip.mp4`
 
 Video clip for the given camera and event id.
 
