@@ -28,8 +28,19 @@ The best way to integrate with HomeAssistant is to use the [official integration
 ### Notifications
 
 Frigate publishes event information in the form of a change feed via MQTT. This allows lots of customization for notifications to meet your needs. Event changes are published with `before` and `after` information as shown [here](#frigateevents).
+Note that some people may not want to expose frigate to the web, so you can leverage the HA API that frigate custom_integration ties into (which is exposed to the web, and thus can be used for mobile notifications etc):
 
-Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image.
+To load an image taken by frigate from HomeAssistants API see below:
+``` 
+https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
+```
+
+To load a video clip taken by frigate from HomeAssistants API :
+``` 
+https://HA_URL/api/frigate/notifications/<event-id>/<camera>/clip.mp4
+```
+
+Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image. 
 
 ```yaml
 automation:
@@ -45,6 +56,7 @@ automation:
             image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
             tag: '{{trigger.payload_json["after"]["id"]}}'
 ```
+
 
 ```yaml
 automation:
