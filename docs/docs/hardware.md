@@ -18,3 +18,12 @@ Cameras that output H.264 video and AAC audio will offer the most compatibility 
 | Raspberry Pi 3B (32bit) | 60ms            | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
 | Raspberry Pi 4 (32bit)  | 15-20ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
 | Raspberry Pi 4 (64bit)  | 10-15ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+
+## Unraid
+
+Many people have powerful enough NAS devices or home servers to also run docker. There is a Unraid Community App.
+To install make sure you have the [community app plugin here](https://forums.unraid.net/topic/38582-plug-in-community-applications/). Then search for "Frigate" in the apps section within Unraid - you can see the online store [here](https://unraid.net/community/apps?q=frigate#r)
+
+| Name                    | Inference Speed | Notes                                                                                                                         |
+| ----------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [M2 Coral Edge TPU](http://coral.ai)       | 6.2ms            | Little complicated to get installed, as needs drivers on the host OS, [info here](https://forums.unraid.net/topic/98064-support-blakeblackshear-frigate/?do=findComment&comment=945776)                         |
