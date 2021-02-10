@@ -1,6 +1,6 @@
 ---
 name: Bug report or Support request
-about: ''
+about: Bug report or Support request
 title: ''
 labels: ''
 assignees: ''
