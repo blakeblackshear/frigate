@@ -2,7 +2,7 @@ import * as Routes from './routes';
 import { h } from 'preact';
 import ActivityIndicator from './components/ActivityIndicator';
 import AsyncRoute from 'preact-async-route';
-import AppBar from './components/AppBar';
+import AppBar from './AppBar';
 import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
@@ -15,7 +15,7 @@ export default function App() {
     <DarkModeProvider>
       <DrawerProvider>
         <div className="w-full">
-          <AppBar title="Frigate" />
+          <AppBar />
           {status !== FetchStatus.LOADED ? (
             <div className="flex flex-grow-1 min-h-screen justify-center items-center">
               <ActivityIndicator />
