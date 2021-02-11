@@ -12,3 +12,11 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   }),
 });
+
+window.fetch = () => Promise.resolve();
+
+beforeEach(() => {
+  jest.spyOn(window, 'fetch').mockImplementation(async (url, opts = {}) => {
+    throw new Error(`Unexpected fetch to ${url}, ${JSON.stringify(opts)}`);
+  });
+});
