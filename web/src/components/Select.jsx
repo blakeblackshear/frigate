@@ -38,29 +38,29 @@ export default function Select({ label, onChange, options: inputOptions = [], se
   const handleKeydown = useCallback(
     (event) => {
       switch (event.key) {
-      case 'Enter': {
-        if (!showMenu) {
-          setShowMenu(true);
-          setFocused(selected);
-        } else {
-          setSelected(focused);
-          onChange && onChange(options[focused].value, options[focused].label);
-          setShowMenu(false);
+        case 'Enter': {
+          if (!showMenu) {
+            setShowMenu(true);
+            setFocused(selected);
+          } else {
+            setSelected(focused);
+            onChange && onChange(options[focused].value, options[focused].label);
+            setShowMenu(false);
+          }
+          break;
         }
-        break;
-      }
 
-      case 'ArrowDown': {
-        const newIndex = focused + 1;
-        newIndex < options.length && setFocused(newIndex);
-        break;
-      }
+        case 'ArrowDown': {
+          const newIndex = focused + 1;
+          newIndex < options.length && setFocused(newIndex);
+          break;
+        }
 
-      case 'ArrowUp': {
-        const newIndex = focused - 1;
-        newIndex > -1 && setFocused(newIndex);
-        break;
-      }
+        case 'ArrowUp': {
+          const newIndex = focused - 1;
+          newIndex > -1 && setFocused(newIndex);
+          break;
+        }
 
         // no default
       }

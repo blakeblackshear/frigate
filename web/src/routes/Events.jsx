@@ -14,32 +14,32 @@ const API_LIMIT = 25;
 const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-  case 'APPEND_EVENTS': {
-    const {
-      meta: { searchString },
-      payload,
-    } = action;
-    return produce(state, (draftState) => {
-      draftState.searchStrings[searchString] = true;
-      draftState.events.push(...payload);
-    });
-  }
+    case 'APPEND_EVENTS': {
+      const {
+        meta: { searchString },
+        payload,
+      } = action;
+      return produce(state, (draftState) => {
+        draftState.searchStrings[searchString] = true;
+        draftState.events.push(...payload);
+      });
+    }
 
-  case 'REACHED_END': {
-    const {
-      meta: { searchString },
-    } = action;
-    return produce(state, (draftState) => {
-      draftState.reachedEnd = true;
-      draftState.searchStrings[searchString] = true;
-    });
-  }
+    case 'REACHED_END': {
+      const {
+        meta: { searchString },
+      } = action;
+      return produce(state, (draftState) => {
+        draftState.reachedEnd = true;
+        draftState.searchStrings[searchString] = true;
+      });
+    }
 
-  case 'RESET':
-    return initialState;
+    case 'RESET':
+      return initialState;
 
-  default:
-    return state;
+    default:
+      return state;
   }
 };
 
