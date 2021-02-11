@@ -19,23 +19,23 @@ const Api = createContext(initialState);
 
 function reducer(state, { type, payload, meta }) {
   switch (type) {
-  case 'REQUEST': {
-    const { url, fetchId } = payload;
-    const data = state.queries[url]?.data || null;
-    return produce(state, (draftState) => {
-      draftState.queries[url] = { status: FetchStatus.LOADING, data, fetchId };
-    });
-  }
+    case 'REQUEST': {
+      const { url, fetchId } = payload;
+      const data = state.queries[url]?.data || null;
+      return produce(state, (draftState) => {
+        draftState.queries[url] = { status: FetchStatus.LOADING, data, fetchId };
+      });
+    }
 
-  case 'RESPONSE': {
-    const { url, ok, data, fetchId } = payload;
-    return produce(state, (draftState) => {
-      draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
-    });
-  }
+    case 'RESPONSE': {
+      const { url, ok, data, fetchId } = payload;
+      return produce(state, (draftState) => {
+        draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
+      });
+    }
 
-  default:
-    return state;
+    default:
+      return state;
   }
 }
 
