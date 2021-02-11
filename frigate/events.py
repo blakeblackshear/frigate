@@ -205,11 +205,12 @@ class EventProcessor(threading.Thread):
             if event_type == 'end':
                 clips_config = self.config.cameras[camera].clips
 
+                clip_created = False
                 if self.should_create_clip(camera, event_data):
-                    clip_created = False
                     if clips_config.enabled and (clips_config.objects is None or event_data['label'] in clips_config.objects):
                         clip_created = self.create_clip(camera, event_data, clips_config.pre_capture, clips_config.post_capture)
-                    
+                
+                if clip_created or event_data['has_snapshot']:
                     Event.create(
                         id=event_data['id'],
                         label=event_data['label'],
