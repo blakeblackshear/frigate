@@ -1,7 +1,5 @@
 import { h } from 'preact';
 
-const noop = () => {};
-
 const ButtonColors = {
   blue: {
     contained: 'bg-blue-500 focus:bg-blue-400 active:bg-blue-600 ring-blue-300',
@@ -50,7 +48,6 @@ export default function Button({
   color = 'blue',
   disabled = false,
   href,
-  onClick,
   size,
   type = 'contained',
   ...attrs
@@ -73,7 +70,6 @@ export default function Button({
       aria-disabled={disabled ? 'true' : 'false'}
       tabindex="0"
       className={classes}
-      onClick={onClick || noop}
       href={href}
       {...attrs}
     >
