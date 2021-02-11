@@ -1,8 +1,7 @@
+import { baseUrl } from './baseUrl';
 import { h, createContext } from 'preact';
 import produce from 'immer';
 import { useContext, useEffect, useReducer } from 'preact/hooks';
-
-export const ApiHost = createContext(import.meta.env.SNOWPACK_PUBLIC_API_HOST || window.baseUrl || '');
 
 export const FetchStatus = {
   NONE: 'none',
@@ -12,11 +11,11 @@ export const FetchStatus = {
 };
 
 const initialState = Object.freeze({
-  host: import.meta.env.SNOWPACK_PUBLIC_API_HOST || window.baseUrl || '',
+  host: baseUrl,
   queries: {},
 });
-export const Api = createContext(initialState);
-export default Api;
+
+const Api = createContext(initialState);
 
 function reducer(state, { type, payload, meta }) {
   switch (type) {
@@ -65,8 +64,12 @@ export function useFetch(url, fetchId) {
     async function fetchData() {
       await dispatch({ type: 'REQUEST', payload: { url, fetchId } });
       const response = await fetch(`${state.host}${url}`);
-      const data = await response.json();
-      await dispatch({ type: 'RESPONSE', payload: { url, ok: response.ok, data, fetchId } });
+      try {
+        const data = await response.json();
+        await dispatch({ type: 'RESPONSE', payload: { url, ok: response.ok, data, fetchId } });
+      } catch (e) {
+        await dispatch({ type: 'RESPONSE', payload: { url, ok: false, data: null, fetchId } });
+      }
     }
 
     fetchData();
