@@ -4,7 +4,7 @@ import { useCallback, useState } from 'preact/hooks';
 
 const MIN_LOAD_TIMEOUT_MS = 200;
 
-export default function AutoUpdatingCameraImage({ camera, searchParams, showFps = true }) {
+export default function AutoUpdatingCameraImage({ camera, searchParams = '', showFps = true }) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState(0);
 
