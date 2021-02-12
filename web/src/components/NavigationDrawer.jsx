@@ -12,9 +12,10 @@ export default function NavigationDrawer({ children, header }) {
 
   return (
     <Fragment>
-      {showDrawer ? <div key="scrim" className="fixed inset-0 z-20" onClick={handleDismiss} /> : ''}
+      {showDrawer ? <div data-testid="scrim" key="scrim" className="fixed inset-0 z-20" onClick={handleDismiss} /> : ''}
       <div
         key="drawer"
+        data-testid="drawer"
         className={`fixed left-0 top-0 bottom-0 lg:sticky max-h-screen flex flex-col w-64 text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-900 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 shadow lg:shadow-none z-20 lg:z-0 transform ${
           !showDrawer ? '-translate-x-full lg:translate-x-0' : 'translate-x-0'
         } transition-transform duration-300`}
