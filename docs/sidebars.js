@@ -10,5 +10,6 @@ module.exports = {
       'configuration/advanced',
     ],
     Usage: ['usage/home-assistant', 'usage/web', 'usage/api', 'usage/mqtt'],
+    Development: ['contributing'],
   },
 };
