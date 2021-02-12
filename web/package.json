@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "start": "cross-env SNOWPACK_PUBLIC_API_HOST=http://localhost:5000 snowpack dev",
+    "start:custom": "snowpack dev",
     "prebuild": "rimraf build",
     "build": "cross-env NODE_ENV=production SNOWPACK_MODE=production SNOWPACK_PUBLIC_API_HOST='' snowpack build",
     "lint": "npm run lint:cmd -- --fix",
