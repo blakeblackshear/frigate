@@ -3,14 +3,14 @@ import Card from '../components/Card.jsx';
 import Button from '../components/Button.jsx';
 import Heading from '../components/Heading.jsx';
 import Switch from '../components/Switch.jsx';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useResizeObserver } from '../hooks';
+import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost, useConfig } from '../api';
 
 export default function CameraMasks({ camera, url }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
   const imageRef = useRef(null);
-  const [imageScale, setImageScale] = useState(1);
   const [snap, setSnap] = useState(true);
 
   const cameraConfig = config.cameras[camera];
@@ -22,26 +22,8 @@ export default function CameraMasks({ camera, url }) {
     zones,
   } = cameraConfig;
 
-  const resizeObserver = useMemo(
-    () =>
-      new ResizeObserver((entries) => {
-        window.requestAnimationFrame(() => {
-          if (Array.isArray(entries) && entries.length) {
-            const scaledWidth = entries[0].contentRect.width;
-            const scale = scaledWidth / width;
-            setImageScale(scale);
-          }
-        });
-      }),
-    [width, setImageScale]
-  );
-
-  useEffect(() => {
-    if (!imageRef.current) {
-      return;
-    }
-    resizeObserver.observe(imageRef.current);
-  }, [resizeObserver, imageRef]);
+  const [{ width: scaledWidth }] = useResizeObserver(imageRef);
+  const imageScale = scaledWidth / width;
 
   const [motionMaskPoints, setMotionMaskPoints] = useState(
     Array.isArray(motionMask)
