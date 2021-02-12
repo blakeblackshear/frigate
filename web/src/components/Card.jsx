@@ -9,10 +9,7 @@ export default function Box({
   elevated = true,
   header,
   href,
-  icons,
   media = null,
-  subheader,
-  supportingText,
   ...props
 }) {
   const Element = href ? 'a' : 'div';
