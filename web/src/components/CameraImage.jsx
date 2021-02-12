@@ -2,31 +2,18 @@ import { h } from 'preact';
 import ActivityIndicator from './ActivityIndicator';
 import { useApiHost, useConfig } from '../api';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useResizeObserver } from '../hooks';
 
 export default function CameraImage({ camera, onload, searchParams = '' }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
-  const [availableWidth, setAvailableWidth] = useState(0);
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const [{ width: availableWidth }] = useResizeObserver(containerRef);
 
   const { name, width, height } = config.cameras[camera];
   const aspectRatio = width / height;
-
-  const resizeObserver = useMemo(() => {
-    return new ResizeObserver((entries) => {
-      window.requestAnimationFrame(() => {
-        if (Array.isArray(entries) && entries.length) {
-          setAvailableWidth(entries[0].contentRect.width);
-        }
-      });
-    });
-  }, []);
-
-  useEffect(() => {
-    resizeObserver.observe(containerRef.current);
-  }, [resizeObserver, containerRef]);
 
   const scaledHeight = useMemo(() => Math.min(Math.ceil(availableWidth / aspectRatio), height), [
     availableWidth,
@@ -57,7 +44,7 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      <canvas height={scaledHeight} ref={canvasRef} width={scaledWidth} />
+      <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} />
       {!hasLoaded ? (
         <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>
           <ActivityIndicator />
