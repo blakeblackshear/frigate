@@ -9,7 +9,7 @@ import TextField from '../components/TextField';
 import { useCallback, useState } from 'preact/hooks';
 
 export default function StyleGuide() {
-  const [switches, setSwitches] = useState({ 0: false, 1: true });
+  const [switches, setSwitches] = useState({ 0: false, 1: true, 2: false, 3: false });
 
   const handleSwitch = useCallback(
     (id, checked) => {
@@ -53,23 +53,26 @@ export default function StyleGuide() {
       </div>
 
       <Heading size="md">Switch</Heading>
-      <div className="flex">
-        <div>
-          <p>Disabled, off</p>
-          <Switch />
-        </div>
-        <div>
-          <p>Disabled, on</p>
-          <Switch checked />
-        </div>
-        <div>
-          <p>Enabled, (off initial)</p>
-          <Switch checked={switches[0]} id={0} onChange={handleSwitch} label="Default" />
-        </div>
-        <div>
-          <p>Enabled, (on initial)</p>
-          <Switch checked={switches[1]} id={1} onChange={handleSwitch} label="Default" />
-        </div>
+      <div className="flex-col space-y-4 max-w-4xl">
+        <Switch label="Disabled, off" labelPosition="after" />
+        <Switch label="Disabled, on" labelPosition="after" checked />
+        <Switch
+          label="Enabled, (off initial)"
+          labelPosition="after"
+          checked={switches[0]}
+          id={0}
+          onChange={handleSwitch}
+        />
+        <Switch
+          label="Enabled, (on initial)"
+          labelPosition="after"
+          checked={switches[1]}
+          id={1}
+          onChange={handleSwitch}
+        />
+
+        <Switch checked={switches[2]} id={2} label="Label before" onChange={handleSwitch} />
+        <Switch checked={switches[3]} id={3} label="Label after" labelPosition="after" onChange={handleSwitch} />
       </div>
 
       <Heading size="md">Select</Heading>

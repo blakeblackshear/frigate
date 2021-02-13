@@ -45,30 +45,36 @@ export default function Camera({ camera }) {
 
   const optionContent = showSettings ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div className="flex space-x-3">
-        <Switch checked={options['bbox']} id="bbox" onChange={handleSetOption} />
-        <span className="inline-flex">Bounding box</span>
-      </div>
-      <div className="flex space-x-3">
-        <Switch checked={options['timestamp']} id="timestamp" onChange={handleSetOption} />
-        <span className="inline-flex">Timestamp</span>
-      </div>
-      <div className="flex space-x-3">
-        <Switch checked={options['zones']} id="zones" onChange={handleSetOption} />
-        <span className="inline-flex">Zones</span>
-      </div>
-      <div className="flex space-x-3">
-        <Switch checked={options['mask']} id="mask" onChange={handleSetOption} />
-        <span className="inline-flex">Masks</span>
-      </div>
-      <div className="flex space-x-3">
-        <Switch checked={options['motion']} id="motion" onChange={handleSetOption} />
-        <span className="inline-flex">Motion boxes</span>
-      </div>
-      <div className="flex space-x-3">
-        <Switch checked={options['regions']} id="regions" onChange={handleSetOption} />
-        <span className="inline-flex">Regions</span>
-      </div>
+      <Switch
+        checked={options['bbox']}
+        id="bbox"
+        onChange={handleSetOption}
+        label="Bounding box"
+        labelPosition="after"
+      />
+      <Switch
+        checked={options['timestamp']}
+        id="timestamp"
+        onChange={handleSetOption}
+        label="Timestamp"
+        labelPosition="after"
+      />
+      <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
+      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch
+        checked={options['motion']}
+        id="motion"
+        onChange={handleSetOption}
+        label="Motion boxes"
+        labelPosition="after"
+      />
+      <Switch
+        checked={options['regions']}
+        id="regions"
+        onChange={handleSetOption}
+        label="Regions"
+        labelPosition="after"
+      />
       <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
     </div>
   ) : null;

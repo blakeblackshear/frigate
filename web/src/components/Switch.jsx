@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
 
-export default function Switch({ checked, id, onChange }) {
+export default function Switch({ checked, id, onChange, label, labelPosition = 'before' }) {
   const [isFocused, setFocused] = useState(false);
 
   const handleChange = useCallback(
@@ -24,15 +24,21 @@ export default function Switch({ checked, id, onChange }) {
   return (
     <label
       htmlFor={id}
-      className={`flex items-center justify-center ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+      className={`flex items-center space-x-4 w-full ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
     >
+      {label && labelPosition === 'before' ? (
+        <div data-testid={`${id}-label`} className="inline-flex flex-grow">
+          {label}
+        </div>
+      ) : null}
       <div
         onMouseOver={handleFocus}
         onMouseOut={handleBlur}
-        className={`w-8 h-5 relative ${!onChange ? 'opacity-60' : ''}`}
+        className={`self-end w-8 h-5 relative ${!onChange ? 'opacity-60' : ''}`}
       >
         <div className="relative overflow-hidden">
           <input
+            data-testid={`${id}-input`}
             className="absolute left-48"
             onBlur={handleBlur}
             onFocus={handleFocus}
@@ -55,6 +61,11 @@ export default function Switch({ checked, id, onChange }) {
           style={checked ? 'transform: translateX(100%);' : 'transform: translateX(0%);'}
         />
       </div>
+      {label && labelPosition !== 'before' ? (
+        <div data-testid={`${id}-label`} class="inline-flex flex-grow">
+          {label}
+        </div>
+      ) : null}
     </label>
   );
 }
