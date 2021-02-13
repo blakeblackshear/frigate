@@ -8,6 +8,8 @@ import sys
 import signal
 
 import yaml
+from gevent import pywsgi
+from geventwebsocket.handler import WebSocketHandler
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -106,8 +108,8 @@ class FrigateApp():
         for log, level in self.config.logger.logs.items():
             logging.getLogger(log).setLevel(level)
         
-        if not 'werkzeug' in self.config.logger.logs:
-            logging.getLogger('werkzeug').setLevel('ERROR')
+        if not 'geventwebsocket.handler' in self.config.logger.logs:
+            logging.getLogger('geventwebsocket.handler').setLevel('ERROR')
 
     def init_queues(self):
         # Queues for clip processing
@@ -239,7 +241,9 @@ class FrigateApp():
         
         signal.signal(signal.SIGTERM, receiveSignal)
 
-        self.flask_app.run(host='127.0.0.1', port=5001, debug=False)
+        server = pywsgi.WSGIServer(('127.0.0.1', 5001), self.flask_app, handler_class=WebSocketHandler)
+        server.serve_forever()
+
         self.stop()
     
     def stop(self):
