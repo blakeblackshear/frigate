@@ -31,8 +31,8 @@ class FrigateWatchdog(threading.Thread):
                 detection_start = detector.detection_start.value
                 if (detection_start > 0.0 and 
                     now - detection_start > 10):
-                    logger.info("Detection appears to be stuck. Restarting detection process")
+                    logger.info("Detection appears to be stuck. Restarting detection process...")
                     detector.start_or_restart()
                 elif not detector.detect_process.is_alive():
-                    logger.info("Detection appears to have stopped. Restarting frigate")
+                    logger.info("Detection appears to have stopped. Exiting frigate...")
                     os.kill(os.getpid(), signal.SIGTERM)
