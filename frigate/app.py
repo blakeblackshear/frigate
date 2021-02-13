@@ -137,7 +137,7 @@ class FrigateApp():
         self.stats_tracking = stats_init(self.camera_metrics, self.detectors)
 
     def init_web_server(self):
-        self.flask_app = create_app(self.config, self.db, self.stats_tracking, self.detected_frames_processor)
+        self.flask_app = create_app(self.config, self.db, self.stats_tracking, self.detected_frames_processor, self.mqtt_client)
 
     def init_mqtt(self):
         self.mqtt_client = create_mqtt_client(self.config, self.camera_metrics)
