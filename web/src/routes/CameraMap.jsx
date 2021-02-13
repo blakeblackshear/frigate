@@ -29,8 +29,8 @@ export default function CameraMasks({ camera, url }) {
     Array.isArray(motionMask)
       ? motionMask.map((mask) => getPolylinePoints(mask))
       : motionMask
-        ? [getPolylinePoints(motionMask)]
-        : []
+      ? [getPolylinePoints(motionMask)]
+      : []
   );
 
   const [zonePoints, setZonePoints] = useState(
@@ -44,8 +44,8 @@ export default function CameraMasks({ camera, url }) {
         [name]: Array.isArray(objectFilters[name].mask)
           ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
           : objectFilters[name].mask
-            ? [getPolylinePoints(objectFilters[name].mask)]
-            : [],
+          ? [getPolylinePoints(objectFilters[name].mask)]
+          : [],
       }),
       {}
     )
@@ -128,11 +128,11 @@ ${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`)
   const handleCopyZones = useCallback(async () => {
     await window.navigator.clipboard.writeText(`  zones:
 ${Object.keys(zonePoints)
-    .map(
-      (zoneName) => `    ${zoneName}:
+  .map(
+    (zoneName) => `    ${zoneName}:
       coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
-    )
-    .join('\n')}`);
+  )
+  .join('\n')}`);
   }, [zonePoints]);
 
   // Object methods
@@ -164,14 +164,14 @@ ${Object.keys(zonePoints)
     await window.navigator.clipboard.writeText(`  objects:
     filters:
 ${Object.keys(objectMaskPoints)
-    .map((objectName) =>
-      objectMaskPoints[objectName].length
-        ? `      ${objectName}:
+  .map((objectName) =>
+    objectMaskPoints[objectName].length
+      ? `      ${objectName}:
         mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
-        : ''
-    )
-    .filter(Boolean)
-    .join('\n')}`);
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n')}`);
   }, [objectMaskPoints]);
 
   const handleAddToObjectMask = useCallback(
@@ -222,8 +222,8 @@ ${Object.keys(objectMaskPoints)
             height={height}
           />
         </div>
-        <div className="flex space-x-4">
-          <span>Snap to edges</span> <Switch checked={snap} onChange={handleChangeSnap} />
+        <div className="max-w-xs">
+          <Switch checked={snap} label="Snap to edges" labelPosition="after" onChange={handleChangeSnap} />
         </div>
       </div>
 
@@ -360,15 +360,15 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-          <PolyPoint
-            boundingRef={boundingRef}
-            index={i}
-            onMove={handleMovePoint}
-            onRemove={handleRemovePoint}
-            x={x + MaskInset}
-            y={y + MaskInset}
-          />
-        ))}
+            <PolyPoint
+              boundingRef={boundingRef}
+              index={i}
+              onMove={handleMovePoint}
+              onRemove={handleRemovePoint}
+              x={x + MaskInset}
+              y={y + MaskInset}
+            />
+          ))}
       <div className="absolute inset-0 right-0 bottom-0" onClick={handleAddPoint} ref={boundingRef} />
       <svg
         width="100%"
