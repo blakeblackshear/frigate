@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from flask import (Blueprint, Flask, Response, current_app, jsonify,
                    make_response, request)
+from flask_sockets import Sockets
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
@@ -21,9 +22,11 @@ from frigate.version import VERSION
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('frigate', __name__)
+ws = Blueprint('ws', __name__)
 
 def create_app(frigate_config, database: SqliteDatabase, stats_tracking, detected_frames_processor):
     app = Flask(__name__)
+    sockets = Sockets(app)
 
     @app.before_request
     def _db_connect():
@@ -39,6 +42,7 @@ def create_app(frigate_config, database: SqliteDatabase, stats_tracking, detecte
     app.detected_frames_processor = detected_frames_processor
 
     app.register_blueprint(bp)
+    sockets.register_blueprint(ws)
 
     return app
 
@@ -304,3 +308,9 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
         ret, jpg = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         yield (b'--frame\r\n'
             b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n\r\n')
+
+@ws.route('/ws')
+def echo_socket(socket):
+    while not socket.closed:
+        message = socket.receive()
+        socket.send(message)
