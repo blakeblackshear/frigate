@@ -23,5 +23,5 @@ function Camera({ name }) {
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => [{ name: 'Events', href: `/events?camera=${name}` }], [name]);
 
-  return <Card buttons={buttons} href={href} header={name} media={<CameraImage camera={name} />} />;
+  return <Card buttons={buttons} href={href} header={name} media={<CameraImage camera={name} stretch />} />;
 }

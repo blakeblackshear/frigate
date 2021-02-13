@@ -4,7 +4,7 @@ import { useApiHost, useConfig } from '../api';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useResizeObserver } from '../hooks';
 
-export default function CameraImage({ camera, onload, searchParams = '' }) {
+export default function CameraImage({ camera, onload, searchParams = '', stretch = false }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -15,11 +15,10 @@ export default function CameraImage({ camera, onload, searchParams = '' }) {
   const { name, width, height } = config.cameras[camera];
   const aspectRatio = width / height;
 
-  const scaledHeight = useMemo(() => Math.min(Math.ceil(availableWidth / aspectRatio), height), [
-    availableWidth,
-    aspectRatio,
-    height,
-  ]);
+  const scaledHeight = useMemo(() => {
+    const scaledHeight = Math.floor(availableWidth / aspectRatio);
+    return stretch ? scaledHeight : Math.min(scaledHeight, height);
+  }, [availableWidth, aspectRatio, height, stretch]);
   const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio), [scaledHeight, aspectRatio]);
 
   const img = useMemo(() => new Image(), []);

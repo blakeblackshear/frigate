@@ -25,12 +25,18 @@ describe('CameraImage', () => {
 
     render(<CameraImage camera="front" />);
     expect(screen.queryByLabelText('Loading…')).toBeInTheDocument();
-    expect(screen.queryByTestId('cameraimage-canvas')).toMatchInlineSnapshot(`
-      <canvas
-        data-testid="cameraimage-canvas"
-        height="405"
-        width="720"
-      />
-    `);
+    const canvas = screen.queryByTestId('cameraimage-canvas');
+    expect(canvas).toHaveAttribute('height', '405');
+    expect(canvas).toHaveAttribute('width', '720');
+  });
+
+  test('allows camera image to stretch to available space', async () => {
+    jest.spyOn(Hooks, 'useResizeObserver').mockReturnValueOnce([{ width: 1400 }]);
+
+    render(<CameraImage camera="front" stretch />);
+    expect(screen.queryByLabelText('Loading…')).toBeInTheDocument();
+    const canvas = screen.queryByTestId('cameraimage-canvas');
+    expect(canvas).toHaveAttribute('height', '787');
+    expect(canvas).toHaveAttribute('width', '1400');
   });
 });
