@@ -113,7 +113,7 @@ class EventProcessor(threading.Thread):
         
         # if we are still using more than 90% of the cache, proactively cleanup
         cache_usage = shutil.disk_usage("/tmp/cache")
-        if cache_usage.used/cache_usage.total > .9:
+        if cache_usage.used/cache_usage.total > .9 and cache_usage.free < 200000000 and len(self.cached_clips) > 0:
             logger.warning("More than 90% of the cache is used.")
             logger.warning("Consider increasing space available at /tmp/cache or reducing max_seconds in your clips config.")
             logger.warning("Proactively cleaning up the cache...")
