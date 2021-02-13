@@ -40,14 +40,14 @@ class MqttBackend():
 
     def publish(self, message):
         json_message = json.loads(message)
-        self.mqtt_client.publish(json_message['topic'], json_message['payload'], retain=json_message['retain'])
+        self.mqtt_client.publish(f"{self.topic_prefix}/{json_message['topic']}", json_message['payload'], retain=json_message['retain'])
 
     def run(self):
         def send(client, userdata, message):
             """Sends mqtt messages to clients."""
             try:
                 ws_message = json.dumps({
-                    'topic': message.topic,
+                    'topic': message.topic.replace(f"{self.topic_prefix}/",""),
                     'payload': message.payload.decode()
                 })
             except:
