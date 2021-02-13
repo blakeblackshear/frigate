@@ -33,19 +33,19 @@ Make sure you choose the right image for your architecture:
 It is recommended to run with docker-compose:
 
 ```yaml
-version: '3.6'
+version: '3.9'
 services:
   frigate:
     container_name: frigate
     restart: unless-stopped
-    privileged: true
-    image: blakeblackshear/frigate:0.8.0-beta2-amd64
-    volumes:
+    image: blakeblackshear/frigate:<specify_version_tag>
+    devices:
       - /dev/bus/usb:/dev/bus/usb
+      - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+    volumes:
       - /etc/localtime:/etc/localtime:ro
-      - <path_to_config>:/config
-      - <path_to_directory_for_clips>:/media/frigate/clips
-      - <path_to_directory_for_recordings>:/media/frigate/recordings
+      - <path_to_config_file>:/config/config.yml:ro
+      - <path_to_directory_for_media>:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
         tmpfs:
@@ -60,19 +60,19 @@ services:
 If you can't use docker compose, you can run the container with something similar to this:
 
 ```bash
-docker run --rm \
---name frigate \
---privileged \
---mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
--v /dev/bus/usb:/dev/bus/usb \
--v <path_to_directory_for_clips>:/media/frigate/clips \
--v <path_to_directory_for_recordings>:/media/frigate/recordings \
--v <path_to_config>:/config:ro \
--v /etc/localtime:/etc/localtime:ro \
--e FRIGATE_RTSP_PASSWORD='password' \
--p 5000:5000 \
--p 1935:1935 \
-blakeblackshear/frigate:0.8.0-beta2-amd64
+docker run -d \
+  --name frigate \
+  --restart=unless-stopped \
+  --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
+  --device /dev/bus/usb:/dev/bus/usb \
+  --device /dev/dri/renderD128
+  -v <path_to_directory_for_media>:/media/frigate \
+  -v <path_to_config_file>:/config/config.yml:ro \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e FRIGATE_RTSP_PASSWORD='password' \
+  -p 5000:5000 \
+  -p 1935:1935 \
+  blakeblackshear/frigate:<specify_version_tag>
 ```
 
 ### Calculating shm-size
