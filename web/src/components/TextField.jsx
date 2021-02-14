@@ -60,7 +60,10 @@ export default function TextField({
         }`}
         ref={inputRef}
       >
-        <label className="flex space-x-2 items-center">
+        <label
+          className="flex space-x-2 items-center"
+          data-testid={`label-${label.toLowerCase().replace(/[^\w]+/g, '_')}`}
+        >
           {LeadingIcon ? (
             <div className="w-10 h-full">
               <LeadingIcon />
