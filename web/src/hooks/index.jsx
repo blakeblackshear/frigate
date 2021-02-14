@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 export function useResizeObserver(...refs) {
   const [dimensions, setDimensions] = useState(
@@ -27,4 +27,33 @@ export function useResizeObserver(...refs) {
   }, [refs, resizeObserver]);
 
   return dimensions;
+}
+
+export function useIntersectionObserver() {
+  const [entry, setEntry] = useState({});
+  const [node, setNode] = useState(null);
+
+  const observer = useRef(null);
+
+  useEffect(() => {
+    if (observer.current) {
+      observer.current.disconnect();
+    }
+
+    observer.current = new IntersectionObserver((entries) => {
+      window.requestAnimationFrame(() => {
+        setEntry(entries[0]);
+      });
+    });
+
+    if (node) {
+      observer.current.observe(node);
+    }
+
+    return () => {
+      observer.current.disconnect();
+    };
+  }, [node]);
+
+  return [entry, setNode];
 }
