@@ -52,7 +52,7 @@ export default function Debug() {
         Debug <span className="text-sm">{service.version}</span>
       </Heading>
 
-      <div className="min-w-0 overflow-auto">
+      <div data-testid="detectors" className="min-w-0 overflow-auto">
         <Table className="w-full">
           <Thead>
             <Tr>
@@ -75,7 +75,7 @@ export default function Debug() {
         </Table>
       </div>
 
-      <div className="min-w-0 overflow-auto">
+      <div data-testid="cameras" className="min-w-0 overflow-auto">
         <Table className="w-full">
           <Thead>
             <Tr>
