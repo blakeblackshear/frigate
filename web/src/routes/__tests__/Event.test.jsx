@@ -3,8 +3,6 @@ import * as Api from '../../api';
 import Event from '../Event';
 import { render, screen } from '@testing-library/preact';
 
-jest.mock('../../api/baseUrl');
-
 describe('Event Route', () => {
   let useEventMock;
 

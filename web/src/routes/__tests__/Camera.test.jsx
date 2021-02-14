@@ -5,8 +5,6 @@ import * as Context from '../../context';
 import Camera from '../Camera';
 import { fireEvent, render, screen } from '@testing-library/preact';
 
-jest.mock('../../api/baseUrl');
-
 describe('Camera Route', () => {
   let mockUsePersistence, mockSetOptions;
 
