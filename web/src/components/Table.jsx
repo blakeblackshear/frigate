@@ -6,39 +6,52 @@ export function Table({ children, className = '' }) {
   );
 }
 
-export function Thead({ children, className }) {
-  return <thead className={className}>{children}</thead>;
+export function Thead({ children, className, ...attrs }) {
+  return (
+    <thead className={className} {...attrs}>
+      {children}
+    </thead>
+  );
 }
 
-export function Tbody({ children, className }) {
-  return <tbody className={className}>{children}</tbody>;
+export function Tbody({ children, className, ...attrs }) {
+  return (
+    <tbody className={className} {...attrs}>
+      {children}
+    </tbody>
+  );
 }
 
-export function Tfoot({ children, className = '' }) {
-  return <tfoot className={`${className}`}>{children}</tfoot>;
+export function Tfoot({ children, className = '', ...attrs }) {
+  return (
+    <tfoot className={`${className}`} {...attrs}>
+      {children}
+    </tfoot>
+  );
 }
 
-export function Tr({ children, className = '' }) {
+export function Tr({ children, className = '', ...attrs }) {
   return (
     <tr
       className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`}
+      {...attrs}
     >
       {children}
     </tr>
   );
 }
 
-export function Th({ children, className = '', colspan }) {
+export function Th({ children, className = '', colspan, ...attrs }) {
   return (
-    <th className={`border-b border-gray-400 p-2 px-1 lg:p-4 text-left ${className}`} colSpan={colspan}>
+    <th className={`border-b border-gray-400 p-2 px-1 lg:p-4 text-left ${className}`} colSpan={colspan} {...attrs}>
       {children}
     </th>
   );
 }
 
-export function Td({ children, className = '', colspan }) {
+export function Td({ children, className = '', colspan, ...attrs }) {
   return (
-    <td className={`p-2 px-1 lg:p-4 ${className}`} colSpan={colspan}>
+    <td className={`p-2 px-1 lg:p-4 ${className}`} colSpan={colspan} {...attrs}>
       {children}
     </td>
   );

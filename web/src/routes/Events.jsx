@@ -5,11 +5,12 @@ import Link from '../components/Link';
 import Select from '../components/Select';
 import produce from 'immer';
 import { route } from 'preact-router';
+import { useIntersectionObserver } from '../hooks';
 import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
-import { useCallback, useEffect, useMemo, useRef, useReducer, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
 
-const API_LIMIT = 25;
+const API_LIMIT = 5;
 
 const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
 const reducer = (state = initialState, action) => {
@@ -43,69 +44,59 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-const defaultSearchString = `include_thumbnails=0&limit=${API_LIMIT}`;
+const defaultSearchString = (limit) => `include_thumbnails=0&limit=${limit}`;
 function removeDefaultSearchKeys(searchParams) {
   searchParams.delete('limit');
   searchParams.delete('include_thumbnails');
   searchParams.delete('before');
 }
 
-export default function Events({ path: pathname } = {}) {
+export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const apiHost = useApiHost();
   const [{ events, reachedEnd, searchStrings }, dispatch] = useReducer(reducer, initialState);
   const { searchParams: initialSearchParams } = new URL(window.location);
-  const [searchString, setSearchString] = useState(`${defaultSearchString}&${initialSearchParams.toString()}`);
+  const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
   const { data, status } = useEvents(searchString);
 
   useEffect(() => {
     if (data && !(searchString in searchStrings)) {
       dispatch({ type: 'APPEND_EVENTS', payload: data, meta: { searchString } });
     }
-    if (Array.isArray(data) && data.length < API_LIMIT) {
+
+    if (data && Array.isArray(data) && data.length < limit) {
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
-  }, [data, searchString, searchStrings]);
+  }, [data, limit, searchString, searchStrings]);
 
-  const observer = useRef(
-    new IntersectionObserver((entries, observer) => {
-      window.requestAnimationFrame(() => {
-        if (entries.length === 0) {
-          return;
-        }
-        // under certain edge cases, a ref may be applied / in memory twice
-        // avoid fetching twice by grabbing the last observed entry only
-        const entry = entries[entries.length - 1];
-        if (entry.isIntersecting) {
-          const { startTime } = entry.target.dataset;
-          const { searchParams } = new URL(window.location);
-          searchParams.set('before', parseFloat(startTime) - 0.0001);
+  const [entry, setIntersectNode] = useIntersectionObserver();
 
-          setSearchString(`${defaultSearchString}&${searchParams.toString()}`);
-        }
-      });
-    })
-  );
+  useEffect(() => {
+    if (entry && entry.isIntersecting) {
+      const { startTime } = entry.target.dataset;
+      const { searchParams } = new URL(window.location);
+      searchParams.set('before', parseFloat(startTime) - 0.0001);
+
+      setSearchString(`${defaultSearchString(limit)}&${searchParams.toString()}`);
+    }
+  }, [entry, limit]);
 
   const lastCellRef = useCallback(
     (node) => {
-      if (node !== null) {
-        observer.current.disconnect();
-        if (!reachedEnd) {
-          observer.current.observe(node);
-        }
+      if (node !== null && !reachedEnd) {
+        setIntersectNode(node);
       }
     },
-    [observer, reachedEnd]
+    [setIntersectNode, reachedEnd]
   );
 
   const handleFilter = useCallback(
     (searchParams) => {
       dispatch({ type: 'RESET' });
       removeDefaultSearchKeys(searchParams);
-      setSearchString(`${defaultSearchString}&${searchParams.toString()}`);
+      setSearchString(`${defaultSearchString(limit)}&${searchParams.toString()}`);
       route(`${pathname}?${searchParams.toString()}`);
     },
-    [pathname, setSearchString]
+    [limit, pathname, setSearchString]
   );
 
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
@@ -140,7 +131,7 @@ export default function Events({ path: pathname } = {}) {
                 const end = new Date(parseInt(endTime * 1000, 10));
                 const ref = i === events.length - 1 ? lastCellRef : undefined;
                 return (
-                  <Tr key={id}>
+                  <Tr data-testid={`event-${id}`} key={id}>
                     <Td className="w-40">
                       <a href={`/events/${id}`} ref={ref} data-start-time={startTime} data-reached-end={reachedEnd}>
                         <img
