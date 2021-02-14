@@ -4,8 +4,6 @@ import Cameras from '../Cameras';
 import * as CameraImage from '../../components/CameraImage';
 import { render, screen } from '@testing-library/preact';
 
-jest.mock('../../api/baseUrl');
-
 describe('Cameras Route', () => {
   let useConfigMock;
 

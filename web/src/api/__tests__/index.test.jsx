@@ -2,8 +2,6 @@ import { h } from 'preact';
 import { ApiProvider, useFetch, useApiHost } from '..';
 import { render, screen } from '@testing-library/preact';
 
-jest.mock('../baseUrl');
-
 describe('useApiHost', () => {
   test('is set from the baseUrl', async () => {
     function Test() {

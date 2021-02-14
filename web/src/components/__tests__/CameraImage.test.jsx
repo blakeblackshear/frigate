@@ -4,8 +4,6 @@ import * as Hooks from '../../hooks';
 import CameraImage from '../CameraImage';
 import { render, screen } from '@testing-library/preact';
 
-jest.mock('../../api/baseUrl');
-
 describe('CameraImage', () => {
   beforeEach(() => {
     jest.spyOn(Api, 'useConfig').mockImplementation(() => {
