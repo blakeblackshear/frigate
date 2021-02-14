@@ -24,6 +24,7 @@
     "@snowpack/plugin-postcss": "^1.1.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/preact": "^2.0.1",
+    "@testing-library/user-event": "^12.7.1",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
     "eslint": "^7.19.0",
