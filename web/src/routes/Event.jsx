@@ -54,7 +54,13 @@ export default function Event({ eventId }) {
       {data.has_clip ? (
         <Fragment>
           <Heading size="sm">Clip</Heading>
-          <video autoPlay className="w-100" src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} controls />
+          <video
+            aria-label={`Clip for event ${data.id}`}
+            autoPlay
+            className="w-100"
+            src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`}
+            controls
+          />
         </Fragment>
       ) : (
         <p>No clip available</p>
