@@ -20,3 +20,5 @@ beforeEach(() => {
     throw new Error(`Unexpected fetch to ${url}, ${JSON.stringify(opts)}`);
   });
 });
+
+jest.mock('../src/env');

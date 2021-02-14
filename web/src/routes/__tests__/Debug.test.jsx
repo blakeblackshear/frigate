@@ -3,8 +3,6 @@ import * as Api from '../../api';
 import Debug from '../Debug';
 import { render, screen } from '@testing-library/preact';
 
-jest.mock('../../api/baseUrl');
-
 describe('Debug Route', () => {
   let useStatsMock;
 

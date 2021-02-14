@@ -14,7 +14,7 @@ export default function App() {
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <div className="w-full">
+        <div data-testid="app" className="w-full">
           <AppBar />
           {status !== FetchStatus.LOADED ? (
             <div className="flex flex-grow-1 min-h-screen justify-center items-center">

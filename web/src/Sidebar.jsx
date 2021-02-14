@@ -2,6 +2,7 @@ import { h, Fragment } from 'preact';
 import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
+import { ENV } from './env';
 import { useConfig } from './api';
 import { useMemo } from 'preact/hooks';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
@@ -30,7 +31,7 @@ export default function Sidebar() {
       <Destination href="/debug" text="Debug" />
       <Separator />
       <div className="flex flex-grow" />
-      {import.meta.env.MODE !== 'production' ? (
+      {ENV !== 'production' ? (
         <Fragment>
           <Destination href="/styleguide" text="Style Guide" />
           <Separator />

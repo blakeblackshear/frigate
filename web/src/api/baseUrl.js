@@ -1,1 +1,2 @@
-export const baseUrl = import.meta.env.SNOWPACK_PUBLIC_API_HOST || window.baseUrl || '';
+import { API_HOST } from '../env';
+export const baseUrl = API_HOST || window.baseUrl || '';
