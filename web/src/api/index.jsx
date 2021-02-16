@@ -1,5 +1,6 @@
 import { baseUrl } from './baseUrl';
 import { h, createContext } from 'preact';
+import { MqttProvider } from './mqtt';
 import produce from 'immer';
 import { useContext, useEffect, useReducer } from 'preact/hooks';
 
@@ -41,7 +42,11 @@ function reducer(state, { type, payload, meta }) {
 
 export const ApiProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  return <Api.Provider value={{ state, dispatch }}>{children}</Api.Provider>;
+  return (
+    <Api.Provider value={{ state, dispatch }}>
+      <MqttProvider>{children}</MqttProvider>
+    </Api.Provider>
+  );
 };
 
 function shouldFetch(state, url, fetchId = null) {
