@@ -477,7 +477,7 @@ redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
 
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
-logging-format-style=old
+logging-format-style=fstr
 
 # Logging modules to check that the string format arguments are in logging
 # function parameter format.
