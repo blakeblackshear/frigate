@@ -31,6 +31,7 @@ def get_local_ip() -> str:
     finally:
         sock.close()
 
+
 def broadcast_zeroconf(frigate_id):
     zeroconf = Zeroconf(interfaces=InterfaceChoice.Default, ip_version=IPVersion.V4Only)
 

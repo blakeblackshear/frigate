@@ -4,26 +4,37 @@ import numpy as np
 from frigate.config import MotionConfig
 
 
-class MotionDetector():
+class MotionDetector:
     def __init__(self, frame_shape, config: MotionConfig):
         self.config = config
         self.frame_shape = frame_shape
-        self.resize_factor = frame_shape[0]/config.frame_height
-        self.motion_frame_size = (config.frame_height, config.frame_height*frame_shape[1]//frame_shape[0])
+        self.resize_factor = frame_shape[0] / config.frame_height
+        self.motion_frame_size = (
+            config.frame_height,
+            config.frame_height * frame_shape[1] // frame_shape[0],
+        )
         self.avg_frame = np.zeros(self.motion_frame_size, np.float)
         self.avg_delta = np.zeros(self.motion_frame_size, np.float)
         self.motion_frame_count = 0
         self.frame_counter = 0
-        resized_mask = cv2.resize(config.mask, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
-        self.mask = np.where(resized_mask==[0])
+        resized_mask = cv2.resize(
+            config.mask,
+            dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
+            interpolation=cv2.INTER_LINEAR,
+        )
+        self.mask = np.where(resized_mask == [0])
 
     def detect(self, frame):
         motion_boxes = []
 
-        gray = frame[0:self.frame_shape[0], 0:self.frame_shape[1]]
+        gray = frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]]
 
         # resize frame
-        resized_frame = cv2.resize(gray, dsize=(self.motion_frame_size[1], self.motion_frame_size[0]), interpolation=cv2.INTER_LINEAR)
+        resized_frame = cv2.resize(
+            gray,
+            dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
+            interpolation=cv2.INTER_LINEAR,
+        )
 
         # TODO: can I improve the contrast of the grayscale image here?
 
@@ -48,7 +59,9 @@ class MotionDetector():
 
             # compute the threshold image for the current frame
             # TODO: threshold
-            current_thresh = cv2.threshold(frameDelta, self.config.threshold, 255, cv2.THRESH_BINARY)[1]
+            current_thresh = cv2.threshold(
+                frameDelta, self.config.threshold, 255, cv2.THRESH_BINARY
+            )[1]
 
             # black out everything in the avg_delta where there isnt motion in the current frame
             avg_delta_image = cv2.convertScaleAbs(self.avg_delta)
@@ -56,7 +69,9 @@ class MotionDetector():
 
             # then look for deltas above the threshold, but only in areas where there is a delta
             # in the current frame. this prevents deltas from previous frames from being included
-            thresh = cv2.threshold(avg_delta_image, self.config.threshold, 255, cv2.THRESH_BINARY)[1]
+            thresh = cv2.threshold(
+                avg_delta_image, self.config.threshold, 255, cv2.THRESH_BINARY
+            )[1]
 
             # dilate the thresholded image to fill in holes, then find contours
             # on thresholded image
@@ -70,16 +85,27 @@ class MotionDetector():
                 contour_area = cv2.contourArea(c)
                 if contour_area > self.config.contour_area:
                     x, y, w, h = cv2.boundingRect(c)
-                    motion_boxes.append((int(x*self.resize_factor), int(y*self.resize_factor), int((x+w)*self.resize_factor), int((y+h)*self.resize_factor)))
-        
+                    motion_boxes.append(
+                        (
+                            int(x * self.resize_factor),
+                            int(y * self.resize_factor),
+                            int((x + w) * self.resize_factor),
+                            int((y + h) * self.resize_factor),
+                        )
+                    )
+
         if len(motion_boxes) > 0:
             self.motion_frame_count += 1
             if self.motion_frame_count >= 10:
                 # only average in the current frame if the difference persists for a bit
-                cv2.accumulateWeighted(resized_frame, self.avg_frame, self.config.frame_alpha)
+                cv2.accumulateWeighted(
+                    resized_frame, self.avg_frame, self.config.frame_alpha
+                )
         else:
             # when no motion, just keep averaging the frames together
-            cv2.accumulateWeighted(resized_frame, self.avg_frame, self.config.frame_alpha)
+            cv2.accumulateWeighted(
+                resized_frame, self.avg_frame, self.config.frame_alpha
+            )
             self.motion_frame_count = 0
 
         return motion_boxes

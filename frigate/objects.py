@@ -16,24 +16,24 @@ from frigate.config import DetectConfig
 from frigate.util import draw_box_with_label
 
 
-class ObjectTracker():
+class ObjectTracker:
     def __init__(self, config: DetectConfig):
         self.tracked_objects = {}
         self.disappeared = {}
         self.max_disappeared = config.max_disappeared
 
     def register(self, index, obj):
-        rand_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         id = f"{obj['frame_time']}-{rand_id}"
-        obj['id'] = id
-        obj['start_time'] = obj['frame_time']
+        obj["id"] = id
+        obj["start_time"] = obj["frame_time"]
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
     def deregister(self, id):
         del self.tracked_objects[id]
         del self.disappeared[id]
-    
+
     def update(self, id, new_obj):
         self.disappeared[id] = 0
         self.tracked_objects[id].update(new_obj)
@@ -42,45 +42,49 @@ class ObjectTracker():
         # group by name
         new_object_groups = defaultdict(lambda: [])
         for obj in new_objects:
-            new_object_groups[obj[0]].append({
-                'label': obj[0],
-                'score': obj[1],
-                'box': obj[2],
-                'area': obj[3],
-                'region': obj[4],
-                'frame_time': frame_time
-            })
-        
+            new_object_groups[obj[0]].append(
+                {
+                    "label": obj[0],
+                    "score": obj[1],
+                    "box": obj[2],
+                    "area": obj[3],
+                    "region": obj[4],
+                    "frame_time": frame_time,
+                }
+            )
+
         # update any tracked objects with labels that are not
         # seen in the current objects and deregister if needed
         for obj in list(self.tracked_objects.values()):
-            if not obj['label'] in new_object_groups:
-                if self.disappeared[obj['id']] >= self.max_disappeared:
-                    self.deregister(obj['id'])
+            if not obj["label"] in new_object_groups:
+                if self.disappeared[obj["id"]] >= self.max_disappeared:
+                    self.deregister(obj["id"])
                 else:
-                    self.disappeared[obj['id']] += 1
-        
+                    self.disappeared[obj["id"]] += 1
+
         if len(new_objects) == 0:
             return
-        
+
         # track objects for each label type
         for label, group in new_object_groups.items():
-            current_objects = [o for o in self.tracked_objects.values() if o['label'] == label]
-            current_ids = [o['id'] for o in current_objects]
-            current_centroids = np.array([o['centroid'] for o in current_objects])
+            current_objects = [
+                o for o in self.tracked_objects.values() if o["label"] == label
+            ]
+            current_ids = [o["id"] for o in current_objects]
+            current_centroids = np.array([o["centroid"] for o in current_objects])
 
             # compute centroids of new objects
             for obj in group:
-                centroid_x = int((obj['box'][0]+obj['box'][2]) / 2.0)
-                centroid_y = int((obj['box'][1]+obj['box'][3]) / 2.0)
-                obj['centroid'] = (centroid_x, centroid_y)
+                centroid_x = int((obj["box"][0] + obj["box"][2]) / 2.0)
+                centroid_y = int((obj["box"][1] + obj["box"][3]) / 2.0)
+                obj["centroid"] = (centroid_x, centroid_y)
 
             if len(current_objects) == 0:
                 for index, obj in enumerate(group):
                     self.register(index, obj)
                 return
-            
-            new_centroids = np.array([o['centroid'] for o in group])
+
+            new_centroids = np.array([o["centroid"] for o in group])
 
             # compute the distance between each pair of tracked
             # centroids and new centroids, respectively -- our
@@ -130,9 +134,9 @@ class ObjectTracker():
             unusedCols = set(range(0, D.shape[1])).difference(usedCols)
 
             # in the event that the number of object centroids is
-			# equal or greater than the number of input centroids
-			# we need to check and see if some of these objects have
-			# potentially disappeared
+            # equal or greater than the number of input centroids
+            # we need to check and see if some of these objects have
+            # potentially disappeared
             if D.shape[0] >= D.shape[1]:
                 for row in unusedRows:
                     id = current_ids[row]
