@@ -13,10 +13,11 @@ from collections import deque
 def listener_configurer():
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(name)-30s %(levelname)-8s: %(message)s')
+    formatter = logging.Formatter("%(name)-30s %(levelname)-8s: %(message)s")
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
+
 
 def root_configurer(queue):
     h = handlers.QueueHandler(queue)
@@ -24,11 +25,13 @@ def root_configurer(queue):
     root.addHandler(h)
     root.setLevel(logging.INFO)
 
+
 def log_process(log_queue):
     stop_event = mp.Event()
+
     def receiveSignal(signalNumber, frame):
         stop_event.set()
-    
+
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
@@ -44,6 +47,7 @@ def log_process(log_queue):
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
+
 
 # based on https://codereview.stackexchange.com/a/17959
 class LogPipe(threading.Thread):
@@ -61,23 +65,20 @@ class LogPipe(threading.Thread):
         self.start()
 
     def fileno(self):
-        """Return the write file descriptor of the pipe
-        """
+        """Return the write file descriptor of the pipe"""
         return self.fdWrite
 
     def run(self):
-        """Run the thread, logging everything.
-        """
-        for line in iter(self.pipeReader.readline, ''):
-            self.deque.append(line.strip('\n'))
+        """Run the thread, logging everything."""
+        for line in iter(self.pipeReader.readline, ""):
+            self.deque.append(line.strip("\n"))
 
         self.pipeReader.close()
-    
+
     def dump(self):
         while len(self.deque) > 0:
             self.logger.log(self.level, self.deque.popleft())
 
     def close(self):
-        """Close the write end of the pipe.
-        """
+        """Close the write end of the pipe."""
         os.close(self.fdWrite)
