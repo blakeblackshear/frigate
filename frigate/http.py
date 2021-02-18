@@ -196,9 +196,8 @@ def event_thumbnail(id):
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
-            for (
-                camera_state
-            ) in current_app.detected_frames_processor.camera_states.values():
+            camera_states = current_app.detected_frames_processor.camera_states.values()
+            for camera_state in camera_states:
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
                     if not tracked_obj is None:
@@ -245,9 +244,8 @@ def event_snapshot(id):
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
-            for (
-                camera_state
-            ) in current_app.detected_frames_processor.camera_states.values():
+            camera_states = current_app.detected_frames_processor.camera_states.values()
+            for camera_state in camera_states:
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
                     if not tracked_obj is None:
