@@ -9,6 +9,7 @@ export default function Box({
   elevated = true,
   header,
   href,
+  icons = [],
   media = null,
   ...props
 }) {
@@ -26,14 +27,20 @@ export default function Box({
           <div className="p-4 pb-2">{header ? <Heading size="base">{header}</Heading> : null}</div>
         </Element>
       ) : null}
-      {buttons.length || content ? (
-        <div className="pl-4 pb-2">
+      {buttons.length || content || icons.length ? (
+        <div className="px-4 pb-2">
           {content || null}
           {buttons.length ? (
             <div className="flex space-x-4 -ml-2">
               {buttons.map(({ name, href }) => (
                 <Button key={name} href={href} type="text">
                   {name}
+                </Button>
+              ))}
+              <div class="flex-grow" />
+              {icons.map(({ name, icon: Icon, ...props }) => (
+                <Button aria-label={name} className="rounded-full" key={name} type="text" {...props}>
+                  <Icon className="w-6" />
                 </Button>
               ))}
             </div>

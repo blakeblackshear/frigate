@@ -45,7 +45,7 @@ describe('MqttProvider', () => {
 
   test('connects to the mqtt server', async () => {
     render(
-      <MqttProvider createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
         <Test />
       </MqttProvider>
     );
@@ -69,7 +69,7 @@ describe('MqttProvider', () => {
     }
 
     const { rerender } = render(
-      <MqttProvider createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
         <Test />
       </MqttProvider>
     );
@@ -78,7 +78,7 @@ describe('MqttProvider', () => {
       data: JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }), retain: false }),
     });
     rerender(
-      <MqttProvider createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
         <Test />
       </MqttProvider>
     );
@@ -96,7 +96,7 @@ describe('MqttProvider', () => {
     }
 
     render(
-      <MqttProvider createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
         <Test />
       </MqttProvider>
     );
@@ -106,4 +106,30 @@ describe('MqttProvider', () => {
       JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }) })
     );
   });
+
+  test('prefills the clips/detect/snapshots state from config', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(123456);
+    const config = {
+      cameras: {
+        front: { name: 'front', detect: { enabled: true }, clips: { enabled: false }, snapshots: { enabled: true } },
+        side: { name: 'side', detect: { enabled: false }, clips: { enabled: false }, snapshots: { enabled: false } },
+      },
+    };
+    render(
+      <MqttProvider config={config} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+        <Test />
+      </MqttProvider>
+    );
+    await screen.findByTestId('data');
+    expect(screen.getByTestId('front/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
+    expect(screen.getByTestId('front/clips/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
+    expect(screen.getByTestId('side/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('side/clips/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+  });
 });
+
+const mockConfig = {
+  cameras: {},
+};
