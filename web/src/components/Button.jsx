@@ -1,4 +1,6 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
+import Tooltip from './Tooltip';
+import { useCallback, useRef, useState } from 'preact/hooks';
 
 const ButtonColors = {
   blue: {
@@ -21,6 +23,13 @@ const ButtonColors = {
       'text-green-500 border-2 border-green-500 hover:bg-green-500 hover:bg-opacity-20 focus:bg-green-500 focus:bg-opacity-40 active:bg-green-500 active:bg-opacity-40',
     text:
       'text-green-500 hover:bg-green-500 hover:bg-opacity-20 focus:bg-green-500 focus:bg-opacity-40 active:bg-green-500 active:bg-opacity-40',
+  },
+  gray: {
+    contained: 'bg-gray-500 focus:bg-gray-400 active:bg-gray-600 ring-gray-300',
+    outlined:
+      'text-gray-500 border-2 border-gray-500 hover:bg-gray-500 hover:bg-opacity-20 focus:bg-gray-500 focus:bg-opacity-40 active:bg-gray-500 active:bg-opacity-40',
+    text:
+      'text-gray-500 hover:bg-gray-500 hover:bg-opacity-20 focus:bg-gray-500 focus:bg-opacity-40 active:bg-gray-500 active:bg-opacity-40',
   },
   disabled: {
     contained: 'bg-gray-400',
@@ -52,6 +61,9 @@ export default function Button({
   type = 'contained',
   ...attrs
 }) {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef();
+
   let classes = `whitespace-nowrap flex items-center space-x-1 ${className} ${ButtonTypes[type]} ${
     ButtonColors[disabled ? 'disabled' : color][type]
   } font-sans inline-flex font-bold uppercase text-xs px-2 py-2 rounded outline-none focus:outline-none ring-opacity-50 transition-shadow transition-colors ${
@@ -62,18 +74,32 @@ export default function Button({
     classes = classes.replace(/(?:focus|active|hover):[^ ]+/g, '');
   }
 
+  const handleMousenter = useCallback((event) => {
+    setHovered(true);
+  }, []);
+
+  const handleMouseleave = useCallback((event) => {
+    setHovered(false);
+  }, []);
+
   const Element = href ? 'a' : 'div';
 
   return (
-    <Element
-      role="button"
-      aria-disabled={disabled ? 'true' : 'false'}
-      tabindex="0"
-      className={classes}
-      href={href}
-      {...attrs}
-    >
-      {children}
-    </Element>
+    <Fragment>
+      <Element
+        role="button"
+        aria-disabled={disabled ? 'true' : 'false'}
+        tabindex="0"
+        className={classes}
+        href={href}
+        ref={ref}
+        onmouseenter={handleMousenter}
+        onmouseleave={handleMouseleave}
+        {...attrs}
+      >
+        {children}
+      </Element>
+      {hovered && attrs['aria-label'] ? <Tooltip text={attrs['aria-label']} relativeTo={ref} /> : null}
+    </Fragment>
   );
 }

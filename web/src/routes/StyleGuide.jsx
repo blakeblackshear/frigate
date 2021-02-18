@@ -25,6 +25,7 @@ export default function StyleGuide() {
         <Button>Default</Button>
         <Button color="red">Danger</Button>
         <Button color="green">Save</Button>
+        <Button color="gray">Gray</Button>
         <Button disabled>Disabled</Button>
       </div>
       <div className="flex space-x-4 mb-4">
@@ -34,6 +35,9 @@ export default function StyleGuide() {
         </Button>
         <Button color="green" type="text">
           Save
+        </Button>
+        <Button color="gray" type="text">
+          Gray
         </Button>
         <Button disabled type="text">
           Disabled
@@ -46,6 +50,9 @@ export default function StyleGuide() {
         </Button>
         <Button color="green" type="outlined">
           Save
+        </Button>
+        <Button color="gray" type="outlined">
+          Gray
         </Button>
         <Button disabled type="outlined">
           Disabled

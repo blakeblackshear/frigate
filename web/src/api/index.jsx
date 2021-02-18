@@ -40,14 +40,19 @@ function reducer(state, { type, payload, meta }) {
   }
 }
 
-export const ApiProvider = ({ children }) => {
+export function ApiProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <Api.Provider value={{ state, dispatch }}>
-      <MqttProvider>{children}</MqttProvider>
+      <MqttWithConfig>{children}</MqttWithConfig>
     </Api.Provider>
   );
-};
+}
+
+function MqttWithConfig({ children }) {
+  const { data, status } = useConfig();
+  return status === FetchStatus.LOADED ? <MqttProvider config={data}>{children}</MqttProvider> : children;
+}
 
 function shouldFetch(state, url, fetchId = null) {
   if ((fetchId && url in state.queries && state.queries[url].fetchId !== fetchId) || !(url in state.queries)) {

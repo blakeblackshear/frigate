@@ -1,8 +1,13 @@
 import { h } from 'preact';
+import * as Mqtt from '../mqtt';
 import { ApiProvider, useFetch, useApiHost } from '..';
 import { render, screen } from '@testing-library/preact';
 
 describe('useApiHost', () => {
+  beforeEach(() => {
+    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+  });
+
   test('is set from the baseUrl', async () => {
     function Test() {
       const apiHost = useApiHost();
@@ -17,26 +22,34 @@ describe('useApiHost', () => {
   });
 });
 
-describe('useFetch', () => {
-  function Test() {
-    const { data, status } = useFetch('/api/tacos');
-    return (
-      <div>
-        <span>{data ? data.returnData : ''}</span>
-        <span>{status}</span>
-      </div>
-    );
-  }
-  test('loads data', async () => {
-    const fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(
-      (url) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({ ok: true, json: () => Promise.resolve({ returnData: 'yep' }) });
-          }, 1);
-        })
-    );
+function Test() {
+  const { data, status } = useFetch('/api/tacos');
+  return (
+    <div>
+      <span>{data ? data.returnData : ''}</span>
+      <span>{status}</span>
+    </div>
+  );
+}
 
+describe('useFetch', () => {
+  let fetchSpy;
+
+  beforeEach(() => {
+    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(async (url, options) => {
+      if (url.endsWith('/api/config')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ ok: true, json: () => Promise.resolve({ returnData: 'yep' }) });
+        }, 1);
+      });
+    });
+  });
+
+  test('loads data', async () => {
     render(
       <ApiProvider>
         <Test />
@@ -55,14 +68,16 @@ describe('useFetch', () => {
   });
 
   test('sets error if response is not okay', async () => {
-    jest.spyOn(window, 'fetch').mockImplementation(
-      (url) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({ ok: false });
-          }, 1);
-        })
-    );
+    jest.spyOn(window, 'fetch').mockImplementation((url) => {
+      if (url.includes('/config')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+      }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ ok: false });
+        }, 1);
+      });
+    });
 
     render(
       <ApiProvider>
@@ -76,15 +91,6 @@ describe('useFetch', () => {
   });
 
   test('does not re-fetch if the query has already been made', async () => {
-    const fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(
-      (url) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({ ok: true, json: () => Promise.resolve({ returnData: 'yep' }) });
-          }, 1);
-        })
-    );
-
     const { rerender } = render(
       <ApiProvider>
         <Test key={0} />
@@ -109,6 +115,7 @@ describe('useFetch', () => {
 
     jest.runAllTimers();
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // once for /api/config, once for /api/tacos
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 });
