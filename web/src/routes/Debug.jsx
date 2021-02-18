@@ -14,7 +14,7 @@ export default function Debug() {
   const { data: config } = useConfig();
 
   const {
-    value: { stats },
+    value: { payload: stats },
   } = useMqtt('stats');
   const { data: initialStats } = useStats();
 

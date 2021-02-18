@@ -31,12 +31,22 @@ function reducer(state, { topic, payload, retain }) {
 }
 
 export function MqttProvider({
+  config,
   children,
   createWebsocket = defaultCreateWebsocket,
   mqttUrl = `${baseUrl.replace(/^https?:/, 'ws:')}/ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const wsRef = useRef();
+
+  useEffect(() => {
+    Object.keys(config.cameras).forEach((camera) => {
+      const { name, clips, detect, snapshots } = config.cameras[camera];
+      dispatch({ topic: `${name}/clips/state`, payload: clips.enabled ? 'ON' : 'OFF' });
+      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF' });
+      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF' });
+    });
+  }, [config]);
 
   useEffect(
     () => {
@@ -62,17 +72,49 @@ export function MqttProvider({
   return <Mqtt.Provider value={{ state, ws: wsRef.current }}>{children}</Mqtt.Provider>;
 }
 
-export function useMqtt(topic) {
+export function useMqtt(watchTopic, publishTopic) {
   const { state, ws } = useContext(Mqtt);
 
-  const value = state[topic] || { payload: null };
+  const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
     (payload) => {
-      ws.send(JSON.stringify({ topic, payload: typeof payload !== 'string' ? JSON.stringify(payload) : payload }));
+      ws.send(
+        JSON.stringify({
+          topic: publishTopic || watchTopic,
+          payload: typeof payload !== 'string' ? JSON.stringify(payload) : payload,
+        })
+      );
     },
-    [ws, topic]
+    [ws, watchTopic, publishTopic]
   );
 
   return { value, send, connected: state.__connected };
+}
+
+export function useDetectState(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useMqtt(`${camera}/detect/state`, `${camera}/detect/set`);
+  return { payload, send, connected };
+}
+
+export function useClipsState(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useMqtt(`${camera}/clips/state`, `${camera}/clips/set`);
+  return { payload, send, connected };
+}
+
+export function useSnapshotsState(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useMqtt(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
+  return { payload, send, connected };
 }
