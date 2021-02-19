@@ -91,6 +91,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                 logger.error("Unable to connect to MQTT: Connection refused. Error code: " + str(rc))
             
         logger.info("MQTT connected")
+        client.subscribe(f"{mqtt_config.topic_prefix}/#")
         client.publish(mqtt_config.topic_prefix+'/available', 'online', retain=True)   
 
     client = mqtt.Client(client_id=mqtt_config.client_id)    
