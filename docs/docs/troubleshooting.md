@@ -4,7 +4,7 @@ title: Troubleshooting and FAQ
 ---
 
 ### How can I get sound or audio in my clips and recordings?
-By default, Frigate removes audio from clips and recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to override the output args to remove `-an` for where you want to include audio. The default ffmpeg args are shown [here](configuration/index#ffmpeg).
+By default, Frigate removes audio from clips and recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to override the output args to remove `-an` for where you want to include audio. The recommended audio codec is `aac`. Not all audio codecs are supported by RTMP, so you may need to re-encode your audio with `-c:a aac`. The default ffmpeg args are shown [here](/frigate/configuration/index#ffmpeg).
 
 ### My mjpeg stream or snapshots look green and crazy
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with vlc or another player. Also make sure you don't have the width and height values backwards.
