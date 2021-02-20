@@ -34,7 +34,7 @@ export function MqttProvider({
   config,
   children,
   createWebsocket = defaultCreateWebsocket,
-  mqttUrl = `${baseUrl.replace(/^https?:/, 'ws:')}/ws`,
+  mqttUrl = `${baseUrl.replace(/^http/, 'ws')}/ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const wsRef = useRef();
