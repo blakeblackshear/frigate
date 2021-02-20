@@ -37,6 +37,7 @@ version: '3.9'
 services:
   frigate:
     container_name: frigate
+    privileged: true # this may not be necessary for all setups
     restart: unless-stopped
     image: blakeblackshear/frigate:<specify_version_tag>
     devices:

@@ -118,7 +118,34 @@ Sample response:
   "service": {
     /* Uptime in seconds */
     "uptime": 10,
-    "version": "0.8.0-8883709"
+    "version": "0.8.0-8883709",
+    /* Storage data in MB for important locations */
+    "storage": {
+      "/media/frigate/clips": {
+        "total": 1000,
+        "used": 700,
+        "free": 300,
+        "mnt_type": "ext4",
+      },
+      "/media/frigate/recordings": {
+        "total": 1000,
+        "used": 700,
+        "free": 300,
+        "mnt_type": "ext4",
+      },
+      "/tmp/cache": {
+        "total": 256,
+        "used": 100,
+        "free": 156,
+        "mnt_type": "tmpfs",
+      },
+      "/dev/shm": {
+        "total": 256,
+        "used": 100,
+        "free": 156,
+        "mnt_type": "tmpfs",
+      },
+    }
   }
 }
 ```
