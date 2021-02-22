@@ -11,10 +11,18 @@ This almost always means that the width/height defined for your camera are not c
 
 ![mismatched-resolution](/img/mismatched-resolution.jpg)
 
-## "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5639eeb6e140] moov atom not found"
+### I have clips and snapshots in my clips folder, but I can't view them in the Web UI.
+This is usually caused one of two things:
+
+- The permissions on the parent folder don't have execute and nginx returns a 403 error you can see in the browser logs
+  - In this case, try mounting a volume to `/media/frigate` inside the container instead of `/media/frigate/clips`.
+- Your cameras do not send h264 encoded video and the mp4 files are not playable in the browser
+
+
+### "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5639eeb6e140] moov atom not found"
 
 These messages in the logs are expected in certain situations. Frigate checks the integrity of the video cache before assembling clips. Occasionally these cached files will be invalid and cleaned up automatically.
 
-## "On connect called"
+### "On connect called"
 
 If you see repeated "On connect called" messages in your config, check for another instance of frigate. This happens when multiple frigate containers are trying to connect to mqtt with the same client_id.
