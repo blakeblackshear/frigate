@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what your issue is.
 
 **Version of frigate**
-Output from `/version`
+Output from `/api/version`
 
 **Config file**
 Include your full config file wrapped in triple back ticks.
@@ -26,7 +26,7 @@ Include relevant log output here
 
 **Frigate stats**
 ```json
-Output from frigate's /stats endpoint
+Output from frigate's /api/stats endpoint
 ```
 
 **FFprobe from your camera**
