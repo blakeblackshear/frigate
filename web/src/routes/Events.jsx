@@ -10,7 +10,7 @@ import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
 
-const API_LIMIT = 5;
+const API_LIMIT = 25;
 
 const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
 const reducer = (state = initialState, action) => {
