@@ -1,15 +1,15 @@
 import { h } from 'preact';
 import { createPortal } from 'preact/compat';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 const TIP_SPACE = 20;
 
 export default function Tooltip({ relativeTo, text }) {
-  const [position, setPosition] = useState({ top: -Infinity, left: -Infinity });
+  const [position, setPosition] = useState({ top: -9999, left: -9999 });
   const portalRoot = document.getElementById('tooltips');
   const ref = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref && ref.current && relativeTo && relativeTo.current) {
       const windowWidth = window.innerWidth;
       const {
@@ -18,7 +18,9 @@ export default function Tooltip({ relativeTo, text }) {
         width: relativeToWidth,
         height: relativeToHeight,
       } = relativeTo.current.getBoundingClientRect();
-      const { width: tipWidth, height: tipHeight } = ref.current.getBoundingClientRect();
+      const { width: _tipWidth, height: _tipHeight } = ref.current.getBoundingClientRect();
+      const tipWidth = _tipWidth * 1.1;
+      const tipHeight = _tipHeight * 1.1;
 
       const left = relativeToX + Math.round(relativeToWidth / 2) + window.scrollX;
       const top = relativeToY + Math.round(relativeToHeight / 2) + window.scrollY;
@@ -47,11 +49,11 @@ export default function Tooltip({ relativeTo, text }) {
   const tooltip = (
     <div
       role="tooltip"
-      className={`shadow max-w-lg absolute pointer-events-none bg-gray-900 dark:bg-gray-200 bg-opacity-80 rounded px-2 py-1 transition-opacity duration-200 opacity-0 text-gray-100 dark:text-gray-900 text-sm ${
-        position.top >= 0 ? 'opacity-100' : ''
+      className={`shadow max-w-lg absolute pointer-events-none bg-gray-900 dark:bg-gray-200 bg-opacity-80 rounded px-2 py-1 transition-transform transition-opacity duration-75 transform scale-90 opacity-0 text-gray-100 dark:text-gray-900 text-sm ${
+        position.top >= 0 ? 'opacity-100 scale-100' : ''
       }`}
       ref={ref}
-      style={position.top >= 0 ? position : null}
+      style={position}
     >
       {text}
     </div>
