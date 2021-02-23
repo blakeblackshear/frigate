@@ -26,8 +26,8 @@ describe('Tooltip', () => {
 
     const tooltip = await screen.findByRole('tooltip');
     const style = window.getComputedStyle(tooltip);
-    expect(style.left).toEqual('105px');
-    expect(style.top).toEqual('70px');
+    expect(style.left).toEqual('103px');
+    expect(style.top).toEqual('68.5px');
   });
 
   test('if too far right, renders to the left', async () => {
@@ -54,7 +54,7 @@ describe('Tooltip', () => {
 
     const tooltip = await screen.findByRole('tooltip');
     const style = window.getComputedStyle(tooltip);
-    expect(style.left).toEqual('942px');
+    expect(style.left).toEqual('937px');
     expect(style.top).toEqual('97px');
   });
 
@@ -109,7 +109,7 @@ describe('Tooltip', () => {
 
     const tooltip = await screen.findByRole('tooltip');
     const style = window.getComputedStyle(tooltip);
-    expect(style.left).toEqual('87px');
-    expect(style.top).toEqual('160px');
+    expect(style.left).toEqual('84px');
+    expect(style.top).toEqual('158.5px');
   });
 });
