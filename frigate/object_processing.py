@@ -155,25 +155,27 @@ class TrackedObject:
         return significant_update
 
     def to_dict(self, include_thumbnail: bool = False):
-        return {
-            "id": self.obj_data["id"],
-            "camera": self.camera,
-            "frame_time": self.obj_data["frame_time"],
-            "label": self.obj_data["label"],
-            "top_score": self.top_score,
-            "false_positive": self.false_positive,
-            "start_time": self.obj_data["start_time"],
-            "end_time": self.obj_data.get("end_time", None),
-            "score": self.obj_data["score"],
-            "box": self.obj_data["box"],
-            "area": self.obj_data["area"],
-            "region": self.obj_data["region"],
-            "current_zones": self.current_zones.copy(),
-            "entered_zones": list(self.entered_zones).copy(),
-            "thumbnail": base64.b64encode(self.get_thumbnail()).decode("utf-8")
-            if include_thumbnail
-            else None,
+        event = {
+            'id': self.obj_data['id'],
+            'camera': self.camera,
+            'frame_time': self.obj_data['frame_time'],
+            'label': self.obj_data['label'],
+            'top_score': self.top_score,
+            'false_positive': self.false_positive,
+            'start_time': self.obj_data['start_time'],
+            'end_time': self.obj_data.get('end_time', None),
+            'score': self.obj_data['score'],
+            'box': self.obj_data['box'],
+            'area': self.obj_data['area'],
+            'region': self.obj_data['region'],
+            'current_zones': self.current_zones.copy(),
+            'entered_zones': list(self.entered_zones).copy(),
         }
+        
+        if include_thumbnail:
+            event['thumbnail'] = base64.b64encode(self.get_thumbnail()).decode('utf-8')
+
+        return event
 
     def get_thumbnail(self):
         if (
