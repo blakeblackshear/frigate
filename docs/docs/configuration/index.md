@@ -78,11 +78,6 @@ clips:
   # NOTE: If an object is being tracked for longer than this amount of time, the cache
   #       will begin to expire and the resulting clip will be the last x seconds of the event.
   max_seconds: 300
-  # Optional: size of tmpfs mount to create for cache files (default: not set)
-  # mount -t tmpfs -o size={tmpfs_cache_size} tmpfs /tmp/cache
-  # NOTICE: Addon users must have Protection mode disabled for the addon when using this setting.
-  # Also, if you have mounted a tmpfs volume through docker, this value should not be set in your config.
-  tmpfs_cache_size: 256m
   # Optional: Retention settings for clips (default: shown below)
   retain:
     # Required: Default retention days (default: shown below)

@@ -55,13 +55,6 @@ class FrigateApp:
             else:
                 logger.debug(f"Skipping directory: {d}")
 
-        tmpfs_size = self.config.clips.tmpfs_cache_size
-        if tmpfs_size:
-            logger.info(f"Creating tmpfs of size {tmpfs_size}")
-            rc = os.system(f"mount -t tmpfs -o size={tmpfs_size} tmpfs {CACHE_DIR}")
-            if rc != 0:
-                logger.error(f"Failed to create tmpfs, error code: {rc}")
-
     def init_logger(self):
         self.log_process = mp.Process(
             target=log_process, args=(self.log_queue,), name="log_process"
