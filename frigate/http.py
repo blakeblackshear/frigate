@@ -356,7 +356,7 @@ def latest_frame(camera_name):
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
     while True:
         # max out at specified FPS
-        time.sleep(1/fps)
+        gevent.sleep(1/fps)
         frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((height,int(height*16/9),3), np.uint8)
