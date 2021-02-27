@@ -2,12 +2,13 @@ import base64
 import json
 import logging
 import os
+import pathlib
 from typing import Dict
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import voluptuous as vol
+from jsonschema import Draft7Validator, validators
 import yaml
 
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -15,327 +16,10 @@ from frigate.util import create_mask
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TRACKED_OBJECTS = ["person"]
-
-DETECTORS_SCHEMA = vol.Schema(
-    {
-        vol.Required(str): {
-            vol.Required("type", default="edgetpu"): vol.In(["cpu", "edgetpu"]),
-            vol.Optional("device", default="usb"): str,
-            vol.Optional("num_threads", default=3): int,
-        }
-    }
-)
-
-DEFAULT_DETECTORS = {"coral": {"type": "edgetpu", "device": "usb"}}
-
-MQTT_SCHEMA = vol.Schema(
-    {
-        vol.Required("host"): str,
-        vol.Optional("port", default=1883): int,
-        vol.Optional("topic_prefix", default="frigate"): str,
-        vol.Optional("client_id", default="frigate"): str,
-        vol.Optional("stats_interval", default=60): int,
-        "user": str,
-        "password": str,
-    }
-)
-
-RETAIN_SCHEMA = vol.Schema(
-    {vol.Required("default", default=10): int, "objects": {str: int}}
-)
-
-CLIPS_SCHEMA = vol.Schema(
-    {
-        vol.Optional("max_seconds", default=300): int,
-        vol.Optional("retain", default={}): RETAIN_SCHEMA,
-    }
-)
-
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
-FFMPEG_INPUT_ARGS_DEFAULT = [
-    "-avoid_negative_ts",
-    "make_zero",
-    "-fflags",
-    "+genpts+discardcorrupt",
-    "-rtsp_transport",
-    "tcp",
-    "-stimeout",
-    "5000000",
-    "-use_wallclock_as_timestamps",
-    "1",
-]
-DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
-RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
-SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT = [
-    "-f",
-    "segment",
-    "-segment_time",
-    "10",
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-c",
-    "copy",
-    "-an",
-]
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
-    "-f",
-    "segment",
-    "-segment_time",
-    "60",
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-c",
-    "copy",
-    "-an",
-]
-
-GLOBAL_FFMPEG_SCHEMA = vol.Schema(
-    {
-        vol.Optional("global_args", default=FFMPEG_GLOBAL_ARGS_DEFAULT): vol.Any(
-            str, [str]
-        ),
-        vol.Optional("hwaccel_args", default=[]): vol.Any(str, [str]),
-        vol.Optional("input_args", default=FFMPEG_INPUT_ARGS_DEFAULT): vol.Any(
-            str, [str]
-        ),
-        vol.Optional("output_args", default={}): {
-            vol.Optional("detect", default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-            vol.Optional("record", default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-            vol.Optional(
-                "clips", default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT
-            ): vol.Any(str, [str]),
-            vol.Optional("rtmp", default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-        },
-    }
-)
-
-MOTION_SCHEMA = vol.Schema(
-    {
-        "mask": vol.Any(str, [str]),
-        "threshold": vol.Range(min=1, max=255),
-        "contour_area": int,
-        "delta_alpha": float,
-        "frame_alpha": float,
-        "frame_height": int,
-    }
-)
-
-DETECT_SCHEMA = vol.Schema({"max_disappeared": int})
-
-FILTER_SCHEMA = vol.Schema(
-    {
-        str: {
-            "min_area": int,
-            "max_area": int,
-            "threshold": float,
-        }
-    }
-)
-
-
-def filters_for_all_tracked_objects(object_config):
-    for tracked_object in object_config.get("track", DEFAULT_TRACKED_OBJECTS):
-        if not "filters" in object_config:
-            object_config["filters"] = {}
-        if not tracked_object in object_config["filters"]:
-            object_config["filters"][tracked_object] = {}
-    return object_config
-
-
-OBJECTS_SCHEMA = vol.Schema(
-    vol.All(
-        filters_for_all_tracked_objects,
-        {
-            "track": [str],
-            "mask": vol.Any(str, [str]),
-            vol.Optional("filters", default={}): FILTER_SCHEMA.extend(
-                {
-                    str: {
-                        "min_score": float,
-                        "mask": vol.Any(str, [str]),
-                    }
-                }
-            ),
-        },
-    )
-)
-
-
-def each_role_used_once(inputs):
-    roles = [role for i in inputs for role in i["roles"]]
-    roles_set = set(roles)
-    if len(roles) > len(roles_set):
-        raise ValueError
-    return inputs
-
-
-def detect_is_required(inputs):
-    roles = [role for i in inputs for role in i["roles"]]
-    if not "detect" in roles:
-        raise ValueError
-    return inputs
-
-
-CAMERA_FFMPEG_SCHEMA = vol.Schema(
-    {
-        vol.Required("inputs"): vol.All(
-            [
-                {
-                    vol.Required("path"): str,
-                    vol.Required("roles"): ["detect", "clips", "record", "rtmp"],
-                    "global_args": vol.Any(str, [str]),
-                    "hwaccel_args": vol.Any(str, [str]),
-                    "input_args": vol.Any(str, [str]),
-                }
-            ],
-            vol.Msg(each_role_used_once, msg="Each input role may only be used once"),
-            vol.Msg(detect_is_required, msg="The detect role is required"),
-        ),
-        "global_args": vol.Any(str, [str]),
-        "hwaccel_args": vol.Any(str, [str]),
-        "input_args": vol.Any(str, [str]),
-        "output_args": {
-            vol.Optional("detect", default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-            vol.Optional("record", default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-            vol.Optional(
-                "clips", default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT
-            ): vol.Any(str, [str]),
-            vol.Optional("rtmp", default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(
-                str, [str]
-            ),
-        },
-    }
-)
-
-
-def ensure_zones_and_cameras_have_different_names(cameras):
-    zones = [zone for camera in cameras.values() for zone in camera["zones"].keys()]
-    for zone in zones:
-        if zone in cameras.keys():
-            raise ValueError
-    return cameras
-
-
-CAMERAS_SCHEMA = vol.Schema(
-    vol.All(
-        {
-            str: {
-                vol.Required("ffmpeg"): CAMERA_FFMPEG_SCHEMA,
-                vol.Required("height"): int,
-                vol.Required("width"): int,
-                "fps": int,
-                vol.Optional("best_image_timeout", default=60): int,
-                vol.Optional("zones", default={}): {
-                    str: {
-                        vol.Required("coordinates"): vol.Any(str, [str]),
-                        vol.Optional("filters", default={}): FILTER_SCHEMA,
-                    }
-                },
-                vol.Optional("clips", default={}): {
-                    vol.Optional("enabled", default=False): bool,
-                    vol.Optional("pre_capture", default=5): int,
-                    vol.Optional("post_capture", default=5): int,
-                    vol.Optional("required_zones", default=[]): [str],
-                    "objects": [str],
-                    vol.Optional("retain", default={}): RETAIN_SCHEMA,
-                },
-                vol.Optional("record", default={}): {
-                    "enabled": bool,
-                    "retain_days": int,
-                },
-                vol.Optional("rtmp", default={}): {
-                    vol.Required("enabled", default=True): bool,
-                },
-                vol.Optional("snapshots", default={}): {
-                    vol.Optional("enabled", default=False): bool,
-                    vol.Optional("timestamp", default=False): bool,
-                    vol.Optional("bounding_box", default=False): bool,
-                    vol.Optional("crop", default=False): bool,
-                    vol.Optional("required_zones", default=[]): [str],
-                    "height": int,
-                    vol.Optional("retain", default={}): RETAIN_SCHEMA,
-                },
-                vol.Optional("mqtt", default={}): {
-                    vol.Optional("enabled", default=True): bool,
-                    vol.Optional("timestamp", default=True): bool,
-                    vol.Optional("bounding_box", default=True): bool,
-                    vol.Optional("crop", default=True): bool,
-                    vol.Optional("height", default=270): int,
-                    vol.Optional("required_zones", default=[]): [str],
-                },
-                vol.Optional("objects", default={}): OBJECTS_SCHEMA,
-                vol.Optional("motion", default={}): MOTION_SCHEMA,
-                vol.Optional("detect", default={}): DETECT_SCHEMA.extend(
-                    {vol.Optional("enabled", default=True): bool}
-                ),
-            }
-        },
-        vol.Msg(
-            ensure_zones_and_cameras_have_different_names,
-            msg="Zones cannot share names with cameras",
-        ),
-    )
-)
-
-FRIGATE_CONFIG_SCHEMA = vol.Schema(
-    {
-        vol.Optional("database", default={}): {
-            vol.Optional("path", default=os.path.join(CLIPS_DIR, "frigate.db")): str
-        },
-        vol.Optional("model", default={"width": 320, "height": 320}): {
-            vol.Required("width"): int,
-            vol.Required("height"): int,
-        },
-        vol.Optional("detectors", default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
-        "mqtt": MQTT_SCHEMA,
-        vol.Optional("logger", default={"default": "info", "logs": {}}): {
-            vol.Optional("default", default="info"): vol.In(
-                ["info", "debug", "warning", "error", "critical"]
-            ),
-            vol.Optional("logs", default={}): {
-                str: vol.In(["info", "debug", "warning", "error", "critical"])
-            },
-        },
-        vol.Optional("snapshots", default={}): {
-            vol.Optional("retain", default={}): RETAIN_SCHEMA
-        },
-        vol.Optional("clips", default={}): CLIPS_SCHEMA,
-        vol.Optional("record", default={}): {
-            vol.Optional("enabled", default=False): bool,
-            vol.Optional("retain_days", default=30): int,
-        },
-        vol.Optional("ffmpeg", default={}): GLOBAL_FFMPEG_SCHEMA,
-        vol.Optional("objects", default={}): OBJECTS_SCHEMA,
-        vol.Optional("motion", default={}): MOTION_SCHEMA,
-        vol.Optional("detect", default={}): DETECT_SCHEMA,
-        vol.Required("cameras", default={}): CAMERAS_SCHEMA,
-        vol.Optional("environment_vars", default={}): {str: str},
-    }
-)
-
 
 class DatabaseConfig:
     def __init__(self, config):
-        self._path = config["path"]
+        self._path = config.get("path", os.path.join(CLIPS_DIR, 'frigate.db'))
 
     @property
     def path(self):
@@ -506,7 +190,7 @@ class CameraInput:
 class CameraFfmpegConfig:
     def __init__(self, global_config, config):
         self._inputs = [CameraInput(config, global_config, i) for i in config["inputs"]]
-        self._output_args = config.get("output_args", global_config["output_args"])
+        self._output_args = config["output_args"]
 
     @property
     def inputs(self):
@@ -522,7 +206,7 @@ class CameraFfmpegConfig:
 
 class RetainConfig:
     def __init__(self, global_config, config):
-        self._default = config.get("default", global_config.get("default"))
+        self._default = config["default"]
         self._objects = config.get("objects", global_config.get("objects", {}))
 
     @property
@@ -645,9 +329,7 @@ class FilterConfig:
 
 class ObjectConfig:
     def __init__(self, global_config, config, frame_shape):
-        self._track = config.get(
-            "track", global_config.get("track", DEFAULT_TRACKED_OBJECTS)
-        )
+        self._track = config.get("track", global_config.get("track"))
         self._raw_mask = config.get("mask")
         self._filters = {
             name: FilterConfig(
@@ -913,7 +595,7 @@ class ZoneConfig:
     def __init__(self, name, config):
         self._coordinates = config["coordinates"]
         self._filters = {
-            name: FilterConfig(c, c) for name, c in config["filters"].items()
+            name: FilterConfig(c, c) for name, c in config.get("filters", {}).items()
         }
 
         if isinstance(self._coordinates, list):
@@ -929,7 +611,7 @@ class ZoneConfig:
                 [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
             )
         else:
-            print(f"Unable to parse zone coordinates for {name}")
+            logger.error(f"Unable to parse zone coordinates for {name}")
             self._contour = np.array([])
 
         self._color = (0, 0, 0)
@@ -1150,6 +832,23 @@ class CameraConfig:
         }
 
 
+def extend_with_default(validator_class):
+    validate_properties = validator_class.VALIDATORS["properties"]
+
+    def set_defaults(validator, properties, instance, schema):
+        for prop, subschema in properties.items():
+            if "default" in subschema and isinstance(instance, dict):
+                instance.setdefault(prop, subschema["default"])
+
+        for error in validate_properties(
+            validator, properties, instance, schema,
+        ):
+            yield error
+
+    return validators.extend(
+        validator_class, {"properties": set_defaults},
+    )
+
 class FrigateConfig:
     def __init__(self, config_file=None, config=None):
         if config is None and config_file is None:
@@ -1157,7 +856,14 @@ class FrigateConfig:
         elif not config_file is None:
             config = self._load_file(config_file)
 
-        config = FRIGATE_CONFIG_SCHEMA(config)
+        dir = pathlib.Path(__file__).parent.absolute()
+        schema = self._load_file(os.path.join(dir, './schema/config.json'))
+
+        SchemaValidator = extend_with_default(Draft7Validator)
+        validator = SchemaValidator(schema)
+        errors = sorted(validator.iter_errors(config), key=lambda e: e.path)
+        for error in errors:
+            logger.error(f"{error.path} - {error.message}")
 
         config = self._sub_env_vars(config)
 
@@ -1173,7 +879,7 @@ class FrigateConfig:
             name: CameraConfig(name, c, config) for name, c in config["cameras"].items()
         }
         self._logger = LoggerConfig(config["logger"])
-        self._environment_vars = config["environment_vars"]
+        self._environment_vars = config['environment_vars']
 
     def _sub_env_vars(self, config):
         frigate_env_vars = {
@@ -1212,7 +918,7 @@ class FrigateConfig:
             "snapshots": self.snapshots.to_dict(),
             "cameras": {k: c.to_dict() for k, c in self.cameras.items()},
             "logger": self.logger.to_dict(),
-            "environment_vars": self._environment_vars,
+            "environment_vars": self._environment_vars
         }
 
     @property

@@ -1,0 +1,464 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blakeblackshear.github.io/frigate",
+
+  "type": "object",
+
+  "title": "frigate.yml",
+
+  "description": "NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}. eg `password: '{FRIGATE_MQTT_PASSWORD}`",
+
+  "properties": {
+    "mqtt": {
+      "title": "MQTT",
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "description": "MQTT host name", "examples": ["mqtt.server.com", "10.0.1.123"] },
+        "port": { "type": "number", "default": 1883, "description": "MQTT port" },
+        "topic_prefix": {
+          "type": "string",
+          "default": "frigate",
+          "description": "MQTT topic prefix – must be unique if you are running multiple instances"
+        },
+        "client_id": {
+          "type": "string",
+          "default": "frigate",
+          "description": "MQTT client ID – must be unique if you are running multiple instances"
+        },
+        "stats_interval": {
+          "type": "number",
+          "default": 60,
+          "description": "Interval in seconds for publishing Frigate internal stats to MQTT. Available at `#/<topic_prefix>/stats`"
+        },
+        "user": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "required": ["host"],
+      "default": {}
+    },
+
+    "database": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "path": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+
+    "model": {
+      "type": "object",
+      "properties": {
+        "width": { "type": "integer", "default": 320 },
+        "height": { "type": "integer", "default": 320 }
+      },
+      "default": {},
+      "additionalProperties": false,
+      "required": ["width", "height"]
+    },
+
+    "detectors": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["edgetpu", "cpu"],
+            "default": "edgetpu"
+          },
+          "device": { "type": "string", "default": "usb" },
+          "num_threads": { "type": "number", "default": 3 }
+        },
+        "required": ["type"]
+      },
+      "default": {
+        "coral": {
+          "type": "edgetpu",
+          "device": "usb"
+        }
+      }
+    },
+
+    "cameras": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "ffmpeg": {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        { "$ref": "#/definitions/ffmpeg" },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": { "type": "string" },
+                            "roles": {
+                              "type": "array",
+                              "items": { "type": "string", "enum": ["detect", "rtmp", "record", "clips"] },
+                              "uniqueItems": true
+                            },
+                            "required": ["path", "roles"]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": ["inputs"]
+              },
+              { "$ref": "#/definitions/ffmpeg" }
+            ]
+          },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" },
+          "fps": { "type": "integer" },
+          "motion": {
+            "type": "object",
+            "properties": {
+              "mask": { "$ref": "#/definitions/string-or-array" }
+            },
+            "default": {},
+            "additionalProperties": false
+          },
+          "objects": {
+            "type": "object",
+            "properties": {
+              "mask": { "type": "string", "examples": ["0,0,1000,0,1000,200,0,200"] },
+              "track": { "type": "array", "items": { "type": "string" }, "default": ["person"] },
+              "filters": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "mask": { "$ref": "#/definitions/string-or-array" },
+                    "filters": { "$ref": "#/definitions/filters" }
+                  },
+                  "additionalProperties": false
+                },
+                "default": {}
+              }
+            },
+            "additionalProperties": false,
+            "default": {}
+          },
+          "best_image_timeout": { "type": "integer", "default": 60 },
+          "zones": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "coordinates": { "$ref": "#/definitions/string-or-array" },
+                "filters": {
+                  "$ref": "#/definitions/filters",
+                  "default": {}
+                }
+              },
+              "required": ["coordinates"],
+              "default": {}
+            },
+            "default": {}
+          },
+          "clips": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": true },
+              "pre_capture": { "type": "integer", "default": 5 },
+              "post_capture": { "type": "integer", "default": 5 },
+              "required_zones": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "default": [] },
+              "objects": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "default": ["person"] },
+              "retain": { "$ref": "#/definitions/retain", "default": {} }
+            },
+            "additionalProperties": false,
+            "default": {}
+          },
+          "record": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": false },
+              "retain_days": { "type": "integer", "default": 30 }
+            },
+            "additionalProperties": false,
+            "default": {}
+          },
+          "rtmp": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": true }
+            },
+            "default": {},
+            "additionalProperties": false
+          },
+          "snapshots": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": true },
+              "timestamp": { "type": "boolean", "default": false },
+              "bounding_box": { "type": "boolean", "default": false },
+              "crop": { "type": "boolean", "default": false },
+              "height": { "type": "integer" },
+              "required_zones": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "default": [] },
+              "retain": { "$ref": "#/definitions/retain", "default": {} }
+            },
+            "additionalProperties": false,
+            "default": {}
+          },
+          "mqtt": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": true },
+              "timestamp": { "type": "boolean", "default": true },
+              "bounding_box": { "type": "boolean", "default": true },
+              "crop": { "type": "boolean", "default": true },
+              "height": { "type": "integer", "default": 270 },
+              "required_zones": { "type": "array", "items": { "type": "string" }, "uniqueItems": true, "default": [] }
+            },
+            "additionalProperties": false,
+            "default": {}
+          }
+        },
+        "required": ["ffmpeg", "width", "height"]
+      }
+    },
+
+    "record": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "retain_days": { "type": "integer", "default": 30 }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+
+    "motion": {
+      "$ref": "#/definitions/motion",
+      "default": {}
+    },
+
+    "detect": {
+      "$ref": "#/definitions/detect",
+      "default": {}
+    },
+
+    "clips": {
+      "type": "object",
+      "properties": {
+        "max_seconds": {
+          "type": "integer",
+          "description": "Maximum length of time to retain video during long events. If an object is being tracked for longer than this amount of time, the cache will begin to expire and the resulting clip will be the last x seconds of the event.",
+          "default": 300
+        },
+        "tmpfs_cache_size": {
+          "type": "string",
+          "description": "Size of tmpfs mount to create for cache files, eg `mount -t tmpfs -o size={tmpfs_cache_size} tmpfs /tmp/cache`.\n\n> Addon users must have Protection mode disabled for the addon when using this setting. \n\n> Also, if you have mounted a tmpfs volume through docker, this value should not be set in your config.",
+          "examples": ["256m", "512m"]
+        },
+        "retain": { "$ref": "#/definitions/retain", "default": {} }
+      },
+      "default": {},
+      "additionalProperties": false
+    },
+
+    "snapshots": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "defualt": true },
+        "retain": { "$ref": "#/definitions/retain", "default": {} }
+      },
+      "default": {},
+      "additionalProperties": false
+    },
+
+    "ffmpeg": {
+      "title": "ffmpeg",
+      "description": "Arguments to apply as a default to all FFMPEG processes",
+      "$ref": "#/definitions/ffmpeg"
+    },
+
+    "objects": {
+      "$ref": "#/definitions/objects",
+      "default": {}
+    },
+
+    "logger": {
+      "type": "object",
+      "description": "Change the default log levels for troubleshooting purposes.",
+      "properties": {
+        "default": { "$ref": "#/definitions/log-level" },
+        "logs": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": { "$ref": "#/definitions/log-level" }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "environment_vars": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": { "type": "string" },
+      "default": {}
+    }
+  },
+
+  "additionalProperties": false,
+
+  "required": ["mqtt", "detectors", "cameras"],
+
+  "examples": [
+    {
+      "mqtt": {
+        "host": "mqtt.server.com"
+      },
+      "cameras": {
+        "back": {
+          "ffmpeg": {
+            "inputs": [
+              {
+                "path": "rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2",
+                "roles": ["detect", "rtmp"]
+              }
+            ]
+          },
+          "width": 1280,
+          "height": 720,
+          "fps": 5
+        }
+      }
+    }
+  ],
+
+  "definitions": {
+    "log-level": { "type": "string", "enum": ["debug", "info", "warning", "error", "critical"] },
+
+    "filters": {
+      "$id": "#filters",
+      "type": "object",
+      "properties": {},
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "min_area": {
+            "type": "integer",
+            "description": "minimum width*height of the bounding box for the detected object",
+            "default": 0
+          },
+          "max_area": {
+            "type": "integer",
+            "description": "maximum width*height of the bounding box for the detected object",
+            "default": 24000000
+          },
+          "min_score": {
+            "type": "number",
+            "description": "minimum score for the object to initiate tracking",
+            "default": 0.5
+          },
+          "threshold": {
+            "type": "number",
+            "description": "minimum decimal percentage for tracked object's computed score to be considered a true positive",
+            "default": 0.7
+          }
+        },
+        "default": {
+          "min_area": 0,
+          "max_area": 24000000,
+          "min_score": 0.5,
+          "threshold": 0.7
+        }
+      },
+      "default": {}
+    },
+
+    "string-or-array": {
+      "$id": "#string-or-array",
+      "anyOf": [{ "type": "array", "items": { "type": "string" } }, { "type": "string" }]
+    },
+
+    "motion": {
+      "$id": "#motion",
+      "type": "object",
+      "properties": {
+        "mask": { "type": "string" },
+        "threshold": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "contour_area": { "type": "integer" },
+        "delta_alpha": { "type": "number" },
+        "frame_alpha": { "type": "number" },
+        "frame_height": { "type": "integer" }
+      }
+    },
+
+    "detect": {
+      "$id": "#detect",
+      "type": "object",
+      "properties": {
+        "max_disappeared": { "type": "integer" }
+      }
+    },
+
+    "retain": {
+      "$id": "#retain",
+      "type": "object",
+      "properties": {
+        "default": { "type": "number", "default": 10 },
+        "objects": { "type": "object", "properties": {}, "additionalProperties": { "type": "number" } }
+      }
+    },
+
+    "ffmpeg": {
+      "$id": "#ffmpeg",
+      "description": "Configure FFMPEG process arguments",
+      "properties": {
+        "global_args": { "$ref": "#/definitions/string-or-array", "default": "-hide_banner -loglevel warning" },
+        "hwaccel_args": { "$ref": "#/definitions/string-or-array", "default": "" },
+        "input_args": {
+          "$ref": "#/definitions/string-or-array",
+          "default": "-avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1"
+        },
+
+        "output_args": {
+          "type": "object",
+          "properties": {
+            "detect": { "$ref": "#/definitions/string-or-array", "default": "-f rawvideo -pix_fmt yuv420p" },
+            "record": {
+              "$ref": "#/definitions/string-or-array",
+              "default": "-f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+            },
+            "clips": {
+              "$ref": "#/definitions/string-or-array",
+              "default": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+            },
+            "rtmp": { "$ref": "#/definitions/string-or-array", "default": "-c copy -f flv" }
+          }
+        }
+      }
+    },
+
+    "objects": {
+      "$id": "#objects",
+      "description": "Track specific objects and apply filters to each",
+      "type": "object",
+      "properties": {
+        "track": { "type": "array", "items": { "type": "string" }, "default": ["person"] },
+        "filters": {
+          "$ref": "#/definitions/filters",
+          "default": {}
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    }
+  }
+}

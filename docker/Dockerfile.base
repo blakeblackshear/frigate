@@ -34,7 +34,7 @@ RUN apt-get -qq update \
 RUN pip3 install \
     peewee_migrate \
     zeroconf \
-    voluptuous\
+    jsonschema \
     Flask-Sockets \
     gevent \
     gevent-websocket
