@@ -206,7 +206,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
           </Tbody>
           <Tfoot>
             <Tr>
-              <Td className="text-center p-4" colspan="8">
+              <Td className="text-center p-4" colspan="9">
                 {status === FetchStatus.LOADING ? <ActivityIndicator /> : reachedEnd ? 'No more events' : null}
               </Td>
             </Tr>
