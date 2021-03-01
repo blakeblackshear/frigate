@@ -26,4 +26,4 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 | Name                    | Inference Speed | Notes                                                                                                                         |
 | ----------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [M2 Coral Edge TPU](http://coral.ai)       | 6.2ms            | Little complicated to get installed, as needs drivers on the host OS, [info here](https://forums.unraid.net/topic/98064-support-blakeblackshear-frigate/?do=findComment&comment=945776)                         |
+| [M2 Coral Edge TPU](http://coral.ai)       | 6.2ms            | Install the Coral plugin from Unraid Community App Center [info here](https://forums.unraid.net/topic/98064-support-blakeblackshear-frigate/?do=findComment&comment=949789)                         |
