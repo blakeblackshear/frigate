@@ -1,0 +1,11 @@
+ARG NODE_VERSION=14.16
+
+FROM node:${NODE_VERSION}
+
+WORKDIR /opt/build
+
+COPY jsmpeg/. .
+
+RUN npm install --no-progress && \
+    npm run build && \
+    npm prune --production --ignore-scripts --prefer-offline
