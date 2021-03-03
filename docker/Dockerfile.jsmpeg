@@ -4,8 +4,7 @@ FROM node:${NODE_VERSION}
 
 WORKDIR /opt/build
 
-COPY jsmpeg/. .
+COPY . .
 
 RUN npm install --no-progress && \
-    npm run build && \
     npm prune --production --ignore-scripts --prefer-offline
