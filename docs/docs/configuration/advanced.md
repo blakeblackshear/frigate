@@ -116,24 +116,3 @@ model:
   # Required: width of the trained model
   width: 320
 ```
-
-## Custom Models
-
-Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use your own models with volume mounts:
-
-- CPU Model: `/cpu_model.tflite`
-- EdgeTPU Model: `/edgetpu_model.tflite`
-- Labels: `/labelmap.txt`
-
-You also need to update the model width/height in the config if they differ from the defaults.
-
-### Customizing the Labelmap
-
-The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. You must retain the same number of labels, but you can change the names. To change:
-
-- Download the [COCO labelmap](https://dl.google.com/coral/canned_models/coco_labels.txt)
-- Modify the label names as desired. For example, change `7 truck` to `7 car`
-- Mount the new file at `/labelmap.txt` in the container with an additional volume
-  ```
-  -v ./config/labelmap.txt:/labelmap.txt
-  ```
