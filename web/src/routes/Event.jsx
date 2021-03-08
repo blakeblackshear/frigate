@@ -1,5 +1,10 @@
 import { h, Fragment } from 'preact';
+import { useCallback, useState } from 'preact/hooks';
+import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
+import Button from '../components/Button';
+import Delete from '../icons/Delete'
+import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import { FetchStatus, useApiHost, useEvent } from '../api';
@@ -8,6 +13,23 @@ import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 export default function Event({ eventId }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
+  const [showDialog, setShowDialog] = useState(false);
+
+  const handleClickDelete = () => {
+    setShowDialog(true);
+  }
+
+  const handleDismissDeleteDialog = () => {
+    setShowDialog(false);
+  };
+
+  const handleClickDeleteDialog = useCallback(
+    async () => {
+      await fetch(`${apiHost}/api/events/${eventId}`, {method: 'DELETE'});
+      setShowDialog(false);
+      route('/events', true);
+    }, [apiHost, eventId, setShowDialog]
+  );
 
   if (status !== FetchStatus.LOADED) {
     return <ActivityIndicator />;
@@ -18,9 +40,25 @@ export default function Event({ eventId }) {
 
   return (
     <div className="space-y-4">
-      <Heading>
-        {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
-      </Heading>
+      <div className="flex">
+        <Heading className="flex-grow">
+          {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
+        </Heading>
+        <Button className="self-start" color="red" aria-label="Delete Event" onClick={handleClickDelete}>
+          <Delete className="w-6" />
+        </Button>
+        {showDialog ? (
+          <Dialog
+            onDismiss={handleDismissDeleteDialog}
+            title="Delete Event?"
+            text="This event will be permanently deleted along with any related clips and snapshots"
+            actions={[
+              { text: 'Delete', color: 'red', onClick: handleClickDeleteDialog },
+              { text: 'Cancel', onClick: handleDismissDeleteDialog },
+            ]}
+          />
+        ) : null}
+      </div>
 
       <Table class="w-full">
         <Thead>

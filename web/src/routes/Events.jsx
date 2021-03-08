@@ -7,8 +7,6 @@ import produce from 'immer';
 import { route } from 'preact-router';
 import { useIntersectionObserver } from '../hooks';
 import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
-import Button from '../components/Button';
-import Delete from '../icons/Delete'
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
 
@@ -101,18 +99,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     [limit, pathname, setSearchString]
   );
 
-  const handleDelete = useCallback(
-    async (eventId) => {
-      // eslint-disable-next-line no-alert
-      if(confirm('Are you sure you want to delete this event and any related clips and snapshots?')) {
-        await fetch(`${apiHost}/api/events/${eventId}`);
-        const { searchParams } = new URL(window.location);
-        handleFilter(searchParams)
-      }
-    },
-    [apiHost, handleFilter]
-  );
-
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   return (
@@ -133,7 +119,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
               <Th>Date</Th>
               <Th>Start</Th>
               <Th>End</Th>
-              <Th />
             </Tr>
           </Thead>
           <Tbody>
@@ -194,11 +179,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                     <Td>{start.toLocaleDateString()}</Td>
                     <Td>{start.toLocaleTimeString()}</Td>
                     <Td>{end.toLocaleTimeString()}</Td>
-                    <Td>
-                      <Button color="red" name="Delete" onClick={() => handleDelete(id)}>
-                        <Delete className="w-6" />
-                      </Button>
-                    </Td>
                   </Tr>
                 );
               }
@@ -206,7 +186,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
           </Tbody>
           <Tfoot>
             <Tr>
-              <Td className="text-center p-4" colspan="9">
+              <Td className="text-center p-4" colspan="8">
                 {status === FetchStatus.LOADING ? <ActivityIndicator /> : reachedEnd ? 'No more events' : null}
               </Td>
             </Tr>
