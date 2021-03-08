@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   title: 'Frigate',
   tagline: 'NVR With Realtime Object Detection for IP Cameras',
@@ -11,7 +13,7 @@ module.exports = {
   themeConfig: {
     algolia: {
       apiKey: '81ec882db78f7fed05c51daf973f0362',
-      indexName: 'frigate'
+      indexName: 'frigate',
     },
     navbar: {
       title: 'Frigate',
@@ -56,6 +58,7 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Blake Blackshear`,
     },
   },
+  plugins: [path.resolve(__dirname, 'plugins', 'raw-loader')],
   presets: [
     [
       '@docusaurus/preset-classic',

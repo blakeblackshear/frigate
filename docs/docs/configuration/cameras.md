@@ -41,9 +41,11 @@ cameras:
 ## Masks & Zones
 
 ### Masks
+
 Masks are used to ignore initial detection in areas of your camera's field of view.
 
 There are two types of masks available:
+
 - **Motion masks**: Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the video feed with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. Over masking will make it more difficult for objects to be tracked. To see this effect, create a mask, and then watch the video feed with `Motion Boxes` enabled again.
 - **Object filter masks**: Object filter masks are used to filter out false positives for a given object type. These should be used to filter any areas where it is not possible for an object of that type to be. The bottom center of the detected object's bounding box is evaluated against the mask. If it is in a masked area, it is assumed to be a false positive. For example, you may want to mask out rooftops, walls, the sky, treetops for people. For cars, masking locations other than the street or your driveway will tell frigate that anything in your yard is a false positive.
 
@@ -102,6 +104,8 @@ zones:
 
 ## Objects
 
+For a list of available objects, see the [objects documentation](./objects.mdx).
+
 ```yaml
 # Optional: Camera level object filters config.
 objects:
@@ -109,7 +113,7 @@ objects:
     - person
     - car
   # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
-  # Checks based on the bottom center of the bounding box of the object. 
+  # Checks based on the bottom center of the bounding box of the object.
   # NOTE: This mask is COMBINED with the object type specific mask below
   mask: 0,0,1000,0,1000,200,0,200
   filters:
@@ -368,7 +372,7 @@ cameras:
         - person
         - car
       # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
-      # Checks based on the bottom center of the bounding box of the object. 
+      # Checks based on the bottom center of the bounding box of the object.
       # NOTE: This mask is COMBINED with the object type specific mask below
       mask: 0,0,1000,0,1000,200,0,200
       filters:
@@ -406,6 +410,7 @@ ffmpeg:
 ```
 
 ### Reolink 410/520 (possibly others)
+
 Several users have reported success with the rtmp video from Reolink cameras.
 
 ```yaml
@@ -426,7 +431,6 @@ ffmpeg:
     - -use_wallclock_as_timestamps
     - '1'
 ```
-
 
 ### Blue Iris RTSP Cameras
 
