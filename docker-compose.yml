@@ -1,0 +1,37 @@
+version: '3'
+services:
+  dev:
+    container_name: core-dev
+    user: vscode
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.core.dev
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - .:/workspace:cached
+    command: /bin/sh -c "while sleep 1000; do :; done"
+  frigate:
+    container_name: frigate
+    privileged: true
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.amd64
+      # dockerfile: docker/Dockerfile.core.dev
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/config.yml:/config/config.yml:ro
+      - ./debug:/media/frigate
+      - ./frigate:/opt/frigate/frigate:cached
+      - ./migrations:/opt/frigate/migrations:cached
+    ports:
+      - '5000:5000'
+      - '1935:1935'
+    command: /bin/sh -c "service nginx start; while sleep 1000; do :; done"
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto
+    ports:
+      - '1883:1883'
