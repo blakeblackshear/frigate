@@ -184,7 +184,7 @@ Returns data for a single event.
 
 ### `DELETE /api/events/<id>`
 
-Permantly deletes the event along with any clips/snapshots.
+Permanently deletes the event along with any clips/snapshots.
 
 ### `GET /api/events/<id>/thumbnail.jpg`
 
