@@ -3,9 +3,9 @@ id: index
 title: Configuration
 ---
 
-HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/config.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](cameras.md).
+HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/frigate.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](cameras.md).
 
-It is recommended to start with a minimal configuration and add to it:
+It is recommended to start with a minimal configuration and add to it. This configuration does not enable Coral TPU hardware. 
 
 ```yaml
 mqtt:
@@ -21,6 +21,11 @@ cameras:
     width: 1280
     height: 720
     fps: 5
+ detectors:
+  cpu1:
+    type: cpu
+  cpu2:
+    type: cpu 
 ```
 
 ## Required
