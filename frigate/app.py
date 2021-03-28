@@ -146,10 +146,16 @@ class FrigateApp():
         model_shape = (self.config.model.height, self.config.model.width)
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
-            shm_in = mp.shared_memory.SharedMemory(name=name, create=True, size=self.config.model.height*self.config.model.width*3)
-            shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}", create=True, size=20*6*4)
-            self.detection_shms.append(shm_in)
-            self.detection_shms.append(shm_out)
+
+            try:
+                self.detection_shms.append(mp.shared_memory.SharedMemory(name=name, create=True, size=self.config.model.height*self.config.model.width*3))
+            except FileExistsError:
+                self.detection_shms.append(mp.shared_memory.SharedMemory(name=name))
+
+            try:
+                self.detection_shms.append(mp.shared_memory.SharedMemory(name=f"out-{name}", create=True, size=20*6*4))
+            except FileExistsError:
+                self.detection_shms.append(mp.shared_memory.SharedMemory(name=f"out-{name}"))
 
         for name, detector in self.config.detectors.items():
             if detector.type == 'cpu':
