@@ -14,25 +14,46 @@ export default function Event({ eventId }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
+  const [deleteMessage, setDeleteMessage] = useState();
 
   const handleClickDelete = () => {
     setShowDialog(true);
-  }
+  };
 
   const handleDismissDeleteDialog = () => {
     setShowDialog(false);
   };
 
-  const handleClickDeleteDialog = useCallback(
-    async () => {
-      await fetch(`${apiHost}/api/events/${eventId}`, {method: 'DELETE'});
+
+  const handleClickDeleteDialog = useCallback(async () => {
+
+    setDeleteStatus(FetchStatus.LOADING);
+    let success;
+    try {
+      debugger;
+      const response = await fetch(`${apiHost}/api/events/${eventId}`, { method: 'DELETE' });
+      debugger;
+      const deleteEvent = await response.json();
+    
+      success = deleteEvent.success;
+      debugger;
+      setDeleteStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
+      setDeleteMessage(deleteEvent.message);
+    } catch (e) {
+      setDeleteStatus(FetchStatus.ERROR);
+    }
+
+    if (success) {
+      setDeleteStatus(FetchStatus.LOADED);
       setShowDialog(false);
       route('/events', true);
-    }, [apiHost, eventId, setShowDialog]
-  );
+
+    }
+  }, [apiHost, eventId, setShowDialog]);
 
   if (status !== FetchStatus.LOADED) {
-    return <ActivityIndicator />;
+    return <ActivityIndicator />
   }
 
   const startime = new Date(data.start_time * 1000);
@@ -44,8 +65,8 @@ export default function Event({ eventId }) {
         <Heading className="flex-grow">
           {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
         </Heading>
-        <Button className="self-start" color="red" aria-label="Delete Event" onClick={handleClickDelete}>
-          <Delete className="w-6" />
+        <Button className="self-start" color="red" onClick={handleClickDelete}>
+          <Delete className="w-6" /> Delete event
         </Button>
         {showDialog ? (
           <Dialog
@@ -53,7 +74,9 @@ export default function Event({ eventId }) {
             title="Delete Event?"
             text="This event will be permanently deleted along with any related clips and snapshots"
             actions={[
-              { text: 'Delete', color: 'red', onClick: handleClickDeleteDialog },
+              deleteStatus !== FetchStatus.LOADING
+                ? { text: 'Delete', color: 'red', onClick: handleClickDeleteDialog }
+                : { text: 'Deleting…', color: 'red', disabled: true },
               { text: 'Cancel', onClick: handleDismissDeleteDialog },
             ]}
           />

@@ -32,11 +32,11 @@ export default function Dialog({ actions = [], portalRootID = 'dialogs', title, 
             <p>{text}</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            {actions.map(({ color, text, onClick }, i) => (
-              <Button className="ml-2" color={color} key={i} onClick={onClick} type="text">
-                {text}
-              </Button>
-            ))}
+          {actions.map(({ color, text, onClick, ...props }, i) => (
+              <Button className="ml-2" color={color} key={i} onClick={onClick} type="text" {...props}>
+                 {text}
+               </Button>
+             ))}
           </div>
         </div>
       </div>
