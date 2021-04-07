@@ -14,10 +14,11 @@ Note that HassOS Addons and custom components are different things. If you are a
 HassOS users can install via the addon repository. Frigate requires an MQTT server.
 
 1. Navigate to Supervisor > Add-on Store > Repositories
-1. Add https://github.com/blakeblackshear/frigate-hass-addons
-1. Setup your configuration in the `Configuration` tab
-1. Start the addon container
-1. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
+2. Add https://github.com/blakeblackshear/frigate-hass-addons
+3. Setup your network configuration in the `Configuration` tab if deisred
+4. Create the file `frigate.yml` in your `config` directory with your detailed Frigate conifguration
+5. Start the addon container
+6. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
 
 ## Docker
 
