@@ -37,7 +37,8 @@ RUN pip3 install \
     voluptuous\
     Flask-Sockets \
     gevent \
-    gevent-websocket
+    gevent-websocket \
+    debugpy
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
@@ -57,5 +58,6 @@ RUN chmod +x /run.sh
 
 EXPOSE 5000
 EXPOSE 1935
+EXPOSE 5678
 
 CMD ["/run.sh"]

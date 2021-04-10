@@ -35,7 +35,8 @@ RUN pip3 wheel --wheel-dir=/wheels \
     click \
     setproctitle \
     peewee \
-    gevent
+    gevent \
+    debugpy
 
 FROM scratch
 
