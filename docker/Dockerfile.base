@@ -37,8 +37,7 @@ RUN pip3 install \
     voluptuous\
     Flask-Sockets \
     gevent \
-    gevent-websocket \
-    debugpy
+    gevent-websocket 
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
