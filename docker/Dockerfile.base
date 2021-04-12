@@ -58,6 +58,5 @@ RUN chmod +x /run.sh
 
 EXPOSE 5000
 EXPOSE 1935
-EXPOSE 5678
 
 CMD ["/run.sh"]

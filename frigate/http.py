@@ -191,7 +191,8 @@ def delete_event(id):
     try:
         event = Event.get(Event.id == id)
     except DoesNotExist:
-        return "Event not found", 404
+        return make_response(jsonify({"success": False, "message": "Event"  + id + " not found"}),404)
+
 
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
@@ -202,8 +203,10 @@ def delete_event(id):
         media.unlink(missing_ok=True)
 
     event.delete_instance()
+    return make_response(jsonify({"success": True, "message": "Event"  + id + " deleted"}),204)
 
-    return '', 204
+
+
 
 @bp.route('/events/<id>/thumbnail.jpg')
 def event_thumbnail(id):
