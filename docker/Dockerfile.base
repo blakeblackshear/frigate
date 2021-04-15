@@ -21,13 +21,13 @@ RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     gnupg wget unzip tzdata nginx libnginx-mod-rtmp \
     && apt-get -qq install --no-install-recommends -y \
-        python3-pip \
+    python3-pip \
     && pip3 install -U /wheels/*.whl \
     && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
     && apt-get -qq update && apt-get -qq install --no-install-recommends -y \
-        libedgetpu1-max=15.0 \
+    libedgetpu1-max=15.0 \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
@@ -37,7 +37,7 @@ RUN pip3 install \
     voluptuous\
     Flask-Sockets \
     gevent \
-    gevent-websocket 
+    gevent-websocket
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 

@@ -57,8 +57,6 @@ class LocalObjectDetector(ObjectDetector):
             device_config = {"device": tf_device}
 
         edge_tpu_delegate = None
-        
-        tf_device = "cpu"
 
         if tf_device != "cpu":
             try:

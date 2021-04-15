@@ -15,7 +15,6 @@ export default function Event({ eventId }) {
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
-  const [deleteMessage, setDeleteMessage] = useState();
 
   const handleClickDelete = () => {
     setShowDialog(true);
@@ -28,20 +27,13 @@ export default function Event({ eventId }) {
 
   const handleClickDeleteDialog = useCallback(async () => {
 
-    setDeleteStatus(FetchStatus.LOADING);
     let success;
     try {
       const response = await fetch(`${apiHost}/api/events/${eventId}`, { method: 'DELETE' });
-      const { success = false, message } = await getJSON(response)
+      success = await (response.status < 300 ? response.json() : { success: true });
       setDeleteStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
-      setDeleteMessage(deleteEvent.message);
     } catch (e) {
       setDeleteStatus(FetchStatus.ERROR);
-    }
-
-    async function getJSON(response) {
-      if (response.status === 204) return {success: true};
-      return response.json();
     }
 
     if (success) {
