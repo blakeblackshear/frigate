@@ -32,8 +32,7 @@ export default function Event({ eventId }) {
     let success;
     try {
       const response = await fetch(`${apiHost}/api/events/${eventId}`, { method: 'DELETE' });
-      const deleteEvent = await getJSON(response)
-      success = deleteEvent.success;
+      const { success = false, message } = await getJSON(response)
       setDeleteStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
       setDeleteMessage(deleteEvent.message);
     } catch (e) {
