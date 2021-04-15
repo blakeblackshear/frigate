@@ -55,7 +55,7 @@ A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the c
 ```
 
 For example, for H265 video (hevc), you'll select `hevc_cuvid`. Add
-`-c:v hevc_covid` to your ffmpeg input arguments:
+`-c:v hevc_cuvid` to your ffmpeg input arguments:
 
 ```
 ffmpeg:
