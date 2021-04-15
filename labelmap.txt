@@ -5,7 +5,7 @@
 4  airplane
 5  bus
 6  train
-7  car
+7  truck
 8  boat
 9  traffic light
 10  fire hydrant
