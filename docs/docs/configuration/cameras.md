@@ -46,8 +46,8 @@ Masks are used to ignore initial detection in areas of your camera's field of vi
 
 There are two types of masks available:
 
-- **Motion masks**: Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the video feed with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. Over masking will make it more difficult for objects to be tracked. To see this effect, create a mask, and then watch the video feed with `Motion Boxes` enabled again.
-- **Object filter masks**: Object filter masks are used to filter out false positives for a given object type. These should be used to filter any areas where it is not possible for an object of that type to be. The bottom center of the detected object's bounding box is evaluated against the mask. If it is in a masked area, it is assumed to be a false positive. For example, you may want to mask out rooftops, walls, the sky, treetops for people. For cars, masking locations other than the street or your driveway will tell frigate that anything in your yard is a false positive.
+- **Motion masks**: Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the video feed with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. Over masking will make it more difficult for objects to be tracked. To see this effect, create a mask, and then watch the video feed with `Motion Boxes` enabled again. The drawn highlighted area of the mask will be ignrored.
+- **Object filter masks**: Object filter masks are used to filter out false positives for a given object type. These should be used to filter any areas where it is not possible for an object of that type to be. The bottom center of the detected object's bounding box is evaluated against the mask. If it is in a masked area, it is assumed to be a false positive. For example, you may want to mask out rooftops, walls, the sky, treetops for people. For cars, masking locations other than the street or your driveway will tell frigate that anything in your yard is a false positive. The drawn highlighted area of the mask will be ignored.
 
 To create a poly mask:
 
@@ -82,6 +82,8 @@ Zones allow you to define a specific area of the frame and apply additional filt
 During testing, `draw_zones` should be set in the config to draw the zone on the frames so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
 To create a zone, follow the same steps above for a "Motion mask", but use the section of the web UI for creating a zone instead.
+
+The drawn highlighted area will define the zone.
 
 ```yaml
 # Optional: zones for this camera
