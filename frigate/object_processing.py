@@ -451,7 +451,7 @@ class TrackedObjectProcessor(threading.Thread):
             event_data = obj.to_dict(include_thumbnail=True)
             event_data['has_snapshot'] = False
             if not obj.false_positive:
-                message = { 'before': obj.previous, 'after': obj.to_dict(), 'type': 'end' }
+                message = { 'before': obj.previous, 'after': event_data, 'type': 'end' }
                 self.client.publish(f"{self.topic_prefix}/events", json.dumps(message), retain=False)
                 # write snapshot to disk if enabled
                 if snapshot_config.enabled and self.should_save_snapshot(camera, obj):
