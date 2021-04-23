@@ -512,6 +512,7 @@ class CameraState:
                 c(self.name, obj_name, 0)
             for c in self.callbacks["snapshot"]:
                 c(self.name, self.best_objects[obj_name], frame_time)
+                del self.best_objects[obj_name]
 
         # cleanup thumbnail frame cache
         current_thumb_frames = {
