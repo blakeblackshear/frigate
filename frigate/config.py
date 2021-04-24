@@ -244,9 +244,12 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional('database', default={}): {
             vol.Optional('path', default=os.path.join(CLIPS_DIR, 'frigate.db')): str
         },
-        vol.Optional('model', default={'width': 320, 'height': 320}): {
+        vol.Optional('model', default={'width': 320, 'height': 320, 'model_type': 'ssd', 'label_path': '/labelmap.txt'}): {
             vol.Required('width'): int,
-            vol.Required('height'): int
+            vol.Required('height'): int,
+            vol.Required('model_type') : vol.In(['ssd', 'yolo']),
+            vol.Required('label_path') : str,
+            vol.Optional('anchors', default="") : str
         },
         vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
         'mqtt': MQTT_SCHEMA,
@@ -288,6 +291,9 @@ class ModelConfig():
     def __init__(self, config):
         self._width = config['width']
         self._height = config['height']
+        self._label_path = config['label_path']
+        self._model_type = config['model_type']
+        self._anchors = config['anchors']
 
     @property
     def width(self):
@@ -297,10 +303,25 @@ class ModelConfig():
     def height(self):
         return self._height
 
+    @property
+    def label_path(self):
+        return self._label_path
+
+    @property
+    def model_type(self):
+        return self._model_type
+
+    @property
+    def anchors(self):
+        return self._anchors
+
     def to_dict(self):
         return {
             'width': self.width,
-            'height': self.height
+            'height': self.height,
+            'label_path': self.label_path,
+            'model_type': self.model_type,
+            'anchors': self.anchors
         }
 
 class DetectorConfig():

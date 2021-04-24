@@ -112,7 +112,13 @@ detectors:
 ```yaml
 model:
   # Required: height of the trained model
-  height: 320
+  height: 416
   # Required: width of the trained model
-  width: 320
+  width: 416
+  # Required: type of model (ssd or yolo)
+  model_type: 'yolo'
+  # Required: path of label map
+  label_path: '/labelmap.txt'
+  # Optional: (but required for yolo) - anchors, comma separated
+  anchors:  '10,14,  23,27,  37,58,  81,82,  135,169,  344,319'
 ```
