@@ -235,9 +235,9 @@ class EventCleanup(threading.Thread):
         self.stop_event = stop_event
         self.camera_keys = list(self.config.cameras.keys())
 
-    def expire(self, media):
+    def expire(self, media_type):
         ## Expire events from unlisted cameras based on the global config
-        if media == 'clips':
+        if media_type == 'clips':
             retain_config = self.config.clips.retain
             file_extension = 'mp4'
             update_params = {'has_clip': False}
@@ -265,8 +265,8 @@ class EventCleanup(threading.Thread):
             # delete the media from disk
             for event in expired_events:
                 media_name = f"{event.camera}-{event.id}"
-                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
-                media.unlink(missing_ok=True)
+                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                media_path.unlink(missing_ok=True)
             # update the clips attribute for the db entry
             update_query = (
                 Event.update(update_params)
@@ -278,7 +278,7 @@ class EventCleanup(threading.Thread):
 
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
-            if media == 'clips':
+            if media_type == 'clips':
                 retain_config = camera.clips.retain
             else:
                 retain_config = camera.snapshots.retain
@@ -302,8 +302,8 @@ class EventCleanup(threading.Thread):
                 # delete the grabbed clips from disk
                 for event in expired_events:
                     media_name = f"{event.camera}-{event.id}"
-                    media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
-                    media.unlink(missing_ok=True)
+                    media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                    media_path.unlink(missing_ok=True)
                 # update the clips attribute for the db entry
                 update_query = (
                     Event.update(update_params)
@@ -335,11 +335,11 @@ class EventCleanup(threading.Thread):
             logger.debug(f"Removing duplicate: {event.id}")
             media_name = f"{event.camera}-{event.id}"
             if event.has_snapshot:
-                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-                media.unlink(missing_ok=True)
+                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+                media_path.unlink(missing_ok=True)
             if event.has_clip:
-                media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-                media.unlink(missing_ok=True)
+                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+                media_path.unlink(missing_ok=True)
 
         (Event.delete()
             .where( Event.id << [event.id for event in duplicate_events] )
