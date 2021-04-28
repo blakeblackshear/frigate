@@ -30,6 +30,18 @@ detectors:
     device: usb:1
 ```
 
+Multiple PCI Corals (Must disable protection mode):
+
+```yaml
+detectors:
+  coral1:
+    type: edgetpu
+    device: pci:0
+  coral2:
+    type: edgetpu
+    device: pci:1
+```
+
 Mixing Corals:
 
 ```yaml
