@@ -43,7 +43,7 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 #### 1. Build the docker container locally with the appropriate make command
 For x86 machines, use `make amd64_frigate`
 
-#### 2. Create a local config file for testing
+#### 2. Create a local frigate config file for testing
 Place the file at `config/config.yml` in the root of the repo.
 
 Here is an example, but modify for your needs:
@@ -68,16 +68,26 @@ cameras:
 
 These input args tell ffmpeg to read the mp4 file in an infinite loop. You can use any valid ffmpeg input here.
 
-#### 3. Gather some mp4 files for testing
+#### 3. Create a local MQTT config file for testing
+Place the file at `config/mqtt.config` in the root of the repo.
+
+For the example from the previous frigate config a anonymous connection has to be allowed.
+The most basic example is:
+```
+listener 1883
+allow_anonymous true
+```
+
+#### 4. Gather some mp4 files for testing
 Create and place these files in a `debug` folder in the root of the repo. This is also where clips and recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
 
-#### 4. Open the repo with Visual Studio Code
+#### 5. Open the repo with Visual Studio Code
 Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
 
-#### 5. Run frigate from the command line
+#### 6. Run frigate from the command line
 VSCode will start the docker compose file for you and you will be able to see 3 containers listed when running `docker ps`. To run frigate with your modified code, run `docker exec -it frigate /bin/bash` from the command line to get a prompt inside the container. Then run `python3 -m frigate` to start.
 
-#### 6. Teardown
+#### 7. Teardown
 After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
 ## Web Interface

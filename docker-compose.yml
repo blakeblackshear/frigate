@@ -33,5 +33,7 @@ services:
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto
+    volumes:
+      - ./config/mqtt.config:/mosquitto/config/mosquitto.conf
     ports:
       - '1883:1883'
