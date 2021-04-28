@@ -20,7 +20,7 @@ import numpy as np
 from frigate.config import FrigateConfig, CameraConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
-from frigate.util import SharedMemoryFrameManager, draw_box_with_label, calculate_region
+from frigate.util import SharedMemoryFrameManager, draw_box_with_label, draw_timestamp, calculate_region
 
 logger = logging.getLogger(__name__)
 
@@ -241,23 +241,15 @@ class TrackedObject:
             )
 
         if timestamp:
-            time_to_show = datetime.datetime.fromtimestamp(
-                self.thumbnail_data["frame_time"]
-            ).strftime("%m/%d/%Y %H:%M:%S")
-            size = cv2.getTextSize(
-                time_to_show, cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, thickness=2
-            )
-            text_width = size[0][0]
-            desired_size = max(150, 0.33 * best_frame.shape[1])
-            font_scale = desired_size / text_width
-            cv2.putText(
-                best_frame,
-                time_to_show,
-                (5, best_frame.shape[0] - 7),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=font_scale,
-                color=(255, 255, 255),
-                thickness=2,
+            draw_timestamp(
+                frame_copy,
+                self.thumbnail_data["frame_time"],
+                "%m/%d/%Y %H:%M:%S",
+                font_effect=None,
+                font_scale=1.0,
+                font_thickness=2,
+                font_color=(255, 255, 255),
+                position="ul",
             )
 
         ret, jpg = cv2.imencode(".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
@@ -380,17 +372,15 @@ class CameraState:
                 )
 
         if draw_options.get("timestamp"):
-            time_to_show = datetime.datetime.fromtimestamp(frame_time).strftime(
-                "%m/%d/%Y %H:%M:%S"
-            )
-            cv2.putText(
+            draw_timestamp(
                 frame_copy,
-                time_to_show,
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=0.8,
-                color=(255, 255, 255),
-                thickness=2,
+                frame_time,
+                "%m/%d/%Y %H:%M:%S",
+                font_effect=None,
+                font_scale=1.0,
+                font_thickness=2,
+                font_color= (255, 255, 255),
+                position="ul",
             )
 
         return frame_copy
