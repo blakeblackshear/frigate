@@ -3,7 +3,7 @@
   "context": "..",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "dev",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/opt/frigate",
   "shutdownAction": "stopCompose",
   "extensions": [
     "ms-python.python",
