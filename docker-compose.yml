@@ -15,6 +15,7 @@ services:
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
     ports:
+      - "1935:1935"
       - "5000:5000"
       - "5001:5001"
       - "8080:8080"
