@@ -14,6 +14,15 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-RUN apt-get install -y git
+RUN apt-get install -y git curl vim
 
 RUN pip3 install pylint black
+
+# Install Node 14
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt-get install -y nodejs
+
+# Install MQTT CLI
+RUN wget -q https://github.com/hivemq/mqtt-cli/releases/download/v4.6.0/mqtt-cli-4.6.0.deb \
+    && apt-get install -y ./mqtt-cli-4.6.0.deb \
+    && rm mqtt-cli-4.6.0.deb
