@@ -13,7 +13,9 @@ from collections import deque
 def listener_configurer():
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(name)-30s %(levelname)-8s: %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
+    )
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
@@ -27,20 +29,10 @@ def root_configurer(queue):
 
 
 def log_process(log_queue):
-    stop_event = mp.Event()
-
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
     threading.current_thread().name = f"logger"
     setproctitle("frigate.logger")
     listener_configurer()
     while True:
-        if stop_event.is_set() and log_queue.empty():
-            break
         try:
             record = log_queue.get(timeout=5)
         except queue.Empty:

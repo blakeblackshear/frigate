@@ -14,6 +14,10 @@ services:
       - .:/opt/frigate:cached
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
     ports:
       - "1935:1935"
       - "5000:5000"
