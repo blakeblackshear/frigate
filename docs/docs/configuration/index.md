@@ -47,6 +47,11 @@ mqtt:
   # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}.
   #       eg. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
+  # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
+  tls_ca_certs: /path/to/ca.crt
+  # Optional: tls_insecure_set (true/false) for enabling TLS verification of
+  # the server hostname in the server certificate (default: None)
+  tls_ca_certs: false
   # Optional: interval in seconds for publishing stats (default: shown below)
   stats_interval: 60
 ```

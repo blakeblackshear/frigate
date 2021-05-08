@@ -104,6 +104,10 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/snapshots/set", on_snapshots_command)
         client.message_callback_add(f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command)
 
+    if not mqtt_config.tls_ca_certs is None:
+        client.tls_set(mqtt_config.tls_ca_certs)
+    if not mqtt_config.tls_insecure_set is None:
+        client.tls_insecure_set(mqtt_config.tls_insecure_set)
     if not mqtt_config.user is None:
         client.username_pw_set(mqtt_config.user, password=mqtt_config.password)
     try:
