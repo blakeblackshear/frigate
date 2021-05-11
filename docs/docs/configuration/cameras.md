@@ -410,10 +410,12 @@ The input and output parameters need to be adjusted for MJPEG cameras
         - '1'
 ```
 
+Note that mjpeg cameras require encoding the video into h264 for clips, recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
 ```yaml
       output_args:
         record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
         clips: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+        rtmp: -c:v libx264 -an -f flv
 ```
 
 ### RTMP Cameras
