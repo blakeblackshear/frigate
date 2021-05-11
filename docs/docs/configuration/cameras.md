@@ -390,7 +390,7 @@ cameras:
 
 ### MJPEG Cameras
 
-The input parameters need to be adjusted for MJPEG cameras
+The input and output parameters need to be adjusted for MJPEG cameras
 
 ```yaml
       input_args:
