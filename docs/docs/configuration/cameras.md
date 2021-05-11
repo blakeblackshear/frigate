@@ -405,7 +405,7 @@ The input and output parameters need to be adjusted for MJPEG cameras
         - -fflags
         - +genpts+discardcorrupt
         - -r
-        - '3'
+        - '3'  # <---- adjust depending on your desired frame rate from the mjpeg image
         - -use_wallclock_as_timestamps
         - '1'
 ```
