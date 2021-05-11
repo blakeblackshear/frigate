@@ -388,6 +388,34 @@ cameras:
 
 ## Camera specific configuration
 
+### MJPEG Cameras
+
+The input parameters need to be adjusted for MJPEG cameras
+
+```yaml
+      input_args:
+        - -avoid_negative_ts
+        - make_zero
+        - -fflags
+        - nobuffer
+        - -flags
+        - low_delay
+        - -strict
+        - experimental
+        - -fflags
+        - +genpts+discardcorrupt
+        - -r
+        - '3'
+        - -use_wallclock_as_timestamps
+        - '1'
+```
+
+```yaml
+      output_args:
+        record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+        clips: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+```
+
 ### RTMP Cameras
 
 The input parameters need to be adjusted for RTMP cameras
