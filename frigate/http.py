@@ -5,6 +5,7 @@ import logging
 import os
 import time
 from functools import reduce
+from pathlib import Path
 
 import cv2
 import gevent
@@ -178,15 +179,36 @@ def events_summary():
     return jsonify([e for e in groups.dicts()])
 
 
-@bp.route("/events/<id>")
+@bp.route("/events/<id>", methods=("GET",))
 def event(id):
     try:
         return model_to_dict(Event.get(Event.id == id))
     except DoesNotExist:
         return "Event not found", 404
 
+@bp.route('/events/<id>', methods=('DELETE',))
+def delete_event(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(jsonify({"success": False, "message": "Event"  + id + " not found"}),404)
 
-@bp.route("/events/<id>/thumbnail.jpg")
+
+    media_name = f"{event.camera}-{event.id}"
+    if event.has_snapshot:
+        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+        media.unlink(missing_ok=True)
+    if event.has_clip:
+        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+        media.unlink(missing_ok=True)
+
+    event.delete_instance()
+    return make_response(jsonify({"success": True, "message": "Event"  + id + " deleted"}),200)
+
+
+
+
+@bp.route('/events/<id>/thumbnail.jpg')
 def event_thumbnail(id):
     format = request.args.get("format", "ios")
     thumbnail_bytes = None
