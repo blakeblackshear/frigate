@@ -203,7 +203,7 @@ def delete_event(id):
         media.unlink(missing_ok=True)
 
     event.delete_instance()
-    return make_response(jsonify({"success": True, "message": "Event"  + id + " deleted"}),204)
+    return make_response(jsonify({"success": True, "message": "Event"  + id + " deleted"}),200)
 
 
 
