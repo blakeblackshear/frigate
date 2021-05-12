@@ -1,6 +1,6 @@
 ---
 id: howtos
-title: Community Guides:
+title: Community Guides
 sidebar_label: Community Guides
 ---
 
