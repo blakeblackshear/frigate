@@ -67,7 +67,7 @@ docker run -d \
   --restart=unless-stopped \
   --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
   --device /dev/bus/usb:/dev/bus/usb \
-  --device /dev/dri/renderD128
+  --device /dev/dri/renderD128 \
   -v <path_to_directory_for_media>:/media/frigate \
   -v <path_to_config_file>:/config/config.yml:ro \
   -v /etc/localtime:/etc/localtime:ro \
