@@ -414,7 +414,7 @@ Note that mjpeg cameras require encoding the video into h264 for clips, recordin
 ```yaml
       output_args:
         record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
-        clips: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+        clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
         rtmp: -c:v libx264 -an -f flv
 ```
 
