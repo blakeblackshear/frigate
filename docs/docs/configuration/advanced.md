@@ -99,7 +99,8 @@ detectors:
   # Required: name of the detector
   coral:
     # Required: type of the detector
-    # Valid values are 'edgetpu' (requires device property below) and 'cpu'. type: edgetpu
+    # Valid values are 'edgetpu' (requires device property below) and 'cpu'.
+    type: edgetpu
     # Optional: device name as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
     device: usb
     # Optional: num_threads value passed to the tflite.Interpreter (default: shown below)
