@@ -86,7 +86,7 @@ def create_app(frigate_config, database: SqliteDatabase, stats_tracking, detecte
 
     @app.before_request
     def _db_connect():
-        database.connect()
+        database.connect(reuse_if_open=True)
 
     @app.teardown_request
     def _db_close(exc):
