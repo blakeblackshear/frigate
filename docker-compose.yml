@@ -23,7 +23,7 @@ services:
       - "5000:5000"
       - "5001:5001"
       - "8080:8080"
-    command: /bin/sh -c "sudo service nginx start; while sleep 1000; do :; done"
+    command: /bin/sh -c "sudo /usr/local/nginx/sbin/nginx; while sleep 1000; do :; done"
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6

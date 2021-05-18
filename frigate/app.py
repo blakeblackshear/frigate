@@ -316,7 +316,11 @@ class FrigateApp:
         server = pywsgi.WSGIServer(
             ("127.0.0.1", 5001), self.flask_app, handler_class=WebSocketHandler
         )
-        server.serve_forever()
+
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
 
         self.stop()
 
