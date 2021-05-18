@@ -14,7 +14,7 @@ amd64_wheels:
 amd64_ffmpeg:
 	docker build --tag blakeblackshear/frigate-ffmpeg:1.1.0-amd64 --file docker/Dockerfile.ffmpeg.amd64 .
 
-nginx:
+nginx_frigate:
 	docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.0 --file docker/Dockerfile.nginx .
 
 amd64_frigate: version web
