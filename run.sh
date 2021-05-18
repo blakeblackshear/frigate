@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-service nginx start
+/usr/local/nginx/sbin/nginx
 exec python3 -u -m frigate

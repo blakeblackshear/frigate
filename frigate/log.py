@@ -35,7 +35,7 @@ def log_process(log_queue):
     while True:
         try:
             record = log_queue.get(timeout=5)
-        except queue.Empty:
+        except (queue.Empty, KeyboardInterrupt):
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)

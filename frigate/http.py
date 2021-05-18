@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+import glob
 import logging
 import os
 import time
@@ -23,7 +24,7 @@ from flask_sockets import Sockets
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
@@ -186,13 +187,15 @@ def event(id):
     except DoesNotExist:
         return "Event not found", 404
 
-@bp.route('/events/<id>', methods=('DELETE',))
+
+@bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
     try:
         event = Event.get(Event.id == id)
     except DoesNotExist:
-        return make_response(jsonify({"success": False, "message": "Event"  + id + " not found"}),404)
-
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
 
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
@@ -203,12 +206,12 @@ def delete_event(id):
         media.unlink(missing_ok=True)
 
     event.delete_instance()
-    return make_response(jsonify({"success": True, "message": "Event"  + id + " deleted"}),200)
+    return make_response(
+        jsonify({"success": True, "message": "Event" + id + " deleted"}), 200
+    )
 
 
-
-
-@bp.route('/events/<id>/thumbnail.jpg')
+@bp.route("/events/<id>/thumbnail.jpg")
 def event_thumbnail(id):
     format = request.args.get("format", "ios")
     thumbnail_bytes = None
@@ -446,10 +449,37 @@ def latest_frame(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+@bp.route("/vod/<path:path>")
+def vod(path):
+    if not os.path.isdir(f"{RECORD_DIR}/{path}"):
+        return "Recordings not found.", 404
+
+    files = glob.glob(f"{RECORD_DIR}/{path}/*.mp4")
+    files.sort()
+
+    clips = []
+    durations = []
+    for filename in files:
+        clips.append({"type": "source", "path": filename})
+        video = cv2.VideoCapture(filename)
+        duration = int(
+            video.get(cv2.CAP_PROP_FRAME_COUNT) / video.get(cv2.CAP_PROP_FPS) * 1000
+        )
+        durations.append(duration)
+
+    return jsonify(
+        {
+            "discontinuity": False,
+            "durations": durations,
+            "sequences": [{"clips": clips}],
+        }
+    )
+
+
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
     while True:
         # max out at specified FPS
-        gevent.sleep(1/fps)
+        gevent.sleep(1 / fps)
         frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((height, int(height * 16 / 9), 3), np.uint8)

@@ -1,8 +1,10 @@
 ARG ARCH=amd64
 ARG WHEELS_VERSION
 ARG FFMPEG_VERSION
+ARG NGINX_VERSION
 FROM blakeblackshear/frigate-wheels:${WHEELS_VERSION}-${ARCH} as wheels
 FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
+FROM blakeblackshear/frigate-nginx:${NGINX_VERSION} as nginx
 FROM frigate-web as web
 
 FROM ubuntu:20.04
@@ -18,16 +20,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get upgrade -y \
-    && apt-get -qq install --no-install-recommends -y \
-    gnupg wget unzip tzdata nginx libnginx-mod-rtmp \
-    && apt-get -qq install --no-install-recommends -y \
-    python3-pip \
+    && apt-get -qq install --no-install-recommends -y gnupg wget unzip tzdata libxml2 \
+    && apt-get -qq install --no-install-recommends -y python3-pip \
     && pip3 install -U /wheels/*.whl \
     && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
-    && apt-get -qq update && apt-get -qq install --no-install-recommends -y \
-    libedgetpu1-max=15.0 \
+    && apt-get -qq update && apt-get -qq install --no-install-recommends -y libedgetpu1-max=15.0 \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
@@ -39,7 +38,8 @@ RUN pip3 install \
     gevent \
     gevent-websocket
 
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY nginx/nginx.conf /usr/local/nginx/conf/nginx.conf
 
 # get model and labels
 COPY labelmap.txt /labelmap.txt
