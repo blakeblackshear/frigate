@@ -81,7 +81,7 @@ environment_vars:
 
 ### `database`
 
-Event and clip information is managed in a sqlite database at `/media/frigate/clips/frigate.db`. If that database is deleted, clips will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within HomeAssistant.
+Event and clip information is managed in a sqlite database at `/media/frigate/clips/frigate.db`. If that database is deleted, clips will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
 
 If you are storing your clips on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
 
