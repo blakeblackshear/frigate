@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import json
 import logging
 import os
@@ -114,19 +115,14 @@ class RecordingMaintainer(threading.Thread):
                 p.unlink(missing_ok=True)
 
     def run(self):
-        counter = 0
-        self.expire_files()
-        while True:
-            if self.stop_event.is_set():
+        for counter in itertools.cycle(range(60)):
+            if self.stop_event.wait(10):
                 logger.info(f"Exiting recording maintenance...")
                 break
 
             # only expire events every 10 minutes, but check for new files every 10 seconds
-            time.sleep(10)
-            counter = counter + 1
-            if counter > 60:
+            if counter == 0:
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
-                counter = 0
 
             self.move_files()

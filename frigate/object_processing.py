@@ -706,11 +706,7 @@ class TrackedObjectProcessor(threading.Thread):
         return self.camera_states[camera].get_current_frame(draw_options)
 
     def run(self):
-        while True:
-            if self.stop_event.is_set():
-                logger.info(f"Exiting object processor...")
-                break
-
+        while not self.stop_event.is_set():
             try:
                 (
                     camera,
@@ -769,3 +765,5 @@ class TrackedObjectProcessor(threading.Thread):
             while not self.event_processed_queue.empty():
                 event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
+
+        logger.info(f"Exiting object processor...")
