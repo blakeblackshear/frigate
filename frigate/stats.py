@@ -94,12 +94,9 @@ class StatsEmitter(threading.Thread):
 
     def run(self):
         time.sleep(10)
-        while True:
-            if self.stop_event.is_set():
-                logger.info(f"Exiting watchdog...")
-                break
+        while not self.stop_event.wait(self.config.mqtt.stats_interval):
             stats = stats_snapshot(self.stats_tracking)
             self.mqtt_client.publish(
                 f"{self.topic_prefix}/stats", json.dumps(stats), retain=False
             )
-            time.sleep(self.config.mqtt.stats_interval)
+        logger.info(f"Exiting watchdog...")

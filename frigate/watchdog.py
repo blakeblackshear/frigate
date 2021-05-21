@@ -17,14 +17,7 @@ class FrigateWatchdog(threading.Thread):
 
     def run(self):
         time.sleep(10)
-        while True:
-            # wait a bit before checking
-            time.sleep(10)
-
-            if self.stop_event.is_set():
-                logger.info(f"Exiting watchdog...")
-                break
-
+        while not self.stop_event.wait(10):
             now = datetime.datetime.now().timestamp()
 
             # check the detection processes
@@ -38,3 +31,5 @@ class FrigateWatchdog(threading.Thread):
                 elif not detector.detect_process.is_alive():
                     logger.info("Detection appears to have stopped. Exiting frigate...")
                     os.kill(os.getpid(), signal.SIGTERM)
+
+        logger.info(f"Exiting watchdog...")

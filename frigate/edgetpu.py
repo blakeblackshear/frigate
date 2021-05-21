@@ -154,10 +154,7 @@ def run_detector(
         out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
         outputs[name] = {"shm": out_shm, "np": out_np}
 
-    while True:
-        if stop_event.is_set():
-            break
-
+    while not stop_event.is_set():
         try:
             connection_id = detection_queue.get(timeout=5)
         except queue.Empty:

@@ -212,15 +212,7 @@ class CameraWatchdog(threading.Thread):
             )
 
         time.sleep(10)
-        while True:
-            if self.stop_event.is_set():
-                stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
-                for p in self.ffmpeg_other_processes:
-                    stop_ffmpeg(p["process"], self.logger)
-                    p["logpipe"].close()
-                self.logpipe.close()
-                break
-
+        while not self.stop_event.wait(10):
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
@@ -248,8 +240,11 @@ class CameraWatchdog(threading.Thread):
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
 
-            # wait a bit before checking again
-            time.sleep(10)
+        stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
+        for p in self.ffmpeg_other_processes:
+            stop_ffmpeg(p["process"], self.logger)
+            p["logpipe"].close()
+        self.logpipe.close()
 
     def start_ffmpeg_detect(self):
         ffmpeg_cmd = [
@@ -451,10 +446,7 @@ def process_frames(
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
 
-    while True:
-        if stop_event.is_set():
-            break
-
+    while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
             logger.info(f"Exiting track_objects...")
             break

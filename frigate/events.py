@@ -226,11 +226,7 @@ class EventProcessor(threading.Thread):
         return True
 
     def run(self):
-        while True:
-            if self.stop_event.is_set():
-                logger.info(f"Exiting event processor...")
-                break
-
+        while not self.stop_event.is_set():
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
             except queue.Empty:
@@ -276,6 +272,8 @@ class EventProcessor(threading.Thread):
                     )
                 del self.events_in_process[event_data["id"]]
                 self.event_processed_queue.put((event_data["id"], camera))
+
+        logger.info(f"Exiting event processor...")
 
 
 class EventCleanup(threading.Thread):
@@ -403,19 +401,8 @@ class EventCleanup(threading.Thread):
         )
 
     def run(self):
-        counter = 0
-        while True:
-            if self.stop_event.is_set():
-                logger.info(f"Exiting event cleanup...")
-                break
-
-            # only expire events every 5 minutes, but check for stop events every 10 seconds
-            time.sleep(10)
-            counter = counter + 1
-            if counter < 30:
-                continue
-            counter = 0
-
+        # only expire events every 5 minutes
+        while not self.stop_event.wait(300):
             self.expire("clips")
             self.expire("snapshots")
             self.purge_duplicates()
@@ -425,3 +412,5 @@ class EventCleanup(threading.Thread):
                 Event.has_clip == False, Event.has_snapshot == False
             )
             delete_query.execute()
+
+        logger.info(f"Exiting event cleanup...")
