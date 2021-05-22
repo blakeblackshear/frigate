@@ -66,28 +66,23 @@ class RecordingMaintainer(threading.Thread):
             if f in files_in_use:
                 continue
 
-            camera = "-".join(f.split("-")[:-1])
-            start_time = datetime.datetime.strptime(
-                f.split("-")[-1].split(".")[0], "%Y%m%d%H%M%S"
-            )
+            basename = os.path.splitext(f)[0]
+            camera, date = basename.rsplit("-", maxsplit=1)
+            start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
-            ffprobe_cmd = " ".join(
-                [
-                    "ffprobe",
-                    "-v",
-                    "error",
-                    "-show_entries",
-                    "format=duration",
-                    "-of",
-                    "default=noprint_wrappers=1:nokey=1",
-                    f"{os.path.join(RECORD_DIR,f)}",
-                ]
-            )
-            p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
-            (output, err) = p.communicate()
-            p_status = p.wait()
-            if p_status == 0:
-                duration = float(output.decode("utf-8").strip())
+            ffprobe_cmd = [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                f"{os.path.join(RECORD_DIR, f)}",
+            ]
+            p = sp.run(ffprobe_cmd, capture_output=True)
+            if p.returncode == 0:
+                duration = float(p.stdout.decode().strip())
             else:
                 logger.info(f"bad file: {f}")
                 os.remove(os.path.join(RECORD_DIR, f))
