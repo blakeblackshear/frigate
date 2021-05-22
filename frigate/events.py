@@ -72,28 +72,23 @@ class EventProcessor(threading.Thread):
             if f in files_in_use or f in self.cached_clips:
                 continue
 
-            camera = "-".join(f.split("-")[:-1])
-            start_time = datetime.datetime.strptime(
-                f.split("-")[-1].split(".")[0], "%Y%m%d%H%M%S"
-            )
+            basename = os.path.splitext(f)[0]
+            camera, date = basename.rsplit("-", maxsplit=1)
+            start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
-            ffprobe_cmd = " ".join(
-                [
-                    "ffprobe",
-                    "-v",
-                    "error",
-                    "-show_entries",
-                    "format=duration",
-                    "-of",
-                    "default=noprint_wrappers=1:nokey=1",
-                    f"{os.path.join(CACHE_DIR,f)}",
-                ]
-            )
-            p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
-            (output, err) = p.communicate()
-            p_status = p.wait()
-            if p_status == 0:
-                duration = float(output.decode("utf-8").strip())
+            ffprobe_cmd = [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                f"{os.path.join(CACHE_DIR, f)}",
+            ]
+            p = sp.run(ffprobe_cmd, capture_output=True)
+            if p.returncode == 0:
+                duration = float(p.stdout.decode().strip())
             else:
                 logger.info(f"bad file: {f}")
                 os.remove(os.path.join(CACHE_DIR, f))
@@ -113,10 +108,10 @@ class EventProcessor(threading.Thread):
         else:
             earliest_event = datetime.datetime.now().timestamp()
 
-        # if the earliest event exceeds the max seconds, cap it
-        max_seconds = self.config.clips.max_seconds
-        if datetime.datetime.now().timestamp() - earliest_event > max_seconds:
-            earliest_event = datetime.datetime.now().timestamp() - max_seconds
+        # if the earliest event is more tha max seconds ago, cap it
+        earliest_event = max(
+            earliest_event, datetime.datetime.now().timestamp() - max_seconds
+        )
 
         for f, data in list(self.cached_clips.items()):
             if earliest_event - 90 > data["start_time"] + data["duration"]:

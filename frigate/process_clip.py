@@ -31,22 +31,18 @@ logger = logging.getLogger(__name__)
 
 
 def get_frame_shape(source):
-    ffprobe_cmd = " ".join(
-        [
-            "ffprobe",
-            "-v",
-            "panic",
-            "-show_error",
-            "-show_streams",
-            "-of",
-            "json",
-            '"' + source + '"',
-        ]
-    )
-    p = sp.Popen(ffprobe_cmd, stdout=sp.PIPE, shell=True)
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    info = json.loads(output)
+    ffprobe_cmd = [
+        "ffprobe",
+        "-v",
+        "panic",
+        "-show_error",
+        "-show_streams",
+        "-of",
+        "json",
+        source,
+    ]
+    p = sp.run(ffprobe_cmd, capture_output=True)
+    info = json.loads(p.stdout)
 
     video_info = [s for s in info["streams"] if s["codec_type"] == "video"][0]
 
