@@ -22,11 +22,11 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         if payload == "ON":
             if not clips_settings.enabled:
                 logger.info(f"Turning on clips for {camera_name} via mqtt")
-                clips_settings._enabled = True
+                clips_settings.enabled = True
         elif payload == "OFF":
             if clips_settings.enabled:
                 logger.info(f"Turning off clips for {camera_name} via mqtt")
-                clips_settings._enabled = False
+                clips_settings.enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
@@ -44,11 +44,11 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         if payload == "ON":
             if not snapshots_settings.enabled:
                 logger.info(f"Turning on snapshots for {camera_name} via mqtt")
-                snapshots_settings._enabled = True
+                snapshots_settings.enabled = True
         elif payload == "OFF":
             if snapshots_settings.enabled:
                 logger.info(f"Turning off snapshots for {camera_name} via mqtt")
-                snapshots_settings._enabled = False
+                snapshots_settings.enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
@@ -67,12 +67,12 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             if not camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning on detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = True
-                detect_settings._enabled = True
+                detect_settings.enabled = True
         elif payload == "OFF":
             if camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning off detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = False
-                detect_settings._enabled = False
+                detect_settings.enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 

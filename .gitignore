@@ -1,5 +1,6 @@
 .DS_Store
 *.pyc
+*.swp
 debug
 .vscode
 config/config.yml

@@ -100,7 +100,7 @@ def stop_ffmpeg(ffmpeg_process, logger):
 def start_or_restart_ffmpeg(
     ffmpeg_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None
 ):
-    if not ffmpeg_process is None:
+    if ffmpeg_process is not None:
         stop_ffmpeg(ffmpeg_process, logger)
 
     if frame_size is None:

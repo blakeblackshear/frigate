@@ -109,6 +109,7 @@ class EventProcessor(threading.Thread):
             earliest_event = datetime.datetime.now().timestamp()
 
         # if the earliest event is more tha max seconds ago, cap it
+        max_seconds = self.config.clips.max_seconds
         earliest_event = max(
             earliest_event,
             datetime.datetime.now().timestamp() - self.config.clips.max_seconds,
