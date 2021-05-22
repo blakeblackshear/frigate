@@ -156,9 +156,9 @@ class TestConfig(TestCase):
         }
         frigate_config = FrigateConfig(config=config)
         assert "dog" in frigate_config.cameras["back"].objects.filters
-        assert len(frigate_config.cameras["back"].objects.filters["dog"]._raw_mask) == 2
+        assert len(frigate_config.cameras["back"].objects.filters["dog"].raw_mask) == 2
         assert (
-            len(frigate_config.cameras["back"].objects.filters["person"]._raw_mask) == 1
+            len(frigate_config.cameras["back"].objects.filters["person"].raw_mask) == 1
         )
 
     def test_ffmpeg_params_global(self):
