@@ -17,6 +17,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+from frigate.birdseye import BirdsEyeFrameManager
 from frigate.config import FrigateConfig, CameraConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
@@ -563,6 +564,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
+        self.birdseye_frame_manager = BirdsEyeFrameManager()
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(("start", camera, obj.to_dict()))
@@ -715,6 +717,14 @@ class TrackedObjectProcessor(threading.Thread):
 
             camera_state.update(
                 frame_time, current_tracked_objects, motion_boxes, regions
+            )
+
+            self.birdseye_frame_manager.update_frame(
+                camera,
+                len(current_tracked_objects),
+                len(motion_boxes),
+                camera_state.current_frame_time,
+                camera_state._current_frame,
             )
 
             # update zone counts for each label

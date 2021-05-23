@@ -14,6 +14,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.birdseye import BirdsEyeFrameOutputter
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import EdgeTPUProcess
@@ -250,6 +251,10 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_birdseye_outputter(self):
+        self.birdseye_outputter = BirdsEyeFrameOutputter(self.stop_event)
+        self.birdseye_outputter.start()
+
     def start_event_processor(self):
         self.event_processor = EventProcessor(
             self.config,
@@ -306,6 +311,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_birdseye_outputter()
         self.init_stats()
         self.init_web_server()
         self.start_event_processor()
