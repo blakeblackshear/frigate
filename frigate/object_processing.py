@@ -91,9 +91,7 @@ class TrackedObject:
             return False
 
         threshold = self.camera_config.objects.filters[self.obj_data["label"]].threshold
-        if self.computed_score < threshold:
-            return True
-        return False
+        return self.computed_score < threshold
 
     def compute_score(self):
         scores = self.score_history[:]
@@ -156,31 +154,31 @@ class TrackedObject:
 
     def to_dict(self, include_thumbnail: bool = False):
         event = {
-            'id': self.obj_data['id'],
-            'camera': self.camera,
-            'frame_time': self.obj_data['frame_time'],
-            'label': self.obj_data['label'],
-            'top_score': self.top_score,
-            'false_positive': self.false_positive,
-            'start_time': self.obj_data['start_time'],
-            'end_time': self.obj_data.get('end_time', None),
-            'score': self.obj_data['score'],
-            'box': self.obj_data['box'],
-            'area': self.obj_data['area'],
-            'region': self.obj_data['region'],
-            'current_zones': self.current_zones.copy(),
-            'entered_zones': list(self.entered_zones).copy(),
+            "id": self.obj_data["id"],
+            "camera": self.camera,
+            "frame_time": self.obj_data["frame_time"],
+            "label": self.obj_data["label"],
+            "top_score": self.top_score,
+            "false_positive": self.false_positive,
+            "start_time": self.obj_data["start_time"],
+            "end_time": self.obj_data.get("end_time", None),
+            "score": self.obj_data["score"],
+            "box": self.obj_data["box"],
+            "area": self.obj_data["area"],
+            "region": self.obj_data["region"],
+            "current_zones": self.current_zones.copy(),
+            "entered_zones": list(self.entered_zones).copy(),
         }
-        
+
         if include_thumbnail:
-            event['thumbnail'] = base64.b64encode(self.get_thumbnail()).decode('utf-8')
+            event["thumbnail"] = base64.b64encode(self.get_thumbnail()).decode("utf-8")
 
         return event
 
     def get_thumbnail(self):
         if (
             self.thumbnail_data is None
-            or not self.thumbnail_data["frame_time"] in self.frame_cache
+            or self.thumbnail_data["frame_time"] not in self.frame_cache
         ):
             ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
 
@@ -300,17 +298,17 @@ class CameraState:
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
         self.best_objects: Dict[str, TrackedObject] = {}
-        self.object_counts = defaultdict(lambda: 0)
+        self.object_counts = defaultdict(int)
         self.tracked_objects: Dict[str, TrackedObject] = {}
         self.frame_cache = {}
-        self.zone_objects = defaultdict(lambda: [])
+        self.zone_objects = defaultdict(list)
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
         self.motion_boxes = []
         self.regions = []
         self.previous_frame_id = None
-        self.callbacks = defaultdict(lambda: [])
+        self.callbacks = defaultdict(list)
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -325,10 +323,10 @@ class CameraState:
         if draw_options.get("bounding_boxes"):
             # draw the bounding boxes on the frame
             for obj in tracked_objects.values():
-                thickness = 2
-                color = COLOR_MAP[obj["label"]]
-
-                if obj["frame_time"] != frame_time:
+                if obj["frame_time"] == frame_time:
+                    thickness = 2
+                    color = COLOR_MAP[obj["label"]]
+                else:
                     thickness = 1
                     color = (255, 0, 0)
 
@@ -341,7 +339,7 @@ class CameraState:
                     box[2],
                     box[3],
                     obj["label"],
-                    f"{int(obj['score']*100)}% {int(obj['area'])}",
+                    f"{obj['score']:.0%} {int(obj['area'])}",
                     thickness=thickness,
                     color=color,
                 )
@@ -361,10 +359,7 @@ class CameraState:
                 thickness = (
                     8
                     if any(
-                        [
-                            name in obj["current_zones"]
-                            for obj in tracked_objects.values()
-                        ]
+                        name in obj["current_zones"] for obj in tracked_objects.values()
                     )
                     else 2
                 )
@@ -407,23 +402,21 @@ class CameraState:
         self.callbacks[event_type].append(callback)
 
     def update(self, frame_time, current_detections, motion_boxes, regions):
-        self.current_frame_time = frame_time
-        self.motion_boxes = motion_boxes
-        self.regions = regions
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
         current_frame = self.frame_manager.get(
             frame_id, self.camera_config.frame_shape_yuv
         )
 
-        current_ids = current_detections.keys()
-        previous_ids = self.tracked_objects.keys()
-        removed_ids = list(set(previous_ids).difference(current_ids))
-        new_ids = list(set(current_ids).difference(previous_ids))
-        updated_ids = list(set(current_ids).intersection(previous_ids))
+        tracked_objects = self.tracked_objects.copy()
+        current_ids = set(current_detections.keys())
+        previous_ids = set(tracked_objects.keys())
+        removed_ids = previous_ids.difference(current_ids)
+        new_ids = current_ids.difference(previous_ids)
+        updated_ids = current_ids.intersection(previous_ids)
 
         for id in new_ids:
-            new_obj = self.tracked_objects[id] = TrackedObject(
+            new_obj = tracked_objects[id] = TrackedObject(
                 self.name, self.camera_config, self.frame_cache, current_detections[id]
             )
 
@@ -432,7 +425,7 @@ class CameraState:
                 c(self.name, new_obj, frame_time)
 
         for id in updated_ids:
-            updated_obj = self.tracked_objects[id]
+            updated_obj = tracked_objects[id]
             significant_update = updated_obj.update(frame_time, current_detections[id])
 
             if significant_update:
@@ -458,7 +451,7 @@ class CameraState:
 
         for id in removed_ids:
             # publish events to mqtt
-            removed_obj = self.tracked_objects[id]
+            removed_obj = tracked_objects[id]
             if not "end_time" in removed_obj.obj_data:
                 removed_obj.obj_data["end_time"] = frame_time
                 for c in self.callbacks["end"]:
@@ -466,13 +459,10 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
-        for obj in self.tracked_objects.values():
+        for obj in tracked_objects.values():
             object_type = obj.obj_data["label"]
             # if the object's thumbnail is not from the current frame
-            if (
-                obj.false_positive
-                or obj.thumbnail_data["frame_time"] != self.current_frame_time
-            ):
+            if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
                 continue
             if object_type in self.best_objects:
                 current_best = self.best_objects[object_type]
@@ -497,10 +487,11 @@ class CameraState:
                     c(self.name, self.best_objects[object_type], frame_time)
 
         # update overall camera state for each object type
-        obj_counter = Counter()
-        for obj in self.tracked_objects.values():
-            if not obj.false_positive:
-                obj_counter[obj.obj_data["label"]] += 1
+        obj_counter = Counter(
+            obj.obj_data["label"]
+            for obj in tracked_objects.values()
+            if not obj.false_positive
+        )
 
         # report on detected objects
         for obj_name, count in obj_counter.items():
@@ -513,7 +504,7 @@ class CameraState:
         expired_objects = [
             obj_name
             for obj_name, count in self.object_counts.items()
-            if count > 0 and not obj_name in obj_counter
+            if count > 0 and obj_name not in obj_counter
         ]
         for obj_name in expired_objects:
             self.object_counts[obj_name] = 0
@@ -523,27 +514,29 @@ class CameraState:
                 c(self.name, self.best_objects[obj_name], frame_time)
 
         # cleanup thumbnail frame cache
-        current_thumb_frames = set(
-            [
-                obj.thumbnail_data["frame_time"]
-                for obj in self.tracked_objects.values()
-                if not obj.false_positive
-            ]
-        )
-        current_best_frames = set(
-            [obj.thumbnail_data["frame_time"] for obj in self.best_objects.values()]
-        )
+        current_thumb_frames = {
+            obj.thumbnail_data["frame_time"]
+            for obj in tracked_objects.values()
+            if not obj.false_positive
+        }
+        current_best_frames = {
+            obj.thumbnail_data["frame_time"] for obj in self.best_objects.values()
+        }
         thumb_frames_to_delete = [
             t
             for t in self.frame_cache.keys()
-            if not t in current_thumb_frames and not t in current_best_frames
+            if t not in current_thumb_frames and t not in current_best_frames
         ]
         for t in thumb_frames_to_delete:
             del self.frame_cache[t]
 
         with self.current_frame_lock:
+            self.tracked_objects = tracked_objects
+            self.current_frame_time = frame_time
+            self.motion_boxes = motion_boxes
+            self.regions = regions
             self._current_frame = current_frame
-            if not self.previous_frame_id is None:
+            if self.previous_frame_id is not None:
                 self.frame_manager.delete(self.previous_frame_id)
             self.previous_frame_id = frame_id
 
@@ -665,7 +658,7 @@ class TrackedObjectProcessor(threading.Thread):
         #       }
         #   }
         # }
-        self.zone_data = defaultdict(lambda: defaultdict(lambda: {}))
+        self.zone_data = defaultdict(lambda: defaultdict(dict))
 
     def should_save_snapshot(self, camera, obj: TrackedObject):
         # if there are required zones and there is no overlap
@@ -728,15 +721,14 @@ class TrackedObjectProcessor(threading.Thread):
             # for each zone in the current camera
             for zone in self.config.cameras[camera].zones.keys():
                 # count labels for the camera in the zone
-                obj_counter = Counter()
-                for obj in camera_state.tracked_objects.values():
-                    if zone in obj.current_zones and not obj.false_positive:
-                        obj_counter[obj.obj_data["label"]] += 1
+                obj_counter = Counter(
+                    obj.obj_data["label"]
+                    for obj in camera_state.tracked_objects.values()
+                    if zone in obj.current_zones and not obj.false_positive
+                )
 
                 # update counts and publish status
-                for label in set(
-                    list(self.zone_data[zone].keys()) + list(obj_counter.keys())
-                ):
+                for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
                     # if we have previously published a count for this zone/label
                     zone_label = self.zone_data[zone][label]
                     if camera in zone_label:
