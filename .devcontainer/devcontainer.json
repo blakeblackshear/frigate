@@ -2,7 +2,7 @@
   "name": "Frigate Dev",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "dev",
-  "workspaceFolder": "/opt/frigate",
+  "workspaceFolder": "/lab/frigate",
   "extensions": [
     "ms-python.python",
     "visualstudioexptteam.vscodeintellicode",
