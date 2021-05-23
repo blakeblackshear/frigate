@@ -53,7 +53,7 @@ class MqttBackend:
             json_message = json.loads(message)
             json_message = {
                 "topic": f"{self.topic_prefix}/{json_message['topic']}",
-                "payload": json_message.get["payload"],
+                "payload": json_message["payload"],
                 "retain": json_message.get("retain", False),
             }
         except:
