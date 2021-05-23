@@ -289,7 +289,7 @@ ZONE_SCHEMA = {
 }
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ZoneConfig:
     filters: Dict[str, FilterConfig]
     coordinates: Union[str, List[str]]
@@ -297,7 +297,7 @@ class ZoneConfig:
     color: Tuple[int, int, int]
 
     @classmethod
-    def build(cls, name, config) -> ZoneConfig:
+    def build(cls, config, color: Tuple[int, int, int]) -> ZoneConfig:
         coordinates = config["coordinates"]
 
         if isinstance(coordinates, list):
@@ -317,7 +317,7 @@ class ZoneConfig:
             {name: FilterConfig.build(c) for name, c in config["filters"].items()},
             coordinates,
             contour,
-            color=(0, 0, 0),
+            color=color,
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -760,8 +760,11 @@ class CameraConfig:
 
     @classmethod
     def build(cls, name, config, global_config) -> CameraConfig:
-        zones = {name: ZoneConfig.build(name, z) for name, z in config["zones"].items()}
-        cls._set_zone_colors(zones)
+        colors = plt.cm.get_cmap("tab10", len(config["zones"]))
+        zones = {
+            name: ZoneConfig.build(z, tuple(round(255 * c) for c in colors(idx)[:3]))
+            for idx, (name, z) in enumerate(config["zones"].items())
+        }
 
         frame_shape = config["height"], config["width"]
 
@@ -830,12 +833,6 @@ class CameraConfig:
         )
 
         return [part for part in cmd if part != ""]
-
-    @classmethod
-    def _set_zone_colors(cls, zones: Dict[str, ZoneConfig]) -> None:
-        colors = plt.cm.get_cmap("tab10", len(zones))
-        for i, (name, zone) in enumerate(zones.items()):
-            zone.color = tuple(int(round(255 * c)) for c in colors(i)[:3])
 
     def to_dict(self) -> Dict[str, Any]:
         return {
