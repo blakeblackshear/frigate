@@ -27,6 +27,19 @@ export default function Sidebar() {
           ) : null
         }
       </Match>
+      <Match path="/recordings/:camera/:date?/:hour?">
+        {({ matches }) =>
+          matches ? (
+            <Fragment>
+              <Separator />
+              {cameras.map((camera) => (
+                <Destination href={`/recordings/${camera}`} text={camera} />
+              ))}
+              <Separator />
+            </Fragment>
+          ) : null
+        }
+      </Match>
       <Destination href="/events" text="Events" />
       <Destination href="/debug" text="Debug" />
       <Separator />
