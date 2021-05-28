@@ -11,11 +11,15 @@
     "test": "jest"
   },
   "dependencies": {
+    "date-fns": "^2.21.3",
+    "flickity": "^2.2.2",
     "idb-keyval": "^5.0.2",
     "immer": "^8.0.1",
     "preact": "^10.5.9",
     "preact-async-route": "^2.2.1",
-    "preact-router": "^3.2.1"
+    "preact-router": "^3.2.1",
+    "video.js": "^7.11.8",
+    "videojs-playlist": "^4.3.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.13",

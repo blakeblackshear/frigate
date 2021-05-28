@@ -110,6 +110,11 @@ export function useEvent(eventId, fetchId) {
   return useFetch(url, fetchId);
 }
 
+export function useRecording(camera, fetchId) {
+  const url = `/api/${camera}/recordings`;
+  return useFetch(url, fetchId);
+}
+
 export function useConfig(searchParams, fetchId) {
   const url = `/api/config${searchParams ? `?${searchParams.toString()}` : ''}`;
   return useFetch(url, fetchId);

@@ -1,9 +1,11 @@
 import base64
-import datetime
+from collections import OrderedDict
+from datetime import datetime, timedelta
 import json
 import glob
 import logging
 import os
+import re
 import time
 from functools import reduce
 from pathlib import Path
@@ -449,6 +451,57 @@ def latest_frame(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+@bp.route("/<camera_name>/recordings")
+def recordings(camera_name):
+    files = glob.glob(f"{RECORD_DIR}/*/*/*/{camera_name}")
+
+    if len(files) == 0:
+        return "No recordings found.", 404
+
+    files.sort()
+
+    dates = OrderedDict()
+    for path in files:
+        search = re.search(r".+/(\d{4}[-]\d{2})/(\d{2})/(\d{2}).+", path)
+        if not search:
+            continue
+        date = f"{search.group(1)}-{search.group(2)}"
+        if date not in dates:
+            dates[date] = OrderedDict()
+        dates[date][search.group(3)] = 0
+
+    events = (
+        Event.select(
+            fn.DATE(Event.start_time, "unixepoch", "localtime"),
+            fn.STRFTIME("%H", Event.start_time, "unixepoch", "localtime"),
+            fn.COUNT(Event.id),
+        )
+        .where(Event.camera == camera_name)
+        .group_by(
+            fn.DATE(Event.start_time, "unixepoch", "localtime"),
+            fn.STRFTIME("%H", Event.start_time, "unixepoch", "localtime"),
+        )
+        .tuples()
+    )
+
+    for date, hour, count in events:
+        key = date.strftime("%Y-%m-%d")
+        if key in dates and hour in dates[key]:
+            dates[key][hour] = count
+
+    return jsonify(
+        [
+            {
+                "date": date,
+                "recordings": [
+                    {"hour": hour, "events": events} for hour, events in hours.items()
+                ],
+            }
+            for date, hours in dates.items()
+        ]
+    )
+
+
 @bp.route("/vod/<path:path>")
 def vod(path):
     if not os.path.isdir(f"{RECORD_DIR}/{path}"):
@@ -467,8 +520,13 @@ def vod(path):
         )
         durations.append(duration)
 
+    # Should we cache?
+    parts = path.split("/", 4)
+    date = datetime.strptime(f"{parts[0]}-{parts[1]} {parts[2]}", "%Y-%m-%d %H")
+
     return jsonify(
         {
+            "cache": datetime.now() - timedelta(hours=2) > date,
             "discontinuity": False,
             "durations": durations,
             "sequences": [{"clips": clips}],

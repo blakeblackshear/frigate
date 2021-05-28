@@ -28,7 +28,10 @@ function Camera({ name }) {
   const { payload: clipValue, send: sendClips } = useClipsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
-  const buttons = useMemo(() => [{ name: 'Events', href: `/events?camera=${name}` }], [name]);
+  const buttons = useMemo(() => [
+    { name: 'Events', href: `/events?camera=${name}` },
+    { name: 'Recordings', href: `/recordings/${name}` }
+  ], [name]);
   const icons = useMemo(
     () => [
       {
