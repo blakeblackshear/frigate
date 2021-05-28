@@ -43,7 +43,7 @@ export default function Recording({ camera, date, hour }) {
       </Link>
     );
 
-    if (item.date == selectedKey) {
+    if (item.date === selectedKey) {
       for (const recording of item.recordings) {
         buttons.push(
           <Button href={`/recordings/${camera}/${item.date}/${recording.hour}`} type="text">

@@ -15,15 +15,8 @@ export default class VideoPlayer extends Component {
       ...defaultOptions,
       ...options,
     };
-    const self = this;
     this.player = videojs(this.videoNode, videoJsOptions, function onPlayerReady() {
       onReady(this);
-      this.on('error', () => {
-        console.error('VIDEOJS: ERROR: currentSources:', this.currentSources());
-      });
-      this.on('play', () => {
-        console.log('VIDEOJS: currentSources:', this.currentSources());
-      });
     });
   }
 
