@@ -1,2 +1,0 @@
-#!/usr/bin/execlineb -P
-/usr/local/bin/node /opt/frigate/jsmpeg/relay.js 8081 8082
