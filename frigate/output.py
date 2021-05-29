@@ -1,13 +1,23 @@
 import queue
+import signal
+import multiprocessing as mp
 from multiprocessing import shared_memory
 from frigate.util import SharedMemoryFrameManager
 
 
-def output_frames(config, video_output_queue, stop_event):
+def output_frames(config, video_output_queue):
+    stop_event = mp.Event()
+
+    def receiveSignal(signalNumber, frame):
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     frame_manager = SharedMemoryFrameManager()
     previous_frames = {}
 
-    while True:
+    while not stop_event.is_set():
         try:
             (
                 camera,

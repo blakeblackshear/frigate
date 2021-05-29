@@ -228,7 +228,6 @@ class FrigateApp:
             args=(
                 self.config,
                 self.video_output_queue,
-                self.stop_event,
             ),
         )
         output_processor.daemon = True
