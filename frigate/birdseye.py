@@ -1,8 +1,23 @@
-import multiprocessing as mp
-import numpy as np
-import subprocess as sp
 import logging
+import multiprocessing as mp
+import subprocess as sp
 import threading
+
+import gevent
+import numpy as np
+from flask import (
+    Blueprint,
+    Flask,
+    Response,
+    current_app,
+    jsonify,
+    make_response,
+    request,
+)
+from flask_sockets import Sockets
+from gevent import pywsgi
+from geventwebsocket.handler import WebSocketHandler
+
 from frigate.util import SharedMemoryFrameManager
 
 logger = logging.getLogger(__name__)
@@ -56,12 +71,12 @@ class BirdsEyeFrameOutputter(threading.Thread):
         )
 
     def start_ffmpeg(self):
-        ffmpeg_cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -video_size 1920x1080 -i pipe: -f mpegts -codec:v mpeg1video -b:v 1000k -bf 0 http://localhost:8081/birdseye".split(
+        ffmpeg_cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -video_size 1920x1080 -i pipe: -f mpegts -codec:v mpeg1video -b:v 1000k -bf 0 pipe:".split(
             " "
         )
         self.process = sp.Popen(
             ffmpeg_cmd,
-            stdout=sp.DEVNULL,
+            stdout=sp.PIPE,
             # TODO: logging
             stderr=sp.DEVNULL,
             stdin=sp.PIPE,
@@ -81,4 +96,50 @@ class BirdsEyeFrameOutputter(threading.Thread):
 
 # separate process for passing jsmpeg packets over websockets
 # signals to the frame manager when a client is listening
-# class JSMpegSocketServer:
+def run_jsmpeg_server():
+    app = Flask(__name__)
+    sockets = Sockets(app)
+
+    http = Blueprint("http", __name__)
+    ws = Blueprint("ws", __name__)
+
+    # TODO: add something for notification of subscribers
+    # self.app.frigate_config = frigate_config
+
+    app.register_blueprint(http)
+    sockets.register_blueprint(ws)
+
+    clients = list()
+
+    @http.route("/birdseye")
+    def receive_mpegts():
+        chunk_size = 4096
+        while True:
+            chunk = request.stream.read(chunk_size)
+            if len(chunk) == 0:
+                break
+            for client in clients:
+                try:
+                    client.send(chunk)
+                except:
+                    logger.debug(
+                        "Removing websocket client due to a closed connection."
+                    )
+                    clients.remove(client)
+
+    @ws.route("/birdseye")
+    def echo_socket(socket):
+        # TODO: get reference to
+        # current_app.mqtt_backend.register(socket)
+        clients.append(socket)
+
+        while not socket.closed:
+            # Sleep to prevent *constant* context-switches.
+            gevent.sleep(0.1)
+
+    server = pywsgi.WSGIServer(("127.0.0.1", 5050), app, handler_class=WebSocketHandler)
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
