@@ -348,6 +348,7 @@ def track_camera(
     )
 
     object_tracker = ObjectTracker(config.detect)
+    nms_threshold = config.detect.nms_threshold
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -365,6 +366,7 @@ def track_camera(
         objects_to_track,
         object_filters,
         detection_enabled,
+        nms_threshold,
         stop_event,
     )
 
@@ -436,6 +438,7 @@ def process_frames(
     object_filters,
     detection_enabled: mp.Value,
     stop_event,
+    nms_threshold,
     exit_on_empty: bool = False,
 ):
 
@@ -540,7 +543,7 @@ def process_frames(
                     for o in group
                 ]
                 confidences = [o[1] for o in group]
-                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, nms_threshold)
 
                 for index in idxs:
                     obj = group[index[0]]

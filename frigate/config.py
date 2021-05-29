@@ -187,7 +187,12 @@ class MotionConfig:
         }
 
 
-GLOBAL_DETECT_SCHEMA = vol.Schema({"max_disappeared": int})
+GLOBAL_DETECT_SCHEMA = vol.Schema(
+    {
+        "max_disappeared": int,
+        vol.Required("nms_threshold", default=0.4): vol.All(float, vol.Range(min=0, max=1)),
+    }
+)
 DETECT_SCHEMA = GLOBAL_DETECT_SCHEMA.extend(
     {vol.Optional("enabled", default=True): bool}
 )
@@ -197,6 +202,7 @@ DETECT_SCHEMA = GLOBAL_DETECT_SCHEMA.extend(
 class DetectConfig:
     enabled: bool
     max_disappeared: int
+    nms_threshold: float
 
     @classmethod
     def build(cls, config, global_config, camera_fps) -> DetectConfig:
@@ -211,6 +217,7 @@ class DetectConfig:
         return {
             "enabled": self.enabled,
             "max_disappeared": self.max_disappeared,
+            "nms_threshold": self.nms_threshold,
         }
 
 

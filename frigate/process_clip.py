@@ -111,6 +111,7 @@ class ProcessClip:
             "detection_frame": mp.Value("d", 0.0),
         }
         stop_event = mp.Event()
+        nms_threshold = self.camera_config.detect.nms_threshold
         model_shape = (self.config.model.height, self.config.model.width)
 
         process_frames(
@@ -128,6 +129,7 @@ class ProcessClip:
             object_filters,
             mask,
             stop_event,
+            nms_threshold,
             exit_on_empty=True,
         )
 

@@ -43,6 +43,10 @@ Global object detection settings. These may also be defined at the camera level.
 detect:
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
+  # Optional: Non Maximum Suppression Threshold, maximum overlap between detections of each detected object type. (default: 0.4)
+  # Higher values mean only detections with a high amount of overlap will have lower confidence detections discarded.
+  # Low values mean more overlapping detections will be discarded as a smaller overlap is tolerated.
+  nms_threshold: 0.4
 ```
 
 ### `logger`

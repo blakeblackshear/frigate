@@ -287,6 +287,8 @@ cameras:
       enabled: True
       # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
       max_disappeared: 25
+      # Optional: Non Maximum Suppression Threshold, maximum overlap between detections of each detected object type. (default: 0.4)
+      nms_threshold: 0.4
 
     # Optional: save clips configuration
     clips:
