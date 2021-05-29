@@ -538,7 +538,7 @@ class CameraState:
             self.regions = regions
             self._current_frame = current_frame
             if self.previous_frame_id is not None:
-                self.frame_manager.delete(self.previous_frame_id)
+                self.frame_manager.close(self.previous_frame_id)
             self.previous_frame_id = frame_id
 
 
@@ -551,6 +551,7 @@ class TrackedObjectProcessor(threading.Thread):
         tracked_objects_queue,
         event_queue,
         event_processed_queue,
+        video_output_queue,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -561,10 +562,10 @@ class TrackedObjectProcessor(threading.Thread):
         self.tracked_objects_queue = tracked_objects_queue
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
+        self.video_output_queue = video_output_queue
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
-        self.birdseye_frame_manager = BirdsEyeFrameManager()
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(("start", camera, obj.to_dict()))
@@ -719,12 +720,14 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
-            self.birdseye_frame_manager.update_frame(
-                camera,
-                len(current_tracked_objects),
-                len(motion_boxes),
-                camera_state.current_frame_time,
-                camera_state._current_frame,
+            self.video_output_queue.put(
+                (
+                    camera,
+                    frame_time,
+                    current_tracked_objects,
+                    motion_boxes,
+                    regions,
+                )
             )
 
             # update zone counts for each label

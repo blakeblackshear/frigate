@@ -24,6 +24,7 @@ from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
+from frigate.output import output_frames
 from frigate.record import RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.video import capture_camera, track_camera
@@ -128,6 +129,7 @@ class FrigateApp:
         # Queues for clip processing
         self.event_queue = mp.Queue()
         self.event_processed_queue = mp.Queue()
+        self.video_output_queue = mp.Queue()
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue = mp.Queue(
@@ -214,9 +216,24 @@ class FrigateApp:
             self.detected_frames_queue,
             self.event_queue,
             self.event_processed_queue,
+            self.video_output_queue,
             self.stop_event,
         )
         self.detected_frames_processor.start()
+
+    def start_video_output_processor(self):
+        output_processor = mp.Process(
+            target=output_frames,
+            name=f"output_processor",
+            args=(
+                self.config,
+                self.video_output_queue,
+                self.stop_event,
+            ),
+        )
+        output_processor.daemon = True
+        self.output_processor = output_processor
+        output_processor.start()
 
     def start_camera_processors(self):
         model_shape = (self.config.model.height, self.config.model.width)
@@ -308,10 +325,10 @@ class FrigateApp:
             self.log_process.terminate()
             sys.exit(1)
         self.start_detectors()
+        self.start_video_output_processor()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
-        self.start_birdseye_outputter()
         self.init_stats()
         self.init_web_server()
         self.start_event_processor()
