@@ -233,6 +233,7 @@ class FrigateApp:
         output_processor.daemon = True
         self.output_processor = output_processor
         output_processor.start()
+        logger.info(f"Output process started: {output_processor.pid}")
 
     def start_camera_processors(self):
         model_shape = (self.config.model.height, self.config.model.width)
