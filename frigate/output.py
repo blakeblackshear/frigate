@@ -111,8 +111,9 @@ def output_frames(config, video_output_queue):
 
         frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
 
-        # send frame to ffmpeg process
-        converter.write(frame.tobytes())
+        # send frame to ffmpeg process if websockets are connected
+        if len(websocket_server.manager) > 0:
+            converter.write(frame.tobytes())
 
         if camera in previous_frames:
             frame_manager.delete(previous_frames[camera])
