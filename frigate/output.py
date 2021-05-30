@@ -20,7 +20,7 @@ from frigate.util import SharedMemoryFrameManager
 
 class FFMpegConverter(object):
     def __init__(self):
-        ffmpeg_cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -video_size 1920x1080 -i pipe: -f mpegts -s 1280x720 -codec:v mpeg1video -b:v 1000k -bf 0 pipe:".split(
+        ffmpeg_cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -video_size 1920x1080 -i pipe: -f mpegts -s 640x360 -codec:v mpeg1video -b:v 1000k -bf 0 pipe:".split(
             " "
         )
         self.process = sp.Popen(
@@ -55,7 +55,7 @@ class BroadcastThread(threading.Thread):
 
     def run(self):
         while True:
-            buf = self.converter.read(4096)
+            buf = self.converter.read(65536)
             if buf:
                 self.websocket_server.manager.broadcast(buf, binary=True)
             elif self.converter.process.poll() is not None:
@@ -80,7 +80,7 @@ def output_frames(config, video_output_queue):
     # start a websocket server on 8082
     WebSocketWSGIHandler.http_version = "1.1"
     websocket_server = make_server(
-        "",
+        "127.0.0.1",
         8082,
         server_class=WSGIServer,
         handler_class=WebSocketWSGIRequestHandler,
