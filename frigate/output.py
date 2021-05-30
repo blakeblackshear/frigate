@@ -18,9 +18,9 @@ from ws4py.websocket import WebSocket
 from frigate.util import SharedMemoryFrameManager
 
 
-class FFMpegConverter(object):
-    def __init__(self):
-        ffmpeg_cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -video_size 1920x1080 -i pipe: -f mpegts -s 640x360 -codec:v mpeg1video -b:v 1000k -bf 0 pipe:".split(
+class FFMpegConverter:
+    def __init__(self, in_width, in_height, out_width, out_height, bitrate):
+        ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -b:v {bitrate} -bf 0 pipe:".split(
             " "
         )
         self.process = sp.Popen(
@@ -48,8 +48,9 @@ class FFMpegConverter(object):
 
 
 class BroadcastThread(threading.Thread):
-    def __init__(self, converter, websocket_server):
+    def __init__(self, camera, converter, websocket_server):
         super(BroadcastThread, self).__init__()
+        self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
 
@@ -57,7 +58,9 @@ class BroadcastThread(threading.Thread):
         while True:
             buf = self.converter.read(65536)
             if buf:
-                self.websocket_server.manager.broadcast(buf, binary=True)
+                for ws in self.websocket_server.manager:
+                    if ws.environ["PATH_INFO"].endswith(self.camera):
+                        ws.send(buf, binary=True)
             elif self.converter.process.poll() is not None:
                 break
 
@@ -89,11 +92,21 @@ def output_frames(config, video_output_queue):
     websocket_server.initialize_websockets_manager()
     websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
-    converter = FFMpegConverter()
-    broadcast_thread = BroadcastThread(converter, websocket_server)
+    converters = {}
+    broadcasters = {}
+
+    for camera, cam_config in config.cameras.items():
+        converters[camera] = FFMpegConverter(
+            cam_config.frame_shape[1], cam_config.frame_shape[0], 640, 320, "1000k"
+        )
+        broadcasters[camera] = BroadcastThread(
+            camera, converters[camera], websocket_server
+        )
 
     websocket_thread.start()
-    broadcast_thread.start()
+
+    for t in broadcasters.values():
+        t.start()
 
     while not stop_event.is_set():
         try:
@@ -111,9 +124,12 @@ def output_frames(config, video_output_queue):
 
         frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
 
-        # send frame to ffmpeg process if websockets are connected
-        if len(websocket_server.manager) > 0:
-            converter.write(frame.tobytes())
+        # send camera frame to ffmpeg process if websockets are connected
+        if any(
+            ws.environ["PATH_INFO"].endswith(camera) for ws in websocket_server.manager
+        ):
+            # write to the converter for the camera if clients are listening to the specific camera
+            converters[camera].write(frame.tobytes())
 
         if camera in previous_frames:
             frame_manager.delete(previous_frames[camera])
@@ -133,8 +149,10 @@ def output_frames(config, video_output_queue):
         frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
         frame_manager.delete(frame_id)
 
-    converter.exit()
-    broadcast_thread.join()
+    for c in converters.values():
+        c.exit()
+    for b in broadcasters.values():
+        b.join()
     websocket_server.manager.close_all()
     websocket_server.manager.stop()
     websocket_server.manager.join()
