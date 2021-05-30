@@ -6,7 +6,6 @@ FROM blakeblackshear/frigate-wheels:${WHEELS_VERSION}-${ARCH} as wheels
 FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
 FROM blakeblackshear/frigate-nginx:${NGINX_VERSION} as nginx
 FROM frigate-web as web
-FROM frigate-jsmpeg as jsmpeg
 
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
@@ -41,7 +40,8 @@ RUN pip3 install \
     voluptuous\
     Flask-Sockets \
     gevent \
-    gevent-websocket
+    gevent-websocket \
+    ws4py
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
@@ -55,9 +55,6 @@ ADD frigate frigate/
 ADD migrations migrations/
 
 COPY --from=web /opt/frigate/build web/
-
-COPY --from=jsmpeg /opt/build jsmpeg/
-COPY --from=jsmpeg /usr/local/bin/node /usr/local/bin/node
 
 COPY docker/rootfs/ /
 
