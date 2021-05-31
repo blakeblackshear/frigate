@@ -17,7 +17,6 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from frigate.birdseye import BirdsEyeFrameManager
 from frigate.config import FrigateConfig, CameraConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels

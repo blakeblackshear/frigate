@@ -3,6 +3,7 @@ import queue
 import signal
 import subprocess as sp
 import threading
+import numpy as np
 from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 
@@ -65,6 +66,32 @@ class BroadcastThread(threading.Thread):
                 break
 
 
+class BirdsEyeFrameManager:
+    def __init__(self, height, width):
+        frame_shape = (height, width)
+        yuv_shape = (height * 3 // 2, width)
+        self.frame = np.ndarray(yuv_shape, dtype=np.uint8)
+
+        # initialize the frame as black and with the frigate logo
+        self.blank_frame = np.zeros(yuv_shape, np.uint8)
+        self.blank_frame[:] = 128
+        self.blank_frame[0 : frame_shape[0], 0 : frame_shape[1]] = 16
+
+        self.frame[:] = self.blank_frame
+
+    def update(self, camera, object_count, motion_count, frame_time, frame):
+        # determine how many cameras are tracking objects (or recently were)
+        # decide on a layout for the birdseye view (try to avoid too much churn)
+        # calculate position of each camera
+        # calculate resolution of each position in the layout
+        # if layout is changing, wipe the frame black again
+        # For each camera currently tracking objects (alphabetical):
+        #   - resize the current frame and copy into the birdseye view
+        # signal to birdseye process that the frame is ready to send
+
+        self.frame[:] = frame
+
+
 def output_frames(config, video_output_queue):
     threading.current_thread().name = f"output"
     setproctitle(f"frigate.output")
@@ -103,10 +130,17 @@ def output_frames(config, video_output_queue):
             camera, converters[camera], websocket_server
         )
 
+    converters["birdseye"] = FFMpegConverter(1920, 1080, 640, 320, "1000k")
+    broadcasters["birdseye"] = BroadcastThread(
+        "birdseye", converters["birdseye"], websocket_server
+    )
+
     websocket_thread.start()
 
     for t in broadcasters.values():
         t.start()
+
+    birdseye_manager = BirdsEyeFrameManager(1080, 1920)
 
     while not stop_event.is_set():
         try:
@@ -130,6 +164,20 @@ def output_frames(config, video_output_queue):
         ):
             # write to the converter for the camera if clients are listening to the specific camera
             converters[camera].write(frame.tobytes())
+
+        # update birdseye if websockets are connected
+        if any(
+            ws.environ["PATH_INFO"].endswith("birdseye")
+            for ws in websocket_server.manager
+        ):
+            birdseye_manager.update(
+                camera,
+                len(current_tracked_objects),
+                len(motion_boxes),
+                frame_time,
+                frame,
+            )
+            converters["birdseye"].write(birdseye_manager.frame.tobytes())
 
         if camera in previous_frames:
             frame_manager.delete(previous_frames[camera])
