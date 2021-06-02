@@ -31,12 +31,12 @@ export default class VideoPlayer extends Component {
   }
 
   render() {
-    const { style } = this.props;
+    const { style, children } = this.props;
     return (
       <div style={style}>
         <div data-vjs-player>
-          <video playsinline ref={(node) => (this.videoNode = node)} className="video-js" />
-          <div className="vjs-playlist" />
+          <video ref={(node) => (this.videoNode = node)} className="video-js vjs-default-skin" controls playsinline />
+          {children}
         </div>
       </div>
     );
