@@ -468,26 +468,17 @@ def recordings(camera_name):
         date = f"{search.group(1)}-{search.group(2)}"
         if date not in dates:
             dates[date] = OrderedDict()
-        dates[date][search.group(3)] = 0
+        dates[date][search.group(3)] = []
 
-    events = (
-        Event.select(
-            fn.DATE(Event.start_time, "unixepoch", "localtime"),
-            fn.STRFTIME("%H", Event.start_time, "unixepoch", "localtime"),
-            fn.COUNT(Event.id),
-        )
-        .where(Event.camera == camera_name)
-        .group_by(
-            fn.DATE(Event.start_time, "unixepoch", "localtime"),
-            fn.STRFTIME("%H", Event.start_time, "unixepoch", "localtime"),
-        )
-        .tuples()
-    )
+    events = Event.select().where(Event.camera == camera_name)
 
-    for date, hour, count in events:
+    e: Event
+    for e in events:
+        date = datetime.fromtimestamp(e.start_time)
         key = date.strftime("%Y-%m-%d")
+        hour = date.strftime("%H")
         if key in dates and hour in dates[key]:
-            dates[key][hour] = count
+            dates[key][hour].append(model_to_dict(e, exclude=[Event.thumbnail]))
 
     return jsonify(
         [

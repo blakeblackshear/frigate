@@ -29,7 +29,7 @@ export default function App() {
                   <AsyncRoute path="/cameras/:camera" getComponent={Routes.getCamera} />
                   <AsyncRoute path="/events/:eventId" getComponent={Routes.getEvent} />
                   <AsyncRoute path="/events" getComponent={Routes.getEvents} />
-                  <AsyncRoute path="/recordings/:camera/:date?/:hour?" getComponent={Routes.getRecording} />
+                  <AsyncRoute path="/recordings/:camera/:date?/:hour?/:seconds?" getComponent={Routes.getRecording} />
                   <AsyncRoute path="/debug" getComponent={Routes.getDebug} />
                   <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
                   <Cameras default path="/" />

@@ -6,7 +6,7 @@ import RecordingPlaylist from '../components/RecordingPlaylist';
 import VideoPlayer from '../components/VideoPlayer';
 import { FetchStatus, useApiHost, useRecording } from '../api';
 
-export default function Recording({ camera, date, hour }) {
+export default function Recording({ camera, date, hour, seconds }) {
   const apiHost = useApiHost();
   const { data, status } = useRecording(camera);
 
@@ -50,6 +50,9 @@ export default function Recording({ camera, date, hour }) {
     this.player.playlist.autoadvance(0);
     if (selectedHour !== -1) {
       this.player.playlist.currentItem(selectedHour);
+      if (seconds !== undefined) {
+        this.player.currentTime(seconds);
+      }
     }
   }
 
@@ -64,6 +67,9 @@ export default function Recording({ camera, date, hour }) {
             player.playlist.autoadvance(0);
             if (selectedHour !== -1) {
               player.playlist.currentItem(selectedHour);
+              if (seconds !== undefined) {
+                player.currentTime(seconds);
+              }
             }
             this.player = player;
           }
