@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "date-fns": "^2.21.3",
-    "flickity": "^2.2.2",
     "idb-keyval": "^5.0.2",
     "immer": "^8.0.1",
     "preact": "^10.5.9",
