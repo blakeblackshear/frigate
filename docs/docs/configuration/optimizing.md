@@ -3,7 +3,7 @@ id: optimizing
 title: Optimizing performance
 ---
 
-- **Google Coral**: It is strongly recommended to use a Google Coral, but Frigate will fall back to CPU in the event one is not found. Offloading TensorFlow to the Google Coral is an order of magnitude faster and will reduce your CPU load dramatically. A $60 device will outperform $2000 CPU. Frigate should work with any supported Coral device from https://coral.ai
+- **Google Coral**: It is strongly recommended to use a Google Coral, Frigate will no longer fall back to CPU in the event one is not found. Offloading TensorFlow to the Google Coral is an order of magnitude faster and will reduce your CPU load dramatically. A $60 device will outperform $2000 CPU. Frigate should work with any supported Coral device from https://coral.ai
 - **Resolution**: For the `detect` input, choose a camera resolution where the smallest object you want to detect barely fits inside a 300x300px square. The model used by Frigate is trained on 300x300px images, so you will get worse performance and no improvement in accuracy by using a larger resolution since Frigate resizes the area where it is looking for objects to 300x300 anyway.
 - **FPS**: 5 frames per second should be adequate. Higher frame rates will require more CPU usage without improving detections or accuracy. Reducing the frame rate on your camera will have the greatest improvement on system resources.
 - **Hardware Acceleration**: Make sure you configure the `hwaccel_args` for your hardware. They provide a significant reduction in CPU usage if they are available.
