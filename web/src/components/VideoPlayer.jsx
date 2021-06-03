@@ -1,10 +1,13 @@
 import { h, Component } from 'preact';
 import videojs from 'video.js';
 import 'videojs-playlist';
+import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
+import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
 const defaultOptions = {
   controls: true,
+  playbackRates: [0.5, 1, 2, 4, 8],
   fluid: true,
 };
 
@@ -17,6 +20,10 @@ export default class VideoPlayer extends Component {
     };
     this.player = videojs(this.videoNode, videoJsOptions, function onPlayerReady() {
       onReady(this);
+    });
+    this.player.seekButtons({
+      forward: 30,
+      back: 15,
     });
   }
 
