@@ -29,7 +29,7 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
               }`}
             >
               <div className="flex-1">
-                <Link href={`/recordings/${camera}/${recording.date}/${item.hour}`} type="text">
+                <Link href={`/recording/${camera}/${recording.date}/${item.hour}`} type="text">
                   {item.hour}:00
                 </Link>
               </div>
@@ -87,7 +87,7 @@ export function EventCard({ camera, event, delay }) {
   const duration = addSeconds(new Date(0), differenceInSeconds(end, start));
   const seconds = Math.max(differenceInSeconds(start, startOfHour(start)) - delay - 10, 0);
   return (
-    <Link className="" href={`/recordings/${camera}/${format(start, 'yyyy-MM-dd')}/${format(start, 'HH')}/${seconds}`}>
+    <Link className="" href={`/recording/${camera}/${format(start, 'yyyy-MM-dd')}/${format(start, 'HH')}/${seconds}`}>
       <div className="flex flex-row mb-2">
         <div className="w-28 mr-4">
           <img className="antialiased" src={`${apiHost}/api/events/${event.id}/thumbnail.jpg`} />

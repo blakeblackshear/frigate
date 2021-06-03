@@ -30,7 +30,7 @@ function Camera({ name }) {
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => [
     { name: 'Events', href: `/events?camera=${name}` },
-    { name: 'Recordings', href: `/recordings/${name}` }
+    { name: 'Recordings', href: `/recording/${name}` }
   ], [name]);
   const icons = useMemo(
     () => [
