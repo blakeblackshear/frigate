@@ -28,18 +28,11 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
                 i === 0 ? 'border-t border-white border-opacity-50' : ''
               }`}
             >
-              {selectedDate === recording.date && selectedHour === item.hour ? (
-                <Fragment>
-                  <div className="flex-1 text-green-500">{item.hour}:00</div>
-                  <div className="flex-1 text-green-500">Now Playing</div>
-                </Fragment>
-              ) : (
-                <div className="flex-1">
-                  <Link href={`/recordings/${camera}/${recording.date}/${item.hour}`} type="text">
-                    {item.hour}:00
-                  </Link>
-                </div>
-              )}
+              <div className="flex-1">
+                <Link href={`/recordings/${camera}/${recording.date}/${item.hour}`} type="text">
+                  {item.hour}:00
+                </Link>
+              </div>
               <div className="flex-1 text-right">{item.events.length} Events</div>
             </div>
             {item.events.map((event) => (
