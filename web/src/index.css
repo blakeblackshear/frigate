@@ -25,11 +25,3 @@
     transform: rotate(360deg);
   }
 }
-
-.vjs-playlist-modal {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 33%;
-  height: 100%;
-}
