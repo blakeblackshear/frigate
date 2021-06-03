@@ -1,4 +1,4 @@
-import { h, Fragment } from 'preact';
+import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { addSeconds, differenceInSeconds, fromUnixTime, format, parseISO, startOfHour } from 'date-fns';
 import ArrowDropdown from '../icons/ArrowDropdown';
