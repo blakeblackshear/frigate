@@ -23,7 +23,7 @@ export default class VideoPlayer extends Component {
     });
     this.player.seekButtons({
       forward: 30,
-      back: 15,
+      back: 10,
     });
   }
 
