@@ -61,6 +61,7 @@ export default function Event({ eventId }) {
             src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`}
             controls
           />
+          <a href={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} download>Download Clip</a>
         </Fragment>
       ) : (
         <p>No clip available</p>
