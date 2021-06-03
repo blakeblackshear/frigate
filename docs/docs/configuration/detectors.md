@@ -42,6 +42,15 @@ detectors:
     device: pci:1
 ```
 
+Native Corals (Dev Board):
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: ''
+```
+
 Mixing Corals:
 
 ```yaml
