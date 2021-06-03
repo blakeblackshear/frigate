@@ -534,6 +534,7 @@ def recordings(camera_name):
         [
             {
                 "date": date,
+                "events": sum([len(value["events"]) for value in hours.values()]),
                 "recordings": [
                     {"hour": hour, "delay": value["delay"], "events": value["events"]}
                     for hour, value in hours.items()
