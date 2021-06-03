@@ -97,10 +97,8 @@ export function EventCard({ camera, event, delay }) {
             <div className="flex flex-row items-center">
               <div className="flex-1">
                 <div className="text-2xl text-white leading-tight capitalize">{event.label}</div>
-                <div className="text-sm md:text-normal text-gray-300">
-                  {format(start, 'HH:mm:ss')} - {format(end, 'HH:mm:ss')}
-                </div>
-                <div className="text-sm md:text-normal text-gray-300">Duration: {format(duration, 'mm:ss')}</div>
+                <div className="text-xs md:text-normal text-gray-300">Start: {format(start, 'HH:mm:ss')}</div>
+                <div className="text-xs md:text-normal text-gray-300">Duration: {format(duration, 'mm:ss')}</div>
               </div>
               <div className="text-lg text-white text-right leading-tight">{(event.top_score * 100).toFixed(1)}%</div>
             </div>
