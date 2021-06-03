@@ -1,4 +1,5 @@
 import { h, Component } from 'preact';
+import { useEffect, useRef } from 'preact/hooks';
 import videojs from 'video.js';
 import 'videojs-playlist';
 import 'video.js/dist/video-js.css';
@@ -7,6 +8,27 @@ const defaultOptions = {
   controls: true,
   fluid: true,
 };
+
+// export default function VideoPlayer({ children, options, onReady = () => {} }) {
+//   const playerRef = useRef(null);
+//   useEffect(() => {
+//     if (playerRef.current) {
+//       const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
+//         onReady(player);
+//       });
+//       return () => {
+//         player.dispose();
+//       };
+//     }
+//   }, [options, onReady]);
+
+//   return (
+//     <div data-vjs-player>
+//       <video ref={playerRef} className="video-js vjs-default-skin" controls playsInline />
+//       {children}
+//     </div>
+//   );
+// }
 
 export default class VideoPlayer extends Component {
   componentDidMount() {
@@ -21,14 +43,16 @@ export default class VideoPlayer extends Component {
   }
 
   componentWillUnmount() {
+    const { onDispose = () => {} } = this.props;
     if (this.player) {
       this.player.dispose();
+      onDispose();
     }
   }
 
-  shouldComponentUpdate() {
-    return false;
-  }
+  // shouldComponentUpdate() {
+  //   return false;
+  // }
 
   render() {
     const { style, children } = this.props;
