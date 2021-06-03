@@ -28,7 +28,7 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
                 i === 0 ? 'border-t border-white border-opacity-50' : ''
               }`}
             >
-              {selectedDate == recording.date && selectedHour === item.hour ? (
+              {selectedDate === recording.date && selectedHour === item.hour ? (
                 <Fragment>
                   <div className="flex-1 text-green-500">{item.hour}:00</div>
                   <div className="flex-1 text-green-500">Now Playing</div>
@@ -113,7 +113,7 @@ export function EventCard({ camera, event, delay }) {
             </div>
           </div>
         </div>
-        <div className="w-6"></div>
+        <div className="w-6" />
       </div>
     </Link>
   );
