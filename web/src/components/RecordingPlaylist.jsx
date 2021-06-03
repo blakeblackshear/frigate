@@ -7,7 +7,7 @@ import Link from '../components/Link';
 import Menu from '../icons/Menu';
 import MenuOpen from '../icons/MenuOpen';
 
-export default function RecordingPlaylist({ camera, recordings, selectedDate }) {
+export default function RecordingPlaylist({ camera, recordings, selectedDate, selectedHour }) {
   const [active, setActive] = useState(true);
   const toggle = () => setActive(!active);
 
@@ -19,13 +19,17 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate }) 
         {recording.recordings.map((item) => (
           <div className="mb-2">
             <div className="text-white bg-black bg-opacity-50 border-b border-gray-500 py-2 px-4 mb-1">
-              <Link href={`/recordings/${camera}/${recording.date}/${item.hour}`} type="text">
-                {item.hour}:00
-              </Link>
+              {recording.date === selectedDate && item.hour === selectedHour ? (
+                <span className="text-green-500">{item.hour}:00</span>
+              ) : (
+                <Link href={`/recordings/${camera}/${recording.date}/${item.hour}`} type="text">
+                  {item.hour}:00
+                </Link>
+              )}
               <span className="float-right">{item.events.length} Events</span>
             </div>
             {item.events.map((event) => (
-              <EventCard camera={camera} event={event} />
+              <EventCard camera={camera} event={event} delay={item.delay} />
             ))}
           </div>
         ))}

@@ -44,7 +44,7 @@ export default function Recording({ camera, date, hour, seconds }) {
 
   const selectedHour = hours.indexOf(hour);
 
-  if (this.player !== undefined) {
+  if (this.player) {
     this.player.playlist([]);
     this.player.playlist(playlist);
     this.player.playlist.autoadvance(0);
@@ -74,8 +74,11 @@ export default function Recording({ camera, date, hour, seconds }) {
             this.player = player;
           }
         }}
+        onDispose={() => {
+          this.player = null;
+        }}
       >
-        <RecordingPlaylist camera={camera} recordings={data} selectedDate={selectedKey} />
+        <RecordingPlaylist camera={camera} recordings={data} selectedDate={selectedKey} selectedHour={hour} />
       </VideoPlayer>
     </div>
   );

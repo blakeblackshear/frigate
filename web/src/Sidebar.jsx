@@ -27,13 +27,17 @@ export default function Sidebar() {
           ) : null
         }
       </Match>
-      <Match path="/recordings/:camera/:date?/:hour?">
+      <Match path="/recordings/:camera/:date?/:hour?/:seconds?">
         {({ matches }) =>
           matches ? (
             <Fragment>
               <Separator />
               {cameras.map((camera) => (
-                <Destination href={`/recordings/${camera}`} text={camera} />
+                <Destination
+                  path={`/recordings/${camera}/:date?/:hour?/:seconds?`}
+                  href={`/recordings/${camera}`}
+                  text={camera}
+                />
               ))}
               <Separator />
             </Fragment>

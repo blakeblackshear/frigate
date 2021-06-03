@@ -23,7 +23,7 @@ from flask import (
     request,
 )
 from flask_sockets import Sockets
-from peewee import SqliteDatabase, operator, fn, DoesNotExist
+from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
 from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR, RECORD_DIR
@@ -462,15 +462,54 @@ def recordings(camera_name):
 
     dates = OrderedDict()
     for path in files:
+        first = glob.glob(f"{path}/00.*.mp4")
+        delay = 0
+        if len(first) > 0:
+            delay = int(first[0].strip(path).split(".")[1])
         search = re.search(r".+/(\d{4}[-]\d{2})/(\d{2})/(\d{2}).+", path)
         if not search:
             continue
         date = f"{search.group(1)}-{search.group(2)}"
         if date not in dates:
             dates[date] = OrderedDict()
-        dates[date][search.group(3)] = []
+        dates[date][search.group(3)] = {"delay": delay, "events": []}
 
-    events = Event.select().where(Event.camera == camera_name)
+    # Packing intervals to return all events with same label and overlapping times as one row.
+    # See: https://blogs.solidq.com/en/sqlserver/packing-intervals/
+    events = Event.raw(
+        """WITH C1 AS
+        (
+        SELECT id, label, camera, top_score, start_time AS ts, +1 AS type, 1 AS sub
+        FROM event
+        WHERE camera = ?
+        UNION ALL
+        SELECT id, label, camera, top_score, end_time + 15 AS ts, -1 AS type, 0 AS sub
+        FROM event
+        WHERE camera = ?
+        ),
+        C2 AS
+        (
+        SELECT C1.*,
+        SUM(type) OVER(PARTITION BY label ORDER BY ts, type DESC
+        ROWS BETWEEN UNBOUNDED PRECEDING
+        AND CURRENT ROW) - sub AS cnt
+        FROM C1
+        ),
+        C3 AS
+        (
+        SELECT id, label, camera, top_score, ts,
+        (ROW_NUMBER() OVER(PARTITION BY label ORDER BY ts) - 1) / 2 + 1
+        AS grpnum
+        FROM C2
+        WHERE cnt = 0
+        )
+        SELECT MIN(id) as id, label, camera, MAX(top_score) as top_score, MIN(ts) AS start_time, max(ts) AS end_time
+        FROM C3
+        GROUP BY label, grpnum
+        ORDER BY start_time;""",
+        camera_name,
+        camera_name,
+    )
 
     e: Event
     for e in events:
@@ -478,14 +517,26 @@ def recordings(camera_name):
         key = date.strftime("%Y-%m-%d")
         hour = date.strftime("%H")
         if key in dates and hour in dates[key]:
-            dates[key][hour].append(model_to_dict(e, exclude=[Event.thumbnail]))
+            dates[key][hour]["events"].append(
+                model_to_dict(
+                    e,
+                    exclude=[
+                        Event.false_positive,
+                        Event.zones,
+                        Event.thumbnail,
+                        Event.has_clip,
+                        Event.has_snapshot,
+                    ],
+                )
+            )
 
     return jsonify(
         [
             {
                 "date": date,
                 "recordings": [
-                    {"hour": hour, "events": events} for hour, events in hours.items()
+                    {"hour": hour, "delay": value["delay"], "events": value["events"]}
+                    for hour, value in hours.items()
                 ],
             }
             for date, hours in dates.items()
