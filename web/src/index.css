@@ -25,3 +25,7 @@
     transform: rotate(360deg);
   }
 }
+
+.video-js.vjs-has-started .vjs-touch-overlay {
+  display: none;
+}
