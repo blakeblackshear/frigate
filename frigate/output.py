@@ -1,12 +1,14 @@
+import datetime
+import math
 import multiprocessing as mp
 import queue
 import signal
 import subprocess as sp
 import threading
-import numpy as np
 from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 
+import numpy as np
 from setproctitle import setproctitle
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
@@ -68,28 +70,79 @@ class BroadcastThread(threading.Thread):
 
 class BirdsEyeFrameManager:
     def __init__(self, height, width):
-        frame_shape = (height, width)
-        yuv_shape = (height * 3 // 2, width)
-        self.frame = np.ndarray(yuv_shape, dtype=np.uint8)
+        self.frame_shape = (height, width)
+        self.yuv_shape = (height * 3 // 2, width)
+        self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
 
         # initialize the frame as black and with the frigate logo
-        self.blank_frame = np.zeros(yuv_shape, np.uint8)
+        self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
         self.blank_frame[:] = 128
-        self.blank_frame[0 : frame_shape[0], 0 : frame_shape[1]] = 16
+        self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
 
         self.frame[:] = self.blank_frame
 
-    def update(self, camera, object_count, motion_count, frame_time, frame):
-        # determine how many cameras are tracking objects (or recently were)
-        # decide on a layout for the birdseye view (try to avoid too much churn)
-        # calculate position of each camera
+        self.last_active_frames = {}
+        self.camera_layout = []
+
+    def clear_frame(self):
+        self.frame[:] = self.blank_frame
+
+    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+
+        # maintain time of most recent active frame for each camera
+        if object_count > 0:
+            self.last_active_frames[camera] = frame_time
+
+        # TODO: avoid the remaining work if exceeding 5 fps and return False
+
+        # determine how many cameras are tracking objects within the last 30 seconds
+        now = datetime.datetime.now().timestamp()
+        active_cameras = [
+            cam
+            for cam, frame_time in self.last_active_frames.items()
+            if now - frame_time < 30
+        ]
+
+        if len(active_cameras) == 0 and len(self.camera_layout) == 0:
+            return False
+
+        # if the sqrt of the layout and the active cameras don't round to the same value,
+        # we need to resize the layout
+        if round(math.sqrt(len(active_cameras))) != round(
+            math.sqrt(len(self.camera_layout))
+        ):
+            # decide on a layout for the birdseye view (try to avoid too much churn)
+            self.columns = math.ceil(math.sqrt(len(active_cameras)))
+            self.rows = round(math.sqrt(len(active_cameras)))
+
+            self.camera_layout = [None] * (self.columns * self.rows)
+            self.clear_frame()
+
+        # remove inactive cameras from the layout
+        self.camera_layout = [
+            cam if cam in active_cameras else None for cam in self.camera_layout
+        ]
+        # place the active cameras in the layout
+        while len(active_cameras) > 0:
+            cam = active_cameras.pop()
+            if cam in self.camera_layout:
+                continue
+            # place camera in the first available spot in the layout
+            for i in range(0, len(self.camera_layout) - 1):
+                if self.camera_layout[i] is None:
+                    self.camera_layout[i] = cam
+                    break
+
         # calculate resolution of each position in the layout
-        # if layout is changing, wipe the frame black again
-        # For each camera currently tracking objects (alphabetical):
+        width = self.frame_shape[1] / self.columns
+        height = self.frame_shape[0] / self.rows
+
+        # For each camera in the layout:
         #   - resize the current frame and copy into the birdseye view
-        # signal to birdseye process that the frame is ready to send
 
         self.frame[:] = frame
+
+        return True
 
 
 def output_frames(config, video_output_queue):
@@ -170,14 +223,14 @@ def output_frames(config, video_output_queue):
             ws.environ["PATH_INFO"].endswith("birdseye")
             for ws in websocket_server.manager
         ):
-            birdseye_manager.update(
+            if birdseye_manager.update(
                 camera,
                 len(current_tracked_objects),
                 len(motion_boxes),
                 frame_time,
                 frame,
-            )
-            converters["birdseye"].write(birdseye_manager.frame.tobytes())
+            ):
+                converters["birdseye"].write(birdseye_manager.frame.tobytes())
 
         if camera in previous_frames:
             frame_manager.delete(previous_frames[camera])
