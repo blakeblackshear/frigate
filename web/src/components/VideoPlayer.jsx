@@ -1,5 +1,6 @@
 import { h, Component } from 'preact';
 import videojs from 'video.js';
+import 'videojs-mobile-ui';
 import 'videojs-playlist';
 import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
@@ -24,6 +25,11 @@ export default class VideoPlayer extends Component {
     this.player.seekButtons({
       forward: 30,
       back: 10,
+    });
+    this.player.mobileUi({
+      fullscreen: {
+        iOS: true,
+      },
     });
   }
 
