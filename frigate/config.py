@@ -55,6 +55,10 @@ MQTT_SCHEMA = vol.Schema(
         vol.Optional("stats_interval", default=60): int,
         vol.Inclusive("user", "auth"): str,
         vol.Inclusive("password", "auth"): str,
+        vol.Optional("tls_ca_certs"): str,
+        vol.Optional("tls_client_cert"): str,
+        vol.Optional("tls_client_key"): str,
+        vol.Optional("tls_insecure"): bool,
     }
 )
 
@@ -68,6 +72,10 @@ class MqttConfig:
     stats_interval: int
     user: Optional[str]
     password: Optional[str]
+    tls_ca_certs: Optional[str]
+    tls_client_cert: Optional[str]
+    tls_client_key: Optional[str]
+    tls_insecure: Optional[bool]
 
     @classmethod
     def build(cls, config) -> MqttConfig:
@@ -79,6 +87,10 @@ class MqttConfig:
             config["stats_interval"],
             config.get("user"),
             config.get("password"),
+            config.get("tls_ca_certs"),
+            config.get("tls_client_cert"),
+            config.get("tls_client_key"),
+            config.get("tls_insecure"),
         )
 
     def to_dict(self) -> Dict[str, Any]:
