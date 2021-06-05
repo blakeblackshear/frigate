@@ -5,7 +5,7 @@ title: Installation
 
 Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). See instructions below for installing the HassOS addon.
 
-For HomeAssistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with HomeAssistant by automatically setting up camera entities, sensors, media browser for clips and recordings, and a public API to simplify notifications.
+For Home Assistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with Home Assistant by automatically setting up camera entities, sensors, media browser for clips and recordings, and a public API to simplify notifications.
 
 Note that HassOS Addons and custom components are different things. If you are already running Frigate with Docker directly, you do not need the Addon since the Addon would run another instance of Frigate.
 
@@ -14,26 +14,27 @@ Note that HassOS Addons and custom components are different things. If you are a
 HassOS users can install via the addon repository. Frigate requires an MQTT server.
 
 1. Navigate to Supervisor > Add-on Store > Repositories
-1. Add https://github.com/blakeblackshear/frigate-hass-addons
-1. Setup your configuration in the `Configuration` tab
-1. Start the addon container
-1. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
+2. Add https://github.com/blakeblackshear/frigate-hass-addons
+3. Setup your network configuration in the `Configuration` tab if deisred
+4. Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
+5. Start the addon container
+6. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
 
 ## Docker
 
 Make sure you choose the right image for your architecture:
 
-|Arch|Image Name|
-|-|-|
-|amd64|blakeblackshear/frigate:stable-amd64|
-|amd64nvidia|blakeblackshear/frigate:stable-amd64nvidia|
-|armv7|blakeblackshear/frigate:stable-armv7|
-|aarch64|blakeblackshear/frigate:stable-aarch64|
+| Arch        | Image Name                                 |
+| ----------- | ------------------------------------------ |
+| amd64       | blakeblackshear/frigate:stable-amd64       |
+| amd64nvidia | blakeblackshear/frigate:stable-amd64nvidia |
+| armv7       | blakeblackshear/frigate:stable-armv7       |
+| aarch64     | blakeblackshear/frigate:stable-aarch64     |
 
 It is recommended to run with docker-compose:
 
 ```yaml
-version: '3.9'
+version: "3.9"
 services:
   frigate:
     container_name: frigate
@@ -52,10 +53,10 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - '5000:5000'
-      - '1935:1935' # RTMP feeds
+      - "5000:5000"
+      - "1935:1935" # RTMP feeds
     environment:
-      FRIGATE_RTSP_PASSWORD: 'password'
+      FRIGATE_RTSP_PASSWORD: "password"
 ```
 
 If you can't use docker compose, you can run the container with something similar to this:
@@ -66,7 +67,7 @@ docker run -d \
   --restart=unless-stopped \
   --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
   --device /dev/bus/usb:/dev/bus/usb \
-  --device /dev/dri/renderD128
+  --device /dev/dri/renderD128 \
   -v <path_to_directory_for_media>:/media/frigate \
   -v <path_to_config_file>:/config/config.yml:ro \
   -v /etc/localtime:/etc/localtime:ro \
@@ -86,7 +87,7 @@ You can calculate the necessary shm-size for each camera with the following form
 (width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
 ```
 
-The shm size cannot be set per container for HomeAssistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+The shm size cannot be set per container for Home Assistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 
 ## Kubernetes
 
@@ -119,5 +120,5 @@ lxc.cap.drop:
 ```
 
 ### ESX
-For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
 
+For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).

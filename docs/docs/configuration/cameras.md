@@ -41,9 +41,11 @@ cameras:
 ## Masks & Zones
 
 ### Masks
+
 Masks are used to ignore initial detection in areas of your camera's field of view.
 
 There are two types of masks available:
+
 - **Motion masks**: Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the video feed with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. Over masking will make it more difficult for objects to be tracked. To see this effect, create a mask, and then watch the video feed with `Motion Boxes` enabled again.
 - **Object filter masks**: Object filter masks are used to filter out false positives for a given object type. These should be used to filter any areas where it is not possible for an object of that type to be. The bottom center of the detected object's bounding box is evaluated against the mask. If it is in a masked area, it is assumed to be a false positive. For example, you may want to mask out rooftops, walls, the sky, treetops for people. For cars, masking locations other than the street or your driveway will tell frigate that anything in your yard is a false positive.
 
@@ -60,7 +62,7 @@ Example of a finished row corresponding to the below example image:
 
 ```yaml
 motion:
-  mask: '0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432'
+  mask: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
 ```
 
 ![poly](/img/example-mask-poly.png)
@@ -102,6 +104,8 @@ zones:
 
 ## Objects
 
+For a list of available objects, see the [objects documentation](./objects.mdx).
+
 ```yaml
 # Optional: Camera level object filters config.
 objects:
@@ -109,7 +113,7 @@ objects:
     - person
     - car
   # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
-  # Checks based on the bottom center of the bounding box of the object. 
+  # Checks based on the bottom center of the bounding box of the object.
   # NOTE: This mask is COMBINED with the object type specific mask below
   mask: 0,0,1000,0,1000,200,0,200
   filters:
@@ -127,7 +131,7 @@ objects:
 
 Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `/tmp/cache` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to `/media/frigate/clips`. Clips are retained according to the retention settings defined on the config for each object type.
 
-These clips will not be playable in the web UI or in HomeAssistant's media browser unless your camera sends video as h264.
+These clips will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
 
 :::caution
 Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
@@ -187,7 +191,7 @@ snapshots:
 
 ## 24/7 Recordings
 
-24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in HomeAssistant's media browser. Each camera supports a configurable retention policy in the config.
+24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
 
 :::caution
 Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
@@ -204,7 +208,7 @@ record:
 
 ## RTMP streams
 
-Frigate can re-stream your video feed as a RTMP feed for other applications such as HomeAssistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and HomeAssistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
+Frigate can re-stream your video feed as a RTMP feed for other applications such as Home Assistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and Home Assistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
 Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
 
@@ -368,7 +372,7 @@ cameras:
         - person
         - car
       # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
-      # Checks based on the bottom center of the bounding box of the object. 
+      # Checks based on the bottom center of the bounding box of the object.
       # NOTE: This mask is COMBINED with the object type specific mask below
       mask: 0,0,1000,0,1000,200,0,200
       filters:
@@ -383,6 +387,37 @@ cameras:
 ```
 
 ## Camera specific configuration
+
+### MJPEG Cameras
+
+The input and output parameters need to be adjusted for MJPEG cameras
+
+```yaml
+input_args:
+  - -avoid_negative_ts
+  - make_zero
+  - -fflags
+  - nobuffer
+  - -flags
+  - low_delay
+  - -strict
+  - experimental
+  - -fflags
+  - +genpts+discardcorrupt
+  - -r
+  - "3" # <---- adjust depending on your desired frame rate from the mjpeg image
+  - -use_wallclock_as_timestamps
+  - "1"
+```
+
+Note that mjpeg cameras require encoding the video into h264 for clips, recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
+
+```yaml
+output_args:
+  record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+  clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+  rtmp: -c:v libx264 -an -f flv
+```
 
 ### RTMP Cameras
 
@@ -402,10 +437,11 @@ ffmpeg:
     - -fflags
     - +genpts+discardcorrupt
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```
 
 ### Reolink 410/520 (possibly others)
+
 Several users have reported success with the rtmp video from Reolink cameras.
 
 ```yaml
@@ -422,11 +458,10 @@ ffmpeg:
     - -fflags
     - +genpts+discardcorrupt
     - -rw_timeout
-    - '5000000'
+    - "5000000"
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```
-
 
 ### Blue Iris RTSP Cameras
 
@@ -446,7 +481,7 @@ ffmpeg:
     - -rtsp_transport
     - tcp
     - -stimeout
-    - '5000000'
+    - "5000000"
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```

@@ -22,7 +22,7 @@ Accepts the following query string parameters:
 | `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
 | `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
 
-You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/back?fps=10` or both with `?fps=10&h=1000`.
+You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
 ### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
 
@@ -55,7 +55,7 @@ Example parameters:
 
 ### `GET /api/stats`
 
-Contains some granular debug info that can be used for sensors in HomeAssistant.
+Contains some granular debug info that can be used for sensors in Home Assistant.
 
 Sample response:
 
@@ -176,7 +176,7 @@ Events from the database. Accepts the following query string parameters:
 
 ### `GET /api/events/summary`
 
-Returns summary data for events in the database. Used by the HomeAssistant integration.
+Returns summary data for events in the database. Used by the Home Assistant integration.
 
 ### `GET /api/events/<id>`
 

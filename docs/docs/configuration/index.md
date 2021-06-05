@@ -3,7 +3,9 @@ id: index
 title: Configuration
 ---
 
-HassOS users can manage their configuration directly in the addon Configuration tab. For other installations, the default location for the config file is `/config/config.yml`. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](cameras.md).
+For HassOS installations, the default location for the config file is `/config/frigate.yml`.
+
+For all other installations, the default location for the config file is '/config/config.yml'. This can be overridden with the `CONFIG_FILE` environment variable. Camera specific ffmpeg parameters are documented [here](cameras.md).
 
 It is recommended to start with a minimal configuration and add to it:
 
@@ -112,7 +114,7 @@ ffmpeg:
 
 ### `objects`
 
-Can be overridden at the camera level
+Can be overridden at the camera level. For a list of available objects, see the [objects documentation](./objects.mdx).
 
 ```yaml
 objects:
@@ -130,4 +132,20 @@ objects:
       min_score: 0.5
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
       threshold: 0.7
+```
+
+### `record`
+
+Can be overridden at the camera level. 24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
+
+:::caution
+Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
+:::
+
+```yaml
+record:
+  # Optional: Enable recording
+  enabled: False
+  # Optional: Number of days to retain
+  retain_days: 30
 ```
