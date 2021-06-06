@@ -31,7 +31,7 @@ describe('Sidebar', () => {
     expect(screen.queryByRole('link', { name: 'side' })).toBeInTheDocument();
   });
 
-  test('render cameras if in camera route', async () => {
+  test('render cameras if in record route', async () => {
     window.history.replaceState({}, 'Front Recordings', '/recording/front');
     render(<Sidebar />);
     expect(screen.queryByRole('link', { name: 'front' })).toBeInTheDocument();
