@@ -456,7 +456,7 @@ def recordings(camera_name):
     files = glob.glob(f"{RECORD_DIR}/*/*/*/{camera_name}")
 
     if len(files) == 0:
-        return "No recordings found.", 404
+        return jsonify([])
 
     files.sort()
 
