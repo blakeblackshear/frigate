@@ -12,8 +12,8 @@ describe('Cameras Route', () => {
     useConfigMock = jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
       data: {
         cameras: {
-          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] } },
-          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] } },
+          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: true } },
+          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: false } },
         },
       },
       status: 'loaded',
@@ -39,6 +39,14 @@ describe('Cameras Route', () => {
 
     expect(screen.queryByText('side')).toBeInTheDocument();
     expect(screen.queryByText('side').closest('a')).toHaveAttribute('href', '/cameras/side');
+  });
+
+  test('shows recordings link', async () => {
+    render(<Cameras />);
+
+    expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
+
+    expect(screen.queryAllByText('Recordings')).toHaveLength(1);
   });
 
   test('buttons toggle detect, clips, and snapshots', async () => {
