@@ -16,22 +16,25 @@ export default function Cameras() {
     <ActivityIndicator />
   ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
-      {Object.keys(config.cameras).map((camera) => (
-        <Camera name={camera} />
+      {Object.entries(config.cameras).map(([camera, conf]) => (
+        <Camera name={camera} conf={conf} />
       ))}
     </div>
   );
 }
 
-function Camera({ name }) {
+function Camera({ name, conf }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const { payload: clipValue, send: sendClips } = useClipsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
-  const buttons = useMemo(() => [
-    { name: 'Events', href: `/events?camera=${name}` },
-    { name: 'Recordings', href: `/recording/${name}` }
-  ], [name]);
+  const buttons = useMemo(() => {
+    const result = [{ name: 'Events', href: `/events?camera=${name}` }];
+    if (conf.record.enabled) {
+      result.push({ name: 'Recordings', href: `/recording/${name}` });
+    }
+    return result;
+  }, [name, conf.record.enabled]);
   const icons = useMemo(
     () => [
       {

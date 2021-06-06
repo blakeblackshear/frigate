@@ -14,6 +14,18 @@ export default function Recording({ camera, date, hour, seconds }) {
     return <ActivityIndicator />;
   }
 
+  if (data.length === 0) {
+    return (
+      <div className="space-y-4">
+        <Heading>{camera} Recordings</Heading>
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+          <p class="font-bold">No Recordings Found</p>
+          <p>Make sure you have enabled the record role in your configuration for the {camera} camera.</p>
+        </div>
+      </div>
+    );
+  }
+
   const recordingDates = data.map((item) => item.date);
   const selectedDate = closestTo(
     date ? parseISO(date) : new Date(),
