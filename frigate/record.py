@@ -1,19 +1,18 @@
 import datetime
 import itertools
-import json
 import logging
 import os
-import queue
+import random
+import string
 import subprocess as sp
 import threading
-import time
-from collections import defaultdict
 from pathlib import Path
 
 import psutil
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.const import RECORD_DIR
+from frigate.models import Recordings
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +83,7 @@ class RecordingMaintainer(threading.Thread):
             p = sp.run(ffprobe_cmd, capture_output=True)
             if p.returncode == 0:
                 duration = float(p.stdout.decode().strip())
+                end_time = start_time + datetime.timedelta(seconds=duration)
             else:
                 logger.info(f"bad file: {f}")
                 os.remove(os.path.join(RECORD_DIR, f))
@@ -97,8 +97,21 @@ class RecordingMaintainer(threading.Thread):
                 os.makedirs(directory)
 
             file_name = f"{start_time.strftime('%M.%S.mp4')}"
+            file_path = os.path.join(directory, file_name)
 
-            os.rename(os.path.join(RECORD_DIR, f), os.path.join(directory, file_name))
+            os.rename(os.path.join(RECORD_DIR, f), file_path)
+
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            Recordings.create(
+                id=f"{start_time.timestamp()}-{rand_id}",
+                camera=camera,
+                path=file_path,
+                start_time=start_time.timestamp(),
+                end_time=end_time.timestamp(),
+                duration=duration,
+            )
 
     def expire_files(self):
         delete_before = {}
@@ -112,6 +125,7 @@ class RecordingMaintainer(threading.Thread):
             if not p.parent.name in delete_before:
                 continue
             if p.stat().st_mtime < delete_before[p.parent.name]:
+                Recordings.delete().where(Recordings.path == str(p)).execute()
                 p.unlink(missing_ok=True)
 
     def run(self):

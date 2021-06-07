@@ -85,7 +85,11 @@ export function EventCard({ camera, event, delay }) {
   const start = fromUnixTime(event.start_time);
   const end = fromUnixTime(event.end_time);
   const duration = addSeconds(new Date(0), differenceInSeconds(end, start));
-  const seconds = Math.max(differenceInSeconds(start, startOfHour(start)) - delay - 10, 0);
+  const position = differenceInSeconds(start, startOfHour(start));
+  const offset = Object.entries(delay)
+    .map(([p, d]) => (position > p ? d : 0))
+    .reduce((p, c) => p + c);
+  const seconds = Math.max(position - offset - 10, 0);
   return (
     <Link className="" href={`/recording/${camera}/${format(start, 'yyyy-MM-dd')}/${format(start, 'HH')}/${seconds}`}>
       <div className="flex flex-row mb-2">
