@@ -88,7 +88,7 @@ export function EventCard({ camera, event, delay }) {
   const position = differenceInSeconds(start, startOfHour(start));
   const offset = Object.entries(delay)
     .map(([p, d]) => (position > p ? d : 0))
-    .reduce((p, c) => p + c);
+    .reduce((p, c) => p + c, 0);
   const seconds = Math.max(position - offset - 10, 0);
   return (
     <Link className="" href={`/recording/${camera}/${format(start, 'yyyy-MM-dd')}/${format(start, 'HH')}/${seconds}`}>
