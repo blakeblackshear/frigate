@@ -18,6 +18,11 @@ export async function getEvents(url, cb, props) {
   return module.default;
 }
 
+export async function getRecording(url, cb, props) {
+  const module = await import('./Recording.jsx');
+  return module.default;
+}
+
 export async function getDebug(url, cb, props) {
   const module = await import('./Debug.jsx');
   return module.default;

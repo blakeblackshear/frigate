@@ -1,5 +1,6 @@
 .DS_Store
 *.pyc
+*.swp
 debug
 .vscode
 config/config.yml
@@ -10,3 +11,4 @@ frigate/version.py
 web/build
 web/node_modules
 web/coverage
+core

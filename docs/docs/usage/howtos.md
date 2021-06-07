@@ -6,10 +6,6 @@ sidebar_label: Community Guides
 
 ## Communitiy Guides/How-To's
 
-You can find here some of the communitiy videos and articles about Frigate:
-
-- Home Assistant Frigate integration for local image recognition (YouTube video) - [LINK](https://youtu.be/Q2UT78lFQpo)
-- Home Assistant Frigate integration for local image recognition (Article) - [LINK](https://peyanski.com/home-assistant-frigate-integration/)
-- Best Camera AI Person & Object Detection - How to Setup Frigate w/ Home Assistant (YouTube video) - [LINK](https://youtu.be/V8vGdoYO6-Y)
-
-If you find more good Frigate guides - let us know!
+- Best Camera AI Person & Object Detection - How to Setup Frigate w/ Home Assistant - digiblurDIY [YouTube](https://youtu.be/V8vGdoYO6-Y) - [Article](https://www.digiblur.com/2021/05/how-to-setup-frigate-home-assistant.html)
+- Even More Free Local Object Detection with Home Assistant - Frigate Install - Everything Smart Home [YouTube](https://youtu.be/pqDCEZSVeRk)
+- Home Assistant Frigate integration for local image recognition - KPeyanski [YouTube](https://youtu.be/Q2UT78lFQpo) - [Article](https://peyanski.com/home-assistant-frigate-integration/)

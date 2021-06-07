@@ -9,7 +9,7 @@ import NavigationDrawer, { Destination, Separator } from './components/Navigatio
 
 export default function Sidebar() {
   const { data: config } = useConfig();
-  const cameras = useMemo(() => Object.keys(config.cameras), [config]);
+  const cameras = useMemo(() => Object.entries(config.cameras), [config]);
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -19,9 +19,31 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.map((camera) => (
+              {cameras.map(([camera]) => (
                 <Destination href={`/cameras/${camera}`} text={camera} />
               ))}
+              <Separator />
+            </Fragment>
+          ) : null
+        }
+      </Match>
+      <Match path="/recording/:camera/:date?/:hour?/:seconds?">
+        {({ matches }) =>
+          matches ? (
+            <Fragment>
+              <Separator />
+              {cameras.map(([camera, conf]) => {
+                if (conf.record.enabled) {
+                  return (
+                    <Destination
+                      path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+                      href={`/recording/${camera}`}
+                      text={camera}
+                    />
+                  );
+                }
+                return null;
+              })}
               <Separator />
             </Fragment>
           ) : null

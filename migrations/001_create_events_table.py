@@ -32,10 +32,14 @@ except ImportError:
 
 SQL = pw.SQL
 
+
 def migrate(migrator, database, fake=False, **kwargs):
-    migrator.sql('CREATE TABLE IF NOT EXISTS "event" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "label" VARCHAR(20) NOT NULL, "camera" VARCHAR(20) NOT NULL, "start_time" DATETIME NOT NULL, "end_time" DATETIME NOT NULL, "top_score" REAL NOT NULL, "false_positive" INTEGER NOT NULL, "zones" JSON NOT NULL, "thumbnail" TEXT NOT NULL)')
+    migrator.sql(
+        'CREATE TABLE IF NOT EXISTS "event" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "label" VARCHAR(20) NOT NULL, "camera" VARCHAR(20) NOT NULL, "start_time" DATETIME NOT NULL, "end_time" DATETIME NOT NULL, "top_score" REAL NOT NULL, "false_positive" INTEGER NOT NULL, "zones" JSON NOT NULL, "thumbnail" TEXT NOT NULL)'
+    )
     migrator.sql('CREATE INDEX IF NOT EXISTS "event_label" ON "event" ("label")')
     migrator.sql('CREATE INDEX IF NOT EXISTS "event_camera" ON "event" ("camera")')
+
 
 def rollback(migrator, database, fake=False, **kwargs):
     pass

@@ -5,3 +5,4 @@ debug
 config/
 *.pyc
 .git
+core
