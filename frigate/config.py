@@ -13,7 +13,7 @@ import numpy as np
 import voluptuous as vol
 import yaml
 
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.const import BASE_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.util import create_mask
 
 logger = logging.getLogger(__name__)
@@ -873,7 +873,7 @@ class CameraConfig:
 FRIGATE_CONFIG_SCHEMA = vol.Schema(
     {
         vol.Optional("database", default={}): {
-            vol.Optional("path", default=os.path.join(CLIPS_DIR, "frigate.db")): str
+            vol.Optional("path", default=os.path.join(BASE_DIR, "frigate.db")): str
         },
         vol.Optional("model", default={"width": 320, "height": 320}): {
             vol.Required("width"): int,

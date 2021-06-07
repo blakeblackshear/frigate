@@ -27,7 +27,7 @@ from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
 from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR, RECORD_DIR
-from frigate.models import Event
+from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
 from frigate.version import VERSION
@@ -453,26 +453,45 @@ def latest_frame(camera_name):
 
 @bp.route("/<camera_name>/recordings")
 def recordings(camera_name):
-    files = glob.glob(f"{RECORD_DIR}/*/*/*/{camera_name}")
-
-    if len(files) == 0:
-        return jsonify([])
-
-    files.sort()
-
     dates = OrderedDict()
-    for path in files:
-        first = glob.glob(f"{path}/00.*.mp4")
-        delay = 0
-        if len(first) > 0:
-            delay = int(first[0].strip(path).split(".")[1])
-        search = re.search(r".+/(\d{4}[-]\d{2})/(\d{2})/(\d{2}).+", path)
-        if not search:
-            continue
-        date = f"{search.group(1)}-{search.group(2)}"
-        if date not in dates:
-            dates[date] = OrderedDict()
-        dates[date][search.group(3)] = {"delay": delay, "events": []}
+
+    # Retrieve all recordings for this camera
+    recordings = (
+        Recordings.select()
+        .where(Recordings.camera == camera_name)
+        .order_by(Recordings.start_time.asc())
+    )
+
+    last_end = 0
+    recording: Recordings
+    for recording in recordings:
+        date = datetime.fromtimestamp(recording.start_time)
+        key = date.strftime("%Y-%m-%d")
+        hour = date.strftime("%H")
+
+        # Create Day Record
+        if key not in dates:
+            dates[key] = OrderedDict()
+
+        # Create Hour Record
+        if hour not in dates[key]:
+            dates[key][hour] = {"delay": {}, "events": []}
+
+        # Check for delay
+        the_hour = datetime.strptime(f"{key} {hour}", "%Y-%m-%d %H").timestamp()
+        # diff current recording start time and the greater of the previous end time or top of the hour
+        diff = recording.start_time - max(last_end, the_hour)
+        # Determine seconds into recording
+        seconds = 0
+        if datetime.fromtimestamp(last_end).strftime("%H") == hour:
+            seconds = int(last_end - the_hour)
+        # Determine the delay
+        delay = min(int(diff), 3600 - seconds)
+        if delay > 1:
+            # Add an offset for any delay greater than a second
+            dates[key][hour]["delay"][seconds] = delay
+
+        last_end = recording.end_time
 
     # Packing intervals to return all events with same label and overlapping times as one row.
     # See: https://blogs.solidq.com/en/sqlserver/packing-intervals/
@@ -511,15 +530,15 @@ def recordings(camera_name):
         camera_name,
     )
 
-    e: Event
-    for e in events:
-        date = datetime.fromtimestamp(e.start_time)
+    event: Event
+    for event in events:
+        date = datetime.fromtimestamp(event.start_time)
         key = date.strftime("%Y-%m-%d")
         hour = date.strftime("%H")
         if key in dates and hour in dates[key]:
             dates[key][hour]["events"].append(
                 model_to_dict(
-                    e,
+                    event,
                     exclude=[
                         Event.false_positive,
                         Event.zones,
@@ -547,29 +566,50 @@ def recordings(camera_name):
 
 @bp.route("/vod/<path:path>")
 def vod(path):
+    # Make sure we actually have recordings
     if not os.path.isdir(f"{RECORD_DIR}/{path}"):
         return "Recordings not found.", 404
 
-    files = glob.glob(f"{RECORD_DIR}/{path}/*.mp4")
-    files.sort()
+    # Break up path
+    parts = path.split("/")
+    start_date = datetime.strptime(f"{parts[0]}-{parts[1]} {parts[2]}", "%Y-%m-%d %H")
+    end_date = start_date + timedelta(hours=1)
+    start_ts = start_date.timestamp()
+    end_ts = end_date.timestamp()
+    camera = parts[3]
+
+    # Select all recordings where either the start or end dates fall in the requested hour
+    recordings = (
+        Recordings.select()
+        .where(
+            (Recordings.start_time.between(start_ts, end_ts))
+            | (Recordings.end_time.between(start_ts, end_ts))
+        )
+        .where(Recordings.camera == camera)
+        .order_by(Recordings.start_time.asc())
+    )
 
     clips = []
     durations = []
-    for filename in files:
-        clips.append({"type": "source", "path": filename})
-        video = cv2.VideoCapture(filename)
-        duration = int(
-            video.get(cv2.CAP_PROP_FRAME_COUNT) / video.get(cv2.CAP_PROP_FPS) * 1000
-        )
-        durations.append(duration)
 
-    # Should we cache?
-    parts = path.split("/", 4)
-    date = datetime.strptime(f"{parts[0]}-{parts[1]} {parts[2]}", "%Y-%m-%d %H")
+    recording: Recordings
+    for recording in recordings:
+        clip = {"type": "source", "path": recording.path}
+        duration = int(recording.duration * 1000)
+        # Determine if offset is needed for first clip
+        if recording.start_time < start_ts:
+            offset = int((start_ts - recording.start_time) * 1000)
+            clip["clipFrom"] = offset
+            duration -= offset
+        # Determine if we need to end the last clip early
+        if recording.end_time > end_ts:
+            duration -= int((recording.end_time - end_ts) * 1000)
+        clips.append(clip)
+        durations.append(duration)
 
     return jsonify(
         {
-            "cache": datetime.now() - timedelta(hours=2) > date,
+            "cache": datetime.now() - timedelta(hours=1) > start_date,
             "discontinuity": False,
             "durations": durations,
             "sequences": [{"clips": clips}],

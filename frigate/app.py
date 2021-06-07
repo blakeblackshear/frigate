@@ -20,7 +20,7 @@ from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventProcessor, EventCleanup
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event
+from frigate.models import Event, Recordings
 from frigate.mqtt import create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.record import RecordingMaintainer
@@ -134,6 +134,14 @@ class FrigateApp:
         )
 
     def init_database(self):
+        # Migrate DB location
+        old_db_path = os.path.join(CLIPS_DIR, "frigate.db")
+        if not os.path.isfile(self.config.database.path) and os.path.isfile(
+            old_db_path
+        ):
+            os.rename(old_db_path, self.config.database.path)
+
+        # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
 
         # Run migrations
@@ -144,7 +152,7 @@ class FrigateApp:
         migrate_db.close()
 
         self.db = SqliteQueueDatabase(self.config.database.path)
-        models = [Event]
+        models = [Event, Recordings]
         self.db.bind(models)
 
     def init_stats(self):
