@@ -564,19 +564,12 @@ def recordings(camera_name):
     )
 
 
-@bp.route("/vod/<path:path>")
-def vod(path):
-    # Make sure we actually have recordings
-    if not os.path.isdir(f"{RECORD_DIR}/{path}"):
-        return "Recordings not found.", 404
-
-    # Break up path
-    parts = path.split("/")
-    start_date = datetime.strptime(f"{parts[0]}-{parts[1]} {parts[2]}", "%Y-%m-%d %H")
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera>")
+def vod(year_month, day, hour, camera):
+    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
     end_date = start_date + timedelta(hours=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
-    camera = parts[3]
 
     # Select all recordings where either the start or end dates fall in the requested hour
     recordings = (
