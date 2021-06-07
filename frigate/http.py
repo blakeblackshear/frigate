@@ -567,7 +567,7 @@ def recordings(camera_name):
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera>")
 def vod(year_month, day, hour, camera):
     start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
-    end_date = start_date + timedelta(hours=1)
+    end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
