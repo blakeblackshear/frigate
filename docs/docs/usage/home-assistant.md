@@ -4,7 +4,7 @@ title: Integration with Home Assistant
 sidebar_label: Home Assistant
 ---
 
-The best way to integrate with HomeAssistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration). When configuring the integration, you will be asked for the `Host` of your frigate instance. This value should be the url you use to access Frigate in the browser and will look like `http://<host>:5000/`. If you are using HassOS with the addon, the host should be `http://ccab4aaf-frigate:5000` (or `http://ccab4aaf-frigate-beta:5000` if your are using the beta version of the addon). HomeAssistant needs access to port 5000 (api) and 1935 (rtmp) for all features. The integration will setup the following entities within HomeAssistant:
+The best way to integrate with Home Assistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration). When configuring the integration, you will be asked for the `Host` of your frigate instance. This value should be the url you use to access Frigate in the browser and will look like `http://<host>:5000/`. If you are using HassOS with the addon, the host should be `http://ccab4aaf-frigate:5000` (or `http://ccab4aaf-frigate-beta:5000` if your are using the beta version of the addon). Home Assistant needs access to port 5000 (api) and 1935 (rtmp) for all features. The integration will setup the following entities within Home Assistant:
 
 ## Sensors:
 
@@ -30,17 +30,19 @@ The best way to integrate with HomeAssistant is to use the [official integration
 Frigate publishes event information in the form of a change feed via MQTT. This allows lots of customization for notifications to meet your needs. Event changes are published with `before` and `after` information as shown [here](#frigateevents).
 Note that some people may not want to expose frigate to the web, so you can leverage the HA API that frigate custom_integration ties into (which is exposed to the web, and thus can be used for mobile notifications etc):
 
-To load an image taken by frigate from HomeAssistants API see below:
-``` 
+To load an image taken by frigate from Home Assistants API see below:
+
+```
 https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
 ```
 
-To load a video clip taken by frigate from HomeAssistants API :
-``` 
+To load a video clip taken by frigate from Home Assistants API :
+
+```
 https://HA_URL/api/frigate/notifications/<event-id>/<camera>/clip.mp4
 ```
 
-Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image. 
+Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image.
 
 ```yaml
 automation:
@@ -56,7 +58,6 @@ automation:
             image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
             tag: '{{trigger.payload_json["after"]["id"]}}'
 ```
-
 
 ```yaml
 automation:
@@ -106,7 +107,7 @@ automation:
   action:
     - service: notify.mobile_app_pixel_3
       data_template:
-        message: 'High confidence dog detection.'
+        message: "High confidence dog detection."
         data:
           image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
           tag: "{{trigger.payload_json['after']['id']}}"

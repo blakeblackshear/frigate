@@ -5,7 +5,7 @@ title: HTTP API
 
 A web server is available on port 5000 with the following endpoints.
 
-### `/api/<camera_name>`
+### `GET /api/<camera_name>`
 
 An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use.
 
@@ -24,7 +24,7 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `/api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
+### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
 
 The best snapshot for any object type. It is a full resolution image by default.
 
@@ -33,7 +33,7 @@ Example parameters:
 - `h=300`: resizes the image to 300 pixes tall
 - `crop=1`: crops the image to the region of the detection rather than returning the entire image
 
-### `/api/<camera_name>/latest.jpg[?h=300]`
+### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
 
@@ -53,9 +53,9 @@ Example parameters:
 
 - `h=300`: resizes the image to 300 pixes tall
 
-### `/api/stats`
+### `GET /api/stats`
 
-Contains some granular debug info that can be used for sensors in HomeAssistant.
+Contains some granular debug info that can be used for sensors in Home Assistant.
 
 Sample response:
 
@@ -125,40 +125,40 @@ Sample response:
         "total": 1000,
         "used": 700,
         "free": 300,
-        "mnt_type": "ext4",
+        "mnt_type": "ext4"
       },
       "/media/frigate/recordings": {
         "total": 1000,
         "used": 700,
         "free": 300,
-        "mnt_type": "ext4",
+        "mnt_type": "ext4"
       },
       "/tmp/cache": {
         "total": 256,
         "used": 100,
         "free": 156,
-        "mnt_type": "tmpfs",
+        "mnt_type": "tmpfs"
       },
       "/dev/shm": {
         "total": 256,
         "used": 100,
         "free": 156,
-        "mnt_type": "tmpfs",
-      },
+        "mnt_type": "tmpfs"
+      }
     }
   }
 }
 ```
 
-### `/api/config`
+### `GET /api/config`
 
 A json representation of your configuration
 
-### `/api/version`
+### `GET /api/version`
 
 Version info
 
-### `/api/events`
+### `GET /api/events`
 
 Events from the database. Accepts the following query string parameters:
 
@@ -174,19 +174,23 @@ Events from the database. Accepts the following query string parameters:
 | `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
 
-### `/api/events/summary`
+### `GET /api/events/summary`
 
-Returns summary data for events in the database. Used by the HomeAssistant integration.
+Returns summary data for events in the database. Used by the Home Assistant integration.
 
-### `/api/events/<id>`
+### `GET /api/events/<id>`
 
 Returns data for a single event.
 
-### `/api/events/<id>/thumbnail.jpg`
+### `DELETE /api/events/<id>`
+
+Permanently deletes the event along with any clips/snapshots.
+
+### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
-### `/api/events/<id>/snapshot.jpg`
+### `GET /api/events/<id>/snapshot.jpg`
 
 Returns the snapshot image for the event id. Works while the event is in progress and after completion.
 
@@ -206,3 +210,7 @@ Video clip for the given camera and event id.
 ### `/clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
+
+### `/vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can be viewed in an application like VLC.

@@ -62,7 +62,7 @@ Example of a finished row corresponding to the below example image:
 
 ```yaml
 motion:
-  mask: '0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432'
+  mask: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
 ```
 
 ![poly](/img/example-mask-poly.png)
@@ -131,7 +131,7 @@ objects:
 
 Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `/tmp/cache` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to `/media/frigate/clips`. Clips are retained according to the retention settings defined on the config for each object type.
 
-These clips will not be playable in the web UI or in HomeAssistant's media browser unless your camera sends video as h264.
+These clips will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
 
 :::caution
 Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
@@ -191,7 +191,7 @@ snapshots:
 
 ## 24/7 Recordings
 
-24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in HomeAssistant's media browser. Each camera supports a configurable retention policy in the config.
+24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
 
 :::caution
 Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
@@ -208,7 +208,7 @@ record:
 
 ## RTMP streams
 
-Frigate can re-stream your video feed as a RTMP feed for other applications such as HomeAssistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and HomeAssistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
+Frigate can re-stream your video feed as a RTMP feed for other applications such as Home Assistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and Home Assistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
 Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
 
@@ -388,6 +388,37 @@ cameras:
 
 ## Camera specific configuration
 
+### MJPEG Cameras
+
+The input and output parameters need to be adjusted for MJPEG cameras
+
+```yaml
+input_args:
+  - -avoid_negative_ts
+  - make_zero
+  - -fflags
+  - nobuffer
+  - -flags
+  - low_delay
+  - -strict
+  - experimental
+  - -fflags
+  - +genpts+discardcorrupt
+  - -r
+  - "3" # <---- adjust depending on your desired frame rate from the mjpeg image
+  - -use_wallclock_as_timestamps
+  - "1"
+```
+
+Note that mjpeg cameras require encoding the video into h264 for clips, recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
+
+```yaml
+output_args:
+  record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+  clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+  rtmp: -c:v libx264 -an -f flv
+```
+
 ### RTMP Cameras
 
 The input parameters need to be adjusted for RTMP cameras
@@ -406,7 +437,7 @@ ffmpeg:
     - -fflags
     - +genpts+discardcorrupt
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```
 
 ### Reolink 410/520 (possibly others)
@@ -427,9 +458,9 @@ ffmpeg:
     - -fflags
     - +genpts+discardcorrupt
     - -rw_timeout
-    - '5000000'
+    - "5000000"
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```
 
 ### Blue Iris RTSP Cameras
@@ -450,7 +481,7 @@ ffmpeg:
     - -rtsp_transport
     - tcp
     - -stimeout
-    - '5000000'
+    - "5000000"
     - -use_wallclock_as_timestamps
-    - '1'
+    - "1"
 ```

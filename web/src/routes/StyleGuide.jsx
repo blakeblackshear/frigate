@@ -2,6 +2,7 @@ import { h } from 'preact';
 import ArrowDropdown from '../icons/ArrowDropdown';
 import ArrowDropup from '../icons/ArrowDropup';
 import Button from '../components/Button';
+import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import Select from '../components/Select';
 import Switch from '../components/Switch';
@@ -10,6 +11,7 @@ import { useCallback, useState } from 'preact/hooks';
 
 export default function StyleGuide() {
   const [switches, setSwitches] = useState({ 0: false, 1: true, 2: false, 3: false });
+  const [showDialog, setShowDialog] = useState(false);
 
   const handleSwitch = useCallback(
     (id, checked) => {
@@ -17,6 +19,10 @@ export default function StyleGuide() {
     },
     [switches]
   );
+
+  const handleDismissDialog = () => {
+    setShowDialog(false);
+  };
 
   return (
     <div>
@@ -58,6 +64,26 @@ export default function StyleGuide() {
           Disabled
         </Button>
       </div>
+
+      <Heading size="md">Dialog</Heading>
+      <Button
+        onClick={() => {
+          setShowDialog(true);
+        }}
+      >
+        Show Dialog
+      </Button>
+      {showDialog ? (
+        <Dialog
+          onDismiss={handleDismissDialog}
+          title="This is a dialog"
+          text="Would you like to see more?"
+          actions={[
+            { text: 'Yes', color: 'red', onClick: handleDismissDialog },
+            { text: 'No', onClick: handleDismissDialog },
+          ]}
+        />
+      ) : null}
 
       <Heading size="md">Switch</Heading>
       <div className="flex-col space-y-4 max-w-4xl">

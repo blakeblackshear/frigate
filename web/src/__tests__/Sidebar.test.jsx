@@ -9,8 +9,8 @@ describe('Sidebar', () => {
     jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
       data: {
         cameras: {
-          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] } },
-          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] } },
+          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: true } },
+          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: false } },
         },
       },
     }));
@@ -29,5 +29,12 @@ describe('Sidebar', () => {
     render(<Sidebar />);
     expect(screen.queryByRole('link', { name: 'front' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'side' })).toBeInTheDocument();
+  });
+
+  test('render cameras if in record route', async () => {
+    window.history.replaceState({}, 'Front Recordings', '/recording/front');
+    render(<Sidebar />);
+    expect(screen.queryByRole('link', { name: 'front' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'side' })).not.toBeInTheDocument();
   });
 });
