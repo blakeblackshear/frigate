@@ -1,3 +1,4 @@
+import cv2
 import datetime
 import math
 import multiprocessing as mp
@@ -18,7 +19,7 @@ from ws4py.server.wsgirefserver import (
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
-from frigate.util import SharedMemoryFrameManager
+from frigate.util import SharedMemoryFrameManager, get_yuv_crop, copy_yuv_to_position
 
 
 class FFMpegConverter:
@@ -39,7 +40,10 @@ class FFMpegConverter:
         self.process.stdin.write(b)
 
     def read(self, length):
-        return self.process.stdout.read1(length)
+        try:
+            return self.process.stdout.read1(length)
+        except ValueError:
+            return False
 
     def exit(self):
         self.process.terminate()
@@ -69,7 +73,9 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, height, width):
+    def __init__(self, config, frame_manager: SharedMemoryFrameManager, height, width):
+        self.config = config
+        self.frame_manager = frame_manager
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
@@ -81,68 +87,168 @@ class BirdsEyeFrameManager:
 
         self.frame[:] = self.blank_frame
 
-        self.last_active_frames = {}
+        self.cameras = {}
+        for camera, settings in self.config.cameras.items():
+            # precalculate the coordinates for all the channels
+            y, u1, u2, v1, v2 = get_yuv_crop(
+                settings.frame_shape_yuv,
+                (
+                    0,
+                    0,
+                    settings.frame_shape[1],
+                    settings.frame_shape[0],
+                ),
+            )
+            self.cameras[camera] = {
+                "last_active_frame": 0.0,
+                "layout_frame": 0.0,
+                "channel_dims": {
+                    "y": y,
+                    "u1": u1,
+                    "u2": u2,
+                    "v1": v1,
+                    "v2": v2,
+                },
+            }
+
         self.camera_layout = []
+        self.active_cameras = set()
+        self.layout_dim = 0
+        self.last_output_time = 0.0
 
     def clear_frame(self):
         self.frame[:] = self.blank_frame
 
-    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+    def copy_to_position(self, position, camera=None, frame_time=None):
+        if camera is None:
+            frame = None
+            channel_dims = None
+        else:
+            frame = self.frame_manager.get(
+                f"{camera}{frame_time}", self.config.cameras[camera].frame_shape_yuv
+            )
+            channel_dims = self.cameras[camera]["channel_dims"]
 
-        # maintain time of most recent active frame for each camera
-        if object_count > 0:
-            self.last_active_frames[camera] = frame_time
+        copy_yuv_to_position(position, self.frame, self.layout_dim, frame, channel_dims)
 
-        # TODO: avoid the remaining work if exceeding 5 fps and return False
-
+    def update_frame(self):
         # determine how many cameras are tracking objects within the last 30 seconds
         now = datetime.datetime.now().timestamp()
-        active_cameras = [
-            cam
-            for cam, frame_time in self.last_active_frames.items()
-            if now - frame_time < 30
-        ]
+        active_cameras = set(
+            [
+                cam
+                for cam, cam_data in self.cameras.items()
+                if now - cam_data["last_active_frame"] < 30
+            ]
+        )
 
-        if len(active_cameras) == 0 and len(self.camera_layout) == 0:
-            return False
+        # if there are no active cameras
+        if len(active_cameras) == 0:
+            # if the layout is already cleared
+            if len(self.camera_layout) == 0:
+                return False
+            # if the layout needs to be cleared
+            else:
+                self.camera_layout = []
+                self.clear_frame()
+                return True
 
-        # if the sqrt of the layout and the active cameras don't round to the same value,
-        # we need to resize the layout
-        if round(math.sqrt(len(active_cameras))) != round(
-            math.sqrt(len(self.camera_layout))
-        ):
-            # decide on a layout for the birdseye view (try to avoid too much churn)
-            self.columns = math.ceil(math.sqrt(len(active_cameras)))
-            self.rows = round(math.sqrt(len(active_cameras)))
+        # calculate layout dimensions
+        layout_dim = math.ceil(math.sqrt(len(active_cameras)))
 
-            self.camera_layout = [None] * (self.columns * self.rows)
+        # reset the layout if it needs to be different
+        if layout_dim != self.layout_dim:
+            self.layout_dim = layout_dim
+
+            self.camera_layout = [None] * layout_dim * layout_dim
+
+            # calculate resolution of each position in the layout
+            self.layout_frame_shape = (
+                self.frame_shape[0] // layout_dim,  # height
+                self.frame_shape[1] // layout_dim,  # width
+            )
+
             self.clear_frame()
 
-        # remove inactive cameras from the layout
-        self.camera_layout = [
-            cam if cam in active_cameras else None for cam in self.camera_layout
-        ]
-        # place the active cameras in the layout
-        while len(active_cameras) > 0:
-            cam = active_cameras.pop()
-            if cam in self.camera_layout:
-                continue
-            # place camera in the first available spot in the layout
-            for i in range(0, len(self.camera_layout) - 1):
-                if self.camera_layout[i] is None:
-                    self.camera_layout[i] = cam
-                    break
+            for cam_data in self.cameras.values():
+                cam_data["layout_frame"] = 0.0
 
-        # calculate resolution of each position in the layout
-        width = self.frame_shape[1] / self.columns
-        height = self.frame_shape[0] / self.rows
+            self.active_cameras = set()
 
-        # For each camera in the layout:
-        #   - resize the current frame and copy into the birdseye view
+        removed_cameras = self.active_cameras.difference(active_cameras)
+        added_cameras = active_cameras.difference(self.active_cameras)
 
-        self.frame[:] = frame
+        self.active_cameras = active_cameras
+
+        # update each position in the layout
+        for position, camera in enumerate(self.camera_layout, start=0):
+
+            # if this camera was removed, replace it or clear it
+            if camera in removed_cameras:
+                # if replacing this camera with a newly added one
+                if len(added_cameras) > 0:
+                    added_camera = added_cameras.pop()
+                    self.camera_layout[position] = added_camera
+                    self.copy_to_position(
+                        position,
+                        added_camera,
+                        self.cameras[added_camera]["last_active_frame"],
+                    )
+                    self.cameras[added_camera]["layout_frame"] = self.cameras[
+                        added_camera
+                    ]["last_active_frame"]
+                # if removing this camera with no replacement
+                else:
+                    self.camera_layout[position] = None
+                    self.copy_to_position(position)
+                removed_cameras.remove(camera)
+            # if an empty spot and there are cameras to add
+            elif camera is None and len(added_cameras) > 0:
+                added_camera = added_cameras.pop()
+                self.camera_layout[position] = added_camera
+                self.copy_to_position(
+                    position,
+                    added_camera,
+                    self.cameras[added_camera]["last_active_frame"],
+                )
+                self.cameras[added_camera]["layout_frame"] = self.cameras[added_camera][
+                    "last_active_frame"
+                ]
+            # if not an empty spot and the camera has a newer frame, copy it
+            elif (
+                not camera is None
+                and self.cameras[camera]["last_active_frame"]
+                != self.cameras[camera]["layout_frame"]
+            ):
+                self.copy_to_position(
+                    position, camera, self.cameras[camera]["last_active_frame"]
+                )
+                self.cameras[camera]["layout_frame"] = self.cameras[camera][
+                    "last_active_frame"
+                ]
 
         return True
+
+    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+
+        # update the last active frame for the camera
+        if object_count > 0:
+            last_active_frame = self.cameras[camera]["last_active_frame"]
+            # cleanup the old frame
+            if last_active_frame != 0.0:
+                frame_id = f"{camera}{last_active_frame}"
+                self.frame_manager.delete(frame_id)
+            self.cameras[camera]["last_active_frame"] = frame_time
+
+        now = datetime.datetime.now().timestamp()
+
+        # limit output to ~24 fps
+        if (now - self.last_output_time) < 0.04:
+            return False
+
+        self.last_output_time = now
+
+        return self.update_frame()
 
 
 def output_frames(config, video_output_queue):
@@ -183,7 +289,7 @@ def output_frames(config, video_output_queue):
             camera, converters[camera], websocket_server
         )
 
-    converters["birdseye"] = FFMpegConverter(1920, 1080, 640, 320, "1000k")
+    converters["birdseye"] = FFMpegConverter(1920, 1080, 1280, 720, "2000k")
     broadcasters["birdseye"] = BroadcastThread(
         "birdseye", converters["birdseye"], websocket_server
     )
@@ -193,7 +299,7 @@ def output_frames(config, video_output_queue):
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(1080, 1920)
+    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, 1080, 1920)
 
     while not stop_event.is_set():
         try:
@@ -233,9 +339,14 @@ def output_frames(config, video_output_queue):
                 converters["birdseye"].write(birdseye_manager.frame.tobytes())
 
         if camera in previous_frames:
-            frame_manager.delete(previous_frames[camera])
+            # if the birdseye manager still needs this frame, don't delete it
+            if (
+                birdseye_manager.cameras[camera]["last_active_frame"]
+                != previous_frames[camera]
+            ):
+                frame_manager.delete(f"{camera}{previous_frames[camera]}")
 
-        previous_frames[camera] = frame_id
+        previous_frames[camera] = frame_time
 
     while not video_output_queue.empty():
         (
@@ -259,4 +370,5 @@ def output_frames(config, video_output_queue):
     websocket_server.manager.join()
     websocket_server.shutdown()
     websocket_thread.join()
+    # TODO: use actual logger
     print("exiting output process...")

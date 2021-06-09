@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import json
 import logging
+import math
 import signal
 import subprocess as sp
 import threading
@@ -231,6 +232,98 @@ def yuv_crop_and_resize(frame, region, height=None):
     ] = frame[v2[1] : v2[3], v2[0] : v2[2]]
 
     return yuv_cropped_frame
+
+
+def copy_yuv_to_position(
+    position,
+    destination_frame,
+    destination_dim,
+    source_frame=None,
+    source_channel_dim=None,
+):
+    # TODO: consider calculating this on layout reflow instead of all the time
+    layout_shape = (
+        (destination_frame.shape[0] // 3 * 2) // destination_dim,
+        destination_frame.shape[1] // destination_dim,
+    )
+    # calculate the x and y offset for the frame in the layout
+    y_offset = layout_shape[0] * math.floor(position / destination_dim)
+    x_offset = layout_shape[1] * (position % destination_dim)
+
+    # get the coordinates of the channels for this position in the layout
+    y, u1, u2, v1, v2 = get_yuv_crop(
+        destination_frame.shape,
+        (
+            x_offset,
+            y_offset,
+            x_offset + layout_shape[1],
+            y_offset + layout_shape[0],
+        ),
+    )
+
+    if source_frame is None:
+        # clear y
+        destination_frame[
+            y[1] : y[3],
+            y[0] : y[2],
+        ] = 16
+
+        # clear u1
+        destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = 128
+        # clear u2
+        destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = 128
+        # clear v1
+        destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = 128
+        # clear v2
+        destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
+    else:
+        interpolation = cv2.INTER_AREA
+        # resize/copy y channel
+        destination_frame[y[1] : y[3], y[0] : y[2]] = cv2.resize(
+            source_frame[
+                source_channel_dim["y"][1] : source_channel_dim["y"][3],
+                source_channel_dim["y"][0] : source_channel_dim["y"][2],
+            ],
+            dsize=(y[2] - y[0], y[3] - y[1]),
+            interpolation=interpolation,
+        )
+
+        # resize/copy u1
+        destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = cv2.resize(
+            source_frame[
+                source_channel_dim["u1"][1] : source_channel_dim["u1"][3],
+                source_channel_dim["u1"][0] : source_channel_dim["u1"][2],
+            ],
+            dsize=(u1[2] - u1[0], u1[3] - u1[1]),
+            interpolation=interpolation,
+        )
+        # resize/copy u2
+        destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = cv2.resize(
+            source_frame[
+                source_channel_dim["u2"][1] : source_channel_dim["u2"][3],
+                source_channel_dim["u2"][0] : source_channel_dim["u2"][2],
+            ],
+            dsize=(u2[2] - u2[0], u2[3] - u2[1]),
+            interpolation=interpolation,
+        )
+        # resize/copy v1
+        destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = cv2.resize(
+            source_frame[
+                source_channel_dim["v1"][1] : source_channel_dim["v1"][3],
+                source_channel_dim["v1"][0] : source_channel_dim["v1"][2],
+            ],
+            dsize=(v1[2] - v1[0], v1[3] - v1[1]),
+            interpolation=interpolation,
+        )
+        # resize/copy v2
+        destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = cv2.resize(
+            source_frame[
+                source_channel_dim["v2"][1] : source_channel_dim["v2"][3],
+                source_channel_dim["v2"][0] : source_channel_dim["v2"][2],
+            ],
+            dsize=(v2[2] - v2[0], v2[3] - v2[1]),
+            interpolation=interpolation,
+        )
 
 
 def yuv_region_2_rgb(frame, region):
