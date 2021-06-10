@@ -4,7 +4,7 @@ module.exports = {
     src: { url: '/dist' },
   },
   plugins: ['@snowpack/plugin-postcss', '@prefresh/snowpack', 'snowpack-plugin-hash'],
-  routes: [{ match: 'routes', src: '.*', dest: '/index.html' }],
+  routes: [{ match: 'all', src: '(?!.*(.svg|.gif|.json|.jpg|.jpeg|.png|.js)).*', dest: '/index.html' }],
   optimize: {
     bundle: false,
     minify: true,
