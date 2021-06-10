@@ -1,4 +1,4 @@
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import { useRef, useEffect } from 'preact/hooks';
 import videojs from 'video.js';
 import 'videojs-playlist';
@@ -84,7 +84,7 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
       player.dispose();
       onDispose();
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-vjs-player>
