@@ -156,7 +156,7 @@ def events_summary():
         clauses.append((Event.has_snapshot == has_snapshot))
 
     if len(clauses) == 0:
-        clauses.append((1 == 1))
+        clauses.append((True))
 
     groups = (
         Event.select(
@@ -332,7 +332,7 @@ def events():
         excluded_fields.append(Event.thumbnail)
 
     if len(clauses) == 0:
-        clauses.append((1 == 1))
+        clauses.append((True))
 
     events = (
         Event.select()
