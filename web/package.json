@@ -18,9 +18,8 @@
     "preact-async-route": "^2.2.1",
     "preact-router": "^3.2.1",
     "video.js": "^7.11.8",
-    "videojs-mobile-ui": "^0.5.3",
     "videojs-playlist": "^4.3.1",
-    "videojs-seek-buttons": "^2.0.0"
+    "videojs-seek-buttons": "^2.0.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.13",

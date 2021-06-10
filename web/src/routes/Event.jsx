@@ -3,10 +3,13 @@ import { useCallback, useState } from 'preact/hooks';
 import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
-import Delete from '../icons/Delete'
+import Clip from '../icons/Clip';
+import Delete from '../icons/Delete';
+import Snapshot from '../icons/Snapshot';
 import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
+import VideoPlayer from '../components/VideoPlayer';
 import { FetchStatus, useApiHost, useEvent } from '../api';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 
@@ -24,9 +27,7 @@ export default function Event({ eventId }) {
     setShowDialog(false);
   };
 
-
   const handleClickDeleteDialog = useCallback(async () => {
-
     let success;
     try {
       const response = await fetch(`${apiHost}/api/events/${eventId}`, { method: 'DELETE' });
@@ -40,12 +41,11 @@ export default function Event({ eventId }) {
       setDeleteStatus(FetchStatus.LOADED);
       setShowDialog(false);
       route('/events', true);
-
     }
   }, [apiHost, eventId, setShowDialog]);
 
   if (status !== FetchStatus.LOADED) {
-    return <ActivityIndicator />
+    return <ActivityIndicator />;
   }
 
   const startime = new Date(data.start_time * 1000);
@@ -106,28 +106,44 @@ export default function Event({ eventId }) {
 
       {data.has_clip ? (
         <Fragment>
-          <Heading size="sm">Clip</Heading>
-          <video
-            aria-label={`Clip for event ${data.id}`}
-            autoPlay
-            className="w-100"
-            src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`}
-            controls
+          <Heading size="lg">Clip</Heading>
+          <VideoPlayer
+            options={{
+              sources: [
+                {
+                  src: `${apiHost}/clips/${data.camera}-${eventId}.mp4`,
+                  type: 'video/mp4',
+                },
+              ],
+              poster: data.has_snapshot
+                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                : `data:image/jpeg;base64,${data.thumbnail}`,
+            }}
+            seekOptions={{ forward: 10, back: 5 }}
+            onReady={(player) => {}}
           />
+          <div className="text-center">
+            <Button className="mx-2" color="blue" href={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} download>
+              <Clip className="w-6" /> Download Clip
+            </Button>
+            <Button className="mx-2" color="blue" href={`${apiHost}/clips/${data.camera}-${eventId}.jpg`} download>
+              <Snapshot className="w-6" /> Download Snapshot
+            </Button>
+          </div>
         </Fragment>
       ) : (
-        <p>No clip available</p>
+        <Fragment>
+          <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+          <img
+            src={
+              data.has_snapshot
+                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                : `data:image/jpeg;base64,${data.thumbnail}`
+            }
+            alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
+          />
+        </Fragment>
       )}
-
-      <Heading size="sm">{data.has_snapshot ? 'Best image' : 'Thumbnail'}</Heading>
-      <img
-        src={
-          data.has_snapshot
-            ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-            : `data:image/jpeg;base64,${data.thumbnail}`
-        }
-        alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
-      />
     </div>
   );
 }

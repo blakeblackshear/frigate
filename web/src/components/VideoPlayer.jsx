@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
+import { useRef, useEffect } from 'preact/hooks';
 import videojs from 'video.js';
-import 'videojs-mobile-ui';
 import 'videojs-playlist';
 import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
@@ -11,49 +11,85 @@ const defaultOptions = {
   playbackRates: [0.5, 1, 2, 4, 8],
   fluid: true,
 };
+const defaultSeekOptions = {
+  forward: 30,
+  back: 10,
+};
 
-export default class VideoPlayer extends Component {
-  componentDidMount() {
-    const { options, onReady = () => {} } = this.props;
-    const videoJsOptions = {
-      ...defaultOptions,
-      ...options,
-    };
-    this.player = videojs(this.videoNode, videoJsOptions, function onPlayerReady() {
-      onReady(this);
-    });
-    this.player.seekButtons({
-      forward: 30,
-      back: 10,
-    });
-    this.player.mobileUi({
-      fullscreen: {
-        iOS: true,
-      },
-    });
-  }
+export default function VideoPlayer({ children, options, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
+  const playerRef = useRef();
 
-  componentWillUnmount() {
-    const { onDispose = () => {} } = this.props;
-    if (this.player) {
-      this.player.dispose();
-      onDispose();
+  useEffect(() => {
+    const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
+      onReady(player);
+    });
+    player.seekButtons({
+      ...defaultSeekOptions,
+      ...seekOptions,
+    });
+
+    // Disable fullscreen on iOS if we have children
+    if (
+      children &&
+      videojs.browser.IS_IOS &&
+      videojs.browser.IOS_VERSION > 9 &&
+      !player.el_.ownerDocument.querySelector('.bc-iframe')
+    ) {
+      player.tech_.el_.setAttribute('playsinline', 'playsinline');
+      player.tech_.supportsFullScreen = function () {
+        return false;
+      };
     }
-  }
 
-  // shouldComponentUpdate() {
-  //   return false;
-  // }
+    const screen = window.screen;
 
-  render() {
-    const { style, children } = this.props;
-    return (
-      <div style={style}>
-        <div data-vjs-player>
-          <video ref={(node) => (this.videoNode = node)} className="video-js vjs-default-skin" controls playsinline />
-          {children}
-        </div>
-      </div>
-    );
-  }
+    const angle = () => {
+      // iOS
+      if (typeof window.orientation === 'number') {
+        return window.orientation;
+      }
+      // Android
+      if (screen && screen.orientation && screen.orientation.angle) {
+        return window.orientation;
+      }
+      videojs.log('angle unknown');
+      return 0;
+    };
+
+    const rotationHandler = () => {
+      const currentAngle = angle();
+
+      if (currentAngle === 90 || currentAngle === 270 || currentAngle === -90) {
+        if (player.paused() === false) {
+          player.requestFullscreen();
+        }
+      }
+
+      if ((currentAngle === 0 || currentAngle === 180) && player.isFullscreen()) {
+        player.exitFullscreen();
+      }
+    };
+
+    if (videojs.browser.IS_IOS) {
+      window.addEventListener('orientationchange', rotationHandler);
+    } else if (videojs.browser.IS_ANDROID && screen.orientation) {
+      // addEventListener('orientationchange') is not a user interaction on Android
+      screen.orientation.onchange = rotationHandler;
+    }
+
+    return () => {
+      if (videojs.browser.IS_IOS) {
+        window.removeEventListener('orientationchange', rotationHandler);
+      }
+      player.dispose();
+      onDispose();
+    };
+  }, []);
+
+  return (
+    <div data-vjs-player>
+      <video ref={playerRef} className="video-js vjs-default-skin" controls playsinline />
+      {children}
+    </div>
+  );
 }
