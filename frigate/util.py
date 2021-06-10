@@ -277,7 +277,7 @@ def copy_yuv_to_position(
         # clear v2
         destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
     else:
-        interpolation = cv2.INTER_AREA
+        interpolation = cv2.INTER_LINEAR
         # resize/copy y channel
         destination_frame[y[1] : y[3], y[0] : y[2]] = cv2.resize(
             source_frame[

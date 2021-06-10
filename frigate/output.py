@@ -23,8 +23,8 @@ from frigate.util import SharedMemoryFrameManager, get_yuv_crop, copy_yuv_to_pos
 
 
 class FFMpegConverter:
-    def __init__(self, in_width, in_height, out_width, out_height, bitrate):
-        ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -b:v {bitrate} -bf 0 pipe:".split(
+    def __init__(self, in_width, in_height, out_width, out_height, quality):
+        ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
             " "
         )
         self.process = sp.Popen(
@@ -73,7 +73,7 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config, frame_manager: SharedMemoryFrameManager, height, width):
+    def __init__(self, config, frame_manager: SharedMemoryFrameManager, width, height):
         self.config = config
         self.frame_manager = frame_manager
         self.frame_shape = (height, width)
@@ -242,8 +242,8 @@ class BirdsEyeFrameManager:
 
         now = datetime.datetime.now().timestamp()
 
-        # limit output to ~24 fps
-        if (now - self.last_output_time) < 0.04:
+        # limit output to 10 fps
+        if (now - self.last_output_time) < 1 / 10:
             return False
 
         self.last_output_time = now
@@ -283,13 +283,13 @@ def output_frames(config, video_output_queue):
 
     for camera, cam_config in config.cameras.items():
         converters[camera] = FFMpegConverter(
-            cam_config.frame_shape[1], cam_config.frame_shape[0], 640, 320, "1000k"
+            cam_config.frame_shape[1], cam_config.frame_shape[0], 640, 320, 8
         )
         broadcasters[camera] = BroadcastThread(
             camera, converters[camera], websocket_server
         )
 
-    converters["birdseye"] = FFMpegConverter(1920, 1080, 1280, 720, "2000k")
+    converters["birdseye"] = FFMpegConverter(1280, 720, 1280, 720, 8)
     broadcasters["birdseye"] = BroadcastThread(
         "birdseye", converters["birdseye"], websocket_server
     )
@@ -299,7 +299,7 @@ def output_frames(config, video_output_queue):
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, 1080, 1920)
+    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, 1280, 720)
 
     while not stop_event.is_set():
         try:
