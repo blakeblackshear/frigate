@@ -26,28 +26,9 @@ describe('Event Route', () => {
     expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
 
     expect(screen.queryByText('Clip')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Clip for event 1613257326.237365-83cgl2')).toHaveAttribute(
-      'src',
-      'http://localhost:5000/clips/front-1613257326.237365-83cgl2.mp4'
-    );
-    expect(screen.queryByText('Best image')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Video Player')).toBeInTheDocument();
+    expect(screen.queryByText('Best Image')).not.toBeInTheDocument();
     expect(screen.queryByText('Thumbnail')).not.toBeInTheDocument();
-    expect(screen.queryByAltText('person at 82.0% confidence')).toHaveAttribute(
-      'src',
-      'http://localhost:5000/clips/front-1613257326.237365-83cgl2.jpg'
-    );
-  });
-
-  test('shows the thumbnail if no snapshot available', async () => {
-    useEventMock.mockReturnValue({ data: { ...mockEvent, has_snapshot: false }, status: 'loaded' });
-    render(<Event eventId={mockEvent.id} />);
-
-    expect(screen.queryByText('Best image')).not.toBeInTheDocument();
-    expect(screen.queryByText('Thumbnail')).toBeInTheDocument();
-    expect(screen.queryByAltText('person at 82.0% confidence')).toHaveAttribute(
-      'src',
-      'data:image/jpeg;base64,/9j/4aa...'
-    );
   });
 
   test('does not render a video if there is no clip', async () => {
@@ -55,7 +36,21 @@ describe('Event Route', () => {
     render(<Event eventId={mockEvent.id} />);
 
     expect(screen.queryByText('Clip')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Clip for event 1613257326.237365-83cgl2')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Video Player')).not.toBeInTheDocument();
+    expect(screen.queryByText('Best Image')).toBeInTheDocument();
+    expect(screen.queryByText('Thumbnail')).not.toBeInTheDocument();
+  });
+
+  test('shows the thumbnail if no snapshot available', async () => {
+    useEventMock.mockReturnValue({ data: { ...mockEvent, has_clip: false, has_snapshot: false }, status: 'loaded' });
+    render(<Event eventId={mockEvent.id} />);
+
+    expect(screen.queryByText('Best Image')).not.toBeInTheDocument();
+    expect(screen.queryByText('Thumbnail')).toBeInTheDocument();
+    expect(screen.queryByAltText('person at 82.0% confidence')).toHaveAttribute(
+      'src',
+      'data:image/jpeg;base64,/9j/4aa...'
+    );
   });
 });
 
