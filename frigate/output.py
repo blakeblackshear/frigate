@@ -19,6 +19,7 @@ from ws4py.server.wsgirefserver import (
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
+from frigate.config import FrigateConfig
 from frigate.util import SharedMemoryFrameManager, get_yuv_crop, copy_yuv_to_position
 
 
@@ -73,9 +74,11 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config, frame_manager: SharedMemoryFrameManager, width, height):
+    def __init__(self, config, frame_manager: SharedMemoryFrameManager):
         self.config = config
         self.frame_manager = frame_manager
+        width = config.birdseye.width
+        height = config.birdseye.height
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
@@ -134,6 +137,7 @@ class BirdsEyeFrameManager:
     def update_frame(self):
         # determine how many cameras are tracking objects within the last 30 seconds
         now = datetime.datetime.now().timestamp()
+        # TODO: this needs to be based on the "mode" from the config
         active_cameras = set(
             [
                 cam
@@ -251,7 +255,7 @@ class BirdsEyeFrameManager:
         return self.update_frame()
 
 
-def output_frames(config, video_output_queue):
+def output_frames(config: FrigateConfig, video_output_queue):
     threading.current_thread().name = f"output"
     setproctitle(f"frigate.output")
 
@@ -289,17 +293,24 @@ def output_frames(config, video_output_queue):
             camera, converters[camera], websocket_server
         )
 
-    converters["birdseye"] = FFMpegConverter(1280, 720, 1280, 720, 8)
-    broadcasters["birdseye"] = BroadcastThread(
-        "birdseye", converters["birdseye"], websocket_server
-    )
+    if config.birdseye.enabled:
+        converters["birdseye"] = FFMpegConverter(
+            config.birdseye.width,
+            config.birdseye.height,
+            config.birdseye.width,
+            config.birdseye.height,
+            config.birdseye.quality,
+        )
+        broadcasters["birdseye"] = BroadcastThread(
+            "birdseye", converters["birdseye"], websocket_server
+        )
 
     websocket_thread.start()
 
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, 1280, 720)
+    birdseye_manager = BirdsEyeFrameManager(config, frame_manager)
 
     while not stop_event.is_set():
         try:
@@ -325,7 +336,7 @@ def output_frames(config, video_output_queue):
             converters[camera].write(frame.tobytes())
 
         # update birdseye if websockets are connected
-        if any(
+        if config.birdseye.enabled and any(
             ws.environ["PATH_INFO"].endswith("birdseye")
             for ws in websocket_server.manager
         ):
