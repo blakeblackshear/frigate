@@ -392,6 +392,41 @@ class ObjectConfig:
         }
 
 
+BIRDSEYE_SCHEMA = vol.Schema(
+    {
+        vol.Optional("enabled", default=True): bool,
+        vol.Optional("width", default=1280): int,
+        vol.Optional("height", default=720): int,
+        vol.Optional("quality", default=8): vol.Range(min=1, max=31),
+        vol.Optional("mode", default="objects"): vol.In(
+            ["objects", "motion", "continuous"]
+        ),
+    }
+)
+
+
+@dataclasses.dataclass(frozen=True)
+class BirdseyeConfig:
+    enabled: bool
+    width: int
+    height: int
+    quality: int
+    mode: str
+
+    @classmethod
+    def build(cls, config) -> BirdseyeConfig:
+        return BirdseyeConfig(
+            config["enabled"],
+            config["width"],
+            config["height"],
+            config["quality"],
+            config["mode"],
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
+
+
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
 FFMPEG_INPUT_ARGS_DEFAULT = [
     "-avoid_negative_ts",
@@ -522,7 +557,7 @@ class CameraFfmpegConfig:
     output_args: Dict[str, List[str]]
 
     @classmethod
-    def build(self, config, global_config):
+    def build(cls, config, global_config):
         output_args = config.get("output_args", global_config["output_args"])
         output_args = {
             k: v if isinstance(v, list) else v.split(" ")
@@ -638,7 +673,7 @@ class CameraSnapshotsConfig:
     retain: RetainConfig
 
     @classmethod
-    def build(self, config, global_config) -> CameraSnapshotsConfig:
+    def build(cls, config, global_config) -> CameraSnapshotsConfig:
         return CameraSnapshotsConfig(
             enabled=config["enabled"],
             timestamp=config["timestamp"],
@@ -901,6 +936,7 @@ FRIGATE_CONFIG_SCHEMA = vol.Schema(
         vol.Optional("objects", default={}): OBJECTS_SCHEMA,
         vol.Optional("motion", default={}): MOTION_SCHEMA,
         vol.Optional("detect", default={}): GLOBAL_DETECT_SCHEMA,
+        vol.Optional("birdseye", default={}): BIRDSEYE_SCHEMA,
         vol.Required("cameras", default={}): CAMERAS_SCHEMA,
         vol.Optional("environment_vars", default={}): {str: str},
     }
@@ -995,6 +1031,7 @@ class FrigateConfig:
         self._mqtt = MqttConfig.build(config["mqtt"])
         self._clips = ClipsConfig.build(config["clips"])
         self._snapshots = SnapshotsConfig.build(config["snapshots"])
+        self._birdseye = BirdseyeConfig.build(config["birdseye"])
         self._cameras = {
             name: CameraConfig.build(name, c, config)
             for name, c in config["cameras"].items()
@@ -1037,6 +1074,7 @@ class FrigateConfig:
             "mqtt": self.mqtt.to_dict(),
             "clips": self.clips.to_dict(),
             "snapshots": self.snapshots.to_dict(),
+            "birdseye": self.birdseye.to_dict(),
             "cameras": {k: c.to_dict() for k, c in self.cameras.items()},
             "logger": self.logger.to_dict(),
             "environment_vars": self._environment_vars,
@@ -1069,6 +1107,10 @@ class FrigateConfig:
     @property
     def snapshots(self) -> SnapshotsConfig:
         return self._snapshots
+
+    @property
+    def birdseye(self) -> BirdseyeConfig:
+        return self._birdseye
 
     @property
     def cameras(self) -> Dict[str, CameraConfig]:
