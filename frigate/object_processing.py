@@ -719,7 +719,6 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
-            # TODO: should this queue have a max length?
             self.video_output_queue.put(
                 (
                     camera,
