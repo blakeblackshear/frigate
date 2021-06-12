@@ -135,7 +135,13 @@ class BirdsEyeFrameManager:
             )
             channel_dims = self.cameras[camera]["channel_dims"]
 
-        copy_yuv_to_position(position, self.frame, self.layout_dim, frame, channel_dims)
+        copy_yuv_to_position(
+            self.frame,
+            self.layout_offsets[position],
+            self.layout_frame_shape,
+            frame,
+            channel_dims,
+        )
 
     def camera_active(self, object_box_count, motion_box_count):
         if self.mode == "continuous":
@@ -191,6 +197,16 @@ class BirdsEyeFrameManager:
                 cam_data["layout_frame"] = 0.0
 
             self.active_cameras = set()
+
+            self.layout_offsets = []
+
+            # calculate the x and y offset for each position in the layout
+            for position in range(0, len(self.camera_layout)):
+                y_offset = self.layout_frame_shape[0] * math.floor(
+                    position / self.layout_dim
+                )
+                x_offset = self.layout_frame_shape[1] * (position % self.layout_dim)
+                self.layout_offsets.append((y_offset, x_offset))
 
         removed_cameras = self.active_cameras.difference(active_cameras)
         added_cameras = active_cameras.difference(self.active_cameras)

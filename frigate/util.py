@@ -235,29 +235,20 @@ def yuv_crop_and_resize(frame, region, height=None):
 
 
 def copy_yuv_to_position(
-    position,
     destination_frame,
-    destination_dim,
+    destination_offset,
+    destination_shape,
     source_frame=None,
     source_channel_dim=None,
 ):
-    # TODO: consider calculating this on layout reflow instead of all the time
-    layout_shape = (
-        (destination_frame.shape[0] // 3 * 2) // destination_dim,
-        destination_frame.shape[1] // destination_dim,
-    )
-    # calculate the x and y offset for the frame in the layout
-    y_offset = layout_shape[0] * math.floor(position / destination_dim)
-    x_offset = layout_shape[1] * (position % destination_dim)
-
     # get the coordinates of the channels for this position in the layout
     y, u1, u2, v1, v2 = get_yuv_crop(
         destination_frame.shape,
         (
-            x_offset,
-            y_offset,
-            x_offset + layout_shape[1],
-            y_offset + layout_shape[0],
+            destination_offset[1],
+            destination_offset[0],
+            destination_offset[1] + destination_shape[1],
+            destination_offset[0] + destination_shape[0],
         ),
     )
 
