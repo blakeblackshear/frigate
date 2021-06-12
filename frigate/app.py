@@ -128,7 +128,7 @@ class FrigateApp:
         # Queues for clip processing
         self.event_queue = mp.Queue()
         self.event_processed_queue = mp.Queue()
-        self.video_output_queue = mp.Queue()
+        self.video_output_queue = mp.Queue(maxsize=len(self.config.cameras.keys()) * 2)
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue = mp.Queue(
