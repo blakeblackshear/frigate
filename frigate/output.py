@@ -1,5 +1,5 @@
-import cv2
 import datetime
+import logging
 import math
 import multiprocessing as mp
 import queue
@@ -9,6 +9,7 @@ import threading
 from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 
+import cv2
 import numpy as np
 from setproctitle import setproctitle
 from ws4py.server.wsgirefserver import (
@@ -20,7 +21,9 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import FrigateConfig
-from frigate.util import SharedMemoryFrameManager, get_yuv_crop, copy_yuv_to_position
+from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
+
+logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
@@ -31,7 +34,6 @@ class FFMpegConverter:
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
-            # TODO: logging
             stderr=sp.DEVNULL,
             stdin=sp.PIPE,
             start_new_session=True,
@@ -392,5 +394,4 @@ def output_frames(config: FrigateConfig, video_output_queue):
     websocket_server.manager.join()
     websocket_server.shutdown()
     websocket_thread.join()
-    # TODO: use actual logger
-    print("exiting output process...")
+    logger.info("exiting output process...")
