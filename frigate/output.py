@@ -68,9 +68,19 @@ class BroadcastThread(threading.Thread):
         while True:
             buf = self.converter.read(65536)
             if buf:
-                for ws in self.websocket_server.manager:
-                    if ws.environ["PATH_INFO"].endswith(self.camera):
-                        ws.send(buf, binary=True)
+                manager = self.websocket_server.manager
+                with manager.lock:
+                    websockets = manager.websockets.copy()
+                    ws_iter = iter(websockets.values())
+
+                for ws in ws_iter:
+                    if not ws.terminated and ws.environ["PATH_INFO"].endswith(
+                        self.camera
+                    ):
+                        try:
+                            ws.send(buf, binary=True)
+                        except:
+                            pass
             elif self.converter.process.poll() is not None:
                 break
 
