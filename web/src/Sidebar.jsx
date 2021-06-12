@@ -49,6 +49,7 @@ export default function Sidebar() {
           ) : null
         }
       </Match>
+      <Destination href="/birdseye" text="Birdseye" />
       <Destination href="/events" text="Events" />
       <Destination href="/debug" text="Debug" />
       <Separator />
