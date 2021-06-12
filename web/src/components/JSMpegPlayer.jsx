@@ -13,7 +13,7 @@ export default function JSMpegPlayer({ camera }) {
       playerRef.current,
       url,
       {canvas: canvasRef.current},
-      {protocols: []}
+      {protocols: [], audio: false}
     );
 
     return () => {
