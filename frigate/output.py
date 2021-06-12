@@ -76,6 +76,7 @@ class BroadcastThread(threading.Thread):
 class BirdsEyeFrameManager:
     def __init__(self, config, frame_manager: SharedMemoryFrameManager):
         self.config = config
+        self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
         width = config.birdseye.width
         height = config.birdseye.height
@@ -134,10 +135,20 @@ class BirdsEyeFrameManager:
 
         copy_yuv_to_position(position, self.frame, self.layout_dim, frame, channel_dims)
 
+    def camera_active(self, object_box_count, motion_box_count):
+        if self.mode == "continuous":
+            return True
+
+        if self.mode == "motion" and object_box_count + motion_box_count > 0:
+            return True
+
+        if self.mode == "objects" and object_box_count > 0:
+            return True
+
     def update_frame(self):
         # determine how many cameras are tracking objects within the last 30 seconds
         now = datetime.datetime.now().timestamp()
-        # TODO: this needs to be based on the "mode" from the config
+
         active_cameras = set(
             [
                 cam
@@ -236,7 +247,7 @@ class BirdsEyeFrameManager:
     def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
 
         # update the last active frame for the camera
-        if object_count > 0:
+        if self.camera_active(object_count, motion_count):
             last_active_frame = self.cameras[camera]["last_active_frame"]
             # cleanup the old frame
             if last_active_frame != 0.0:
