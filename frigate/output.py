@@ -1,4 +1,5 @@
 import datetime
+import glob
 import logging
 import math
 import multiprocessing as mp
@@ -100,6 +101,22 @@ class BirdsEyeFrameManager:
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
         self.blank_frame[:] = 128
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
+
+        # find and copy the logo on the blank frame
+        logo_files = glob.glob("/opt/frigate/web/apple-touch-icon.*.png")
+        frigate_logo = None
+        if len(logo_files) > 0:
+            frigate_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
+        if not frigate_logo is None:
+            transparent_layer = frigate_logo[:, :, 3]
+            y_offset = height // 2 - transparent_layer.shape[0] // 2
+            x_offset = width // 2 - transparent_layer.shape[1] // 2
+            self.blank_frame[
+                y_offset : y_offset + transparent_layer.shape[1],
+                x_offset : x_offset + transparent_layer.shape[0],
+            ] = transparent_layer
+        else:
+            logger.warning("Unable to read frigate logo")
 
         self.frame[:] = self.blank_frame
 
