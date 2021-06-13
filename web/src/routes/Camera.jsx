@@ -82,14 +82,14 @@ export default function Camera({ camera }) {
   ) : null;
 
   let player;
-  if (viewMode == 'live') {
+  if (viewMode === 'live') {
     player = <>
       <div>
         <JSMpegPlayer camera={camera} />
       </div>
     </>;
   }
-  else if (viewMode == 'debug') {
+  else if (viewMode === 'debug') {
     player = <>
       <div>
         <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
@@ -110,10 +110,10 @@ export default function Camera({ camera }) {
       <Heading size="2xl">{camera}</Heading>
       <div>
         <nav className="flex justify-end">
-          <button onClick={() => setViewMode('live')} className={viewMode == 'live' ? `text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500` : `text-gray-600 py-0 px-4 block hover:text-gray-500`}>
+          <button onClick={() => setViewMode('live')} className={viewMode === 'live' ? 'text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500' : 'text-gray-600 py-0 px-4 block hover:text-gray-500'}>
             Live
           </button>
-          <button onClick={() => setViewMode('debug')} className={viewMode == 'debug' ? `text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500` : `text-gray-600 py-0 px-4 block hover:text-gray-500`}>
+          <button onClick={() => setViewMode('debug')} className={viewMode === 'debug' ? 'text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500' : 'text-gray-600 py-0 px-4 block hover:text-gray-500'}>
             Debug
           </button>
         </nav>

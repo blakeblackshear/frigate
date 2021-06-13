@@ -21,7 +21,6 @@ export default function JSMpegPlayer({ camera }) {
   }, [url]);
 
   return (
-    <div ref={playerRef} class="jsmpeg">
-    </div>
+    <div ref={playerRef} class="jsmpeg" />
   );
 }
