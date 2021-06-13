@@ -83,26 +83,30 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    player = <>
-      <div>
-        <JSMpegPlayer camera={camera} />
-      </div>
-    </>;
+    player = (
+      <Fragment>
+        <div>
+          <JSMpegPlayer camera={camera} />
+        </div>
+      </Fragment>
+    );
   }
   else if (viewMode === 'debug') {
-    player = <>
-      <div>
-        <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
-      </div>
+    player = (
+      <Fragment>
+        <div>
+          <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
+        </div>
 
-      <Button onClick={handleToggleSettings} type="text">
-        <span className="w-5 h-5">
-          <SettingsIcon />
-        </span>{' '}
-        <span>{showSettings ? 'Hide' : 'Show'} Options</span>
-      </Button>
-      {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
-    </>;
+        <Button onClick={handleToggleSettings} type="text">
+          <span className="w-5 h-5">
+            <SettingsIcon />
+          </span>{' '}
+          <span>{showSettings ? 'Hide' : 'Show'} Options</span>
+        </Button>
+        {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
+      </Fragment>
+    );
   }
 
   return (

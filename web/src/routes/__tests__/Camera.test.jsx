@@ -32,7 +32,10 @@ describe('Camera Route', () => {
       },
       mockSetOptions,
     ]);
+
     render(<Camera camera="front" />);
+
+    fireEvent.click(screen.queryByText('Debug'));
     fireEvent.click(screen.queryByText('Show Options'));
     expect(screen.queryByTestId('mock-image')).toHaveTextContent(
       'bbox=1&timestamp=0&zones=1&mask=0&motion=1&regions=0'
@@ -47,6 +50,7 @@ describe('Camera Route', () => {
 
     render(<Camera camera="front" />);
 
+    fireEvent.click(screen.queryByText('Debug'));
     fireEvent.click(screen.queryByText('Show Options'));
     fireEvent.change(screen.queryByTestId('bbox-input'), { target: { checked: true } });
     fireEvent.change(screen.queryByTestId('timestamp-input'), { target: { checked: true } });
