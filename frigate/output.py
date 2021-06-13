@@ -295,9 +295,11 @@ class BirdsEyeFrameManager:
         if (now - self.last_output_time) < 1 / 10:
             return False
 
-        self.last_output_time = now
-
-        return self.update_frame()
+        # if the frame was updated or the fps is too low, send frame
+        if self.update_frame() or (now - self.last_output_time) > 1:
+            self.last_output_time = now
+            return True
+        return False
 
 
 def output_frames(config: FrigateConfig, video_output_queue):
