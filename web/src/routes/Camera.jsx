@@ -1,5 +1,6 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
+import JSMpegPlayer from '../components/JSMpegPlayer';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Heading from '../components/Heading';
@@ -16,6 +17,7 @@ export default function Camera({ camera }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
+  const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
@@ -79,9 +81,16 @@ export default function Camera({ camera }) {
     </div>
   ) : null;
 
-  return (
-    <div className="space-y-4">
-      <Heading size="2xl">{camera}</Heading>
+  let player;
+  if (viewMode == 'live') {
+    player = <>
+      <div>
+        <JSMpegPlayer camera={camera} />
+      </div>
+    </>;
+  }
+  else if (viewMode == 'debug') {
+    player = <>
       <div>
         <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
       </div>
@@ -93,6 +102,24 @@ export default function Camera({ camera }) {
         <span>{showSettings ? 'Hide' : 'Show'} Options</span>
       </Button>
       {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
+    </>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <Heading size="2xl">{camera}</Heading>
+      <div>
+        <nav className="flex justify-end">
+          <button onClick={() => setViewMode('live')} className={viewMode == 'live' ? `text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500` : `text-gray-600 py-0 px-4 block hover:text-gray-500`}>
+            Live
+          </button>
+          <button onClick={() => setViewMode('debug')} className={viewMode == 'debug' ? `text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500` : `text-gray-600 py-0 px-4 block hover:text-gray-500`}>
+            Debug
+          </button>
+        </nav>
+      </div>
+
+      {player}
 
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
