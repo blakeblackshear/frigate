@@ -117,6 +117,7 @@ class BirdsEyeFrameManager:
             )
             self.cameras[camera] = {
                 "last_active_frame": 0.0,
+                "current_frame": 0.0,
                 "layout_frame": 0.0,
                 "channel_dims": {
                     "y": y,
@@ -133,6 +134,7 @@ class BirdsEyeFrameManager:
         self.last_output_time = 0.0
 
     def clear_frame(self):
+        logger.debug(f"Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
 
     def copy_to_position(self, position, camera=None, frame_time=None):
@@ -165,15 +167,16 @@ class BirdsEyeFrameManager:
 
     def update_frame(self):
         # determine how many cameras are tracking objects within the last 30 seconds
-        now = datetime.datetime.now().timestamp()
-
         active_cameras = set(
             [
                 cam
                 for cam, cam_data in self.cameras.items()
-                if now - cam_data["last_active_frame"] < 30
+                if cam_data["last_active_frame"] > 0
+                and cam_data["current_frame"] - cam_data["last_active_frame"] < 30
             ]
         )
+
+        logger.debug(f"Active cameras: {active_cameras}")
 
         # if there are no active cameras
         if len(active_cameras) == 0:
@@ -188,9 +191,11 @@ class BirdsEyeFrameManager:
 
         # calculate layout dimensions
         layout_dim = math.ceil(math.sqrt(len(active_cameras)))
+        logger.debug(f"New calculated layout dimensions: {layout_dim}")
 
         # reset the layout if it needs to be different
         if layout_dim != self.layout_dim:
+            logger.debug(f"Changing layout size from {self.layout_dim} to {layout_dim}")
             self.layout_dim = layout_dim
 
             self.camera_layout = [None] * layout_dim * layout_dim
@@ -235,11 +240,11 @@ class BirdsEyeFrameManager:
                     self.copy_to_position(
                         position,
                         added_camera,
-                        self.cameras[added_camera]["last_active_frame"],
+                        self.cameras[added_camera]["current_frame"],
                     )
                     self.cameras[added_camera]["layout_frame"] = self.cameras[
                         added_camera
-                    ]["last_active_frame"]
+                    ]["current_frame"]
                 # if removing this camera with no replacement
                 else:
                     self.camera_layout[position] = None
@@ -252,22 +257,22 @@ class BirdsEyeFrameManager:
                 self.copy_to_position(
                     position,
                     added_camera,
-                    self.cameras[added_camera]["last_active_frame"],
+                    self.cameras[added_camera]["current_frame"],
                 )
                 self.cameras[added_camera]["layout_frame"] = self.cameras[added_camera][
-                    "last_active_frame"
+                    "current_frame"
                 ]
             # if not an empty spot and the camera has a newer frame, copy it
             elif (
                 not camera is None
-                and self.cameras[camera]["last_active_frame"]
+                and self.cameras[camera]["current_frame"]
                 != self.cameras[camera]["layout_frame"]
             ):
                 self.copy_to_position(
-                    position, camera, self.cameras[camera]["last_active_frame"]
+                    position, camera, self.cameras[camera]["current_frame"]
                 )
                 self.cameras[camera]["layout_frame"] = self.cameras[camera][
-                    "last_active_frame"
+                    "current_frame"
                 ]
 
         return True
@@ -275,6 +280,7 @@ class BirdsEyeFrameManager:
     def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
 
         # update the last active frame for the camera
+        self.cameras[camera]["current_frame"] = frame_time
         if self.camera_active(object_count, motion_count):
             last_active_frame = self.cameras[camera]["last_active_frame"]
             # cleanup the old frame
