@@ -767,7 +767,17 @@ class TrackedObjectProcessor(threading.Thread):
 
             # cleanup event finished queue
             while not self.event_processed_queue.empty():
-                event_id, camera = self.event_processed_queue.get()
+                event_id, camera, clip_created = self.event_processed_queue.get()
+                if clip_created:
+                    obj = self.camera_states[camera].tracked_objects[event_id]
+                    message = {
+                        "before": obj.previous,
+                        "after": obj.to_dict(),
+                        "type": "clip_ready",
+                    }
+                    self.client.publish(
+                        f"{self.topic_prefix}/events", json.dumps(message), retain=False
+                    )
                 self.camera_states[camera].finished(event_id)
 
         logger.info(f"Exiting object processor...")
