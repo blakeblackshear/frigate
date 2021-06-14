@@ -165,7 +165,6 @@ class FrigateApp:
             self.db,
             self.stats_tracking,
             self.detected_frames_processor,
-            # self.mqtt_client,
         )
 
     def init_mqtt(self):
