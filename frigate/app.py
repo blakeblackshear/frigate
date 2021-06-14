@@ -2,26 +2,25 @@ import json
 import logging
 import multiprocessing as mp
 import os
+import signal
+import sys
+import threading
 from logging.handlers import QueueHandler
 from typing import Dict, List
-import sys
-import signal
 
 import yaml
-from gevent import pywsgi
-from geventwebsocket.handler import WebSocketHandler
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.edgetpu import EdgeTPUProcess
-from frigate.events import EventProcessor, EventCleanup
+from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
-from frigate.mqtt import create_mqtt_client
+from frigate.mqtt import create_mqtt_client, MqttSocketRelay
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.record import RecordingMaintainer
@@ -121,8 +120,8 @@ class FrigateApp:
         for log, level in self.config.logger.logs.items():
             logging.getLogger(log).setLevel(level)
 
-        if not "geventwebsocket.handler" in self.config.logger.logs:
-            logging.getLogger("geventwebsocket.handler").setLevel("ERROR")
+        if not "werkzeug" in self.config.logger.logs:
+            logging.getLogger("werkzeug").setLevel("ERROR")
 
     def init_queues(self):
         # Queues for clip processing
@@ -166,11 +165,17 @@ class FrigateApp:
             self.db,
             self.stats_tracking,
             self.detected_frames_processor,
-            self.mqtt_client,
+            # self.mqtt_client,
         )
 
     def init_mqtt(self):
         self.mqtt_client = create_mqtt_client(self.config, self.camera_metrics)
+
+    def start_mqtt_relay(self):
+        self.mqtt_relay = MqttSocketRelay(
+            self.mqtt_client, self.config.mqtt.topic_prefix
+        )
+        self.mqtt_relay.start()
 
     def start_detectors(self):
         model_shape = (self.config.model.height, self.config.model.width)
@@ -267,10 +272,6 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
-    def start_birdseye_outputter(self):
-        self.birdseye_outputter = BirdsEyeFrameOutputter(self.stop_event)
-        self.birdseye_outputter.start()
-
     def start_event_processor(self):
         self.event_processor = EventProcessor(
             self.config,
@@ -330,6 +331,7 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.init_stats()
         self.init_web_server()
+        self.start_mqtt_relay()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
@@ -343,12 +345,8 @@ class FrigateApp:
 
         signal.signal(signal.SIGTERM, receiveSignal)
 
-        server = pywsgi.WSGIServer(
-            ("127.0.0.1", 5001), self.flask_app, handler_class=WebSocketHandler
-        )
-
         try:
-            server.serve_forever()
+            self.flask_app.run(host="127.0.0.1", port=5001, debug=False)
         except KeyboardInterrupt:
             pass
 
@@ -358,6 +356,7 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
+        self.mqtt_relay.stop()
         self.detected_frames_processor.join()
         self.event_processor.join()
         self.event_cleanup.join()

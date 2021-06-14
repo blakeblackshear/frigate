@@ -38,9 +38,6 @@ RUN pip3 install \
     peewee_migrate \
     zeroconf \
     voluptuous\
-    Flask-Sockets \
-    gevent \
-    gevent-websocket \
     ws4py
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
