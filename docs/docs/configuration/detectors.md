@@ -30,6 +30,15 @@ detectors:
     device: usb:1
 ```
 
+Native Coral (Dev Board):
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: ''
+```
+
 Multiple PCIE/M.2 Corals:
 
 ```yaml
@@ -40,15 +49,6 @@ detectors:
   coral2:
     type: edgetpu
     device: pci:1
-```
-
-Native Corals (Dev Board):
-
-```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: ''
 ```
 
 Mixing Corals:
