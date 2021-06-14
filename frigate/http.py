@@ -11,7 +11,7 @@ from functools import reduce
 from pathlib import Path
 
 import cv2
-import gevent
+
 import numpy as np
 from flask import (
     Blueprint,
@@ -22,7 +22,7 @@ from flask import (
     make_response,
     request,
 )
-from flask_sockets import Sockets
+
 from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
 from playhouse.shortcuts import model_to_dict
 
@@ -35,74 +35,6 @@ from frigate.version import VERSION
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("frigate", __name__)
-ws = Blueprint("ws", __name__)
-
-
-class MqttBackend:
-    """Interface for registering and updating WebSocket clients."""
-
-    def __init__(self, mqtt_client, topic_prefix):
-        self.clients = list()
-        self.mqtt_client = mqtt_client
-        self.topic_prefix = topic_prefix
-
-    def register(self, client):
-        """Register a WebSocket connection for Mqtt updates."""
-        self.clients.append(client)
-
-    def publish(self, message):
-        try:
-            json_message = json.loads(message)
-            json_message = {
-                "topic": f"{self.topic_prefix}/{json_message['topic']}",
-                "payload": json_message["payload"],
-                "retain": json_message.get("retain", False),
-            }
-        except:
-            logger.warning("Unable to parse websocket message as valid json.")
-            return
-
-        logger.debug(
-            f"Publishing mqtt message from websockets at {json_message['topic']}."
-        )
-        self.mqtt_client.publish(
-            json_message["topic"],
-            json_message["payload"],
-            retain=json_message["retain"],
-        )
-
-    def run(self):
-        def send(client, userdata, message):
-            """Sends mqtt messages to clients."""
-            try:
-                logger.debug(f"Received mqtt message on {message.topic}.")
-                ws_message = json.dumps(
-                    {
-                        "topic": message.topic.replace(f"{self.topic_prefix}/", ""),
-                        "payload": message.payload.decode(),
-                    }
-                )
-            except:
-                # if the payload can't be decoded don't relay to clients
-                logger.debug(
-                    f"MQTT payload for {message.topic} wasn't text. Skipping..."
-                )
-                return
-
-            for client in self.clients:
-                try:
-                    client.send(ws_message)
-                except:
-                    logger.debug(
-                        "Removing websocket client due to a closed connection."
-                    )
-                    self.clients.remove(client)
-
-        self.mqtt_client.message_callback_add(f"{self.topic_prefix}/#", send)
-
-    def start(self):
-        """Maintains mqtt subscription in the background."""
-        gevent.spawn(self.run)
 
 
 def create_app(
@@ -110,10 +42,8 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
-    mqtt_client,
 ):
     app = Flask(__name__)
-    sockets = Sockets(app)
 
     @app.before_request
     def _db_connect():
@@ -129,10 +59,6 @@ def create_app(
     app.detected_frames_processor = detected_frames_processor
 
     app.register_blueprint(bp)
-    sockets.register_blueprint(ws)
-
-    app.mqtt_backend = MqttBackend(mqtt_client, frigate_config.mqtt.topic_prefix)
-    app.mqtt_backend.start()
 
     return app
 
@@ -613,7 +539,7 @@ def vod(year_month, day, hour, camera):
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
     while True:
         # max out at specified FPS
-        gevent.sleep(1 / fps)
+        time.sleep(1 / fps)
         frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((height, int(height * 16 / 9), 3), np.uint8)
@@ -626,16 +552,3 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + jpg.tobytes() + b"\r\n\r\n"
         )
-
-
-@ws.route("/ws")
-def echo_socket(socket):
-    current_app.mqtt_backend.register(socket)
-
-    while not socket.closed:
-        # Sleep to prevent *constant* context-switches.
-        gevent.sleep(0.1)
-
-        message = socket.receive()
-        if message:
-            current_app.mqtt_backend.publish(message)
