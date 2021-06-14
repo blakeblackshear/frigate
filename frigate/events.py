@@ -268,7 +268,7 @@ class EventProcessor(threading.Thread):
                         has_snapshot=event_data["has_snapshot"],
                     )
                 del self.events_in_process[event_data["id"]]
-                self.event_processed_queue.put((event_data["id"], camera))
+                self.event_processed_queue.put((event_data["id"], camera, clip_created))
 
         logger.info(f"Exiting event processor...")
 

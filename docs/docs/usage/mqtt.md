@@ -32,7 +32,7 @@ Message published for each changed event. The first message is published when th
 
 ```json
 {
-  "type": "update", // new, update, or end
+  "type": "update", // new, update, end or clip_ready
   "before": {
     "id": "1607123955.475377-mxklsc",
     "camera": "front_door",
