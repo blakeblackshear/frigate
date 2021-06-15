@@ -20,7 +20,12 @@ import numpy as np
 from frigate.config import FrigateConfig, CameraConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
-from frigate.util import SharedMemoryFrameManager, draw_box_with_label, draw_timestamp, calculate_region
+from frigate.util import (
+    SharedMemoryFrameManager,
+    draw_box_with_label,
+    draw_timestamp,
+    calculate_region,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -239,17 +244,17 @@ class TrackedObject:
             best_frame = cv2.resize(
                 best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
             )
-
         if timestamp:
+            logger.info("Jetzad")
             draw_timestamp(
-                frame_copy,
+                best_frame,
                 self.thumbnail_data["frame_time"],
-                "%m/%d/%Y %H:%M:%S",
-                font_effect=None,
-                font_scale=1.0,
-                font_thickness=2,
-                font_color=(255, 255, 255),
-                position="ul",
+                self.camera_config.timestamp_style.format,
+                font_effect=self.camera_config.timestamp_style.effect,
+                font_scale=self.camera_config.timestamp_style.scale,
+                font_thickness=self.camera_config.timestamp_style.thickness,
+                font_color=self.camera_config.timestamp_style.color,
+                position=self.camera_config.timestamp_style.position,
             )
 
         ret, jpg = cv2.imencode(".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
@@ -375,12 +380,12 @@ class CameraState:
             draw_timestamp(
                 frame_copy,
                 frame_time,
-                "%m/%d/%Y %H:%M:%S",
-                font_effect=None,
-                font_scale=1.0,
-                font_thickness=2,
-                font_color= (255, 255, 255),
-                position="ul",
+                self.camera_config.timestamp_style.format,
+                font_effect=self.camera_config.timestamp_style.effect,
+                font_scale=self.camera_config.timestamp_style.scale,
+                font_thickness=self.camera_config.timestamp_style.thickness,
+                font_color=self.camera_config.timestamp_style.color,
+                position=self.camera_config.timestamp_style.position,
             )
 
         return frame_copy
