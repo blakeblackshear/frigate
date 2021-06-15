@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import base64
 import dataclasses
+import datetime
 import json
 import logging
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import voluptuous as vol
@@ -18,8 +18,13 @@ from frigate.util import create_mask
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TRACKED_OBJECTS = ["person"]
+# TODO: Identify what the default format to display timestamps is
+DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
+# German Style:
+# DEFAULT_TIME_FORMAT = "%d.%m.%Y %H:%M:%S"
 
+DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_RGB_COLOR = {"red": 255, "green": 255, "blue": 255}
 DEFAULT_DETECTORS = {"coral": {"type": "edgetpu", "device": "usb"}}
 DETECTORS_SCHEMA = vol.Schema(
     {
@@ -322,7 +327,6 @@ class ZoneConfig:
                 [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
             )
         else:
-            print(f"Unable to parse zone coordinates for {name}")
             contour = np.array([])
 
         return ZoneConfig(
@@ -607,6 +611,19 @@ def ensure_zones_and_cameras_have_different_names(cameras):
     return cameras
 
 
+def ensure_timeformat_is_legit(format_string):
+    datetime.datetime.now().strftime(format_string)
+    return format_string
+
+
+RGB_COLOR_SCHEMA = vol.Schema(
+    {
+        vol.Required("red"): vol.Range(min=0, max=255),
+        vol.Required("green"): vol.Range(min=0, max=255),
+        vol.Required("blue"): vol.Range(min=0, max=255),
+    }
+)
+
 CAMERAS_SCHEMA = vol.Schema(
     vol.All(
         {
@@ -653,6 +670,20 @@ CAMERAS_SCHEMA = vol.Schema(
                 vol.Optional("objects", default={}): OBJECTS_SCHEMA,
                 vol.Optional("motion", default={}): MOTION_SCHEMA,
                 vol.Optional("detect", default={}): DETECT_SCHEMA,
+                vol.Optional("timestamp_style", default={}): {
+                    vol.Optional("position", default="tl"): vol.In(
+                        ["tl", "tr", "bl", "br"]
+                    ),
+                    vol.Optional(
+                        "format", default=DEFAULT_TIME_FORMAT
+                    ): ensure_timeformat_is_legit,
+                    vol.Optional("color", default=DEFAULT_RGB_COLOR): RGB_COLOR_SCHEMA,
+                    vol.Optional("scale", default=1.0): float,
+                    vol.Optional("thickness", default=2): int,
+                    vol.Optional("effect", default=None): vol.In(
+                        [None, "solid", "shadow"]
+                    ),
+                },
             }
         },
         vol.Msg(
@@ -727,6 +758,30 @@ class CameraMqttConfig:
 
 
 @dataclasses.dataclass
+class TimestampStyleConfig:
+    position: str
+    format: str
+    color: Tuple[int, int, int]
+    scale: float
+    thickness: int
+    effect: str
+
+    @classmethod
+    def build(cls, config) -> TimestampStyleConfig:
+        return TimestampStyleConfig(
+            config["position"],
+            config["format"],
+            (config["color"]["red"], config["color"]["green"], config["color"]["blue"]),
+            config["scale"],
+            config["thickness"],
+            config["effect"],
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
+
+
+@dataclasses.dataclass
 class CameraClipsConfig:
     enabled: bool
     pre_capture: int
@@ -789,6 +844,7 @@ class CameraConfig:
     objects: ObjectConfig
     motion: MotionConfig
     detect: DetectConfig
+    timestamp_style: TimestampStyleConfig
 
     @property
     def frame_shape(self) -> Tuple[int, int]:
@@ -841,6 +897,7 @@ class CameraConfig:
             detect=DetectConfig.build(
                 config["detect"], global_config["detect"], config.get("fps", 5)
             ),
+            timestamp_style=TimestampStyleConfig.build(config["timestamp_style"]),
         )
 
     def _get_ffmpeg_cmd(self, ffmpeg_input):
