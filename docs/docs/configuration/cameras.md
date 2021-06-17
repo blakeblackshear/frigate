@@ -215,6 +215,37 @@ Frigate can re-stream your video feed as a RTMP feed for other applications such
 
 Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
 
+## Timestamp style configuration
+
+For the live view and snapshots it is possible to embed a timestamp in the feed. In some instances the default position obstructs important space, visibility or contrast is too low because of color or the datetime format does not match ones desire.
+
+```yaml
+# Optional: in-feed timestamp style configuration
+timestamp_style:
+  # Optional: Position of the timestamp (default: shown below)
+  #           "tl" (top left), "tr" (top right), "bl" (bottom left), "br" (bottom right)
+  position: "tl"
+  # Optional: Format specifier conform to the Python package "datetime" (default: shown below)
+  #           Additional Examples:
+  #             german: "%d.%m.%Y %H:%M:%S"
+  format: "%m/%d/%Y %H:%M:%S"
+  # Optional: Color of font
+  color:
+    # All Required when color is specified (default: shown below)
+    red: 255
+    green: 255
+    blue: 255
+  # Optional: Scale factor for font (default: shown below)
+  scale: 1.0
+  # Optional: Line thickness of font (default: shown below)
+  thickness: 2
+  # Optional: Effect of lettering (default: shown below)
+  #           None (No effect), 
+  #           "solid" (solid background in inverse color of font)
+  #           "shadow" (shadow for font)
+  effect: None
+```
+
 ## Full example
 
 The following is a full example of all of the options together for a camera configuration
@@ -387,6 +418,31 @@ cameras:
           # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
           # Checks based on the bottom center of the bounding box of the object
           mask: 0,0,1000,0,1000,200,0,200
+
+    # Optional: In-feed timestamp style configuration
+    timestamp_style:
+    # Optional: Position of the timestamp (default: shown below)
+    #           "tl" (top left), "tr" (top right), "bl" (bottom left), "br" (bottom right)
+    position: "tl"
+    # Optional: Format specifier conform to the Python package "datetime" (default: shown below)
+    #           Additional Examples:
+    #             german: "%d.%m.%Y %H:%M:%S"
+    format: "%m/%d/%Y %H:%M:%S"
+    # Optional: Color of font
+    color:
+        # All Required when color is specified (default: shown below)
+        red: 255
+        green: 255
+        blue: 255
+    # Optional: Scale factor for font (default: shown below)
+    scale: 1.0
+    # Optional: Line thickness of font (default: shown below)
+    thickness: 2
+    # Optional: Effect of lettering (default: shown below)
+    #           None (No effect), 
+    #           "solid" (solid background in inverse color of font)
+    #           "shadow" (shadow for font)
+    effect: None
 ```
 
 ## Camera specific configuration
