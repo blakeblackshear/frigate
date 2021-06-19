@@ -217,7 +217,7 @@ Some video feeds are not compatible with RTMP. If you are experiencing issues, c
 
 ## Timestamp style configuration
 
-For the live view and snapshots it is possible to embed a timestamp in the feed. In some instances the default position obstructs important space, visibility or contrast is too low because of color or the datetime format does not match ones desire.
+For the debug view and snapshots it is possible to embed a timestamp in the feed. In some instances the default position obstructs important space, visibility or contrast is too low because of color or the datetime format does not match ones desire.
 
 ```yaml
 # Optional: in-feed timestamp style configuration
