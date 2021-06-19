@@ -272,7 +272,6 @@ class TrackedObject:
                 best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
             )
         if timestamp:
-            logger.info("Jetzad")
             draw_timestamp(
                 best_frame,
                 self.thumbnail_data["frame_time"],
