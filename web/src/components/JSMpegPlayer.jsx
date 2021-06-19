@@ -15,6 +15,19 @@ export default function JSMpegPlayer({ camera }) {
       {protocols: [], audio: false}
     );
 
+    const fullscreen = () => {
+      console.log("fullscreen");
+
+      if(video.els.canvas.webkitRequestFullScreen) {
+        video.els.canvas.webkitRequestFullScreen();
+      }
+      else {
+        video.els.canvas.mozRequestFullScreen();
+      }
+    }
+
+    video.els.canvas.addEventListener("click",fullscreen)
+
     return () => {
       video.destroy();
     };
