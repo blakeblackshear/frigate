@@ -283,7 +283,7 @@ class EventCleanup(threading.Thread):
 
     def expire(self, media_type):
         ## Expire events from unlisted cameras based on the global config
-        if media_type == 'clips':
+        if media_type == "clips":
             retain_config = self.config.clips.retain
             file_extension = "mp4"
             update_params = {"has_clip": False}
@@ -314,8 +314,16 @@ class EventCleanup(threading.Thread):
             # delete the media from disk
             for event in expired_events:
                 media_name = f"{event.camera}-{event.id}"
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                media_path = Path(
+                    f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                )
                 media_path.unlink(missing_ok=True)
+                if file_extension == "jpg":
+                    media_path = Path(
+                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                    )
+                    media_path.unlink(missing_ok=True)
+
             # update the clips attribute for the db entry
             update_query = Event.update(update_params).where(
                 Event.camera.not_in(self.camera_keys),
@@ -326,7 +334,7 @@ class EventCleanup(threading.Thread):
 
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
-            if media_type == 'clips':
+            if media_type == "clips":
                 retain_config = camera.clips.retain
             else:
                 retain_config = camera.snapshots.retain
@@ -351,8 +359,15 @@ class EventCleanup(threading.Thread):
                 # delete the grabbed clips from disk
                 for event in expired_events:
                     media_name = f"{event.camera}-{event.id}"
-                    media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}")
+                    media_path = Path(
+                        f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                    )
                     media_path.unlink(missing_ok=True)
+                    if file_extension == "jpg":
+                        media_path = Path(
+                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                        )
+                        media_path.unlink(missing_ok=True)
                 # update the clips attribute for the db entry
                 update_query = Event.update(update_params).where(
                     Event.camera == name,
