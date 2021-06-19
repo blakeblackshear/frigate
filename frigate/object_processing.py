@@ -153,10 +153,16 @@ class TrackedObject:
         return significant_update
 
     def to_dict(self, include_thumbnail: bool = False):
+        snapshot_time = (
+            self.thumbnail_data["frame_time"]
+            if not self.thumbnail_data is None
+            else 0.0
+        )
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera,
             "frame_time": self.obj_data["frame_time"],
+            "snapshot_time": snapshot_time,
             "label": self.obj_data["label"],
             "top_score": self.top_score,
             "false_positive": self.false_positive,
