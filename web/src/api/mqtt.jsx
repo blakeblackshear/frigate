@@ -79,6 +79,7 @@ export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
 
   const send = useCallback(
     (payload) => {
+      payload = payload || defaultValue;
       ws.send(
         JSON.stringify({
           topic: publishTopic || watchTopic,
