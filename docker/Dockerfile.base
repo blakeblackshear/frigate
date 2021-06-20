@@ -7,7 +7,7 @@ FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
 FROM blakeblackshear/frigate-nginx:${NGINX_VERSION} as nginx
 FROM frigate-web as web
 
-FROM ubuntu:20.04 AS build
+FROM ubuntu:20.04 as build
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -yqq update && \
