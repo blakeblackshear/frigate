@@ -1,11 +1,3 @@
-FROM ubuntu:20.04 AS docker
-
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get -yqq update && \
-    apt-get install -yq --no-install-recommends ca-certificates docker.io && \
-    apt-get autoremove -y && \
-    apt-get clean -y
-
 ARG ARCH=amd64
 ARG WHEELS_VERSION
 ARG FFMPEG_VERSION
@@ -14,6 +6,14 @@ FROM blakeblackshear/frigate-wheels:${WHEELS_VERSION}-${ARCH} as wheels
 FROM blakeblackshear/frigate-ffmpeg:${FFMPEG_VERSION}-${ARCH} as ffmpeg
 FROM blakeblackshear/frigate-nginx:${NGINX_VERSION} as nginx
 FROM frigate-web as web
+
+FROM ubuntu:20.04 AS build
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get -yqq update && \
+    apt-get install -yq --no-install-recommends ca-certificates docker.io && \
+    apt-get autoremove -y && \
+    apt-get clean -y
 
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
@@ -26,7 +26,7 @@ COPY --from=ffmpeg /usr/local /usr/local/
 
 COPY --from=wheels /wheels/. /wheels/
 
-COPY --from=docker /usr/bin/docker /usr/local/bin/docker
+COPY --from=build /usr/bin/docker /usr/local/bin/docker
 
 ENV FLASK_ENV=development
 # ENV FONTCONFIG_PATH=/etc/fonts
