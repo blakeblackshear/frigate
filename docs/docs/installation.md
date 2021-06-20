@@ -46,6 +46,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro # for Frigate restart with docker command
       - <path_to_config_file>:/config/config.yml:ro
       - <path_to_directory_for_media>:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
@@ -71,6 +72,7 @@ docker run -d \
   -v <path_to_directory_for_media>:/media/frigate \
   -v <path_to_config_file>:/config/config.yml:ro \
   -v /etc/localtime:/etc/localtime:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
   -p 1935:1935 \

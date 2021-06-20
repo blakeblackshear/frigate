@@ -13,6 +13,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import FrigateConfig
+from frigate.util import restart_frigate
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
+    def on_restart_command(client, userdata, message):
+        payload = message.payload.decode()
+        if payload == "container":
+            logger.warning(f"Restart container received via mqtt")
+            restart_frigate()
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
     def on_connect(client, userdata, flags, rc):
         threading.current_thread().name = "mqtt"
         if rc != 0:
@@ -124,6 +133,10 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
         )
+
+    client.message_callback_add(
+        f"{mqtt_config.topic_prefix}/restart", on_restart_command
+    )
 
     if not mqtt_config.tls_ca_certs is None:
         if (

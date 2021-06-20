@@ -72,7 +72,7 @@ export function MqttProvider({
   return <Mqtt.Provider value={{ state, ws: wsRef.current }}>{children}</Mqtt.Provider>;
 }
 
-export function useMqtt(watchTopic, publishTopic) {
+export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
   const { state, ws } = useContext(Mqtt);
 
   const value = state[watchTopic] || { payload: null };
@@ -117,4 +117,13 @@ export function useSnapshotsState(camera) {
     connected,
   } = useMqtt(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
   return { payload, send, connected };
+}
+
+export function useRestart() {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useMqtt(``, `restart`, "container");
+  return { send, connected };
 }

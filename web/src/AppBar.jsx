@@ -5,12 +5,17 @@ import Menu, { MenuItem, MenuSeparator } from './components/Menu';
 import AutoAwesomeIcon from './icons/AutoAwesome';
 import LightModeIcon from './icons/LightMode';
 import DarkModeIcon from './icons/DarkMode';
+import FrigateRestartIcon from './icons/FrigateRestart';
+import Dialog from './components/Dialog';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
+import { useRestart } from './api/mqtt';
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const { setDarkMode } = useDarkMode();
+  const { send: sendRestart } = useRestart();
 
   const handleSelectDarkMode = useCallback(
     (value, label) => {
@@ -30,6 +35,20 @@ export default function AppBar() {
     setShowMoreMenu(false);
   }, [setShowMoreMenu]);
 
+  const handleClickRestartDialog = useCallback(() => {
+    setShowDialog(false);
+    sendRestart();
+  }, [setShowDialog]);
+
+  const handleDismissRestartDialog = () => {
+    setShowDialog(false);
+  };
+
+  const handleRestart = useCallback(() => {
+    setShowMoreMenu(false);
+    setShowDialog(true);
+  });
+
   return (
     <Fragment>
       <BaseAppBar title={LinkedLogo} overflowRef={moreRef} onOverflowClick={handleShowMenu} />
@@ -39,7 +58,20 @@ export default function AppBar() {
           <MenuSeparator />
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
+          <MenuSeparator />
+          <MenuItem icon={RestartFrigateIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
+      ) : null},
+      {showDialog ? (
+        <Dialog
+          onDismiss={handleDismissRestartDialog}
+          title="Restart Frigate"
+          text="Are you sure?"
+          actions={[
+            { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
+            { text: 'Cancel', onClick: handleDismissRestartDialog },
+          ]}
+        />
       ) : null}
     </Fragment>
   );

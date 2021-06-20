@@ -383,6 +383,11 @@ def clipped(obj, frame_shape):
         return False
 
 
+def restart_frigate():
+    sp.run("docker restart $(hostname)", shell=True)
+    return
+
+
 class EventsPerSecond:
     def __init__(self, max_events=1000):
         self._start = None

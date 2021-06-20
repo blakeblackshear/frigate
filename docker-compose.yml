@@ -10,6 +10,7 @@ services:
       dockerfile: docker/Dockerfile.dev
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - .:/lab/frigate:cached
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate

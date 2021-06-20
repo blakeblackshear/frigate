@@ -1,3 +1,11 @@
+FROM ubuntu:20.04 AS docker
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get -yqq update && \
+    apt-get install -yq --no-install-recommends ca-certificates docker.io && \
+    apt-get autoremove -y && \
+    apt-get clean -y
+
 ARG ARCH=amd64
 ARG WHEELS_VERSION
 ARG FFMPEG_VERSION
@@ -17,6 +25,8 @@ RUN chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer 
 COPY --from=ffmpeg /usr/local /usr/local/
 
 COPY --from=wheels /wheels/. /wheels/
+
+COPY --from=docker /usr/bin/docker /usr/local/bin/docker
 
 ENV FLASK_ENV=development
 # ENV FONTCONFIG_PATH=/etc/fonts
