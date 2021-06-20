@@ -170,6 +170,9 @@ snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
+  # Optional: Enable writing a clean copy png snapshot to /media/frigate/clips (default: shown below)
+  # Only works if snapshots are enabled. This image is intended to be used for training purposes.
+  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)

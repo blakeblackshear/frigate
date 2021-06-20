@@ -5,14 +5,13 @@ import JSMpeg from '@cycjimmy/jsmpeg-player';
 
 export default function JSMpegPlayer({ camera }) {
   const playerRef = useRef();
-  const canvasRef = useRef();
   const url = `${baseUrl.replace(/^http/, 'ws')}/live/${camera}`
 
   useEffect(() => {
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,
-      {canvas: canvasRef.current},
+      {},
       {protocols: [], audio: false}
     );
 
@@ -22,8 +21,6 @@ export default function JSMpegPlayer({ camera }) {
   }, [url]);
 
   return (
-    <div ref={playerRef} className="jsmpeg">
-      <canvas ref={canvasRef} className="relative w-full" />
-    </div>
+    <div ref={playerRef} class="jsmpeg" />
   );
 }

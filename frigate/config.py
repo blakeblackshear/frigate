@@ -634,6 +634,7 @@ CAMERAS_SCHEMA = vol.Schema(
                 },
                 vol.Optional("snapshots", default={}): {
                     vol.Optional("enabled", default=False): bool,
+                    vol.Optional("clean_copy", default=True): bool,
                     vol.Optional("timestamp", default=False): bool,
                     vol.Optional("bounding_box", default=False): bool,
                     vol.Optional("crop", default=False): bool,
@@ -665,6 +666,7 @@ CAMERAS_SCHEMA = vol.Schema(
 @dataclasses.dataclass
 class CameraSnapshotsConfig:
     enabled: bool
+    clean_copy: bool
     timestamp: bool
     bounding_box: bool
     crop: bool
@@ -676,6 +678,7 @@ class CameraSnapshotsConfig:
     def build(cls, config, global_config) -> CameraSnapshotsConfig:
         return CameraSnapshotsConfig(
             enabled=config["enabled"],
+            clean_copy=config["clean_copy"],
             timestamp=config["timestamp"],
             bounding_box=config["bounding_box"],
             crop=config["crop"],
@@ -689,6 +692,7 @@ class CameraSnapshotsConfig:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "enabled": self.enabled,
+            "clean_copy": self.clean_copy,
             "timestamp": self.timestamp,
             "bounding_box": self.bounding_box,
             "crop": self.crop,

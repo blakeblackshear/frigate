@@ -153,10 +153,16 @@ class TrackedObject:
         return significant_update
 
     def to_dict(self, include_thumbnail: bool = False):
+        snapshot_time = (
+            self.thumbnail_data["frame_time"]
+            if not self.thumbnail_data is None
+            else 0.0
+        )
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera,
             "frame_time": self.obj_data["frame_time"],
+            "snapshot_time": snapshot_time,
             "label": self.obj_data["label"],
             "top_score": self.top_score,
             "false_positive": self.false_positive,
@@ -191,6 +197,27 @@ class TrackedObject:
         else:
             ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
             return jpg.tobytes()
+
+    def get_clean_png(self):
+        if self.thumbnail_data is None:
+            return None
+
+        try:
+            best_frame = cv2.cvtColor(
+                self.frame_cache[self.thumbnail_data["frame_time"]],
+                cv2.COLOR_YUV2BGR_I420,
+            )
+        except KeyError:
+            logger.warning(
+                f"Unable to create clean png because frame {self.thumbnail_data['frame_time']} is not in the cache"
+            )
+            return None
+
+        ret, png = cv2.imencode(".png", best_frame)
+        if ret:
+            return png.tobytes()
+        else:
+            return None
 
     def get_jpg_bytes(
         self, timestamp=False, bounding_box=False, crop=False, height=None
@@ -615,6 +642,23 @@ class TrackedObjectProcessor(threading.Thread):
                         ) as j:
                             j.write(jpg_bytes)
                         event_data["has_snapshot"] = True
+
+                    # write clean snapshot if enabled
+                    if snapshot_config.clean_copy:
+                        png_bytes = obj.get_clean_png()
+                        if png_bytes is None:
+                            logger.warning(
+                                f"Unable to save clean snapshot for {obj.obj_data['id']}."
+                            )
+                        else:
+                            with open(
+                                os.path.join(
+                                    CLIPS_DIR,
+                                    f"{camera}-{obj.obj_data['id']}-clean.png",
+                                ),
+                                "wb",
+                            ) as p:
+                                p.write(png_bytes)
             self.event_queue.put(("end", camera, event_data))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):

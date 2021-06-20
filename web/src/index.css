@@ -25,3 +25,7 @@
     transform: rotate(360deg);
   }
 }
+
+.jsmpeg canvas {
+  position: static !important;
+}
