@@ -59,7 +59,7 @@ export default function AppBar() {
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
           <MenuSeparator />
-          <MenuItem icon={RestartFrigateIcon} label="Restart Frigate" onSelect={handleRestart} />
+          <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
       ) : null},
       {showDialog ? (
