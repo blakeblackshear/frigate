@@ -75,7 +75,7 @@ export function MqttProvider({
 export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
   const { state, ws } = useContext(Mqtt);
 
-  const value = state[watchTopic] || { payload: null };
+  const value = state[watchTopic] || { payload: defaultValue };
 
   const send = useCallback(
     (payload) => {
