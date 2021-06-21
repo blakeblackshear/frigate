@@ -17,6 +17,7 @@ from typing import AnyStr
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -516,6 +517,13 @@ def clipped(obj, frame_shape):
         return True
     else:
         return False
+
+
+def restart_frigate():
+    for proc in psutil.process_iter():
+        if proc.name().startswith("frigate.detector."):
+           psutil.Process(proc.pid).terminate()
+    return
 
 
 class EventsPerSecond:
