@@ -203,6 +203,7 @@ class BirdsEyeFrameManager:
             # if the layout needs to be cleared
             else:
                 self.camera_layout = []
+                self.layout_dim = 0
                 self.clear_frame()
                 return True
 
