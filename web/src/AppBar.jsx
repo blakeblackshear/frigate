@@ -14,6 +14,7 @@ import { useRestart } from './api/mqtt';
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDialogWait, setShowDialogWait] = useState(false);
   const { setDarkMode } = useDarkMode();
   const { send: sendRestart } = useRestart();
 
@@ -37,6 +38,7 @@ export default function AppBar() {
 
   const handleClickRestartDialog = useCallback(() => {
     setShowDialog(false);
+    setShowDialogWait(true);
     sendRestart();
   }, [setShowDialog]);
 
@@ -71,6 +73,12 @@ export default function AppBar() {
             { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
             { text: 'Cancel', onClick: handleDismissRestartDialog },
           ]}
+        />
+      ) : null},
+      {showDialogWait ? (
+        <Dialog
+          title="Restart in progress"
+          text="Please wait a few seconds for the restart to complete before reloading the page."
         />
       ) : null}
     </Fragment>
