@@ -522,7 +522,7 @@ def clipped(obj, frame_shape):
 def restart_frigate():
     for proc in psutil.process_iter():
         if proc.name().startswith("frigate.detector."):
-           psutil.Process(proc.pid).terminate()
+            psutil.Process(proc.pid).terminate()
     return
 
 
