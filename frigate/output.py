@@ -300,11 +300,6 @@ class BirdsEyeFrameManager:
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
         if self.camera_active(object_count, motion_count):
-            last_active_frame = self.cameras[camera]["last_active_frame"]
-            # cleanup the old frame
-            if last_active_frame != 0.0:
-                frame_id = f"{camera}{last_active_frame}"
-                self.frame_manager.delete(frame_id)
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -419,12 +414,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 converters["birdseye"].write(birdseye_manager.frame.tobytes())
 
         if camera in previous_frames:
-            # if the birdseye manager still needs this frame, don't delete it
-            if (
-                birdseye_manager.cameras[camera]["last_active_frame"]
-                != previous_frames[camera]
-            ):
-                frame_manager.delete(f"{camera}{previous_frames[camera]}")
+            frame_manager.delete(f"{camera}{previous_frames[camera]}")
 
         previous_frames[camera] = frame_time
 
