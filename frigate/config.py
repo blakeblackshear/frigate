@@ -963,6 +963,7 @@ class CameraConfig:
                 {"roles": c["roles"], "cmd": " ".join(c["cmd"])}
                 for c in self.ffmpeg_cmds
             ],
+            "timestamp_style": self.timestamp_style.to_dict(),
         }
 
 

@@ -19,6 +19,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 def draw_timestamp(
     frame,
     timestamp,
@@ -27,16 +28,14 @@ def draw_timestamp(
     font_scale=1.0,
     font_thickness=2,
     font_color=(255, 255, 255),
-    position="ul",
-    ):
-    time_to_show = datetime.datetime.fromtimestamp(
-        timestamp
-    ).strftime(timestamp_format)
+    position="tl",
+):
+    time_to_show = datetime.datetime.fromtimestamp(timestamp).strftime(timestamp_format)
     size = cv2.getTextSize(
-        time_to_show, 
-        cv2.FONT_HERSHEY_SIMPLEX, 
-        fontScale = font_scale, 
-        thickness = font_thickness
+        time_to_show,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=font_scale,
+        thickness=font_thickness,
     )
     image_width = frame.shape[1]
     image_height = frame.shape[0]
@@ -44,10 +43,10 @@ def draw_timestamp(
     text_height = size[0][1]
     line_height = text_height + size[1]
 
-    if position == "ul":
+    if position == "tl":
         text_offset_x = 0
         text_offset_y = 0 if 0 < line_height else 0 - (line_height + 8)
-    elif position == "ur":
+    elif position == "tr":
         text_offset_x = image_width - text_width
         text_offset_y = 0 if 0 < line_height else 0 - (line_height + 8)
     elif position == "bl":
@@ -59,18 +58,20 @@ def draw_timestamp(
 
     if font_effect == "solid":
         # make the coords of the box with a small padding of two pixels
-        timestamp_box_coords = np.array([
-            [text_offset_x, text_offset_y],
-            [text_offset_x+text_width, text_offset_y],
-            [text_offset_x+text_width, text_offset_y + line_height+ 8],
-            [text_offset_x, text_offset_y + line_height+ 8],
-        ])
+        timestamp_box_coords = np.array(
+            [
+                [text_offset_x, text_offset_y],
+                [text_offset_x + text_width, text_offset_y],
+                [text_offset_x + text_width, text_offset_y + line_height + 8],
+                [text_offset_x, text_offset_y + line_height + 8],
+            ]
+        )
 
         cv2.fillPoly(
-            frame, 
+            frame,
             [timestamp_box_coords],
             # inverse color of text for background for max. contrast
-            (255-font_color[0], 255-font_color[1], 255-font_color[2]),
+            (255 - font_color[0], 255 - font_color[1], 255 - font_color[2]),
         )
     elif font_effect == "shadow":
         cv2.putText(
@@ -78,9 +79,9 @@ def draw_timestamp(
             time_to_show,
             (text_offset_x + 3, text_offset_y + line_height),
             cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale = font_scale,
-            color = (255-font_color[0], 255-font_color[1], 255-font_color[2]),
-            thickness = font_thickness,
+            fontScale=font_scale,
+            color=(255 - font_color[0], 255 - font_color[1], 255 - font_color[2]),
+            thickness=font_thickness,
         )
 
     cv2.putText(
@@ -88,10 +89,11 @@ def draw_timestamp(
         time_to_show,
         (text_offset_x, text_offset_y + line_height - 3),
         cv2.FONT_HERSHEY_SIMPLEX,
-        fontScale = font_scale,
-        color = font_color,
-        thickness = font_thickness,
+        fontScale=font_scale,
+        color=font_color,
+        thickness=font_thickness,
     )
+
 
 def draw_box_with_label(
     frame,
