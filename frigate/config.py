@@ -649,6 +649,10 @@ CAMERAS_SCHEMA = vol.Schema(
                 vol.Optional("rtmp", default={}): {
                     vol.Required("enabled", default=True): bool,
                 },
+                vol.Optional("live", default={}): {
+                    "height": int,
+                    vol.Optional("quality", default=8): vol.Range(min=1, max=31),
+                },
                 vol.Optional("snapshots", default={}): {
                     vol.Optional("enabled", default=False): bool,
                     vol.Optional("clean_copy", default=True): bool,
@@ -827,6 +831,27 @@ class CameraRtmpConfig:
         return dataclasses.asdict(self)
 
 
+@dataclasses.dataclass
+class CameraLiveConfig:
+    height: int
+    width: int
+    quality: int
+
+    @classmethod
+    def build(cls, config, camera_height, camera_width) -> CameraRtmpConfig:
+        if "height" in config and config["height"] <= camera_height:
+            height = config["height"]
+            width = int(height * (camera_width / camera_height))
+        else:
+            height = camera_height
+            width = camera_width
+
+        return CameraLiveConfig(height, width, config["quality"])
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
+
+
 @dataclasses.dataclass(frozen=True)
 class CameraConfig:
     name: str
@@ -839,6 +864,7 @@ class CameraConfig:
     clips: CameraClipsConfig
     record: RecordConfig
     rtmp: CameraRtmpConfig
+    live: CameraLiveConfig
     snapshots: CameraSnapshotsConfig
     mqtt: CameraMqttConfig
     objects: ObjectConfig
@@ -886,6 +912,9 @@ class CameraConfig:
             clips=CameraClipsConfig.build(config["clips"], global_config),
             record=RecordConfig.build(config["record"], global_config["record"]),
             rtmp=CameraRtmpConfig.build(config["rtmp"]),
+            live=CameraLiveConfig.build(
+                config["live"], config["height"], config["width"]
+            ),
             snapshots=CameraSnapshotsConfig.build(config["snapshots"], global_config),
             mqtt=CameraMqttConfig.build(config["mqtt"]),
             objects=ObjectConfig.build(
