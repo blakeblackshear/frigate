@@ -122,9 +122,8 @@ export function useSnapshotsState(camera) {
 
 export function useRestart() {
   const {
-    value: { payload },
     send,
     connected,
-  } = useMqtt(``, `restart`, "container");
+  } = useMqtt('', 'restart', 'container');
   return { send, connected };
 }
