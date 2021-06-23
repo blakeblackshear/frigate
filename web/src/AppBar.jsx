@@ -70,7 +70,7 @@ export default function AppBar() {
           title="Restart Frigate"
           text="Are you sure ?"
           actions={[
-            { text: 'Yes' color: 'red', onClick: handleClickRestartDialog },
+            { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
             { text: 'Cancel', onClick: handleDismissRestartDialog },
           ]}
         />
