@@ -240,7 +240,7 @@ timestamp_style:
   # Optional: Line thickness of font (default: shown below)
   thickness: 2
   # Optional: Effect of lettering (default: shown below)
-  #           None (No effect), 
+  #           None (No effect),
   #           "solid" (solid background in inverse color of font)
   #           "shadow" (shadow for font)
   effect: None
@@ -357,8 +357,18 @@ cameras:
 
     # Optional: RTMP re-stream configuration
     rtmp:
-      # Required: Enable the live stream (default: True)
+      # Required: Enable the RTMP stream (default: True)
       enabled: True
+
+    # Optional: Live stream configuration for WebUI
+    live:
+      # Optional: Set the height of the live stream. (default: detect stream height)
+      # This must be less than or equal to the height of the detect stream. Lower resolutions
+      # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
+      height: 720
+      # Optional: Set the encode quality of the live stream (default: shown below)
+      # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+      quality: 8
 
     # Optional: Configuration for the jpg snapshots written to the clips directory for each event
     snapshots:
@@ -430,16 +440,16 @@ cameras:
     format: "%m/%d/%Y %H:%M:%S"
     # Optional: Color of font
     color:
-        # All Required when color is specified (default: shown below)
-        red: 255
-        green: 255
-        blue: 255
+      # All Required when color is specified (default: shown below)
+      red: 255
+      green: 255
+      blue: 255
     # Optional: Scale factor for font (default: shown below)
     scale: 1.0
     # Optional: Line thickness of font (default: shown below)
     thickness: 2
     # Optional: Effect of lettering (default: shown below)
-    #           None (No effect), 
+    #           None (No effect),
     #           "solid" (solid background in inverse color of font)
     #           "shadow" (shadow for font)
     effect: None

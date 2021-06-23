@@ -346,9 +346,9 @@ def output_frames(config: FrigateConfig, video_output_queue):
         converters[camera] = FFMpegConverter(
             cam_config.frame_shape[1],
             cam_config.frame_shape[0],
-            cam_config.frame_shape[1],
-            cam_config.frame_shape[0],
-            8,
+            cam_config.live.width,
+            cam_config.live.height,
+            cam_config.live.quality,
         )
         broadcasters[camera] = BroadcastThread(
             camera, converters[camera], websocket_server

@@ -167,14 +167,14 @@ A dynamic combined camera view of all tracked cameras. This is optimized for min
 
 ```yaml
 birdseye:
-  # Optional: Enable birdseye view
+  # Optional: Enable birdseye view (default: shown below)
   enabled: True
-  # Optional: Width of the output resolution
+  # Optional: Width of the output resolution (default: shown below)
   width: 1280
-  # Optional: Height of the output resolution
+  # Optional: Height of the output resolution (default: shown below)
   height: 720
-  # Optional: Encoding quality of the mpeg1 feed. 1 is the highest quality, and 31 is the lowest.
-  # Lower quality feeds utilize less CPU resources.
+  # Optional: Encoding quality of the mpeg1 feed (default: shown below)
+  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
   quality: 8
   # Optional: Mode of the view. Available options are: objects, motion, and continuous
   #   objects - cameras are included if they have had a tracked object within the last 30 seconds
