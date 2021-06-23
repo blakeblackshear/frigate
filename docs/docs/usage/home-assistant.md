@@ -42,6 +42,10 @@ To load a video clip taken by frigate from Home Assistants API :
 https://HA_URL/api/frigate/notifications/<event-id>/<camera>/clip.mp4
 ```
 
+:::caution
+The clip video is not immediately available after the `end` event arrives.
+:::
+
 Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image.
 
 ```yaml
@@ -110,6 +114,29 @@ automation:
         message: "High confidence dog detection."
         data:
           image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
+          tag: "{{trigger.payload_json['after']['id']}}"
+```
+
+```yaml
+# Tested on iOS
+- alias: Play the clip video in the notification dropdown when the last event arrives
+  trigger:
+    platform: mqtt
+    topic: frigate/events
+  condition:
+    - "{{ trigger.payload_json['after']['label'] == 'person' }}"
+    - "{{ 'yard' in trigger.payload_json['before']['current_zones'] }}"
+    - "{{ trigger.payload_json['type'] == 'end'}}"
+  action:
+    # A delay is needed here because frigate needs some time to store the clip video,
+    # otherwise HA companion app will show 404 in the notification.
+    - delay: "00:00:15"
+    - service: notify.mobile_app_jojo
+      data_template:
+        title: "Motion detected"
+        message: "A {{trigger.payload_json['after']['label']}} has entered the yard."
+        data:
+          video: "https://HA_URL/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/{{trigger.payload_json['after']['camera']}}/clip.mp4"
           tag: "{{trigger.payload_json['after']['id']}}"
 ```
 
