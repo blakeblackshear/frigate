@@ -49,7 +49,7 @@ export default function AppBar() {
   const handleRestart = useCallback(() => {
     setShowMoreMenu(false);
     setShowDialog(true);
-  });
+  }, [setShowDialog]);
 
   return (
     <Fragment>
@@ -70,8 +70,8 @@ export default function AppBar() {
           title="Restart Frigate"
           text="Are you sure ?"
           actions={[
-            { text: "Yes", color: "red", onClick: handleClickRestartDialog },
-            { text: "Cancel", onClick: handleDismissRestartDialog },
+            { text: 'Yes' color: 'red', onClick: handleClickRestartDialog },
+            { text: 'Cancel', onClick: handleDismissRestartDialog },
           ]}
         />
       ) : null},
