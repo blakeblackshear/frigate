@@ -343,51 +343,86 @@ def copy_yuv_to_position(
         # clear v2
         destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
     else:
+        # calculate the resized frame, maintaining the aspect ratio
+        source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
+        dest_aspect_ratio = destination_shape[1] / destination_shape[0]
+
+        if source_aspect_ratio <= dest_aspect_ratio:
+            y_resize_height = int(destination_shape[0] // 4 * 4)
+            y_resize_width = int((y_resize_height * source_aspect_ratio) // 4 * 4)
+        else:
+            y_resize_width = int(destination_shape[1] // 4 * 4)
+            y_resize_height = int((y_resize_width / source_aspect_ratio) // 4 * 4)
+
+        uv_resize_width = int(y_resize_width // 2)
+        uv_resize_height = int(y_resize_height // 4)
+
+        y_y_offset = int((destination_shape[0] - y_resize_height) / 4 // 4 * 4)
+        y_x_offset = int((destination_shape[1] - y_resize_width) / 2 // 4 * 4)
+
+        uv_y_offset = y_y_offset // 4
+        uv_x_offset = y_x_offset // 2
+
         interpolation = cv2.INTER_LINEAR
         # resize/copy y channel
-        destination_frame[y[1] : y[3], y[0] : y[2]] = cv2.resize(
+        destination_frame[
+            y[1] + y_y_offset : y[1] + y_y_offset + y_resize_height,
+            y[0] + y_x_offset : y[0] + y_x_offset + y_resize_width,
+        ] = cv2.resize(
             source_frame[
                 source_channel_dim["y"][1] : source_channel_dim["y"][3],
                 source_channel_dim["y"][0] : source_channel_dim["y"][2],
             ],
-            dsize=(y[2] - y[0], y[3] - y[1]),
+            dsize=(y_resize_width, y_resize_height),
             interpolation=interpolation,
         )
 
         # resize/copy u1
-        destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = cv2.resize(
+        destination_frame[
+            u1[1] + uv_y_offset : u1[1] + uv_y_offset + uv_resize_height,
+            u1[0] + uv_x_offset : u1[0] + uv_x_offset + uv_resize_width,
+        ] = cv2.resize(
             source_frame[
                 source_channel_dim["u1"][1] : source_channel_dim["u1"][3],
                 source_channel_dim["u1"][0] : source_channel_dim["u1"][2],
             ],
-            dsize=(u1[2] - u1[0], u1[3] - u1[1]),
+            dsize=(uv_resize_width, uv_resize_height),
             interpolation=interpolation,
         )
         # resize/copy u2
-        destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = cv2.resize(
+        destination_frame[
+            u2[1] + uv_y_offset : u2[1] + uv_y_offset + uv_resize_height,
+            u2[0] + uv_x_offset : u2[0] + uv_x_offset + uv_resize_width,
+        ] = cv2.resize(
             source_frame[
                 source_channel_dim["u2"][1] : source_channel_dim["u2"][3],
                 source_channel_dim["u2"][0] : source_channel_dim["u2"][2],
             ],
-            dsize=(u2[2] - u2[0], u2[3] - u2[1]),
+            dsize=(uv_resize_width, uv_resize_height),
             interpolation=interpolation,
         )
         # resize/copy v1
-        destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = cv2.resize(
+        destination_frame[
+            v1[1] + uv_y_offset : v1[1] + uv_y_offset + uv_resize_height,
+            v1[0] + uv_x_offset : v1[0] + uv_x_offset + uv_resize_width,
+        ] = cv2.resize(
             source_frame[
                 source_channel_dim["v1"][1] : source_channel_dim["v1"][3],
                 source_channel_dim["v1"][0] : source_channel_dim["v1"][2],
             ],
-            dsize=(v1[2] - v1[0], v1[3] - v1[1]),
+            dsize=(uv_resize_width, uv_resize_height),
             interpolation=interpolation,
         )
         # resize/copy v2
-        destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = cv2.resize(
+        destination_frame[
+            v2[1] + uv_y_offset : v2[1] + uv_y_offset + uv_resize_height,
+            v2[0] + uv_x_offset : v2[0] + uv_x_offset + uv_resize_width,
+        ] = cv2.resize(
             source_frame[
                 source_channel_dim["v2"][1] : source_channel_dim["v2"][3],
                 source_channel_dim["v2"][0] : source_channel_dim["v2"][2],
             ],
-            dsize=(v2[2] - v2[0], v2[3] - v2[1]),
+            dsize=(uv_resize_width, uv_resize_height),
             interpolation=interpolation,
         )
 
