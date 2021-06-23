@@ -327,22 +327,22 @@ def copy_yuv_to_position(
         ),
     )
 
-    if source_frame is None:
-        # clear y
-        destination_frame[
-            y[1] : y[3],
-            y[0] : y[2],
-        ] = 16
+    # clear y
+    destination_frame[
+        y[1] : y[3],
+        y[0] : y[2],
+    ] = 16
 
-        # clear u1
-        destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = 128
-        # clear u2
-        destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = 128
-        # clear v1
-        destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = 128
-        # clear v2
-        destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
-    else:
+    # clear u1
+    destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = 128
+    # clear u2
+    destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = 128
+    # clear v1
+    destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = 128
+    # clear v2
+    destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
+
+    if not source_frame is None:
         # calculate the resized frame, maintaining the aspect ratio
         source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
         dest_aspect_ratio = destination_shape[1] / destination_shape[0]
