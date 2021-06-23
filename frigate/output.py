@@ -193,8 +193,6 @@ class BirdsEyeFrameManager:
             ]
         )
 
-        logger.debug(f"Active cameras: {active_cameras}")
-
         # if there are no active cameras
         if len(active_cameras) == 0:
             # if the layout is already cleared
@@ -209,7 +207,6 @@ class BirdsEyeFrameManager:
 
         # calculate layout dimensions
         layout_dim = math.ceil(math.sqrt(len(active_cameras)))
-        logger.debug(f"New calculated layout dimensions: {layout_dim}")
 
         # reset the layout if it needs to be different
         if layout_dim != self.layout_dim:
