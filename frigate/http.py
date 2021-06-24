@@ -272,7 +272,14 @@ def events():
 
 @bp.route("/config")
 def config():
-    return jsonify(current_app.frigate_config.to_dict())
+    return jsonify(current_app.frigate_config.dict())
+
+
+@bp.route("/config/schema")
+def config_schema():
+    return current_app.response_class(
+        current_app.frigate_config.schema_json(), mimetype="application/json"
+    )
 
 
 @bp.route("/version")

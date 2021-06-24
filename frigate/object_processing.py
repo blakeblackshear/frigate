@@ -272,6 +272,7 @@ class TrackedObject:
                 best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
             )
         if timestamp:
+            color = self.camera_config.timestamp_style.color
             draw_timestamp(
                 best_frame,
                 self.thumbnail_data["frame_time"],
@@ -279,7 +280,7 @@ class TrackedObject:
                 font_effect=self.camera_config.timestamp_style.effect,
                 font_scale=self.camera_config.timestamp_style.scale,
                 font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=self.camera_config.timestamp_style.color,
+                font_color=(color.red, color.green, color.blue),
                 position=self.camera_config.timestamp_style.position,
             )
 
@@ -318,7 +319,7 @@ class CameraState:
     def __init__(self, name, config, frame_manager):
         self.name = name
         self.config = config
-        self.camera_config = config.cameras[name]
+        self.camera_config: CameraConfig = config.cameras[name]
         self.frame_manager = frame_manager
         self.best_objects: Dict[str, TrackedObject] = {}
         self.object_counts = defaultdict(int)
@@ -328,6 +329,7 @@ class CameraState:
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
         self.current_frame_lock = threading.Lock()
         self.current_frame_time = 0.0
+        self.motion_mask = self.camera_config.motion.mask
         self.motion_boxes = []
         self.regions = []
         self.previous_frame_id = None
@@ -389,7 +391,7 @@ class CameraState:
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
 
         if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion.mask == [0])
+            mask_overlay = np.where(self.motion_mask == [0])
             frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("motion_boxes"):

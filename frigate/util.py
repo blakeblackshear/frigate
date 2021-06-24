@@ -1,4 +1,5 @@
 import collections
+import copy
 import datetime
 import hashlib
 import json
@@ -18,6 +19,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+def deep_merge(dct1: dict, dct2: dict, override=False) -> dict:
+    """
+    :param dct1: First dict to merge
+    :param dct2: Second dict to merge
+    :param override: if same key exists in both dictionaries, should override? otherwise ignore. (default=True)
+    :return: The merge dictionary
+    """
+    merged = copy.deepcopy(dct1)
+    for k, v2 in dct2.items():
+        if k in merged:
+            v1 = merged[k]
+            if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
+                merged[k] = deep_merge(v1, v2, override)
+            elif isinstance(v1, list) and isinstance(v2, list):
+                merged[k] = v1 + v2
+            else:
+                if override:
+                    merged[k] = copy.deepcopy(v2)
+        else:
+            merged[k] = copy.deepcopy(v2)
+    return merged
 
 
 def draw_timestamp(
