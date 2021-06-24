@@ -40,7 +40,7 @@ export default function AppBar() {
     setShowDialog(false);
     setShowDialogWait(true);
     sendRestart();
-  }, [setShowDialog]);
+  }, [setShowDialog]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDismissRestartDialog = () => {
     setShowDialog(false);
