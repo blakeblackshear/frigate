@@ -21,7 +21,7 @@ from ws4py.server.wsgirefserver import (
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
-from frigate.config import FrigateConfig
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -173,13 +173,16 @@ class BirdsEyeFrameManager:
         )
 
     def camera_active(self, object_box_count, motion_box_count):
-        if self.mode == "continuous":
+        if self.mode == BirdseyeModeEnum.continuous:
             return True
 
-        if self.mode == "motion" and object_box_count + motion_box_count > 0:
+        if (
+            self.mode == BirdseyeModeEnum.motion
+            and object_box_count + motion_box_count > 0
+        ):
             return True
 
-        if self.mode == "objects" and object_box_count > 0:
+        if self.mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
     def update_frame(self):

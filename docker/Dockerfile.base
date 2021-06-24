@@ -36,8 +36,8 @@ RUN apt-get -qq update \
 
 RUN pip3 install \
     peewee_migrate \
+    pydantic \
     zeroconf \
-    voluptuous\
     ws4py
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/

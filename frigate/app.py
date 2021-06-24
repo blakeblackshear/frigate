@@ -13,7 +13,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.config import FrigateConfig
+from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventCleanup, EventProcessor
@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self):
         self.stop_event = mp.Event()
+        self.base_config: FrigateConfig = None
         self.config: FrigateConfig = None
         self.detection_queue = mp.Queue()
         self.detectors: Dict[str, EdgeTPUProcess] = {}
@@ -65,7 +66,8 @@ class FrigateApp:
 
     def init_config(self):
         config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-        self.config = FrigateConfig(config_file=config_file)
+        user_config = FrigateConfig.parse_file(config_file)
+        self.config = user_config.runtime_config
 
         for camera_name in self.config.cameras.keys():
             # create camera_metrics
@@ -116,9 +118,9 @@ class FrigateApp:
                 )
 
     def set_log_levels(self):
-        logging.getLogger().setLevel(self.config.logger.default)
+        logging.getLogger().setLevel(self.config.logger.default.value.upper())
         for log, level in self.config.logger.logs.items():
-            logging.getLogger(log).setLevel(level)
+            logging.getLogger(log).setLevel(level.value.upper())
 
         if not "werkzeug" in self.config.logger.logs:
             logging.getLogger("werkzeug").setLevel("ERROR")
@@ -183,9 +185,9 @@ class FrigateApp:
 
             try:
                 shm_in = mp.shared_memory.SharedMemory(
-                    name=name, 
-                    create=True, 
-                    size=self.config.model.height*self.config.model.width * 3,
+                    name=name,
+                    create=True,
+                    size=self.config.model.height * self.config.model.width * 3,
                 )
             except FileExistsError:
                 shm_in = mp.shared_memory.SharedMemory(name=name)
@@ -201,7 +203,7 @@ class FrigateApp:
             self.detection_shms.append(shm_out)
 
         for name, detector in self.config.detectors.items():
-            if detector.type == "cpu":
+            if detector.type == DetectorTypeEnum.cpu:
                 self.detectors[name] = EdgeTPUProcess(
                     name,
                     self.detection_queue,
@@ -210,7 +212,7 @@ class FrigateApp:
                     "cpu",
                     detector.num_threads,
                 )
-            if detector.type == "edgetpu":
+            if detector.type == DetectorTypeEnum.edgetpu:
                 self.detectors[name] = EdgeTPUProcess(
                     name,
                     self.detection_queue,
