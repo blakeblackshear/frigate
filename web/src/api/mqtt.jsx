@@ -87,7 +87,7 @@ export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
         })
       );
     },
-    [ws, watchTopic, publishTopic]
+    [ws, watchTopic, publishTopic] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return { value, send, connected: state.__connected };
