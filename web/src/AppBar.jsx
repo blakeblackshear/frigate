@@ -68,7 +68,7 @@ export default function AppBar() {
         <Dialog
           onDismiss={handleDismissRestartDialog}
           title="Restart Frigate"
-          text="Are you sure ?"
+          text="Are you sure?"
           actions={[
             { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
             { text: 'Cancel', onClick: handleDismissRestartDialog },
