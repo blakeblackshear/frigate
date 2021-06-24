@@ -2,7 +2,6 @@ import cv2
 import imutils
 import numpy as np
 from frigate.config import MotionConfig
-from frigate.util import create_mask
 
 
 class MotionDetector:
@@ -19,7 +18,7 @@ class MotionDetector:
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
-            create_mask(frame_shape, config.mask),
+            config.mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
             interpolation=cv2.INTER_LINEAR,
         )
