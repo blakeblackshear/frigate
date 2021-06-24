@@ -281,26 +281,22 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 
 
 class FfmpegOutputArgsConfig(BaseModel):
-    detect: List[str] = Field(
+    detect: Union[str, List[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Detect role FFmpeg output arguments.",
     )
-    record: List[str] = Field(
+    record: Union[str, List[str]] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
-    clips: List[str] = Field(
+    clips: Union[str, List[str]] = Field(
         default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Clips role FFmpeg output arguments.",
     )
-    rtmp: List[str] = Field(
+    rtmp: Union[str, List[str]] = Field(
         default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="RTMP role FFmpeg output arguments.",
     )
-
-    @validator("detect", "record", "clips", "rtmp", pre=True)
-    def extract_args(cls, args):
-        return args if isinstance(args, list) else args.split(" ")
 
 
 class FfmpegConfig(BaseModel):
@@ -322,32 +318,32 @@ class FfmpegConfig(BaseModel):
 class CameraInput(BaseModel):
     path: str = Field(title="Camera input path.")
     roles: List[str] = Field(title="Roles assigned to this input.")
-    global_args: List[str] = Field(
+    global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
     )
-    hwaccel_args: List[str] = Field(
+    hwaccel_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg hardware acceleration arguments."
     )
-    input_args: List[str] = Field(default_factory=list, title="FFmpeg input arguments.")
+    input_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg input arguments."
+    )
 
     @validator("path")
     def sub_env_vars(cls, v):
         return v.format(**FRIGATE_ENV_VARS)
 
-    @validator("global_args", "hwaccel_args", "input_args")
-    def extract_args(cls, args):
-        return args if isinstance(args, list) else args.split(" ")
-
 
 class CameraFfmpegConfig(FfmpegConfig):
     inputs: List[CameraInput] = Field(title="Camera inputs.")
-    global_args: List[str] = Field(
+    global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
     )
-    hwaccel_args: List[str] = Field(
+    hwaccel_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg hardware acceleration arguments."
     )
-    input_args: List[str] = Field(default_factory=list, title="FFmpeg input arguments.")
+    input_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg input arguments."
+    )
     output_args: FfmpegOutputArgsConfig = Field(
         default_factory=FfmpegOutputArgsConfig, title="FFmpeg output arguments."
     )
@@ -364,10 +360,6 @@ class CameraFfmpegConfig(FfmpegConfig):
             raise ValueError("The detect role is required.")
 
         return v
-
-    @validator("global_args", "hwaccel_args", "input_args")
-    def extract_args(cls, args):
-        return args if isinstance(args, list) else args.split(" ")
 
 
 class CameraSnapshotsConfig(BaseModel):
@@ -521,26 +513,42 @@ class CameraConfig(BaseModel):
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
-            ffmpeg_output_args = (
-                self.ffmpeg.output_args.detect + ffmpeg_output_args + ["pipe:"]
+            detect_args = (
+                self.ffmpeg.output_args.detect
+                if isinstance(self.ffmpeg.output_args.detect, list)
+                else self.ffmpeg.output_args.detect.split(" ")
             )
+            ffmpeg_output_args = detect_args + ffmpeg_output_args + ["pipe:"]
             if self.fps:
                 ffmpeg_output_args = ["-r", str(self.fps)] + ffmpeg_output_args
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
-            ffmpeg_output_args = (
+            rtmp_args = (
                 self.ffmpeg.output_args.rtmp
-                + [f"rtmp://127.0.0.1/live/{self.name}"]
-                + ffmpeg_output_args
+                if isinstance(self.ffmpeg.output_args.rtmp, list)
+                else self.ffmpeg.output_args.rtmp.split(" ")
+            )
+            ffmpeg_output_args = (
+                rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
         if "clips" in ffmpeg_input.roles:
-            ffmpeg_output_args = (
+            clips_args = (
                 self.ffmpeg.output_args.clips
+                if isinstance(self.ffmpeg.output_args.clips, list)
+                else self.ffmpeg.output_args.clips.split(" ")
+            )
+            ffmpeg_output_args = (
+                clips_args
                 + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
                 + ffmpeg_output_args
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
-            ffmpeg_output_args = (
+            record_args = (
                 self.ffmpeg.output_args.record
+                if isinstance(self.ffmpeg.output_args.record, list)
+                else self.ffmpeg.output_args.record.split(" ")
+            )
+            ffmpeg_output_args = (
+                record_args
                 + [f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
                 + ffmpeg_output_args
             )
@@ -549,11 +557,25 @@ class CameraConfig(BaseModel):
         if len(ffmpeg_output_args) == 0:
             return None
 
+        global_args = ffmpeg_input.global_args or self.ffmpeg.global_args
+        hwaccel_args = ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args
+        input_args = ffmpeg_input.input_args or self.ffmpeg.input_args
+
+        global_args = (
+            global_args if isinstance(global_args, list) else global_args.split(" ")
+        )
+        hwaccel_args = (
+            hwaccel_args if isinstance(hwaccel_args, list) else hwaccel_args.split(" ")
+        )
+        input_args = (
+            input_args if isinstance(input_args, list) else input_args.split(" ")
+        )
+
         cmd = (
             ["ffmpeg"]
-            + (ffmpeg_input.global_args or self.ffmpeg.global_args)
-            + (ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args)
-            + (ffmpeg_input.input_args or self.ffmpeg.input_args)
+            + global_args
+            + hwaccel_args
+            + input_args
             + ["-i", ffmpeg_input.path]
             + ffmpeg_output_args
         )
