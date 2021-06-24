@@ -21,7 +21,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def deep_merge(dct1: dict, dct2: dict, override=False) -> dict:
+def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dict:
     """
     :param dct1: First dict to merge
     :param dct2: Second dict to merge
@@ -35,7 +35,8 @@ def deep_merge(dct1: dict, dct2: dict, override=False) -> dict:
             if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
                 merged[k] = deep_merge(v1, v2, override)
             elif isinstance(v1, list) and isinstance(v2, list):
-                merged[k] = v1 + v2
+                if merge_lists:
+                    merged[k] = v1 + v2
             else:
                 if override:
                     merged[k] = copy.deepcopy(v2)

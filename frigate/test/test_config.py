@@ -199,7 +199,7 @@ class TestConfig(unittest.TestCase):
 
     def test_ffmpeg_params_global(self):
         config = {
-            "ffmpeg": {"input_args": ["-re"]},
+            "ffmpeg": {"input_args": "-re"},
             "mqtt": {"host": "mqtt"},
             "cameras": {
                 "back": {
@@ -226,6 +226,7 @@ class TestConfig(unittest.TestCase):
     def test_ffmpeg_params_camera(self):
         config = {
             "mqtt": {"host": "mqtt"},
+            "ffmpeg": {"input_args": ["test"]},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -248,10 +249,12 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert "-re" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "test" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
 
     def test_ffmpeg_params_input(self):
         config = {
             "mqtt": {"host": "mqtt"},
+            "ffmpeg": {"input_args": ["test2"]},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -259,9 +262,10 @@ class TestConfig(unittest.TestCase):
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
                                 "roles": ["detect"],
-                                "input_args": ["-re"],
+                                "input_args": "-re test",
                             }
-                        ]
+                        ],
+                        "input_args": "test3",
                     },
                     "height": 1080,
                     "width": 1920,
@@ -277,6 +281,9 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert "-re" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "test" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "test2" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "test3" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
 
     def test_inherit_clips_retention(self):
         config = {
