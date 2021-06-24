@@ -58,7 +58,7 @@ class MqttConfig(BaseModel):
     def validate_password(cls, v, values):
         if (v is None) != (values["user"] is None):
             raise ValueError("Password must be provided with username.")
-        return v if v is None else v.format(**FRIGATE_ENV_VARS)
+        return v
 
 
 class RetainConfig(BaseModel):
@@ -327,10 +327,6 @@ class CameraInput(BaseModel):
     input_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg input arguments."
     )
-
-    @validator("path")
-    def sub_env_vars(cls, v):
-        return v.format(**FRIGATE_ENV_VARS)
 
 
 class CameraFfmpegConfig(FfmpegConfig):
@@ -665,6 +661,12 @@ class FrigateConfig(BaseModel):
     def runtime_config(self) -> FrigateConfig:
         """Merge camera config with globals."""
         config = self.copy(deep=True)
+
+        # MQTT password substitution
+        if config.mqtt.password:
+            config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+
+        # Global config to propegate down to camera level
         global_config = config.dict(
             include={
                 "clips": {"retain"},
@@ -681,6 +683,10 @@ class FrigateConfig(BaseModel):
         for name, camera in config.cameras.items():
             merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
             camera_config = CameraConfig.parse_obj({"name": name, **merged_config})
+
+            # FFMPEG input substitution
+            for input in camera_config.ffmpeg.inputs:
+                input.path = input.path.format(**FRIGATE_ENV_VARS)
 
             # Add default filters
             object_keys = camera_config.objects.track
