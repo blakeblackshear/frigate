@@ -404,6 +404,7 @@ class CameraState:
                 )
 
         if draw_options.get("timestamp"):
+            color = self.camera_config.timestamp_style.color
             draw_timestamp(
                 frame_copy,
                 frame_time,
@@ -411,7 +412,7 @@ class CameraState:
                 font_effect=self.camera_config.timestamp_style.effect,
                 font_scale=self.camera_config.timestamp_style.scale,
                 font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=self.camera_config.timestamp_style.color,
+                font_color=(color.red, color.green, color.blue),
                 position=self.camera_config.timestamp_style.position,
             )
 

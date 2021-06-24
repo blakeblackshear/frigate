@@ -472,8 +472,8 @@ class CameraConfig(BaseModel):
     )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: Optional[DetectConfig] = Field(title="Object detection configuration.")
-    timestamp_style: Optional[TimestampStyleConfig] = Field(
-        title="Timestamp style configuration."
+    timestamp_style: TimestampStyleConfig = Field(
+        default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
 
     def __init__(self, **config):
