@@ -233,7 +233,7 @@ class CameraWatchdog(threading.Thread):
 
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
-                if poll == None:
+                if poll is None:
                     continue
                 p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
