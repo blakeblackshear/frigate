@@ -425,6 +425,33 @@ class TestConfig(unittest.TestCase):
         assert len(ffmpeg_cmds) == 1
         assert not "clips" in ffmpeg_cmds[0]["roles"]
 
+    def test_max_disappeared_default(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 1080,
+                    "width": 1920,
+                    "detect": {"enabled": True},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        ffmpeg_cmds = runtime_config.cameras["back"].ffmpeg_cmds
+        assert runtime_config.cameras["back"].detect.max_disappeared == 5 * 5
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
