@@ -14,33 +14,33 @@ RUN     apt-get -yqq update && \
 
 FROM base as build
 
-ENV         FFMPEG_VERSION=4.3.1 \
-            AOM_VERSION=v1.0.0 \
-            FDKAAC_VERSION=0.1.5 \
-            FREETYPE_VERSION=2.5.5 \
-            FRIBIDI_VERSION=0.19.7 \
-            KVAZAAR_VERSION=1.2.0 \
-            LAME_VERSION=3.100 \
-            LIBPTHREAD_STUBS_VERSION=0.4 \
-            LIBVIDSTAB_VERSION=1.1.0 \
-            LIBXCB_VERSION=1.13.1 \
-            XCBPROTO_VERSION=1.13 \
-            OGG_VERSION=1.3.2 \
-            OPENCOREAMR_VERSION=0.1.5 \
-            OPUS_VERSION=1.2 \
-            OPENJPEG_VERSION=2.1.2 \
-            THEORA_VERSION=1.1.1 \
-            VORBIS_VERSION=1.3.5 \
-            VPX_VERSION=1.8.0 \
-            WEBP_VERSION=1.0.2 \
-            X264_VERSION=20170226-2245-stable \
-            X265_VERSION=3.1.1 \
-            XAU_VERSION=1.0.9 \
-            XORG_MACROS_VERSION=1.19.2 \
-            XPROTO_VERSION=7.0.31 \
-            XVID_VERSION=1.3.4 \
-            LIBZMQ_VERSION=4.3.2 \
-            SRC=/usr/local
+ENV     FFMPEG_VERSION=4.3.1 \
+        AOM_VERSION=v1.0.0 \
+        FDKAAC_VERSION=0.1.5 \
+        FREETYPE_VERSION=2.5.5 \
+        FRIBIDI_VERSION=0.19.7 \
+        KVAZAAR_VERSION=1.2.0 \
+        LAME_VERSION=3.100 \
+        LIBPTHREAD_STUBS_VERSION=0.4 \
+        LIBVIDSTAB_VERSION=1.1.0 \
+        LIBXCB_VERSION=1.13.1 \
+        XCBPROTO_VERSION=1.13 \
+        OGG_VERSION=1.3.2 \
+        OPENCOREAMR_VERSION=0.1.5 \
+        OPUS_VERSION=1.2 \
+        OPENJPEG_VERSION=2.1.2 \
+        THEORA_VERSION=1.1.1 \
+        VORBIS_VERSION=1.3.5 \
+        VPX_VERSION=1.8.0 \
+        WEBP_VERSION=1.0.2 \
+        X264_VERSION=20170226-2245-stable \
+        X265_VERSION=3.1.1 \
+        XAU_VERSION=1.0.9 \
+        XORG_MACROS_VERSION=1.19.2 \
+        XPROTO_VERSION=7.0.31 \
+        XVID_VERSION=1.3.4 \
+        LIBZMQ_VERSION=4.3.2 \
+        SRC=/usr/local
 
 ARG         FREETYPE_SHA256SUM="5d03dd76c2171a7601e9ce10551d52d4471cf92cd205948e60289251daddffa8 freetype-2.5.5.tar.gz"
 ARG         FRIBIDI_SHA256SUM="3fc96fa9473bd31dcb5500bdf1aa78b337ba13eb8c301e7c28923fea982453a8 0.19.7.tar.gz"
@@ -60,27 +60,27 @@ ARG         PREFIX=/opt/ffmpeg
 ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:/usr/lib64:/usr/lib:/lib64:/lib"
 
 
-RUN      buildDeps="autoconf \
-                    automake \
-                    cmake \
-                    curl \
-                    bzip2 \
-                    libexpat1-dev \
-                    g++ \
-                    gcc \
-                    git \
-                    gperf \
-                    libtool \
-                    make \
-                    nasm \
-                    perl \
-                    pkg-config \
-                    python \
-                    libssl-dev \
-                    yasm \
-                    libva-dev \
-                    libmfx-dev \
-                    zlib1g-dev" && \
+RUN     buildDeps="autoconf \
+        automake \
+        cmake \
+        curl \
+        bzip2 \
+        libexpat1-dev \
+        g++ \
+        gcc \
+        git \
+        gperf \
+        libtool \
+        make \
+        nasm \
+        perl \
+        pkg-config \
+        python \
+        libssl-dev \
+        yasm \
+        libva-dev \
+        libmfx-dev \
+        zlib1g-dev" && \
         apt-get -yqq update && \
         apt-get install -yq --no-install-recommends ${buildDeps}
 ## opencore-amr https://sourceforge.net/projects/opencore-amr/
@@ -450,7 +450,7 @@ RUN \
         cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
         mkdir -p /usr/local/lib/pkgconfig && \
         for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
-          sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+        sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
         done
 
 FROM        base AS release
@@ -463,6 +463,6 @@ ENTRYPOINT  ["ffmpeg"]
 COPY --from=build /usr/local /usr/local/
 
 RUN \
-	apt-get update -y && \
-	apt-get install -y --no-install-recommends libva-drm2 libva2 i965-va-driver mesa-va-drivers && \
-	rm -rf /var/lib/apt/lists/*
+        apt-get update -y && \
+        apt-get install -y --no-install-recommends libva-drm2 libva2 i965-va-driver mesa-va-drivers && \
+        rm -rf /var/lib/apt/lists/*
