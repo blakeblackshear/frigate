@@ -214,6 +214,9 @@ def event_snapshot(id):
     except:
         return "Event not found", 404
 
+    if jpg_bytes is None:
+        return "Event not found", 404
+
     response = make_response(jpg_bytes)
     response.headers['Content-Type'] = 'image/jpg'
     return response
