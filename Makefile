@@ -12,7 +12,7 @@ amd64_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-amd64 --file docker/Dockerfile.wheels .
 
 amd64_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:1.1.0-amd64 --file docker/Dockerfile.ffmpeg.amd64 .
+	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.2.0-amd64 --file docker/Dockerfile.ffmpeg.amd64 .
 
 nginx_frigate:
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.0 --file docker/Dockerfile.nginx .
@@ -27,7 +27,7 @@ amd64nvidia_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-amd64nvidia --file docker/Dockerfile.wheels .
 
 amd64nvidia_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:1.0.0-amd64nvidia --file docker/Dockerfile.ffmpeg.amd64nvidia .
+	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.0.0-amd64nvidia --file docker/Dockerfile.ffmpeg.amd64nvidia .
 
 amd64nvidia_frigate: version web
 	docker build --tag frigate-base --build-arg ARCH=amd64nvidia --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.0 --file docker/Dockerfile.base .
@@ -39,7 +39,7 @@ aarch64_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-aarch64 --file docker/Dockerfile.wheels .
 
 aarch64_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:1.0.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
+	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.0.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
 
 aarch64_frigate: version web
 	docker build --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.0 --file docker/Dockerfile.base .
@@ -51,7 +51,7 @@ armv7_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-armv7 --file docker/Dockerfile.wheels .
 
 armv7_ffmpeg:
-	docker build --tag blakeblackshear/frigate-ffmpeg:1.0.0-armv7 --file docker/Dockerfile.ffmpeg.armv7 .
+	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.0.0-armv7 --file docker/Dockerfile.ffmpeg.armv7 .
 
 armv7_frigate: version web
 	docker build --tag frigate-base --build-arg ARCH=armv7 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.0 --file docker/Dockerfile.base .
