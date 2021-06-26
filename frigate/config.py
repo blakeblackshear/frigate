@@ -126,7 +126,7 @@ class RuntimeMotionConfig(MotionConfig):
 
 class DetectConfig(BaseModel):
     enabled: bool = Field(default=True, title="Detection Enabled.")
-    max_disappeared: int = Field(
+    max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
 
@@ -732,8 +732,11 @@ class FrigateConfig(BaseModel):
                 )
 
             # Default detect configuration
-            if camera_config.detect is None:
-                max_disappeared = (camera_config.fps or 5) * 5
+            max_disappeared = (camera_config.fps or 5) * 5
+            if camera_config.detect:
+                if camera_config.detect.max_disappeared is None:
+                    camera_config.detect.max_disappeared = max_disappeared
+            else:
                 camera_config.detect = DetectConfig(max_disappeared=max_disappeared)
 
             # Default live configuration
