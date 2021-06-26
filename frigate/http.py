@@ -47,7 +47,8 @@ def create_app(
 
     @app.before_request
     def _db_connect():
-        database.connect()
+        if database.is_closed():
+            database.connect()
 
     @app.teardown_request
     def _db_close(exc):
