@@ -123,7 +123,7 @@ class EventProcessor(threading.Thread):
 
         # if we are still using more than 90% of the cache, proactively cleanup
         cache_usage = shutil.disk_usage("/tmp/cache")
-        if (
+        while (
             cache_usage.used / cache_usage.total > 0.9
             and cache_usage.free < 200000000
             and len(self.cached_clips) > 0
@@ -133,13 +133,10 @@ class EventProcessor(threading.Thread):
                 "Consider increasing space available at /tmp/cache or reducing max_seconds in your clips config."
             )
             logger.warning("Proactively cleaning up the cache...")
-            while cache_usage.used / cache_usage.total > 0.9:
-                oldest_clip = min(
-                    self.cached_clips.values(), key=lambda x: x["start_time"]
-                )
-                del self.cached_clips[oldest_clip["path"]]
-                os.remove(os.path.join(CACHE_DIR, oldest_clip["path"]))
-                cache_usage = shutil.disk_usage("/tmp/cache")
+            oldest_clip = min(self.cached_clips.values(), key=lambda x: x["start_time"])
+            del self.cached_clips[oldest_clip["path"]]
+            os.remove(os.path.join(CACHE_DIR, oldest_clip["path"]))
+            cache_usage = shutil.disk_usage("/tmp/cache")
 
     def create_clip(self, camera, event_data, pre_capture, post_capture):
         # get all clips from the camera with the event sorted
