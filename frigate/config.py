@@ -82,7 +82,7 @@ class MotionConfig(BaseModel):
         ge=1,
         le=255,
     )
-    contour_area: int = Field(default=100, title="Contour Area")
+    contour_area: Optional[int] = Field(title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.2, title="Frame Alpha")
     frame_height: Optional[int] = Field(title="Frame Height")
@@ -99,7 +99,11 @@ class RuntimeMotionConfig(MotionConfig):
         frame_shape = config.get("frame_shape", (1, 1))
 
         if "frame_height" not in config:
-            config["frame_height"] = max(frame_shape[0] // 6, 180)
+            config["frame_height"] = max(frame_shape[0] // 6, 120)
+
+        if "contour_area" not in config:
+            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
+            config["contour_area"] = config["frame_height"] * frame_width * 0.003912363
 
         mask = config.get("mask", "")
         config["raw_mask"] = mask
