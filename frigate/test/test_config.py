@@ -449,8 +449,33 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        ffmpeg_cmds = runtime_config.cameras["back"].ffmpeg_cmds
         assert runtime_config.cameras["back"].detect.max_disappeared == 5 * 5
+
+    def test_motion_frame_height_wont_go_below_180(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 480,
+                    "width": 640,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].motion.frame_height >= 180
 
 
 if __name__ == "__main__":
