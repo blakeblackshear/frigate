@@ -99,7 +99,7 @@ class RuntimeMotionConfig(MotionConfig):
         frame_shape = config.get("frame_shape", (1, 1))
 
         if "frame_height" not in config:
-            config["frame_height"] = frame_shape[0] // 6
+            config["frame_height"] = max(frame_shape[0] // 6, 180)
 
         mask = config.get("mask", "")
         config["raw_mask"] = mask
