@@ -225,7 +225,7 @@ class TrackedObject:
             return None
 
     def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None
+        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
     ):
         if self.thumbnail_data is None:
             return None
@@ -284,7 +284,9 @@ class TrackedObject:
                 position=self.camera_config.timestamp_style.position,
             )
 
-        ret, jpg = cv2.imencode(".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(
+            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        )
         if ret:
             return jpg.tobytes()
         else:
@@ -624,6 +626,7 @@ class TrackedObjectProcessor(threading.Thread):
                         bounding_box=snapshot_config.bounding_box,
                         crop=snapshot_config.crop,
                         height=snapshot_config.height,
+                        quality=snapshot_config.quality,
                     )
                     if jpg_bytes is None:
                         logger.warning(
@@ -665,6 +668,7 @@ class TrackedObjectProcessor(threading.Thread):
                     bounding_box=mqtt_config.bounding_box,
                     crop=mqtt_config.crop,
                     height=mqtt_config.height,
+                    quality=mqtt_config.quality,
                 )
 
                 if jpg_bytes is None:

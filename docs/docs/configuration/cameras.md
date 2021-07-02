@@ -181,6 +181,8 @@ snapshots:
   crop: False
   # Optional: height to resize the snapshot to (default: original size)
   height: 175
+  # Optional: jpeg encode quality (default: shown below)
+  quality: 70
   # Optional: Restrict snapshots to objects that entered any of the listed zones (default: no required zones)
   required_zones: []
   # Optional: Camera override for retention settings (default: global values)
@@ -407,6 +409,8 @@ cameras:
       crop: True
       # Optional: height to resize the snapshot to (default: shown below)
       height: 270
+      # Optional: jpeg encode quality (default: shown below)
+      quality: 70
       # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
       required_zones: []
 

@@ -24,7 +24,7 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
+### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1&quality=70]`
 
 The best snapshot for any object type. It is a full resolution image by default.
 
@@ -32,6 +32,7 @@ Example parameters:
 
 - `h=300`: resizes the image to 300 pixes tall
 - `crop=1`: crops the image to the region of the detection rather than returning the entire image
+- `quality=70`: sets the jpeg encoding quality (0-100)
 
 ### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
@@ -48,6 +49,7 @@ Accepts the following query string parameters:
 | `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
 | `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
 | `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
+| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.                     |
 
 Example parameters:
 
@@ -202,6 +204,7 @@ Accepts the following query string parameters, but they are only applied when an
 | `bbox`      | int  | Show bounding boxes for detected objects (0 or 1) |
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
+| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
 
 ### `/clips/<camera>-<id>.mp4`
 
