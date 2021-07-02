@@ -231,7 +231,12 @@ class BirdseyeConfig(BaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
     width: int = Field(default=1280, title="Birdseye width.")
     height: int = Field(default=720, title="Birdseye height.")
-    quality: int = Field(default=8, title="Encoding quality.")
+    quality: int = Field(
+        default=8,
+        title="Encoding quality.",
+        ge=1,
+        le=31,
+    )
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode."
     )
