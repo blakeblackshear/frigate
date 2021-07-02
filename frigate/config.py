@@ -382,6 +382,12 @@ class CameraSnapshotsConfig(BaseModel):
     retain: RetainConfig = Field(
         default_factory=RetainConfig, title="Snapshot retention."
     )
+    quality: int = Field(
+        default=70,
+        title="Quality of the encoded jpeg (0-100).",
+        ge=0,
+        le=100,
+    )
 
 
 class ColorConfig(BaseModel):
@@ -408,6 +414,12 @@ class CameraMqttConfig(BaseModel):
     required_zones: List[str] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to send the image.",
+    )
+    quality: int = Field(
+        default=70,
+        title="Quality of the encoded jpeg (0-100).",
+        ge=0,
+        le=100,
     )
 
 

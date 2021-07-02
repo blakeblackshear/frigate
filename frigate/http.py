@@ -208,6 +208,7 @@ def event_snapshot(id):
                             bounding_box=request.args.get("bbox", type=int),
                             crop=request.args.get("crop", type=int),
                             height=request.args.get("h", type=int),
+                            quality=request.args.get("quality", default=70, type=int),
                         )
         except:
             return "Event not found", 404
@@ -317,11 +318,14 @@ def best(camera_name, label):
 
         height = int(request.args.get("h", str(best_frame.shape[0])))
         width = int(height * best_frame.shape[1] / best_frame.shape[0])
+        resize_quality = request.args.get("quality", default=70, type=int)
 
         best_frame = cv2.resize(
             best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
         )
-        ret, jpg = cv2.imencode(".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(
+            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        )
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpg"
         return response
@@ -367,8 +371,9 @@ def latest_frame(camera_name):
         "motion_boxes": request.args.get("motion", type=int),
         "regions": request.args.get("regions", type=int),
     }
+    resize_quality = request.args.get("quality", default=70, type=int)
+
     if camera_name in current_app.frigate_config.cameras:
-        # max out at specified FPS
         frame = current_app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
@@ -380,7 +385,9 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        )
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpg"
         return response
