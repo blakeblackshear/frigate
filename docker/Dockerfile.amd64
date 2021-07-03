@@ -6,13 +6,16 @@ ENV LIBVA_DRIVER_NAME=i965
 # Install packages for apt repo
 
 RUN wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
-    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list
+    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F63F0F2B90935439 \
+    && echo 'deb http://ppa.launchpad.net/kisak/kisak-mesa/ubuntu focal main' > /etc/apt/sources.list.d/kisak-mesa-focal.list
+
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     # ffmpeg dependencies
     libgomp1 \
     # VAAPI drivers for Intel hardware accel
-    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-va-drivers \
+    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
     ## Tensorflow lite
     && wget -q https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
     && python3.8 -m pip install tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
