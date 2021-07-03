@@ -34,7 +34,27 @@ function reducer(state, { type, payload, meta }) {
         draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
       });
     }
+    case 'DELETE': {
+      const { eventId } = payload;
 
+      return produce(state, (draftState) => {
+        Object.keys(draftState.queries).map(function (url, index) {
+          // If no url or data has no array length then just return state.
+          if (!(url in draftState.queries) || !draftState.queries[url].data.length) return state;
+
+          //Find the index to remove
+          const removeIndex = draftState.queries[url].data.map((event) => event.id).indexOf(eventId);
+          if (removeIndex === -1) return;
+
+          // We need to keep track of deleted items, This will be used to calculate "ReachEnd" for auto load new events. Events.jsx
+          const totDeleted = state.queries[url].deleted || 0;
+
+          // Splice the deleted index.
+          draftState.queries[url].data.splice(removeIndex, 1);
+          draftState.queries[url].deleted = totDeleted + 1;
+        });
+      });
+    }
     default:
       return state;
   }
@@ -91,8 +111,23 @@ export function useFetch(url, fetchId) {
 
   const data = state.queries[url].data || null;
   const status = state.queries[url].status;
+  const deleted = state.queries[url].deleted || 0;
 
-  return { data, status };
+  return { data, status, deleted };
+}
+
+export function useDelete() {
+  const { dispatch, state } = useContext(Api);
+
+  async function deleteEvent(eventId) {
+    if (!eventId) return { success: false };
+
+    const response = await fetch(`${state.host}/api/events/${eventId}`, { method: 'DELETE' });
+    await dispatch({ type: 'DELETE', payload: { eventId } });
+    return await (response.status < 300 ? response.json() : { success: true });
+  }
+
+  return deleteEvent;
 }
 
 export function useApiHost() {

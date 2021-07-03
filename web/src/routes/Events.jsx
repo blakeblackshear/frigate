@@ -20,6 +20,7 @@ const reducer = (state = initialState, action) => {
         meta: { searchString },
         payload,
       } = action;
+
       return produce(state, (draftState) => {
         draftState.searchStrings[searchString] = true;
         draftState.events.push(...payload);
@@ -56,17 +57,17 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const [{ events, reachedEnd, searchStrings }, dispatch] = useReducer(reducer, initialState);
   const { searchParams: initialSearchParams } = new URL(window.location);
   const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
-  const { data, status } = useEvents(searchString);
+  const { data, status, deleted } = useEvents(searchString);
 
   useEffect(() => {
     if (data && !(searchString in searchStrings)) {
       dispatch({ type: 'APPEND_EVENTS', payload: data, meta: { searchString } });
     }
 
-    if (data && Array.isArray(data) && data.length < limit) {
+    if (data && Array.isArray(data) && data.length + deleted < limit) {
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
-  }, [data, limit, searchString, searchStrings]);
+  }, [data, limit, searchString, searchStrings, deleted]);
 
   const [entry, setIntersectNode] = useIntersectionObserver();
 
@@ -100,7 +101,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   );
 
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
-
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>

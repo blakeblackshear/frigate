@@ -10,7 +10,7 @@ import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import VideoPlayer from '../components/VideoPlayer';
-import { FetchStatus, useApiHost, useEvent } from '../api';
+import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 
 export default function Event({ eventId }) {
@@ -18,6 +18,7 @@ export default function Event({ eventId }) {
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
+  const setDeleteEvent = useDelete();
 
   const handleClickDelete = () => {
     setShowDialog(true);
@@ -30,8 +31,7 @@ export default function Event({ eventId }) {
   const handleClickDeleteDialog = useCallback(async () => {
     let success;
     try {
-      const response = await fetch(`${apiHost}/api/events/${eventId}`, { method: 'DELETE' });
-      success = await (response.status < 300 ? response.json() : { success: true });
+      success = await setDeleteEvent(eventId);
       setDeleteStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
     } catch (e) {
       setDeleteStatus(FetchStatus.ERROR);
@@ -42,7 +42,7 @@ export default function Event({ eventId }) {
       setShowDialog(false);
       route('/events', true);
     }
-  }, [apiHost, eventId, setShowDialog]);
+  }, [eventId, setShowDialog]);
 
   if (status !== FetchStatus.LOADED) {
     return <ActivityIndicator />;
@@ -64,7 +64,11 @@ export default function Event({ eventId }) {
           <Dialog
             onDismiss={handleDismissDeleteDialog}
             title="Delete Event?"
-            text="This event will be permanently deleted along with any related clips and snapshots"
+            text={
+              deleteStatus === FetchStatus.ERROR
+                ? 'Could not delete event, please try again.'
+                : 'This event will be permanently deleted along with any related clips and snapshots'
+            }
             actions={[
               deleteStatus !== FetchStatus.LOADING
                 ? { text: 'Delete', color: 'red', onClick: handleClickDeleteDialog }
