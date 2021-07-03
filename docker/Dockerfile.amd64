@@ -4,6 +4,9 @@ LABEL maintainer "blakeb@blakeshome.com"
 # By default, use the i965 driver
 ENV LIBVA_DRIVER_NAME=i965
 # Install packages for apt repo
+
+RUN wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
+    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     # ffmpeg dependencies
