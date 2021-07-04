@@ -38,15 +38,15 @@ function reducer(state, { type, payload, meta }) {
       const { eventId } = payload;
 
       return produce(state, (draftState) => {
-        Object.keys(draftState.queries).map(function (url, index) {
-          // If no url or data has no array length then just return state.
-          if (!(url in draftState.queries) || !draftState.queries[url].data.length) return state;
+        Object.keys(draftState.queries).map((url, index) => {
+          // If data has no array length then just return state.
+          if (!('data' in draftState.queries[url]) || !draftState.queries[url].data.length) return state;
 
           //Find the index to remove
           const removeIndex = draftState.queries[url].data.map((event) => event.id).indexOf(eventId);
-          if (removeIndex === -1) return;
+          if (removeIndex === -1) return state;
 
-          // We need to keep track of deleted items, This will be used to calculate "ReachEnd" for auto load new events. Events.jsx
+          // We need to keep track of deleted items, This will be used to re-calculate "ReachEnd" for auto load new events. Events.jsx
           const totDeleted = state.queries[url].deleted || 0;
 
           // Splice the deleted index.
@@ -120,7 +120,7 @@ export function useDelete() {
   const { dispatch, state } = useContext(Api);
 
   async function deleteEvent(eventId) {
-    if (!eventId) return { success: false };
+    if (!eventId) return null;
 
     const response = await fetch(`${state.host}/api/events/${eventId}`, { method: 'DELETE' });
     await dispatch({ type: 'DELETE', payload: { eventId } });

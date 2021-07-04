@@ -42,7 +42,7 @@ export default function Event({ eventId }) {
       setShowDialog(false);
       route('/events', true);
     }
-  }, [eventId, setShowDialog]);
+  }, [eventId, setShowDialog, setDeleteEvent]);
 
   if (status !== FetchStatus.LOADED) {
     return <ActivityIndicator />;
@@ -66,7 +66,7 @@ export default function Event({ eventId }) {
             title="Delete Event?"
             text={
               deleteStatus === FetchStatus.ERROR
-                ? 'Could not delete event, please try again.'
+                ? 'An error occurred, please try again.'
                 : 'This event will be permanently deleted along with any related clips and snapshots'
             }
             actions={[
