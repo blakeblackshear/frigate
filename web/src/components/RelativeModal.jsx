@@ -79,7 +79,7 @@ export default function RelativeModal({
       }
       // too close to bottom
       if (top + menuHeight > windowHeight - WINDOW_PADDING + window.scrollY) {
-        newTop = relativeToY - menuHeight;
+        newTop = WINDOW_PADDING;
       }
 
       if (top <= WINDOW_PADDING + window.scrollY) {
