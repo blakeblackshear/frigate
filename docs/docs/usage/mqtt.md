@@ -11,6 +11,10 @@ Designed to be used as an availability topic with Home Assistant. Possible messa
 "online": published when frigate is running (on startup)
 "offline": published right before frigate stops
 
+### `frigate/restart`
+
+Causes frigate to exit. Docker should be configured to automatically restart the container on exit.
+
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
