@@ -72,14 +72,13 @@ export function MqttProvider({
   return <Mqtt.Provider value={{ state, ws: wsRef.current }}>{children}</Mqtt.Provider>;
 }
 
-export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
+export function useMqtt(watchTopic, publishTopic) {
   const { state, ws } = useContext(Mqtt);
 
   const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
     (payload) => {
-      payload = payload || defaultValue;
       ws.send(
         JSON.stringify({
           topic: publishTopic || watchTopic,
@@ -87,7 +86,7 @@ export function useMqtt(watchTopic, publishTopic, defaultValue = null) {
         })
       );
     },
-    [ws, watchTopic, publishTopic] // eslint-disable-line react-hooks/exhaustive-deps
+    [ws, watchTopic, publishTopic]
   );
 
   return { value, send, connected: state.__connected };
@@ -122,8 +121,9 @@ export function useSnapshotsState(camera) {
 
 export function useRestart() {
   const {
+    value: { payload },
     send,
     connected,
-  } = useMqtt('', 'restart', 'container');
-  return { send, connected };
+  } = useMqtt('restart', 'restart');
+  return { payload, send, connected };
 }
