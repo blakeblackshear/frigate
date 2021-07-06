@@ -90,12 +90,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.publish(state_topic, payload, retain=True)
 
     def on_restart_command(client, userdata, message):
-        payload = message.payload.decode()
-        if payload == "container":
-            logger.warning(f"Restart container received via mqtt")
-            restart_frigate()
-        else:
-            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+        restart_frigate()
 
     def on_connect(client, userdata, flags, rc):
         threading.current_thread().name = "mqtt"
@@ -197,7 +192,7 @@ class MqttSocketRelay:
                     json_message = json.loads(message.data.decode("utf-8"))
                     json_message = {
                         "topic": f"{self.topic_prefix}/{json_message['topic']}",
-                        "payload": json_message["payload"],
+                        "payload": json_message.get("payload"),
                         "retain": json_message.get("retain", False),
                     }
                 except Exception as e:
