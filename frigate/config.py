@@ -185,6 +185,10 @@ class ZoneConfig(BaseModel):
     coordinates: Union[str, List[str]] = Field(
         title="Coordinates polygon for the defined zone."
     )
+    objects: List[str] = Field(
+        default_factory=list,
+        title="List of objects that can trigger the zone.",
+    )
     _color: Optional[Tuple[int, int, int]] = PrivateAttr()
     _contour: np.ndarray = PrivateAttr()
 
