@@ -107,6 +107,7 @@ class TrackedObject:
 
     def update(self, current_frame_time, obj_data):
         significant_update = False
+        zone_change = False
         self.obj_data.update(obj_data)
         # if the object is not in the current frame, add a 0.0 to the score history
         if self.obj_data["frame_time"] != current_frame_time:
@@ -152,10 +153,10 @@ class TrackedObject:
 
         # if the zones changed, signal an update
         if not self.false_positive and set(self.current_zones) != set(current_zones):
-            significant_update = True
+            zone_change = True
 
         self.current_zones = current_zones
-        return significant_update
+        return (significant_update, zone_change)
 
     def to_dict(self, include_thumbnail: bool = False):
         snapshot_time = (
@@ -451,7 +452,9 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            significant_update = updated_obj.update(frame_time, current_detections[id])
+            significant_update, zone_change = updated_obj.update(
+                frame_time, current_detections[id]
+            )
 
             if significant_update:
                 # ensure this frame is stored in the cache
@@ -464,11 +467,12 @@ class CameraState:
                 updated_obj.last_updated = frame_time
 
             # if it has been more than 5 seconds since the last publish
-            # and the last update is greater than the last publish
+            # and the last update is greater than the last publish or
+            # the object has changed zones
             if (
                 frame_time - updated_obj.last_published > 5
                 and updated_obj.last_updated > updated_obj.last_published
-            ):
+            ) or zone_change:
                 # call event handlers
                 for c in self.callbacks["update"]:
                     c(self.name, updated_obj, frame_time)
