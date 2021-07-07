@@ -143,6 +143,9 @@ class TrackedObject:
         bottom_center = (self.obj_data["centroid"][0], self.obj_data["box"][3])
         # check each zone
         for name, zone in self.camera_config.zones.items():
+            # if the zone is not for this object type, skip
+            if len(zone.objects) > 0 and not self.obj_data["label"] in zone.objects:
+                continue
             contour = zone.contour
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
