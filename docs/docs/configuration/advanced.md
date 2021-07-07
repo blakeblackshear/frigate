@@ -16,7 +16,7 @@ motion:
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
   threshold: 25
-  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: ~0.4% of the motion frame area)
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: ~0.17% of the motion frame area)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will make motion detection more sensitive to smaller
   # moving objects.
   contour_area: 100
@@ -29,7 +29,7 @@ motion:
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
   frame_alpha: 0.2
-  # Optional: Height of the resized motion frame  (default: 1/6th of the original frame height, but no less than 120)
+  # Optional: Height of the resized motion frame  (default: 1/6th of the original frame height, but no less than 180)
   # This operates as an efficient blur alternative. Higher values will result in more granular motion detection at the expense of higher CPU usage.
   # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 180
