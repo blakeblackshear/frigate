@@ -503,6 +503,86 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert round(runtime_config.cameras["back"].motion.contour_area) == 99
 
+    def test_merge_labelmap(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "model": {"labelmap": {7: "truck"}},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 1080,
+                    "width": 1920,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.model.merged_labelmap[7] == "truck"
+
+    def test_default_labelmap_empty(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 1080,
+                    "width": 1920,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.model.merged_labelmap[0] == "person"
+
+    def test_default_labelmap(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "model": {"width": 320, "height": 320},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 1080,
+                    "width": 1920,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.model.merged_labelmap[0] == "person"
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

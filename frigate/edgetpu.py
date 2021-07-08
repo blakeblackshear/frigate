@@ -231,7 +231,7 @@ class EdgeTPUProcess:
 
 class RemoteObjectDetector:
     def __init__(self, name, labels, detection_queue, event, model_shape):
-        self.labels = load_labels(labels)
+        self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue

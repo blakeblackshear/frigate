@@ -13,6 +13,7 @@ from pydantic.fields import PrivateAttr
 import yaml
 
 from frigate.const import BASE_DIR, RECORD_DIR, CACHE_DIR
+from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
 logger = logging.getLogger(__name__)
@@ -615,6 +616,22 @@ class DatabaseConfig(BaseModel):
 class ModelConfig(BaseModel):
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
+    labelmap: Dict[int, str] = Field(
+        default_factory=dict, title="Labelmap customization."
+    )
+    _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
+
+    @property
+    def merged_labelmap(self) -> Dict[int, str]:
+        return self._merged_labelmap
+
+    def __init__(self, **config):
+        super().__init__(**config)
+
+        self._merged_labelmap = {
+            **load_labels("/labelmap.txt"),
+            **config.get("labelmap", {}),
+        }
 
 
 class LogLevelEnum(str, Enum):
