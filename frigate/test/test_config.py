@@ -501,7 +501,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert round(runtime_config.cameras["back"].motion.contour_area) == 225
+        assert round(runtime_config.cameras["back"].motion.contour_area) == 99
 
 
 if __name__ == "__main__":
