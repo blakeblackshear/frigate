@@ -259,6 +259,7 @@ class FrigateApp:
                     name,
                     config,
                     model_shape,
+                    self.config.model.merged_labelmap,
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,

@@ -110,10 +110,17 @@ detectors:
 
 ### `model`
 
+If using a custom model, the width and height will need to be specified.
+
+The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
+
 ```yaml
 model:
   # Required: height of the trained model
   height: 320
   # Required: width of the trained model
   width: 320
+  # Optional: labelmap overrides
+  labelmap:
+    7: car
 ```
