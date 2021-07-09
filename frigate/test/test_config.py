@@ -198,7 +198,6 @@ class TestConfig(unittest.TestCase):
         assert len(back_camera.objects.filters["person"].raw_mask) == 1
 
     def test_default_input_args(self):
-
         config = {
             "mqtt": {"host": "mqtt"},
             "cameras": {
