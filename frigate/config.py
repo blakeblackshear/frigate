@@ -69,10 +69,29 @@ class RetainConfig(BaseModel):
     )
 
 
+# DEPRECATED: Will eventually be removed
 class ClipsConfig(BaseModel):
+    enabled: bool = Field(default=False, title="Save clips.")
     max_seconds: int = Field(default=300, title="Maximum clip duration.")
+    pre_capture: int = Field(default=5, title="Seconds to capture before event starts.")
+    post_capture: int = Field(default=5, title="Seconds to capture after event ends.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the clip.",
+    )
+    objects: Optional[List[str]] = Field(
+        title="List of objects to be detected in order to save the clip.",
+    )
     retain: RetainConfig = Field(
         default_factory=RetainConfig, title="Clip retention settings."
+    )
+
+
+class RecordConfig(BaseModel):
+    enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    retain_days: int = Field(default=0, title="Recording retention period in days.")
+    events: ClipsConfig = Field(
+        default_factory=ClipsConfig, title="Event specific settings."
     )
 
 
@@ -264,26 +283,11 @@ FFMPEG_INPUT_ARGS_DEFAULT = [
 ]
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
 RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
-SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT = [
-    "-f",
-    "segment",
-    "-segment_time",
-    "10",
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-c",
-    "copy",
-    "-an",
-]
 RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-f",
     "segment",
     "-segment_time",
-    "60",
+    "10",
     "-segment_format",
     "mp4",
     "-reset_timestamps",
@@ -304,10 +308,6 @@ class FfmpegOutputArgsConfig(BaseModel):
     record: Union[str, List[str]] = Field(
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
-    )
-    clips: Union[str, List[str]] = Field(
-        default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="Clips role FFmpeg output arguments.",
     )
     rtmp: Union[str, List[str]] = Field(
         default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT,
@@ -423,20 +423,6 @@ class CameraMqttConfig(BaseModel):
     )
 
 
-class CameraClipsConfig(BaseModel):
-    enabled: bool = Field(default=False, title="Save clips.")
-    pre_capture: int = Field(default=5, title="Seconds to capture before event starts.")
-    post_capture: int = Field(default=5, title="Seconds to capture after event ends.")
-    required_zones: List[str] = Field(
-        default_factory=list,
-        title="List of required zones to be entered in order to save the clip.",
-    )
-    objects: Optional[List[str]] = Field(
-        title="List of objects to be detected in order to save the clip.",
-    )
-    retain: RetainConfig = Field(default_factory=RetainConfig, title="Clip retention.")
-
-
 class CameraRtmpConfig(BaseModel):
     enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
 
@@ -444,11 +430,6 @@ class CameraRtmpConfig(BaseModel):
 class CameraLiveConfig(BaseModel):
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
-
-
-class RecordConfig(BaseModel):
-    enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    retain_days: int = Field(default=30, title="Recording retention period in days.")
 
 
 class CameraConfig(BaseModel):
@@ -466,9 +447,7 @@ class CameraConfig(BaseModel):
     zones: Dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
     )
-    clips: CameraClipsConfig = Field(
-        default_factory=CameraClipsConfig, title="Clip configuration."
-    )
+    clips: ClipsConfig = Field(default_factory=ClipsConfig, title="Clip configuration.")
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Record configuration."
     )
@@ -541,18 +520,9 @@ class CameraConfig(BaseModel):
             ffmpeg_output_args = (
                 rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
-        if "clips" in ffmpeg_input.roles:
-            clips_args = (
-                self.ffmpeg.output_args.clips
-                if isinstance(self.ffmpeg.output_args.clips, list)
-                else self.ffmpeg.output_args.clips.split(" ")
-            )
-            ffmpeg_output_args = (
-                clips_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
-                + ffmpeg_output_args
-            )
-        if "record" in ffmpeg_input.roles and self.record.enabled:
+        if any(role in ["clips", "record"] for role in ffmpeg_input.roles) and (
+            self.record.enabled or self.clips.enabled
+        ):
             record_args = (
                 self.ffmpeg.output_args.record
                 if isinstance(self.ffmpeg.output_args.record, list)
@@ -560,7 +530,7 @@ class CameraConfig(BaseModel):
             )
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
                 + ffmpeg_output_args
             )
 
@@ -700,7 +670,7 @@ class FrigateConfig(BaseModel):
         # Global config to propegate down to camera level
         global_config = config.dict(
             include={
-                "clips": {"retain"},
+                "clips": ...,
                 "record": ...,
                 "snapshots": ...,
                 "objects": ...,
@@ -713,7 +683,9 @@ class FrigateConfig(BaseModel):
 
         for name, camera in config.cameras.items():
             merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
-            camera_config = CameraConfig.parse_obj({"name": name, **merged_config})
+            camera_config: CameraConfig = CameraConfig.parse_obj(
+                {"name": name, **merged_config}
+            )
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
@@ -775,6 +747,21 @@ class FrigateConfig(BaseModel):
                 camera_config.live = CameraLiveConfig()
 
             config.cameras[name] = camera_config
+
+            # Merge Clips configuration for backward compatibility
+            if camera_config.clips.enabled:
+                logger.warn(
+                    "Clips configuration is deprecated. Configure clip settings under record -> events."
+                )
+                if not camera_config.record.enabled:
+                    camera_config.record.enabled = True
+                    camera_config.record.retain_days = 0
+                camera_config.record.events = ClipsConfig.parse_obj(
+                    deep_merge(
+                        camera_config.clips.dict(exclude_unset=True),
+                        camera_config.record.events.dict(exclude_unset=True),
+                    )
+                )
 
         return config
 

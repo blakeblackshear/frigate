@@ -115,8 +115,8 @@ export default function Event({ eventId }) {
             options={{
               sources: [
                 {
-                  src: `${apiHost}/clips/${data.camera}-${eventId}.mp4`,
-                  type: 'video/mp4',
+                  src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
+                  type: 'application/vnd.apple.mpegurl',
                 },
               ],
               poster: data.has_snapshot
@@ -127,7 +127,7 @@ export default function Event({ eventId }) {
             onReady={(player) => {}}
           />
           <div className="text-center">
-            <Button className="mx-2" color="blue" href={`${apiHost}/clips/${data.camera}-${eventId}.mp4`} download>
+            <Button className="mx-2" color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4`} download>
               <Clip className="w-6" /> Download Clip
             </Button>
             <Button className="mx-2" color="blue" href={`${apiHost}/clips/${data.camera}-${eventId}.jpg`} download>
