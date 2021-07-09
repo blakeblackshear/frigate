@@ -10,10 +10,6 @@ FROM frigate-web as web
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
 
-# s6-overlay
-ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.1/s6-overlay-amd64-installer /tmp/
-RUN chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer /
-
 COPY --from=ffmpeg /usr/local /usr/local/
 
 COPY --from=wheels /wheels/. /wheels/
@@ -57,7 +53,3 @@ COPY docker/rootfs/ /
 
 EXPOSE 5000
 EXPOSE 1935
-
-ENTRYPOINT ["/init"]
-
-CMD ["python3", "-u", "-m", "frigate"]

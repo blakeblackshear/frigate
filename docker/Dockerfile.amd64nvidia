@@ -4,9 +4,9 @@ LABEL maintainer "blakeb@blakeshome.com"
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-        # ffmpeg dependencies
-        libgomp1 \
-        ## Tensorflow lite
+    # ffmpeg dependencies
+    libgomp1 \
+    ## Tensorflow lite
     && wget -q https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
     && python3.8 -m pip install tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
     && rm tflite_runtime-2.5.0-cp38-cp38-linux_x86_64.whl \
@@ -45,3 +45,11 @@ ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,video
 ENV NVIDIA_REQUIRE_CUDA "cuda>=11.1 brand=tesla,driver>=418,driver<419 brand=tesla,driver>=440,driver<441 brand=tesla,driver>=450,driver<451"
+
+# s6-overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-amd64-installer /tmp/
+RUN chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer /
+
+ENTRYPOINT ["/init"]
+
+CMD ["python3", "-u", "-m", "frigate"]
