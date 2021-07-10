@@ -87,12 +87,9 @@ class EventProcessor(threading.Thread):
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
             except queue.Empty:
-                # if not self.stop_event.is_set():
-                #     self.refresh_cache()
                 continue
 
             logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
-            # self.refresh_cache()
 
             if event_type == "start":
                 self.events_in_process[event_data["id"]] = event_data

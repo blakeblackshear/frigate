@@ -173,12 +173,12 @@ class RecordingMaintainer(threading.Thread):
                 retain[recording.path] = True
 
         # Actually expire recordings
-        for path, keep in retain.items():
-            if not keep:
-                Path(path).unlink(missing_ok=True)
-                Recordings.delete_by_id(recording.recording_id)
+        delete_paths = [path for path, keep in retain.items() if not keep]
+        for path in delete_paths:
+            Path(path).unlink(missing_ok=True)
+        Recordings.delete().where(Recordings.path << delete_paths).execute()
 
-        # Update Event
+        # Update Events to reflect deleted recordings
         event_no_recordings = (
             Event.select()
             .join(
@@ -202,8 +202,7 @@ class RecordingMaintainer(threading.Thread):
             )
             .where(Recordings.id.is_null())
         )
-        update = Event.update(has_clip=False).where(Event.id << event_no_recordings)
-        update.execute()
+        Event.update(has_clip=False).where(Event.id << event_no_recordings).execute()
 
         event_paths = list(retain.keys())
 
@@ -218,7 +217,7 @@ class RecordingMaintainer(threading.Thread):
             expire_before = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
-            if recording.end_time >= expire_before:
+            if recording.end_time < expire_before:
                 Path(recording.path).unlink(missing_ok=True)
                 Recordings.delete_by_id(recording.id)
 
@@ -239,7 +238,7 @@ class RecordingMaintainer(threading.Thread):
                 expire_before = (
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()
-                if recording.end_time >= expire_before:
+                if recording.end_time < expire_before:
                     Path(recording.path).unlink(missing_ok=True)
                     Recordings.delete_by_id(recording.id)
 
