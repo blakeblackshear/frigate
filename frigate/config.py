@@ -347,18 +347,6 @@ class CameraInput(BaseModel):
 
 class CameraFfmpegConfig(FfmpegConfig):
     inputs: List[CameraInput] = Field(title="Camera inputs.")
-    global_args: Union[str, List[str]] = Field(
-        default_factory=list, title="FFmpeg global arguments."
-    )
-    hwaccel_args: Union[str, List[str]] = Field(
-        default_factory=list, title="FFmpeg hardware acceleration arguments."
-    )
-    input_args: Union[str, List[str]] = Field(
-        default_factory=list, title="FFmpeg input arguments."
-    )
-    output_args: FfmpegOutputArgsConfig = Field(
-        default_factory=FfmpegOutputArgsConfig, title="FFmpeg output arguments."
-    )
 
     @validator("inputs")
     def validate_roles(cls, v):
