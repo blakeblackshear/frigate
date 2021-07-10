@@ -197,6 +197,32 @@ class TestConfig(unittest.TestCase):
         assert len(back_camera.objects.filters["dog"].raw_mask) == 2
         assert len(back_camera.objects.filters["person"].raw_mask) == 1
 
+    def test_default_input_args(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "height": 1080,
+                    "width": 1920,
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert "-rtsp_transport" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+
     def test_ffmpeg_params_global(self):
         config = {
             "ffmpeg": {"input_args": "-re"},
