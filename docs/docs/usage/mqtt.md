@@ -88,13 +88,13 @@ Topic to turn detection for a camera on and off. Expected values are `ON` and `O
 
 Topic with current state of detection for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/clips/set`
+### `frigate/<camera_name>/recordings/set`
 
-Topic to turn clips for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn recordings for a camera on and off. Expected values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/clips/state`
+### `frigate/<camera_name>/recordings/state`
 
-Topic with current state of clips for a camera. Published values are `ON` and `OFF`.
+Topic with current state of recordings for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/snapshots/set`
 

@@ -5,7 +5,7 @@ import CameraImage from '../components/CameraImage';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
-import { useDetectState, useClipsState, useSnapshotsState } from '../api/mqtt';
+import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
 import { useConfig, FetchStatus } from '../api';
 import { useMemo } from 'preact/hooks';
 
@@ -25,7 +25,7 @@ export default function Cameras() {
 
 function Camera({ name, conf }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
-  const { payload: clipValue, send: sendClips } = useClipsState(name);
+  const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
@@ -46,11 +46,11 @@ function Camera({ name, conf }) {
         },
       },
       {
-        name: `Toggle clips ${clipValue === 'ON' ? 'off' : 'on'}`,
+        name: `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}`,
         icon: ClipIcon,
-        color: clipValue === 'ON' ? 'blue' : 'gray',
+        color: recordValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendClips(clipValue === 'ON' ? 'OFF' : 'ON');
+          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON');
         },
       },
       {
@@ -62,7 +62,7 @@ function Camera({ name, conf }) {
         },
       },
     ],
-    [detectValue, sendDetect, clipValue, sendClips, snapshotValue, sendSnapshots]
+    [detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
   return (

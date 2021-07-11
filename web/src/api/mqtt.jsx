@@ -41,8 +41,8 @@ export function MqttProvider({
 
   useEffect(() => {
     Object.keys(config.cameras).forEach((camera) => {
-      const { name, clips, detect, snapshots } = config.cameras[camera];
-      dispatch({ topic: `${name}/clips/state`, payload: clips.enabled ? 'ON' : 'OFF' });
+      const { name, record, detect, snapshots } = config.cameras[camera];
+      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF' });
       dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF' });
       dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF' });
     });
@@ -101,12 +101,12 @@ export function useDetectState(camera) {
   return { payload, send, connected };
 }
 
-export function useClipsState(camera) {
+export function useRecordingsState(camera) {
   const {
     value: { payload },
     send,
     connected,
-  } = useMqtt(`${camera}/clips/state`, `${camera}/clips/set`);
+  } = useMqtt(`${camera}/recordings/state`, `${camera}/recordings/set`);
   return { payload, send, connected };
 }
 
