@@ -553,6 +553,7 @@ def recording_clip(camera, start_ts, end_ts):
         .where(
             (Recordings.start_time.between(start_ts, end_ts))
             | (Recordings.end_time.between(start_ts, end_ts))
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
         .where(Recordings.camera == camera)
         .order_by(Recordings.start_time.asc())
@@ -626,8 +627,9 @@ def vod_ts(camera, start_ts, end_ts):
     recordings = (
         Recordings.select()
         .where(
-            (Recordings.start_time.between(start_ts, end_ts))
-            | (Recordings.end_time.between(start_ts, end_ts))
+            Recordings.start_time.between(start_ts, end_ts)
+            | Recordings.end_time.between(start_ts, end_ts)
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
         .where(Recordings.camera == camera)
         .order_by(Recordings.start_time.asc())
