@@ -68,6 +68,7 @@ class RecordingMaintainer(threading.Thread):
                 continue
 
         for f in recordings:
+            # Skip files currently in use
             if f in files_in_use:
                 continue
 
@@ -75,6 +76,11 @@ class RecordingMaintainer(threading.Thread):
             basename = os.path.splitext(f)[0]
             camera, date = basename.rsplit("-", maxsplit=1)
             start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
+
+            # Just delete files if recordings are turned off
+            if not self.config.cameras[camera].record.enabled:
+                Path(cache_path).unlink(missing_ok=True)
+                continue
 
             ffprobe_cmd = [
                 "ffprobe",
@@ -118,6 +124,21 @@ class RecordingMaintainer(threading.Thread):
                 end_time=end_time.timestamp(),
                 duration=duration,
             )
+
+    def run(self):
+        # Check for new files every 5 seconds
+        while not self.stop_event.wait(5):
+            self.move_files()
+
+        logger.info(f"Exiting recording maintenance...")
+
+
+class RecordingCleanup(threading.Thread):
+    def __init__(self, config: FrigateConfig, stop_event):
+        threading.Thread.__init__(self)
+        self.name = "recording_cleanup"
+        self.config = config
+        self.stop_event = stop_event
 
     def expire_recordings(self):
         logger.debug("Start expire recordings (new).")
@@ -234,17 +255,14 @@ class RecordingMaintainer(threading.Thread):
         logger.debug("End expire files (legacy).")
 
     def run(self):
-        # only expire events every 10 minutes, but check for new files every 5 seconds
-        for counter in itertools.cycle(range(120)):
-            if self.stop_event.wait(5):
-                logger.info(f"Exiting recording maintenance...")
+        # Expire recordings every minute, clean directories every 5 minutes.
+        for counter in itertools.cycle(range(5)):
+            if self.stop_event.wait(60):
+                logger.info(f"Exiting recording cleanup...")
                 break
 
-            if counter % 12 == 0:
-                self.expire_recordings()
+            self.expire_recordings()
 
             if counter == 0:
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
-
-            self.move_files()

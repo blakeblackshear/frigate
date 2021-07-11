@@ -23,7 +23,7 @@ from frigate.models import Event, Recordings
 from frigate.mqtt import create_mqtt_client, MqttSocketRelay
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
-from frigate.record import RecordingMaintainer
+from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -301,6 +301,10 @@ class FrigateApp:
         self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
         self.recording_maintainer.start()
 
+    def start_recording_cleanup(self):
+        self.recording_cleanup = RecordingCleanup(self.config, self.stop_event)
+        self.recording_cleanup.start()
+
     def start_stats_emitter(self):
         self.stats_emitter = StatsEmitter(
             self.config,
@@ -346,6 +350,7 @@ class FrigateApp:
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
+        self.start_recording_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
@@ -372,6 +377,7 @@ class FrigateApp:
         self.event_processor.join()
         self.event_cleanup.join()
         self.recording_maintainer.join()
+        self.recording_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
