@@ -107,12 +107,12 @@ describe('MqttProvider', () => {
     );
   });
 
-  test('prefills the clips/detect/snapshots state from config', async () => {
+  test('prefills the recordings/detect/snapshots state from config', async () => {
     jest.spyOn(Date, 'now').mockReturnValue(123456);
     const config = {
       cameras: {
-        front: { name: 'front', detect: { enabled: true }, clips: { enabled: false }, snapshots: { enabled: true } },
-        side: { name: 'side', detect: { enabled: false }, clips: { enabled: false }, snapshots: { enabled: false } },
+        front: { name: 'front', detect: { enabled: true }, record: { enabled: false }, snapshots: { enabled: true } },
+        side: { name: 'side', detect: { enabled: false }, record: { enabled: false }, snapshots: { enabled: false } },
       },
     };
     render(
@@ -122,10 +122,10 @@ describe('MqttProvider', () => {
     );
     await screen.findByTestId('data');
     expect(screen.getByTestId('front/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
-    expect(screen.getByTestId('front/clips/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('front/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
     expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
     expect(screen.getByTestId('side/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
-    expect(screen.getByTestId('side/clips/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('side/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
     expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
   });
 });

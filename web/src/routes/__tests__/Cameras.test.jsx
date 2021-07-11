@@ -51,13 +51,13 @@ describe('Cameras Route', () => {
 
   test('buttons toggle detect, clips, and snapshots', async () => {
     const sendDetect = jest.fn();
-    const sendClips = jest.fn();
+    const sendRecordings = jest.fn();
     const sendSnapshots = jest.fn();
     jest.spyOn(Mqtt, 'useDetectState').mockImplementation(() => {
       return { payload: 'ON', send: sendDetect };
     });
-    jest.spyOn(Mqtt, 'useClipsState').mockImplementation(() => {
-      return { payload: 'OFF', send: sendClips };
+    jest.spyOn(Mqtt, 'useRecordingsState').mockImplementation(() => {
+      return { payload: 'OFF', send: sendRecordings };
     });
     jest.spyOn(Mqtt, 'useSnapshotsState').mockImplementation(() => {
       return { payload: 'ON', send: sendSnapshots };
@@ -72,11 +72,11 @@ describe('Cameras Route', () => {
     fireEvent.click(screen.getAllByLabelText('Toggle snapshots off')[0]);
     expect(sendSnapshots).toHaveBeenCalledWith('OFF');
 
-    fireEvent.click(screen.getAllByLabelText('Toggle clips on')[0]);
-    expect(sendClips).toHaveBeenCalledWith('ON');
+    fireEvent.click(screen.getAllByLabelText('Toggle recordings on')[0]);
+    expect(sendRecordings).toHaveBeenCalledWith('ON');
 
     expect(sendDetect).toHaveBeenCalledTimes(1);
     expect(sendSnapshots).toHaveBeenCalledTimes(1);
-    expect(sendClips).toHaveBeenCalledTimes(1);
+    expect(sendRecordings).toHaveBeenCalledTimes(1);
   });
 });
