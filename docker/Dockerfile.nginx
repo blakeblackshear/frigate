@@ -23,6 +23,8 @@ RUN apt-get -yqq install --no-install-recommends curl \
     && curl -sL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz | tar -C /tmp/nginx -zx --strip-components=1 \
     && mkdir /tmp/nginx-vod-module \
     && curl -sL https://github.com/kaltura/nginx-vod-module/archive/refs/tags/${VOD_MODULE_VERSION}.tar.gz | tar -C /tmp/nginx-vod-module -zx --strip-components=1 \
+    # Patch MAX_CLIPS to allow more clips to be added than the default 128
+    && sed -i 's/MAX_CLIPS (128)/MAX_CLIPS (1080)/g' /tmp/nginx-vod-module/vod/media_set.h \
     && mkdir /tmp/nginx-rtmp-module \
     && curl -sL https://github.com/arut/nginx-rtmp-module/archive/refs/tags/v${RTMP_MODULE_VERSION}.tar.gz | tar -C /tmp/nginx-rtmp-module -zx --strip-components=1
 
