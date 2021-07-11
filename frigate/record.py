@@ -120,96 +120,12 @@ class RecordingMaintainer(threading.Thread):
             )
 
     def expire_recordings(self):
-        event_recordings = Recordings.select(
-            Recordings.id.alias("recording_id"),
-            Recordings.camera,
-            Recordings.path,
-            Recordings.end_time,
-            Event.id.alias("event_id"),
-            Event.label,
-        ).join(
-            Event,
-            on=(
-                (Recordings.camera == Event.camera)
-                & (
-                    (Recordings.start_time.between(Event.start_time, Event.end_time))
-                    | (Recordings.end_time.between(Event.start_time, Event.end_time))
-                ),
-            ),
-        )
+        logger.debug("Start expire recordings (new).")
 
-        retain = {}
-        for recording in event_recordings:
-            # Set default to delete
-            if recording.path not in retain:
-                retain[recording.path] = False
-
-            # Handle deleted cameras that still have recordings and events
-            if recording.camera in self.config.cameras:
-                record_config = self.config.cameras[recording.camera].record
-            else:
-                record_config = self.config.record
-
-            # Check event retention and set to True if within window
-            expire_days_event = (
-                0
-                if not record_config.events.enabled
-                else record_config.events.retain.objects.get(
-                    recording.event.label, record_config.events.retain.default
-                )
-            )
-            expire_before_event = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days_event)
-            ).timestamp()
-            if recording.end_time >= expire_before_event:
-                retain[recording.path] = True
-
-            # Check recording retention and set to True if within window
-            expire_days_record = record_config.retain_days
-            expire_before_record = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days_record)
-            ).timestamp()
-            if recording.end_time > expire_before_record:
-                retain[recording.path] = True
-
-        # Actually expire recordings
-        delete_paths = [path for path, keep in retain.items() if not keep]
-        for path in delete_paths:
-            Path(path).unlink(missing_ok=True)
-        Recordings.delete().where(Recordings.path << delete_paths).execute()
-
-        # Update Events to reflect deleted recordings
-        event_no_recordings = (
-            Event.select()
-            .join(
-                Recordings,
-                JOIN.LEFT_OUTER,
-                on=(
-                    (Recordings.camera == Event.camera)
-                    & (
-                        (
-                            Recordings.start_time.between(
-                                Event.start_time, Event.end_time
-                            )
-                        )
-                        | (
-                            Recordings.end_time.between(
-                                Event.start_time, Event.end_time
-                            )
-                        )
-                    ),
-                ),
-            )
-            .where(Recordings.id.is_null())
-        )
-        Event.update(has_clip=False).where(Event.id << event_no_recordings).execute()
-
-        event_paths = list(retain.keys())
-
+        logger.debug("Start deleted cameras.")
         # Handle deleted cameras
         no_camera_recordings: Recordings = Recordings.select().where(
             Recordings.camera.not_in(list(self.config.cameras.keys())),
-            Recordings.path.not_in(event_paths),
         )
 
         for recording in no_camera_recordings:
@@ -220,29 +136,83 @@ class RecordingMaintainer(threading.Thread):
             if recording.end_time < expire_before:
                 Path(recording.path).unlink(missing_ok=True)
                 Recordings.delete_by_id(recording.id)
+        logger.debug("End deleted cameras.")
 
-        # When deleting recordings without events, we have to keep at LEAST the configured max clip duration
+        logger.debug("Start all cameras.")
         for camera, config in self.config.cameras.items():
+            logger.debug(f"Start camera: {camera}.")
+            # When deleting recordings without events, we have to keep at LEAST the configured max clip duration
             min_end = (
                 datetime.datetime.now()
                 - datetime.timedelta(seconds=config.record.events.max_seconds)
             ).timestamp()
+            expire_days = config.record.retain_days
+            expire_before = (
+                datetime.datetime.now() - datetime.timedelta(days=expire_days)
+            ).timestamp()
+            expire_date = min(min_end, expire_before)
+
+            # Get recordings to remove
             recordings: Recordings = Recordings.select().where(
                 Recordings.camera == camera,
-                Recordings.path.not_in(event_paths),
-                Recordings.end_time < min_end,
+                Recordings.end_time < expire_date,
             )
 
             for recording in recordings:
-                expire_days = config.record.retain_days
-                expire_before = (
-                    datetime.datetime.now() - datetime.timedelta(days=expire_days)
-                ).timestamp()
-                if recording.end_time < expire_before:
+                # See if there are any associated events
+                events: Event = Event.select().where(
+                    Event.camera == recording.camera,
+                    (
+                        Event.start_time.between(
+                            recording.start_time, recording.end_time
+                        )
+                        | Event.end_time.between(
+                            recording.start_time, recording.end_time
+                        )
+                        | (
+                            (recording.start_time > Event.start_time)
+                            & (recording.end_time < Event.end_time)
+                        )
+                    ),
+                )
+                keep = False
+                event_ids = set()
+
+                event: Event
+                for event in events:
+                    event_ids.add(event.id)
+                    # Check event/label retention and keep the recording if within window
+                    expire_days_event = (
+                        0
+                        if not config.record.events.enabled
+                        else config.record.events.retain.objects.get(
+                            event.label, config.record.events.retain.default
+                        )
+                    )
+                    expire_before_event = (
+                        datetime.datetime.now()
+                        - datetime.timedelta(days=expire_days_event)
+                    ).timestamp()
+                    if recording.end_time >= expire_before_event:
+                        keep = True
+
+                # Delete recordings outside of the retention window
+                if not keep:
                     Path(recording.path).unlink(missing_ok=True)
                     Recordings.delete_by_id(recording.id)
+                    if event_ids:
+                        # Update associated events
+                        Event.update(has_clip=False).where(
+                            Event.id.in_(list(event_ids))
+                        ).execute()
+
+            logger.debug(f"End camera: {camera}.")
+
+        logger.debug("End all cameras.")
+        logger.debug("End expire recordings (new).")
 
     def expire_files(self):
+        logger.debug("Start expire files (legacy).")
         default_expire = (
             datetime.datetime.now().timestamp()
             - SECONDS_IN_DAY * self.config.record.retain_days
@@ -260,6 +230,8 @@ class RecordingMaintainer(threading.Thread):
                 continue
             if p.stat().st_mtime < delete_before.get(p.parent.name, default_expire):
                 p.unlink(missing_ok=True)
+
+        logger.debug("End expire files (legacy).")
 
     def run(self):
         # only expire events every 10 minutes, but check for new files every 5 seconds
