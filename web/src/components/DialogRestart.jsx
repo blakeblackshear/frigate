@@ -4,18 +4,16 @@ import Dialog from './Dialog';
 import { useApiHost } from '../api';
 import { useRestart } from '../api/mqtt';
 
-export default function DialogRestart({ showDialog, setShowDialog }) {
+export default function DialogRestart({ show, setShow }) {
   const apiHost = useApiHost();
   const { payload: detectRestarted = null, send: sendRestart } = useRestart();
-  const [dialogTitle, setDialogTitle] = useState("Restart in progress");
-  const [showDialogWait, setShowDialogWait] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState('Restart in progress');
 
   useEffect(() => {
     if (detectRestarted != null && Number.isInteger(detectRestarted)) {
       if (!detectRestarted)
-        setDialogTitle("Server-initiated startup");
-      setShowDialog(false);
-      setShowDialogWait(true);
+        setDialogTitle('Server-initiated startup');
+      setShow(false);
     }
   }, [detectRestarted]);
 
@@ -35,18 +33,17 @@ export default function DialogRestart({ showDialog, setShowDialog }) {
 
   const handleClick = useCallback(() => {
     sendRestart();
-    setShowDialog(false);
+    setShow(false);
     waitPlease();
   });
 
   const handleDismiss = useCallback(() => {
-    setShowDialog(false);
-    setShowDialogWait(false);
+    setShow(false);
   });
 
   return (
     <Fragment>
-      {showDialog ? (
+      {show ? (
         <Dialog
           onDismiss={handleDismiss}
           title="Restart Frigate"
