@@ -234,9 +234,9 @@ def event_snapshot(id):
 def event_clip(id):
     download = request.args.get("download", type=bool)
 
-    event: Event = Event.get(Event.id == id)
-
-    if event is None:
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
         return "Event not found.", 404
 
     if not event.has_clip:
@@ -689,9 +689,9 @@ def vod_hour(year_month, day, hour, camera):
 
 @bp.route("/vod/event/<id>")
 def vod_event(id):
-    event: Event = Event.get(Event.id == id)
-
-    if event is None:
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
         return "Event not found.", 404
 
     if not event.has_clip:
