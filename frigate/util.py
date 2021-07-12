@@ -523,12 +523,7 @@ def restart_frigate(mqtt_client, topic_prefix, from_ui = 0):
 
     def on_publish(client,userdata,result):
         time.sleep(0.67)
-        rc, docker = 1, "/usr/local/bin/docker"
-        if os.access(docker, os.X_OK) and os.path.isfile("/var/run/docker.sock"):
-            rc = sp.Popen(f"{docker} restart $(hostname)", shell=True).wait()
-        if rc:
-            # Sometimes you have to wait a long time like this
-            os.kill(os.getpid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGTERM)
 
     mqtt_client.on_publish = on_publish
     mqtt_client.publish(f"{topic_prefix}/restarted", int(from_ui))
