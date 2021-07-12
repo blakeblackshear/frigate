@@ -127,10 +127,20 @@ export default function Event({ eventId }) {
             onReady={(player) => {}}
           />
           <div className="text-center">
-            <Button className="mx-2" color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4`} download>
+            <Button
+              className="mx-2"
+              color="blue"
+              href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
+              download
+            >
               <Clip className="w-6" /> Download Clip
             </Button>
-            <Button className="mx-2" color="blue" href={`${apiHost}/clips/${data.camera}-${eventId}.jpg`} download>
+            <Button
+              className="mx-2"
+              color="blue"
+              href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
+              download
+            >
               <Snapshot className="w-6" /> Download Snapshot
             </Button>
           </div>
