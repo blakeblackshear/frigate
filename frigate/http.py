@@ -187,6 +187,7 @@ def event_thumbnail(id):
 
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
+    download = request.args.get("download", type=bool)
     jpg_bytes = None
     try:
         event = Event.get(Event.id == id)
@@ -222,11 +223,17 @@ def event_snapshot(id):
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpg"
+    if download:
+        response.headers[
+            "Content-Disposition"
+        ] = f"attachment; filename=snapshot-{id}.jpg"
     return response
 
 
 @bp.route("/events/<id>/clip.mp4")
 def event_clip(id):
+    download = request.args.get("download", type=bool)
+
     event: Event = Event.get(Event.id == id)
 
     if event is None:
@@ -246,7 +253,7 @@ def event_clip(id):
     return send_file(
         clip_path,
         mimetype="video/mp4",
-        as_attachment=True,
+        as_attachment=download,
         attachment_filename=f"{event.camera}_{start_ts}-{end_ts}.mp4",
     )
 
@@ -548,6 +555,8 @@ def recordings(camera_name):
 @bp.route("/<camera>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
 @bp.route("/<camera>/start/<float:start_ts>/end/<float:end_ts>/clip.mp4")
 def recording_clip(camera, start_ts, end_ts):
+    download = request.args.get("download", type=bool)
+
     recordings = (
         Recordings.select()
         .where(
@@ -615,9 +624,10 @@ def recording_clip(camera, start_ts, end_ts):
 
     response = make_response(mp4_bytes)
     response.mimetype = "video/mp4"
-    response.headers[
-        "Content-Disposition"
-    ] = f"attachment; filename={camera}_{start_ts}-{end_ts}.mp4"
+    if download:
+        response.headers[
+            "Content-Disposition"
+        ] = f"attachment; filename={camera}_{start_ts}-{end_ts}.mp4"
     return response
 
 
