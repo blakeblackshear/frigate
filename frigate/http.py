@@ -594,8 +594,6 @@ def recording_clip(camera, start_ts, end_ts):
         "-",
         "-c",
         "copy",
-        "-f",
-        "mp4",
         "-movflags",
         "+faststart",
         path,
