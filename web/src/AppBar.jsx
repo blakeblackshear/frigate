@@ -51,7 +51,7 @@ export default function AppBar() {
           <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
       ) : null}
-      <DialogRestart showDialog={showDialogRestart} setShowDialog={setShowDialogRestart} />
+      <DialogRestart show={showDialogRestart} setShow={setShowDialogRestart} />
     </Fragment>
   );
 }
