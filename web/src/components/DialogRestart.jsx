@@ -1,11 +1,9 @@
 import { h, Fragment } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import Dialog from './Dialog';
-import { useApiHost } from '../api';
 import { useRestart } from '../api/mqtt';
 
 export default function DialogRestart({ show, setShow }) {
-  const apiHost = useApiHost();
   const { payload: detectRestarted = null, send: sendRestart } = useRestart();
   const [dialogTitle, setDialogTitle] = useState('Restart in progress');
 
@@ -22,8 +20,8 @@ export default function DialogRestart({ show, setShow }) {
     await delay(3456);
     while (true) {
       try {
-        const response = await fetch(`${apiHost}/api/config`, { method: 'GET' });
-        if (await response.status == 200)
+        const response = await fetch('/api/config', { method: 'GET' });
+        if (await response.status === 200)
           window.location.reload();
       }
       catch (e) {}
