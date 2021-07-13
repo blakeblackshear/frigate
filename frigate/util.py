@@ -523,6 +523,7 @@ def restart_frigate(mqtt_client, topic_prefix):
 
     def on_publish(client,userdata,result):
         time.sleep(0.67)
+        logger.info("Restart requested.")
         os.kill(os.getpid(), signal.SIGTERM)
 
     mqtt_client.on_publish = on_publish
