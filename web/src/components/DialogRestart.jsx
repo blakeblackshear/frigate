@@ -13,11 +13,12 @@ export default function DialogRestart({ show, setShow }) {
         setDialogTitle('Server-initiated startup');
       setShow(false);
     }
-  }, [detectRestarted]);
+  }, [detectRestarted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const waitPlease = async () => {
     const delay = ms => new Promise(res => setTimeout(res, ms));
     await delay(3456);
+    /* eslint-disable no-constant-condition */
     while (true) {
       try {
         const response = await fetch('/api/config', { method: 'GET' });
@@ -33,11 +34,11 @@ export default function DialogRestart({ show, setShow }) {
     sendRestart();
     setShow(false);
     waitPlease();
-  });
+  }, [show]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDismiss = useCallback(() => {
     setShow(false);
-  });
+  }, [show]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Fragment>
