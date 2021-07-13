@@ -36,7 +36,7 @@ export default function AppBar() {
   const handleRestart = useCallback(() => {
     setShowMoreMenu(false);
     setShowDialog(true);
-  }, [setShowDialog]);
+  }, [showDialogRestart]);
 
   return (
     <Fragment>
