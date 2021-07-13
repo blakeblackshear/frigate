@@ -322,7 +322,9 @@ def zone_filtered(obj: TrackedObject, object_config):
 
 # Maintains the state of a camera
 class CameraState:
-    def __init__(self, name, config, frame_manager):
+    def __init__(
+        self, name, config: FrigateConfig, frame_manager: SharedMemoryFrameManager
+    ):
         self.name = name
         self.config = config
         self.camera_config = config.cameras[name]
@@ -396,7 +398,7 @@ class CameraState:
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
 
         if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion_mask == [0])
+            mask_overlay = np.where(self.camera_config.motion.mask == [0])
             frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("motion_boxes"):
