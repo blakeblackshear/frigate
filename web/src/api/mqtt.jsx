@@ -124,6 +124,6 @@ export function useRestart() {
     value: { payload },
     send,
     connected,
-  } = useMqtt('restart', 'restart');
+  } = useMqtt('restarted', 'restart');
   return { payload, send, connected };
 }
