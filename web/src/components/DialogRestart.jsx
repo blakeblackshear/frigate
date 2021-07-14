@@ -52,7 +52,7 @@ export default function DialogRestart({ show, setShow }) {
             { text: 'Cancel', onClick: handleDismiss } ]}
         />
       ) : detectRestarted != null && (
-        <Dialog title={dialogTitle} text="This page should refresh as soon as the server is up and running." />
+        <Dialog title={dialogTitle} text="This page should refresh as soon as the server is up and running…" />
       )}
     </Fragment>
   );
