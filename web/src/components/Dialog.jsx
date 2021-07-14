@@ -28,7 +28,7 @@ export default function Dialog({ actions = [], portalRootID = 'dialogs', title, 
           }`}
         >
           <div className="p-4">
-            <Heading size="lg">{title}</Heading>
+            <Heading size="lg" className="mb-4">{title}</Heading>
             <p>{text}</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
