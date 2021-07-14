@@ -9,8 +9,9 @@ export default function DialogRestart({ show, setShow }) {
 
   useEffect(() => {
     if (detectRestarted != null && Number.isInteger(detectRestarted)) {
-      if (!detectRestarted)
+      if (!detectRestarted) {
         setDialogTitle('Server-initiated startup');
+      }
       setShow(false);
     }
   }, [detectRestarted]); // eslint-disable-line react-hooks/exhaustive-deps
