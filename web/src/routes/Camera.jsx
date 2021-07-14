@@ -7,6 +7,7 @@ import Heading from '../components/Heading';
 import Link from '../components/Link';
 import SettingsIcon from '../icons/Settings';
 import Switch from '../components/Switch';
+import ButtonsTabbed from '../components/ButtonsTabbed';
 import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost, useConfig } from '../api';
@@ -112,16 +113,7 @@ export default function Camera({ camera }) {
   return (
     <div className="space-y-4">
       <Heading size="2xl">{camera}</Heading>
-      <div>
-        <nav className="flex justify-end">
-          <button onClick={() => setViewMode('live')} className={viewMode === 'live' ? 'text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500' : 'text-gray-600 py-0 px-4 block hover:text-gray-500'}>
-            Live
-          </button>
-          <button onClick={() => setViewMode('debug')} className={viewMode === 'debug' ? 'text-gray-600 py-0 px-4 block hover:text-gray-500 focus:outline-none border-b-2 font-medium border-gray-500' : 'text-gray-600 py-0 px-4 block hover:text-gray-500'}>
-            Debug
-          </button>
-        </nav>
-      </div>
+      <ButtonsTabbed titles={['live', 'debug']} setViewMode={setViewMode} viewMode={viewMode} />
 
       {player}
 
