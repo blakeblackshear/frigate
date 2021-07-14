@@ -23,8 +23,9 @@ export default function DialogRestart({ show, setShow }) {
     while (true) {
       try {
         const response = await fetch('/api/config', { method: 'GET' });
-        if (await response.status === 200)
+        if (await response.status === 200) {
           window.location.reload();
+        }
       }
       catch (e) {}
       await delay(987);
