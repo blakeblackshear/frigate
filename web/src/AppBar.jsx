@@ -12,7 +12,7 @@ import { useCallback, useRef, useState } from 'preact/hooks';
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [showDialogRestart, setShowDialogRestart] = useState(false);
+  const [showDialogRestart, setShowDialogRestart] = useState(0);
   const { setDarkMode } = useDarkMode();
 
   const handleSelectDarkMode = useCallback(

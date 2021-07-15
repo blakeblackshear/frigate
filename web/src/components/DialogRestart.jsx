@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import { useRestart } from '../api/mqtt';
 
 export default function DialogRestart({ show, setShow }) {
+  const { payload: restartedMessage = null, send: sendRestart } = useRestart();
 
   useEffect(() => {
     if (show === 2) {
@@ -11,12 +12,12 @@ export default function DialogRestart({ show, setShow }) {
       setTimeout(async () => {
         const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-        while (show === 2) {
+        /* eslint-disable no-constant-condition */
+        while (true) {
           try {
             const response = await fetch('/api/config', { method: 'GET' });
             if (await response.status === 200) {
-              setShow(0);
-              continue;
+              break;;
             }
           }
           catch (e) {}
