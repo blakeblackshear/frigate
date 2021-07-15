@@ -90,7 +90,10 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.publish(state_topic, payload, retain=True)
 
     def on_restart_command(client, userdata, message):
-        restart_frigate(client, mqtt_config.topic_prefix)
+        payload = message.payload.decode()
+
+        if payload == "please_restart":
+            restart_frigate()
 
     def on_connect(client, userdata, flags, rc):
         threading.current_thread().name = "mqtt"

@@ -4,57 +4,43 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import { useRestart } from '../api/mqtt';
 
 export default function DialogRestart({ show, setShow }) {
-  const { payload: detectRestarted = null, send: sendRestart } = useRestart();
-  const [dialogTitle, setDialogTitle] = useState('Restart in progress');
 
   useEffect(() => {
-    if (detectRestarted != null && Number.isInteger(detectRestarted)) {
-      if (!detectRestarted) {
-        setDialogTitle('Server-initiated startup');
-      }
-      setShow(false);
-    }
-  }, [detectRestarted]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (show === 2) {
+      sendRestart('please_restart');
+      setTimeout(async () => {
+        const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
-  const waitPlease = async () => {
-    const delay = ms => new Promise(res => setTimeout(res, ms));
-    await delay(3456);
-    /* eslint-disable no-constant-condition */
-    while (true) {
-      try {
-        const response = await fetch('/api/config', { method: 'GET' });
-        if (await response.status === 200) {
-          window.location.reload();
+        while (show === 2) {
+          try {
+            const response = await fetch('/api/config', { method: 'GET' });
+            if (await response.status === 200) {
+              setShow(0);
+              continue;
+            }
+          }
+          catch (e) {}
+          await delay(987);
         }
-      }
-      catch (e) {}
-      await delay(987);
+        window.location.reload();
+
+      }, 3456);
     }
-  };
-
-  const handleClick = useCallback(() => {
-    sendRestart();
-    setShow(false);
-    waitPlease();
-  }, [show]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleDismiss = useCallback(() => {
-    setShow(false);
   }, [show]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Fragment>
-      {show ? (
+      {show === 2 ? (
+        <Dialog title="Restart in progress" text="This page should refresh as soon as the server is up and running…" />
+      ) : show === 1 && (
         <Dialog
-          onDismiss={handleDismiss}
+          onDismiss={() => setShow(0)}
           title="Restart Frigate"
           text="Are you sure?"
           actions={[
-            { text: 'Yes', color: 'red', onClick: handleClick },
-            { text: 'Cancel', onClick: handleDismiss } ]}
+            { text: 'Yes', color: 'red', onClick: () => setShow(2) },
+            { text: 'Cancel', onClick: () => setShow(0) } ]}
         />
-      ) : detectRestarted != null && (
-        <Dialog title={dialogTitle} text="This page should refresh as soon as the server is up and running…" />
       )}
     </Fragment>
   );

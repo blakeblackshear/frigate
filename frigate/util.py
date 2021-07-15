@@ -519,13 +519,8 @@ def clipped(obj, frame_shape):
         return False
 
 
-def restart_frigate(mqtt_client, topic_prefix, from_ui = 1):
-
-    def on_publish(client,userdata,result):
-        os.kill(os.getpid(), signal.SIGKILL)
-
-    mqtt_client.on_publish = on_publish
-    mqtt_client.publish(f"{topic_prefix}/restarted", int(from_ui))
+def restart_frigate():
+    os.kill(os.getpid(), signal.SIGKILL)
 
 
 class EventsPerSecond:
