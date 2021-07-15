@@ -1,10 +1,10 @@
 import { h, Fragment } from 'preact';
 import Dialog from './Dialog';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useEffect } from 'preact/hooks';
 import { useRestart } from '../api/mqtt';
 
 export default function DialogRestart({ show, setShow }) {
-  const { payload: restartedMessage = null, send: sendRestart } = useRestart();
+  const { send: sendRestart } = useRestart();
 
   useEffect(() => {
     if (show === 2) {
@@ -17,7 +17,7 @@ export default function DialogRestart({ show, setShow }) {
           try {
             const response = await fetch('/api/config', { method: 'GET' });
             if (await response.status === 200) {
-              break;;
+              break;
             }
           }
           catch (e) {}
