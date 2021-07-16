@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
@@ -9,6 +9,7 @@ import { useIntersectionObserver } from '../hooks';
 import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
+import { DateFilterOptions } from '../components/DatePicker';
 
 const API_LIMIT = 25;
 
@@ -49,7 +50,7 @@ const defaultSearchString = (limit) => `include_thumbnails=0&limit=${limit}`;
 function removeDefaultSearchKeys(searchParams) {
   searchParams.delete('limit');
   searchParams.delete('include_thumbnails');
-  searchParams.delete('before');
+  // searchParams.delete('before');
 }
 
 export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
@@ -101,6 +102,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   );
 
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
+
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
@@ -249,23 +251,34 @@ function Filters({ onChange, searchParams }) {
   }, [data]);
 
   return (
-    <div className="flex space-x-4">
-      <Filter onChange={onChange} options={cameras} paramName="camera" searchParams={searchParams} />
-      <Filter onChange={onChange} options={zones} paramName="zone" searchParams={searchParams} />
-      <Filter onChange={onChange} options={labels} paramName="label" searchParams={searchParams} />
-    </div>
+    <Fragment>
+      <div className="flex space-x-4">
+        <Filter
+          type="dropdown"
+          onChange={onChange}
+          options={cameras}
+          paramName={['camera']}
+          label="Camera"
+          searchParams={searchParams}
+        />
+      </div>
+    </Fragment>
   );
 }
 
-function Filter({ onChange, searchParams, paramName, options }) {
+function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
   const handleSelect = useCallback(
     (key) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      if (key !== 'all') {
-        newParams.set(paramName, key);
-      } else {
-        newParams.delete(paramName);
-      }
+      key.map((queryArray) => {
+        if (queryArray[paramName] !== 'all') {
+          for (let query in queryArray) {
+            newParams.set(query, queryArray[query]);
+          }
+        } else {
+          paramName.map((p) => newParams.delete(p));
+        }
+      });
 
       onChange(newParams);
     },
@@ -273,13 +286,16 @@ function Filter({ onChange, searchParams, paramName, options }) {
   );
 
   const selectOptions = useMemo(() => ['all', ...options], [options]);
+  const selected = useMemo(() => paramName.map((p) => searchParams.get(p) || 'all'));
 
   return (
     <Select
-      label={`${paramName.charAt(0).toUpperCase()}${paramName.substr(1)}`}
       onChange={handleSelect}
       options={selectOptions}
-      selected={searchParams.get(paramName) || 'all'}
+      selected={selected}
+      paramName={paramName}
+      type={type}
+      {...rest}
     />
   );
 }
