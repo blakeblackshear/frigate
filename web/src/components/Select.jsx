@@ -23,15 +23,35 @@ export default function Select({
 
   const [showMenu, setShowMenu] = useState(false);
   const [selected, setSelected] = useState();
+  const [datePickerValue, setDatePickerValue] = useState();
 
   useEffect(() => {
-    setSelected(
-      Math.max(
-        options.findIndex(({ value }) => propSelected.includes(value)),
-        0
-      )
-    );
-  }, [options, propSelected]);
+    if (type === 'datepicker' && 'after' && 'before' in propSelected) {
+      for (let i = 0; i < inputOptions.length; i++) {
+        if (
+          inputOptions[i].value &&
+          Object.entries(inputOptions[i].value).sort().toString() === Object.entries(propSelected).sort().toString()
+        ) {
+          setDatePickerValue(inputOptions[i]?.label);
+          break;
+        } else {
+          setDatePickerValue(
+            `${new Date(propSelected.after * 1000).toLocaleDateString()} -> ${new Date(
+              propSelected.before * 1000 - 1
+            ).toLocaleDateString()}`
+          );
+        }
+      }
+    }
+    if (type === 'dropdown') {
+      setSelected(
+        Math.max(
+          options.findIndex(({ value }) => Object.values(propSelected).includes(value)),
+          0
+        )
+      );
+    }
+  }, [inputOptions, propSelected, setSelected]);
 
   const [focused, setFocused] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -141,8 +161,8 @@ export default function Select({
             onclick={handleClick}
             onkeydown={handleKeydown}
             trailingIcon={showMenu ? ArrowDropup : ArrowDropdown}
-            value={options[selected]}
-          ></DatePicker>
+            value={datePickerValue}
+          />
           {showDatePicker && (
             <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref}>
               <Calender onChange={handleDateRange} calenderRef={calenderRef} />
@@ -178,7 +198,7 @@ export default function Select({
                   label={label}
                   focus={focused === i}
                   onSelect={handleSelect}
-                  value={[{ [paramName]: value }]}
+                  value={{ [paramName]: value }}
                 />
               ))}
             </Menu>

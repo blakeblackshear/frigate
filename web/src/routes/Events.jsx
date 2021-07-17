@@ -261,6 +261,30 @@ function Filters({ onChange, searchParams }) {
           label="Camera"
           searchParams={searchParams}
         />
+        <Filter
+          type="dropdown"
+          onChange={onChange}
+          options={zones}
+          paramName={['zone']}
+          label="Zone"
+          searchParams={searchParams}
+        />
+        <Filter
+          type="dropdown"
+          onChange={onChange}
+          options={labels}
+          paramName={['label']}
+          label="Label"
+          searchParams={searchParams}
+        />
+        <Filter
+          type="datepicker"
+          onChange={onChange}
+          options={DateFilterOptions}
+          paramName={['before', 'after']}
+          label="DatePicker"
+          searchParams={searchParams}
+        />
       </div>
     </Fragment>
   );
@@ -270,11 +294,9 @@ function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
   const handleSelect = useCallback(
     (key) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      key.map((queryArray) => {
-        if (queryArray[paramName] !== 'all') {
-          for (let query in queryArray) {
-            newParams.set(query, queryArray[query]);
-          }
+      Object.keys(key).map((entries) => {
+        if (key[entries] !== 'all') {
+          newParams.set(entries, key[entries]);
         } else {
           paramName.map((p) => newParams.delete(p));
         }
@@ -286,13 +308,14 @@ function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
   );
 
   const selectOptions = useMemo(() => ['all', ...options], [options]);
-  const selected = useMemo(() => paramName.map((p) => searchParams.get(p) || 'all'));
+  let obj = {};
+  paramName.map((p) => Object.assign(obj, { [p]: searchParams.get(p) }), [searchParams]);
 
   return (
     <Select
       onChange={handleSelect}
       options={selectOptions}
-      selected={selected}
+      selected={obj}
       paramName={paramName}
       type={type}
       {...rest}

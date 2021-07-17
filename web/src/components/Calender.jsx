@@ -173,7 +173,7 @@ const Calender = ({ onChange, calenderRef }) => {
 
     // setDateToInput(day.timestamp);
     if (onChange) {
-      onChange([{ before: range.selectedRange.before, after: range.selectedRange.after }]);
+      onChange({ before: range.selectedRange.before, after: range.selectedRange.after });
     }
   };
 

@@ -8,58 +8,48 @@ export const DateFilterOptions = [
   },
   {
     label: 'Today',
-    value: [
-      {
-        //Before
-        before: new Date().setHours(24, 0, 0, 0) / 1000,
-        //After
-        after: new Date().setHours(0, 0, 0, 0) / 1000,
-      },
-    ],
+    value: {
+      //Before
+      before: new Date().setHours(24, 0, 0, 0) / 1000,
+      //After
+      after: new Date().setHours(0, 0, 0, 0) / 1000,
+    },
   },
   {
     label: 'Yesterday',
-    value: [
-      {
-        //Before
-        before: new Date(new Date().setDate(new Date().getDate() - 1)).setHours(24, 0, 0, 0) / 1000,
-        //After
-        after: new Date(new Date().setDate(new Date().getDate() - 1)).setHours(0, 0, 0, 0) / 1000,
-      },
-    ],
+    value: {
+      //Before
+      before: new Date(new Date().setDate(new Date().getDate() - 1)).setHours(24, 0, 0, 0) / 1000,
+      //After
+      after: new Date(new Date().setDate(new Date().getDate() - 1)).setHours(0, 0, 0, 0) / 1000,
+    },
   },
   {
     label: 'Last 7 Days',
-    value: [
-      {
-        //Before
-        before: new Date().setHours(24, 0, 0, 0) / 1000,
-        //After
-        after: new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0) / 1000,
-      },
-    ],
+    value: {
+      //Before
+      before: new Date().setHours(24, 0, 0, 0) / 1000,
+      //After
+      after: new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0) / 1000,
+    },
   },
   {
     label: 'This Month',
-    value: [
-      {
-        //Before
-        before: new Date().setHours(24, 0, 0, 0) / 1000,
-        //After
-        after: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime() / 1000,
-      },
-    ],
+    value: {
+      //Before
+      before: new Date().setHours(24, 0, 0, 0) / 1000,
+      //After
+      after: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime() / 1000,
+    },
   },
   {
     label: 'Last Month',
-    value: [
-      {
-        //Before
-        before: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime() / 1000,
-        //After
-        after: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getTime() / 1000,
-      },
-    ],
+    value: {
+      //Before
+      before: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime() / 1000,
+      //After
+      after: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getTime() / 1000,
+    },
   },
   {
     label: 'Custom Range',
@@ -176,6 +166,7 @@ export default function DatePicker({
               onInput={handleChange}
               tabIndex="0"
               onClick={onClick}
+              value={propValue}
             />
             <div
               className={`absolute top-3 transition transform text-gray-600 dark:text-gray-400 ${
