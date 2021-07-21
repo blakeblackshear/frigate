@@ -353,10 +353,14 @@ def output_frames(config: FrigateConfig, video_output_queue):
     broadcasters = {}
 
     for camera, cam_config in config.cameras.items():
+        width = int(
+            cam_config.live.height
+            * (cam_config.frame_shape[1] / cam_config.frame_shape[0])
+        )
         converters[camera] = FFMpegConverter(
             cam_config.frame_shape[1],
             cam_config.frame_shape[0],
-            cam_config.live.width,
+            width,
             cam_config.live.height,
             cam_config.live.quality,
         )

@@ -442,8 +442,7 @@ class CameraRtmpConfig(BaseModel):
 
 
 class CameraLiveConfig(BaseModel):
-    height: Optional[int] = Field(title="Live camera view height")
-    width: Optional[int] = Field(title="Live camera view width")
+    height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
 
@@ -772,22 +771,8 @@ class FrigateConfig(BaseModel):
                 camera_config.detect = DetectConfig(max_disappeared=max_disappeared)
 
             # Default live configuration
-            if camera_config.live:
-                if (
-                    camera_config.live.height
-                    and camera_config.live.height <= camera_config.height
-                ):
-                    camera_config.live.width = int(
-                        camera_config.live.height
-                        * (camera_config.width / camera_config.height)
-                    )
-                else:
-                    camera_config.live.height = camera_config.height
-                    camera_config.live.width = camera_config.width
-            else:
-                camera_config.live = CameraLiveConfig(
-                    height=camera_config.height, width=camera_config.width
-                )
+            if camera_config.live is None:
+                camera_config.live = CameraLiveConfig()
 
             config.cameras[name] = camera_config
 

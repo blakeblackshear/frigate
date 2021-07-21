@@ -370,7 +370,7 @@ cameras:
 
     # Optional: Live stream configuration for WebUI
     live:
-      # Optional: Set the height of the live stream. (default: detect stream height)
+      # Optional: Set the height of the live stream. (default: 720)
       # This must be less than or equal to the height of the detect stream. Lower resolutions
       # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
       height: 720
