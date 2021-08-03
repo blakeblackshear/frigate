@@ -131,3 +131,9 @@ automation:
               - url: 'http://ccab4aaf-frigate:5000/api/events/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg'
                 caption: 'A {{trigger.payload_json["after"]["label"]}} was detected on {{ trigger.payload_json["after"]["camera"] }} camera'
 ```
+
+## FAQ
+
+### When using the [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) in Home Assistant to expose cameras to HomeKit, the camera's motion sensor in HomeKit do not appear to function properly.
+
+If tracking multiple object types, the HomeKit integration will randomly link one of the motion sensor entities grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
