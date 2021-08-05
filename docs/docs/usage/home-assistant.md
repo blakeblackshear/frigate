@@ -134,6 +134,6 @@ automation:
 
 ## FAQ
 
-### When using the [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) in Home Assistant to expose cameras to HomeKit, the camera's motion sensor in HomeKit do not appear to function properly.
+### If I am detecting multiple objects, how do I assign the correct 'binary_sensor' to the camera in HomeKit?
 
-If tracking multiple object types, the HomeKit integration will randomly link one of the motion sensor entities grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
+The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
