@@ -134,6 +134,6 @@ automation:
 
 ## FAQ
 
-### If I am detecting multiple objects, how do I assign the correct 'binary_sensor' to the camera in HomeKit?
+### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
 
 The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
