@@ -10,7 +10,7 @@ The best way to integrate with Home Assistant is to use the [official integratio
 
 Available via HACS as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories). To install:
 
-   * Add the custom repository:
+- Add the custom repository:
 
 ```
 Home Assistant > HACS > Integrations > [...] > Custom Repositories
@@ -21,12 +21,15 @@ Home Assistant > HACS > Integrations > [...] > Custom Repositories
 | Repository URL | https://github.com/blakeblackshear/frigate-hass-integration |
 | Category       | Integration                                                 |
 
-   * Use [HACS](https://hacs.xyz/) to install the integration:
+- Use [HACS](https://hacs.xyz/) to install the integration:
+
 ```
 Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
 ```
-   * Restart Home Assistant.
-   * Then add/configure the integration:
+
+- Restart Home Assistant.
+- Then add/configure the integration:
+
 ```
 Home Assistant > Configuration > Integrations > Add Integration > Frigate
 ```
@@ -39,12 +42,12 @@ in your Home Assistant configuration for the Media Browser to appear.
 
 When configuring the integration, you will be asked for the following parameters:
 
-
 | Variable | Description                                                                                                                                                                                                                                                                                                                                                                      |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | URL      | The `URL` of your frigate instance, the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be `http://ccab4aaf-frigate:5000` (or `http://ccab4aaf-frigate-beta:5000` if your are using the beta version of the addon). Live streams required port 1935, see [RTMP streams](#streams) |
 
 <a name="options"></a>
+
 ## Options
 
 ```
@@ -74,6 +77,7 @@ The integration provides:
 This is accessible via "Media Browser" on the left menu panel in Home Assistant.
 
 <a name="api"></a>
+
 ## API
 
 - Notification API with public facing endpoints for images in notifications
@@ -115,6 +119,7 @@ automation:
           data:
             image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
             tag: '{{trigger.payload_json["after"]["id"]}}'
+            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
 
 ```yaml
@@ -133,6 +138,7 @@ automation:
           data:
             image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
             tag: "{{trigger.payload_json['after']['id']}}"
+            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
 
 ```yaml
@@ -151,6 +157,7 @@ automation:
         data:
           image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
           tag: "{{trigger.payload_json['after']['id']}}"
+          when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
 
 ```yaml
@@ -169,6 +176,7 @@ automation:
         data:
           image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
           tag: "{{trigger.payload_json['after']['id']}}"
+          when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
 
 If you are using telegram, you can fetch the image directly from Frigate:
@@ -191,6 +199,7 @@ automation:
 ```
 
 <a name="streams"></a>
+
 ## RTMP stream
 
 In order for the live streams to function they need to be accessible on the RTMP
@@ -233,7 +242,7 @@ rtmp://<frigate_host>:2000/live/{{ name|lower }}
 
 ## Multiple Instance Support
 
-The Frigate integration seamlessly supports the use of multiple Frigate servers. 
+The Frigate integration seamlessly supports the use of multiple Frigate servers.
 
 ### Requirements for Multiple Instances
 
@@ -270,4 +279,3 @@ which server they are referring to.
 ### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
 
 The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
-
