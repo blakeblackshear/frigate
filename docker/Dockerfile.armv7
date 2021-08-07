@@ -18,8 +18,6 @@ RUN apt-get -qq update \
     libdc1394-22 \
     libaom0 \
     libx265-179 \
-    ## Tensorflow lite
-    && pip3 install https://github.com/google-coral/pycoral/releases/download/release-frogfish/tflite_runtime-2.5.0-cp38-cp38-linux_armv7l.whl \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
