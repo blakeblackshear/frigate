@@ -404,10 +404,10 @@ def detect(
     for d in region_detections:
         box = d[2]
         size = region[2] - region[0]
-        x_min = int((box[1] * size) + region[0])
-        y_min = int((box[0] * size) + region[1])
-        x_max = int((box[3] * size) + region[0])
-        y_max = int((box[2] * size) + region[1])
+        x_min = int((box[1]) + region[0])
+        y_min = int((box[0]) + region[1])
+        x_max = int((box[3]) + region[0])
+        y_max = int((box[2]) + region[1])
         det = (
             d[0],
             d[1],

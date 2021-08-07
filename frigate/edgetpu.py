@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Dict
 
 import numpy as np
+from pycoral.adapters import detect
 import tflite_runtime.interpreter as tflite
 from setproctitle import setproctitle
 from tflite_runtime.interpreter import load_delegate
@@ -97,25 +98,20 @@ class LocalObjectDetector(ObjectDetector):
     def detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
-        boxes = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[0]["index"])
-        )
-        label_codes = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[1]["index"])
-        )
-        scores = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[2]["index"])
-        )
+
+        objects = detect.get_objects(self.interpreter, 0.4)
 
         detections = np.zeros((20, 6), np.float32)
-        for i, score in enumerate(scores):
+        for i, obj in enumerate(objects):
+            if i == 20:
+                break
             detections[i] = [
-                label_codes[i],
-                score,
-                boxes[i][0],
-                boxes[i][1],
-                boxes[i][2],
-                boxes[i][3],
+                obj.id,
+                obj.score,
+                obj.bbox.ymin,
+                obj.bbox.xmin,
+                obj.bbox.ymax,
+                obj.bbox.xmax,
             ]
 
         return detections
