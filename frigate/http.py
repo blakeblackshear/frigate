@@ -245,17 +245,24 @@ def event_clip(id):
     event_config = current_app.frigate_config.cameras[event.camera].record.events
     start_ts = event.start_time - event_config.pre_capture
     end_ts = event.end_time + event_config.post_capture
-    clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
+    file_name = f"{event.camera}-{id}.mp4"
+    clip_path = os.path.join(CLIPS_DIR, file_name)
 
     if not os.path.isfile(clip_path):
         return recording_clip(event.camera, start_ts, end_ts)
 
-    return send_file(
-        clip_path,
-        mimetype="video/mp4",
-        as_attachment=download,
-        attachment_filename=f"{event.camera}_{start_ts}-{end_ts}.mp4",
-    )
+    response = make_response()
+    response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "video/mp4"
+    if download:
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
+    response.headers["Content-Length"] = os.path.getsize(clip_path)
+    response.headers[
+        "X-Accel-Redirect"
+    ] = f"/clips/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+
+    return response
 
 
 @bp.route("/events")
@@ -579,7 +586,8 @@ def recording_clip(camera, start_ts, end_ts):
         if clip.end_time > end_ts:
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
-    path = f"/tmp/cache/tmp_clip_{camera}_{start_ts}-{end_ts}.mp4"
+    file_name = f"clip_{camera}_{start_ts}-{end_ts}.mp4"
+    path = f"/tmp/cache/{file_name}"
 
     ffmpeg_cmd = [
         "ffmpeg",
@@ -609,23 +617,17 @@ def recording_clip(camera, start_ts, end_ts):
         logger.error(p.stderr)
         return f"Could not create clip from recordings for {camera}.", 500
 
-    mp4_bytes = None
-    try:
-        # read clip from disk
-        with open(path, "rb") as mp4_file:
-            mp4_bytes = mp4_file.read()
-
-        # delete after we have the bytes
-        os.remove(path)
-    except DoesNotExist:
-        return f"Could not create clip from recordings for {camera}.", 500
-
-    response = make_response(mp4_bytes)
-    response.mimetype = "video/mp4"
+    response = make_response()
+    response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "video/mp4"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename={camera}_{start_ts}-{end_ts}.mp4"
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
+    response.headers["Content-Length"] = os.path.getsize(path)
+    response.headers[
+        "X-Accel-Redirect"
+    ] = f"/cache/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+
     return response
 
 
