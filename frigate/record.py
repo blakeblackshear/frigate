@@ -140,6 +140,14 @@ class RecordingCleanup(threading.Thread):
         self.config = config
         self.stop_event = stop_event
 
+    def clean_tmp_clips(self):
+        # delete any clips more than 5 minutes old
+        for p in Path("/tmp/cache").rglob("clip_*.mp4"):
+            logger.debug(f"Checking tmp clip {p}.")
+            if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
+                logger.debug("Deleting tmp clip.")
+                p.unlink(missing_ok=True)
+
     def expire_recordings(self):
         logger.debug("Start expire recordings (new).")
 
@@ -262,6 +270,7 @@ class RecordingCleanup(threading.Thread):
                 break
 
             self.expire_recordings()
+            self.clean_tmp_clips()
 
             if counter == 0:
                 self.expire_files()
