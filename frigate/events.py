@@ -63,25 +63,6 @@ class EventProcessor(threading.Thread):
 
         return True
 
-    def verify_clip(self, camera, end_time):
-        # check every 5 seconds for the last required recording
-        for _ in range(4):
-            recordings_count = (
-                Recordings.select()
-                .where(Recordings.camera == camera, Recordings.end_time > end_time)
-                .limit(1)
-                .count()
-            )
-            if recordings_count > 0:
-                return True
-            logger.debug(f"Missing recording for {camera} clip. Waiting...")
-            time.sleep(5)
-
-        logger.warning(
-            f"Unable to verify clip for {camera}. There were no recordings for this camera."
-        )
-        return False
-
     def run(self):
         while not self.stop_event.is_set():
             try:
@@ -98,13 +79,6 @@ class EventProcessor(threading.Thread):
                 record_config: RecordConfig = self.config.cameras[camera].record
 
                 has_clip = self.should_create_clip(camera, event_data)
-
-                # Wait for recordings to be ready
-                if has_clip:
-                    has_clip = self.verify_clip(
-                        camera,
-                        event_data["end_time"] + record_config.events.post_capture,
-                    )
 
                 if has_clip or event_data["has_snapshot"]:
                     Event.create(
