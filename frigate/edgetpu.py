@@ -72,6 +72,10 @@ class LocalObjectDetector(ObjectDetector):
                 logger.info("No EdgeTPU detected.")
                 raise
         else:
+            self.logger.error("****************************************************")
+            self.logger.error(f"** CPU detectors are not recommended and should")
+            self.logger.error(f"** only be used for testing or for trial purposes.")
+            self.logger.error(("****************************************************"))
             self.interpreter = tflite.Interpreter(
                 model_path="/cpu_model.tflite", num_threads=num_threads
             )
