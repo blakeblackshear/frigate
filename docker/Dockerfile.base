@@ -10,6 +10,8 @@ FROM frigate-web as web
 FROM ubuntu:20.04
 LABEL maintainer "blakeb@blakeshome.com"
 
+ARG OVERLAY_ARCH=amd64
+
 COPY --from=ffmpeg /usr/local /usr/local/
 
 COPY --from=wheels /wheels/. /wheels/
@@ -48,6 +50,14 @@ ADD frigate frigate/
 ADD migrations migrations/
 
 COPY --from=web /opt/frigate/build web/
+
+# s6-overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${OVERLAY_ARCH}-installer /tmp/
+RUN chmod +x /tmp/s6-overlay-${OVERLAY_ARCH}-installer && \
+    /tmp/s6-overlay-${OVERLAY_ARCH}-installer / && \
+    useradd -u 1000 -U -d /config -s /bin/false frigate && \
+    usermod -G users frigate && \
+    mv /usr/bin/with-contenv /usr/bin/with-contenvb
 
 COPY docker/rootfs/ /
 

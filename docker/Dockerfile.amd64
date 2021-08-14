@@ -19,10 +19,6 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
-# s6-overlay
-ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-amd64-installer /tmp/
-RUN chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer /
-
 ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]

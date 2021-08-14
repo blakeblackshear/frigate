@@ -57,6 +57,8 @@ services:
       - "1935:1935" # RTMP feeds
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
+      PUID: 1000 # uid for frigate process
+      PGID: 1000 # gid for frigate process
 ```
 
 If you can't use docker compose, you can run the container with something similar to this:
@@ -72,6 +74,8 @@ docker run -d \
   -v <path_to_config_file>:/config/config.yml:ro \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
+  -e PUID=1000 \
+  -e PGID=1000 \
   -p 5000:5000 \
   -p 1935:1935 \
   blakeblackshear/frigate:<specify_version_tag>
