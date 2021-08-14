@@ -151,6 +151,9 @@ class RuntimeMotionConfig(MotionConfig):
 
 
 class DetectConfig(BaseModel):
+    height: int = Field(title="Height of the stream for the detect role.")
+    width: int = Field(title="Width of the stream for the detect role.")
+    fps: int = Field(title="Number of frames per second to process through detection.")
     enabled: bool = Field(default=True, title="Detection Enabled.")
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
@@ -435,11 +438,6 @@ class CameraLiveConfig(BaseModel):
 class CameraConfig(BaseModel):
     name: Optional[str] = Field(title="Camera name.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
-    height: int = Field(title="Height of the stream for the detect role.")
-    width: int = Field(title="Width of the stream for the detect role.")
-    fps: Optional[int] = Field(
-        title="Number of frames per second to process through Frigate."
-    )
     best_image_timeout: int = Field(
         default=60,
         title="How long to wait for the image with the highest confidence score.",
@@ -465,7 +463,7 @@ class CameraConfig(BaseModel):
         default_factory=ObjectConfig, title="Object configuration."
     )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
-    detect: Optional[DetectConfig] = Field(title="Object detection configuration.")
+    detect: DetectConfig = Field(title="Object detection configuration.")
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
@@ -483,11 +481,11 @@ class CameraConfig(BaseModel):
 
     @property
     def frame_shape(self) -> Tuple[int, int]:
-        return self.height, self.width
+        return self.detect.height, self.detect.width
 
     @property
     def frame_shape_yuv(self) -> Tuple[int, int]:
-        return self.height * 3 // 2, self.width
+        return self.detect.height * 3 // 2, self.detect.width
 
     @property
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
@@ -508,9 +506,17 @@ class CameraConfig(BaseModel):
                 if isinstance(self.ffmpeg.output_args.detect, list)
                 else self.ffmpeg.output_args.detect.split(" ")
             )
-            ffmpeg_output_args = detect_args + ffmpeg_output_args + ["pipe:"]
-            if self.fps:
-                ffmpeg_output_args = ["-r", str(self.fps)] + ffmpeg_output_args
+            ffmpeg_output_args = (
+                [
+                    "-r",
+                    str(self.detect.fps),
+                    "-s",
+                    f"{self.detect.width}x{self.detect.height}",
+                ]
+                + detect_args
+                + ffmpeg_output_args
+                + ["pipe:"]
+            )
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
             rtmp_args = (
                 self.ffmpeg.output_args.rtmp
@@ -735,12 +741,9 @@ class FrigateConfig(BaseModel):
                 )
 
             # Default detect configuration
-            max_disappeared = (camera_config.fps or 5) * 5
-            if camera_config.detect:
-                if camera_config.detect.max_disappeared is None:
-                    camera_config.detect.max_disappeared = max_disappeared
-            else:
-                camera_config.detect = DetectConfig(max_disappeared=max_disappeared)
+            max_disappeared = camera_config.detect.fps * 5
+            if camera_config.detect.max_disappeared is None:
+                camera_config.detect.max_disappeared = max_disappeared
 
             # Default live configuration
             if camera_config.live is None:

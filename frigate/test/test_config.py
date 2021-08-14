@@ -18,8 +18,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -42,8 +45,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -60,8 +66,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -82,8 +91,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {"track": ["cat"]},
                 }
             },
@@ -105,8 +117,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -130,8 +145,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -152,8 +170,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {
                         "track": ["person", "dog"],
                         "filters": {"dog": {"threshold": 0.7}},
@@ -179,8 +200,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {
                         "mask": "0,0,1,1,0,1",
                         "filters": {"dog": {"mask": "1,1,1,1,1,1"}},
@@ -210,8 +234,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -233,8 +260,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {
                         "track": ["person", "dog"],
                         "filters": {"dog": {"threshold": 0.7}},
@@ -260,8 +290,11 @@ class TestConfig(unittest.TestCase):
                         ],
                         "input_args": ["-re"],
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {
                         "track": ["person", "dog"],
                         "filters": {"dog": {"threshold": 0.7}},
@@ -292,8 +325,11 @@ class TestConfig(unittest.TestCase):
                         ],
                         "input_args": "test3",
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "objects": {
                         "track": ["person", "dog"],
                         "filters": {"dog": {"threshold": 0.7}},
@@ -321,8 +357,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -344,8 +383,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video2", "roles": ["detect"]},
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -362,8 +404,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "zones": {"back": {"coordinates": "1,1,1,1,1,1"}},
                 }
             },
@@ -381,8 +426,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "zones": {"test": {"coordinates": "1,1,1,1,1,1"}},
                 }
             },
@@ -408,8 +456,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "clips": {"enabled": True},
                 }
             },
@@ -436,8 +487,11 @@ class TestConfig(unittest.TestCase):
                             {"path": "rtsp://10.0.0.1:554/record", "roles": ["record"]},
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -463,9 +517,12 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
-                    "detect": {"enabled": True},
+                    "detect": {
+                        "enabled": True,
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -490,8 +547,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 480,
-                    "width": 640,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -516,8 +576,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -543,8 +606,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -569,8 +635,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -596,8 +665,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "height": 1080,
-                    "width": 1920,
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }

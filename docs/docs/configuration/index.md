@@ -20,9 +20,10 @@ cameras:
           roles:
             - detect
             - rtmp
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 ## Required
@@ -76,9 +77,10 @@ cameras:
           roles:
             - detect
             - rtmp
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 ## Optional

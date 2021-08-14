@@ -32,9 +32,10 @@ cameras:
           roles:
             - clips
             - record
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 ## Masks & Zones
@@ -280,14 +281,20 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       output_args:
 
-    # Required: width of the frame for the input with the detect role
-    width: 1280
-    # Required: height of the frame for the input with the detect role
-    height: 720
-    # Optional: desired fps for your camera for the input with the detect role
-    # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
-    #       Frigate will attempt to autodetect if not specified.
-    fps: 5
+    # Required: Camera level detect settings
+    detect:
+      # Required: width of the frame for the input with the detect role
+      width: 1280
+      # Required: height of the frame for the input with the detect role
+      height: 720
+      # Required: desired fps for your camera for the input with the detect role
+      # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
+      fps: 5
+      # Optional: enables detection for the camera (default: True)
+      # This value can be set via MQTT and will be updated in startup based on retained value
+      enabled: True
+      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+      max_disappeared: 25
 
     # Optional: camera level motion config
     motion:
@@ -318,14 +325,6 @@ cameras:
             min_area: 5000
             max_area: 100000
             threshold: 0.7
-
-    # Optional: Camera level detect settings
-    detect:
-      # Optional: enables detection for the camera (default: True)
-      # This value can be set via MQTT and will be updated in startup based on retained value
-      enabled: True
-      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
-      max_disappeared: 25
 
     # Optional: save clips configuration
     clips:
