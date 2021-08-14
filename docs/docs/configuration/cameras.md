@@ -38,6 +38,8 @@ cameras:
     fps: 5
 ```
 
+`width`, `height`, and `fps` are only used for the `detect` role. Other streams are passed through, so there is no need to specify the resolution.
+
 ## Masks & Zones
 
 ### Masks
