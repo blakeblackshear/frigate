@@ -264,3 +264,10 @@ When a single Frigate instance is configured, the `client-id` parameter need not
 be specified in URLs/identifiers -- that single instance is assumed. When
 multiple Frigate instances are configured, the user **must** explicitly specify
 which server they are referring to.
+
+## FAQ
+
+### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
+
+The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.
+
