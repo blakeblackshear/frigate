@@ -112,7 +112,7 @@ class EventCleanup(threading.Thread):
     def expire(self, media_type):
         ## Expire events from unlisted cameras based on the global config
         if media_type == "clips":
-            retain_config = self.config.clips.retain
+            retain_config = self.config.record.events.retain
             file_extension = "mp4"
             update_params = {"has_clip": False}
         else:
@@ -163,7 +163,7 @@ class EventCleanup(threading.Thread):
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
             if media_type == "clips":
-                retain_config = camera.clips.retain
+                retain_config = camera.record.events.retain
             else:
                 retain_config = camera.snapshots.retain
             # get distinct objects in database for this camera

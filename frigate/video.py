@@ -413,17 +413,16 @@ def detect(
     object_detector, frame, model_shape, region, objects_to_track, object_filters
 ):
     tensor_input = create_tensor_input(frame, model_shape, region)
-    scale = float(region[2] - region[0]) / model_shape[0]
 
     detections = []
     region_detections = object_detector.detect(tensor_input)
     for d in region_detections:
         box = d[2]
         size = region[2] - region[0]
-        x_min = int(max(0, box[1]) * scale + region[0])
-        y_min = int(max(0, box[0]) * scale + region[1])
-        x_max = int(min(frame.shape[1], box[3]) * scale + region[0])
-        y_max = int(min(frame.shape[0], box[2]) * scale + region[1])
+        x_min = int((box[1] * size) + region[0])
+        y_min = int((box[0] * size) + region[1])
+        x_max = int((box[3] * size) + region[0])
+        y_max = int((box[2] * size) + region[1])
         det = (
             d[0],
             d[1],
