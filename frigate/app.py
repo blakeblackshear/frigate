@@ -90,15 +90,6 @@ class FrigateApp:
             assigned_roles = list(
                 set([r for i in camera.ffmpeg.inputs for r in i.roles])
             )
-            if not camera.clips.enabled and "clips" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has clips assigned to an input, but clips is not enabled."
-                )
-            elif camera.clips.enabled and not "clips" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has clips enabled, but clips is not assigned to an input."
-                )
-
             if not camera.record.enabled and "record" in assigned_roles:
                 logger.warning(
                     f"Camera {name} has record assigned to an input, but record is not enabled."

@@ -206,10 +206,6 @@ Accepts the following query string parameters, but they are only applied when an
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
 
-### `/clips/<camera>-<id>.mp4`
-
-Video clip for the given camera and event id.
-
 ### `/clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.

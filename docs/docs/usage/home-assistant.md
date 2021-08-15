@@ -64,14 +64,14 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 | --------------- | --------------------------------------------------------------------------------- |
 | `camera`        | Live camera stream (requires RTMP), camera for image of the last detected object. |
 | `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
-| `switch`        | Switch entities to toggle detection, clips and snapshots.                         |
+| `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
 | `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |
 
 ## Media Browser Support
 
 The integration provides:
 
-- Rich UI with thumbnails for browsing event clips
+- Rich UI with thumbnails for browsing event recordings
 - Rich UI for browsing 24/7 recordings by month, day, camera, time
 
 This is accessible via "Media Browser" on the left menu panel in Home Assistant.

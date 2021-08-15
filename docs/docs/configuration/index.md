@@ -127,7 +127,7 @@ logger:
 
 Can be overridden at the camera level. 24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
 
-Clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+Exported clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
 
 These recordings will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
 
@@ -149,16 +149,16 @@ record:
     # NOTE: If an object is being tracked for longer than this amount of time, the cache
     #       will begin to expire and the resulting clip will be the last x seconds of the event unless retain_days under record is > 0.
     max_seconds: 300
-    # Optional: Number of seconds before the event to include in the clips (default: shown below)
+    # Optional: Number of seconds before the event to include (default: shown below)
     pre_capture: 5
-    # Optional: Number of seconds after the event to include in the clips (default: shown below)
+    # Optional: Number of seconds after the event to include (default: shown below)
     post_capture: 5
-    # Optional: Objects to save clips for. (default: all tracked objects)
+    # Optional: Objects to save recordings for. (default: all tracked objects)
     objects:
       - person
-    # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
+    # Optional: Restrict recordings to objects that entered any of the listed zones (default: no required zones)
     required_zones: []
-    # Optional: Retention settings for clips
+    # Optional: Retention settings for events
     retain:
       # Required: Default retention days (default: shown below)
       default: 10
@@ -201,8 +201,6 @@ ffmpeg:
     detect: -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
-    # Optional: output args for clips streams (default: shown below)
-    clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
     # Optional: output args for rtmp streams (default: shown below)
     rtmp: -c copy -f flv
 ```

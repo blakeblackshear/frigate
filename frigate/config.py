@@ -445,7 +445,6 @@ class CameraConfig(BaseModel):
     zones: Dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
     )
-    clips: ClipsConfig = Field(default_factory=ClipsConfig, title="Clip configuration.")
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Record configuration."
     )
@@ -526,9 +525,7 @@ class CameraConfig(BaseModel):
             ffmpeg_output_args = (
                 rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
-        if any(role in ["clips", "record"] for role in ffmpeg_input.roles) and (
-            self.record.enabled or self.clips.enabled
-        ):
+        if "record" in ffmpeg_input.roles and self.record.enabled:
             record_args = (
                 self.ffmpeg.output_args.record
                 if isinstance(self.ffmpeg.output_args.record, list)
@@ -638,9 +635,6 @@ class FrigateConfig(BaseModel):
     logger: LoggerConfig = Field(
         default_factory=LoggerConfig, title="Logging configuration."
     )
-    clips: ClipsConfig = Field(
-        default_factory=ClipsConfig, title="Global clips configuration."
-    )
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Global record configuration."
     )
@@ -676,7 +670,6 @@ class FrigateConfig(BaseModel):
         # Global config to propegate down to camera level
         global_config = config.dict(
             include={
-                "clips": ...,
                 "record": ...,
                 "snapshots": ...,
                 "objects": ...,
@@ -750,21 +743,6 @@ class FrigateConfig(BaseModel):
                 camera_config.live = CameraLiveConfig()
 
             config.cameras[name] = camera_config
-
-            # Merge Clips configuration for backward compatibility
-            if camera_config.clips.enabled:
-                logger.warn(
-                    "Clips configuration is deprecated. Configure clip settings under record -> events."
-                )
-                if not camera_config.record.enabled:
-                    camera_config.record.enabled = True
-                    camera_config.record.retain_days = 0
-                camera_config.record.events = ClipsConfig.parse_obj(
-                    deep_merge(
-                        camera_config.clips.dict(exclude_unset=True),
-                        camera_config.record.events.dict(exclude_unset=True),
-                    )
-                )
 
         return config
 

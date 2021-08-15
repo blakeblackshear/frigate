@@ -349,7 +349,9 @@ class TestConfig(unittest.TestCase):
     def test_inherit_clips_retention(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "clips": {"retain": {"default": 20, "objects": {"person": 30}}},
+            "record": {
+                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -369,12 +371,16 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].clips.retain.objects["person"] == 30
+        assert (
+            runtime_config.cameras["back"].record.events.retain.objects["person"] == 30
+        )
 
     def test_roles_listed_twice_throws_error(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "clips": {"retain": {"default": 20, "objects": {"person": 30}}},
+            "record": {
+                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -396,7 +402,9 @@ class TestConfig(unittest.TestCase):
     def test_zone_matching_camera_name_throws_error(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "clips": {"retain": {"default": 20, "objects": {"person": 30}}},
+            "record": {
+                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -418,7 +426,9 @@ class TestConfig(unittest.TestCase):
     def test_zone_assigns_color_and_contour(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "clips": {"retain": {"default": 20, "objects": {"person": 30}}},
+            "record": {
+                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+            },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -447,7 +457,9 @@ class TestConfig(unittest.TestCase):
     def test_clips_should_default_to_global_objects(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "clips": {"retain": {"default": 20, "objects": {"person": 30}}},
+            "record": {
+                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+            },
             "objects": {"track": ["person", "dog"]},
             "cameras": {
                 "back": {
@@ -461,7 +473,7 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
-                    "clips": {"enabled": True},
+                    "record": {"events": {"enabled": True}},
                 }
             },
         }
@@ -470,8 +482,8 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         back_camera = runtime_config.cameras["back"]
-        assert back_camera.clips.objects is None
-        assert back_camera.clips.retain.objects["person"] == 30
+        assert back_camera.record.events.objects is None
+        assert back_camera.record.events.retain.objects["person"] == 30
 
     def test_role_assigned_but_not_enabled(self):
         config = {

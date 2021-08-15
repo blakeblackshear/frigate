@@ -5,7 +5,7 @@ title: Cameras
 
 ## Setting Up Camera Inputs
 
-Up to 4 inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create clips from a higher resolution stream, or vice versa.
+Up to 4 inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
@@ -30,7 +30,6 @@ cameras:
             - rtmp
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
           roles:
-            - clips
             - record
     detect:
       width: 1280
@@ -136,7 +135,7 @@ objects:
 
 24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
 
-Clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+Exported clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
 
 These recordings will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
 
@@ -158,16 +157,16 @@ record:
     # NOTE: If an object is being tracked for longer than this amount of time, the cache
     #       will begin to expire and the resulting clip will be the last x seconds of the event unless retain_days under record is > 0.
     max_seconds: 300
-    # Optional: Number of seconds before the event to include in the clips (default: shown below)
+    # Optional: Number of seconds before the event to include in the event (default: shown below)
     pre_capture: 5
-    # Optional: Number of seconds after the event to include in the clips (default: shown below)
+    # Optional: Number of seconds after the event to include in the event (default: shown below)
     post_capture: 5
-    # Optional: Objects to save clips for. (default: all tracked objects)
+    # Optional: Objects to save event for. (default: all tracked objects)
     objects:
       - person
-    # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
+    # Optional: Restrict event to objects that entered any of the listed zones (default: no required zones)
     required_zones: []
-    # Optional: Retention settings for clips
+    # Optional: Retention settings for event
     retain:
       # Required: Default retention days (default: shown below)
       default: 10
@@ -262,8 +261,8 @@ cameras:
         # Required: the path to the stream
         # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,clips,rtmp
-          # NOTICE: In addition to assigning the record, clips, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,rtmp
+          # NOTICE: In addition to assigning the record, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
@@ -328,34 +327,33 @@ cameras:
             max_area: 100000
             threshold: 0.7
 
-    # Optional: save clips configuration
-    clips:
-      # Required: enables clips for the camera (default: shown below)
-      # This value can be set via MQTT and will be updated in startup based on retained value
-      enabled: False
-      # Optional: Number of seconds before the event to include in the clips (default: shown below)
-      pre_capture: 5
-      # Optional: Number of seconds after the event to include in the clips (default: shown below)
-      post_capture: 5
-      # Optional: Objects to save clips for. (default: all tracked objects)
-      objects:
-        - person
-      # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
-      required_zones: []
-      # Optional: Camera override for retention settings (default: global values)
-      retain:
-        # Required: Default retention days (default: shown below)
-        default: 10
-        # Optional: Per object retention days
-        objects:
-          person: 15
-
     # Optional: 24/7 recording configuration
     record:
       # Optional: Enable recording (default: global setting)
       enabled: False
       # Optional: Number of days to retain (default: global setting)
       retain_days: 30
+      # Optional: Event recording settings
+      events:
+        # Required: enables event recordings for the camera (default: shown below)
+        # This value can be set via MQTT and will be updated in startup based on retained value
+        enabled: False
+        # Optional: Number of seconds before the event to include (default: shown below)
+        pre_capture: 5
+        # Optional: Number of seconds after the event to include (default: shown below)
+        post_capture: 5
+        # Optional: Objects to save events for. (default: all tracked objects)
+        objects:
+          - person
+        # Optional: Restrict events to objects that entered any of the listed zones (default: no required zones)
+        required_zones: []
+        # Optional: Camera override for retention settings (default: global values)
+        retain:
+          # Required: Default retention days (default: shown below)
+          default: 10
+          # Optional: Per object retention days
+          objects:
+            person: 15
 
     # Optional: RTMP re-stream configuration
     rtmp:
@@ -483,12 +481,11 @@ input_args:
   - "1"
 ```
 
-Note that mjpeg cameras require encoding the video into h264 for clips, recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
+Note that mjpeg cameras require encoding the video into h264 for recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
 
 ```yaml
 output_args:
   record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
-  clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
   rtmp: -c:v libx264 -an -f flv
 ```
 
