@@ -55,8 +55,9 @@ COPY --from=web /opt/frigate/build web/
 ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${OVERLAY_ARCH}-installer /tmp/
 RUN chmod +x /tmp/s6-overlay-${OVERLAY_ARCH}-installer && \
     /tmp/s6-overlay-${OVERLAY_ARCH}-installer / && \
+    groupadd -g 109 render && \
     useradd -u 1000 -U -d /config -s /bin/false frigate && \
-    usermod -G users frigate && \
+    usermod -G users,render,video,plugdev frigate && \
     mv /usr/bin/with-contenv /usr/bin/with-contenvb
 
 COPY docker/rootfs/ /

@@ -81,6 +81,14 @@ docker run -d \
   blakeblackshear/frigate:<specify_version_tag>
 ```
 
+**Note:** You will need to add a udev rule to fix the permissions of the /dev/bus/usb device permissions:
+
+```
+sudo echo -e "SUBSYSTEM=="usb",ATTRS{idVendor}=="1a6e",GROUP="plugdev",MODE="0770"\nSUBSYSTEM=="usb",ATTRS{idVendor}=="18d1",GROUP="plugdev",MODE="0770" \n" >> /etc/udev/rules.d/99-coral-frigate.rules
+
+udevadm control --reload
+```
+
 ### Calculating shm-size
 
 The default shm-size of 64m is fine for setups with 3 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
