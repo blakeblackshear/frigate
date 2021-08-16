@@ -1,5 +1,5 @@
-import copy
 import base64
+import copy
 import datetime
 import hashlib
 import itertools
@@ -14,29 +14,19 @@ from statistics import mean, median
 from typing import Callable, Dict
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
-from frigate.config import FrigateConfig, CameraConfig
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.config import CameraConfig, FrigateConfig
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import (
     SharedMemoryFrameManager,
+    calculate_region,
     draw_box_with_label,
     draw_timestamp,
-    calculate_region,
 )
 
 logger = logging.getLogger(__name__)
-
-PATH_TO_LABELS = "/labelmap.txt"
-
-LABELS = load_labels(PATH_TO_LABELS)
-cmap = plt.cm.get_cmap("tab10", len(LABELS.keys()))
-
-COLOR_MAP = {}
-for key, val in LABELS.items():
-    COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
 
 def on_edge(box, frame_shape):
@@ -72,9 +62,12 @@ def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
 
 
 class TrackedObject:
-    def __init__(self, camera, camera_config: CameraConfig, frame_cache, obj_data):
+    def __init__(
+        self, camera, colormap, camera_config: CameraConfig, frame_cache, obj_data
+    ):
         self.obj_data = obj_data
         self.camera = camera
+        self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
         self.current_zones = []
@@ -247,7 +240,7 @@ class TrackedObject:
 
         if bounding_box:
             thickness = 2
-            color = COLOR_MAP[self.obj_data["label"]]
+            color = self.colormap[self.obj_data["label"]]
 
             # draw the bounding boxes on the frame
             box = self.thumbnail_data["box"]
@@ -357,7 +350,7 @@ class CameraState:
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time:
                     thickness = 2
-                    color = COLOR_MAP[obj["label"]]
+                    color = self.config.model.colormap[obj["label"]]
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -448,7 +441,11 @@ class CameraState:
 
         for id in new_ids:
             new_obj = tracked_objects[id] = TrackedObject(
-                self.name, self.camera_config, self.frame_cache, current_detections[id]
+                self.name,
+                self.config.model.colormap,
+                self.camera_config,
+                self.frame_cache,
+                current_detections[id],
             )
 
             # call event handlers

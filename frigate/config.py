@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from enum import Enum
 import json
 import logging
 import os
+from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import yaml
 from pydantic import BaseModel, Field, validator
 from pydantic.fields import PrivateAttr
-import yaml
 
-from frigate.const import BASE_DIR, RECORD_DIR, CACHE_DIR
+from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
@@ -578,10 +578,15 @@ class ModelConfig(BaseModel):
         default_factory=dict, title="Labelmap customization."
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
+    _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
 
     @property
     def merged_labelmap(self) -> Dict[int, str]:
         return self._merged_labelmap
+
+    @property
+    def colormap(self) -> Dict[int, tuple[int, int, int]]:
+        return self._colormap
 
     def __init__(self, **config):
         super().__init__(**config)
@@ -590,6 +595,12 @@ class ModelConfig(BaseModel):
             **load_labels("/labelmap.txt"),
             **config.get("labelmap", {}),
         }
+
+        cmap = plt.cm.get_cmap("tab10", len(self._merged_labelmap.keys()))
+
+        self._colormap = {}
+        for key, val in self._merged_labelmap.items():
+            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
 
 class LogLevelEnum(str, Enum):

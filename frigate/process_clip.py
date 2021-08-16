@@ -14,7 +14,7 @@ import numpy as np
 from frigate.config import FRIGATE_CONFIG_SCHEMA, FrigateConfig
 from frigate.edgetpu import LocalObjectDetector
 from frigate.motion import MotionDetector
-from frigate.object_processing import COLOR_MAP, CameraState
+from frigate.object_processing import CameraState
 from frigate.objects import ObjectTracker
 from frigate.util import (
     DictFrameManager,
