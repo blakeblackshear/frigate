@@ -26,7 +26,7 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
-DEFAULT_DETECTORS = {"coral": {"type": "edgetpu", "device": "usb"}}
+DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 
 
 class DetectorTypeEnum(str, Enum):
@@ -35,9 +35,7 @@ class DetectorTypeEnum(str, Enum):
 
 
 class DetectorConfig(BaseModel):
-    type: DetectorTypeEnum = Field(
-        default=DetectorTypeEnum.edgetpu, title="Detector Type"
-    )
+    type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
     device: str = Field(default="usb", title="Device Type")
     num_threads: int = Field(default=3, title="Number of detection threads")
 
