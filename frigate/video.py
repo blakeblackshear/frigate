@@ -217,20 +217,12 @@ class CameraWatchdog(threading.Thread):
 
             if not self.capture_thread.is_alive():
                 self.logger.error(
-                    "***********************************************************************"
+                    f"FFMPEG process crashed unexpectedly for {self.camera_name}."
                 )
                 self.logger.error(
-                    f"** FFMPEG process crashed unexpectedly for {self.camera_name}."
+                    "The following ffmpeg logs include the last 100 lines prior to exit."
                 )
-                self.logger.error(
-                    f"** The following ffmpeg logs include the last 100 lines prior to exit."
-                )
-                self.logger.error(
-                    f"** You may have invalid args defined for this camera."
-                )
-                self.logger.error(
-                    "***********************************************************************"
-                )
+                self.logger.error("You may have invalid args defined for this camera.")
                 self.logpipe.dump()
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:

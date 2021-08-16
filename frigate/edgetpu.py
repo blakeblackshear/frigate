@@ -68,13 +68,14 @@ class LocalObjectDetector(ObjectDetector):
                     experimental_delegates=[edge_tpu_delegate],
                 )
             except ValueError:
-                logger.info("No EdgeTPU detected.")
+                logger.error(
+                    "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
+                )
                 raise
         else:
-            logger.error("****************************************************")
-            logger.error(f"** CPU detectors are not recommended and should")
-            logger.error(f"** only be used for testing or for trial purposes.")
-            logger.error(("****************************************************"))
+            logger.warning(
+                "CPU detectors are not recommended and should only be used for testing or for trial purposes."
+            )
             self.interpreter = tflite.Interpreter(
                 model_path="/cpu_model.tflite", num_threads=num_threads
             )
