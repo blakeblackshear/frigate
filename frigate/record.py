@@ -111,7 +111,9 @@ class RecordingMaintainer(threading.Thread):
             file_name = f"{start_time.strftime('%M.%S.mp4')}"
             file_path = os.path.join(directory, file_name)
 
-            shutil.move(cache_path, file_path)
+            # copy then delete is required when recordings are stored on some network drives
+            shutil.copyfile(cache_path, file_path)
+            os.remove(cache_path)
 
             rand_id = "".join(
                 random.choices(string.ascii_lowercase + string.digits, k=6)
