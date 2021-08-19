@@ -63,7 +63,7 @@ export default function AppBar() {
           <MenuSeparator />
           <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
-      ) : null},
+      ) : null}
       {showDialog ? (
         <Dialog
           onDismiss={handleDismissRestartDialog}
@@ -74,7 +74,7 @@ export default function AppBar() {
             { text: 'Cancel', onClick: handleDismissRestartDialog },
           ]}
         />
-      ) : null},
+      ) : null}
       {showDialogWait ? (
         <Dialog
           title="Restart in progress"
