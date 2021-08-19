@@ -87,7 +87,7 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div data-vjs-player>
+    <div className="md:w-2/3 sm:w-full m-auto">
       <video ref={playerRef} className="video-js vjs-default-skin" controls playsinline />
       {children}
     </div>
