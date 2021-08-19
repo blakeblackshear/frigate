@@ -119,21 +119,23 @@ export default function Event({ eventId }) {
       {data.has_clip ? (
         <Fragment>
           <Heading size="lg">Clip</Heading>
-          <VideoPlayer
-            options={{
-              sources: [
-                {
-                  src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
-                  type: 'application/vnd.apple.mpegurl',
-                },
-              ],
-              poster: data.has_snapshot
-                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                : `data:image/jpeg;base64,${data.thumbnail}`,
-            }}
-            seekOptions={{ forward: 10, back: 5 }}
-            onReady={(player) => {}}
-          />
+          <div className="md:w-2/3 sm:w-full m-auto">
+            <VideoPlayer
+              options={{
+                sources: [
+                  {
+                    src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
+                    type: 'application/vnd.apple.mpegurl',
+                  },
+                ],
+                poster: data.has_snapshot
+                  ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                  : `data:image/jpeg;base64,${data.thumbnail}`,
+              }}
+              seekOptions={{ forward: 10, back: 5 }}
+              onReady={(player) => {}}
+            />
+          </div>
           <div className="text-center">
             <Button
               className="mx-2"
