@@ -86,9 +86,10 @@ export default function Event({ eventId, close }) {
 
       {data.has_clip ? (
         <Fragment>
+          <Heading size="lg">Clip</Heading>
           <div className="outer-max-width m-auto">
             <div className="aspect-ratio-box w-full relative">
-              <div className="absolute w-full top-10 left-0">
+              <div className="absolute w-full top-0 left-0">
                 <VideoPlayer
                   options={{
                     sources: [
@@ -106,6 +107,14 @@ export default function Event({ eventId, close }) {
                 />
               </div>
             </div>
+          </div>
+          <div className="flex space-x-4 justify-center">
+            <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
+              <Clip className="w-6" /> Download Clip
+            </Button>
+            <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
+              <Snapshot className="w-6" /> Download Snapshot
+            </Button>
           </div>
         </Fragment>
       ) : (
