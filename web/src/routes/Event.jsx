@@ -121,7 +121,7 @@ export default function Event({ eventId }) {
       {data.has_clip ? (
         <Fragment>
           <Heading size="lg">Clip</Heading>
-          <div className="md:w-2/3 sm:w-full m-auto">
+          <div className="md:w-3/4 sm:w-full m-auto">
             <VideoPlayer
               options={{
                 sources: [
