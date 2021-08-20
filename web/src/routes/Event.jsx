@@ -55,17 +55,19 @@ export default function Event({ eventId }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap space-x-4">
+      <div className="flex flex-wrap justify-center">
         <Heading className="flex-grow">
           {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
         </Heading>
-        <Button className="self-start" onClick={() => setShowDetails(!showDetails)} color="gray">
-          <ArrowDown className="w-6" />
-          {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
-        </Button>
-        <Button className="self-start" color="red" onClick={handleClickDelete}>
-          <Delete className="w-6" /> Delete event
-        </Button>
+        <div className="space-x-4">
+          <Button className="self-start" onClick={() => setShowDetails(!showDetails)} color="gray">
+            <ArrowDown className="w-6" />
+            {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
+          </Button>
+          <Button className="self-start" color="red" onClick={handleClickDelete}>
+            <Delete className="w-6" /> Delete event
+          </Button>
+        </div>
         {showDialog ? (
           <Dialog
             onDismiss={handleDismissDeleteDialog}
@@ -136,21 +138,11 @@ export default function Event({ eventId }) {
               onReady={(player) => {}}
             />
           </div>
-          <div className="text-center">
-            <Button
-              className="mx-2"
-              color="blue"
-              href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
-              download
-            >
+          <div className="flex space-x-4 justify-center">
+            <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
               <Clip className="w-6" /> Download Clip
             </Button>
-            <Button
-              className="mx-2"
-              color="blue"
-              href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
-              download
-            >
+            <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
               <Snapshot className="w-6" /> Download Snapshot
             </Button>
           </div>
