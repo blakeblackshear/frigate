@@ -66,7 +66,7 @@ export default function Button({
 
   let classes = `whitespace-nowrap flex items-center space-x-1 ${className} ${ButtonTypes[type]} ${
     ButtonColors[disabled ? 'disabled' : color][type]
-  } font-sans inline-flex font-bold uppercase text-xs px-1.5 md:px-2 sm:py-0 md:py-2 rounded outline-none focus:outline-none ring-opacity-50 transition-shadow transition-colors ${
+  } font-sans inline-flex font-bold uppercase text-xs px-1.5 py-2 md:py-2 rounded outline-none focus:outline-none ring-opacity-50 transition-shadow transition-colors ${
     disabled ? 'cursor-not-allowed' : 'focus:ring-2 cursor-pointer'
   }`;
 
