@@ -51,7 +51,7 @@ function reducer(state, { type, payload, meta }) {
 
           // Splice the deleted index.
           draftState.queries[url].data.splice(removeIndex, 1);
-          draftState.queries[url].deleted = totDeleted + 1;
+          draftState.queries[url].deletedId = eventId;
         });
       });
     }
@@ -111,9 +111,9 @@ export function useFetch(url, fetchId) {
 
   const data = state.queries[url].data || null;
   const status = state.queries[url].status;
-  const deleted = state.queries[url].deleted || 0;
+  const deletedId = state.queries[url].deletedId || 0;
 
-  return { data, status, deleted };
+  return { data, status, deletedId };
 }
 
 export function useDelete() {
