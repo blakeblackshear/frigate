@@ -1,13 +1,48 @@
 import { h, Fragment } from 'preact';
+import { useCallback, useState } from 'preact/hooks';
+import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
+import Button from '../components/Button';
+import Clip from '../icons/Clip';
+import Delete from '../icons/Delete';
+import Snapshot from '../icons/Snapshot';
+import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
-import { FetchStatus, useApiHost, useEvent } from '../api';
+import VideoPlayer from '../components/VideoPlayer';
+import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 
 export default function Event({ eventId }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
+  const [showDialog, setShowDialog] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
+  const setDeleteEvent = useDelete();
+
+  const handleClickDelete = () => {
+    setShowDialog(true);
+  };
+
+  const handleDismissDeleteDialog = () => {
+    setShowDialog(false);
+  };
+
+  const handleClickDeleteDialog = useCallback(async () => {
+    let success;
+    try {
+      success = await setDeleteEvent(eventId);
+      setDeleteStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
+    } catch (e) {
+      setDeleteStatus(FetchStatus.ERROR);
+    }
+
+    if (success) {
+      setDeleteStatus(FetchStatus.LOADED);
+      setShowDialog(false);
+      route('/events', true);
+    }
+  }, [eventId, setShowDialog, setDeleteEvent]);
 
   if (status !== FetchStatus.LOADED) {
     return <ActivityIndicator />;
@@ -18,9 +53,31 @@ export default function Event({ eventId }) {
 
   return (
     <div className="space-y-4">
-      <Heading>
-        {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
-      </Heading>
+      <div className="flex">
+        <Heading className="flex-grow">
+          {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
+        </Heading>
+        <Button className="self-start" color="red" onClick={handleClickDelete}>
+          <Delete className="w-6" /> Delete event
+        </Button>
+        {showDialog ? (
+          <Dialog
+            onDismiss={handleDismissDeleteDialog}
+            title="Delete Event?"
+            text={
+              deleteStatus === FetchStatus.ERROR
+                ? 'An error occurred, please try again.'
+                : 'This event will be permanently deleted along with any related clips and snapshots'
+            }
+            actions={[
+              deleteStatus !== FetchStatus.LOADING
+                ? { text: 'Delete', color: 'red', onClick: handleClickDeleteDialog }
+                : { text: 'Deleting…', color: 'red', disabled: true },
+              { text: 'Cancel', onClick: handleDismissDeleteDialog },
+            ]}
+          />
+        ) : null}
+      </div>
 
       <Table class="w-full">
         <Thead>
@@ -53,28 +110,54 @@ export default function Event({ eventId }) {
 
       {data.has_clip ? (
         <Fragment>
-          <Heading size="sm">Clip</Heading>
-          <video
-            aria-label={`Clip for event ${data.id}`}
-            autoPlay
-            className="w-100"
-            src={`${apiHost}/clips/${data.camera}-${eventId}.mp4`}
-            controls
+          <Heading size="lg">Clip</Heading>
+          <VideoPlayer
+            options={{
+              sources: [
+                {
+                  src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
+                  type: 'application/vnd.apple.mpegurl',
+                },
+              ],
+              poster: data.has_snapshot
+                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                : `data:image/jpeg;base64,${data.thumbnail}`,
+            }}
+            seekOptions={{ forward: 10, back: 5 }}
+            onReady={(player) => {}}
           />
+          <div className="text-center">
+            <Button
+              className="mx-2"
+              color="blue"
+              href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
+              download
+            >
+              <Clip className="w-6" /> Download Clip
+            </Button>
+            <Button
+              className="mx-2"
+              color="blue"
+              href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
+              download
+            >
+              <Snapshot className="w-6" /> Download Snapshot
+            </Button>
+          </div>
         </Fragment>
       ) : (
-        <p>No clip available</p>
+        <Fragment>
+          <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+          <img
+            src={
+              data.has_snapshot
+                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                : `data:image/jpeg;base64,${data.thumbnail}`
+            }
+            alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
+          />
+        </Fragment>
       )}
-
-      <Heading size="sm">{data.has_snapshot ? 'Best image' : 'Thumbnail'}</Heading>
-      <img
-        src={
-          data.has_snapshot
-            ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-            : `data:image/jpeg;base64,${data.thumbnail}`
-        }
-        alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
-      />
     </div>
   );
 }

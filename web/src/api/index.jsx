@@ -34,7 +34,27 @@ function reducer(state, { type, payload, meta }) {
         draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
       });
     }
+    case 'DELETE': {
+      const { eventId } = payload;
 
+      return produce(state, (draftState) => {
+        Object.keys(draftState.queries).map((url, index) => {
+          // If data has no array length then just return state.
+          if (!('data' in draftState.queries[url]) || !draftState.queries[url].data.length) return state;
+
+          //Find the index to remove
+          const removeIndex = draftState.queries[url].data.map((event) => event.id).indexOf(eventId);
+          if (removeIndex === -1) return state;
+
+          // We need to keep track of deleted items, This will be used to re-calculate "ReachEnd" for auto load new events. Events.jsx
+          const totDeleted = state.queries[url].deleted || 0;
+
+          // Splice the deleted index.
+          draftState.queries[url].data.splice(removeIndex, 1);
+          draftState.queries[url].deleted = totDeleted + 1;
+        });
+      });
+    }
     default:
       return state;
   }
@@ -91,8 +111,23 @@ export function useFetch(url, fetchId) {
 
   const data = state.queries[url].data || null;
   const status = state.queries[url].status;
+  const deleted = state.queries[url].deleted || 0;
 
-  return { data, status };
+  return { data, status, deleted };
+}
+
+export function useDelete() {
+  const { dispatch, state } = useContext(Api);
+
+  async function deleteEvent(eventId) {
+    if (!eventId) return null;
+
+    const response = await fetch(`${state.host}/api/events/${eventId}`, { method: 'DELETE' });
+    await dispatch({ type: 'DELETE', payload: { eventId } });
+    return await (response.status < 300 ? response.json() : { success: true });
+  }
+
+  return deleteEvent;
 }
 
 export function useApiHost() {
@@ -107,6 +142,11 @@ export function useEvents(searchParams, fetchId) {
 
 export function useEvent(eventId, fetchId) {
   const url = `/api/events/${eventId}`;
+  return useFetch(url, fetchId);
+}
+
+export function useRecording(camera, fetchId) {
+  const url = `/api/${camera}/recordings`;
   return useFetch(url, fetchId);
 }
 

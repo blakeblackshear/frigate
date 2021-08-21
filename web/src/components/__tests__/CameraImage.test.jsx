@@ -7,7 +7,7 @@ import { render, screen } from '@testing-library/preact';
 describe('CameraImage', () => {
   beforeEach(() => {
     jest.spyOn(Api, 'useConfig').mockImplementation(() => {
-      return { data: { cameras: { front: { name: 'front', width: 1280, height: 720 } } } };
+      return { data: { cameras: { front: { name: 'front', detect: { width: 1280, height: 720 } } } } };
     });
     jest.spyOn(Api, 'useApiHost').mockReturnValue('http://base-url.local:5000');
     jest.spyOn(Hooks, 'useResizeObserver').mockImplementation(() => [{ width: 0 }]);

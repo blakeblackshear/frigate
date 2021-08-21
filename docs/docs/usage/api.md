@@ -5,7 +5,7 @@ title: HTTP API
 
 A web server is available on port 5000 with the following endpoints.
 
-### `/api/<camera_name>`
+### `GET /api/<camera_name>`
 
 An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use.
 
@@ -24,7 +24,7 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `/api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1]`
+### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1&quality=70]`
 
 The best snapshot for any object type. It is a full resolution image by default.
 
@@ -32,8 +32,9 @@ Example parameters:
 
 - `h=300`: resizes the image to 300 pixes tall
 - `crop=1`: crops the image to the region of the detection rather than returning the entire image
+- `quality=70`: sets the jpeg encoding quality (0-100)
 
-### `/api/<camera_name>/latest.jpg[?h=300]`
+### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
 
@@ -48,12 +49,13 @@ Accepts the following query string parameters:
 | `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
 | `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
 | `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
+| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.                     |
 
 Example parameters:
 
 - `h=300`: resizes the image to 300 pixes tall
 
-### `/api/stats`
+### `GET /api/stats`
 
 Contains some granular debug info that can be used for sensors in Home Assistant.
 
@@ -150,15 +152,15 @@ Sample response:
 }
 ```
 
-### `/api/config`
+### `GET /api/config`
 
 A json representation of your configuration
 
-### `/api/version`
+### `GET /api/version`
 
 Version info
 
-### `/api/events`
+### `GET /api/events`
 
 Events from the database. Accepts the following query string parameters:
 
@@ -174,19 +176,23 @@ Events from the database. Accepts the following query string parameters:
 | `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
 
-### `/api/events/summary`
+### `GET /api/events/summary`
 
 Returns summary data for events in the database. Used by the Home Assistant integration.
 
-### `/api/events/<id>`
+### `GET /api/events/<id>`
 
 Returns data for a single event.
 
-### `/api/events/<id>/thumbnail.jpg`
+### `DELETE /api/events/<id>`
+
+Permanently deletes the event along with any clips/snapshots.
+
+### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
-### `/api/events/<id>/snapshot.jpg`
+### `GET /api/events/<id>/snapshot.jpg`
 
 Returns the snapshot image for the event id. Works while the event is in progress and after completion.
 
@@ -198,11 +204,12 @@ Accepts the following query string parameters, but they are only applied when an
 | `bbox`      | int  | Show bounding boxes for detected objects (0 or 1) |
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
-
-### `/clips/<camera>-<id>.mp4`
-
-Video clip for the given camera and event id.
+| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
 
 ### `/clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
+
+### `/vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can be viewed in an application like VLC.

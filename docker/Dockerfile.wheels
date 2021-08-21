@@ -34,8 +34,7 @@ RUN pip3 wheel --wheel-dir=/wheels \
     matplotlib \
     click \
     setproctitle \
-    peewee \
-    gevent
+    peewee
 
 FROM scratch
 

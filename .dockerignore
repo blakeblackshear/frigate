@@ -5,3 +5,6 @@ debug
 config/
 *.pyc
 .git
+core
+*.mp4
+*.db

@@ -1,1057 +1,770 @@
-import base64
+from __future__ import annotations
+
 import json
 import logging
 import os
-from typing import Dict
+from enum import Enum
+from typing import Dict, List, Optional, Tuple, Union
 
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import voluptuous as vol
 import yaml
+from pydantic import BaseModel, Field, validator
+from pydantic.fields import PrivateAttr
 
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
-from frigate.util import create_mask
+from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
+from frigate.edgetpu import load_labels
+from frigate.util import create_mask, deep_merge
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TRACKED_OBJECTS = ['person']
+# TODO: Identify what the default format to display timestamps is
+DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
+# German Style:
+# DEFAULT_TIME_FORMAT = "%d.%m.%Y %H:%M:%S"
+
+FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+
+DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
+
+
+class DetectorTypeEnum(str, Enum):
+    edgetpu = "edgetpu"
+    cpu = "cpu"
+
+
+class DetectorConfig(BaseModel):
+    type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
+    device: str = Field(default="usb", title="Device Type")
+    num_threads: int = Field(default=3, title="Number of detection threads")
+
+
+class MqttConfig(BaseModel):
+    host: str = Field(title="MQTT Host")
+    port: int = Field(default=1883, title="MQTT Port")
+    topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
+    client_id: str = Field(default="frigate", title="MQTT Client ID")
+    stats_interval: int = Field(default=60, title="MQTT Camera Stats Interval")
+    user: Optional[str] = Field(title="MQTT Username")
+    password: Optional[str] = Field(title="MQTT Password")
+    tls_ca_certs: Optional[str] = Field(title="MQTT TLS CA Certificates")
+    tls_client_cert: Optional[str] = Field(title="MQTT TLS Client Certificate")
+    tls_client_key: Optional[str] = Field(title="MQTT TLS Client Key")
+    tls_insecure: Optional[bool] = Field(title="MQTT TLS Insecure")
+
+    @validator("password", pre=True, always=True)
+    def validate_password(cls, v, values):
+        if (v is None) != (values["user"] is None):
+            raise ValueError("Password must be provided with username.")
+        return v
+
+
+class RetainConfig(BaseModel):
+    default: int = Field(default=10, title="Default retention period.")
+    objects: Dict[str, int] = Field(
+        default_factory=dict, title="Object retention period."
+    )
+
+
+# DEPRECATED: Will eventually be removed
+class ClipsConfig(BaseModel):
+    enabled: bool = Field(default=False, title="Save clips.")
+    max_seconds: int = Field(default=300, title="Maximum clip duration.")
+    pre_capture: int = Field(default=5, title="Seconds to capture before event starts.")
+    post_capture: int = Field(default=5, title="Seconds to capture after event ends.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the clip.",
+    )
+    objects: Optional[List[str]] = Field(
+        title="List of objects to be detected in order to save the clip.",
+    )
+    retain: RetainConfig = Field(
+        default_factory=RetainConfig, title="Clip retention settings."
+    )
+
+
+class RecordConfig(BaseModel):
+    enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    retain_days: int = Field(default=0, title="Recording retention period in days.")
+    events: ClipsConfig = Field(
+        default_factory=ClipsConfig, title="Event specific settings."
+    )
+
+
+class MotionConfig(BaseModel):
+    threshold: int = Field(
+        default=25,
+        title="Motion detection threshold (1-255).",
+        ge=1,
+        le=255,
+    )
+    contour_area: Optional[int] = Field(title="Contour Area")
+    delta_alpha: float = Field(default=0.2, title="Delta Alpha")
+    frame_alpha: float = Field(default=0.2, title="Frame Alpha")
+    frame_height: Optional[int] = Field(title="Frame Height")
+    mask: Union[str, List[str]] = Field(
+        default="", title="Coordinates polygon for the motion mask."
+    )
+
+
+class RuntimeMotionConfig(MotionConfig):
+    raw_mask: Union[str, List[str]] = ""
+    mask: np.ndarray = None
+
+    def __init__(self, **config):
+        frame_shape = config.get("frame_shape", (1, 1))
+
+        if "frame_height" not in config:
+            config["frame_height"] = max(frame_shape[0] // 6, 180)
+
+        if "contour_area" not in config:
+            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
+            config["contour_area"] = (
+                config["frame_height"] * frame_width * 0.00173611111
+            )
 
-DETECTORS_SCHEMA = vol.Schema(
-    {
-        vol.Required(str): {
-            vol.Required('type', default='edgetpu'): vol.In(['cpu', 'edgetpu']),
-            vol.Optional('device', default='usb'): str,
-            vol.Optional('num_threads', default=3): int
-        }
-    }
-)
+        mask = config.get("mask", "")
+        config["raw_mask"] = mask
 
-DEFAULT_DETECTORS = {
-    'coral': {
-        'type': 'edgetpu',
-        'device': 'usb'
-    }
-}
-
-MQTT_SCHEMA = vol.Schema(
-    {
-        vol.Required('host'): str,
-        vol.Optional('port', default=1883): int,
-        vol.Optional('topic_prefix', default='frigate'): str,
-        vol.Optional('client_id', default='frigate'): str,
-        vol.Optional('stats_interval', default=60): int,
-        'user': str,
-        'password': str
-    }
-)
-
-RETAIN_SCHEMA = vol.Schema(
-    {
-        vol.Required('default',default=10): int,
-        'objects': {
-            str: int
-        }
-    }
-)
-
-CLIPS_SCHEMA = vol.Schema(
-    {
-        vol.Optional('max_seconds', default=300): int,
-        'tmpfs_cache_size': str,
-        vol.Optional('retain', default={}): RETAIN_SCHEMA
-    }
-)
-
-FFMPEG_GLOBAL_ARGS_DEFAULT = ['-hide_banner','-loglevel','warning']
-FFMPEG_INPUT_ARGS_DEFAULT = ['-avoid_negative_ts', 'make_zero',
-    '-fflags', '+genpts+discardcorrupt',
-    '-rtsp_transport', 'tcp',
-    '-stimeout', '5000000',
-    '-use_wallclock_as_timestamps', '1']
-DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ['-f', 'rawvideo',
-    '-pix_fmt', 'yuv420p']
-RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
-SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "segment", "-segment_time",
-    "10", "-segment_format", "mp4", "-reset_timestamps", "1", "-strftime",
-    "1", "-c", "copy", "-an"]
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "segment", "-segment_time",
-    "60", "-segment_format", "mp4", "-reset_timestamps", "1", "-strftime",
-    "1", "-c", "copy", "-an"]
-
-GLOBAL_FFMPEG_SCHEMA = vol.Schema(
-    {
-        vol.Optional('global_args', default=FFMPEG_GLOBAL_ARGS_DEFAULT):  vol.Any(str, [str]),
-        vol.Optional('hwaccel_args', default=[]): vol.Any(str, [str]),
-        vol.Optional('input_args', default=FFMPEG_INPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-        vol.Optional('output_args', default={}): {
-            vol.Optional('detect', default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('record', default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('clips', default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('rtmp', default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-        }
-    }
-)
-
-MOTION_SCHEMA = vol.Schema(
-    {
-        'mask': vol.Any(str, [str]),
-        'threshold': vol.Range(min=1, max=255),
-        'contour_area': int,
-        'delta_alpha': float,
-        'frame_alpha': float,
-        'frame_height': int
-    }
-)
-
-DETECT_SCHEMA = vol.Schema(
-    {
-        'max_disappeared': int
-    }
-)
-
-FILTER_SCHEMA = vol.Schema(
-    {
-        str: {
-                'min_area': int,
-                'max_area': int,
-                'threshold': float,
-            }
-    }
-)
-
-def filters_for_all_tracked_objects(object_config):
-    for tracked_object in object_config.get('track', DEFAULT_TRACKED_OBJECTS):
-        if not 'filters' in object_config:
-            object_config['filters'] = {}
-        if not tracked_object in object_config['filters']:
-            object_config['filters'][tracked_object] = {}
-    return object_config
-
-OBJECTS_SCHEMA = vol.Schema(vol.All(filters_for_all_tracked_objects,
-    {
-        'track': [str],
-        'mask': vol.Any(str, [str]),
-        vol.Optional('filters', default = {}): FILTER_SCHEMA.extend(
-            { 
-                str: {
-                        'min_score': float,
-                        'mask': vol.Any(str, [str]),
-                    }
-            })
-    }
-))
-
-def each_role_used_once(inputs):
-    roles = [role for i in inputs for role in i['roles']]
-    roles_set = set(roles)
-    if len(roles) > len(roles_set):
-        raise ValueError
-    return inputs
-
-def detect_is_required(inputs):
-    roles = [role for i in inputs for role in i['roles']]
-    if not 'detect' in roles:
-        raise ValueError
-    return inputs
-
-CAMERA_FFMPEG_SCHEMA = vol.Schema(
-    {
-        vol.Required('inputs'): vol.All([{
-            vol.Required('path'): str,
-            vol.Required('roles'): ['detect', 'clips', 'record', 'rtmp'],
-            'global_args':  vol.Any(str, [str]),
-            'hwaccel_args': vol.Any(str, [str]),
-            'input_args': vol.Any(str, [str]),
-        }], vol.Msg(each_role_used_once, msg="Each input role may only be used once"), 
-            vol.Msg(detect_is_required, msg="The detect role is required")),
-        'global_args':  vol.Any(str, [str]),
-        'hwaccel_args': vol.Any(str, [str]),
-        'input_args': vol.Any(str, [str]),
-        'output_args': {
-            vol.Optional('detect', default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('record', default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('clips', default=SAVE_CLIPS_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-            vol.Optional('rtmp', default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT): vol.Any(str, [str]),
-        }
-    }
-)
-
-def ensure_zones_and_cameras_have_different_names(cameras):
-    zones = [zone for camera in cameras.values() for zone in camera['zones'].keys()]
-    for zone in zones:
-        if zone in cameras.keys():
-            raise ValueError
-    return cameras
-
-CAMERAS_SCHEMA = vol.Schema(vol.All(
-    {
-        str: {
-            vol.Required('ffmpeg'): CAMERA_FFMPEG_SCHEMA,
-            vol.Required('height'): int,
-            vol.Required('width'): int,
-            'fps': int,
-            vol.Optional('best_image_timeout', default=60): int,
-            vol.Optional('zones', default={}):  {
-                str: {
-                    vol.Required('coordinates'): vol.Any(str, [str]),
-                    vol.Optional('filters', default={}): FILTER_SCHEMA
-                }
-            },
-            vol.Optional('clips', default={}): {
-                vol.Optional('enabled', default=False): bool,
-                vol.Optional('pre_capture', default=5): int,
-                vol.Optional('post_capture', default=5): int,
-                vol.Optional('required_zones', default=[]): [str],
-                'objects': [str],
-                vol.Optional('retain', default={}): RETAIN_SCHEMA,
-            },
-            vol.Optional('record', default={}): {
-                'enabled': bool,
-                'retain_days': int,
-            },
-            vol.Optional('rtmp', default={}): {
-                vol.Required('enabled', default=True): bool,
-            },
-            vol.Optional('snapshots', default={}): {
-                vol.Optional('enabled', default=False): bool,
-                vol.Optional('timestamp', default=False): bool,
-                vol.Optional('bounding_box', default=False): bool,
-                vol.Optional('crop', default=False): bool,
-                vol.Optional('required_zones', default=[]): [str],
-                'height': int,
-                vol.Optional('retain', default={}): RETAIN_SCHEMA,
-            },
-            vol.Optional('mqtt', default={}): {
-                vol.Optional('enabled', default=True): bool,
-                vol.Optional('timestamp', default=True): bool,
-                vol.Optional('bounding_box', default=True): bool,
-                vol.Optional('crop', default=True): bool,
-                vol.Optional('height', default=270): int,
-                vol.Optional('required_zones', default=[]): [str],
-            },
-            vol.Optional('objects', default={}): OBJECTS_SCHEMA,
-            vol.Optional('motion', default={}): MOTION_SCHEMA,
-            vol.Optional('detect', default={}): DETECT_SCHEMA.extend({
-                vol.Optional('enabled', default=True): bool
-            })
-        }
-    }, vol.Msg(ensure_zones_and_cameras_have_different_names, msg='Zones cannot share names with cameras'))
-)
-
-FRIGATE_CONFIG_SCHEMA = vol.Schema(
-    {
-        vol.Optional('database', default={}): {
-            vol.Optional('path', default=os.path.join(CLIPS_DIR, 'frigate.db')): str
-        },
-        vol.Optional('model', default={'width': 320, 'height': 320}): {
-            vol.Required('width'): int,
-            vol.Required('height'): int
-        },
-        vol.Optional('detectors', default=DEFAULT_DETECTORS): DETECTORS_SCHEMA,
-        'mqtt': MQTT_SCHEMA,
-        vol.Optional('logger', default={'default': 'info', 'logs': {}}): {
-            vol.Optional('default', default='info'): vol.In(['info', 'debug', 'warning', 'error', 'critical']),
-            vol.Optional('logs', default={}): {str: vol.In(['info', 'debug', 'warning', 'error', 'critical']) }
-        },
-        vol.Optional('snapshots', default={}): {
-            vol.Optional('retain', default={}): RETAIN_SCHEMA
-        },
-        vol.Optional('clips', default={}): CLIPS_SCHEMA,
-        vol.Optional('record', default={}): {
-            vol.Optional('enabled', default=False): bool,
-            vol.Optional('retain_days', default=30): int,
-        },
-        vol.Optional('ffmpeg', default={}): GLOBAL_FFMPEG_SCHEMA,
-        vol.Optional('objects', default={}): OBJECTS_SCHEMA,
-        vol.Optional('motion', default={}): MOTION_SCHEMA,
-        vol.Optional('detect', default={}): DETECT_SCHEMA,
-        vol.Required('cameras', default={}): CAMERAS_SCHEMA,
-        vol.Optional('environment_vars', default={}): { str: str }
-    }
-)
-
-class DatabaseConfig():
-    def __init__(self, config):
-        self._path = config['path']
-
-    @property
-    def path(self):
-        return self._path
-
-    def to_dict(self):
-        return {
-            'path': self.path
-        }
-
-class ModelConfig():
-    def __init__(self, config):
-        self._width = config['width']
-        self._height = config['height']
-
-    @property
-    def width(self):
-        return self._width
-
-    @property
-    def height(self):
-        return self._height
-
-    def to_dict(self):
-        return {
-            'width': self.width,
-            'height': self.height
-        }
-
-class DetectorConfig():
-    def __init__(self, config):
-        self._type = config['type']
-        self._device = config['device']
-        self._num_threads = config['num_threads']
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def device(self):
-        return self._device
-
-    @property
-    def num_threads(self):
-        return self._num_threads
-
-    def to_dict(self):
-        return {
-            'type': self.type,
-            'device': self.device,
-            'num_threads': self.num_threads
-        }
-
-class LoggerConfig():
-    def __init__(self, config):
-        self._default = config['default'].upper()
-        self._logs = {k: v.upper() for k, v in config['logs'].items()}
-
-    @property
-    def default(self):
-        return self._default
-
-    @property
-    def logs(self):
-        return self._logs
-
-    def to_dict(self):
-        return {
-            'default': self.default,
-            'logs': self.logs
-        }
-
-class MqttConfig():
-    def __init__(self, config):
-        self._host = config['host']
-        self._port = config['port']
-        self._topic_prefix = config['topic_prefix']
-        self._client_id = config['client_id']
-        self._user = config.get('user')
-        self._password = config.get('password')
-        self._stats_interval = config.get('stats_interval')
-    
-    @property
-    def host(self):
-        return self._host
-
-    @property
-    def port(self):
-        return self._port
-
-    @property
-    def topic_prefix(self):
-        return self._topic_prefix
-
-    @property
-    def client_id(self):
-        return self._client_id
-
-    @property
-    def user(self):
-        return self._user
-
-    @property
-    def password(self):
-        return self._password
-
-    @property
-    def stats_interval(self):
-        return self._stats_interval
-
-    def to_dict(self):
-        return {
-            'host': self.host,
-            'port': self.port,
-            'topic_prefix': self.topic_prefix,
-            'client_id': self.client_id,
-            'user': self.user,
-            'stats_interval': self.stats_interval
-        }
-
-class CameraInput():
-    def __init__(self, camera_config, global_config, ffmpeg_input):
-        self._path = ffmpeg_input['path']
-        self._roles = ffmpeg_input['roles']
-        self._global_args = ffmpeg_input.get('global_args', camera_config.get('global_args', global_config['global_args']))
-        self._hwaccel_args = ffmpeg_input.get('hwaccel_args', camera_config.get('hwaccel_args', global_config['hwaccel_args']))
-        self._input_args = ffmpeg_input.get('input_args', camera_config.get('input_args', global_config['input_args']))
-
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def roles(self):
-        return self._roles
-
-    @property
-    def global_args(self):
-        return self._global_args if isinstance(self._global_args, list) else self._global_args.split(' ')
-
-    @property
-    def hwaccel_args(self):
-        return self._hwaccel_args if isinstance(self._hwaccel_args, list) else self._hwaccel_args.split(' ')
-
-    @property
-    def input_args(self):
-        return self._input_args if isinstance(self._input_args, list) else self._input_args.split(' ')
-
-class CameraFfmpegConfig():
-    def __init__(self, global_config, config):
-        self._inputs = [CameraInput(config, global_config, i) for i in config['inputs']]
-        self._output_args = config.get('output_args', global_config['output_args'])
-
-    @property
-    def inputs(self):
-        return self._inputs
-
-    @property
-    def output_args(self):
-        return {k: v if isinstance(v, list) else v.split(' ') for k, v in self._output_args.items()}
-
-class RetainConfig():
-    def __init__(self, global_config, config):
-        self._default = config.get('default', global_config.get('default'))
-        self._objects = config.get('objects', global_config.get('objects', {}))
-
-    @property
-    def default(self):
-        return self._default
-
-    @property
-    def objects(self):
-        return self._objects
-
-    def to_dict(self):
-        return {
-            'default': self.default,
-            'objects': self.objects
-        }
-
-class ClipsConfig():
-    def __init__(self, config):
-        self._max_seconds = config['max_seconds']
-        self._tmpfs_cache_size = config.get('tmpfs_cache_size', '').strip()
-        self._retain = RetainConfig(config['retain'], config['retain'])
-    
-    @property
-    def max_seconds(self):
-        return self._max_seconds
-
-    @property
-    def tmpfs_cache_size(self):
-        return self._tmpfs_cache_size
-
-    @property
-    def retain(self):
-        return self._retain
-
-    def to_dict(self):
-        return {
-            'max_seconds': self.max_seconds,
-            'tmpfs_cache_size': self.tmpfs_cache_size,
-            'retain': self.retain.to_dict()
-        }
-
-class SnapshotsConfig():
-    def __init__(self, config):
-        self._retain = RetainConfig(config['retain'], config['retain'])
-
-    @property
-    def retain(self):
-        return self._retain
-
-    def to_dict(self):
-        return {
-            'retain': self.retain.to_dict()
-        }
-
-class RecordConfig():
-    def __init__(self, global_config, config):
-        self._enabled = config.get('enabled', global_config['enabled'])
-        self._retain_days = config.get('retain_days', global_config['retain_days'])
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @property
-    def retain_days(self):
-        return self._retain_days
-
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-            'retain_days': self.retain_days,
-        }
-
-class FilterConfig():
-    def __init__(self, global_config, config, global_mask=None, frame_shape=None):
-        self._min_area = config.get('min_area', global_config.get('min_area', 0))
-        self._max_area = config.get('max_area', global_config.get('max_area', 24000000))
-        self._threshold = config.get('threshold', global_config.get('threshold', 0.7))
-        self._min_score = config.get('min_score', global_config.get('min_score', 0.5))
-
-        self._raw_mask = []
-        if global_mask:
-            if isinstance(global_mask, list):
-                self._raw_mask += global_mask
-            elif isinstance(global_mask, str):
-                self._raw_mask += [global_mask]
-
-        mask = config.get('mask')
         if mask:
-            if isinstance(mask, list):
-                self._raw_mask += mask
-            elif isinstance(mask, str):
-                self._raw_mask += [mask]
-        self._mask = create_mask(frame_shape, self._raw_mask) if self._raw_mask else None
-
-    @property
-    def min_area(self):
-        return self._min_area
-
-    @property
-    def max_area(self):
-        return self._max_area
-
-    @property
-    def threshold(self):
-        return self._threshold
-
-    @property
-    def min_score(self):
-        return self._min_score
-
-    @property
-    def mask(self):
-        return self._mask
-
-    def to_dict(self):
-        return {
-            'min_area': self.min_area,
-            'max_area': self.max_area,
-            'threshold': self.threshold,
-            'min_score': self.min_score,
-            'mask': self._raw_mask
-        }
-
-class ObjectConfig():
-    def __init__(self, global_config, config, frame_shape):
-        self._track = config.get('track', global_config.get('track', DEFAULT_TRACKED_OBJECTS))
-        self._raw_mask = config.get('mask')
-        self._filters = { name: FilterConfig(global_config['filters'].get(name, {}), config['filters'].get(name, {}), self._raw_mask, frame_shape) for name in self._track }
-
-    @property
-    def track(self):
-        return self._track
-
-    @property
-    def filters(self) -> Dict[str, FilterConfig]:
-        return self._filters
-
-    def to_dict(self):
-        return {
-            'track': self.track,
-            'mask': self._raw_mask,
-            'filters': { k: f.to_dict() for k, f in self.filters.items() }
-        }
-
-class CameraSnapshotsConfig():
-    def __init__(self, global_config, config):
-        self._enabled = config['enabled']
-        self._timestamp = config['timestamp']
-        self._bounding_box = config['bounding_box']
-        self._crop = config['crop']
-        self._height = config.get('height')
-        self._retain = RetainConfig(global_config['snapshots']['retain'], config['retain'])
-        self._required_zones = config['required_zones']
-    
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @property
-    def timestamp(self):
-        return self._timestamp
-
-    @property
-    def bounding_box(self):
-        return self._bounding_box
-
-    @property
-    def crop(self):
-        return self._crop
-
-    @property
-    def height(self):
-        return self._height
-    
-    @property
-    def retain(self):
-        return self._retain
-
-    @property
-    def required_zones(self):
-        return self._required_zones
-    
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-            'timestamp': self.timestamp,
-            'bounding_box': self.bounding_box,
-            'crop': self.crop,
-            'height': self.height,
-            'retain': self.retain.to_dict(),
-            'required_zones': self.required_zones
-        }
-
-class CameraMqttConfig():
-    def __init__(self, config):
-        self._enabled = config['enabled']
-        self._timestamp = config['timestamp']
-        self._bounding_box = config['bounding_box']
-        self._crop = config['crop']
-        self._height = config.get('height')
-        self._required_zones = config['required_zones']
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @property
-    def timestamp(self):
-        return self._timestamp
-
-    @property
-    def bounding_box(self):
-        return self._bounding_box
-
-    @property
-    def crop(self):
-        return self._crop
-
-    @property
-    def height(self):
-        return self._height
-
-    @property
-    def required_zones(self):
-        return self._required_zones
-
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-            'timestamp': self.timestamp,
-            'bounding_box': self.bounding_box,
-            'crop': self.crop,
-            'height': self.height,
-            'required_zones': self.required_zones
-        }
-
-class CameraClipsConfig():
-    def __init__(self, global_config, config):
-        self._enabled = config['enabled']
-        self._pre_capture = config['pre_capture']
-        self._post_capture = config['post_capture']
-        self._objects = config.get('objects')
-        self._retain = RetainConfig(global_config['clips']['retain'], config['retain'])
-        self._required_zones = config['required_zones']
-    
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @property
-    def pre_capture(self):
-        return self._pre_capture
-
-    @property
-    def post_capture(self):
-        return self._post_capture
-
-    @property
-    def objects(self):
-        return self._objects
-
-    @property
-    def retain(self):
-        return self._retain
-
-    @property
-    def required_zones(self):
-        return self._required_zones
-
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-            'pre_capture': self.pre_capture,
-            'post_capture': self.post_capture,
-            'objects': self.objects,
-            'retain': self.retain.to_dict(),
-            'required_zones': self.required_zones
-        }
-
-class CameraRtmpConfig():
-    def __init__(self, global_config, config):
-        self._enabled = config['enabled']
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-        }
-
-class MotionConfig():
-    def __init__(self, global_config, config, frame_shape):
-        self._raw_mask = config.get('mask')
-        if self._raw_mask:
-            self._mask = create_mask(frame_shape, self._raw_mask)
+            config["mask"] = create_mask(frame_shape, mask)
         else:
-            default_mask = np.zeros(frame_shape, np.uint8)
-            default_mask[:] = 255
-            self._mask = default_mask
-        self._threshold = config.get('threshold', global_config.get('threshold', 25))
-        self._contour_area = config.get('contour_area', global_config.get('contour_area', 100))
-        self._delta_alpha = config.get('delta_alpha', global_config.get('delta_alpha', 0.2))
-        self._frame_alpha = config.get('frame_alpha', global_config.get('frame_alpha', 0.2))
-        self._frame_height = config.get('frame_height', global_config.get('frame_height', frame_shape[0]//6))
+            empty_mask = np.zeros(frame_shape, np.uint8)
+            empty_mask[:] = 255
+            config["mask"] = empty_mask
+
+        super().__init__(**config)
+
+    def dict(self, **kwargs):
+        ret = super().dict(**kwargs)
+        if "mask" in ret:
+            ret["mask"] = ret["raw_mask"]
+            ret.pop("raw_mask")
+        return ret
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class DetectConfig(BaseModel):
+    height: int = Field(title="Height of the stream for the detect role.")
+    width: int = Field(title="Width of the stream for the detect role.")
+    fps: int = Field(title="Number of frames per second to process through detection.")
+    enabled: bool = Field(default=True, title="Detection Enabled.")
+    max_disappeared: Optional[int] = Field(
+        title="Maximum number of frames the object can dissapear before detection ends."
+    )
+
+
+class FilterConfig(BaseModel):
+    min_area: int = Field(
+        default=0, title="Minimum area of bounding box for object to be counted."
+    )
+    max_area: int = Field(
+        default=24000000, title="Maximum area of bounding box for object to be counted."
+    )
+    threshold: float = Field(
+        default=0.7,
+        title="Average detection confidence threshold for object to be counted.",
+    )
+    min_score: float = Field(
+        default=0.5, title="Minimum detection confidence for object to be counted."
+    )
+    mask: Optional[Union[str, List[str]]] = Field(
+        title="Detection area polygon mask for this filter configuration.",
+    )
+
+
+class RuntimeFilterConfig(FilterConfig):
+    mask: Optional[np.ndarray]
+    raw_mask: Optional[Union[str, List[str]]]
+
+    def __init__(self, **config):
+        mask = config.get("mask")
+        config["raw_mask"] = mask
+
+        if mask is not None:
+            config["mask"] = create_mask(config.get("frame_shape", (1, 1)), mask)
+
+        super().__init__(**config)
+
+    def dict(self, **kwargs):
+        ret = super().dict(**kwargs)
+        if "mask" in ret:
+            ret["mask"] = ret["raw_mask"]
+            ret.pop("raw_mask")
+        return ret
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class ZoneConfig(BaseModel):
+    filters: Dict[str, FilterConfig] = Field(
+        default_factory=dict, title="Zone filters."
+    )
+    coordinates: Union[str, List[str]] = Field(
+        title="Coordinates polygon for the defined zone."
+    )
+    objects: List[str] = Field(
+        default_factory=list,
+        title="List of objects that can trigger the zone.",
+    )
+    _color: Optional[Tuple[int, int, int]] = PrivateAttr()
+    _contour: np.ndarray = PrivateAttr()
 
     @property
-    def mask(self):
-        return self._mask
-
-    @property
-    def threshold(self):
-        return self._threshold
-
-    @property
-    def contour_area(self):
-        return self._contour_area
-
-    @property
-    def delta_alpha(self):
-        return self._delta_alpha
-
-    @property
-    def frame_alpha(self):
-        return self._frame_alpha
-
-    @property
-    def frame_height(self):
-        return self._frame_height
-
-    def to_dict(self):
-        return {
-            'mask': self._raw_mask,
-            'threshold': self.threshold,
-            'contour_area': self.contour_area,
-            'delta_alpha': self.delta_alpha,
-            'frame_alpha': self.frame_alpha,
-            'frame_height': self.frame_height,
-        }
-
-
-
-class DetectConfig():
-    def __init__(self, global_config, config, camera_fps):
-        self._enabled = config['enabled']
-        self._max_disappeared = config.get('max_disappeared', global_config.get('max_disappeared', camera_fps*5))
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @property
-    def max_disappeared(self):
-        return self._max_disappeared
-
-    def to_dict(self):
-        return {
-            'enabled': self.enabled,
-            'max_disappeared': self._max_disappeared,
-        }
-
-class ZoneConfig():
-    def __init__(self, name, config):
-        self._coordinates = config['coordinates']
-        self._filters = { name: FilterConfig(c, c) for name, c in config['filters'].items() }
-
-        if isinstance(self._coordinates, list):
-            self._contour =  np.array([[int(p.split(',')[0]), int(p.split(',')[1])] for p in self._coordinates])
-        elif isinstance(self._coordinates, str):
-            points = self._coordinates.split(',')
-            self._contour =  np.array([[int(points[i]), int(points[i+1])] for i in range(0, len(points), 2)])
-        else:
-            print(f"Unable to parse zone coordinates for {name}")
-            self._contour = np.array([])
-
-        self._color = (0,0,0)
-
-    @property
-    def coordinates(self):
-        return self._coordinates
-
-    @property
-    def contour(self):
-        return self._contour
-
-    @contour.setter
-    def contour(self, val):
-        self._contour = val
-
-    @property
-    def color(self):
+    def color(self) -> Tuple[int, int, int]:
         return self._color
 
-    @color.setter
-    def color(self, val):
-        self._color = val
+    @property
+    def contour(self) -> np.ndarray:
+        return self._contour
+
+    def __init__(self, **config):
+        super().__init__(**config)
+
+        self._color = config.get("color", (0, 0, 0))
+        coordinates = config["coordinates"]
+
+        if isinstance(coordinates, list):
+            self._contour = np.array(
+                [[int(p.split(",")[0]), int(p.split(",")[1])] for p in coordinates]
+            )
+        elif isinstance(coordinates, str):
+            points = coordinates.split(",")
+            self._contour = np.array(
+                [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+            )
+        else:
+            self._contour = np.array([])
+
+
+class ObjectConfig(BaseModel):
+    track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
+    filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
+    mask: Union[str, List[str]] = Field(default="", title="Object mask.")
+
+
+class BirdseyeModeEnum(str, Enum):
+    objects = "objects"
+    motion = "motion"
+    continuous = "continuous"
+
+
+class BirdseyeConfig(BaseModel):
+    enabled: bool = Field(default=True, title="Enable birdseye view.")
+    width: int = Field(default=1280, title="Birdseye width.")
+    height: int = Field(default=720, title="Birdseye height.")
+    quality: int = Field(
+        default=8,
+        title="Encoding quality.",
+        ge=1,
+        le=31,
+    )
+    mode: BirdseyeModeEnum = Field(
+        default=BirdseyeModeEnum.objects, title="Tracking mode."
+    )
+
+
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
+FFMPEG_INPUT_ARGS_DEFAULT = [
+    "-avoid_negative_ts",
+    "make_zero",
+    "-fflags",
+    "+genpts+discardcorrupt",
+    "-rtsp_transport",
+    "tcp",
+    "-stimeout",
+    "5000000",
+    "-use_wallclock_as_timestamps",
+    "1",
+]
+DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
+RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
+RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
+    "-f",
+    "segment",
+    "-segment_time",
+    "10",
+    "-segment_format",
+    "mp4",
+    "-reset_timestamps",
+    "1",
+    "-strftime",
+    "1",
+    "-c",
+    "copy",
+    "-an",
+]
+
+
+class FfmpegOutputArgsConfig(BaseModel):
+    detect: Union[str, List[str]] = Field(
+        default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
+        title="Detect role FFmpeg output arguments.",
+    )
+    record: Union[str, List[str]] = Field(
+        default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
+        title="Record role FFmpeg output arguments.",
+    )
+    rtmp: Union[str, List[str]] = Field(
+        default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT,
+        title="RTMP role FFmpeg output arguments.",
+    )
+
+
+class FfmpegConfig(BaseModel):
+    global_args: Union[str, List[str]] = Field(
+        default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
+    )
+    hwaccel_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg hardware acceleration arguments."
+    )
+    input_args: Union[str, List[str]] = Field(
+        default=FFMPEG_INPUT_ARGS_DEFAULT, title="FFmpeg input arguments."
+    )
+    output_args: FfmpegOutputArgsConfig = Field(
+        default_factory=FfmpegOutputArgsConfig,
+        title="FFmpeg output arguments per role.",
+    )
+
+
+class CameraInput(BaseModel):
+    path: str = Field(title="Camera input path.")
+    roles: List[str] = Field(title="Roles assigned to this input.")
+    global_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg global arguments."
+    )
+    hwaccel_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg hardware acceleration arguments."
+    )
+    input_args: Union[str, List[str]] = Field(
+        default_factory=list, title="FFmpeg input arguments."
+    )
+
+
+class CameraFfmpegConfig(FfmpegConfig):
+    inputs: List[CameraInput] = Field(title="Camera inputs.")
+
+    @validator("inputs")
+    def validate_roles(cls, v):
+        roles = [role for i in v for role in i.roles]
+        roles_set = set(roles)
+
+        if len(roles) > len(roles_set):
+            raise ValueError("Each input role may only be used once.")
+
+        if not "detect" in roles:
+            raise ValueError("The detect role is required.")
+
+        return v
+
+
+class CameraSnapshotsConfig(BaseModel):
+    enabled: bool = Field(default=False, title="Snapshots enabled.")
+    clean_copy: bool = Field(
+        default=True, title="Create a clean copy of the snapshot image."
+    )
+    timestamp: bool = Field(
+        default=False, title="Add a timestamp overlay on the snapshot."
+    )
+    bounding_box: bool = Field(
+        default=True, title="Add a bounding box overlay on the snapshot."
+    )
+    crop: bool = Field(default=False, title="Crop the snapshot to the detected object.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save a snapshot.",
+    )
+    height: Optional[int] = Field(title="Snapshot image height.")
+    retain: RetainConfig = Field(
+        default_factory=RetainConfig, title="Snapshot retention."
+    )
+    quality: int = Field(
+        default=70,
+        title="Quality of the encoded jpeg (0-100).",
+        ge=0,
+        le=100,
+    )
+
+
+class ColorConfig(BaseModel):
+    red: int = Field(default=255, le=0, ge=255, title="Red")
+    green: int = Field(default=255, le=0, ge=255, title="Green")
+    blue: int = Field(default=255, le=0, ge=255, title="Blue")
+
+
+class TimestampStyleConfig(BaseModel):
+    position: str = Field(default="tl", title="Timestamp position.")
+    format: str = Field(default=DEFAULT_TIME_FORMAT, title="Timestamp format.")
+    color: ColorConfig = Field(default_factory=ColorConfig, title="Timestamp color.")
+    scale: float = Field(default=1.0, title="Timestamp scale.")
+    thickness: int = Field(default=2, title="Timestamp thickness.")
+    effect: Optional[str] = Field(title="Timestamp effect.")
+
+
+class CameraMqttConfig(BaseModel):
+    enabled: bool = Field(default=True, title="Send image over MQTT.")
+    timestamp: bool = Field(default=True, title="Add timestamp to MQTT image.")
+    bounding_box: bool = Field(default=True, title="Add bounding box to MQTT image.")
+    crop: bool = Field(default=True, title="Crop MQTT image to detected object.")
+    height: int = Field(default=270, title="MQTT image height.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to send the image.",
+    )
+    quality: int = Field(
+        default=70,
+        title="Quality of the encoded jpeg (0-100).",
+        ge=0,
+        le=100,
+    )
+
+
+class CameraRtmpConfig(BaseModel):
+    enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
+
+
+class CameraLiveConfig(BaseModel):
+    height: int = Field(default=720, title="Live camera view height")
+    quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
+
+
+class CameraConfig(BaseModel):
+    name: Optional[str] = Field(title="Camera name.")
+    ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
+    best_image_timeout: int = Field(
+        default=60,
+        title="How long to wait for the image with the highest confidence score.",
+    )
+    zones: Dict[str, ZoneConfig] = Field(
+        default_factory=dict, title="Zone configuration."
+    )
+    record: RecordConfig = Field(
+        default_factory=RecordConfig, title="Record configuration."
+    )
+    rtmp: CameraRtmpConfig = Field(
+        default_factory=CameraRtmpConfig, title="RTMP restreaming configuration."
+    )
+    live: Optional[CameraLiveConfig] = Field(title="Live playback settings.")
+    snapshots: CameraSnapshotsConfig = Field(
+        default_factory=CameraSnapshotsConfig, title="Snapshot configuration."
+    )
+    mqtt: CameraMqttConfig = Field(
+        default_factory=CameraMqttConfig, title="MQTT configuration."
+    )
+    objects: ObjectConfig = Field(
+        default_factory=ObjectConfig, title="Object configuration."
+    )
+    motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
+    detect: DetectConfig = Field(title="Object detection configuration.")
+    timestamp_style: TimestampStyleConfig = Field(
+        default_factory=TimestampStyleConfig, title="Timestamp style configuration."
+    )
+
+    def __init__(self, **config):
+        # Set zone colors
+        if "zones" in config:
+            colors = plt.cm.get_cmap("tab10", len(config["zones"]))
+            config["zones"] = {
+                name: {**z, "color": tuple(round(255 * c) for c in colors(idx)[:3])}
+                for idx, (name, z) in enumerate(config["zones"].items())
+            }
+
+        super().__init__(**config)
 
     @property
-    def filters(self):
-        return self._filters
+    def frame_shape(self) -> Tuple[int, int]:
+        return self.detect.height, self.detect.width
 
-    def to_dict(self):
-        return {
-            'filters': {k: f.to_dict() for k, f in self.filters.items()},
-            'coordinates': self._coordinates
-        }
+    @property
+    def frame_shape_yuv(self) -> Tuple[int, int]:
+        return self.detect.height * 3 // 2, self.detect.width
 
-class CameraConfig():
-    def __init__(self, name, config, global_config):
-        self._name = name
-        self._ffmpeg = CameraFfmpegConfig(global_config['ffmpeg'], config['ffmpeg'])
-        self._height = config.get('height')
-        self._width = config.get('width')
-        self._frame_shape = (self._height, self._width)
-        self._frame_shape_yuv = (self._frame_shape[0]*3//2, self._frame_shape[1])
-        self._fps = config.get('fps')
-        self._best_image_timeout = config['best_image_timeout']
-        self._zones = { name: ZoneConfig(name, z) for name, z in config['zones'].items() }
-        self._clips = CameraClipsConfig(global_config, config['clips'])
-        self._record = RecordConfig(global_config['record'], config['record'])
-        self._rtmp = CameraRtmpConfig(global_config, config['rtmp'])
-        self._snapshots = CameraSnapshotsConfig(global_config, config['snapshots'])
-        self._mqtt = CameraMqttConfig(config['mqtt'])
-        self._objects = ObjectConfig(global_config['objects'], config.get('objects', {}), self._frame_shape)
-        self._motion = MotionConfig(global_config['motion'], config['motion'], self._frame_shape)
-        self._detect = DetectConfig(global_config['detect'], config['detect'], config.get('fps', 5))
-
-        self._ffmpeg_cmds = []
-        for ffmpeg_input in self._ffmpeg.inputs:
+    @property
+    def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+        ffmpeg_cmds = []
+        for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
             if ffmpeg_cmd is None:
                 continue
 
-            self._ffmpeg_cmds.append({
-                'roles': ffmpeg_input.roles,
-                'cmd': ffmpeg_cmd
-            })
+            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
+        return ffmpeg_cmds
 
-
-        self._set_zone_colors(self._zones)
-
-    def _get_ffmpeg_cmd(self, ffmpeg_input):
+    def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
-        if 'detect' in ffmpeg_input.roles:
-            ffmpeg_output_args = self.ffmpeg.output_args['detect'] + ffmpeg_output_args + ['pipe:']
-            if self.fps:
-                ffmpeg_output_args = ["-r", str(self.fps)] + ffmpeg_output_args
-        if 'rtmp' in ffmpeg_input.roles and self.rtmp.enabled:
-            ffmpeg_output_args = self.ffmpeg.output_args['rtmp'] + [
-                f"rtmp://127.0.0.1/live/{self.name}"
-            ] + ffmpeg_output_args
-        if 'clips' in ffmpeg_input.roles:
-            ffmpeg_output_args = self.ffmpeg.output_args['clips'] + [
-                f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
-            ] + ffmpeg_output_args
-        if 'record' in ffmpeg_input.roles and self.record.enabled:
-            ffmpeg_output_args = self.ffmpeg.output_args['record'] + [
-                f"{os.path.join(RECORD_DIR, self.name)}-%Y%m%d%H%M%S.mp4"
-            ] + ffmpeg_output_args
+        if "detect" in ffmpeg_input.roles:
+            detect_args = (
+                self.ffmpeg.output_args.detect
+                if isinstance(self.ffmpeg.output_args.detect, list)
+                else self.ffmpeg.output_args.detect.split(" ")
+            )
+            ffmpeg_output_args = (
+                [
+                    "-r",
+                    str(self.detect.fps),
+                    "-s",
+                    f"{self.detect.width}x{self.detect.height}",
+                ]
+                + detect_args
+                + ffmpeg_output_args
+                + ["pipe:"]
+            )
+        if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
+            rtmp_args = (
+                self.ffmpeg.output_args.rtmp
+                if isinstance(self.ffmpeg.output_args.rtmp, list)
+                else self.ffmpeg.output_args.rtmp.split(" ")
+            )
+            ffmpeg_output_args = (
+                rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
+            )
+        if "record" in ffmpeg_input.roles and self.record.enabled:
+            record_args = (
+                self.ffmpeg.output_args.record
+                if isinstance(self.ffmpeg.output_args.record, list)
+                else self.ffmpeg.output_args.record.split(" ")
+            )
+            ffmpeg_output_args = (
+                record_args
+                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + ffmpeg_output_args
+            )
 
         # if there arent any outputs enabled for this input
         if len(ffmpeg_output_args) == 0:
             return None
 
-        cmd = (['ffmpeg'] +
-                ffmpeg_input.global_args +
-                ffmpeg_input.hwaccel_args +
-                ffmpeg_input.input_args +
-                ['-i', ffmpeg_input.path] +
-                ffmpeg_output_args)
+        global_args = ffmpeg_input.global_args or self.ffmpeg.global_args
+        hwaccel_args = ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args
+        input_args = ffmpeg_input.input_args or self.ffmpeg.input_args
 
-        return [part for part in cmd if part != '']
+        global_args = (
+            global_args if isinstance(global_args, list) else global_args.split(" ")
+        )
+        hwaccel_args = (
+            hwaccel_args if isinstance(hwaccel_args, list) else hwaccel_args.split(" ")
+        )
+        input_args = (
+            input_args if isinstance(input_args, list) else input_args.split(" ")
+        )
 
-    def _set_zone_colors(self, zones: Dict[str, ZoneConfig]):
-        # set colors for zones
-        all_zone_names = zones.keys()
-        zone_colors = {}
-        colors = plt.cm.get_cmap('tab10', len(all_zone_names))
-        for i, zone in enumerate(all_zone_names):
-            zone_colors[zone] = tuple(int(round(255 * c)) for c in colors(i)[:3])
+        cmd = (
+            ["ffmpeg"]
+            + global_args
+            + hwaccel_args
+            + input_args
+            + ["-i", ffmpeg_input.path]
+            + ffmpeg_output_args
+        )
 
-        for name, zone in zones.items():
-            zone.color = zone_colors[name]
+        return [part for part in cmd if part != ""]
 
-    @property
-    def name(self):
-        return self._name
 
-    @property
-    def ffmpeg(self):
-        return self._ffmpeg
+class DatabaseConfig(BaseModel):
+    path: str = Field(
+        default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
+    )
 
-    @property
-    def height(self):
-        return self._height
 
-    @property
-    def width(self):
-        return self._width
-
-    @property
-    def fps(self):
-        return self._fps
-
-    @property
-    def best_image_timeout(self):
-        return self._best_image_timeout
+class ModelConfig(BaseModel):
+    width: int = Field(default=320, title="Object detection model input width.")
+    height: int = Field(default=320, title="Object detection model input height.")
+    labelmap: Dict[int, str] = Field(
+        default_factory=dict, title="Labelmap customization."
+    )
+    _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
+    _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
 
     @property
-    def zones(self)-> Dict[str, ZoneConfig]:
-        return self._zones
+    def merged_labelmap(self) -> Dict[int, str]:
+        return self._merged_labelmap
 
     @property
-    def clips(self):
-        return self._clips
+    def colormap(self) -> Dict[int, tuple[int, int, int]]:
+        return self._colormap
 
-    @property
-    def record(self):
-        return self._record
+    def __init__(self, **config):
+        super().__init__(**config)
 
-    @property
-    def rtmp(self):
-        return self._rtmp
-
-    @property
-    def snapshots(self):
-        return self._snapshots
-
-    @property
-    def mqtt(self):
-        return self._mqtt
-
-    @property
-    def objects(self):
-        return self._objects
-
-    @property
-    def motion(self):
-        return self._motion
-
-    @property
-    def detect(self):
-        return self._detect
-
-    @property
-    def frame_shape(self):
-        return self._frame_shape
-
-    @property
-    def frame_shape_yuv(self):
-        return self._frame_shape_yuv
-
-    @property
-    def ffmpeg_cmds(self):
-        return self._ffmpeg_cmds
-
-    def to_dict(self):
-        return {
-            'name': self.name,
-            'height': self.height,
-            'width': self.width,
-            'fps': self.fps,
-            'best_image_timeout': self.best_image_timeout,
-            'zones': {k: z.to_dict() for k, z in self.zones.items()},
-            'clips': self.clips.to_dict(),
-            'record': self.record.to_dict(),
-            'rtmp': self.rtmp.to_dict(),
-            'snapshots': self.snapshots.to_dict(),
-            'mqtt': self.mqtt.to_dict(),
-            'objects': self.objects.to_dict(),
-            'motion': self.motion.to_dict(),
-            'detect': self.detect.to_dict(),
-            'frame_shape': self.frame_shape,
-            'ffmpeg_cmds': [{'roles': c['roles'], 'cmd': ' '.join(c['cmd'])} for c in self.ffmpeg_cmds],
+        self._merged_labelmap = {
+            **load_labels("/labelmap.txt"),
+            **config.get("labelmap", {}),
         }
 
+        cmap = plt.cm.get_cmap("tab10", len(self._merged_labelmap.keys()))
 
-class FrigateConfig():
-    def __init__(self, config_file=None, config=None):
-        if config is None and config_file is None:
-            raise ValueError('config or config_file must be defined')
-        elif not config_file is None:
-            config = self._load_file(config_file)
+        self._colormap = {}
+        for key, val in self._merged_labelmap.items():
+            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
-        config = FRIGATE_CONFIG_SCHEMA(config)
 
-        config = self._sub_env_vars(config)
+class LogLevelEnum(str, Enum):
+    debug = "debug"
+    info = "info"
+    warning = "warning"
+    error = "error"
+    critical = "critical"
 
-        self._database = DatabaseConfig(config['database'])
-        self._model = ModelConfig(config['model'])
-        self._detectors = { name: DetectorConfig(d) for name, d in config['detectors'].items() }
-        self._mqtt = MqttConfig(config['mqtt'])
-        self._clips = ClipsConfig(config['clips'])
-        self._snapshots = SnapshotsConfig(config['snapshots'])
-        self._cameras = { name: CameraConfig(name, c, config) for name, c in config['cameras'].items() }
-        self._logger = LoggerConfig(config['logger'])
-        self._environment_vars = config['environment_vars']
 
-    def _sub_env_vars(self, config):
-        frigate_env_vars = {k: v for k, v in os.environ.items() if k.startswith('FRIGATE_')}
+class LoggerConfig(BaseModel):
+    default: LogLevelEnum = Field(
+        default=LogLevelEnum.info, title="Default logging level."
+    )
+    logs: Dict[str, LogLevelEnum] = Field(
+        default_factory=dict, title="Log level for specified processes."
+    )
 
-        if 'password' in config['mqtt']:
-            config['mqtt']['password'] = config['mqtt']['password'].format(**frigate_env_vars)
 
-        for camera in config['cameras'].values():
-            for i in camera['ffmpeg']['inputs']:
-                i['path'] = i['path'].format(**frigate_env_vars)
+class SnapshotsConfig(BaseModel):
+    retain: RetainConfig = Field(
+        default_factory=RetainConfig, title="Global snapshot retention configuration."
+    )
+
+
+class FrigateConfig(BaseModel):
+    mqtt: MqttConfig = Field(title="MQTT Configuration.")
+    database: DatabaseConfig = Field(
+        default_factory=DatabaseConfig, title="Database configuration."
+    )
+    environment_vars: Dict[str, str] = Field(
+        default_factory=dict, title="Frigate environment variables."
+    )
+    model: ModelConfig = Field(
+        default_factory=ModelConfig, title="Detection model configuration."
+    )
+    detectors: Dict[str, DetectorConfig] = Field(
+        default={name: DetectorConfig(**d) for name, d in DEFAULT_DETECTORS.items()},
+        title="Detector hardware configuration.",
+    )
+    logger: LoggerConfig = Field(
+        default_factory=LoggerConfig, title="Logging configuration."
+    )
+    record: RecordConfig = Field(
+        default_factory=RecordConfig, title="Global record configuration."
+    )
+    snapshots: SnapshotsConfig = Field(
+        default_factory=SnapshotsConfig, title="Global snapshots configuration."
+    )
+    birdseye: BirdseyeConfig = Field(
+        default_factory=BirdseyeConfig, title="Birdseye configuration."
+    )
+    ffmpeg: FfmpegConfig = Field(
+        default_factory=FfmpegConfig, title="Global FFmpeg configuration."
+    )
+    objects: ObjectConfig = Field(
+        default_factory=ObjectConfig, title="Global object configuration."
+    )
+    motion: Optional[MotionConfig] = Field(
+        title="Global motion detection configuration."
+    )
+    detect: Optional[DetectConfig] = Field(
+        title="Global object tracking configuration."
+    )
+    cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+
+    @property
+    def runtime_config(self) -> FrigateConfig:
+        """Merge camera config with globals."""
+        config = self.copy(deep=True)
+
+        # MQTT password substitution
+        if config.mqtt.password:
+            config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+
+        # Global config to propegate down to camera level
+        global_config = config.dict(
+            include={
+                "record": ...,
+                "snapshots": ...,
+                "objects": ...,
+                "motion": ...,
+                "detect": ...,
+                "ffmpeg": ...,
+            },
+            exclude_unset=True,
+        )
+
+        for name, camera in config.cameras.items():
+            merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
+            camera_config: CameraConfig = CameraConfig.parse_obj(
+                {"name": name, **merged_config}
+            )
+
+            # FFMPEG input substitution
+            for input in camera_config.ffmpeg.inputs:
+                input.path = input.path.format(**FRIGATE_ENV_VARS)
+
+            # Add default filters
+            object_keys = camera_config.objects.track
+            if camera_config.objects.filters is None:
+                camera_config.objects.filters = {}
+            object_keys = object_keys - camera_config.objects.filters.keys()
+            for key in object_keys:
+                camera_config.objects.filters[key] = FilterConfig()
+
+            # Apply global object masks and convert masks to numpy array
+            for object, filter in camera_config.objects.filters.items():
+                if camera_config.objects.mask:
+                    filter_mask = []
+                    if filter.mask is not None:
+                        filter_mask = (
+                            filter.mask
+                            if isinstance(filter.mask, list)
+                            else [filter.mask]
+                        )
+                    object_mask = (
+                        camera_config.objects.mask
+                        if isinstance(camera_config.objects.mask, list)
+                        else [camera_config.objects.mask]
+                    )
+                    filter.mask = filter_mask + object_mask
+
+                # Set runtime filter to create masks
+                camera_config.objects.filters[object] = RuntimeFilterConfig(
+                    frame_shape=camera_config.frame_shape,
+                    **filter.dict(exclude_unset=True),
+                )
+
+            # Convert motion configuration
+            if camera_config.motion is None:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=camera_config.frame_shape
+                )
+            else:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=camera_config.frame_shape,
+                    raw_mask=camera_config.motion.mask,
+                    **camera_config.motion.dict(exclude_unset=True),
+                )
+
+            # Default detect configuration
+            max_disappeared = camera_config.detect.fps * 5
+            if camera_config.detect.max_disappeared is None:
+                camera_config.detect.max_disappeared = max_disappeared
+
+            # Default live configuration
+            if camera_config.live is None:
+                camera_config.live = CameraLiveConfig()
+
+            config.cameras[name] = camera_config
 
         return config
 
-    def _load_file(self, config_file):
+    @validator("cameras")
+    def ensure_zones_and_cameras_have_different_names(cls, v: Dict[str, CameraConfig]):
+        zones = [zone for camera in v.values() for zone in camera.zones.keys()]
+        for zone in zones:
+            if zone in v.keys():
+                raise ValueError("Zones cannot share names with cameras")
+        return v
+
+    @classmethod
+    def parse_file(cls, config_file):
         with open(config_file) as f:
             raw_config = f.read()
 
@@ -1060,53 +773,4 @@ class FrigateConfig():
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 
-        return config
-
-    def to_dict(self):
-        return {
-            'database': self.database.to_dict(),
-            'model': self.model.to_dict(),
-            'detectors': {k: d.to_dict() for k, d in self.detectors.items()},
-            'mqtt': self.mqtt.to_dict(),
-            'clips': self.clips.to_dict(),
-            'snapshots': self.snapshots.to_dict(),
-            'cameras': {k: c.to_dict() for k, c in self.cameras.items()},
-            'logger': self.logger.to_dict(),
-            'environment_vars': self._environment_vars
-        }
-
-    @property
-    def database(self):
-        return self._database
-
-    @property
-    def model(self):
-        return self._model
-
-    @property
-    def detectors(self) -> Dict[str, DetectorConfig]:
-        return self._detectors
-
-    @property
-    def logger(self):
-        return self._logger
-
-    @property
-    def mqtt(self):
-        return self._mqtt
-
-    @property
-    def clips(self):
-        return self._clips
-
-    @property
-    def snapshots(self):
-        return self._snapshots
-
-    @property
-    def cameras(self) -> Dict[str, CameraConfig]:
-        return self._cameras
-
-    @property
-    def environment_vars(self):
-        return self._environment_vars
+        return cls.parse_obj(config)

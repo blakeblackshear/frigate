@@ -16,7 +16,7 @@ motion:
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
   threshold: 25
-  # Optional: Minimum size in pixels in the resized motion image that counts as motion
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: ~0.17% of the motion frame area)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will make motion detection more sensitive to smaller
   # moving objects.
   contour_area: 100
@@ -29,7 +29,7 @@ motion:
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
   frame_alpha: 0.2
-  # Optional: Height of the resized motion frame  (default: 1/6th of the original frame height)
+  # Optional: Height of the resized motion frame  (default: 1/6th of the original frame height, but no less than 180)
   # This operates as an efficient blur alternative. Higher values will result in more granular motion detection at the expense of higher CPU usage.
   # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 180
@@ -81,15 +81,15 @@ environment_vars:
 
 ### `database`
 
-Event and clip information is managed in a sqlite database at `/media/frigate/clips/frigate.db`. If that database is deleted, clips will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
+Event and recording information is managed in a sqlite database at `/media/frigate/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
 
-If you are storing your clips on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
+If you are storing your database on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
 
-This may need to be in a custom location if network storage is used for clips.
+This may need to be in a custom location if network storage is used for the media folder.
 
 ```yaml
 database:
-  path: /media/frigate/clips/frigate.db
+  path: /media/frigate/frigate.db
 ```
 
 ### `detectors`
@@ -110,10 +110,17 @@ detectors:
 
 ### `model`
 
+If using a custom model, the width and height will need to be specified.
+
+The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
+
 ```yaml
 model:
   # Required: height of the trained model
   height: 320
   # Required: width of the trained model
   width: 320
+  # Optional: labelmap overrides
+  labelmap:
+    7: car
 ```

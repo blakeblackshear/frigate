@@ -118,7 +118,7 @@ module.exports = {
 
     'import/no-unresolved': 'error',
 
-    'react-hooks/exhaustive-deps': 'error',
+    // 'react-hooks/exhaustive-deps': 'error',
 
     'jest/consistent-test-it': ['error', { fn: 'test' }],
     'jest/no-test-prefixes': 'error',

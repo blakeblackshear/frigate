@@ -5,16 +5,15 @@ title: Cameras
 
 ## Setting Up Camera Inputs
 
-Up to 4 inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create clips from a higher resolution stream, or vice versa.
+Up to 4 inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role     | Description                                                                          |
-| -------- | ------------------------------------------------------------------------------------ |
-| `detect` | Main feed for object detection                                                       |
-| `clips`  | Clips of events from objects detected in the `detect` feed. [docs](#recording-clips) |
-| `record` | Saves 60 second segments of the video feed. [docs](#247-recordings)                  |
-| `rtmp`   | Broadcast as an RTMP feed for other services to consume. [docs](#rtmp-streams)       |
+| Role     | Description                                                                           |
+| -------- | ------------------------------------------------------------------------------------- |
+| `detect` | Main feed for object detection                                                        |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](#recordings) |
+| `rtmp`   | Broadcast as an RTMP feed for other services to consume. [docs](#rtmp-streams)        |
 
 ### Example
 
@@ -31,11 +30,11 @@ cameras:
             - rtmp
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
           roles:
-            - clips
             - record
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 `width`, `height`, and `fps` are only used for the `detect` role. Other streams are passed through, so there is no need to specify the resolution.
@@ -95,6 +94,9 @@ zones:
     # Required: List of x,y coordinates to define the polygon of the zone.
     # NOTE: Coordinates can be generated at https://www.image-map.net/
     coordinates: 545,1077,747,939,788,805
+    # Optional: List of objects that can trigger this zone (default: all tracked objects)
+    objects:
+      - person
     # Optional: Zone level object filters.
     # NOTE: The global and camera filters are applied upstream.
     filters:
@@ -129,37 +131,48 @@ objects:
       mask: 0,0,1000,0,1000,200,0,200
 ```
 
-## Clips
+## Recordings
 
-Frigate can save video clips without any CPU overhead for encoding by simply copying the stream directly with FFmpeg. It leverages FFmpeg's segment functionality to maintain a cache of video for each camera. The cache files are written to disk at `/tmp/cache` and do not introduce memory overhead. When an object is being tracked, it will extend the cache to ensure it can assemble a clip when the event ends. Once the event ends, it again uses FFmpeg to assemble a clip by combining the video clips without any encoding by the CPU. Assembled clips are are saved to `/media/frigate/clips`. Clips are retained according to the retention settings defined on the config for each object type.
+24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
 
-These clips will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
+Exported clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+
+These recordings will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
 
 :::caution
 Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
 :::
 
 ```yaml
-clips:
-  # Required: enables clips for the camera (default: shown below)
-  # This value can be set via MQTT and will be updated in startup based on retained value
+record:
+  # Optional: Enable recording (default: shown below)
   enabled: False
-  # Optional: Number of seconds before the event to include in the clips (default: shown below)
-  pre_capture: 5
-  # Optional: Number of seconds after the event to include in the clips (default: shown below)
-  post_capture: 5
-  # Optional: Objects to save clips for. (default: all tracked objects)
-  objects:
-    - person
-  # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
-  required_zones: []
-  # Optional: Camera override for retention settings (default: global values)
-  retain:
-    # Required: Default retention days (default: shown below)
-    default: 10
-    # Optional: Per object retention days
+  # Optional: Number of days to retain (default: shown below)
+  retain_days: 0
+  # Optional: Event recording settings
+  events:
+    # Optional: Enable event recording retention settings (default: shown below)
+    enabled: False
+    # Optional: Maximum length of time to retain video during long events. (default: shown below)
+    # NOTE: If an object is being tracked for longer than this amount of time, the cache
+    #       will begin to expire and the resulting clip will be the last x seconds of the event unless retain_days under record is > 0.
+    max_seconds: 300
+    # Optional: Number of seconds before the event to include in the event (default: shown below)
+    pre_capture: 5
+    # Optional: Number of seconds after the event to include in the event (default: shown below)
+    post_capture: 5
+    # Optional: Objects to save event for. (default: all tracked objects)
     objects:
-      person: 15
+      - person
+    # Optional: Restrict event to objects that entered any of the listed zones (default: no required zones)
+    required_zones: []
+    # Optional: Retention settings for event
+    retain:
+      # Required: Default retention days (default: shown below)
+      default: 10
+      # Optional: Per object retention days
+      objects:
+        person: 15
 ```
 
 ## Snapshots
@@ -172,6 +185,9 @@ snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
+  # Optional: Enable writing a clean copy png snapshot to /media/frigate/clips (default: shown below)
+  # Only works if snapshots are enabled. This image is intended to be used for training purposes.
+  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
@@ -180,6 +196,8 @@ snapshots:
   crop: False
   # Optional: height to resize the snapshot to (default: original size)
   height: 175
+  # Optional: jpeg encode quality (default: shown below)
+  quality: 70
   # Optional: Restrict snapshots to objects that entered any of the listed zones (default: no required zones)
   required_zones: []
   # Optional: Camera override for retention settings (default: global values)
@@ -191,28 +209,42 @@ snapshots:
       person: 15
 ```
 
-## 24/7 Recordings
-
-24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
-
-:::caution
-Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
-:::
-
-```yaml
-# Optional: 24/7 recording configuration
-record:
-  # Optional: Enable recording (default: global setting)
-  enabled: False
-  # Optional: Number of days to retain (default: global setting)
-  retain_days: 30
-```
-
 ## RTMP streams
 
 Frigate can re-stream your video feed as a RTMP feed for other applications such as Home Assistant to utilize it at `rtmp://<frigate_host>/live/<camera_name>`. Port 1935 must be open. This allows you to use a video feed for detection in frigate and Home Assistant live view at the same time without having to make two separate connections to the camera. The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
 Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
+
+## Timestamp style configuration
+
+For the debug view and snapshots it is possible to embed a timestamp in the feed. In some instances the default position obstructs important space, visibility or contrast is too low because of color or the datetime format does not match ones desire.
+
+```yaml
+# Optional: in-feed timestamp style configuration
+timestamp_style:
+  # Optional: Position of the timestamp (default: shown below)
+  #           "tl" (top left), "tr" (top right), "bl" (bottom left), "br" (bottom right)
+  position: "tl"
+  # Optional: Format specifier conform to the Python package "datetime" (default: shown below)
+  #           Additional Examples:
+  #             german: "%d.%m.%Y %H:%M:%S"
+  format: "%m/%d/%Y %H:%M:%S"
+  # Optional: Color of font
+  color:
+    # All Required when color is specified (default: shown below)
+    red: 255
+    green: 255
+    blue: 255
+  # Optional: Scale factor for font (default: shown below)
+  scale: 1.0
+  # Optional: Line thickness of font (default: shown below)
+  thickness: 2
+  # Optional: Effect of lettering (default: shown below)
+  #           None (No effect),
+  #           "solid" (solid background in inverse color of font)
+  #           "shadow" (shadow for font)
+  effect: None
+```
 
 ## Full example
 
@@ -229,8 +261,8 @@ cameras:
         # Required: the path to the stream
         # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,clips,rtmp
-          # NOTICE: In addition to assigning the record, clips, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,rtmp
+          # NOTICE: In addition to assigning the record, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
@@ -250,14 +282,20 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       output_args:
 
-    # Required: width of the frame for the input with the detect role
-    width: 1280
-    # Required: height of the frame for the input with the detect role
-    height: 720
-    # Optional: desired fps for your camera for the input with the detect role
-    # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
-    #       Frigate will attempt to autodetect if not specified.
-    fps: 5
+    # Required: Camera level detect settings
+    detect:
+      # Required: width of the frame for the input with the detect role
+      width: 1280
+      # Required: height of the frame for the input with the detect role
+      height: 720
+      # Required: desired fps for your camera for the input with the detect role
+      # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
+      fps: 5
+      # Optional: enables detection for the camera (default: True)
+      # This value can be set via MQTT and will be updated in startup based on retained value
+      enabled: True
+      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+      max_disappeared: 25
 
     # Optional: camera level motion config
     motion:
@@ -278,6 +316,9 @@ cameras:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Coordinates can be generated at https://www.image-map.net/
         coordinates: 545,1077,747,939,788,805
+        # Optional: List of objects that can trigger this zone (default: all tracked objects)
+        objects:
+          - person
         # Optional: Zone level object filters.
         # NOTE: The global and camera filters are applied upstream.
         filters:
@@ -286,47 +327,48 @@ cameras:
             max_area: 100000
             threshold: 0.7
 
-    # Optional: Camera level detect settings
-    detect:
-      # Optional: enables detection for the camera (default: True)
-      # This value can be set via MQTT and will be updated in startup based on retained value
-      enabled: True
-      # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
-      max_disappeared: 25
-
-    # Optional: save clips configuration
-    clips:
-      # Required: enables clips for the camera (default: shown below)
-      # This value can be set via MQTT and will be updated in startup based on retained value
-      enabled: False
-      # Optional: Number of seconds before the event to include in the clips (default: shown below)
-      pre_capture: 5
-      # Optional: Number of seconds after the event to include in the clips (default: shown below)
-      post_capture: 5
-      # Optional: Objects to save clips for. (default: all tracked objects)
-      objects:
-        - person
-      # Optional: Restrict clips to objects that entered any of the listed zones (default: no required zones)
-      required_zones: []
-      # Optional: Camera override for retention settings (default: global values)
-      retain:
-        # Required: Default retention days (default: shown below)
-        default: 10
-        # Optional: Per object retention days
-        objects:
-          person: 15
-
     # Optional: 24/7 recording configuration
     record:
       # Optional: Enable recording (default: global setting)
       enabled: False
       # Optional: Number of days to retain (default: global setting)
       retain_days: 30
+      # Optional: Event recording settings
+      events:
+        # Required: enables event recordings for the camera (default: shown below)
+        # This value can be set via MQTT and will be updated in startup based on retained value
+        enabled: False
+        # Optional: Number of seconds before the event to include (default: shown below)
+        pre_capture: 5
+        # Optional: Number of seconds after the event to include (default: shown below)
+        post_capture: 5
+        # Optional: Objects to save events for. (default: all tracked objects)
+        objects:
+          - person
+        # Optional: Restrict events to objects that entered any of the listed zones (default: no required zones)
+        required_zones: []
+        # Optional: Camera override for retention settings (default: global values)
+        retain:
+          # Required: Default retention days (default: shown below)
+          default: 10
+          # Optional: Per object retention days
+          objects:
+            person: 15
 
     # Optional: RTMP re-stream configuration
     rtmp:
-      # Required: Enable the live stream (default: True)
+      # Required: Enable the RTMP stream (default: True)
       enabled: True
+
+    # Optional: Live stream configuration for WebUI
+    live:
+      # Optional: Set the height of the live stream. (default: 720)
+      # This must be less than or equal to the height of the detect stream. Lower resolutions
+      # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
+      height: 720
+      # Optional: Set the encode quality of the live stream (default: shown below)
+      # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+      quality: 8
 
     # Optional: Configuration for the jpg snapshots written to the clips directory for each event
     snapshots:
@@ -365,6 +407,8 @@ cameras:
       crop: True
       # Optional: height to resize the snapshot to (default: shown below)
       height: 270
+      # Optional: jpeg encode quality (default: shown below)
+      quality: 70
       # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
       required_zones: []
 
@@ -386,6 +430,31 @@ cameras:
           # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
           # Checks based on the bottom center of the bounding box of the object
           mask: 0,0,1000,0,1000,200,0,200
+
+    # Optional: In-feed timestamp style configuration
+    timestamp_style:
+    # Optional: Position of the timestamp (default: shown below)
+    #           "tl" (top left), "tr" (top right), "bl" (bottom left), "br" (bottom right)
+    position: "tl"
+    # Optional: Format specifier conform to the Python package "datetime" (default: shown below)
+    #           Additional Examples:
+    #             german: "%d.%m.%Y %H:%M:%S"
+    format: "%m/%d/%Y %H:%M:%S"
+    # Optional: Color of font
+    color:
+      # All Required when color is specified (default: shown below)
+      red: 255
+      green: 255
+      blue: 255
+    # Optional: Scale factor for font (default: shown below)
+    scale: 1.0
+    # Optional: Line thickness of font (default: shown below)
+    thickness: 2
+    # Optional: Effect of lettering (default: shown below)
+    #           None (No effect),
+    #           "solid" (solid background in inverse color of font)
+    #           "shadow" (shadow for font)
+    effect: None
 ```
 
 ## Camera specific configuration
@@ -412,12 +481,11 @@ input_args:
   - "1"
 ```
 
-Note that mjpeg cameras require encoding the video into h264 for clips, recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
+Note that mjpeg cameras require encoding the video into h264 for recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
 
 ```yaml
 output_args:
   record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
-  clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
   rtmp: -c:v libx264 -an -f flv
 ```
 
