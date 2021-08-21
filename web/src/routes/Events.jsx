@@ -1,10 +1,11 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import Select from '../components/Select';
 import produce from 'immer';
 import { route } from 'preact-router';
+import Event from './Event';
 import { useIntersectionObserver } from '../hooks';
 import { FetchStatus, useApiHost, useConfig, useEvents } from '../api';
 import { Table, Thead, Tbody, Tfoot, Th, Tr, Td } from '../components/Table';
@@ -12,9 +13,20 @@ import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/ho
 
 const API_LIMIT = 25;
 
-const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {} });
+const initialState = Object.freeze({ events: [], reachedEnd: false, searchStrings: {}, deleted: 0 });
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case 'DELETE_EVENT': {
+      const { deletedId } = action;
+
+      return produce(state, (draftState) => {
+        const idx = draftState.events.findIndex((e) => e.id === deletedId);
+        if (idx === -1) return state;
+
+        draftState.events.splice(idx, 1);
+        draftState.deleted++;
+      });
+    }
     case 'APPEND_EVENTS': {
       const {
         meta: { searchString },
@@ -54,11 +66,13 @@ function removeDefaultSearchKeys(searchParams) {
 
 export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const apiHost = useApiHost();
-  const [{ events, reachedEnd, searchStrings }, dispatch] = useReducer(reducer, initialState);
+  const [{ events, reachedEnd, searchStrings, deleted }, dispatch] = useReducer(reducer, initialState);
   const { searchParams: initialSearchParams } = new URL(window.location);
+  const [viewEvent, setViewEvent] = useState(null);
   const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
-  const { data, status, deleted } = useEvents(searchString);
+  const { data, status, deletedId } = useEvents(searchString);
 
+  let scrollToRef = {};
   useEffect(() => {
     if (data && !(searchString in searchStrings)) {
       dispatch({ type: 'APPEND_EVENTS', payload: data, meta: { searchString } });
@@ -67,7 +81,11 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     if (data && Array.isArray(data) && data.length + deleted < limit) {
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
-  }, [data, limit, searchString, searchStrings, deleted]);
+
+    if (deletedId) {
+      dispatch({ type: 'DELETE_EVENT', deletedId });
+    }
+  }, [data, limit, searchString, searchStrings, deleted, deletedId]);
 
   const [entry, setIntersectNode] = useIntersectionObserver();
 
@@ -99,8 +117,13 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     },
     [limit, pathname, setSearchString]
   );
-
+  const viewEventHandler = (id) => {
+    if (viewEvent === id) return setViewEvent(null);
+    if (id in scrollToRef) scrollToRef[id].scrollIntoView();
+    setViewEvent(id);
+  };
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
+
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
@@ -131,55 +154,73 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                 const end = new Date(parseInt(endTime * 1000, 10));
                 const ref = i === events.length - 1 ? lastCellRef : undefined;
                 return (
-                  <Tr data-testid={`event-${id}`} key={id}>
-                    <Td className="w-40">
-                      <a href={`/events/${id}`} ref={ref} data-start-time={startTime} data-reached-end={reachedEnd}>
-                        <img
-                          width="150"
-                          height="150"
-                          style="min-height: 48px; min-width: 48px;"
-                          src={`${apiHost}/api/events/${id}/thumbnail.jpg`}
+                  <Fragment key={id}>
+                    <Tr data-testid={`event-${id}`} className={`${viewEvent === id ? 'border-none' : ''}`}>
+                      <Td className="w-40">
+                        <a
+                          onClick={() => viewEventHandler(id)}
+                          ref={ref}
+                          data-start-time={startTime}
+                          data-reached-end={reachedEnd}
+                        >
+                          <img
+                            ref={(el) => (scrollToRef[id] = el)}
+                            width="150"
+                            height="150"
+                            className="cursor-pointer"
+                            style="min-height: 48px; min-width: 48px;"
+                            src={`${apiHost}/api/events/${id}/thumbnail.jpg`}
+                          />
+                        </a>
+                      </Td>
+                      <Td>
+                        <Filterable
+                          onFilter={handleFilter}
+                          pathname={pathname}
+                          searchParams={searchParams}
+                          paramName="camera"
+                          name={camera}
                         />
-                      </a>
-                    </Td>
-                    <Td>
-                      <Filterable
-                        onFilter={handleFilter}
-                        pathname={pathname}
-                        searchParams={searchParams}
-                        paramName="camera"
-                        name={camera}
-                      />
-                    </Td>
-                    <Td>
-                      <Filterable
-                        onFilter={handleFilter}
-                        pathname={pathname}
-                        searchParams={searchParams}
-                        paramName="label"
-                        name={label}
-                      />
-                    </Td>
-                    <Td>{(score * 100).toFixed(2)}%</Td>
-                    <Td>
-                      <ul>
-                        {zones.map((zone) => (
-                          <li>
-                            <Filterable
-                              onFilter={handleFilter}
-                              pathname={pathname}
-                              searchParams={searchString}
-                              paramName="zone"
-                              name={zone}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </Td>
-                    <Td>{start.toLocaleDateString()}</Td>
-                    <Td>{start.toLocaleTimeString()}</Td>
-                    <Td>{end.toLocaleTimeString()}</Td>
-                  </Tr>
+                      </Td>
+                      <Td>
+                        <Filterable
+                          onFilter={handleFilter}
+                          pathname={pathname}
+                          searchParams={searchParams}
+                          paramName="label"
+                          name={label}
+                        />
+                      </Td>
+                      <Td>{(score * 100).toFixed(2)}%</Td>
+                      <Td>
+                        <ul>
+                          {zones.map((zone) => (
+                            <li>
+                              <Filterable
+                                onFilter={handleFilter}
+                                pathname={pathname}
+                                searchParams={searchString}
+                                paramName="zone"
+                                name={zone}
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      </Td>
+                      <Td>{start.toLocaleDateString()}</Td>
+                      <Td>{start.toLocaleTimeString()}</Td>
+                      <Td>{end.toLocaleTimeString()}</Td>
+                    </Tr>
+                    {viewEvent === id ? (
+                      <Tr className="border-b-1">
+                        <Td colspan="8">
+                          <div>
+                            <Event eventId={viewEvent} close={() => setViewEvent(null)} />
+                          </div>
+                        </Td>
+                      </Tr>
+                    ) : null}
+                  </Fragment>
                 );
               }
             )}
