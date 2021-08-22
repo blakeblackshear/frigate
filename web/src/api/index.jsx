@@ -18,7 +18,7 @@ const initialState = Object.freeze({
 
 const Api = createContext(initialState);
 
-function reducer(state, { type, payload, meta }) {
+function reducer(state, { type, payload }) {
   switch (type) {
     case 'REQUEST': {
       const { url, fetchId } = payload;
@@ -36,9 +36,8 @@ function reducer(state, { type, payload, meta }) {
     }
     case 'DELETE': {
       const { eventId } = payload;
-
       return produce(state, (draftState) => {
-        Object.keys(draftState.queries).map((url, index) => {
+        Object.keys(draftState.queries).map((url) => {
           draftState.queries[url].deletedId = eventId;
         });
       });
