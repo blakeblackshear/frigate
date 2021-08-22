@@ -85,7 +85,6 @@ export default function Event({ eventId, close }) {
 
       {data.has_clip ? (
         <Fragment>
-          <Heading size="lg">Clip</Heading>
           <div className="outer-max-width m-auto">
             <div className="aspect-ratio-box w-full relative">
               <div className="absolute w-full top-0 left-0">
