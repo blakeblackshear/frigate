@@ -1,19 +1,15 @@
 import { h, Fragment } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
-import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
-import ArrowDown from '../icons/ArrowDropdown';
 import Menu from '../icons/Menu';
 import Delete from '../icons/Delete';
 import Snapshot from '../icons/Snapshot';
 import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
-import Link from '../components/Link';
 import VideoPlayer from '../components/VideoPlayer';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
-import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 
 export default function Event({ eventId, close }) {
   const apiHost = useApiHost();
@@ -49,9 +45,7 @@ export default function Event({ eventId, close }) {
     return <ActivityIndicator />;
   }
 
-  const startime = new Date(data.start_time * 1000);
-  const endtime = new Date(data.end_time * 1000);
-
+  console.log(data);
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4">
@@ -61,10 +55,6 @@ export default function Event({ eventId, close }) {
           </Button>
           <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
             <Snapshot className="w-6" /> Download Snapshot
-          </Button>
-          <Button className="self-start" onClick={() => setShowDetails(!showDetails)}>
-            <ArrowDown className="w-6" />
-            {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
           </Button>
         </div>
         <div class="col-end-10 col-span-2 space-x-4">
@@ -93,35 +83,6 @@ export default function Event({ eventId, close }) {
           />
         ) : null}
       </div>
-
-      <Table class="w-full">
-        <Thead>
-          <Th>Key</Th>
-          <Th>Value</Th>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td>Camera</Td>
-            <Td>
-              <Link href={`/cameras/${data.camera}`}>{data.camera}</Link>
-            </Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Timeframe</Td>
-            <Td>
-              {startime.toLocaleString()} – {endtime.toLocaleString()}
-            </Td>
-          </Tr>
-          <Tr>
-            <Td>Score</Td>
-            <Td>{(data.top_score * 100).toFixed(2)}%</Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Zones</Td>
-            <Td>{data.zones.join(', ')}</Td>
-          </Tr>
-        </Tbody>
-      </Table>
 
       {data.has_clip ? (
         <Fragment>
