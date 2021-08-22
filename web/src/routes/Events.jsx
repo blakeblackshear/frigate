@@ -128,6 +128,13 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   };
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
+  const viewEventById = (eventId) => (
+    <Tr className="border-b-1">
+      <Td colspan="8">
+        <Event eventId={eventId} close={() => setViewEvent(null)} />
+      </Td>
+    </Tr>
+  );
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
@@ -215,13 +222,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                       <Td>{start.toLocaleTimeString()}</Td>
                       <Td>{end.toLocaleTimeString()}</Td>
                     </Tr>
-                    {viewEvent === id ? (
-                      <Tr className="border-b-1">
-                        <Td colspan="8">
-                          <Event eventId={viewEvent} close={() => setViewEvent(null)} />
-                        </Td>
-                      </Tr>
-                    ) : null}
+                    {viewEvent === id ? viewEventById(viewEvent) : null}
                   </Fragment>
                 );
               }
