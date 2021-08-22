@@ -29,3 +29,16 @@
 .jsmpeg canvas {
   position: static !important;
 }
+
+/*
+Event.js
+Maintain aspect ratio and scale down the video container
+Could not find a proper tailwind css.
+*/
+.outer-max-width {
+  max-width: 60%;
+}
+.aspect-ratio-box {
+  padding-top: calc(9 / 16 * 100%);
+  padding-bottom: 20%;
+}
