@@ -136,7 +136,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
 
   const viewEventById = (eventId) => (
     <Tr className="border-b-1">
-      <Td colspan="8">
+      <Td colSpan="8">
         <Event eventId={eventId} close={() => setViewEvent(null)} />
       </Td>
     </Tr>
