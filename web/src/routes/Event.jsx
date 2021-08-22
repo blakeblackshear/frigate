@@ -82,12 +82,11 @@ export default function Event({ eventId, close }) {
           />
         ) : null}
       </div>
-
-      {data.has_clip ? (
-        <Fragment>
-          <div className="outer-max-width m-auto">
-            <div className="aspect-ratio-box w-full relative">
-              <div className="absolute w-full top-10 left-0">
+      <div className="outer-max-width m-auto">
+        <div className="aspect-ratio-box w-full relative">
+          <div className="absolute w-full top-10 left-0">
+            {data.has_clip ? (
+              <Fragment>
                 <VideoPlayer
                   options={{
                     sources: [
@@ -103,23 +102,23 @@ export default function Event({ eventId, close }) {
                   seekOptions={{ forward: 10, back: 5 }}
                   onReady={(player) => {}}
                 />
-              </div>
-            </div>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+                <img
+                  src={
+                    data.has_snapshot
+                      ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                      : `data:image/jpeg;base64,${data.thumbnail}`
+                  }
+                  alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
+                />
+              </Fragment>
+            )}
           </div>
-        </Fragment>
-      ) : (
-        <Fragment>
-          <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
-          <img
-            src={
-              data.has_snapshot
-                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                : `data:image/jpeg;base64,${data.thumbnail}`
-            }
-            alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
-          />
-        </Fragment>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
