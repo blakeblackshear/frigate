@@ -45,7 +45,6 @@ export default function Event({ eventId, close }) {
     return <ActivityIndicator />;
   }
 
-  console.log(data);
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-6 gap-4">
@@ -107,14 +106,6 @@ export default function Event({ eventId, close }) {
                 />
               </div>
             </div>
-          </div>
-          <div className="flex space-x-4 justify-center">
-            <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
-              <Clip className="w-6" /> Download Clip
-            </Button>
-            <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
-              <Snapshot className="w-6" /> Download Snapshot
-            </Button>
           </div>
         </Fragment>
       ) : (
