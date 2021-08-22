@@ -20,8 +20,8 @@ export default function Event({ eventId, close, scrollIntoView }) {
 
   useEffect(() => {
     // Call Events.js scroll when this event has been mounted.
-    () => scrollIntoView(eventId);
-  }, []);
+    scrollIntoView(eventId);
+  }, [scrollIntoView]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
