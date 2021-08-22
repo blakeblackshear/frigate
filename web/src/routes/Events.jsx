@@ -80,7 +80,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     }
 
     if (data && Array.isArray(data) && data.length + deleted < limit) {
-      console.log('reached end');
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
   }, [data, limit, searchString, searchStrings, deleted]);
