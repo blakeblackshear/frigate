@@ -121,10 +121,16 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     },
     [limit, pathname, setSearchString]
   );
+
   const viewEventHandler = (id) => {
+    //Toggle event view
     if (viewEvent === id) return setViewEvent(null);
-    if (id in scrollToRef) scrollToRef[id].scrollIntoView();
+
+    //Set event id to be rendered.
     setViewEvent(id);
+
+    //scroll the event into view
+    if (id in scrollToRef) scrollToRef[id].scrollIntoView();
   };
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
