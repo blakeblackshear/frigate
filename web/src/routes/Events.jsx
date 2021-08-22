@@ -73,7 +73,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
   const { data, status, deletedId } = useEvents(searchString);
 
-  let scrollToRef = {};
+  const scrollToRef = {};
   useEffect(() => {
     if (data && !(searchString in searchStrings)) {
       dispatch({ type: 'APPEND_EVENTS', payload: data, meta: { searchString } });

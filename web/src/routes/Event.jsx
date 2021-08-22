@@ -20,7 +20,7 @@ export default function Event({ eventId, close, scrollIntoView }) {
 
   useEffect(() => {
     // Call Events.js scroll when this event has been mounted.
-    scrollIntoView(eventId);
+    () => scrollIntoView(eventId);
   }, []);
 
   const handleClickDelete = () => {
@@ -92,6 +92,7 @@ export default function Event({ eventId, close, scrollIntoView }) {
           <div className="absolute w-full top-10 left-0">
             {data.has_clip ? (
               <Fragment>
+                <Heading size="lg">Clip</Heading>
                 <VideoPlayer
                   options={{
                     sources: [
