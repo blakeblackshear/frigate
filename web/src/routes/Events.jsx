@@ -72,10 +72,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const [viewEvent, setViewEvent] = useState(null);
   const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
   const { data, status, deletedId } = useEvents(searchString);
-  console.log('deleted', deleted);
-  console.log('deletedId', deletedId);
-  console.log('limit', limit);
-  console.log('data.length', data && data.length);
 
   let scrollToRef = {};
   useEffect(() => {
