@@ -39,18 +39,6 @@ function reducer(state, { type, payload, meta }) {
 
       return produce(state, (draftState) => {
         Object.keys(draftState.queries).map((url, index) => {
-          // If data has no array length then just return state.
-          if (!('data' in draftState.queries[url]) || !draftState.queries[url].data.length) return state;
-
-          //Find the index to remove
-          const removeIndex = draftState.queries[url].data.map((event) => event.id).indexOf(eventId);
-          if (removeIndex === -1) return state;
-
-          // We need to keep track of deleted items, This will be used to re-calculate "ReachEnd" for auto load new events. Events.jsx
-          const totDeleted = state.queries[url].deleted || 0;
-
-          // Splice the deleted index.
-          draftState.queries[url].data.splice(removeIndex, 1);
           draftState.queries[url].deletedId = eventId;
         });
       });

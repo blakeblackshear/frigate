@@ -36,6 +36,7 @@ const reducer = (state = initialState, action) => {
       return produce(state, (draftState) => {
         draftState.searchStrings[searchString] = true;
         draftState.events.push(...payload);
+        draftState.deleted = 0;
       });
     }
 
@@ -71,6 +72,10 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const [viewEvent, setViewEvent] = useState(null);
   const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${initialSearchParams.toString()}`);
   const { data, status, deletedId } = useEvents(searchString);
+  console.log('deleted', deleted);
+  console.log('deletedId', deletedId);
+  console.log('limit', limit);
+  console.log('data.length', data && data.length);
 
   let scrollToRef = {};
   useEffect(() => {
@@ -79,13 +84,16 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     }
 
     if (data && Array.isArray(data) && data.length + deleted < limit) {
+      console.log('reached end');
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
+  }, [data, limit, searchString, searchStrings, deleted]);
 
+  useEffect(() => {
     if (deletedId) {
       dispatch({ type: 'DELETE_EVENT', deletedId });
     }
-  }, [data, limit, searchString, searchStrings, deleted, deletedId]);
+  }, [deletedId]);
 
   const [entry, setIntersectNode] = useIntersectionObserver();
 
@@ -214,9 +222,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                     {viewEvent === id ? (
                       <Tr className="border-b-1">
                         <Td colspan="8">
-                          <div>
-                            <Event eventId={viewEvent} close={() => setViewEvent(null)} />
-                          </div>
+                          <Event eventId={viewEvent} close={() => setViewEvent(null)} />
                         </Td>
                       </Tr>
                     ) : null}
