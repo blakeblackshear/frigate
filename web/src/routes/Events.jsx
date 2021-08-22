@@ -128,19 +128,16 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
 
     //Set event id to be rendered.
     setViewEvent(id);
+  };
 
-    //scroll the event into view
+  // Called from the mounted event.js to prevent
+  // race condition between scollIntoView and if component has been mounted.
+  const scrollIntoView = (id) => {
     if (id in scrollToRef) scrollToRef[id].scrollIntoView();
   };
+
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
-  const viewEventById = (eventId) => (
-    <Tr className="border-b-1">
-      <Td colSpan="8">
-        <Event eventId={eventId} close={() => setViewEvent(null)} />
-      </Td>
-    </Tr>
-  );
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
@@ -163,10 +160,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
           </Thead>
           <Tbody>
             {events.map(
-              (
-                { camera, id, label, start_time: startTime, end_time: endTime, thumbnail, top_score: score, zones },
-                i
-              ) => {
+              ({ camera, id, label, start_time: startTime, end_time: endTime, top_score: score, zones }, i) => {
                 const start = new Date(parseInt(startTime * 1000, 10));
                 const end = new Date(parseInt(endTime * 1000, 10));
                 const ref = i === events.length - 1 ? lastCellRef : undefined;
@@ -228,7 +222,13 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                       <Td>{start.toLocaleTimeString()}</Td>
                       <Td>{end.toLocaleTimeString()}</Td>
                     </Tr>
-                    {viewEvent === id ? viewEventById(viewEvent) : null}
+                    {viewEvent === id ? (
+                      <Tr className="border-b-1">
+                        <Td colSpan="8">
+                          <Event scrollIntoView={scrollIntoView} eventId={id} close={() => setViewEvent(null)} />
+                        </Td>
+                      </Tr>
+                    ) : null}
                   </Fragment>
                 );
               }
@@ -236,7 +236,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
           </Tbody>
           <Tfoot>
             <Tr>
-              <Td className="text-center p-4" colspan="8">
+              <Td className="text-center p-4" colSpan="8">
                 {status === FetchStatus.LOADING ? <ActivityIndicator /> : reachedEnd ? 'No more events' : null}
               </Td>
             </Tr>
