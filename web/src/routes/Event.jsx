@@ -1,5 +1,5 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useState, useEffect } from 'preact/hooks';
+import { useCallback, useState, useEffect, useRef } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
@@ -11,7 +11,7 @@ import Heading from '../components/Heading';
 import VideoPlayer from '../components/VideoPlayer';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
 
-export default function Event({ eventId, close, scrollIntoView }) {
+export default function Event({ eventId, close, scrollRef }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
@@ -20,8 +20,15 @@ export default function Event({ eventId, close, scrollIntoView }) {
 
   useEffect(() => {
     // Call Events.js scroll when this event has been mounted.
-    scrollIntoView(eventId);
-  }, [scrollIntoView, eventId]);
+    // scrollIntoView(eventId);
+    scrollToElement();
+  }, [data]);
+
+  const scrollToElement = useCallback(() => {
+    if (scrollRef && scrollRef[eventId]) {
+      scrollRef[eventId].scrollIntoView();
+    }
+  }, [scrollRef]);
 
   const handleClickDelete = () => {
     setShowDialog(true);

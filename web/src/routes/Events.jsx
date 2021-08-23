@@ -80,6 +80,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     }
 
     if (data && Array.isArray(data) && data.length + deleted < limit) {
+      console.log('reached end');
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
   }, [data, limit, searchString, searchStrings, deleted]);
@@ -127,12 +128,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
 
     //Set event id to be rendered.
     setViewEvent(id);
-  };
-
-  // Called from the mounted event.js to prevent
-  // race condition between scollIntoView and if component has been mounted.
-  const scrollIntoView = (id) => {
-    if (id in scrollToRef) scrollToRef[id].scrollIntoView();
   };
 
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
@@ -224,7 +219,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                     {viewEvent === id ? (
                       <Tr className="border-b-1">
                         <Td colSpan="8">
-                          <Event scrollIntoView={scrollIntoView} eventId={id} close={() => setViewEvent(null)} />
+                          <Event eventId={id} close={() => setViewEvent(null)} scrollRef={scrollToRef} />
                         </Td>
                       </Tr>
                     ) : null}
