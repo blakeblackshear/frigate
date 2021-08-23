@@ -15,20 +15,17 @@ export default function Event({ eventId, close, scrollRef }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
+  const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
   const setDeleteEvent = useDelete();
 
   useEffect(() => {
-    // Call Events.js scroll when this event has been mounted.
-    // scrollIntoView(eventId);
-    scrollToElement();
-  }, [data]);
-
-  const scrollToElement = useCallback(() => {
-    if (scrollRef && scrollRef[eventId]) {
+    // Scroll event into view when component has been mounted.
+    if (shouldScroll && scrollRef && scrollRef[eventId]) {
       scrollRef[eventId].scrollIntoView();
+      setShouldScroll(false);
     }
-  }, [scrollRef]);
+  }, [data, scrollRef, eventId, shouldScroll]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
