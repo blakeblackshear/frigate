@@ -16,12 +16,12 @@ describe('Event Route', () => {
 
   test('shows an ActivityIndicator if not yet loaded', async () => {
     useEventMock.mockReturnValueOnce(() => ({ status: 'loading' }));
-    render(<Event eventId={mockEvent.id} scrollIntoView={mockEvent.scrollIntoView} />);
+    render(<Event eventId={mockEvent.id} />);
     expect(screen.queryByLabelText('Loading…')).toBeInTheDocument();
   });
 
   test('shows cameras', async () => {
-    render(<Event eventId={mockEvent.id} scrollIntoView={mockEvent.scrollIntoView} />);
+    render(<Event eventId={mockEvent.id} />);
 
     expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
 
@@ -33,7 +33,7 @@ describe('Event Route', () => {
 
   test('does not render a video if there is no clip', async () => {
     useEventMock.mockReturnValue({ data: { ...mockEvent, has_clip: false }, status: 'loaded' });
-    render(<Event eventId={mockEvent.id} scrollIntoView={mockEvent.scrollIntoView} />);
+    render(<Event eventId={mockEvent.id} />);
 
     expect(screen.queryByText('Clip')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Video Player')).not.toBeInTheDocument();
@@ -43,7 +43,7 @@ describe('Event Route', () => {
 
   test('shows the thumbnail if no snapshot available', async () => {
     useEventMock.mockReturnValue({ data: { ...mockEvent, has_clip: false, has_snapshot: false }, status: 'loaded' });
-    render(<Event eventId={mockEvent.id} scrollIntoView={mockEvent.scrollIntoView} />);
+    render(<Event eventId={mockEvent.id} />);
 
     expect(screen.queryByText('Best Image')).not.toBeInTheDocument();
     expect(screen.queryByText('Thumbnail')).toBeInTheDocument();
@@ -66,5 +66,4 @@ const mockEvent = {
   top_score: 0.8203125,
   zones: ['front_patio'],
   thumbnail: '/9j/4aa...',
-  scrollIntoView: jest.fn(),
 };
