@@ -1,5 +1,5 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useState, useEffect, useRef } from 'preact/hooks';
+import { useCallback, useState, useEffect } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
@@ -113,7 +113,7 @@ export default function Event({ eventId, close, scrollRef }) {
                       : `data:image/jpeg;base64,${data.thumbnail}`,
                   }}
                   seekOptions={{ forward: 10, back: 5 }}
-                  onReady={(player) => {}}
+                  onReady={() => {}}
                 />
               </Fragment>
             ) : (
