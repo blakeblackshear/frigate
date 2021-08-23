@@ -244,6 +244,8 @@ class RecordingCleanup(threading.Thread):
 
     def expire_files(self):
         logger.debug("Start expire files (legacy).")
+
+        shortest_retention = self.config.record.retain_days
         default_expire = (
             datetime.datetime.now().timestamp()
             - SECONDS_IN_DAY * self.config.record.retain_days
@@ -254,8 +256,19 @@ class RecordingCleanup(threading.Thread):
                 datetime.datetime.now().timestamp()
                 - SECONDS_IN_DAY * camera.record.retain_days
             )
+            if camera.record.retain_days < shortest_retention:
+                shortest_retention = camera.record.retain_days
 
-        for p in Path("/media/frigate/recordings").rglob("*.mp4"):
+        logger.debug(f"Shortest retention: {shortest_retention}")
+        process = sp.run(
+            ["find", RECORD_DIR, "-type", "f", "-mtime", f"+{shortest_retention}"],
+            capture_output=True,
+            text=True,
+        )
+        files_to_check = process.stdout.splitlines()
+
+        for f in files_to_check:
+            p = Path(f)
             # Ignore files that have a record in the recordings DB
             if Recordings.select().where(Recordings.path == str(p)).count():
                 continue
@@ -265,8 +278,8 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End expire files (legacy).")
 
     def run(self):
-        # Expire recordings every minute, clean directories every 5 minutes.
-        for counter in itertools.cycle(range(5)):
+        # Expire recordings every minute, clean directories every hour.
+        for counter in itertools.cycle(range(60)):
             if self.stop_event.wait(60):
                 logger.info(f"Exiting recording cleanup...")
                 break
