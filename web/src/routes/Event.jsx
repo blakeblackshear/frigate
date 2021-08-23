@@ -92,41 +92,39 @@ export default function Event({ eventId, close, scrollRef }) {
         ) : null}
       </div>
       <div className="outer-max-width m-auto">
-        <div className="aspect-ratio-box w-full relative">
-          <div className="absolute w-full top-10 left-0">
-            {data.has_clip ? (
-              <Fragment>
-                <Heading size="lg">Clip</Heading>
-                <VideoPlayer
-                  options={{
-                    sources: [
-                      {
-                        src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
-                        type: 'application/vnd.apple.mpegurl',
-                      },
-                    ],
-                    poster: data.has_snapshot
-                      ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                      : `data:image/jpeg;base64,${data.thumbnail}`,
-                  }}
-                  seekOptions={{ forward: 10, back: 5 }}
-                  onReady={() => {}}
-                />
-              </Fragment>
-            ) : (
-              <Fragment>
-                <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
-                <img
-                  src={
-                    data.has_snapshot
-                      ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                      : `data:image/jpeg;base64,${data.thumbnail}`
-                  }
-                  alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
-                />
-              </Fragment>
-            )}
-          </div>
+        <div className="w-full pt-5 relative pb-20">
+          {data.has_clip ? (
+            <Fragment>
+              <Heading size="lg">Clip</Heading>
+              <VideoPlayer
+                options={{
+                  sources: [
+                    {
+                      src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
+                      type: 'application/vnd.apple.mpegurl',
+                    },
+                  ],
+                  poster: data.has_snapshot
+                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    : `data:image/jpeg;base64,${data.thumbnail}`,
+                }}
+                seekOptions={{ forward: 10, back: 5 }}
+                onReady={() => {}}
+              />
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+              <img
+                src={
+                  data.has_snapshot
+                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    : `data:image/jpeg;base64,${data.thumbnail}`
+                }
+                alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
+              />
+            </Fragment>
+          )}
         </div>
       </div>
     </div>
