@@ -82,13 +82,17 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     if (data && Array.isArray(data) && data.length + deleted < limit) {
       dispatch({ type: 'REACHED_END', meta: { searchString } });
     }
-  }, [data, limit, searchString, searchStrings, deleted]);
 
-  useEffect(() => {
     if (deletedId) {
       dispatch({ type: 'DELETE_EVENT', deletedId });
     }
-  }, [deletedId]);
+  }, [data, limit, searchString, searchStrings, deleted, deletedId]);
+
+  // useEffect(() => {
+  //   if (deletedId) {
+  //     dispatch({ type: 'DELETE_EVENT', deletedId });
+  //   }
+  // }, [deletedId]);
 
   const [entry, setIntersectNode] = useIntersectionObserver();
 
