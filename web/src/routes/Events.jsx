@@ -88,12 +88,6 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     }
   }, [data, limit, searchString, searchStrings, deleted, deletedId]);
 
-  // useEffect(() => {
-  //   if (deletedId) {
-  //     dispatch({ type: 'DELETE_EVENT', deletedId });
-  //   }
-  // }, [deletedId]);
-
   const [entry, setIntersectNode] = useIntersectionObserver();
 
   useEffect(() => {
