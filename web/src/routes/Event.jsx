@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
-import Menu from '../icons/Menu';
+import Close from '../icons/Close';
 import Delete from '../icons/Delete';
 import Snapshot from '../icons/Snapshot';
 import Dialog from '../components/Dialog';
@@ -70,7 +70,7 @@ export default function Event({ eventId, close, scrollRef }) {
             <Delete className="w-6" /> Delete event
           </Button>
           <Button color="gray" className="self-start" onClick={() => close()}>
-            <Menu className="w-6" /> Close
+            <Close className="w-6" /> Close
           </Button>
         </div>
         {showDialog ? (
