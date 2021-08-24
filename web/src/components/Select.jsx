@@ -25,9 +25,24 @@ export default function Select({
   const [selected, setSelected] = useState();
   const [datePickerValue, setDatePickerValue] = useState();
 
+  // Reset the state if the prop value changes
+  useEffect(() => {
+    const selectedIndex = Math.max(
+      options.findIndex(({ value }) => value === propSelected),
+      0
+    );
+    if (propSelected && selectedIndex !== selected) {
+      setSelected(selectedIndex);
+      setFocused(selectedIndex);
+    }
+    // DO NOT include `selected`
+  }, [options, propSelected]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (type === 'datepicker') {
       if ('after' && 'before' in propSelected) {
+        if (!propSelected.before || !propSelected.after) return setDatePickerValue('all');
+
         for (let i = 0; i < inputOptions.length; i++) {
           if (
             inputOptions[i].value &&
@@ -62,18 +77,17 @@ export default function Select({
 
   const handleSelect = useCallback(
     (value, label) => {
-      setSelected(options.findIndex((opt) => opt.value === value));
+      setSelected(options.findIndex(({ value }) => Object.values(propSelected).includes(value)));
       setShowMenu(false);
 
       if (!value) return setShowDatePicker(true);
       onChange && onChange(value, label);
     },
-    [onChange, options]
+    [onChange, options, propSelected, setSelected]
   );
+
   const handleDateRange = useCallback(
     (range) => {
-      // setSelected(options.findIndex((opt) => opt.value === value));
-
       onChange && onChange(range, 'range');
       setShowMenu(false);
     },
@@ -120,19 +134,6 @@ export default function Select({
   const handleDismiss = useCallback(() => {
     setShowMenu(false);
   }, [setShowMenu]);
-
-  // Reset the state if the prop value changes
-  useEffect(() => {
-    const selectedIndex = Math.max(
-      options.findIndex(({ value }) => value === propSelected),
-      0
-    );
-    if (propSelected && selectedIndex !== selected) {
-      setSelected(selectedIndex);
-      setFocused(selectedIndex);
-    }
-    // DO NOT include `selected`
-  }, [options, propSelected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     window.addEventListener('click', addBackDrop);
