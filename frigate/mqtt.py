@@ -96,14 +96,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         threading.current_thread().name = "mqtt"
         if rc != 0:
             if rc == 3:
-                logger.error("MQTT Server unavailable")
+                logger.error("Unable to connect to MQTT server: MQTT Server unavailable")
             elif rc == 4:
-                logger.error("MQTT Bad username or password")
+                logger.error("Unable to connect to MQTT server: MQTT Bad username or password")
             elif rc == 5:
-                logger.error("MQTT Not authorized")
+                logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
-                    "Unable to connect to MQTT: Connection refused. Error code: "
+                    "Unable to connect to MQTT server: Connection refused. Error code: "
                     + str(rc)
                 )
 
