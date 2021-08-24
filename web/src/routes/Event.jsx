@@ -66,11 +66,11 @@ export default function Event({ eventId, close, scrollRef }) {
           </Button>
         </div>
         <div class="col-end-10 col-span-2 space-x-4">
-          <Button color="gray" className="self-start" onClick={() => close()}>
-            <Menu className="w-6" /> Close
-          </Button>
           <Button className="self-start" color="red" onClick={handleClickDelete}>
             <Delete className="w-6" /> Delete event
+          </Button>
+          <Button color="gray" className="self-start" onClick={() => close()}>
+            <Menu className="w-6" /> Close
           </Button>
         </div>
         {showDialog ? (
