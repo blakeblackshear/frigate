@@ -12,7 +12,7 @@ export default function JSMpegPlayer({ camera }) {
       playerRef.current,
       url,
       {},
-      {protocols: [], audio: false}
+      {protocols: [], audio: false, videoBufferSize: 1024*1024*4}
     );
 
     const fullscreen = () => {

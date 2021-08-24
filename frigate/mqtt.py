@@ -13,6 +13,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import FrigateConfig
+from frigate.util import restart_frigate
 
 logger = logging.getLogger(__name__)
 
@@ -20,22 +21,22 @@ logger = logging.getLogger(__name__)
 def create_mqtt_client(config: FrigateConfig, camera_metrics):
     mqtt_config = config.mqtt
 
-    def on_clips_command(client, userdata, message):
+    def on_recordings_command(client, userdata, message):
         payload = message.payload.decode()
-        logger.debug(f"on_clips_toggle: {message.topic} {payload}")
+        logger.debug(f"on_recordings_toggle: {message.topic} {payload}")
 
         camera_name = message.topic.split("/")[-3]
 
-        clips_settings = config.cameras[camera_name].clips
+        record_settings = config.cameras[camera_name].record
 
         if payload == "ON":
-            if not clips_settings.enabled:
-                logger.info(f"Turning on clips for {camera_name} via mqtt")
-                clips_settings.enabled = True
+            if not record_settings.enabled:
+                logger.info(f"Turning on recordings for {camera_name} via mqtt")
+                record_settings.enabled = True
         elif payload == "OFF":
-            if clips_settings.enabled:
-                logger.info(f"Turning off clips for {camera_name} via mqtt")
-                clips_settings.enabled = False
+            if record_settings.enabled:
+                logger.info(f"Turning off recordings for {camera_name} via mqtt")
+                record_settings.enabled = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
@@ -88,6 +89,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
+    def on_restart_command(client, userdata, message):
+        restart_frigate()
+
     def on_connect(client, userdata, flags, rc):
         threading.current_thread().name = "mqtt"
         if rc != 0:
@@ -116,7 +120,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
     # register callbacks
     for name in config.cameras.keys():
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/clips/set", on_clips_command
+            f"{mqtt_config.topic_prefix}/{name}/recordings/set", on_recordings_command
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/snapshots/set", on_snapshots_command
@@ -124,6 +128,10 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
         )
+
+    client.message_callback_add(
+        f"{mqtt_config.topic_prefix}/restart", on_restart_command
+    )
 
     if not mqtt_config.tls_ca_certs is None:
         if (
@@ -151,8 +159,8 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
 
     for name in config.cameras.keys():
         client.publish(
-            f"{mqtt_config.topic_prefix}/{name}/clips/state",
-            "ON" if config.cameras[name].clips.enabled else "OFF",
+            f"{mqtt_config.topic_prefix}/{name}/recordings/state",
+            "ON" if config.cameras[name].record.enabled else "OFF",
             retain=True,
         )
         client.publish(
@@ -184,7 +192,7 @@ class MqttSocketRelay:
                     json_message = json.loads(message.data.decode("utf-8"))
                     json_message = {
                         "topic": f"{self.topic_prefix}/{json_message['topic']}",
-                        "payload": json_message["payload"],
+                        "payload": json_message.get("payload"),
                         "retain": json_message.get("retain", False),
                     }
                 except Exception as e:

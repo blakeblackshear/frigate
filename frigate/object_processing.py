@@ -1,5 +1,5 @@
-import copy
 import base64
+import copy
 import datetime
 import hashlib
 import itertools
@@ -14,29 +14,19 @@ from statistics import mean, median
 from typing import Callable, Dict
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
-from frigate.config import FrigateConfig, CameraConfig
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.config import CameraConfig, FrigateConfig
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import (
     SharedMemoryFrameManager,
+    calculate_region,
     draw_box_with_label,
     draw_timestamp,
-    calculate_region,
 )
 
 logger = logging.getLogger(__name__)
-
-PATH_TO_LABELS = "/labelmap.txt"
-
-LABELS = load_labels(PATH_TO_LABELS)
-cmap = plt.cm.get_cmap("tab10", len(LABELS.keys()))
-
-COLOR_MAP = {}
-for key, val in LABELS.items():
-    COLOR_MAP[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
 
 def on_edge(box, frame_shape):
@@ -72,9 +62,12 @@ def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
 
 
 class TrackedObject:
-    def __init__(self, camera, camera_config: CameraConfig, frame_cache, obj_data):
+    def __init__(
+        self, camera, colormap, camera_config: CameraConfig, frame_cache, obj_data
+    ):
         self.obj_data = obj_data
         self.camera = camera
+        self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
         self.current_zones = []
@@ -107,6 +100,7 @@ class TrackedObject:
 
     def update(self, current_frame_time, obj_data):
         significant_update = False
+        zone_change = False
         self.obj_data.update(obj_data)
         # if the object is not in the current frame, add a 0.0 to the score history
         if self.obj_data["frame_time"] != current_frame_time:
@@ -142,6 +136,9 @@ class TrackedObject:
         bottom_center = (self.obj_data["centroid"][0], self.obj_data["box"][3])
         # check each zone
         for name, zone in self.camera_config.zones.items():
+            # if the zone is not for this object type, skip
+            if len(zone.objects) > 0 and not self.obj_data["label"] in zone.objects:
+                continue
             contour = zone.contour
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
@@ -152,10 +149,10 @@ class TrackedObject:
 
         # if the zones changed, signal an update
         if not self.false_positive and set(self.current_zones) != set(current_zones):
-            significant_update = True
+            zone_change = True
 
         self.current_zones = current_zones
-        return significant_update
+        return (significant_update, zone_change)
 
     def to_dict(self, include_thumbnail: bool = False):
         snapshot_time = (
@@ -243,7 +240,7 @@ class TrackedObject:
 
         if bounding_box:
             thickness = 2
-            color = COLOR_MAP[self.obj_data["label"]]
+            color = self.colormap[self.obj_data["label"]]
 
             # draw the bounding boxes on the frame
             box = self.thumbnail_data["box"]
@@ -318,7 +315,9 @@ def zone_filtered(obj: TrackedObject, object_config):
 
 # Maintains the state of a camera
 class CameraState:
-    def __init__(self, name, config, frame_manager):
+    def __init__(
+        self, name, config: FrigateConfig, frame_manager: SharedMemoryFrameManager
+    ):
         self.name = name
         self.config = config
         self.camera_config = config.cameras[name]
@@ -351,7 +350,7 @@ class CameraState:
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time:
                     thickness = 2
-                    color = COLOR_MAP[obj["label"]]
+                    color = self.config.model.colormap[obj["label"]]
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -392,7 +391,7 @@ class CameraState:
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
 
         if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion_mask == [0])
+            mask_overlay = np.where(self.camera_config.motion.mask == [0])
             frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("motion_boxes"):
@@ -442,7 +441,11 @@ class CameraState:
 
         for id in new_ids:
             new_obj = tracked_objects[id] = TrackedObject(
-                self.name, self.camera_config, self.frame_cache, current_detections[id]
+                self.name,
+                self.config.model.colormap,
+                self.camera_config,
+                self.frame_cache,
+                current_detections[id],
             )
 
             # call event handlers
@@ -451,7 +454,9 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            significant_update = updated_obj.update(frame_time, current_detections[id])
+            significant_update, zone_change = updated_obj.update(
+                frame_time, current_detections[id]
+            )
 
             if significant_update:
                 # ensure this frame is stored in the cache
@@ -464,11 +469,12 @@ class CameraState:
                 updated_obj.last_updated = frame_time
 
             # if it has been more than 5 seconds since the last publish
-            # and the last update is greater than the last publish
+            # and the last update is greater than the last publish or
+            # the object has changed zones
             if (
                 frame_time - updated_obj.last_published > 5
                 and updated_obj.last_updated > updated_obj.last_published
-            ):
+            ) or zone_change:
                 # call event handlers
                 for c in self.callbacks["update"]:
                     c(self.name, updated_obj, frame_time)

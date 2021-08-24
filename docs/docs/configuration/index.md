@@ -20,9 +20,10 @@ cameras:
           roles:
             - detect
             - rtmp
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 ## Required
@@ -76,22 +77,103 @@ cameras:
           roles:
             - detect
             - rtmp
-    width: 1280
-    height: 720
-    fps: 5
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
 ```
 
 ## Optional
 
-### `clips`
+### `database`
 
 ```yaml
-clips:
-  # Optional: Maximum length of time to retain video during long events. (default: shown below)
-  # NOTE: If an object is being tracked for longer than this amount of time, the cache
-  #       will begin to expire and the resulting clip will be the last x seconds of the event.
-  max_seconds: 300
-  # Optional: Retention settings for clips (default: shown below)
+database:
+  # The path to store the SQLite DB (default: shown below)
+  path: /media/frigate/frigate.db
+```
+
+### `model`
+
+```yaml
+# Optional: model modifications
+model:
+  # Required: Object detection model input width (default: shown below)
+  width: 320
+  # Required: Object detection model input height (default: shown below)
+  height: 320
+  # Optional: Label name modifications
+  labelmap:
+    2: vehicle # previously "car"
+```
+
+### `detectors`
+
+Check the [detectors configuration page](detectors.md) for a complete list of options.
+
+### `logger`
+
+```yaml
+# Optional: logger verbosity settings
+logger:
+  # Optional: Default log verbosity (default: shown below)
+  default: info
+  # Optional: Component specific logger overrides
+  logs:
+    frigate.event: debug
+```
+
+### `record`
+
+Can be overridden at the camera level. 24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
+
+Exported clips are also created off of these recordings. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+
+These recordings will not be playable in the web UI or in Home Assistant's media browser unless your camera sends video as h264.
+
+:::caution
+Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
+:::
+
+```yaml
+record:
+  # Optional: Enable recording (default: shown below)
+  enabled: False
+  # Optional: Number of days to retain (default: shown below)
+  retain_days: 0
+  # Optional: Event recording settings
+  events:
+    # Optional: Enable event recording retention settings (default: shown below)
+    enabled: False
+    # Optional: Maximum length of time to retain video during long events. (default: shown below)
+    # NOTE: If an object is being tracked for longer than this amount of time, the cache
+    #       will begin to expire and the resulting clip will be the last x seconds of the event unless retain_days under record is > 0.
+    max_seconds: 300
+    # Optional: Number of seconds before the event to include (default: shown below)
+    pre_capture: 5
+    # Optional: Number of seconds after the event to include (default: shown below)
+    post_capture: 5
+    # Optional: Objects to save recordings for. (default: all tracked objects)
+    objects:
+      - person
+    # Optional: Restrict recordings to objects that entered any of the listed zones (default: no required zones)
+    required_zones: []
+    # Optional: Retention settings for events
+    retain:
+      # Required: Default retention days (default: shown below)
+      default: 10
+      # Optional: Per object retention days
+      objects:
+        person: 15
+```
+
+## `snapshots`
+
+Can be overridden at the camera level. Global snapshot retention settings.
+
+```yaml
+# Optional: Configuration for the jpg snapshots written to the clips directory for each event
+snapshots:
   retain:
     # Required: Default retention days (default: shown below)
     default: 10
@@ -101,6 +183,8 @@ clips:
 ```
 
 ### `ffmpeg`
+
+Can be overridden at the camera level.
 
 ```yaml
 ffmpeg:
@@ -117,8 +201,6 @@ ffmpeg:
     detect: -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: -f segment -segment_time 60 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
-    # Optional: output args for clips streams (default: shown below)
-    clips: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
     # Optional: output args for rtmp streams (default: shown below)
     rtmp: -c copy -f flv
 ```
@@ -143,22 +225,6 @@ objects:
       min_score: 0.5
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
       threshold: 0.7
-```
-
-### `record`
-
-Can be overridden at the camera level. 24/7 recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM/DD/HH/<camera_name>/MM.SS.mp4`. These recordings are written directly from your camera stream without re-encoding and are available in Home Assistant's media browser. Each camera supports a configurable retention policy in the config.
-
-:::caution
-Previous versions of frigate included `-vsync drop` in input parameters. This is not compatible with FFmpeg's segment feature and must be removed from your input parameters if you have overrides set.
-:::
-
-```yaml
-record:
-  # Optional: Enable recording
-  enabled: False
-  # Optional: Number of days to retain
-  retain_days: 30
 ```
 
 ### `birdseye`

@@ -22,7 +22,7 @@ export default function NavigationDrawer({ children, header }) {
         onClick={handleDismiss}
       >
         {header ? (
-          <div className="flex-shrink-0 p-5 flex flex-row items-center justify-between border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-shrink-0 p-2 flex flex-row items-center justify-between border-b border-gray-200 dark:border-gray-700">
             {header}
           </div>
         ) : null}

@@ -15,12 +15,15 @@ export default function CameraMasks({ camera, url }) {
 
   const cameraConfig = config.cameras[camera];
   const {
-    width,
-    height,
     motion: { mask: motionMask },
     objects: { filters: objectFilters },
     zones,
   } = cameraConfig;
+
+  const {
+    width,
+    height,
+  } = cameraConfig.detect;
 
   const [{ width: scaledWidth }] = useResizeObserver(imageRef);
   const imageScale = scaledWidth / width;

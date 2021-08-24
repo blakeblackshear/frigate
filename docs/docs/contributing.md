@@ -63,17 +63,17 @@ cameras:
           roles:
             - detect
             - rtmp
-            - clips
-    height: 1080
-    width: 1920
-    fps: 5
+    detect:
+      height: 1080
+      width: 1920
+      fps: 5
 ```
 
 These input args tell ffmpeg to read the mp4 file in an infinite loop. You can use any valid ffmpeg input here.
 
 #### 3. Gather some mp4 files for testing
 
-Create and place these files in a `debug` folder in the root of the repo. This is also where clips and recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
+Create and place these files in a `debug` folder in the root of the repo. This is also where recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
 
 #### 4. Open the repo with Visual Studio Code
 

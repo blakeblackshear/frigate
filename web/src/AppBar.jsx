@@ -5,12 +5,18 @@ import Menu, { MenuItem, MenuSeparator } from './components/Menu';
 import AutoAwesomeIcon from './icons/AutoAwesome';
 import LightModeIcon from './icons/LightMode';
 import DarkModeIcon from './icons/DarkMode';
+import FrigateRestartIcon from './icons/FrigateRestart';
+import Dialog from './components/Dialog';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
+import { useRestart } from './api/mqtt';
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showDialogWait, setShowDialogWait] = useState(false);
   const { setDarkMode } = useDarkMode();
+  const { send: sendRestart } = useRestart();
 
   const handleSelectDarkMode = useCallback(
     (value, label) => {
@@ -30,6 +36,21 @@ export default function AppBar() {
     setShowMoreMenu(false);
   }, [setShowMoreMenu]);
 
+  const handleClickRestartDialog = useCallback(() => {
+    setShowDialog(false);
+    setShowDialogWait(true);
+    sendRestart();
+  }, [setShowDialog]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDismissRestartDialog = useCallback(() => {
+    setShowDialog(false);
+  }, [setShowDialog]);
+
+  const handleRestart = useCallback(() => {
+    setShowMoreMenu(false);
+    setShowDialog(true);
+  }, [setShowDialog]);
+
   return (
     <Fragment>
       <BaseAppBar title={LinkedLogo} overflowRef={moreRef} onOverflowClick={handleShowMenu} />
@@ -39,7 +60,26 @@ export default function AppBar() {
           <MenuSeparator />
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
+          <MenuSeparator />
+          <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
+      ) : null}
+      {showDialog ? (
+        <Dialog
+          onDismiss={handleDismissRestartDialog}
+          title="Restart Frigate"
+          text="Are you sure?"
+          actions={[
+            { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
+            { text: 'Cancel', onClick: handleDismissRestartDialog },
+          ]}
+        />
+      ) : null}
+      {showDialogWait ? (
+        <Dialog
+          title="Restart in progress"
+          text="Please wait a few seconds for the restart to complete before reloading the page."
+        />
       ) : null}
     </Fragment>
   );

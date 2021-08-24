@@ -23,7 +23,7 @@ from frigate.models import Event, Recordings
 from frigate.mqtt import create_mqtt_client, MqttSocketRelay
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
-from frigate.record import RecordingMaintainer
+from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -90,15 +90,6 @@ class FrigateApp:
             assigned_roles = list(
                 set([r for i in camera.ffmpeg.inputs for r in i.roles])
             )
-            if not camera.clips.enabled and "clips" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has clips assigned to an input, but clips is not enabled."
-                )
-            elif camera.clips.enabled and not "clips" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has clips enabled, but clips is not assigned to an input."
-                )
-
             if not camera.record.enabled and "record" in assigned_roles:
                 logger.warning(
                     f"Camera {name} has record assigned to an input, but record is not enabled."
@@ -259,6 +250,7 @@ class FrigateApp:
                     name,
                     config,
                     model_shape,
+                    self.config.model.merged_labelmap,
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
@@ -299,6 +291,10 @@ class FrigateApp:
     def start_recording_maintainer(self):
         self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
         self.recording_maintainer.start()
+
+    def start_recording_cleanup(self):
+        self.recording_cleanup = RecordingCleanup(self.config, self.stop_event)
+        self.recording_cleanup.start()
 
     def start_stats_emitter(self):
         self.stats_emitter = StatsEmitter(
@@ -345,6 +341,7 @@ class FrigateApp:
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
+        self.start_recording_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
@@ -371,6 +368,7 @@ class FrigateApp:
         self.event_processor.join()
         self.event_cleanup.join()
         self.recording_maintainer.join()
+        self.recording_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()

@@ -12,7 +12,8 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
   const canvasRef = useRef(null);
   const [{ width: availableWidth }] = useResizeObserver(containerRef);
 
-  const { name, width, height } = config.cameras[camera];
+  const { name } = config.cameras[camera];
+  const { width, height } = config.cameras[camera].detect;
   const aspectRatio = width / height;
 
   const scaledHeight = useMemo(() => {

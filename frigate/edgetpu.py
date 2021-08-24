@@ -68,9 +68,14 @@ class LocalObjectDetector(ObjectDetector):
                     experimental_delegates=[edge_tpu_delegate],
                 )
             except ValueError:
-                logger.info("No EdgeTPU detected.")
+                logger.error(
+                    "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
+                )
                 raise
         else:
+            logger.warning(
+                "CPU detectors are not recommended and should only be used for testing or for trial purposes."
+            )
             self.interpreter = tflite.Interpreter(
                 model_path="/cpu_model.tflite", num_threads=num_threads
             )
@@ -97,21 +102,22 @@ class LocalObjectDetector(ObjectDetector):
     def detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
-        boxes = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[0]["index"])
-        )
-        label_codes = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[1]["index"])
-        )
-        scores = np.squeeze(
-            self.interpreter.get_tensor(self.tensor_output_details[2]["index"])
+
+        boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
+        class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]
+        scores = self.interpreter.tensor(self.tensor_output_details[2]["index"])()[0]
+        count = int(
+            self.interpreter.tensor(self.tensor_output_details[3]["index"])()[0]
         )
 
         detections = np.zeros((20, 6), np.float32)
-        for i, score in enumerate(scores):
+
+        for i in range(count):
+            if scores[i] < 0.4 or i == 20:
+                break
             detections[i] = [
-                label_codes[i],
-                score,
+                class_ids[i],
+                float(scores[i]),
                 boxes[i][0],
                 boxes[i][1],
                 boxes[i][2],
@@ -231,7 +237,7 @@ class EdgeTPUProcess:
 
 class RemoteObjectDetector:
     def __init__(self, name, labels, detection_queue, event, model_shape):
-        self.labels = load_labels(labels)
+        self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue

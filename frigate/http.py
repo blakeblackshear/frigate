@@ -6,11 +6,13 @@ import glob
 import logging
 import os
 import re
+import subprocess as sp
 import time
 from functools import reduce
 from pathlib import Path
 
 import cv2
+from flask.helpers import send_file
 
 import numpy as np
 from flask import (
@@ -185,6 +187,7 @@ def event_thumbnail(id):
 
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
+    download = request.args.get("download", type=bool)
     jpg_bytes = None
     try:
         event = Event.get(Event.id == id)
@@ -220,6 +223,45 @@ def event_snapshot(id):
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpg"
+    if download:
+        response.headers[
+            "Content-Disposition"
+        ] = f"attachment; filename=snapshot-{id}.jpg"
+    return response
+
+
+@bp.route("/events/<id>/clip.mp4")
+def event_clip(id):
+    download = request.args.get("download", type=bool)
+
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return "Event not found.", 404
+
+    if not event.has_clip:
+        return "Clip not available", 404
+
+    event_config = current_app.frigate_config.cameras[event.camera].record.events
+    start_ts = event.start_time - event_config.pre_capture
+    end_ts = event.end_time + event_config.post_capture
+    file_name = f"{event.camera}-{id}.mp4"
+    clip_path = os.path.join(CLIPS_DIR, file_name)
+
+    if not os.path.isfile(clip_path):
+        return recording_clip(event.camera, start_ts, end_ts)
+
+    response = make_response()
+    response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "video/mp4"
+    if download:
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
+    response.headers["Content-Length"] = os.path.getsize(clip_path)
+    response.headers[
+        "X-Accel-Redirect"
+    ] = f"/clips/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+
     return response
 
 
@@ -277,7 +319,16 @@ def events():
 
 @bp.route("/config")
 def config():
-    return jsonify(current_app.frigate_config.dict())
+    config = current_app.frigate_config.dict()
+
+    # add in the ffmpeg_cmds
+    for camera_name, camera in current_app.frigate_config.cameras.items():
+        camera_dict = config["cameras"][camera_name]
+        camera_dict["ffmpeg_cmds"] = camera.ffmpeg_cmds
+        for cmd in camera_dict["ffmpeg_cmds"]:
+            cmd["cmd"] = " ".join(cmd["cmd"])
+
+    return jsonify(config)
 
 
 @bp.route("/config/schema")
@@ -508,19 +559,87 @@ def recordings(camera_name):
     )
 
 
-@bp.route("/vod/<year_month>/<day>/<hour>/<camera>")
-def vod(year_month, day, hour, camera):
-    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
-    end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
-    start_ts = start_date.timestamp()
-    end_ts = end_date.timestamp()
+@bp.route("/<camera>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
+@bp.route("/<camera>/start/<float:start_ts>/end/<float:end_ts>/clip.mp4")
+def recording_clip(camera, start_ts, end_ts):
+    download = request.args.get("download", type=bool)
 
-    # Select all recordings where either the start or end dates fall in the requested hour
     recordings = (
         Recordings.select()
         .where(
             (Recordings.start_time.between(start_ts, end_ts))
             | (Recordings.end_time.between(start_ts, end_ts))
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+        )
+        .where(Recordings.camera == camera)
+        .order_by(Recordings.start_time.asc())
+    )
+
+    playlist_lines = []
+    clip: Recordings
+    for clip in recordings:
+        playlist_lines.append(f"file '{clip.path}'")
+        # if this is the starting clip, add an inpoint
+        if clip.start_time < start_ts:
+            playlist_lines.append(f"inpoint {int(start_ts - clip.start_time)}")
+        # if this is the ending clip, add an outpoint
+        if clip.end_time > end_ts:
+            playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
+
+    file_name = f"clip_{camera}_{start_ts}-{end_ts}.mp4"
+    path = f"/tmp/cache/{file_name}"
+
+    ffmpeg_cmd = [
+        "ffmpeg",
+        "-y",
+        "-protocol_whitelist",
+        "pipe,file",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        "-",
+        "-c",
+        "copy",
+        "-movflags",
+        "+faststart",
+        path,
+    ]
+
+    p = sp.run(
+        ffmpeg_cmd,
+        input="\n".join(playlist_lines),
+        encoding="ascii",
+        capture_output=True,
+    )
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return f"Could not create clip from recordings for {camera}.", 500
+
+    response = make_response()
+    response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "video/mp4"
+    if download:
+        response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
+    response.headers["Content-Length"] = os.path.getsize(path)
+    response.headers[
+        "X-Accel-Redirect"
+    ] = f"/cache/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+
+    return response
+
+
+@bp.route("/vod/<camera>/start/<int:start_ts>/end/<int:end_ts>")
+@bp.route("/vod/<camera>/start/<float:start_ts>/end/<float:end_ts>")
+def vod_ts(camera, start_ts, end_ts):
+    recordings = (
+        Recordings.select()
+        .where(
+            Recordings.start_time.between(start_ts, end_ts)
+            | Recordings.end_time.between(start_ts, end_ts)
+            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
         .where(Recordings.camera == camera)
         .order_by(Recordings.start_time.asc())
@@ -544,12 +663,55 @@ def vod(year_month, day, hour, camera):
         clips.append(clip)
         durations.append(duration)
 
+    if not clips:
+        return "No recordings found.", 404
+
+    hour_ago = datetime.now() - timedelta(hours=1)
     return jsonify(
         {
-            "cache": datetime.now() - timedelta(hours=1) > start_date,
+            "cache": hour_ago.timestamp() > start_ts,
             "discontinuity": False,
             "durations": durations,
             "sequences": [{"clips": clips}],
+        }
+    )
+
+
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera>")
+def vod_hour(year_month, day, hour, camera):
+    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
+    end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
+    start_ts = start_date.timestamp()
+    end_ts = end_date.timestamp()
+
+    return vod_ts(camera, start_ts, end_ts)
+
+
+@bp.route("/vod/event/<id>")
+def vod_event(id):
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return "Event not found.", 404
+
+    if not event.has_clip:
+        return "Clip not available", 404
+
+    event_config = current_app.frigate_config.cameras[event.camera].record.events
+    start_ts = event.start_time - event_config.pre_capture
+    end_ts = event.end_time + event_config.post_capture
+    clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
+
+    if not os.path.isfile(clip_path):
+        return vod_ts(event.camera, start_ts, end_ts)
+
+    duration = int((end_ts - start_ts) * 1000)
+    return jsonify(
+        {
+            "cache": True,
+            "discontinuity": False,
+            "durations": [duration],
+            "sequences": [{"clips": [{"type": "source", "path": clip_path}]}],
         }
     )
 

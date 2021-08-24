@@ -5,7 +5,7 @@ title: Installation
 
 Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). See instructions below for installing the HassOS addon.
 
-For Home Assistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with Home Assistant by automatically setting up camera entities, sensors, media browser for clips and recordings, and a public API to simplify notifications.
+For Home Assistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with Home Assistant by automatically setting up camera entities, sensors, media browser for recordings, and a public API to simplify notifications.
 
 Note that HassOS Addons and custom components are different things. If you are already running Frigate with Docker directly, you do not need the Addon since the Addon would run another instance of Frigate.
 
