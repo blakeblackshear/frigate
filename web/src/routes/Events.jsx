@@ -256,7 +256,7 @@ function Filters({ onChange, searchParams }) {
         <Filter
           type="dropdown"
           onChange={onChange}
-          options={cameras}
+          options={['all', ...cameras]}
           paramName={['camera']}
           label="Camera"
           searchParams={searchParams}
@@ -264,7 +264,7 @@ function Filters({ onChange, searchParams }) {
         <Filter
           type="dropdown"
           onChange={onChange}
-          options={zones}
+          options={['all', ...zones]}
           paramName={['zone']}
           label="Zone"
           searchParams={searchParams}
@@ -272,7 +272,7 @@ function Filters({ onChange, searchParams }) {
         <Filter
           type="dropdown"
           onChange={onChange}
-          options={labels}
+          options={['all', ...labels]}
           paramName={['label']}
           label="Label"
           searchParams={searchParams}
@@ -307,18 +307,10 @@ function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
     [searchParams, paramName, onChange]
   );
 
-  const selectOptions = useMemo(() => ['all', ...options], [options]);
   let obj = {};
   paramName.map((p) => Object.assign(obj, { [p]: searchParams.get(p) }), [searchParams]);
 
   return (
-    <Select
-      onChange={handleSelect}
-      options={selectOptions}
-      selected={obj}
-      paramName={paramName}
-      type={type}
-      {...rest}
-    />
+    <Select onChange={handleSelect} options={options} selected={obj} paramName={paramName} type={type} {...rest} />
   );
 }

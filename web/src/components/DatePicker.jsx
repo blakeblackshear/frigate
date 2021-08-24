@@ -78,12 +78,7 @@ export default function DatePicker({
     if (propValue !== value) {
       setValue(propValue);
     }
-    // DO NOT include `value`
-  }, [propValue, setValue]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    setDateToInput(value);
-  }, []);
+  }, [propValue, setValue, value]);
 
   const handleFocus = useCallback(
     (event) => {
@@ -110,34 +105,6 @@ export default function DatePicker({
     [onChangeText, setValue]
   );
 
-  const getDateFromDateString = (dateValue) => {
-    const dateData = dateValue.split('-').map((d) => parseInt(d, 10));
-    if (dateData.length < 3) return null;
-
-    const year = dateData[0];
-    const month = dateData[1];
-    const date = dateData[2];
-    return { year, month, date };
-  };
-
-  const getDateStringFromTimestamp = (timestamp) => {
-    const dateObject = new Date(timestamp * 1000);
-    const month = dateObject.getMonth() + 1;
-    const date = dateObject.getDate();
-    return dateObject.getFullYear() + '-' + (month < 10 ? '0' + month : month) + '-' + (date < 10 ? '0' + date : date);
-  };
-
-  const setDateClick = (dateData) => {
-    const selectedDay = new Date(dateData.year, dateData.month - 1, dateData.date).getTime();
-    if (props.onchange) {
-      props.onchange(new Date(selectedDay).getTime() / 1000);
-    }
-  };
-
-  const setDateToInput = (timestamp) => {
-    const dateString = getDateStringFromTimestamp(timestamp);
-    // inputRef.current.value = dateString;
-  };
   const onClick = (e) => {
     props.onclick(e);
   };

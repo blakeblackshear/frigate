@@ -1,17 +1,34 @@
 import { h } from 'preact';
-import { useEffect, useState, useRef } from 'preact/hooks';
+import { useEffect, useState, useCallback, useMemo } from 'preact/hooks';
 import ArrowRight from '../icons/ArrowRight';
 import ArrowRightDouble from '../icons/ArrowRightDouble';
 
-let oneDay = 60 * 60 * 24 * 1000;
-let todayTimestamp = Date.now() - (Date.now() % oneDay) + new Date().getTimezoneOffset() * 1000 * 60;
+const oneDay = 60 * 60 * 24 * 1000;
+const todayTimestamp = Date.now() - (Date.now() % oneDay) + new Date().getTimezoneOffset() * 1000 * 60;
 
 const Calender = ({ onChange, calenderRef }) => {
-  const inputRef = useRef();
-  // const inputRefs = useRef();
-  let date = new Date();
-  let year = date.getFullYear();
-  let month = date.getMonth();
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const daysMap = useMemo(() => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], []);
+  const monthMap = useMemo(
+    () => [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    []
+  );
 
   const [state, setState] = useState({
     getMonthDetails: [],
@@ -22,78 +39,66 @@ const Calender = ({ onChange, calenderRef }) => {
     selectedRangeBefore: false,
     monthDetails: null,
   });
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const getNumberOfDays = useCallback((year, month) => {
+    return 40 - new Date(year, month, 40).getDate();
+  }, []);
+
+  const getDayDetails = useCallback(
+    (args) => {
+      const date = args.index - args.firstDay;
+      const day = args.index % 7;
+      let prevMonth = args.month - 1;
+      let prevYear = args.year;
+      if (prevMonth < 0) {
+        prevMonth = 11;
+        prevYear--;
+      }
+      const prevMonthNumberOfDays = getNumberOfDays(prevYear, prevMonth);
+      const _date = (date < 0 ? prevMonthNumberOfDays + date : date % args.numberOfDays) + 1;
+      const month = date < 0 ? -1 : date >= args.numberOfDays ? 1 : 0;
+      const timestamp = new Date(args.year, args.month, _date).getTime();
+      return {
+        date: _date,
+        day,
+        month,
+        timestamp,
+        dayString: daysMap[day],
+      };
+    },
+    [getNumberOfDays, daysMap]
+  );
+
+  const getMonthDetails = useCallback(
+    (year, month) => {
+      const firstDay = new Date(year, month).getDay();
+      const numberOfDays = getNumberOfDays(year, month);
+      const monthArray = [];
+      const rows = 6;
+      let currentDay = null;
+      let index = 0;
+      const cols = 7;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          currentDay = getDayDetails({
+            index,
+            numberOfDays,
+            firstDay,
+            year,
+            month,
+          });
+          monthArray.push(currentDay);
+          index++;
+        }
+      }
+      return monthArray;
+    },
+    [getNumberOfDays, getDayDetails]
+  );
 
   useEffect(() => {
     setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: getMonthDetails(year, month) }));
-  }, []);
-
-  const daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const monthMap = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  const getDayDetails = (args) => {
-    let date = args.index - args.firstDay;
-    let day = args.index % 7;
-    let prevMonth = args.month - 1;
-    let prevYear = args.year;
-    if (prevMonth < 0) {
-      prevMonth = 11;
-      prevYear--;
-    }
-    let prevMonthNumberOfDays = getNumberOfDays(prevYear, prevMonth);
-    let _date = (date < 0 ? prevMonthNumberOfDays + date : date % args.numberOfDays) + 1;
-    let month = date < 0 ? -1 : date >= args.numberOfDays ? 1 : 0;
-    let timestamp = new Date(args.year, args.month, _date).getTime();
-    return {
-      date: _date,
-      day,
-      month,
-      timestamp,
-      dayString: daysMap[day],
-    };
-  };
-
-  const getNumberOfDays = (year, month) => {
-    return 40 - new Date(year, month, 40).getDate();
-  };
-
-  const getMonthDetails = (year, month) => {
-    let firstDay = new Date(year, month).getDay();
-    let numberOfDays = getNumberOfDays(year, month);
-    let monthArray = [];
-    let rows = 6;
-    let currentDay = null;
-    let index = 0;
-    let cols = 7;
-
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        currentDay = getDayDetails({
-          index,
-          numberOfDays,
-          firstDay,
-          year,
-          month,
-        });
-        monthArray.push(currentDay);
-        index++;
-      }
-    }
-    return monthArray;
-  };
+  }, [year, month, getMonthDetails]);
 
   const isCurrentDay = (day) => {
     return day.timestamp === todayTimestamp;
@@ -108,54 +113,7 @@ const Calender = ({ onChange, calenderRef }) => {
     return day.timestamp < state.selectedRange.before * 1000 && day.timestamp >= state.selectedRange.after * 1000;
   };
 
-  const getDateFromDateString = (dateValue) => {
-    const dateData = dateValue.split('-').map((d) => parseInt(d, 10));
-    if (dateData.length < 3) return null;
-
-    const year = dateData[0];
-    const month = dateData[1];
-    const date = dateData[2];
-    return { year, month, date };
-  };
-
   const getMonthStr = (month) => monthMap[Math.max(Math.min(11, month), 0)] || 'Month';
-
-  const getDateStringFromTimestamp = (timestamp) => {
-    let dateObject = new Date(timestamp);
-    let month = dateObject.getMonth() + 1;
-    let date = dateObject.getDate();
-    return dateObject.getFullYear() + '-' + (month < 10 ? '0' + month : month) + '-' + (date < 10 ? '0' + date : date);
-  };
-
-  const setDate = (dateData) => {
-    let selectedDay = new Date(dateData.year, dateData.month - 1, dateData.date).getTime();
-    setState((prev) => ({ ...prev, selectedDay }));
-
-    if (onChange) {
-      // onChange(selectedDay);
-    }
-  };
-
-  const updateDateFromInput = () => {
-    let dateValue = inputRef.current.value;
-    let dateData = getDateFromDateString(dateValue);
-    if (dateData !== null) {
-      setDate(dateData);
-      setState(
-        (prev = {
-          ...prev,
-          year: dateData.year,
-          month: dateData.month - 1,
-          monthDetails: getMonthDetails(dateData.year, dateData.month - 1),
-        })
-      );
-    }
-  };
-
-  // const setDateToInput = (timestamp) => {
-  //   const dateString = getDateStringFromTimestamp(timestamp);
-  //   inputRef.current.value = dateString;
-  // };
 
   const onDateClick = (day) => {
     const range = {
@@ -171,7 +129,6 @@ const Calender = ({ onChange, calenderRef }) => {
       selectedRangeBefore: !state.selectedRangeBefore,
     }));
 
-    // setDateToInput(day.timestamp);
     if (onChange) {
       onChange({ before: range.selectedRange.before, after: range.selectedRange.after });
     }
@@ -190,8 +147,8 @@ const Calender = ({ onChange, calenderRef }) => {
   };
 
   const setMonth = (offset) => {
-    const year = state.year;
-    const month = state.month + offset;
+    let year = state.year;
+    let month = state.month + offset;
     if (month === -1) {
       month = 11;
       year--;
@@ -209,24 +166,18 @@ const Calender = ({ onChange, calenderRef }) => {
     });
   };
 
-  /**
-   *  Renderers
-   */
-
   const renderCalendar = () => {
-    let days =
+    const days =
       state.monthDetails &&
       state.monthDetails.map((day, index) => {
         return (
           <div
             onClick={() => onDateClick(day)}
-            className={
-              'h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ' +
-              (day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : '') +
-              (isCurrentDay(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : '') +
-              (isSelectedDay(day) ? 'bg-gray-100 dark:hover:bg-gray-100' : '') +
-              (isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-500' : '')
-            }
+            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
+              day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
+            }${isCurrentDay(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}${
+              isSelectedDay(day) ? 'bg-gray-100 dark:hover:bg-gray-100' : ''
+            }${isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-500' : ''}`}
             key={index}
           >
             <div className=" font-light ">

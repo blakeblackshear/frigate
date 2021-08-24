@@ -17,7 +17,7 @@ export default function Select({
 }) {
   const options = useMemo(
     () =>
-      typeof inputOptions[1] === 'string' ? inputOptions.map((opt) => ({ value: opt, label: opt })) : inputOptions,
+      typeof inputOptions[0] === 'string' ? inputOptions.map((opt) => ({ value: opt, label: opt })) : inputOptions,
     [inputOptions]
   );
 
@@ -26,20 +26,22 @@ export default function Select({
   const [datePickerValue, setDatePickerValue] = useState();
 
   useEffect(() => {
-    if (type === 'datepicker' && 'after' && 'before' in propSelected) {
-      for (let i = 0; i < inputOptions.length; i++) {
-        if (
-          inputOptions[i].value &&
-          Object.entries(inputOptions[i].value).sort().toString() === Object.entries(propSelected).sort().toString()
-        ) {
-          setDatePickerValue(inputOptions[i]?.label);
-          break;
-        } else {
-          setDatePickerValue(
-            `${new Date(propSelected.after * 1000).toLocaleDateString()} -> ${new Date(
-              propSelected.before * 1000 - 1
-            ).toLocaleDateString()}`
-          );
+    if (type === 'datepicker') {
+      if ('after' && 'before' in propSelected) {
+        for (let i = 0; i < inputOptions.length; i++) {
+          if (
+            inputOptions[i].value &&
+            Object.entries(inputOptions[i].value).sort().toString() === Object.entries(propSelected).sort().toString()
+          ) {
+            setDatePickerValue(inputOptions[i]?.label);
+            break;
+          } else {
+            setDatePickerValue(
+              `${new Date(propSelected.after * 1000).toLocaleDateString()} -> ${new Date(
+                propSelected.before * 1000 - 1
+              ).toLocaleDateString()}`
+            );
+          }
         }
       }
     }
@@ -177,7 +179,9 @@ export default function Select({
           ) : null}
         </Fragment>
       );
-    case 'dropdown':
+
+    // case 'dropdown':
+    default:
       return (
         <Fragment>
           <TextField
@@ -205,7 +209,5 @@ export default function Select({
           ) : null}
         </Fragment>
       );
-    default:
-      return <div />;
   }
 }
