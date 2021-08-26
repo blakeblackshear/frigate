@@ -18,7 +18,7 @@ const initialState = Object.freeze({
 
 const Api = createContext(initialState);
 
-function reducer(state, { type, payload, meta }) {
+function reducer(state, { type, payload }) {
   switch (type) {
     case 'REQUEST': {
       const { url, fetchId } = payload;
@@ -36,22 +36,9 @@ function reducer(state, { type, payload, meta }) {
     }
     case 'DELETE': {
       const { eventId } = payload;
-
       return produce(state, (draftState) => {
-        Object.keys(draftState.queries).map((url, index) => {
-          // If data has no array length then just return state.
-          if (!('data' in draftState.queries[url]) || !draftState.queries[url].data.length) return state;
-
-          //Find the index to remove
-          const removeIndex = draftState.queries[url].data.map((event) => event.id).indexOf(eventId);
-          if (removeIndex === -1) return state;
-
-          // We need to keep track of deleted items, This will be used to re-calculate "ReachEnd" for auto load new events. Events.jsx
-          const totDeleted = state.queries[url].deleted || 0;
-
-          // Splice the deleted index.
-          draftState.queries[url].data.splice(removeIndex, 1);
-          draftState.queries[url].deleted = totDeleted + 1;
+        Object.keys(draftState.queries).map((url) => {
+          draftState.queries[url].deletedId = eventId;
         });
       });
     }
@@ -111,9 +98,9 @@ export function useFetch(url, fetchId) {
 
   const data = state.queries[url].data || null;
   const status = state.queries[url].status;
-  const deleted = state.queries[url].deleted || 0;
+  const deletedId = state.queries[url].deletedId || 0;
 
-  return { data, status, deleted };
+  return { data, status, deletedId };
 }
 
 export function useDelete() {

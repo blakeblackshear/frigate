@@ -19,7 +19,7 @@ export default function Dialog({ actions = [], portalRootID = 'dialogs', title, 
       <div
         data-testid="scrim"
         key="scrim"
-        className="absolute inset-0 z-10 flex justify-center items-center bg-black bg-opacity-40"
+        className="fixed bg-fixed inset-0 z-10 flex justify-center items-center bg-black bg-opacity-40"
       >
         <div
           role="modal"

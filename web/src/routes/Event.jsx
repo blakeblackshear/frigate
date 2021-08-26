@@ -1,24 +1,31 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useState } from 'preact/hooks';
-import { route } from 'preact-router';
+import { useCallback, useState, useEffect } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
+import Close from '../icons/Close';
 import Delete from '../icons/Delete';
 import Snapshot from '../icons/Snapshot';
 import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
-import Link from '../components/Link';
 import VideoPlayer from '../components/VideoPlayer';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
-import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 
-export default function Event({ eventId }) {
+export default function Event({ eventId, close, scrollRef }) {
   const apiHost = useApiHost();
   const { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
+  const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
   const setDeleteEvent = useDelete();
+
+  useEffect(() => {
+    // Scroll event into view when component has been mounted.
+    if (shouldScroll && scrollRef && scrollRef[eventId]) {
+      scrollRef[eventId].scrollIntoView();
+      setShouldScroll(false);
+    }
+  }, [data, scrollRef, eventId, shouldScroll]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
@@ -40,7 +47,6 @@ export default function Event({ eventId }) {
     if (success) {
       setDeleteStatus(FetchStatus.LOADED);
       setShowDialog(false);
-      route('/events', true);
     }
   }, [eventId, setShowDialog, setDeleteEvent]);
 
@@ -48,18 +54,25 @@ export default function Event({ eventId }) {
     return <ActivityIndicator />;
   }
 
-  const startime = new Date(data.start_time * 1000);
-  const endtime = new Date(data.end_time * 1000);
-
   return (
     <div className="space-y-4">
-      <div className="flex">
-        <Heading className="flex-grow">
-          {data.camera} {data.label} <span className="text-sm">{startime.toLocaleString()}</span>
-        </Heading>
-        <Button className="self-start" color="red" onClick={handleClickDelete}>
-          <Delete className="w-6" /> Delete event
-        </Button>
+      <div className="grid grid-cols-6 gap-4">
+        <div class="col-start-1 col-end-8 md:space-x-4">
+          <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
+            <Clip className="w-6" /> Download Clip
+          </Button>
+          <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
+            <Snapshot className="w-6" /> Download Snapshot
+          </Button>
+        </div>
+        <div class="col-end-10 col-span-2 space-x-4">
+          <Button className="self-start" color="red" onClick={handleClickDelete}>
+            <Delete className="w-6" /> Delete event
+          </Button>
+          <Button color="gray" className="self-start" onClick={() => close()}>
+            <Close className="w-6" /> Close
+          </Button>
+        </div>
         {showDialog ? (
           <Dialog
             onDismiss={handleDismissDeleteDialog}
@@ -78,86 +91,42 @@ export default function Event({ eventId }) {
           />
         ) : null}
       </div>
-
-      <Table class="w-full">
-        <Thead>
-          <Th>Key</Th>
-          <Th>Value</Th>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td>Camera</Td>
-            <Td>
-              <Link href={`/cameras/${data.camera}`}>{data.camera}</Link>
-            </Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Timeframe</Td>
-            <Td>
-              {startime.toLocaleString()} – {endtime.toLocaleString()}
-            </Td>
-          </Tr>
-          <Tr>
-            <Td>Score</Td>
-            <Td>{(data.top_score * 100).toFixed(2)}%</Td>
-          </Tr>
-          <Tr index={1}>
-            <Td>Zones</Td>
-            <Td>{data.zones.join(', ')}</Td>
-          </Tr>
-        </Tbody>
-      </Table>
-
-      {data.has_clip ? (
-        <Fragment>
-          <Heading size="lg">Clip</Heading>
-          <VideoPlayer
-            options={{
-              sources: [
-                {
-                  src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
-                  type: 'application/vnd.apple.mpegurl',
-                },
-              ],
-              poster: data.has_snapshot
-                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                : `data:image/jpeg;base64,${data.thumbnail}`,
-            }}
-            seekOptions={{ forward: 10, back: 5 }}
-            onReady={(player) => {}}
-          />
-          <div className="text-center">
-            <Button
-              className="mx-2"
-              color="blue"
-              href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
-              download
-            >
-              <Clip className="w-6" /> Download Clip
-            </Button>
-            <Button
-              className="mx-2"
-              color="blue"
-              href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
-              download
-            >
-              <Snapshot className="w-6" /> Download Snapshot
-            </Button>
-          </div>
-        </Fragment>
-      ) : (
-        <Fragment>
-          <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
-          <img
-            src={
-              data.has_snapshot
-                ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
-                : `data:image/jpeg;base64,${data.thumbnail}`
-            }
-            alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
-          />
-        </Fragment>
-      )}
+      <div className="outer-max-width m-auto">
+        <div className="w-full pt-5 relative pb-20">
+          {data.has_clip ? (
+            <Fragment>
+              <Heading size="lg">Clip</Heading>
+              <VideoPlayer
+                options={{
+                  sources: [
+                    {
+                      src: `${apiHost}/vod/event/${eventId}/index.m3u8`,
+                      type: 'application/vnd.apple.mpegurl',
+                    },
+                  ],
+                  poster: data.has_snapshot
+                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    : `data:image/jpeg;base64,${data.thumbnail}`,
+                }}
+                seekOptions={{ forward: 10, back: 5 }}
+                onReady={() => {}}
+              />
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Heading size="sm">{data.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+              <img
+                src={
+                  data.has_snapshot
+                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    : `data:image/jpeg;base64,${data.thumbnail}`
+                }
+                alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
+              />
+            </Fragment>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
