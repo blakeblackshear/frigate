@@ -9,6 +9,7 @@ import { Table, Tbody, Tfoot, Tr, Td } from '../../components/Table';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
 import { reducer, initialState } from './reducer';
 import { useSearchString } from './hooks/useSearchString';
+import { useIntersectionObserver } from '../../hooks';
 
 const API_LIMIT = 25;
 
@@ -52,7 +53,25 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     },
     [limit, pathname, setSearchString, removeDefaultSearchKeys]
   );
+  const [entry, setIntersectNode] = useIntersectionObserver();
 
+  const lastCellRef = useCallback(
+    (node) => {
+      if (node !== null && !reachedEnd) {
+        setIntersectNode(node);
+      }
+    },
+    [setIntersectNode, reachedEnd]
+  );
+
+  useEffect(() => {
+    if (entry && entry.isIntersecting) {
+      const { startTime } = entry.target.dataset;
+      const { searchParams } = new URL(window.location);
+      searchParams.set('before', parseFloat(startTime) - 0.0001);
+      setSearchString(limit, searchParams.toString());
+    }
+  }, [entry, limit]);
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   console.log('counter ' + counter);
@@ -78,8 +97,9 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
                   pathname={pathname}
                   searchParams={searchParams}
                   limit={API_LIMIT}
-                  setSearchString={setSearchString}
                   handleFilter={handleFilter}
+                  lastCellRef={lastCellRef}
+                  removeDefaultSearchKeys={removeDefaultSearchKeys}
                   {...rest}
                 />
               );

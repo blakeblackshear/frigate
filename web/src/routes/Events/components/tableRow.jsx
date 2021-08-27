@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, useRef } from 'preact/hooks';
 import { Tr, Td } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
-import { useIntersectionObserver } from '../../../hooks';
+
 import { memo } from 'preact/compat';
 import { useSearchString } from '../hooks/useSearchString';
 
@@ -24,13 +24,15 @@ const EventsRow = memo(
       score,
       zones,
       numberOfEvents,
-      limit,
       idx,
+      searchString,
+      lastCellRef,
+      removeDefaultSearchKeys,
     },
     i
   ) => {
     const [viewEvent, setViewEvent] = useState(null);
-    const [searchString, setSearchString, removeDefaultSearchKeys] = useSearchString(limit);
+    // const [searchString, setSearchString, removeDefaultSearchKeys] = useSearchString(limit);
     // const ref = useRef();
 
     const viewEventHandler = useCallback(
@@ -58,26 +60,6 @@ const EventsRow = memo(
     //     document.removeEventListener('mousedown', checkIfClickedOutside);
     //   };
     // }, [setViewEvent, viewEvent]);
-
-    const [entry, setIntersectNode] = useIntersectionObserver();
-
-    const lastCellRef = useCallback(
-      (node) => {
-        if (node !== null && !reachedEnd) {
-          setIntersectNode(node);
-        }
-      },
-      [setIntersectNode, reachedEnd]
-    );
-
-    useEffect(() => {
-      if (entry && entry.isIntersecting) {
-        const { startTime } = entry.target.dataset;
-        const { searchParams } = new URL(window.location);
-        searchParams.set('before', parseFloat(startTime) - 0.0001);
-        setSearchString(limit, searchParams.toString());
-      }
-    }, [entry, limit]);
 
     const start = new Date(parseInt(startTime * 1000, 10));
     const end = new Date(parseInt(endTime * 1000, 10));
