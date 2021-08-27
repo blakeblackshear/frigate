@@ -1,39 +1,30 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useEffect, useState, useRef } from 'preact/hooks';
+import { memo } from 'preact/compat';
+import { useCallback, useState } from 'preact/hooks';
 import { Tr, Td } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
 
-import { memo } from 'preact/compat';
-import { useSearchString } from '../hooks/useSearchString';
-
 const EventsRow = memo(
-  (
-    {
-      id,
-      apiHost,
-      start_time: startTime,
-      end_time: endTime,
-      handleFilter,
-      reachedEnd,
-      scrollToRef,
-      pathname,
-      searchParams,
-      camera,
-      label,
-      score,
-      zones,
-      numberOfEvents,
-      idx,
-      searchString,
-      lastCellRef,
-      removeDefaultSearchKeys,
-    },
-    i
-  ) => {
+  ({
+    id,
+    apiHost,
+    start_time: startTime,
+    end_time: endTime,
+    reachedEnd,
+    scrollToRef,
+    searchString,
+    lastRowRef,
+    handleFilter,
+    pathname,
+    searchParams,
+    camera,
+    label,
+    top_score: score,
+    zones,
+    removeDefaultSearchKeys,
+  }) => {
     const [viewEvent, setViewEvent] = useState(null);
-    // const [searchString, setSearchString, removeDefaultSearchKeys] = useSearchString(limit);
-    // const ref = useRef();
 
     const viewEventHandler = useCallback(
       (id) => {
@@ -46,32 +37,19 @@ const EventsRow = memo(
       [viewEvent]
     );
 
-    // useEffect(() => {
-    //   const checkIfClickedOutside = (e) => {
-    //     // If the menu is open and the clicked target is not within the menu,
-    //     // then close the menu
-    //     if (viewEvent && ref.current && !ref.current.contains(e.target)) {
-    //       setViewEvent(null);
-    //     }
-    //   };
-    //   document.addEventListener('mousedown', checkIfClickedOutside);
-    //   return () => {
-    //     // Cleanup the event listener
-    //     document.removeEventListener('mousedown', checkIfClickedOutside);
-    //   };
-    // }, [setViewEvent, viewEvent]);
-
     const start = new Date(parseInt(startTime * 1000, 10));
     const end = new Date(parseInt(endTime * 1000, 10));
-    const ref = idx === numberOfEvents - 1 ? lastCellRef : undefined;
-
-    console.log('table row renders');
-
+    console.log('tablerow has been rendered');
     return (
       <Fragment key={id}>
         <Tr data-testid={`event-${id}`} className={`${viewEvent === id ? 'border-none' : ''}`}>
           <Td className="w-40">
-            <a onClick={() => viewEventHandler(id)} ref={ref} data-start-time={startTime} data-reached-end={reachedEnd}>
+            <a
+              onClick={() => viewEventHandler(id)}
+              ref={lastRowRef}
+              data-start-time={startTime}
+              data-reached-end={reachedEnd}
+            >
               <img
                 ref={(el) => (scrollToRef[id] = el)}
                 width="150"
@@ -131,36 +109,6 @@ const EventsRow = memo(
           </Tr>
         ) : null}
       </Fragment>
-      // <Fragment>
-      //   <Tr>
-      //     <Td className="w-40">
-      //       <a
-      //         onClick={() => viewEventHandler(id)}
-      //         ref={lastCellRef}
-      //         data-start-time={startTime}
-      //         data-reached-end={reachedEnd}
-      //       >
-      //         <img
-      //           ref={(el) => (scrollToRef[id] = el)}
-      //           width="150"
-      //           height="150"
-      //           className="cursor-pointer"
-      //           style="min-height: 48px; min-width: 48px;"
-      //           src={`${apiHost}/api/events/${id}/thumbnail.jpg`}
-      //         />
-      //       </a>
-      //     </Td>
-      //     {viewEvent === id ? (
-      //       <span ref={ref}>
-      //         <Tr className="border-b-1">
-      //           <Td colSpan="8">
-      //             <Event eventId={id} close={() => setViewEvent(null)} scrollRef={scrollToRef} />
-      //           </Td>
-      //         </Tr>
-      //       </span>
-      //     ) : null}
-      //   </Tr>
-      // </Fragment>
     );
   }
 );

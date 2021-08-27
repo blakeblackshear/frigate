@@ -1,4 +1,4 @@
-import { h, Fragment } from 'preact';
+import { h } from 'preact';
 import ActivityIndicator from '../../components/ActivityIndicator';
 import Heading from '../../components/Heading';
 import { TableHead, Filters } from './components';
@@ -22,7 +22,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const { data, status, deletedId } = useEvents(searchString);
   const [counter, setCounter] = useState(0);
 
-  let scrollToRef = useMemo(() => Object, []);
+  const scrollToRef = useMemo(() => Object, []);
 
   useEffect(() => {
     if (data && !(searchString in searchStrings)) {
@@ -38,22 +38,16 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     }
   }, [data, limit, searchString, searchStrings, deleted, deletedId]);
 
-  useEffect(() => {
-    setInterval(() => {
-      setCounter((prev) => prev + 1);
-    }, 1000);
-  }, []);
-
-  const handleFilter = useCallback(
-    (searchParams) => {
-      dispatch({ type: 'RESET' });
-      removeDefaultSearchKeys(searchParams);
-      setSearchString(limit, searchParams.toString());
-      route(`${pathname}?${searchParams.toString()}`);
-    },
-    [limit, pathname, setSearchString, removeDefaultSearchKeys]
-  );
   const [entry, setIntersectNode] = useIntersectionObserver();
+
+  useEffect(() => {
+    if (entry && entry.isIntersecting) {
+      const { startTime } = entry.target.dataset;
+      const { searchParams } = new URL(window.location);
+      searchParams.set('before', parseFloat(startTime) - 0.0001);
+      setSearchString(limit, searchParams.toString());
+    }
+  }, [entry, limit, setSearchString]);
 
   const lastCellRef = useCallback(
     (node) => {
@@ -64,17 +58,54 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     [setIntersectNode, reachedEnd]
   );
 
-  useEffect(() => {
-    if (entry && entry.isIntersecting) {
-      const { startTime } = entry.target.dataset;
-      const { searchParams } = new URL(window.location);
-      searchParams.set('before', parseFloat(startTime) - 0.0001);
+  const handleFilter = useCallback(
+    (searchParams) => {
+      dispatch({ type: 'RESET' });
+      removeDefaultSearchKeys(searchParams);
       setSearchString(limit, searchParams.toString());
-    }
-  }, [entry, limit]);
+      route(`${pathname}?${searchParams.toString()}`);
+    },
+    [limit, pathname, setSearchString, removeDefaultSearchKeys]
+  );
+
   const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
-  console.log('counter ' + counter);
+  const RenderTableRow = useCallback(
+    (props) => (
+      <TableRow
+        key={props.id}
+        apiHost={apiHost}
+        scrollToRef={scrollToRef}
+        reachedEnd={reachedEnd}
+        setSearchString={setSearchString}
+        pathname={pathname}
+        searchParams={searchParams}
+        limit={API_LIMIT}
+        searchString={searchString}
+        handleFilter={handleFilter}
+        removeDefaultSearchKeys={removeDefaultSearchKeys}
+        {...props}
+      />
+    ),
+    [
+      reachedEnd,
+      apiHost,
+      setSearchString,
+      handleFilter,
+      pathname,
+      removeDefaultSearchKeys,
+      scrollToRef,
+      // searchParams,
+      // searchString,
+    ]
+  );
+  useEffect(() => {
+    setInterval(() => {
+      setCounter((prev) => prev + 1);
+    }, 1000);
+  }, []);
+
+  console.log('main render', counter);
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
@@ -85,24 +116,9 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
         <Table className="min-w-full table-fixed">
           <TableHead />
           <Tbody>
-            {events.map(({ id, ...rest }, idx) => {
-              return (
-                <TableRow
-                  key={id}
-                  idx={idx}
-                  numberOfEvents={events.length}
-                  id={id}
-                  apiHost={apiHost}
-                  scrollToRef={scrollToRef}
-                  pathname={pathname}
-                  searchParams={searchParams}
-                  limit={API_LIMIT}
-                  handleFilter={handleFilter}
-                  lastCellRef={lastCellRef}
-                  removeDefaultSearchKeys={removeDefaultSearchKeys}
-                  {...rest}
-                />
-              );
+            {events.map((props, idx) => {
+              const lastRowRef = idx === events.length - 1 ? lastCellRef : undefined;
+              return <RenderTableRow {...props} lastRowRef={lastRowRef} idx={idx} />;
             })}
           </Tbody>
           <Tfoot>

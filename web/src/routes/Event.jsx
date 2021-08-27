@@ -1,5 +1,5 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useState, useEffect } from 'preact/hooks';
+import { useCallback, useState, useEffect, useRef } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Clip from '../icons/Clip';
@@ -18,6 +18,7 @@ export default function Event({ eventId, close, scrollRef }) {
   const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
   const setDeleteEvent = useDelete();
+  const eventRef = useRef(null);
 
   useEffect(() => {
     // Scroll event into view when component has been mounted.
@@ -26,6 +27,21 @@ export default function Event({ eventId, close, scrollRef }) {
       setShouldScroll(false);
     }
   }, [data, scrollRef, eventId, shouldScroll]);
+
+  // useEffect(() => {
+  //   const checkIfClickedOutside = (e) => {
+  //     // If the event is open and the clicked target is not within the event window or delete modal,
+  //     // then close the menu
+  //     if (!showDialog && eventRef.current && !eventRef.current.contains(e.target)) {
+  //       close(null);
+  //     }
+  //   };
+  //   document.addEventListener('mousedown', checkIfClickedOutside);
+  //   return () => {
+  //     // Cleanup the
+  //     document.removeEventListener('mousedown', checkIfClickedOutside);
+  //   };
+  // }, [close, showDialog]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
@@ -55,7 +71,7 @@ export default function Event({ eventId, close, scrollRef }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={eventRef}>
       <div className="grid grid-cols-6 gap-4">
         <div class="col-start-1 col-end-8 md:space-x-4">
           <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
