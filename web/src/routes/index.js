@@ -19,7 +19,7 @@ export async function getBirdseye(url, cb, props) {
 }
 
 export async function getEvents(url, cb, props) {
-  const module = await import('./Events.jsx');
+  const module = await import('./Events');
   return module.default;
 }
 
