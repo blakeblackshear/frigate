@@ -21,7 +21,7 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
         events={recording.events}
         selected={recording.date === selectedDate}
       >
-        {recording.recordings.map((item, i) => (
+        {recording.recordings.slice().reverse().map((item, i) => (
           <div className="mb-2 w-full">
             <div
               className={`flex w-full text-md text-white px-8 py-2 mb-2 ${
