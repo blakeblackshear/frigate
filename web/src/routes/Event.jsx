@@ -1,5 +1,5 @@
 import { h, Fragment } from 'preact';
-import { useCallback, useState, useEffect, useRef } from 'preact/hooks';
+import { useCallback, useState, useEffect } from 'preact/hooks';
 import Link from '../components/Link';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
@@ -33,9 +33,8 @@ export default function Event({ eventId, close, scrollRef }) {
       // When opening new event window, the previous one will sometimes cause the
       // navbar to be visible, hence the "hide nav" code bellow.
       // Navbar will be hided if we add the - translate - y - full class.appBar.js
-      console.log('getElementById');
-      let element = document.getElementById('appbar');
-      element.classList.add('-translate-y-full');
+      const element = document.getElementById('appbar');
+      if (element) element.classList.add('-translate-y-full');
     };
   }, [data, scrollRef, eventId, shouldScroll]);
 
@@ -70,23 +69,33 @@ export default function Event({ eventId, close, scrollRef }) {
   return (
     <div className="space-y-4">
       <div className="flex md:flex-row justify-between flex-wrap flex-col">
-        <div class="space-x-4">
-          <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
+        <div className="space-y-2 xs:space-y-0 xs:space-x-4">
+          <Button
+            className="w-full xs:w-auto"
+            color="blue"
+            href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
+            download
+          >
             <Clip className="w-6" /> Download Clip
           </Button>
-          <Button color="blue" href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`} download>
+          <Button
+            className="w-full xs:w-auto"
+            color="blue"
+            href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
+            download
+          >
             <Snapshot className="w-6" /> Download Snapshot
           </Button>
-          <Button className="self-start" onClick={() => setShowDetails(!showDetails)}>
+          <Button className="w-full xs:w-auto" onClick={() => setShowDetails(!showDetails)}>
             <ArrowDown className="w-6" />
             {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
           </Button>
         </div>
-        <div class="space-x-4">
-          <Button className="self-start" color="red" onClick={handleClickDelete}>
+        <div class="space-y-2 space-x-2 xs:space-y-0 xs:space-x-4">
+          <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
             <Delete className="w-6" /> Delete event
           </Button>
-          <Button color="gray" className="self-start" onClick={() => close()}>
+          <Button color="gray" className="xs:w-auto" onClick={() => close()}>
             <Close className="w-6" /> Close
           </Button>
         </div>
@@ -141,13 +150,13 @@ export default function Event({ eventId, close, scrollRef }) {
         ) : null}
       </div>
       <div className="outer-max-width xs:m-auto">
-        <div className="pt-5 relative pb-20">
+        <div className="pt-5 relative pb-20 w-screen xs:w-full">
           {data.has_clip ? (
             <Fragment>
               <Heading size="lg">Clip</Heading>
               <VideoPlayer
                 options={{
-                  // preload: 'none',
+                  preload: 'none',
                   sources: [
                     {
                       src: `${apiHost}/vod/event/${eventId}/index.m3u8`,

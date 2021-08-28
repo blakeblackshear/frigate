@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 
 // https://stackoverflow.com/a/54292872/2693528
 export const useOuterClick = (callback) => {

@@ -1,6 +1,6 @@
-import { h, Fragment } from 'preact';
+import { h } from 'preact';
 import { memo } from 'preact/compat';
-import { useCallback, useState, useMemo, useEffect } from 'preact/hooks';
+import { useCallback, useState, useMemo } from 'preact/hooks';
 import { Tr, Td, Tbody } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
@@ -43,17 +43,16 @@ const EventsRow = memo(
 
     const start = new Date(parseInt(startTime * 1000, 10));
     const end = new Date(parseInt(endTime * 1000, 10));
-    // console.log('tablerow has been rendered');
 
     return (
-      <Tbody reference={innerRef} key={id}>
+      <Tbody reference={innerRef}>
         <Tr data-testid={`event-${id}`} className={`${viewEvent === id ? 'border-none' : ''}`}>
           <Td className="w-40">
             <a
               onClick={() => viewEventHandler(id)}
               ref={lastRowRef}
               data-start-time={startTime}
-              // data-reached-end={reachedEnd}
+              // data-reached-end={reachedEnd} <-- Enable this will cause all events to re-render when reaching end.
             >
               <img
                 width="150"
