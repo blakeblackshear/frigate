@@ -36,5 +36,5 @@ Maintain aspect ratio and scale down the video container
 Could not find a proper tailwind css.
 */
 .outer-max-width {
-  max-width: 70%;
+  max-width: 60%;
 }

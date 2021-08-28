@@ -43,7 +43,7 @@ const EventsRow = memo(
 
     const start = new Date(parseInt(startTime * 1000, 10));
     const end = new Date(parseInt(endTime * 1000, 10));
-    console.log('tablerow has been rendered');
+    // console.log('tablerow has been rendered');
 
     return (
       <Tbody reference={innerRef} key={id}>

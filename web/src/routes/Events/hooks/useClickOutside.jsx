@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 
+// https://stackoverflow.com/a/54292872/2693528
 export const useOuterClick = (callback) => {
   const callbackRef = useRef(); // initialize mutable ref, which stores callback
   const innerRef = useRef(); // returned to client, who marks "border" element
@@ -15,7 +16,7 @@ export const useOuterClick = (callback) => {
     function handleClick(e) {
       if (innerRef.current && callbackRef.current && !innerRef.current.contains(e.target)) callbackRef.current(e);
     }
-  }, []); // no dependencies -> stable click listener
+  }, []);
 
   return innerRef; // convenience for client (doesn't need to init ref himself)
 };

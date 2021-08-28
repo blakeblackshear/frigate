@@ -29,6 +29,14 @@ export default function Event({ eventId, close, scrollRef }) {
       scrollRef[eventId].scrollIntoView();
       setShouldScroll(false);
     }
+    return () => {
+      // When opening new event window, the previous one will sometimes cause the
+      // navbar to be visible, hence the "hide nav" code bellow.
+      // Navbar will be hided if we add the - translate - y - full class.appBar.js
+      console.log('getElementById');
+      let element = document.getElementById('appbar');
+      element.classList.add('-translate-y-full');
+    };
   }, [data, scrollRef, eventId, shouldScroll]);
 
   const handleClickDelete = () => {

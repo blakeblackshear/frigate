@@ -81,7 +81,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     [apiHost, handleFilter, pathname, scrollToRef]
   );
 
-  console.log('main render');
+  // console.log('main render');
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
