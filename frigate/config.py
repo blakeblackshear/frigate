@@ -332,9 +332,15 @@ class FfmpegConfig(BaseModel):
     )
 
 
+class CameraRoleEnum(str, Enum):
+    record = "record"
+    rtmp = "rtmp"
+    detect = "detect"
+
+
 class CameraInput(BaseModel):
     path: str = Field(title="Camera input path.")
-    roles: List[str] = Field(title="Roles assigned to this input.")
+    roles: List[CameraRoleEnum] = Field(title="Roles assigned to this input.")
     global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
     )

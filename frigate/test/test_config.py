@@ -32,8 +32,8 @@ class TestConfig(unittest.TestCase):
         assert self.minimal == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert "coral" in runtime_config.detectors.keys()
-        assert runtime_config.detectors["coral"].type == DetectorTypeEnum.edgetpu
+        assert "cpu" in runtime_config.detectors.keys()
+        assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
 
     def test_invalid_mqtt_config(self):
         config = {
@@ -691,6 +691,31 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.model.merged_labelmap[0] == "person"
+
+    def test_fails_on_invalid_role(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "clips"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
 
 
 if __name__ == "__main__":
