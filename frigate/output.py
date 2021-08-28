@@ -75,8 +75,9 @@ class BroadcastThread(threading.Thread):
                     ws_iter = iter(websockets.values())
 
                 for ws in ws_iter:
-                    if not ws.terminated and ws.environ["PATH_INFO"].endswith(
-                        self.camera
+                    if (
+                        not ws.terminated
+                        and ws.environ["PATH_INFO"] == f"/{self.camera}"
                     ):
                         try:
                             ws.send(buf, binary=True)
