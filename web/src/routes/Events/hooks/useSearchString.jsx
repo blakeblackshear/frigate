@@ -6,13 +6,13 @@ export const useSearchString = (limit, searchParams) => {
   const { searchParams: initialSearchParams } = new URL(window.location);
   const _searchParams = searchParams || initialSearchParams.toString();
 
-  const [searchString, setSearchString] = useState(`${defaultSearchString(limit)}&${_searchParams}`);
+  const [searchString, changeSearchString] = useState(`${defaultSearchString(limit)}&${_searchParams}`);
 
-  const changeSearchString = useCallback(
+  const setSearchString = useCallback(
     (limit, searchString) => {
-      setSearchString(`${defaultSearchString(limit)}&${searchString}`);
+      changeSearchString(`${defaultSearchString(limit)}&${searchString}`);
     },
-    [setSearchString]
+    [changeSearchString]
   );
 
   const removeDefaultSearchKeys = useCallback((searchParams) => {
@@ -21,5 +21,5 @@ export const useSearchString = (limit, searchParams) => {
     searchParams.delete('before');
   }, []);
 
-  return [searchString, changeSearchString, removeDefaultSearchKeys];
+  return { searchString, setSearchString, removeDefaultSearchKeys };
 };

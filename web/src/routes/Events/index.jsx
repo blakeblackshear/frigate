@@ -1,12 +1,11 @@
 import { h } from 'preact';
 import ActivityIndicator from '../../components/ActivityIndicator';
 import Heading from '../../components/Heading';
-import { TableHead, Filters } from './components';
+import { TableHead, Filters, TableRow } from './components';
 import { route } from 'preact-router';
-import TableRow from './components/tableRow';
 import { FetchStatus, useApiHost, useEvents } from '../../api';
 import { Table, Tbody, Tfoot, Tr, Td } from '../../components/Table';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useReducer } from 'preact/hooks';
 import { reducer, initialState } from './reducer';
 import { useSearchString } from './hooks/useSearchString';
 import { useIntersectionObserver } from '../../hooks';
@@ -15,12 +14,9 @@ const API_LIMIT = 25;
 
 export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
   const apiHost = useApiHost();
-  const [searchString, setSearchString, removeDefaultSearchKeys] = useSearchString(limit);
-
+  const { searchString, setSearchString, removeDefaultSearchKeys } = useSearchString(limit);
   const [{ events, reachedEnd, searchStrings, deleted }, dispatch] = useReducer(reducer, initialState);
-
   const { data, status, deletedId } = useEvents(searchString);
-  const [counter, setCounter] = useState(0);
 
   const scrollToRef = useMemo(() => Object, []);
 
@@ -76,42 +72,20 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
         key={props.id}
         apiHost={apiHost}
         scrollToRef={scrollToRef}
-        reachedEnd={reachedEnd}
-        setSearchString={setSearchString}
         pathname={pathname}
-        searchParams={searchParams}
         limit={API_LIMIT}
-        searchString={searchString}
         handleFilter={handleFilter}
-        removeDefaultSearchKeys={removeDefaultSearchKeys}
         {...props}
       />
     ),
-    [
-      reachedEnd,
-      apiHost,
-      setSearchString,
-      handleFilter,
-      pathname,
-      removeDefaultSearchKeys,
-      scrollToRef,
-      // searchParams,
-      // searchString,
-    ]
+    [apiHost, handleFilter, pathname, scrollToRef]
   );
-  useEffect(() => {
-    setInterval(() => {
-      setCounter((prev) => prev + 1);
-    }, 1000);
-  }, []);
 
-  console.log('main render', counter);
+  console.log('main render');
   return (
     <div className="space-y-4 w-full">
       <Heading>Events</Heading>
-
       <Filters onChange={handleFilter} searchParams={searchParams} />
-
       <div className="min-w-0 overflow-auto">
         <Table className="min-w-full table-fixed">
           <TableHead />

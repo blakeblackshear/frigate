@@ -28,4 +28,5 @@ const Filterable = ({ onFilter, pathname, searchParams, paramName, name, removeD
     </Link>
   );
 };
+
 export default Filterable;

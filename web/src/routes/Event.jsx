@@ -28,21 +28,6 @@ export default function Event({ eventId, close, scrollRef }) {
     }
   }, [data, scrollRef, eventId, shouldScroll]);
 
-  // useEffect(() => {
-  //   const checkIfClickedOutside = (e) => {
-  //     // If the event is open and the clicked target is not within the event window or delete modal,
-  //     // then close the menu
-  //     if (!showDialog && eventRef.current && !eventRef.current.contains(e.target)) {
-  //       close(null);
-  //     }
-  //   };
-  //   document.addEventListener('mousedown', checkIfClickedOutside);
-  //   return () => {
-  //     // Cleanup the
-  //     document.removeEventListener('mousedown', checkIfClickedOutside);
-  //   };
-  // }, [close, showDialog]);
-
   const handleClickDelete = () => {
     setShowDialog(true);
   };

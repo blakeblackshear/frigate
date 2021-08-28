@@ -1,9 +1,10 @@
 import { h, Fragment } from 'preact';
 import { memo } from 'preact/compat';
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useState, useMemo } from 'preact/hooks';
 import { Tr, Td } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
+import { useSearchString } from '../hooks/useSearchString';
 
 const EventsRow = memo(
   ({
@@ -11,26 +12,24 @@ const EventsRow = memo(
     apiHost,
     start_time: startTime,
     end_time: endTime,
-    reachedEnd,
     scrollToRef,
-    searchString,
     lastRowRef,
     handleFilter,
     pathname,
-    searchParams,
+    limit,
     camera,
     label,
     top_score: score,
     zones,
-    removeDefaultSearchKeys,
   }) => {
     const [viewEvent, setViewEvent] = useState(null);
+    const { searchString, removeDefaultSearchKeys } = useSearchString(limit);
+    const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
     const viewEventHandler = useCallback(
       (id) => {
         //Toggle event view
         if (viewEvent === id) return setViewEvent(null);
-
         //Set event id to be rendered.
         setViewEvent(id);
       },
@@ -48,7 +47,7 @@ const EventsRow = memo(
               onClick={() => viewEventHandler(id)}
               ref={lastRowRef}
               data-start-time={startTime}
-              data-reached-end={reachedEnd}
+              // data-reached-end={reachedEnd}
             >
               <img
                 ref={(el) => (scrollToRef[id] = el)}
