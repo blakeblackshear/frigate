@@ -1,10 +1,11 @@
 import { h, Fragment } from 'preact';
 import { memo } from 'preact/compat';
-import { useCallback, useState, useMemo } from 'preact/hooks';
-import { Tr, Td } from '../../../components/Table';
+import { useCallback, useState, useMemo, useEffect } from 'preact/hooks';
+import { Tr, Td, Tbody } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
 import { useSearchString } from '../hooks/useSearchString';
+import { useOuterClick } from '../hooks/useClickOutside';
 
 const EventsRow = memo(
   ({
@@ -26,6 +27,10 @@ const EventsRow = memo(
     const { searchString, removeDefaultSearchKeys } = useSearchString(limit);
     const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
+    const innerRef = useOuterClick(() => {
+      setViewEvent(null);
+    });
+
     const viewEventHandler = useCallback(
       (id) => {
         //Toggle event view
@@ -39,8 +44,9 @@ const EventsRow = memo(
     const start = new Date(parseInt(startTime * 1000, 10));
     const end = new Date(parseInt(endTime * 1000, 10));
     console.log('tablerow has been rendered');
+
     return (
-      <Fragment key={id}>
+      <Tbody reference={innerRef} key={id}>
         <Tr data-testid={`event-${id}`} className={`${viewEvent === id ? 'border-none' : ''}`}>
           <Td className="w-40">
             <a
@@ -50,7 +56,6 @@ const EventsRow = memo(
               // data-reached-end={reachedEnd}
             >
               <img
-                ref={(el) => (scrollToRef[id] = el)}
                 width="150"
                 height="150"
                 className="cursor-pointer"
@@ -102,12 +107,12 @@ const EventsRow = memo(
         </Tr>
         {viewEvent === id ? (
           <Tr className="border-b-1">
-            <Td colSpan="8">
+            <Td colSpan="8" reference={(el) => (scrollToRef[id] = el)}>
               <Event eventId={id} close={() => setViewEvent(null)} scrollRef={scrollToRef} />
             </Td>
           </Tr>
         ) : null}
-      </Fragment>
+      </Tbody>
     );
   }
 );

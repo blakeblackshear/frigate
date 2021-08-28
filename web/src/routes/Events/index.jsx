@@ -4,7 +4,7 @@ import Heading from '../../components/Heading';
 import { TableHead, Filters, TableRow } from './components';
 import { route } from 'preact-router';
 import { FetchStatus, useApiHost, useEvents } from '../../api';
-import { Table, Tbody, Tfoot, Tr, Td } from '../../components/Table';
+import { Table, Tfoot, Tr, Td } from '../../components/Table';
 import { useCallback, useEffect, useMemo, useReducer } from 'preact/hooks';
 import { reducer, initialState } from './reducer';
 import { useSearchString } from './hooks/useSearchString';
@@ -89,12 +89,12 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
       <div className="min-w-0 overflow-auto">
         <Table className="min-w-full table-fixed">
           <TableHead />
-          <Tbody>
-            {events.map((props, idx) => {
-              const lastRowRef = idx === events.length - 1 ? lastCellRef : undefined;
-              return <RenderTableRow {...props} lastRowRef={lastRowRef} idx={idx} />;
-            })}
-          </Tbody>
+
+          {events.map((props, idx) => {
+            const lastRowRef = idx === events.length - 1 ? lastCellRef : undefined;
+            return <RenderTableRow {...props} lastRowRef={lastRowRef} idx={idx} />;
+          })}
+
           <Tfoot>
             <Tr>
               <Td className="text-center p-4" colSpan="8">
