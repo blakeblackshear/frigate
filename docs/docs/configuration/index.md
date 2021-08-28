@@ -167,21 +167,6 @@ record:
         person: 15
 ```
 
-## `snapshots`
-
-Can be overridden at the camera level. Global snapshot retention settings.
-
-```yaml
-# Optional: Configuration for the jpg snapshots written to the clips directory for each event
-snapshots:
-  retain:
-    # Required: Default retention days (default: shown below)
-    default: 10
-    # Optional: Per object retention days
-    objects:
-      person: 15
-```
-
 ### `ffmpeg`
 
 Can be overridden at the camera level.

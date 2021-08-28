@@ -802,6 +802,88 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].detect.height == 1080
         assert runtime_config.cameras["back"].detect.width == 1920
 
+    def test_global_snapshots(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "snapshots": {"enabled": True},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "snapshots": {
+                        "height": 100,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].snapshots.enabled
+        assert runtime_config.cameras["back"].snapshots.height == 100
+
+    def test_default_snapshots(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].snapshots.bounding_box
+        assert runtime_config.cameras["back"].snapshots.quality == 70
+
+    def test_global_snapshots_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "snapshots": {"bounding_box": False, "height": 300},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "snapshots": {
+                        "height": 150,
+                        "enabled": True,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].snapshots.bounding_box == False
+        assert runtime_config.cameras["back"].snapshots.height == 150
+        assert runtime_config.cameras["back"].snapshots.enabled
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

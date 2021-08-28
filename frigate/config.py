@@ -371,7 +371,7 @@ class CameraFfmpegConfig(FfmpegConfig):
         return v
 
 
-class CameraSnapshotsConfig(BaseModel):
+class SnapshotsConfig(BaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
     clean_copy: bool = Field(
         default=True, title="Create a clean copy of the snapshot image."
@@ -457,9 +457,11 @@ class CameraConfig(BaseModel):
     rtmp: CameraRtmpConfig = Field(
         default_factory=CameraRtmpConfig, title="RTMP restreaming configuration."
     )
-    live: Optional[CameraLiveConfig] = Field(title="Live playback settings.")
-    snapshots: CameraSnapshotsConfig = Field(
-        default_factory=CameraSnapshotsConfig, title="Snapshot configuration."
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Live playback settings."
+    )
+    snapshots: SnapshotsConfig = Field(
+        default_factory=SnapshotsConfig, title="Snapshot configuration."
     )
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig, title="MQTT configuration."
@@ -468,7 +470,9 @@ class CameraConfig(BaseModel):
         default_factory=ObjectConfig, title="Object configuration."
     )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
-    detect: Optional[DetectConfig] = Field(title="Object detection configuration.")
+    detect: DetectConfig = Field(
+        default_factory=DetectConfig, title="Object detection configuration."
+    )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
@@ -628,12 +632,6 @@ class LoggerConfig(BaseModel):
     )
 
 
-class SnapshotsConfig(BaseModel):
-    retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Global snapshot retention configuration."
-    )
-
-
 class FrigateConfig(BaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -670,8 +668,8 @@ class FrigateConfig(BaseModel):
     motion: Optional[MotionConfig] = Field(
         title="Global motion detection configuration."
     )
-    detect: Optional[DetectConfig] = Field(
-        title="Global object tracking configuration."
+    detect: DetectConfig = Field(
+        default_factory=DetectConfig, title="Global object tracking configuration."
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
 
@@ -703,10 +701,7 @@ class FrigateConfig(BaseModel):
                 {"name": name, **merged_config}
             )
 
-            # Default detect configuration
-            if camera_config.detect is None:
-                camera_config.detect = DetectConfig()
-
+            # Default max_disappeared configuration
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
@@ -757,10 +752,6 @@ class FrigateConfig(BaseModel):
                     raw_mask=camera_config.motion.mask,
                     **camera_config.motion.dict(exclude_unset=True),
                 )
-
-            # Default live configuration
-            if camera_config.live is None:
-                camera_config.live = CameraLiveConfig()
 
             config.cameras[name] = camera_config
 
