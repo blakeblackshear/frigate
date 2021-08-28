@@ -284,11 +284,11 @@ cameras:
 
     # Required: Camera level detect settings
     detect:
-      # Required: width of the frame for the input with the detect role
+      # Optional: width of the frame for the input with the detect role (default: shown below)
       width: 1280
-      # Required: height of the frame for the input with the detect role
+      # Optional: height of the frame for the input with the detect role (default: shown below)
       height: 720
-      # Required: desired fps for your camera for the input with the detect role
+      # Optional: desired fps for your camera for the input with the detect role (default: shown below)
       # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
       fps: 5
       # Optional: enables detection for the camera (default: True)

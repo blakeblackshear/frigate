@@ -149,9 +149,11 @@ class RuntimeMotionConfig(MotionConfig):
 
 
 class DetectConfig(BaseModel):
-    height: int = Field(title="Height of the stream for the detect role.")
-    width: int = Field(title="Width of the stream for the detect role.")
-    fps: int = Field(title="Number of frames per second to process through detection.")
+    height: int = Field(default=720, title="Height of the stream for the detect role.")
+    width: int = Field(default=1280, title="Width of the stream for the detect role.")
+    fps: int = Field(
+        default=5, title="Number of frames per second to process through detection."
+    )
     enabled: bool = Field(default=True, title="Detection Enabled.")
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
@@ -466,7 +468,7 @@ class CameraConfig(BaseModel):
         default_factory=ObjectConfig, title="Object configuration."
     )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
-    detect: DetectConfig = Field(title="Object detection configuration.")
+    detect: Optional[DetectConfig] = Field(title="Object detection configuration.")
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
@@ -701,6 +703,14 @@ class FrigateConfig(BaseModel):
                 {"name": name, **merged_config}
             )
 
+            # Default detect configuration
+            if camera_config.detect is None:
+                camera_config.detect = DetectConfig()
+
+            max_disappeared = camera_config.detect.fps * 5
+            if camera_config.detect.max_disappeared is None:
+                camera_config.detect.max_disappeared = max_disappeared
+
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
@@ -747,11 +757,6 @@ class FrigateConfig(BaseModel):
                     raw_mask=camera_config.motion.mask,
                     **camera_config.motion.dict(exclude_unset=True),
                 )
-
-            # Default detect configuration
-            max_disappeared = camera_config.detect.fps * 5
-            if camera_config.detect.max_disappeared is None:
-                camera_config.detect.max_disappeared = max_disappeared
 
             # Default live configuration
             if camera_config.live is None:

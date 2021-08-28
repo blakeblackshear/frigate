@@ -717,6 +717,91 @@ class TestConfig(unittest.TestCase):
 
         self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
 
+    def test_global_detect(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "detect": {"max_disappeared": 1},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].detect.max_disappeared == 1
+        assert runtime_config.cameras["back"].detect.height == 1080
+
+    def test_default_detect(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].detect.max_disappeared == 25
+        assert runtime_config.cameras["back"].detect.height == 720
+
+    def test_global_detect_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "detect": {"max_disappeared": 1, "height": 720},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].detect.max_disappeared == 1
+        assert runtime_config.cameras["back"].detect.height == 1080
+        assert runtime_config.cameras["back"].detect.width == 1920
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
