@@ -78,7 +78,10 @@ class RecordingMaintainer(threading.Thread):
             start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
             # Just delete files if recordings are turned off
-            if not self.config.cameras[camera].record.enabled:
+            if (
+                not camera in self.config.cameras
+                or not self.config.cameras[camera].record.enabled
+            ):
                 Path(cache_path).unlink(missing_ok=True)
                 continue
 
