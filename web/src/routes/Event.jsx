@@ -57,8 +57,8 @@ export default function Event({ eventId, close, scrollRef }) {
 
   return (
     <div className="space-y-4" ref={eventRef}>
-      <div className="grid grid-cols-6 gap-4">
-        <div class="col-start-1 col-end-8 md:space-x-4">
+      <div className="flex md:flex-row justify-between flex-wrap flex-col">
+        <div class="space-x-4">
           <Button color="blue" href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`} download>
             <Clip className="w-6" /> Download Clip
           </Button>
@@ -66,7 +66,7 @@ export default function Event({ eventId, close, scrollRef }) {
             <Snapshot className="w-6" /> Download Snapshot
           </Button>
         </div>
-        <div class="col-end-10 col-span-2 space-x-4">
+        <div class="space-x-4">
           <Button className="self-start" color="red" onClick={handleClickDelete}>
             <Delete className="w-6" /> Delete event
           </Button>
@@ -92,7 +92,7 @@ export default function Event({ eventId, close, scrollRef }) {
           />
         ) : null}
       </div>
-      <div className="outer-max-width m-auto">
+      <div className="outer-max-width xs:m-auto">
         <div className="w-full pt-5 relative pb-20">
           {data.has_clip ? (
             <Fragment>
