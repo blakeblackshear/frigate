@@ -4,6 +4,7 @@ import Link from '../components/Link';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import ArrowDown from '../icons/ArrowDropdown';
+import ArrowDropup from '../icons/ArrowDropup';
 import Clip from '../icons/Clip';
 import Close from '../icons/Close';
 import Delete from '../icons/Delete';
@@ -13,6 +14,38 @@ import Heading from '../components/Heading';
 import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
+
+const ActionButtonGroup = ({ className, handleClickDelete, close }) => (
+  <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
+    <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
+      <Delete className="w-6" /> Delete event
+    </Button>
+    <Button color="gray" className="xs:w-auto" onClick={() => close()}>
+      <Close className="w-6" /> Close
+    </Button>
+  </div>
+);
+
+const DownloadButtonGroup = ({ className, apiHost, eventId }) => (
+  <span className={`space-y-2 sm:space-y-0 space-x-0 sm:space-x-4 ${className}`}>
+    <Button
+      className="w-full sm:w-auto"
+      color="blue"
+      href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
+      download
+    >
+      <Clip className="w-6" /> Download Clip
+    </Button>
+    <Button
+      className="w-full sm:w-auto"
+      color="blue"
+      href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
+      download
+    >
+      <Snapshot className="w-6" /> Download Snapshot
+    </Button>
+  </span>
+);
 
 export default function Event({ eventId, close, scrollRef }) {
   const apiHost = useApiHost();
@@ -65,50 +98,28 @@ export default function Event({ eventId, close, scrollRef }) {
     return <ActivityIndicator />;
   }
 
-  const DownloadButtonGroup = ({ className }) => (
-    <span className={`space-y-2 sm:space-y-0 space-x-0 sm:space-x-4 ${className}`}>
-      <Button
-        className="w-full sm:w-auto"
-        color="blue"
-        href={`${apiHost}/api/events/${eventId}/clip.mp4?download=true`}
-        download
-      >
-        <Clip className="w-6" /> Download Clip
-      </Button>
-      <Button
-        className="w-full sm:w-auto"
-        color="blue"
-        href={`${apiHost}/api/events/${eventId}/snapshot.jpg?download=true`}
-        download
-      >
-        <Snapshot className="w-6" /> Download Snapshot
-      </Button>
-    </span>
-  );
-  const DeleteButtonGroup = ({ className }) => (
-    <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
-      <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
-        <Delete className="w-6" /> Delete event
-      </Button>
-      <Button color="gray" className="xs:w-auto" onClick={() => close()}>
-        <Close className="w-6" /> Close
-      </Button>
-    </div>
-  );
   const startime = new Date(data.start_time * 1000);
   const endtime = new Date(data.end_time * 1000);
   return (
     <div className="space-y-4">
       <div className="flex md:flex-row justify-between flex-wrap flex-col">
         <div className="space-y-2 xs:space-y-0 sm:space-x-4">
-          <DownloadButtonGroup className="hidden sm:inline" />
-
+          <DownloadButtonGroup apiHost={apiHost} eventId={eventId} className="hidden sm:inline" />
           <Button className="w-full sm:w-auto" onClick={() => setShowDetails(!showDetails)}>
-            <ArrowDown className="w-6" />
-            {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
+            {showDetails ? (
+              <Fragment>
+                <ArrowDropup className="w-6" />
+                Hide event Details
+              </Fragment>
+            ) : (
+              <Fragment>
+                <ArrowDown className="w-6" />
+                Show event Details
+              </Fragment>
+            )}
           </Button>
         </div>
-        <DeleteButtonGroup className="hidden sm:block" />
+        <ActionButtonGroup handleClickDelete={handleClickDelete} close={close} className="hidden sm:block" />
         {showDialog ? (
           <Dialog
             onDismiss={handleDismissDeleteDialog}
@@ -198,8 +209,8 @@ export default function Event({ eventId, close, scrollRef }) {
         </div>
       </div>
       <div className="space-y-2 xs:space-y-0">
-        <DownloadButtonGroup className="block sm:hidden" />
-        <DeleteButtonGroup className="block sm:hidden" />
+        <DownloadButtonGroup apiHost={apiHost} eventId={eventId} className="block sm:hidden" />
+        <ActionButtonGroup handleClickDelete={handleClickDelete} close={close} className="block sm:hidden" />
       </div>
     </div>
   );
