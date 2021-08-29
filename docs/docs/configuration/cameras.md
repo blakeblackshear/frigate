@@ -487,3 +487,14 @@ ffmpeg:
     - -use_wallclock_as_timestamps
     - "1"
 ```
+
+### UDP Cameras
+
+You will need to add `rtsp_transport` option for UDP cameras
+
+```yaml
+ffmpeg:
+  input_args:
+    - -rtsp_transport
+    - udp
+```
