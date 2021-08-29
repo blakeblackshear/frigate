@@ -91,7 +91,7 @@ export default function Event({ eventId, close, scrollRef }) {
             {`${showDetails ? 'Hide event Details' : 'View event Details'}`}
           </Button>
         </div>
-        <div class="space-y-2 space-x-2 xs:space-y-0 xs:space-x-4">
+        <div className="space-y-2 space-x-2 xs:space-y-0 xs:space-x-4">
           <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
             <Delete className="w-6" /> Delete event
           </Button>
