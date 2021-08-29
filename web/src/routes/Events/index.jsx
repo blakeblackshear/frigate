@@ -7,7 +7,7 @@ import { FetchStatus, useApiHost, useEvents } from '../../api';
 import { Table, Tfoot, Tr, Td } from '../../components/Table';
 import { useCallback, useEffect, useMemo, useReducer } from 'preact/hooks';
 import { reducer, initialState } from './reducer';
-import { useSearchString } from './hooks/useSearchString';
+import { useSearchString } from '../../hooks/useSearchString';
 import { useIntersectionObserver } from '../../hooks';
 
 const API_LIMIT = 25;

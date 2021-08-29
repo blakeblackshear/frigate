@@ -4,8 +4,8 @@ import { useCallback, useState, useMemo } from 'preact/hooks';
 import { Tr, Td, Tbody } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
-import { useSearchString } from '../hooks/useSearchString';
-import { useOuterClick } from '../hooks/useClickOutside';
+import { useSearchString } from '../../../hooks/useSearchString';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 const EventsRow = memo(
   ({
@@ -27,7 +27,7 @@ const EventsRow = memo(
     const { searchString, removeDefaultSearchKeys } = useSearchString(limit);
     const searchParams = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
-    const innerRef = useOuterClick(() => {
+    const innerRef = useClickOutside(() => {
       setViewEvent(null);
     });
 

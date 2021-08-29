@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 
 // https://stackoverflow.com/a/54292872/2693528
-export const useOuterClick = (callback) => {
+export const useClickOutside = (callback) => {
   const callbackRef = useRef(); // initialize mutable ref, which stores callback
   const innerRef = useRef(); // returned to client, who marks "border" element
 
