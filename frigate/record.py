@@ -10,8 +10,7 @@ import threading
 from pathlib import Path
 
 import psutil
-
-from peewee import JOIN
+from peewee import JOIN, DoesNotExist
 
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, RECORD_DIR
@@ -261,15 +260,14 @@ class RecordingCleanup(threading.Thread):
             )
 
         # find all the recordings older than the oldest recording in the db
-        oldest_recording = (
-            Recordings.select().order_by(Recordings.start_time.desc()).get()
-        )
+        try:
+            oldest_recording = (
+                Recordings.select().order_by(Recordings.start_time.desc()).get()
+            )
 
-        oldest_timestamp = (
-            oldest_recording.start_time
-            if oldest_recording
-            else datetime.datetime.now().timestamp()
-        )
+            oldest_timestamp = oldest_recording.start_time
+        except DoesNotExist:
+            oldest_timestamp = datetime.datetime.now().timestamp()
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
