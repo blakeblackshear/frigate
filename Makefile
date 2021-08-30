@@ -42,7 +42,7 @@ aarch64_frigate: version web
 	docker build --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.base .
 	docker build --tag frigate --file docker/Dockerfile.aarch64 .
 
-armv7_all: armv7_wheels armv7_ffmpeg armv7_frigate
+aarch64_all: aarch64_wheels aarch64_ffmpeg aarch64_frigate
 
 armv7_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-armv7 --file docker/Dockerfile.wheels .
