@@ -14,6 +14,7 @@ title: Optimizing performance
 Frigate works on Raspberry Pi 3b/4 and x86 machines. It is recommended to update your configuration to enable hardware accelerated decoding in ffmpeg. Depending on your system, these parameters may not be compatible.
 
 Raspberry Pi 3/4 (32-bit OS)
+Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config > Performance Options > GPU Memory).
 **NOTICE**: If you are using the addon, ensure you turn off `Protection mode` for hardware acceleration.
 
 ```yaml
