@@ -14,7 +14,7 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
 
   // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
   // https://github.com/blakeblackshear/frigate/issues/1657
-  let scrollBarWidth;
+  let scrollBarWidth = 0;
   if (window.innerWidth && document.body.offsetWidth) {
     scrollBarWidth = window.innerWidth - document.body.offsetWidth;
   }
@@ -28,7 +28,10 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
     const scaledHeight = Math.floor(availableWidth / aspectRatio);
     return stretch ? scaledHeight : Math.min(scaledHeight, height);
   }, [availableWidth, aspectRatio, height, stretch]);
-  const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio), [scaledHeight, aspectRatio]);
+  const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth), [
+    scaledHeight,
+    aspectRatio,
+  ]);
 
   const img = useMemo(() => new Image(), []);
   img.onload = useCallback(
