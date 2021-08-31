@@ -233,3 +233,13 @@ birdseye:
   #   continuous - all cameras are included always
   mode: objects
 ```
+
+### `rtmp`
+
+Can be overridden at the camera level. See the [cameras configuration page](cameras.md) for more information about RTMP streaming.
+
+```yaml
+rtmp:
+  # Optional: Enable the RTMP stream (default: True)
+  enabled: True
+```

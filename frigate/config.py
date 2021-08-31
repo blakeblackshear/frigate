@@ -432,7 +432,7 @@ class CameraMqttConfig(BaseModel):
     )
 
 
-class CameraRtmpConfig(BaseModel):
+class RtmpConfig(BaseModel):
     enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
 
 
@@ -454,8 +454,8 @@ class CameraConfig(BaseModel):
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Record configuration."
     )
-    rtmp: CameraRtmpConfig = Field(
-        default_factory=CameraRtmpConfig, title="RTMP restreaming configuration."
+    rtmp: RtmpConfig = Field(
+        default_factory=RtmpConfig, title="RTMP restreaming configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
@@ -656,6 +656,9 @@ class FrigateConfig(BaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
+    rtmp: RtmpConfig = Field(
+        default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
+    )
     birdseye: BirdseyeConfig = Field(
         default_factory=BirdseyeConfig, title="Birdseye configuration."
     )
@@ -687,6 +690,7 @@ class FrigateConfig(BaseModel):
             include={
                 "record": ...,
                 "snapshots": ...,
+                "rtmp": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
