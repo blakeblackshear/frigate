@@ -675,6 +675,9 @@ class FrigateConfig(BaseModel):
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+    timestamp_style: TimestampStyleConfig = Field(
+        default_factory=TimestampStyleConfig, title="Global timestamp style configuration."
+    )
 
     @property
     def runtime_config(self) -> FrigateConfig:
@@ -695,6 +698,7 @@ class FrigateConfig(BaseModel):
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,
+                "timestamp_style": ...,
             },
             exclude_unset=True,
         )
