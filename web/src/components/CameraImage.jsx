@@ -31,6 +31,7 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
   const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth), [
     scaledHeight,
     aspectRatio,
+    scrollBarWidth,
   ]);
 
   const img = useMemo(() => new Image(), []);
