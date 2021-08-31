@@ -9,6 +9,12 @@ For Home Assistant users, there is also a [custom component (aka integration)](h
 
 Note that HassOS Addons and custom components are different things. If you are already running Frigate with Docker directly, you do not need the Addon since the Addon would run another instance of Frigate.
 
+If you are running Frigate seperate to HassOS, you will need to install and configure an (https://mqtt.org/software/)[MQTT broker] such as (https://mosquitto.org/)[Mosquitto] first.
+
+Before using Frigate with a Coral accelerator, make sure that you have the edge TPU runtime installed. Click for instructions for the [USB accelerator](https://coral.ai/docs/accelerator/get-started/) or [M.2/Mini PCI-e accelerator](https://coral.ai/docs/m2/get-started/)
+
+A valid [configuration file](https://blakeblackshear.github.io/frigate/configuration/index/) must exist before starting Frigate.
+
 ## HassOS Addon
 
 HassOS users can install via the addon repository. Frigate requires an MQTT server.
@@ -46,7 +52,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - <path_to_config_file>:/config/config.yml:ro
+      - <path_to_config_directory>:/config:ro
       - <path_to_directory_for_media>:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -69,13 +75,14 @@ docker run -d \
   --device /dev/bus/usb:/dev/bus/usb \
   --device /dev/dri/renderD128 \
   -v <path_to_directory_for_media>:/media/frigate \
-  -v <path_to_config_file>:/config/config.yml:ro \
+  -v <path_to_config_directory>:/config:ro \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
   -p 1935:1935 \
-  blakeblackshear/frigate:<specify_version_tag>
+  blakeblackshear/frigate:<arch_image_tag>
 ```
+For M.2 or PCI-e based Coral accelerators, replace `/dev/bus/usb:/dev/bus/usb` with `/dev/apex_0:/dev/apex_0`
 
 ### Calculating shm-size
 
@@ -118,6 +125,8 @@ lxc.apparmor.profile: unconfined
 lxc.cgroup.devices.allow: a
 lxc.cap.drop:
 ```
+
+Note that this assumes that a Coral USB accelerator is used.
 
 ### ESX
 
