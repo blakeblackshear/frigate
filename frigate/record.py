@@ -196,37 +196,10 @@ class RecordingCleanup(threading.Thread):
                 Event.camera == camera, Event.end_time < expire_date, Event.has_clip
             )
 
-            # mark has_clip false for all expired events
-            expired_event_ids = set()
-            for event in events:
-                # get the date that this event should expire
-                expire_days_event = (
-                    0
-                    if not config.record.events.enabled
-                    else config.record.events.retain.objects.get(
-                        event.label, config.record.events.retain.default
-                    )
-                )
-                expire_before_event = (
-                    datetime.datetime.now() - datetime.timedelta(days=expire_days_event)
-                ).timestamp()
-                # if the event is expired
-                if event.start_time < expire_before_event:
-                    event.has_clip = False
-                    expired_event_ids.add(event.id)
-
-            if expired_event_ids:
-                # Update associated events
-                Event.update(has_clip=False).where(
-                    Event.id.in_(list(expired_event_ids))
-                ).execute()
-
             # loop over recordings and see if they overlap with any non-expired events
             for recording in recordings:
                 keep = False
                 for event in events:
-                    if not event.has_clip:
-                        continue
                     if (
                         (  # event starts in this segment
                             event.start_time > recording.start_time
