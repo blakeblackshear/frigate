@@ -157,18 +157,18 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug("Start deleted cameras.")
         # Handle deleted cameras
+        expire_days = self.config.record.retain_days
+        expire_before = (
+            datetime.datetime.now() - datetime.timedelta(days=expire_days)
+        ).timestamp()
         no_camera_recordings: Recordings = Recordings.select().where(
             Recordings.camera.not_in(list(self.config.cameras.keys())),
+            Recordings.end_time < expire_before,
         )
 
         for recording in no_camera_recordings:
-            expire_days = self.config.record.retain_days
-            expire_before = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days)
-            ).timestamp()
-            if recording.end_time < expire_before:
-                Path(recording.path).unlink(missing_ok=True)
-                Recordings.delete_by_id(recording.id)
+            Path(recording.path).unlink(missing_ok=True)
+            Recordings.delete_by_id(recording.id)
         logger.debug("End deleted cameras.")
 
         logger.debug("Start all cameras.")
@@ -185,59 +185,69 @@ class RecordingCleanup(threading.Thread):
             ).timestamp()
             expire_date = min(min_end, expire_before)
 
-            # Get recordings to remove
+            # Get recordings to check for expiration
             recordings: Recordings = Recordings.select().where(
                 Recordings.camera == camera,
                 Recordings.end_time < expire_date,
             )
 
-            for recording in recordings:
-                # See if there are any associated events
-                events: Event = Event.select().where(
-                    Event.camera == recording.camera,
-                    (
-                        Event.start_time.between(
-                            recording.start_time, recording.end_time
-                        )
-                        | Event.end_time.between(
-                            recording.start_time, recording.end_time
-                        )
-                        | (
-                            (recording.start_time > Event.start_time)
-                            & (recording.end_time < Event.end_time)
-                        )
-                    ),
-                )
-                keep = False
-                event_ids = set()
+            # Get all the events to check against
+            events: Event = Event.select().where(
+                Event.camera == camera, Event.end_time < expire_date, Event.has_clip
+            )
 
-                event: Event
-                for event in events:
-                    event_ids.add(event.id)
-                    # Check event/label retention and keep the recording if within window
-                    expire_days_event = (
-                        0
-                        if not config.record.events.enabled
-                        else config.record.events.retain.objects.get(
-                            event.label, config.record.events.retain.default
-                        )
+            # mark has_clip false for all expired events
+            expired_event_ids = set()
+            for event in events:
+                # get the date that this event should expire
+                expire_days_event = (
+                    0
+                    if not config.record.events.enabled
+                    else config.record.events.retain.objects.get(
+                        event.label, config.record.events.retain.default
                     )
-                    expire_before_event = (
-                        datetime.datetime.now()
-                        - datetime.timedelta(days=expire_days_event)
-                    ).timestamp()
-                    if recording.end_time >= expire_before_event:
+                )
+                expire_before_event = (
+                    datetime.datetime.now() - datetime.timedelta(days=expire_days_event)
+                ).timestamp()
+                # if the event is expired
+                if event.start_time < expire_before_event:
+                    event.has_clip = False
+                    expired_event_ids.add(event.id)
+
+            if expired_event_ids:
+                # Update associated events
+                Event.update(has_clip=False).where(
+                    Event.id.in_(list(expired_event_ids))
+                ).execute()
+
+            # loop over recordings and see if they overlap with any non-expired events
+            for recording in recordings:
+                keep = False
+                for event in events:
+                    if not event.has_clip:
+                        continue
+                    if (
+                        (  # event starts in this segment
+                            event.start_time > recording.start_time
+                            and event.start_time < recording.end_time
+                        )
+                        or (  # event ends in this segment
+                            event.end_time > recording.start_time
+                            and event.end_time < recording.end_time
+                        )
+                        or (  # event spans this segment
+                            recording.start_time > event.start_time
+                            and recording.end_time < event.end_time
+                        )
+                    ):
                         keep = True
+                        break
 
                 # Delete recordings outside of the retention window
                 if not keep:
                     Path(recording.path).unlink(missing_ok=True)
                     Recordings.delete_by_id(recording.id)
-                    if event_ids:
-                        # Update associated events
-                        Event.update(has_clip=False).where(
-                            Event.id.in_(list(event_ids))
-                        ).execute()
 
             logger.debug(f"End camera: {camera}.")
 
