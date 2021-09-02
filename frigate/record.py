@@ -186,20 +186,38 @@ class RecordingCleanup(threading.Thread):
             expire_date = min(min_end, expire_before)
 
             # Get recordings to check for expiration
-            recordings: Recordings = Recordings.select().where(
-                Recordings.camera == camera,
-                Recordings.end_time < expire_date,
+            recordings: Recordings = (
+                Recordings.select()
+                .where(
+                    Recordings.camera == camera,
+                    Recordings.end_time < expire_date,
+                )
+                .order_by(Recordings.start_time.desc())
+                .objects()
             )
 
             # Get all the events to check against
-            events: Event = Event.select().where(
-                Event.camera == camera, Event.end_time < expire_date, Event.has_clip
+            events: Event = (
+                Event.select()
+                .where(
+                    Event.camera == camera, Event.end_time < expire_date, Event.has_clip
+                )
+                .order_by(Event.start_time.desc())
+                .objects()
             )
 
             # loop over recordings and see if they overlap with any non-expired events
+            event_start = 0
+            logger.debug(
+                f"Checking {len(recordings)} recordings against {len(events)} events"
+            )
             for recording in recordings:
                 keep = False
-                for event in events:
+                # since the events and recordings are sorted, we can skip events
+                # that start after the previous recording segment ended
+                for idx in range(event_start, len(events)):
+                    event = events[idx]
+                    # logger.debug(f"Checking event {event.id}")
                     if (
                         (  # event starts in this segment
                             event.start_time > recording.start_time
@@ -216,6 +234,10 @@ class RecordingCleanup(threading.Thread):
                     ):
                         keep = True
                         break
+
+                    # if the event starts after the current recording, skip it next time
+                    if event.start_time > recording.end_time:
+                        event_start = idx
 
                 # Delete recordings outside of the retention window
                 if not keep:
