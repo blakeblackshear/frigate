@@ -214,33 +214,24 @@ class RecordingCleanup(threading.Thread):
                 # that start after the previous recording segment ended
                 for idx in range(event_start, len(events)):
                     event = events[idx]
-                    # logger.debug(f"Checking event {event.id}")
-                    if (
-                        (  # event starts in this segment
-                            event.start_time > recording.start_time
-                            and event.start_time < recording.end_time
-                        )
-                        or (  # event ends in this segment
-                            event.end_time > recording.start_time
-                            and event.end_time < recording.end_time
-                        )
-                        or (  # event spans this segment
-                            recording.start_time > event.start_time
-                            and recording.end_time < event.end_time
-                        )
-                    ):
-                        keep = True
+
+                    # if the next event ends before this segment starts, break
+                    if event.end_time < recording.start_time:
                         break
 
-                    # if the event starts after the current recording, skip it next time
+                    # if the next event starts after the current segment ends, skip it
                     if event.start_time > recording.end_time:
                         event_start = idx
+                        continue
+
+                    keep = True
 
                 # Delete recordings outside of the retention window
                 if not keep:
                     Path(recording.path).unlink(missing_ok=True)
                     deleted_recordings.add(recording.id)
 
+            logger.debug(f"Expiring {len(deleted_recordings)} recordings")
             (Recordings.delete().where(Recordings.id << deleted_recordings).execute())
 
             logger.debug(f"End camera: {camera}.")
