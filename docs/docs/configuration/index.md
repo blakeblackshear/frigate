@@ -233,3 +233,44 @@ birdseye:
   #   continuous - all cameras are included always
   mode: objects
 ```
+
+### `rtmp`
+
+Can be overridden at the camera level. See the [cameras configuration page](cameras.md) for more information about RTMP streaming.
+
+```yaml
+rtmp:
+  # Optional: Enable the RTMP stream (default: True)
+  enabled: True
+```
+
+## `timestamp_style`
+
+Can be overridden at the camera level. See the [cameras configuration page](cameras.md) for more information about timestamp styling.
+
+```yaml
+# Optional: in-feed timestamp style configuration
+timestamp_style:
+  # Optional: Position of the timestamp (default: shown below)
+  #           "tl" (top left), "tr" (top right), "bl" (bottom left), "br" (bottom right)
+  position: "tl"
+  # Optional: Format specifier conform to the Python package "datetime" (default: shown below)
+  #           Additional Examples:
+  #             german: "%d.%m.%Y %H:%M:%S"
+  format: "%m/%d/%Y %H:%M:%S"
+  # Optional: Color of font
+  color:
+    # All Required when color is specified (default: shown below)
+    red: 255
+    green: 255
+    blue: 255
+  # Optional: Scale factor for font (default: shown below)
+  scale: 1.0
+  # Optional: Line thickness of font (default: shown below)
+  thickness: 2
+  # Optional: Effect of lettering (default: shown below)
+  #           None (No effect),
+  #           "solid" (solid background in inverse color of font)
+  #           "shadow" (shadow for font)
+  effect: None
+```

@@ -215,6 +215,12 @@ Frigate can re-stream your video feed as a RTMP feed for other applications such
 
 Some video feeds are not compatible with RTMP. If you are experiencing issues, check to make sure your camera feed is h264 with AAC audio. If your camera doesn't support a compatible format for RTMP, you can use the ffmpeg args to re-encode it on the fly at the expense of increased CPU utilization.
 
+```yaml
+rtmp:
+  # Optional: Enable the RTMP stream (default: True)
+  enabled: True
+```
+
 ## Timestamp style configuration
 
 For the debug view and snapshots it is possible to embed a timestamp in the feed. In some instances the default position obstructs important space, visibility or contrast is too low because of color or the datetime format does not match ones desire.
@@ -357,7 +363,7 @@ cameras:
 
     # Optional: RTMP re-stream configuration
     rtmp:
-      # Required: Enable the RTMP stream (default: True)
+      # Optional: Enable the RTMP stream (default: True)
       enabled: True
 
     # Optional: Live stream configuration for WebUI

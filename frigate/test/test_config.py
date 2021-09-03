@@ -884,6 +884,156 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
 
+    def test_global_rtmp(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": True},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].rtmp.enabled
+
+    def test_default_rtmp(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].rtmp.enabled
+
+    def test_global_rtmp_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "rtmp": {
+                        "enabled": True,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].rtmp.enabled
+
+    def test_global_timestamp_style(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "timestamp_style": {"position": "bl", "scale": 1.5},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].timestamp_style.position == "bl"
+        assert runtime_config.cameras["back"].timestamp_style.scale == 1.5
+
+    def test_default_timestamp_style(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].timestamp_style.position == "tl"
+        assert runtime_config.cameras["back"].timestamp_style.scale == 1.0
+
+    def test_global_timestamp_style_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "timestamp_style": {"position": "br", "scale": 2.0},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "timestamp_style": {"position": "bl", "scale": 1.5},
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].timestamp_style.position == "bl"
+        assert runtime_config.cameras["back"].timestamp_style.scale == 1.5
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
