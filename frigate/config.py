@@ -676,7 +676,8 @@ class FrigateConfig(BaseModel):
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
     timestamp_style: TimestampStyleConfig = Field(
-        default_factory=TimestampStyleConfig, title="Global timestamp style configuration."
+        default_factory=TimestampStyleConfig,
+        title="Global timestamp style configuration.",
     )
 
     @property
