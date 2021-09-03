@@ -193,7 +193,6 @@ class RecordingCleanup(threading.Thread):
                     Recordings.end_time < expire_date,
                 )
                 .order_by(Recordings.start_time.desc())
-                .objects()
             )
 
             # Get all the events to check against
@@ -208,10 +207,8 @@ class RecordingCleanup(threading.Thread):
 
             # loop over recordings and see if they overlap with any non-expired events
             event_start = 0
-            logger.debug(
-                f"Checking {len(recordings)} recordings against {len(events)} events"
-            )
-            for recording in recordings:
+            deleted_recordings = set()
+            for recording in recordings.objects().iterator():
                 keep = False
                 # since the events and recordings are sorted, we can skip events
                 # that start after the previous recording segment ended
@@ -242,7 +239,9 @@ class RecordingCleanup(threading.Thread):
                 # Delete recordings outside of the retention window
                 if not keep:
                     Path(recording.path).unlink(missing_ok=True)
-                    Recordings.delete_by_id(recording.id)
+                    deleted_recordings.add(recording.id)
+
+            (Recordings.delete().where(Recordings.id << deleted_recordings).execute())
 
             logger.debug(f"End camera: {camera}.")
 
