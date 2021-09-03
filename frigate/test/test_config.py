@@ -883,7 +883,7 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].snapshots.bounding_box == False
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
-    
+
     def test_global_rtmp(self):
 
         config = {
@@ -908,7 +908,7 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].rtmp.enabled
 
-    def test_default_snapshots(self):
+    def test_default_rtmp(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
@@ -931,7 +931,7 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].rtmp.enabled
 
-    def test_global_snapshots_merge(self):
+    def test_global_rtmp_merge(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
@@ -1033,6 +1033,7 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].timestamp_style.position == "bl"
         assert runtime_config.cameras["back"].timestamp_style.scale == 1.5
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
