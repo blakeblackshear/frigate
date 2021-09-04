@@ -962,7 +962,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "timestamp_style": {"position": "bl", "scale": 1.5},
+            "timestamp_style": {"position": "bl"},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -981,7 +981,6 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].timestamp_style.position == "bl"
-        assert runtime_config.cameras["back"].timestamp_style.scale == 1.5
 
     def test_default_timestamp_style(self):
 
@@ -1005,14 +1004,13 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].timestamp_style.position == "tl"
-        assert runtime_config.cameras["back"].timestamp_style.scale == 1.0
 
     def test_global_timestamp_style_merge(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
             "rtmp": {"enabled": False},
-            "timestamp_style": {"position": "br", "scale": 2.0},
+            "timestamp_style": {"position": "br", "thickness": 2},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1023,7 +1021,7 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "timestamp_style": {"position": "bl", "scale": 1.5},
+                    "timestamp_style": {"position": "bl", "thickness": 4},
                 }
             },
         }
@@ -1032,7 +1030,7 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].timestamp_style.position == "bl"
-        assert runtime_config.cameras["back"].timestamp_style.scale == 1.5
+        assert runtime_config.cameras["back"].timestamp_style.thickness == 4
 
 
 if __name__ == "__main__":
