@@ -276,7 +276,7 @@ class TrackedObject:
                 self.camera_config.timestamp_style.format,
                 font_effect=self.camera_config.timestamp_style.effect,
                 font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=(color.red, color.green, color.blue),
+                font_color=(color.blue, color.green, color.red),
                 position=self.camera_config.timestamp_style.position,
             )
 
@@ -411,7 +411,7 @@ class CameraState:
                 self.camera_config.timestamp_style.format,
                 font_effect=self.camera_config.timestamp_style.effect,
                 font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=(color.red, color.green, color.blue),
+                font_color=(color.blue, color.green, color.red),
                 position=self.camera_config.timestamp_style.position,
             )
 

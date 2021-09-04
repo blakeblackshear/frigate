@@ -400,9 +400,9 @@ class SnapshotsConfig(BaseModel):
 
 
 class ColorConfig(BaseModel):
-    red: int = Field(default=255, le=0, ge=255, title="Red")
-    green: int = Field(default=255, le=0, ge=255, title="Green")
-    blue: int = Field(default=255, le=0, ge=255, title="Blue")
+    red: int = Field(default=255, ge=0, le=255, title="Red")
+    green: int = Field(default=255, ge=0, le=255, title="Green")
+    blue: int = Field(default=255, ge=0, le=255, title="Blue")
 
 
 class TimestampPositionEnum(str, Enum):
