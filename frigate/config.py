@@ -405,13 +405,26 @@ class ColorConfig(BaseModel):
     blue: int = Field(default=255, le=0, ge=255, title="Blue")
 
 
+class TimestampPositionEnum(str, Enum):
+    tl = "tl"
+    tr = "tr"
+    bl = "bl"
+    br = "br"
+
+
+class TimestampEffectEnum(str, Enum):
+    solid = "solid"
+    shadow = "shadow"
+
+
 class TimestampStyleConfig(BaseModel):
-    position: str = Field(default="tl", title="Timestamp position.")
+    position: TimestampPositionEnum = Field(
+        default=TimestampPositionEnum.tl, title="Timestamp position."
+    )
     format: str = Field(default=DEFAULT_TIME_FORMAT, title="Timestamp format.")
     color: ColorConfig = Field(default_factory=ColorConfig, title="Timestamp color.")
-    scale: float = Field(default=1.0, title="Timestamp scale.")
     thickness: int = Field(default=2, title="Timestamp thickness.")
-    effect: Optional[str] = Field(title="Timestamp effect.")
+    effect: Optional[TimestampEffectEnum] = Field(title="Timestamp effect.")
 
 
 class CameraMqttConfig(BaseModel):

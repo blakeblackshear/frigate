@@ -51,18 +51,32 @@ def draw_timestamp(
     timestamp,
     timestamp_format,
     font_effect=None,
-    font_scale=1.0,
     font_thickness=2,
     font_color=(255, 255, 255),
     position="tl",
 ):
     time_to_show = datetime.datetime.fromtimestamp(timestamp).strftime(timestamp_format)
+
+    # calculate a dynamic font size
+    size = cv2.getTextSize(
+        time_to_show,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=1.0,
+        thickness=font_thickness,
+    )
+
+    text_width = size[0][0]
+    desired_size = max(150, 0.33 * frame.shape[1])
+    font_scale = desired_size / text_width
+
+    # calculate the actual size with the dynamic scale
     size = cv2.getTextSize(
         time_to_show,
         cv2.FONT_HERSHEY_SIMPLEX,
         fontScale=font_scale,
         thickness=font_thickness,
     )
+
     image_width = frame.shape[1]
     image_height = frame.shape[0]
     text_width = size[0][0]
