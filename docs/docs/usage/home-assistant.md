@@ -8,18 +8,18 @@ The best way to integrate with Home Assistant is to use the [official integratio
 
 ## Installation
 
-Available via HACS as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories). To install:
+### Preparation
 
-- Add the custom repository:
+The Frigate integration requires the `mqtt` integration to be installed and
+manually configured first.
 
-```
-Home Assistant > HACS > Integrations > [...] > Custom Repositories
-```
+See the [MQTT integration
+documentation](https://www.home-assistant.io/integrations/mqtt/) for more
+details.
 
-| Key            | Value                                                       |
-| -------------- | ----------------------------------------------------------- |
-| Repository URL | https://github.com/blakeblackshear/frigate-hass-integration |
-| Category       | Integration                                                 |
+### Integration installation
+
+Available via HACS as a default repository. To install:
 
 - Use [HACS](https://hacs.xyz/) to install the integration:
 
@@ -37,6 +37,12 @@ Home Assistant > Configuration > Integrations > Add Integration > Frigate
 Note: You will also need
 [media_source](https://www.home-assistant.io/integrations/media_source/) enabled
 in your Home Assistant configuration for the Media Browser to appear.
+
+### (Optional) Lovelace Card Installation
+
+To install the optional companion Lovelace card, please see the [separate
+installation instructions](https://github.com/dermotduffy/frigate-hass-card) for
+that card.
 
 ## Configuration
 
