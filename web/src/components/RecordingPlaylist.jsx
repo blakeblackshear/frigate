@@ -1,8 +1,7 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { addSeconds, differenceInSeconds, fromUnixTime, format, parseISO, startOfHour } from 'date-fns';
-import ArrowDropdown from '../icons/ArrowDropdown';
-import ArrowDropup from '../icons/ArrowDropup';
+import Arrow from '../icons/Arrow';
 import Link from '../components/Link';
 import Menu from '../icons/Menu';
 import MenuOpen from '../icons/MenuOpen';
@@ -73,7 +72,7 @@ export function ExpandableList({ title, events = 0, children, selected = false }
       <div className="flex items-center w-full p-2 cursor-pointer md:text-lg" onClick={toggle}>
         <div className="flex-1 font-bold">{title}</div>
         <div className="flex-1 text-right mr-4">{events} Events</div>
-        <div className="w-6 md:w-10 h-6 md:h-10">{active ? <ArrowDropup /> : <ArrowDropdown />}</div>
+        <div className="w-6 md:w-10 h-6 md:h-10">{active ? <Arrow /> : <Arrow rotate_degrees="180" />}</div>
       </div>
       <div className={`bg-gray-800 bg-opacity-50 ${active ? '' : 'hidden'}`}>{children}</div>
     </div>

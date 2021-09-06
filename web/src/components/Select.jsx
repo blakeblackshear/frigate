@@ -1,6 +1,5 @@
 import { h, Fragment } from 'preact';
-import ArrowDropdown from '../icons/ArrowDropdown';
-import ArrowDropup from '../icons/ArrowDropup';
+import Arrow from '../icons/Arrow';
 import Menu, { MenuItem } from './Menu';
 import TextField from './TextField';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -94,7 +93,7 @@ export default function Select({ label, onChange, options: inputOptions = [], se
         onclick={handleClick}
         onkeydown={handleKeydown}
         readonly
-        trailingIcon={showMenu ? ArrowDropup : ArrowDropdown}
+        trailingIcon={showMenu ? Arrow : (() => <Arrow rotate_degrees="180" />)}
         value={options[selected]?.label}
       />
       {showMenu ? (

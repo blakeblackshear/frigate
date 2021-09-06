@@ -3,8 +3,7 @@ import { useCallback, useState, useEffect } from 'preact/hooks';
 import Link from '../components/Link';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
-import ArrowDown from '../icons/ArrowDropdown';
-import ArrowDropup from '../icons/ArrowDropup';
+import Arrow from '../icons/Arrow';
 import Clip from '../icons/Clip';
 import Close from '../icons/Close';
 import Delete from '../icons/Delete';
@@ -108,12 +107,12 @@ export default function Event({ eventId, close, scrollRef }) {
           <Button className="w-full sm:w-auto" onClick={() => setShowDetails(!showDetails)}>
             {showDetails ? (
               <Fragment>
-                <ArrowDropup className="w-6" />
+                <Arrow className="w-6" />
                 Hide event Details
               </Fragment>
             ) : (
               <Fragment>
-                <ArrowDown className="w-6" />
+                <Arrow rotate_degrees="180" className="w-6" />
                 Show event Details
               </Fragment>
             )}

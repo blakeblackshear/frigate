@@ -1,6 +1,5 @@
 import { h } from 'preact';
-import ArrowDropdown from '../icons/ArrowDropdown';
-import ArrowDropup from '../icons/ArrowDropup';
+import Arrow from '../icons/Arrow';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
@@ -118,8 +117,8 @@ export default function StyleGuide() {
         <TextField label="Default text field" />
         <TextField label="Pre-filled" value="This is my pre-filled value" />
         <TextField label="With help" helpText="This is some help text" />
-        <TextField label="Leading icon" leadingIcon={ArrowDropdown} />
-        <TextField label="Trailing icon" trailingIcon={ArrowDropup} />
+        <TextField label="Leading icon" leadingIcon={(() => <Arrow rotate_degrees="180" />)} />
+        <TextField label="Trailing icon" trailingIcon={Arrow} />
       </div>
     </div>
   );
