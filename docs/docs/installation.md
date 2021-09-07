@@ -15,10 +15,11 @@ HassOS users can install via the addon repository. Frigate requires an MQTT serv
 
 1. Navigate to Supervisor > Add-on Store > Repositories
 2. Add https://github.com/blakeblackshear/frigate-hass-addons
-3. Setup your network configuration in the `Configuration` tab if deisred
-4. Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
-5. Start the addon container
-6. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
+3. Install one of the Frigate NVR Addons and navigate to it's page
+4. Setup your network configuration in the `Configuration` tab if deisred
+5. Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
+6. Start the addon container
+7. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
 
 ## Docker
 
