@@ -473,7 +473,7 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
-                    "record": {"events": {"enabled": True}},
+                    "record": {"events": {}},
                 }
             },
         }

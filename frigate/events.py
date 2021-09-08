@@ -35,10 +35,8 @@ class EventProcessor(threading.Thread):
 
         record_config: RecordConfig = self.config.cameras[camera].record
 
-        # Recording clips is disabled
-        if not record_config.enabled or (
-            record_config.retain_days == 0 and not record_config.events.enabled
-        ):
+        # Recording is disabled
+        if not record_config.enabled:
             return False
 
         # If there are required zones and there is no overlap

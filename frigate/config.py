@@ -72,29 +72,27 @@ class RetainConfig(FrigateBaseModel):
     )
 
 
-# DEPRECATED: Will eventually be removed
-class ClipsConfig(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="Save clips.")
-    max_seconds: int = Field(default=300, title="Maximum clip duration.")
-    pre_capture: int = Field(default=5, title="Seconds to capture before event starts.")
-    post_capture: int = Field(default=5, title="Seconds to capture after event ends.")
+class EventsConfig(FrigateBaseModel):
+    max_seconds: int = Field(default=300, title="Maximum event duration.")
+    pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
+    post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
         default_factory=list,
-        title="List of required zones to be entered in order to save the clip.",
+        title="List of required zones to be entered in order to save the event.",
     )
     objects: Optional[List[str]] = Field(
-        title="List of objects to be detected in order to save the clip.",
+        title="List of objects to be detected in order to save the event.",
     )
     retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Clip retention settings."
+        default_factory=RetainConfig, title="Event retention settings."
     )
 
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
     retain_days: int = Field(default=0, title="Recording retention period in days.")
-    events: ClipsConfig = Field(
-        default_factory=ClipsConfig, title="Event specific settings."
+    events: EventsConfig = Field(
+        default_factory=EventsConfig, title="Event specific settings."
     )
 
 
