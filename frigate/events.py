@@ -6,11 +6,11 @@ import threading
 import time
 from pathlib import Path
 
-from frigate.config import FrigateConfig, RecordConfig
-from frigate.const import CLIPS_DIR
-from frigate.models import Event, Recordings
-
 from peewee import fn
+
+from frigate.config import EventsConfig, FrigateConfig, RecordConfig
+from frigate.const import CLIPS_DIR
+from frigate.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -74,17 +74,17 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data["id"]] = event_data
 
             if event_type == "end":
-                record_config: RecordConfig = self.config.cameras[camera].record
-
                 has_clip = self.should_create_clip(camera, event_data)
+
+                event_config: EventsConfig = self.config.cameras[camera].record.events
 
                 if has_clip or event_data["has_snapshot"]:
                     Event.create(
                         id=event_data["id"],
                         label=event_data["label"],
                         camera=camera,
-                        start_time=event_data["start_time"],
-                        end_time=event_data["end_time"],
+                        start_time=event_data["start_time"] - event_config.pre_capture,
+                        end_time=event_data["end_time"] + event_config.post_capture,
                         top_score=event_data["top_score"],
                         false_positive=event_data["false_positive"],
                         zones=list(event_data["entered_zones"]),

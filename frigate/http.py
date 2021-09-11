@@ -242,14 +242,11 @@ def event_clip(id):
     if not event.has_clip:
         return "Clip not available", 404
 
-    event_config = current_app.frigate_config.cameras[event.camera].record.events
-    start_ts = event.start_time - event_config.pre_capture
-    end_ts = event.end_time + event_config.post_capture
     file_name = f"{event.camera}-{id}.mp4"
     clip_path = os.path.join(CLIPS_DIR, file_name)
 
     if not os.path.isfile(clip_path):
-        return recording_clip(event.camera, start_ts, end_ts)
+        return recording_clip(event.camera, event.start_time, event.end_time)
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
@@ -697,15 +694,12 @@ def vod_event(id):
     if not event.has_clip:
         return "Clip not available", 404
 
-    event_config = current_app.frigate_config.cameras[event.camera].record.events
-    start_ts = event.start_time - event_config.pre_capture
-    end_ts = event.end_time + event_config.post_capture
     clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
 
     if not os.path.isfile(clip_path):
-        return vod_ts(event.camera, start_ts, end_ts)
+        return vod_ts(event.camera, event.start_time, event.end_time)
 
-    duration = int((end_ts - start_ts) * 1000)
+    duration = int((event.end_time - event.start_time) * 1000)
     return jsonify(
         {
             "cache": True,
