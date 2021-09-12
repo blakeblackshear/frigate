@@ -18,7 +18,7 @@
     "preact": "^10.5.9",
     "preact-async-route": "^2.2.1",
     "preact-router": "^3.2.1",
-    "video.js": "^7.13.0",
+    "video.js": "^7.15.4",
     "videojs-playlist": "^4.3.1",
     "videojs-seek-buttons": "^2.0.1"
   },

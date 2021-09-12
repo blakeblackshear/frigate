@@ -192,6 +192,10 @@ Permanently deletes the event along with any clips/snapshots.
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
+### `GET /api/events/<id>/clip.mp4`
+
+Returns the clip for the event id. Works after the event has ended.
+
 ### `GET /api/events/<id>/snapshot.jpg`
 
 Returns the snapshot image for the event id. Works while the event is in progress and after completion.
@@ -206,10 +210,22 @@ Accepts the following query string parameters, but they are only applied when an
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
 
-### `/clips/<camera>-<id>.jpg`
+### `GET /clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
 
-### `/vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
+### `GET /vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can be viewed in an application like VLC.
+
+### `GET /vod/event/<event-id>/index.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
+
+### `GET /vod/event/<event-id>/index.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
+
+### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.

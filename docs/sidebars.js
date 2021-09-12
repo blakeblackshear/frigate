@@ -1,16 +1,32 @@
 module.exports = {
   docs: {
-    Frigate: ['index', 'how-it-works', 'hardware', 'installation', 'troubleshooting'],
+    Frigate: [
+      'index',
+      'hardware',
+      'installation',
+    ],
+    Guides: [
+      'guides/camera_setup',
+      'guides/getting_started',
+      'guides/false_positives',
+    ],
     Configuration: [
       'configuration/index',
-      'configuration/cameras',
-      'configuration/optimizing',
       'configuration/detectors',
-      'configuration/false_positives',
+      'configuration/cameras',
+      'configuration/masks',
+      'configuration/record',
+      'configuration/snapshots',
       'configuration/objects',
+      'configuration/rtmp',
+      'configuration/zones',
       'configuration/advanced',
+      'configuration/hardware_acceleration',
+      'configuration/nvdec',
+      'configuration/camera_specific',
     ],
-    Usage: ['usage/home-assistant', 'usage/web', 'usage/api', 'usage/mqtt'],
+    Integrations: ['integrations/home-assistant', 'integrations/api', 'integrations/mqtt'],
+    Troubleshooting: ['faqs'],
     Development: ['contributing'],
   },
 };

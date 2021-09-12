@@ -1,6 +1,6 @@
 ---
 id: nvdec
-title: nVidia hardware decoder
+title: NVIDIA hardware decoder
 ---
 
 Certain nvidia cards include a hardware decoder, which can greatly improve the
@@ -23,7 +23,7 @@ In order to pass NVDEC, the docker engine must be set to `nvidia` and the enviro
 
 In a docker compose file, these lines need to be set:
 
-```
+```yaml
 services:
   frigate:
     ...
@@ -41,7 +41,7 @@ The decoder you choose will depend on the input video.
 
 A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the container to get a list)
 
-```
+```shell
  V..... h263_cuvid           Nvidia CUVID H263 decoder (codec h263)
  V..... h264_cuvid           Nvidia CUVID H264 decoder (codec h264)
  V..... hevc_cuvid           Nvidia CUVID HEVC decoder (codec hevc)
@@ -57,10 +57,9 @@ A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the c
 For example, for H265 video (hevc), you'll select `hevc_cuvid`. Add
 `-c:v hevc_cuvid` to your ffmpeg input arguments:
 
-```
+```yaml
 ffmpeg:
-  input_args:
-    ...
+  input_args: ...
     - -c:v
     - hevc_cuvid
 ```
@@ -100,10 +99,10 @@ processes:
 To further improve performance, you can set ffmpeg to skip frames in the output,
 using the fps filter:
 
-```
-  output_args:
-    - -filter:v
-    - fps=fps=5
+```yaml
+output_args:
+  - -filter:v
+  - fps=fps=5
 ```
 
 This setting, for example, allows Frigate to consume my 10-15fps camera streams on
