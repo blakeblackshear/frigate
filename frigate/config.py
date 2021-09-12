@@ -603,6 +603,8 @@ class DatabaseConfig(FrigateBaseModel):
 
 
 class ModelConfig(FrigateBaseModel):
+    path: Optional[str] = Field(title="Custom Object detection model path.")
+    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
@@ -623,7 +625,7 @@ class ModelConfig(FrigateBaseModel):
         super().__init__(**config)
 
         self._merged_labelmap = {
-            **load_labels("/labelmap.txt"),
+            **load_labels(config.get("labelmap_path", "/labelmap.txt")),
             **config.get("labelmap", {}),
         }
 
