@@ -19,8 +19,6 @@ input_args:
   - experimental
   - -fflags
   - +genpts+discardcorrupt
-  - -r
-  - "3" # <---- adjust depending on your desired frame rate from the mjpeg image
   - -use_wallclock_as_timestamps
   - "1"
 ```
