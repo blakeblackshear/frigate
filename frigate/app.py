@@ -170,6 +170,7 @@ class FrigateApp:
         self.mqtt_relay.start()
 
     def start_detectors(self):
+        model_path = self.config.model.path
         model_shape = (self.config.model.height, self.config.model.width)
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
@@ -199,6 +200,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
+                    model_path,
                     model_shape,
                     "cpu",
                     detector.num_threads,
@@ -208,6 +210,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
+                    model_path,
                     model_shape,
                     detector.device,
                     detector.num_threads,
