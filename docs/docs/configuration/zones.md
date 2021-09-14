@@ -8,3 +8,27 @@ Zones allow you to define a specific area of the frame and apply additional filt
 During testing, enable the Zones option for the debug feed so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
 To create a zone, follow [the steps for a "Motion mask"](/configuration/masks), but use the section of the web UI for creating a zone instead.
+
+### Restricting zones to specific objects
+
+Sometimes you want to limit a zone to specific object types to have more granular control of when events/snapshots are saved. The following example will limit one zone to person objects and the other to cars.
+
+```yaml
+camera:
+  record:
+    events:
+      required_zones:
+        - entire_yard
+        - front_yard_street
+  zones:
+    entire_yard:
+      coordinates: ... (everywhere you want a person)
+      objects:
+        - person
+    front_yard_street:
+      coordinates: ... (just the street)
+      objects:
+        - car
+```
+
+Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get clips for person objects that enter anywhere in the yard, and clips for cars only if they enter the street.

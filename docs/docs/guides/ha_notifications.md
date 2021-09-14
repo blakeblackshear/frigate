@@ -1,6 +1,6 @@
 ---
 id: ha_notifications
-title: Home Assistant Notifications
+title: Home Assistant notifications
 ---
 
 The best way to get started with notifications for Frigate is to use the [Blueprint](https://community.home-assistant.io/t/frigate-mobile-app-notifications/311091). You can use the yaml generated from the Blueprint as a starting point and customize from there.

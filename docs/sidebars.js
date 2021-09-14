@@ -10,6 +10,7 @@ module.exports = {
       'guides/getting_started',
       'guides/false_positives',
       'guides/ha_notifications',
+      'guides/stationary_objects',
     ],
     Configuration: [
       'configuration/index',
