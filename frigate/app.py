@@ -20,14 +20,14 @@ from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
-from frigate.mqtt import create_mqtt_client, MqttSocketRelay
+from frigate.mqtt import MqttSocketRelay, create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
+from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
-from frigate.zeroconf import broadcast_zeroconf
 
 logger = logging.getLogger(__name__)
 
@@ -315,6 +315,7 @@ class FrigateApp:
 
     def start(self):
         self.init_logger()
+        logger.info(f"Starting Frigate ({VERSION})")
         try:
             try:
                 self.init_config()
