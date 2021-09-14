@@ -677,6 +677,9 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Global live configuration."
+    )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
     )
@@ -715,6 +718,7 @@ class FrigateConfig(FrigateBaseModel):
             include={
                 "record": ...,
                 "snapshots": ...,
+                "live": ...,
                 "rtmp": ...,
                 "objects": ...,
                 "motion": ...,
