@@ -9,6 +9,7 @@ module.exports = {
       'guides/camera_setup',
       'guides/getting_started',
       'guides/false_positives',
+      'guides/ha_notifications',
     ],
     Configuration: [
       'configuration/index',
