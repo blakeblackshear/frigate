@@ -16,7 +16,7 @@ from typing import Callable, Dict
 import cv2
 import numpy as np
 
-from frigate.config import CameraConfig, FrigateConfig
+from frigate.config import CameraConfig, SnapshotsConfig, RecordConfig, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import (
@@ -73,6 +73,8 @@ class TrackedObject:
         self.current_zones = []
         self.entered_zones = set()
         self.false_positive = True
+        self.has_clip = False
+        self.has_snapshot = False
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data = None
         self.last_updated = 0
@@ -176,6 +178,8 @@ class TrackedObject:
             "region": self.obj_data["region"],
             "current_zones": self.current_zones.copy(),
             "entered_zones": list(self.entered_zones).copy(),
+            "has_clip": self.has_clip,
+            "has_snapshot": self.has_snapshot,
         }
 
         if include_thumbnail:
@@ -611,9 +615,46 @@ class TrackedObjectProcessor(threading.Thread):
             obj.previous = after
 
         def end(camera, obj: TrackedObject, current_frame_time):
-            snapshot_config = self.config.cameras[camera].snapshots
-            event_data = obj.to_dict(include_thumbnail=True)
-            event_data["has_snapshot"] = False
+            # populate has_snapshot
+            obj.has_snapshot = self.should_save_snapshot(camera, obj)
+            obj.has_clip = self.should_retain_recording(camera, obj)
+
+            # write the snapshot to disk
+            if obj.has_snapshot:
+                snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
+                jpg_bytes = obj.get_jpg_bytes(
+                    timestamp=snapshot_config.timestamp,
+                    bounding_box=snapshot_config.bounding_box,
+                    crop=snapshot_config.crop,
+                    height=snapshot_config.height,
+                    quality=snapshot_config.quality,
+                )
+                if jpg_bytes is None:
+                    logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
+                else:
+                    with open(
+                        os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"),
+                        "wb",
+                    ) as j:
+                        j.write(jpg_bytes)
+
+                # write clean snapshot if enabled
+                if snapshot_config.clean_copy:
+                    png_bytes = obj.get_clean_png()
+                    if png_bytes is None:
+                        logger.warning(
+                            f"Unable to save clean snapshot for {obj.obj_data['id']}."
+                        )
+                    else:
+                        with open(
+                            os.path.join(
+                                CLIPS_DIR,
+                                f"{camera}-{obj.obj_data['id']}-clean.png",
+                            ),
+                            "wb",
+                        ) as p:
+                            p.write(png_bytes)
+
             if not obj.false_positive:
                 message = {
                     "before": obj.previous,
@@ -623,46 +664,8 @@ class TrackedObjectProcessor(threading.Thread):
                 self.client.publish(
                     f"{self.topic_prefix}/events", json.dumps(message), retain=False
                 )
-                # write snapshot to disk if enabled
-                if snapshot_config.enabled and self.should_save_snapshot(camera, obj):
-                    jpg_bytes = obj.get_jpg_bytes(
-                        timestamp=snapshot_config.timestamp,
-                        bounding_box=snapshot_config.bounding_box,
-                        crop=snapshot_config.crop,
-                        height=snapshot_config.height,
-                        quality=snapshot_config.quality,
-                    )
-                    if jpg_bytes is None:
-                        logger.warning(
-                            f"Unable to save snapshot for {obj.obj_data['id']}."
-                        )
-                    else:
-                        with open(
-                            os.path.join(
-                                CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"
-                            ),
-                            "wb",
-                        ) as j:
-                            j.write(jpg_bytes)
-                        event_data["has_snapshot"] = True
 
-                    # write clean snapshot if enabled
-                    if snapshot_config.clean_copy:
-                        png_bytes = obj.get_clean_png()
-                        if png_bytes is None:
-                            logger.warning(
-                                f"Unable to save clean snapshot for {obj.obj_data['id']}."
-                            )
-                        else:
-                            with open(
-                                os.path.join(
-                                    CLIPS_DIR,
-                                    f"{camera}-{obj.obj_data['id']}-clean.png",
-                                ),
-                                "wb",
-                            ) as p:
-                                p.write(png_bytes)
-            self.event_queue.put(("end", camera, event_data))
+            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config = self.config.cameras[camera].mqtt
@@ -711,11 +714,49 @@ class TrackedObjectProcessor(threading.Thread):
         self.zone_data = defaultdict(lambda: defaultdict(dict))
 
     def should_save_snapshot(self, camera, obj: TrackedObject):
+        if obj.false_positive:
+            return False
+
+        snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
+
+        if not snapshot_config.enabled:
+            return False
+
         # if there are required zones and there is no overlap
-        required_zones = self.config.cameras[camera].snapshots.required_zones
+        required_zones = snapshot_config.required_zones
         if len(required_zones) > 0 and not obj.entered_zones & set(required_zones):
             logger.debug(
                 f"Not creating snapshot for {obj.obj_data['id']} because it did not enter required zones"
+            )
+            return False
+
+        return True
+
+    def should_retain_recording(self, camera, obj: TrackedObject):
+        if obj.false_positive:
+            return False
+
+        record_config: RecordConfig = self.config.cameras[camera].record
+
+        # Recording is disabled
+        if not record_config.enabled:
+            return False
+
+        # If there are required zones and there is no overlap
+        required_zones = record_config.events.required_zones
+        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
+            logger.debug(
+                f"Not creating clip for {obj.obj_data['id']} because it did not enter required zones"
+            )
+            return False
+
+        # If the required objects are not present
+        if (
+            record_config.events.objects is not None
+            and obj.obj_data["label"] not in record_config.events.objects
+        ):
+            logger.debug(
+                f"Not creating clip for {obj.obj_data['id']} because it did not contain required objects"
             )
             return False
 
@@ -815,17 +856,7 @@ class TrackedObjectProcessor(threading.Thread):
 
             # cleanup event finished queue
             while not self.event_processed_queue.empty():
-                event_id, camera, clip_created = self.event_processed_queue.get()
-                if clip_created:
-                    obj = self.camera_states[camera].tracked_objects[event_id]
-                    message = {
-                        "before": obj.previous,
-                        "after": obj.to_dict(),
-                        "type": "clip_ready",
-                    }
-                    self.client.publish(
-                        f"{self.topic_prefix}/events", json.dumps(message), retain=False
-                    )
+                event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
 
         logger.info(f"Exiting object processor...")

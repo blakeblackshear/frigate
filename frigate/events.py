@@ -29,38 +29,6 @@ class EventProcessor(threading.Thread):
         self.events_in_process = {}
         self.stop_event = stop_event
 
-    def should_create_clip(self, camera, event_data):
-        if event_data["false_positive"]:
-            return False
-
-        record_config: RecordConfig = self.config.cameras[camera].record
-
-        # Recording is disabled
-        if not record_config.enabled:
-            return False
-
-        # If there are required zones and there is no overlap
-        required_zones = record_config.events.required_zones
-        if len(required_zones) > 0 and not set(event_data["entered_zones"]) & set(
-            required_zones
-        ):
-            logger.debug(
-                f"Not creating clip for {event_data['id']} because it did not enter required zones"
-            )
-            return False
-
-        # If the required objects are not present
-        if (
-            record_config.events.objects is not None
-            and event_data["label"] not in record_config.events.objects
-        ):
-            logger.debug(
-                f"Not creating clip for {event_data['id']} because it did not contain required objects"
-            )
-            return False
-
-        return True
-
     def run(self):
         while not self.stop_event.is_set():
             try:
@@ -74,11 +42,9 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data["id"]] = event_data
 
             if event_type == "end":
-                has_clip = self.should_create_clip(camera, event_data)
-
                 event_config: EventsConfig = self.config.cameras[camera].record.events
 
-                if has_clip or event_data["has_snapshot"]:
+                if event_data["has_clip"] or event_data["has_snapshot"]:
                     Event.create(
                         id=event_data["id"],
                         label=event_data["label"],
@@ -89,12 +55,12 @@ class EventProcessor(threading.Thread):
                         false_positive=event_data["false_positive"],
                         zones=list(event_data["entered_zones"]),
                         thumbnail=event_data["thumbnail"],
-                        has_clip=has_clip,
+                        has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
                     )
 
                 del self.events_in_process[event_data["id"]]
-                self.event_processed_queue.put((event_data["id"], camera, has_clip))
+                self.event_processed_queue.put((event_data["id"], camera))
 
         logger.info(f"Exiting event processor...")
 
