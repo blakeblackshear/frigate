@@ -166,9 +166,13 @@ class RecordingCleanup(threading.Thread):
             Recordings.end_time < expire_before,
         )
 
+        deleted_recordings = set()
         for recording in no_camera_recordings:
             Path(recording.path).unlink(missing_ok=True)
-            Recordings.delete_by_id(recording.id)
+            deleted_recordings.add(recording.id)
+
+        logger.debug(f"Expiring {len(deleted_recordings)} recordings")
+        Recordings.delete().where(Recordings.id << deleted_recordings).execute()
         logger.debug("End deleted cameras.")
 
         logger.debug("Start all cameras.")
