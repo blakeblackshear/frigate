@@ -196,7 +196,7 @@ class RecordingCleanup(threading.Thread):
                     Recordings.camera == camera,
                     Recordings.end_time < expire_date,
                 )
-                .order_by(Recordings.start_time.desc())
+                .order_by(Recordings.start_time)
             )
 
             # Get all the events to check against
@@ -205,7 +205,7 @@ class RecordingCleanup(threading.Thread):
                 .where(
                     Event.camera == camera, Event.end_time < expire_date, Event.has_clip
                 )
-                .order_by(Event.start_time.desc())
+                .order_by(Event.start_time)
                 .objects()
             )
 
@@ -214,21 +214,28 @@ class RecordingCleanup(threading.Thread):
             deleted_recordings = set()
             for recording in recordings.objects().iterator():
                 keep = False
-                # since the events and recordings are sorted, we can skip events
-                # that start after the previous recording segment ended
+                # Now look for a reason to keep this recording segment
                 for idx in range(event_start, len(events)):
                     event = events[idx]
 
-                    # if the next event ends before this segment starts, break
-                    if event.end_time < recording.start_time:
+                    # if the event starts in the future, stop checking events
+                    # and let this recording segment expire
+                    if event.start_time > recording.end_time:
+                        keep = False
                         break
 
-                    # if the next event starts after the current segment ends, skip it
-                    if event.start_time > recording.end_time:
-                        event_start = idx
-                        continue
+                    # if the event ends after the recording starts, keep it
+                    # and stop looking at events
+                    if event.end_time >= recording.start_time:
+                        keep = True
+                        break
 
-                    keep = True
+                    # if the event ends before this recording segment starts, skip
+                    # this event and check the next event for an overlap.
+                    # since the events and recordings are sorted, we can skip events
+                    # that end before the previous recording segment started on future segments
+                    if event.end_time < recording.start_time:
+                        event_start = idx
 
                 # Delete recordings outside of the retention window
                 if not keep:
@@ -236,7 +243,7 @@ class RecordingCleanup(threading.Thread):
                     deleted_recordings.add(recording.id)
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-            (Recordings.delete().where(Recordings.id << deleted_recordings).execute())
+            Recordings.delete().where(Recordings.id << deleted_recordings).execute()
 
             logger.debug(f"End camera: {camera}.")
 
