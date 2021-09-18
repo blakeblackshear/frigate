@@ -18,6 +18,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -534,7 +535,13 @@ def clipped(obj, frame_shape):
 
 
 def restart_frigate():
-    os.kill(os.getpid(), signal.SIGTERM)
+    proc = psutil.Process(1)
+    # if this is running via s6, sigterm pid 1
+    if proc.name() == "s6-svscan":
+        proc.terminate()
+    # otherwise, just try and exit frigate
+    else:
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 class EventsPerSecond:
