@@ -66,8 +66,8 @@ class MqttConfig(FrigateBaseModel):
 
 
 class RetainConfig(FrigateBaseModel):
-    default: int = Field(default=10, title="Default retention period.")
-    objects: Dict[str, int] = Field(
+    default: float = Field(default=10, title="Default retention period.")
+    objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
     )
 
@@ -90,7 +90,7 @@ class EventsConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    retain_days: int = Field(default=0, title="Recording retention period in days.")
+    retain_days: float = Field(default=0, title="Recording retention period in days.")
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
     )

@@ -1107,6 +1107,30 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].timestamp_style.position == "bl"
         assert runtime_config.cameras["back"].timestamp_style.thickness == 4
 
+    def test_allow_retain_to_be_a_decimal(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "snapshots": {"retain": {"default": 1.5}},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].snapshots.retain.default == 1.5
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
