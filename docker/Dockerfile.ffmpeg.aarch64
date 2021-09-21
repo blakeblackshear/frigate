@@ -9,7 +9,7 @@ WORKDIR     /tmp/workdir
 
 ENV     DEBIAN_FRONTEND=noninteractive
 RUN     apt-get -yqq update && \
-        apt-get install -yq --no-install-recommends ca-certificates expat libgomp1 && \
+        apt-get install -yq --no-install-recommends ca-certificates expat libgomp1 xutils-dev && \
         apt-get autoremove -y && \
         apt-get clean -y
 
@@ -18,7 +18,7 @@ FROM base as build
 ENV         FFMPEG_VERSION=4.3.1 \
             AOM_VERSION=v1.0.0 \
             FDKAAC_VERSION=0.1.5 \
-            FREETYPE_VERSION=2.5.5 \
+            FREETYPE_VERSION=2.11.0 \
             FRIBIDI_VERSION=0.19.7 \
             KVAZAAR_VERSION=1.2.0 \
             LAME_VERSION=3.100 \
@@ -43,7 +43,7 @@ ENV         FFMPEG_VERSION=4.3.1 \
             LIBZMQ_VERSION=4.3.2 \
             SRC=/usr/local
 
-ARG         FREETYPE_SHA256SUM="5d03dd76c2171a7601e9ce10551d52d4471cf92cd205948e60289251daddffa8 freetype-2.5.5.tar.gz"
+ARG         FREETYPE_SHA256SUM="a45c6b403413abd5706f3582f04c8339d26397c4304b78fa552f2215df64101f freetype-2.11.0.tar.gz"
 ARG         FRIBIDI_SHA256SUM="3fc96fa9473bd31dcb5500bdf1aa78b337ba13eb8c301e7c28923fea982453a8 0.19.7.tar.gz"
 ARG         LIBVIDSTAB_SHA256SUM="14d2a053e56edad4f397be0cb3ef8eb1ec3150404ce99a426c4eb641861dc0bb v1.1.0.tar.gz"
 ARG         OGG_SHA256SUM="e19ee34711d7af328cb26287f4137e70630e7261b17cbe3cd41011d73a654692 libogg-1.3.2.tar.gz"
@@ -391,6 +391,19 @@ RUN \
         make check && \
         make -j $(nproc) install && \
         rm -rf ${DIR}
+        
+RUN \
+        DIR=/tmp/rkmpp && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+##        git clone  https://github.com/ayufan-rock64-packages/libmali && \
+        git clone https://github.com/rockchip-linux/libdrm-rockchip && git clone https://github.com/rockchip-linux/mpp && \
+        cd libdrm-rockchip && bash autogen.sh && ./configure && make && make install && \
+##	      cd ../libmali && cmake CMakeLists.txt && make -j4 && make install && ldconfig && \
+##	      LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib && \
+##	      LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/include && \
+	      cd ../mpp && cmake -DRKPLATFORM=ON -DHAVE_DRM=ON && make -j6 && make install && \
+        rm -rf ${DIR}
 
 ## ffmpeg https://ffmpeg.org/
 RUN  \
@@ -434,6 +447,8 @@ RUN \
         --enable-libkvazaar \
         --enable-libaom \
         --extra-libs=-lpthread \
+	      --enable-rkmpp \
+	      --enable-libdrm \
         # --enable-omx \
         # --enable-omx-rpi \
         # --enable-mmal \
