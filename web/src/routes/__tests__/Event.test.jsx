@@ -57,7 +57,6 @@ describe('Event Route', () => {
 const mockEvent = {
   camera: 'front',
   end_time: 1613257337.841237,
-  false_positive: false,
   has_clip: true,
   has_snapshot: true,
   id: '1613257326.237365-83cgl2',

@@ -55,6 +55,9 @@ class EventProcessor(threading.Thread):
                         false_positive=event_data["false_positive"],
                         zones=list(event_data["entered_zones"]),
                         thumbnail=event_data["thumbnail"],
+                        region=event_data["region"],
+                        box=event_data["box"],
+                        area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
                     )

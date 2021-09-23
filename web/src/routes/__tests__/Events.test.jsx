@@ -71,7 +71,6 @@ describe('Events Route', () => {
 
 const mockEvents = new Array(12).fill(null).map((v, i) => ({
   end_time: 1613257337 + i,
-  false_positive: false,
   has_clip: true,
   has_snapshot: true,
   id: i,
