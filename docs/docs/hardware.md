@@ -11,23 +11,26 @@ I recommend Dahua, Hikvision, and Amcrest in that order. Dahua edges out Hikvisi
 
 Here are some of the camera's I recommend:
 
-- [Loryta(Dahua) T5442TM-AS-LED](https://www.amazon.com/Loryta-IPC-T5442TM-AS-LED-Starlight-Eyeball-Network/dp/B07S5QZJDH/)
-- [Loryta(Dahua) IPC-T5442TM-AS](https://www.amazon.com/Loryta-IPC-T5442TM-AS-Starlight-Eyeball-Network/dp/B07S21FVC7/)
-- [Amcrest IP5M-T1179EW-28MM](https://www.amazon.com/Amcrest-5-Megapixel-NightVision-Weatherproof-IP5M-T1179EW-28MM/dp/B083G9KT4C/)
+- [Loryta(Dahua) T5442TM-AS-LED](https://amzn.to/2Wck2hQ) (affiliate link)
+- [Loryta(Dahua) IPC-T5442TM-AS](https://amzn.to/39FODrm) (affiliate link)
+- [Amcrest IP5M-T1179EW-28MM](https://amzn.to/39H1zgt) (affiliate link)
+
+I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
 ## Server
 
-My current favorite is the Minisforum GK41 because the dual NICs allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet.
+My current favorite is the Minisforum GK50 because the dual NICs allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                    | Inference Speed | Notes                                                                                                                         |
-| ----------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Minisforum GK41         | 9-10ms          | Great alternative to a NUC with dual Gigabit NICs. Easily handles several 1080p cameras.                                      |
-| Intel NUC NUC7i3BNK     | 8-10ms          | Great performance. Can handle many cameras at 5fps depending on typical amounts of motion.                                    |
-| BMAX B2 Plus            | 10-12ms         | Good balance of performance and cost. Also capable of running many other services at the same time as frigate.                |
-| Atomic Pi               | 16ms            | Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding. |
-| Raspberry Pi 3B (32bit) | 60ms            | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
-| Raspberry Pi 4 (32bit)  | 15-20ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
-| Raspberry Pi 4 (64bit)  | 10-15ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+| Name                                                                | Inference Speed | Notes                                                                                                                         |
+| ------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [Minisforum GK41](https://amzn.to/3kI0njr) (affiliate link)         | 9-10ms          | Great alternative to a NUC. Easily handles several 1080p cameras.                                                             |
+| [Minisforum GK50](https://amzn.to/3m49yKk) (affiliate link)         | 9-10ms          | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                     |
+| [Intel NUC](https://amzn.to/3kImYMT) (affiliate link)               | 8-10ms          | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion.             |
+| [BMAX B2 Plus](https://amzn.to/3uccBnD) (affiliate link)            | 10-12ms         | Good balance of performance and cost. Also capable of running many other services at the same time as frigate.                |
+| [Atomic Pi](https://amzn.to/3i9YRVw) (affiliate link)               | 16ms            | Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding. |
+| [Raspberry Pi 3B (32bit)](https://amzn.to/3lZUi16) (affiliate link) | 60ms            | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
+| [Raspberry Pi 4 (32bit)](https://amzn.to/2ZpgDNW) (affiliate link)  | 15-20ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+| [Raspberry Pi 4 (64bit)](https://amzn.to/2ZpgDNW) (affiliate link)  | 10-15ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
 
 ## Google Coral TPU
 
