@@ -17,7 +17,7 @@ class Event(Model):
     has_snapshot = BooleanField(default=True)
     region = JSONField()
     box = JSONField()
-    area = IntegerField
+    area = IntegerField()
 
 
 class Recordings(Model):
