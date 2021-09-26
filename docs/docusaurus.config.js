@@ -3,8 +3,8 @@ const path = require('path');
 module.exports = {
   title: 'Frigate',
   tagline: 'NVR With Realtime Object Detection for IP Cameras',
-  url: 'https://blakeblackshear.github.io',
-  baseUrl: '/frigate/',
+  url: 'https://docs.frigate.video',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
