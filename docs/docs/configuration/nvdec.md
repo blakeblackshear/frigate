@@ -9,6 +9,8 @@ ffmpeg with NVDEC support is required. The special docker architecture 'amd64nvi
 includes this support for amd64 platforms. An aarch64 for the Jetson, which
 also includes NVDEC may be added in the future.
 
+Some more detailed setup instructions are also available in [this issue](https://github.com/blakeblackshear/frigate/issues/1847#issuecomment-932076731).
+
 ## Docker setup
 
 ### Requirements
