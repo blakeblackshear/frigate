@@ -99,7 +99,7 @@ class RecordingMaintainer(threading.Thread):
                 duration = float(p.stdout.decode().strip())
                 end_time = start_time + datetime.timedelta(seconds=duration)
             else:
-                logger.info(f"bad file: {f}")
+                logger.warning(f"Discarding a corrupt recording segment: {f}")
                 Path(cache_path).unlink(missing_ok=True)
                 continue
 
