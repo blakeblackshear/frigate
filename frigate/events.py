@@ -192,12 +192,12 @@ class EventCleanup(threading.Thread):
         for event in duplicate_events:
             logger.debug(f"Removing duplicate: {event.id}")
             media_name = f"{event.camera}-{event.id}"
-            if event.has_snapshot:
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-                media_path.unlink(missing_ok=True)
-            if event.has_clip:
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-                media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+            media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+            media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+            media_path.unlink(missing_ok=True)
 
         (
             Event.delete()
