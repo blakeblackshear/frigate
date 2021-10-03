@@ -42,7 +42,7 @@ aarch64_ffmpeg:
 	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.3.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
 
 aarch64_frigate: version web
-	docker build --no-cache --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.3.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
+	docker build --no-cache --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
 	docker build --no-cache --tag frigate --file docker/Dockerfile.aarch64 .
 
 aarch64_all: aarch64_wheels aarch64_ffmpeg aarch64_frigate
