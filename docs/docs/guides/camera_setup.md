@@ -17,7 +17,7 @@ The ideal resolution for detection is one where the objects you want to detect f
 
 Larger resolutions **do** improve performance if the objects are very small in the frame.
 
-![Resolutions](/img/resolutions.png)
+![Resolutions](/img/resolutions-min.jpg)
 
 ### Example Camera Configuration
 

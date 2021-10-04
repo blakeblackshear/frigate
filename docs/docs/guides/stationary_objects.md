@@ -21,7 +21,7 @@ See [this example](/configuration/zones#restricting-zones-to-specific-objects) f
 
 You can also create a zone for the entrance of your driveway and only save an event if that zone is in the list of entered_zones when the object is a car.
 
-![Driveway Zones](/img/driveway_zones.png)
+![Driveway Zones](/img/driveway_zones-min.png)
 
 ```yaml
 camera:

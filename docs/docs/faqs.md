@@ -19,7 +19,7 @@ By default, Frigate removes audio from recordings to reduce the likelihood of fa
 
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with vlc or another player. Also make sure you don't have the width and height values backwards.
 
-![mismatched-resolution](/img/mismatched-resolution.jpg)
+![mismatched-resolution](/img/mismatched-resolution-min.jpg)
 
 ### I can't view events or recordings in the Web UI.
 

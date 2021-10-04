@@ -20,6 +20,6 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 
 ## Screenshots
 
-![Media Browser](/img/media_browser.png)
+![Media Browser](/img/media_browser-min.png)
 
-![Notification](/img/notification.png)
+![Notification](/img/notification-min.png)

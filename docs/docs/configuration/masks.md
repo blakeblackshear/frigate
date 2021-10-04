@@ -36,7 +36,7 @@ motion:
     - 0,461,3,0,1919,0,1919,843,1699,492,1344
 ```
 
-![poly](/img/example-mask-poly.png)
+![poly](/img/example-mask-poly-min.png)
 
 ### Further Clarification
 
