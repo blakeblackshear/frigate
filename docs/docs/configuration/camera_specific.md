@@ -19,7 +19,7 @@ output_args:
   rtmp: -c:v libx264 -an -f flv
 ```
 
-### RTMP Cameras (Reolink 410/520 and possibly others)
+### RTMP Cameras
 
 The input parameters need to be adjusted for RTMP cameras
 
@@ -27,6 +27,46 @@ The input parameters need to be adjusted for RTMP cameras
 ffmpeg:
   input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rw_timeout 5000000 -use_wallclock_as_timestamps 1 -f live_flv
 ```
+
+### Reolink 410/520 (possibly others)
+
+According to [this discussion](https://github.com/blakeblackshear/frigate/issues/1713#issuecomment-932976305), the http video streams seem to be the most reliable for Reolink.
+
+```yaml
+cameras:
+  reolink:
+    ffmpeg:
+      hwaccel_args:
+      input_args:
+        - -avoid_negative_ts
+        - make_zero
+        - -fflags
+        - nobuffer+genpts+discardcorrupt
+        - -flags
+        - low_delay
+        - -strict
+        - experimental
+        - -analyzeduration
+        - 1000M
+        - -probesize
+        - 1000M
+        - -rw_timeout
+        - "5000000"
+      inputs:
+        - path: http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password
+          roles:
+            - record
+            - rtmp
+        - path: http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
+          roles:
+            - detect
+    detect:
+      width: 640
+      height: 480
+      fps: 7
+```
+
+![Resolutions](/img/reolink-settings.png)
 
 ### Blue Iris RTSP Cameras
 
