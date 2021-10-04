@@ -13,9 +13,9 @@ Many users have reported various issues with Reolink cameras, so I do not recomm
 
 Here are some of the camera's I recommend:
 
-- [Loryta(Dahua) T5442TM-AS-LED](https://amzn.to/2Wck2hQ) (affiliate link)
-- [Loryta(Dahua) IPC-T5442TM-AS](https://amzn.to/39FODrm) (affiliate link)
-- [Amcrest IP5M-T1179EW-28MM](https://amzn.to/39H1zgt) (affiliate link)
+- <a href="https://amzn.to/3uFLtxB" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) T5442TM-AS-LED</a> (affiliate link)
+- <a href="https://amzn.to/3isJ3gU" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T5442TM-AS</a> (affiliate link)
+- <a href="https://amzn.to/2ZWNWIA" target="_blank" rel="nofollow noopener sponsored">Amcrest IP5M-T1179EW-28MM</a> (affiliate link)
 
 I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
@@ -23,16 +23,16 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 My current favorite is the Minisforum GK50 because the dual NICs allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                | Inference Speed | Notes                                                                                                                         |
-| ------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Minisforum GK41](https://amzn.to/3kI0njr) (affiliate link)         | 9-10ms          | Great alternative to a NUC. Easily handles several 1080p cameras.                                                             |
-| [Minisforum GK50](https://amzn.to/3m49yKk) (affiliate link)         | 9-10ms          | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                     |
-| [Intel NUC](https://amzn.to/3kImYMT) (affiliate link)               | 8-10ms          | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion.             |
-| [BMAX B2 Plus](https://amzn.to/3uccBnD) (affiliate link)            | 10-12ms         | Good balance of performance and cost. Also capable of running many other services at the same time as frigate.                |
-| [Atomic Pi](https://amzn.to/3i9YRVw) (affiliate link)               | 16ms            | Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding. |
-| [Raspberry Pi 3B (32bit)](https://amzn.to/3lZUi16) (affiliate link) | 60ms            | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
-| [Raspberry Pi 4 (32bit)](https://amzn.to/2ZpgDNW) (affiliate link)  | 15-20ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
-| [Raspberry Pi 4 (64bit)](https://amzn.to/2ZpgDNW) (affiliate link)  | 10-15ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+| Name                                                                                                                             | Inference Speed | Notes                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| <a href="https://amzn.to/3oxEC8m" target="_blank" rel="nofollow noopener sponsored">Minisforum GK41</a> (affiliate link)         | 9-10ms          | Great alternative to a NUC. Easily handles several 1080p cameras.                                                             |
+| <a href="https://amzn.to/3ixJFlb" target="_blank" rel="nofollow noopener sponsored">Minisforum GK50</a> (affiliate link)         | 9-10ms          | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                     |
+| <a href="https://amzn.to/3l7vCEI" target="_blank" rel="nofollow noopener sponsored">Intel NUC</a> (affiliate link)               | 8-10ms          | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion.             |
+| <a href="https://amzn.to/3a6TBh8" target="_blank" rel="nofollow noopener sponsored">BMAX B2 Plus</a> (affiliate link)            | 10-12ms         | Good balance of performance and cost. Also capable of running many other services at the same time as frigate.                |
+| <a href="https://amzn.to/2YjpY9m" target="_blank" rel="nofollow noopener sponsored">Atomic Pi</a> (affiliate link)               | 16ms            | Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding. |
+| <a href="https://amzn.to/2WIpwRU" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 3B (32bit)</a> (affiliate link) | 60ms            | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
+| <a href="https://amzn.to/2YhSGHH" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 4 (32bit)</a> (affiliate link)  | 15-20ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+| <a href="https://amzn.to/2YhSGHH" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 4 (64bit)</a> (affiliate link)  | 10-15ms         | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
 
 ## Google Coral TPU
 
