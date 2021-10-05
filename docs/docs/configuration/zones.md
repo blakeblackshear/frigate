@@ -20,6 +20,10 @@ camera:
       required_zones:
         - entire_yard
         - front_yard_street
+  snapshots:
+    required_zones:
+      - entire_yard
+      - front_yard_street
   zones:
     entire_yard:
       coordinates: ... (everywhere you want a person)
@@ -31,4 +35,4 @@ camera:
         - car
 ```
 
-Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get clips for person objects that enter anywhere in the yard, and clips for cars only if they enter the street.
+Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get events for person objects that enter anywhere in the yard, and events for cars only if they enter the street.

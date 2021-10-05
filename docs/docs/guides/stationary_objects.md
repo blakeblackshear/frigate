@@ -15,13 +15,13 @@ Frigate is designed to track objects as they move and over-masking can prevent i
 
 :::
 
-For example, you could create multiple zones that cover your driveway. For cars, you would only notify if entered_zones has more than 1 zone. For person, you would notify regardless of the number of entered_zones.
+To only be notified of cars that enter your driveway from the street, you could create multiple zones that cover your driveway. For cars, you would only notify if `entered_zones` from the events MQTT topic has more than 1 zone.
 
-See [this example](/configuration/zones#restricting-zones-to-specific-objects) from the Zones documentation.
-
-You can also create a zone for the entrance of your driveway and only save an event if that zone is in the list of entered_zones when the object is a car.
+See [this example](/configuration/zones#restricting-zones-to-specific-objects) from the Zones documentation to see how to restrict zones to certain object types.
 
 ![Driveway Zones](/img/driveway_zones-min.png)
+
+To limit snapshots and events, you can list the zone for the entrance of your driveway under `required_zones` in your configuration file. Example below.
 
 ```yaml
 camera:

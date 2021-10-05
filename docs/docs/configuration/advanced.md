@@ -48,3 +48,17 @@ This may need to be in a custom location if network storage is used for the medi
 If using a custom model, the width and height will need to be specified.
 
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
+
+```yaml
+model:
+  labelmap:
+    2: vehicle
+    3: vehicle
+    5: vehicle
+    7: vehicle
+    15: animal
+    16: animal
+    17: animal
+```
+
+Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
