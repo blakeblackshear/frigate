@@ -104,7 +104,7 @@ class BirdsEyeFrameManager:
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
 
         # find and copy the logo on the blank frame
-        logo_files = glob.glob("/opt/frigate/web/apple-touch-icon.*.png")
+        logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
         frigate_logo = None
         if len(logo_files) > 0:
             frigate_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
