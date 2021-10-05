@@ -36,6 +36,59 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 - [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
+- Extra Coral device (optional, but very helpful to simulate real world performance)
+
+### Setup
+
+#### 1. Build the docker container locally with the appropriate make command
+
+For x86 machines, use `make amd64_frigate`
+
+#### 2. Create a local config file for testing
+
+Place the file at `config/config.yml` in the root of the repo.
+
+Here is an example, but modify for your needs:
+
+```yaml
+mqtt:
+  host: mqtt
+
+cameras:
+  test:
+    ffmpeg:
+      inputs:
+        - path: /media/frigate/car-stopping.mp4
+          input_args: -re -stream_loop -1 -fflags +genpts
+          roles:
+            - detect
+            - rtmp
+    detect:
+      height: 1080
+      width: 1920
+      fps: 5
+```
+
+These input args tell ffmpeg to read the mp4 file in an infinite loop. You can use any valid ffmpeg input here.
+
+#### 3. Gather some mp4 files for testing
+
+Create and place these files in a `debug` folder in the root of the repo. This is also where recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
+
+#### 4. Open the repo with Visual Studio Code
+
+Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
+
+#### 5. Run frigate from the command line
+
+VSCode will start the docker compose file for you and open a terminal window connected to `frigate-dev`.
+
+- Run `python3 -m frigate` to start the backend.
+- In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm start` to start the frontend.
+
+#### 6. Teardown
+
+After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
 ## Web Interface
 
@@ -109,7 +162,7 @@ npm run test
 #### 1. Installation
 
 ```console
-npm run install
+npm install
 ```
 
 #### 2. Local Development

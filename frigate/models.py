@@ -1,3 +1,4 @@
+from numpy import unique
 from peewee import *
 from playhouse.sqlite_ext import *
 
@@ -14,3 +15,15 @@ class Event(Model):
     thumbnail = TextField()
     has_clip = BooleanField(default=True)
     has_snapshot = BooleanField(default=True)
+    region = JSONField()
+    box = JSONField()
+    area = IntegerField()
+
+
+class Recordings(Model):
+    id = CharField(null=False, primary_key=True, max_length=30)
+    camera = CharField(index=True, max_length=20)
+    path = CharField(unique=True)
+    start_time = DateTimeField()
+    end_time = DateTimeField()
+    duration = FloatField()

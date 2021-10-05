@@ -11,11 +11,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@cycjimmy/jsmpeg-player": "^5.0.1",
+    "date-fns": "^2.21.3",
     "idb-keyval": "^5.0.2",
     "immer": "^8.0.1",
     "preact": "^10.5.9",
     "preact-async-route": "^2.2.1",
-    "preact-router": "^3.2.1"
+    "preact-router": "^3.2.1",
+    "video.js": "^7.15.4",
+    "videojs-playlist": "^4.3.1",
+    "videojs-seek-buttons": "^2.0.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.13",

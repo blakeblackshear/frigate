@@ -3,24 +3,43 @@ id: installation
 title: Installation
 ---
 
-Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). See instructions below for installing the HassOS addon.
+Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](integrations/home-assistant) is required to integrate Frigate into Home Assistant.
 
-For Home Assistant users, there is also a [custom component (aka integration)](https://github.com/blakeblackshear/frigate-hass-integration). This custom component adds tighter integration with Home Assistant by automatically setting up camera entities, sensors, media browser for clips and recordings, and a public API to simplify notifications.
+## Dependencies
 
-Note that HassOS Addons and custom components are different things. If you are already running Frigate with Docker directly, you do not need the Addon since the Addon would run another instance of Frigate.
+**MQTT broker** - Frigate requires an MQTT broker. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
 
-## HassOS Addon
+## Preparing your hardware
 
-HassOS users can install via the addon repository. Frigate requires an MQTT server.
+### Operating System
 
-1. Navigate to Supervisor > Add-on Store > Repositories
-2. Add https://github.com/blakeblackshear/frigate-hass-addons
-3. Setup your network configuration in the `Configuration` tab if deisred
-4. Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
-5. Start the addon container
-6. If you are using hardware acceleration for ffmpeg, you will need to disable "Protection mode"
+Frigate runs best with docker installed on bare metal debian-based distributions. For ideal performance, Frigate needs access to underlying hardware for the Coral and GPU devices. Running Frigate in a VM on top of Proxmox, ESXi, Virtualbox, etc. is not recommended. The virtualization layer often introduces a sizable amount of overhead for communication with Coral devices, but [not in all circumstances](https://github.com/blakeblackshear/frigate/discussions/1837).
+
+Windows is not officially supported, but some users have had success getting it to run under WSL or Virtualbox. Getting the GPU and/or Coral devices properly passed to Frigate may be difficult or impossible. Search previous discussions or issues for help.
+
+### Calculating required shm-size
+
+Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is 64m.
+
+The default shm-size of 64m is fine for setups with 2 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
+
+You can calculate the necessary shm-size for each camera with the following formula:
+
+```
+(width * height * 1.5 * 9 + 270480)/1048576 = <shm size in mb>
+```
+
+The shm size cannot be set per container for Home Assistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+
+### Raspberry Pi 3/4
+
+By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
+
+Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
 ## Docker
+
+Running in Docker directly is the recommended install method.
 
 Make sure you choose the right image for your architecture:
 
@@ -41,13 +60,14 @@ services:
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
     image: blakeblackshear/frigate:<specify_version_tag>
+    shm_size: "64mb" # update for your cameras based on calculation above
     devices:
-      - /dev/bus/usb:/dev/bus/usb
+      - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - <path_to_config_file>:/config/config.yml:ro
-      - <path_to_directory_for_media>:/media/frigate
+      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
         tmpfs:
@@ -68,8 +88,9 @@ docker run -d \
   --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
   --device /dev/bus/usb:/dev/bus/usb \
   --device /dev/dri/renderD128 \
-  -v <path_to_directory_for_media>:/media/frigate \
-  -v <path_to_config_file>:/config/config.yml:ro \
+  --shm-size=64m \
+  -v /path/to/your/storage:/media/frigate \
+  -v /path/to/your/config.yml:/config/config.yml:ro \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
@@ -77,48 +98,62 @@ docker run -d \
   blakeblackshear/frigate:<specify_version_tag>
 ```
 
-### Calculating shm-size
+## Home Assistant Operating System (HassOS)
 
-The default shm-size of 64m is fine for setups with 3 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it could be because you have too many high resolution cameras and you need to specify a higher shm size.
+:::caution
 
-You can calculate the necessary shm-size for each camera with the following formula:
+Due to limitations in Home Assistant Operating System, Frigate cannot utilize external storage for recordings or snapshots.
 
+:::
+
+:::tip
+
+If possible, it is recommended to run Frigate standalone in Docker and use [Frigate's Proxy Addon](https://github.com/blakeblackshear/frigate-hass-addons/blob/main/frigate_proxy/README.md).
+
+:::
+
+HassOS users can install via the addon repository.
+
+1. Navigate to Supervisor > Add-on Store > Repositories
+2. Add https://github.com/blakeblackshear/frigate-hass-addons
+3. Install your desired Frigate NVR Addon and navigate to it's page
+4. Setup your network configuration in the `Configuration` tab
+5. (not for proxy addon) Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
+6. Start the addon container
+7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
+
+## Home Assistant Supervised
+
+:::tip
+
+If possible, it is recommended to run Frigate standalone in Docker and use [Frigate's Proxy Addon](https://github.com/blakeblackshear/frigate-hass-addons/blob/main/frigate_proxy/README.md).
+
+:::
+
+When running Home Assistant with the [Supervised install method](https://github.com/home-assistant/supervised-installer), you can get the benefit of running the Addon along with the ability to customize the storage used by Frigate.
+
+In order to customize the storage location for Frigate, simply use `fstab` to mount the drive you want at `/usr/share/hassio/media`. Here is an example fstab entry:
+
+```shell
+UUID=1a65fec6-c25f-404a-b3d2-1f2fcf6095c8 /media/data ext4 defaults 0 0
+/media/data/homeassistant/media /usr/share/hassio/media none bind 0 0
 ```
-(width * height * 1.5 * 7 + 270480)/1048576 = <shm size in mb>
-```
 
-The shm size cannot be set per container for Home Assistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+Then follow the instructions listed for [Home Assistant Operating System](#home-assistant-operating-system-hassos).
 
 ## Kubernetes
 
 Use the [helm chart](https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate).
 
-## Virtualization
+## Unraid
 
-For ideal performance, Frigate needs access to underlying hardware for the Coral and GPU devices for ffmpeg decoding. Running Frigate in a VM on top of Proxmox, ESXi, Virtualbox, etc. is not recommended. The virtualization layer typically introduces a sizable amount of overhead for communication with Coral devices.
+Many people have powerful enough NAS devices or home servers to also run docker. There is a Unraid Community App.
+To install make sure you have the [community app plugin here](https://forums.unraid.net/topic/38582-plug-in-community-applications/). Then search for "Frigate" in the apps section within Unraid - you can see the online store [here](https://unraid.net/community/apps?q=frigate#r)
 
-### Proxmox
+## Proxmox
 
-Some people have had success running Frigate in LXC directly with the following config:
+It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more information.
 
-```
-arch: amd64
-cores: 2
-features: nesting=1
-hostname: FrigateLXC
-memory: 4096
-net0: name=eth0,bridge=vmbr0,firewall=1,hwaddr=2E:76:AE:5A:58:48,ip=dhcp,ip6=auto,type=veth
-ostype: debian
-rootfs: local-lvm:vm-115-disk-0,size=12G
-swap: 512
-lxc.cgroup.devices.allow: c 189:385 rwm
-lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file
-lxc.mount.entry: /dev/bus/usb/004/002 dev/bus/usb/004/002 none bind,optional,create=file
-lxc.apparmor.profile: unconfined
-lxc.cgroup.devices.allow: a
-lxc.cap.drop:
-```
-
-### ESX
+## ESX
 
 For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).

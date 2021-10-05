@@ -11,6 +11,10 @@ Designed to be used as an availability topic with Home Assistant. Possible messa
 "online": published when frigate is running (on startup)
 "offline": published right before frigate stops
 
+### `frigate/restart`
+
+Causes frigate to exit. Docker should be configured to automatically restart the container on exit.
+
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
@@ -32,11 +36,12 @@ Message published for each changed event. The first message is published when th
 
 ```json
 {
-  "type": "update", // new, update, or end
+  "type": "update", // new, update, end
   "before": {
     "id": "1607123955.475377-mxklsc",
     "camera": "front_door",
     "frame_time": 1607123961.837752,
+    "snapshot_time": 1607123961.837752,
     "label": "person",
     "top_score": 0.958984375,
     "false_positive": false,
@@ -48,12 +53,15 @@ Message published for each changed event. The first message is published when th
     "region": [264, 450, 667, 853],
     "current_zones": ["driveway"],
     "entered_zones": ["yard", "driveway"],
-    "thumbnail": null
+    "thumbnail": null,
+    "has_snapshot": false,
+    "has_clip": false
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
     "camera": "front_door",
     "frame_time": 1607123962.082975,
+    "snapshot_time": 1607123961.837752,
     "label": "person",
     "top_score": 0.958984375,
     "false_positive": false,
@@ -65,7 +73,9 @@ Message published for each changed event. The first message is published when th
     "region": [218, 440, 693, 915],
     "current_zones": ["yard", "driveway"],
     "entered_zones": ["yard", "driveway"],
-    "thumbnail": null
+    "thumbnail": null,
+    "has_snapshot": false,
+    "has_clip": false
   }
 }
 ```
@@ -82,13 +92,13 @@ Topic to turn detection for a camera on and off. Expected values are `ON` and `O
 
 Topic with current state of detection for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/clips/set`
+### `frigate/<camera_name>/recordings/set`
 
-Topic to turn clips for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn recordings for a camera on and off. Expected values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/clips/state`
+### `frigate/<camera_name>/recordings/state`
 
-Topic with current state of clips for a camera. Published values are `ON` and `OFF`.
+Topic with current state of recordings for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/snapshots/set`
 

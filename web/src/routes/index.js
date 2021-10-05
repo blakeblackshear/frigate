@@ -13,8 +13,18 @@ export async function getEvent(url, cb, props) {
   return module.default;
 }
 
+export async function getBirdseye(url, cb, props) {
+  const module = await import('./Birdseye.jsx');
+  return module.default;
+}
+
 export async function getEvents(url, cb, props) {
-  const module = await import('./Events.jsx');
+  const module = await import('./Events');
+  return module.default;
+}
+
+export async function getRecording(url, cb, props) {
+  const module = await import('./Recording.jsx');
   return module.default;
 }
 

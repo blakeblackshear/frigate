@@ -1,11 +1,13 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
+import JSMpegPlayer from '../components/JSMpegPlayer';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import SettingsIcon from '../icons/Settings';
 import Switch from '../components/Switch';
+import ButtonsTabbed from '../components/ButtonsTabbed';
 import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost, useConfig } from '../api';
@@ -16,6 +18,7 @@ export default function Camera({ camera }) {
   const { data: config } = useConfig();
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
+  const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
@@ -79,20 +82,40 @@ export default function Camera({ camera }) {
     </div>
   ) : null;
 
+  let player;
+  if (viewMode === 'live') {
+    player = (
+      <Fragment>
+        <div>
+          <JSMpegPlayer camera={camera} />
+        </div>
+      </Fragment>
+    );
+  }
+  else if (viewMode === 'debug') {
+    player = (
+      <Fragment>
+        <div>
+          <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
+        </div>
+
+        <Button onClick={handleToggleSettings} type="text">
+          <span className="w-5 h-5">
+            <SettingsIcon />
+          </span>{' '}
+          <span>{showSettings ? 'Hide' : 'Show'} Options</span>
+        </Button>
+        {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
+      </Fragment>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <Heading size="2xl">{camera}</Heading>
-      <div>
-        <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
-      </div>
+      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
 
-      <Button onClick={handleToggleSettings} type="text">
-        <span className="w-5 h-5">
-          <SettingsIcon />
-        </span>{' '}
-        <span>{showSettings ? 'Hide' : 'Show'} Options</span>
-      </Button>
-      {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
+      {player}
 
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>

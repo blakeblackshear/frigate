@@ -18,7 +18,7 @@ const initialState = Object.freeze({
 
 const Api = createContext(initialState);
 
-function reducer(state, { type, payload, meta }) {
+function reducer(state, { type, payload }) {
   switch (type) {
     case 'REQUEST': {
       const { url, fetchId } = payload;
@@ -34,7 +34,14 @@ function reducer(state, { type, payload, meta }) {
         draftState.queries[url] = { status: ok ? FetchStatus.LOADED : FetchStatus.ERROR, data, fetchId };
       });
     }
-
+    case 'DELETE': {
+      const { eventId } = payload;
+      return produce(state, (draftState) => {
+        Object.keys(draftState.queries).map((url) => {
+          draftState.queries[url].deletedId = eventId;
+        });
+      });
+    }
     default:
       return state;
   }
@@ -91,8 +98,23 @@ export function useFetch(url, fetchId) {
 
   const data = state.queries[url].data || null;
   const status = state.queries[url].status;
+  const deletedId = state.queries[url].deletedId || 0;
 
-  return { data, status };
+  return { data, status, deletedId };
+}
+
+export function useDelete() {
+  const { dispatch, state } = useContext(Api);
+
+  async function deleteEvent(eventId) {
+    if (!eventId) return null;
+
+    const response = await fetch(`${state.host}/api/events/${eventId}`, { method: 'DELETE' });
+    await dispatch({ type: 'DELETE', payload: { eventId } });
+    return await (response.status < 300 ? response.json() : { success: true });
+  }
+
+  return deleteEvent;
 }
 
 export function useApiHost() {
@@ -107,6 +129,11 @@ export function useEvents(searchParams, fetchId) {
 
 export function useEvent(eventId, fetchId) {
   const url = `/api/events/${eventId}`;
+  return useFetch(url, fetchId);
+}
+
+export function useRecording(camera, fetchId) {
+  const url = `/api/${camera}/recordings`;
   return useFetch(url, fetchId);
 }
 

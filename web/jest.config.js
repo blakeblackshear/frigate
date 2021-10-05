@@ -6,4 +6,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/config/setupTests.js'],
   testEnvironment: 'jsdom',
   timers: 'fake',
+  moduleNameMapper: {
+    '\\.(scss|sass|css)$': '<rootDir>/src/__mocks__/styleMock.js'
+  }
 };
