@@ -102,7 +102,7 @@ docker run -d \
 
 :::caution
 
-Due to limitations in Home Assistant Operating System, Frigate cannot utilize external storage for recordings or snapshots.
+Due to limitations in Home Assistant Operating System, utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
 
 :::
 
