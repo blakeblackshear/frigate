@@ -203,7 +203,11 @@ class RecordingCleanup(threading.Thread):
             events: Event = (
                 Event.select()
                 .where(
-                    Event.camera == camera, Event.end_time < expire_date, Event.has_clip
+                    Event.camera == camera,
+                    # need to ensure segments for all events starting
+                    # before the expire date are included
+                    Event.start_time < expire_date,
+                    Event.has_clip,
                 )
                 .order_by(Event.start_time)
                 .objects()
