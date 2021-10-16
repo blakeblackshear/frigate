@@ -305,7 +305,6 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "1",
     "-c",
     "copy",
-    "-an",
 ]
 
 
