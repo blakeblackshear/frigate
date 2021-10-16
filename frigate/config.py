@@ -298,7 +298,7 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-segment_time",
     "10",
     "-segment_format",
-    "mp4",
+    "ts",
     "-reset_timestamps",
     "1",
     "-strftime",
@@ -562,7 +562,7 @@ class CameraConfig(FrigateBaseModel):
             )
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.ts"]
                 + ffmpeg_output_args
             )
 
