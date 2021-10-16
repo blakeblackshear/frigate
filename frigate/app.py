@@ -12,6 +12,7 @@ import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
@@ -320,7 +321,19 @@ class FrigateApp:
             try:
                 self.init_config()
             except Exception as e:
-                print(f"Error parsing config: {e}")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Your config file is not valid!                     ***")
+                print("***    Please check the docs at                           ***")
+                print("***    https://docs.frigate.video/configuration/index     ***")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Config Validation Errors                           ***")
+                print("*************************************************************")
+                print(e)
+                print("*************************************************************")
+                print("***    End Config Validation Errors                       ***")
+                print("*************************************************************")
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
