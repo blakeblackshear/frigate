@@ -563,6 +563,14 @@ class CameraConfig(FrigateBaseModel):
                 if isinstance(self.ffmpeg.output_args.record, list)
                 else self.ffmpeg.output_args.record.split(" ")
             )
+
+            # backwards compatibility check for segment_format change from mp4 to ts
+            record_args = (
+                " ".join(record_args)
+                .replace("-segment_format mp4", "-segment_format ts")
+                .split(" ")
+            )
+
             ffmpeg_output_args = (
                 record_args
                 + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.ts"]
