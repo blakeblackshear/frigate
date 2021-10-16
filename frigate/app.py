@@ -86,29 +86,6 @@ class FrigateApp:
                 "frame_queue": mp.Queue(maxsize=2),
             }
 
-    def check_config(self):
-        for name, camera in self.config.cameras.items():
-            assigned_roles = list(
-                set([r for i in camera.ffmpeg.inputs for r in i.roles])
-            )
-            if not camera.record.enabled and "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record assigned to an input, but record is not enabled."
-                )
-            elif camera.record.enabled and not "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
-
-            if not camera.rtmp.enabled and "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp assigned to an input, but rtmp is not enabled."
-                )
-            elif camera.rtmp.enabled and not "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
-
     def set_log_levels(self):
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
         for log, level in self.config.logger.logs.items():
@@ -338,7 +315,6 @@ class FrigateApp:
                 sys.exit(1)
             self.set_environment_vars()
             self.ensure_dirs()
-            self.check_config()
             self.set_log_levels()
             self.init_queues()
             self.init_database()
