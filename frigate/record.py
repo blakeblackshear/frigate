@@ -294,7 +294,8 @@ class RecordingCleanup(threading.Thread):
                 Recordings.select().order_by(Recordings.start_time.desc()).get()
             )
 
-            oldest_timestamp = oldest_recording.start_time
+            p = Path(oldest_recording.path)
+            oldest_timestamp = p.stat().st_mtime - 1
         except DoesNotExist:
             oldest_timestamp = datetime.datetime.now().timestamp()
 
