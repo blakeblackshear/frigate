@@ -87,7 +87,7 @@ export default function Camera({ camera }) {
     player = (
       <Fragment>
         <div>
-          <JSMpegPlayer camera={camera} />
+          <JSMpegPlayer camera={camera} width={cameraConfig.detect.width} height={cameraConfig.detect.height} />
         </div>
       </Fragment>
     );

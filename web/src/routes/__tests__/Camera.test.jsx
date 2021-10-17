@@ -13,7 +13,7 @@ describe('Camera Route', () => {
     mockSetOptions = jest.fn();
     mockUsePersistence = jest.spyOn(Context, 'usePersistence').mockImplementation(() => [{}, mockSetOptions]);
     jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
-      data: { cameras: { front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] } } } },
+      data: { cameras: { front: { name: 'front', detect: {width: 1280, height: 720}, objects: { track: ['taco', 'cat', 'dog'] } } } },
     }));
     jest.spyOn(Api, 'useApiHost').mockImplementation(() => 'http://base-url.local:5000');
     jest.spyOn(AutoUpdatingCameraImage, 'default').mockImplementation(({ searchParams }) => {
