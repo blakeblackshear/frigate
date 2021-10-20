@@ -48,9 +48,7 @@ class RecordingMaintainer(threading.Thread):
         recordings = [
             d
             for d in os.listdir(CACHE_DIR)
-            if os.path.isfile(os.path.join(CACHE_DIR, d))
-            and d.endswith(".mp4")
-            and not d.startswith("clip_")
+            if os.path.isfile(os.path.join(CACHE_DIR, d)) and d.endswith(".ts")
         ]
 
         files_in_use = []
@@ -113,9 +111,30 @@ class RecordingMaintainer(threading.Thread):
             file_name = f"{start_time.strftime('%M.%S.mp4')}"
             file_path = os.path.join(directory, file_name)
 
-            # copy then delete is required when recordings are stored on some network drives
-            shutil.copyfile(cache_path, file_path)
-            os.remove(cache_path)
+            ffmpeg_cmd = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                cache_path,
+                "-c",
+                "copy",
+                "-movflags",
+                "+faststart",
+                file_path,
+            ]
+
+            p = sp.run(
+                ffmpeg_cmd,
+                encoding="ascii",
+                capture_output=True,
+            )
+
+            Path(cache_path).unlink(missing_ok=True)
+
+            if p.returncode != 0:
+                logger.error(f"Unable to convert {cache_path} to {file_path}")
+                logger.error(p.stderr)
+                continue
 
             rand_id = "".join(
                 random.choices(string.ascii_lowercase + string.digits, k=6)
@@ -203,7 +222,11 @@ class RecordingCleanup(threading.Thread):
             events: Event = (
                 Event.select()
                 .where(
-                    Event.camera == camera, Event.end_time < expire_date, Event.has_clip
+                    Event.camera == camera,
+                    # need to ensure segments for all events starting
+                    # before the expire date are included
+                    Event.start_time < expire_date,
+                    Event.has_clip,
                 )
                 .order_by(Event.start_time)
                 .objects()
@@ -271,7 +294,8 @@ class RecordingCleanup(threading.Thread):
                 Recordings.select().order_by(Recordings.start_time.desc()).get()
             )
 
-            oldest_timestamp = oldest_recording.start_time
+            p = Path(oldest_recording.path)
+            oldest_timestamp = p.stat().st_mtime - 1
         except DoesNotExist:
             oldest_timestamp = datetime.datetime.now().timestamp()
 

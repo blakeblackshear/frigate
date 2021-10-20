@@ -21,6 +21,7 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
+  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -87,7 +88,7 @@ export default function Camera({ camera }) {
     player = (
       <Fragment>
         <div>
-          <JSMpegPlayer camera={camera} />
+          <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
         </div>
       </Fragment>
     );

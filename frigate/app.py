@@ -12,6 +12,7 @@ import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
@@ -84,29 +85,6 @@ class FrigateApp:
                 "ffmpeg_pid": mp.Value("i", 0),
                 "frame_queue": mp.Queue(maxsize=2),
             }
-
-    def check_config(self):
-        for name, camera in self.config.cameras.items():
-            assigned_roles = list(
-                set([r for i in camera.ffmpeg.inputs for r in i.roles])
-            )
-            if not camera.record.enabled and "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record assigned to an input, but record is not enabled."
-                )
-            elif camera.record.enabled and not "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
-
-            if not camera.rtmp.enabled and "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp assigned to an input, but rtmp is not enabled."
-                )
-            elif camera.rtmp.enabled and not "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
 
     def set_log_levels(self):
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
@@ -320,12 +298,23 @@ class FrigateApp:
             try:
                 self.init_config()
             except Exception as e:
-                print(f"Error parsing config: {e}")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Your config file is not valid!                     ***")
+                print("***    Please check the docs at                           ***")
+                print("***    https://docs.frigate.video/configuration/index     ***")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Config Validation Errors                           ***")
+                print("*************************************************************")
+                print(e)
+                print("*************************************************************")
+                print("***    End Config Validation Errors                       ***")
+                print("*************************************************************")
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
             self.ensure_dirs()
-            self.check_config()
             self.set_log_levels()
             self.init_queues()
             self.init_database()

@@ -3,7 +3,7 @@ import { baseUrl } from '../api/baseUrl';
 import { useRef, useEffect } from 'preact/hooks';
 import JSMpeg from '@cycjimmy/jsmpeg-player';
 
-export default function JSMpegPlayer({ camera }) {
+export default function JSMpegPlayer({ camera, width, height }) {
   const playerRef = useRef();
   const url = `${baseUrl.replace(/^http/, 'ws')}/live/${camera}`
 
@@ -32,6 +32,6 @@ export default function JSMpegPlayer({ camera }) {
   }, [url]);
 
   return (
-    <div ref={playerRef} class="jsmpeg" />
+    <div ref={playerRef} class="jsmpeg" style={`max-height: ${height}px; max-width: ${width}px`} />
   );
 }

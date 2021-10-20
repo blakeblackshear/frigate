@@ -298,14 +298,13 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-segment_time",
     "10",
     "-segment_format",
-    "mp4",
+    "ts",
     "-reset_timestamps",
     "1",
     "-strftime",
     "1",
     "-c",
     "copy",
-    "-an",
 ]
 
 
@@ -505,6 +504,10 @@ class CameraConfig(FrigateBaseModel):
                 for idx, (name, z) in enumerate(config["zones"].items())
             }
 
+        # add roles to the input if there is only one
+        if len(config["ffmpeg"]["inputs"]) == 1:
+            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect"]
+
         super().__init__(**config)
 
     @property
@@ -560,9 +563,17 @@ class CameraConfig(FrigateBaseModel):
                 if isinstance(self.ffmpeg.output_args.record, list)
                 else self.ffmpeg.output_args.record.split(" ")
             )
+
+            # backwards compatibility check for segment_format change from mp4 to ts
+            record_args = (
+                " ".join(record_args)
+                .replace("-segment_format mp4", "-segment_format ts")
+                .split(" ")
+            )
+
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.ts"]
                 + ffmpeg_output_args
             )
 
@@ -797,6 +808,23 @@ class FrigateConfig(FrigateBaseModel):
         for zone in zones:
             if zone in v.keys():
                 raise ValueError("Zones cannot share names with cameras")
+        return v
+
+    @validator("cameras")
+    def ensure_cameras_are_not_missing_roles(cls, v: Dict[str, CameraConfig]):
+        for name, camera in v.items():
+            assigned_roles = list(
+                set([r for i in camera.ffmpeg.inputs for r in i.roles])
+            )
+            if camera.record.enabled and not "record" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has record enabled, but record is not assigned to an input."
+                )
+
+            if camera.rtmp.enabled and not "rtmp" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                )
         return v
 
     @classmethod
