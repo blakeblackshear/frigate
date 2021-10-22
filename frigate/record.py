@@ -113,6 +113,7 @@ class RecordingMaintainer(threading.Thread):
 
             ffmpeg_cmd = [
                 "ffmpeg",
+                "-hide_banner",
                 "-y",
                 "-i",
                 cache_path,
