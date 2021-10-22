@@ -6,6 +6,7 @@ debug
 config/config.yml
 models
 *.mp4
+*.ts
 *.db
 frigate/version.py
 web/build
