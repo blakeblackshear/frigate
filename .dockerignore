@@ -8,3 +8,4 @@ config/
 core
 *.mp4
 *.db
+*.ts
