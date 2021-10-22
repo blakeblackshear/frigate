@@ -17,6 +17,61 @@ Frigate runs best with docker installed on bare metal debian-based distributions
 
 Windows is not officially supported, but some users have had success getting it to run under WSL or Virtualbox. Getting the GPU and/or Coral devices properly passed to Frigate may be difficult or impossible. Search previous discussions or issues for help.
 
+### Storage
+
+Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
+
+- `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
+- `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
+- `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
+- `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder.
+- `/dev/shm`: It is not recommended to modify this directory or map it with docker. This is the location for raw decoded frames in shared memory and it's size is impacted by the `shm-size` calculations below.
+- `/config/config.yml`: Default location of the config file.
+
+#### Common docker compose storage configurations
+
+Writing to a local disk or external USB drive:
+
+```yaml
+version: "3.9"
+services:
+  frigate:
+    ...
+    volumes:
+      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/storage:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ...
+```
+
+Writing to a network drive with database on a local drive:
+
+```yaml
+version: "3.9"
+services:
+  frigate:
+    ...
+    volumes:
+      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/network/storage:/media/frigate
+      - /path/to/local/disk:/db
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ...
+```
+
+frigate.yml
+
+```yaml
+database:
+  path: /db/frigate.db
+```
+
 ### Calculating required shm-size
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is 64m.
