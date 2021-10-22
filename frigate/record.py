@@ -290,9 +290,7 @@ class RecordingCleanup(threading.Thread):
 
         # find all the recordings older than the oldest recording in the db
         try:
-            oldest_recording = (
-                Recordings.select().order_by(Recordings.start_time.desc()).get()
-            )
+            oldest_recording = Recordings.select().order_by(Recordings.start_time).get()
 
             p = Path(oldest_recording.path)
             oldest_timestamp = p.stat().st_mtime - 1
@@ -301,7 +299,7 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
-            ["find", RECORD_DIR, "-type", "f", "-newermt", f"@{oldest_timestamp}"],
+            ["find", RECORD_DIR, "-type", "f", "!", "-newermt", f"@{oldest_timestamp}"],
             capture_output=True,
             text=True,
         )
