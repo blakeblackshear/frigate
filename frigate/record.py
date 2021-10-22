@@ -111,6 +111,8 @@ class RecordingMaintainer(threading.Thread):
             file_name = f"{start_time.strftime('%M.%S.mp4')}"
             file_path = os.path.join(directory, file_name)
 
+            cache_path_mp4 = f"{cache_path[:-2]}mp4"
+
             ffmpeg_cmd = [
                 "ffmpeg",
                 "-hide_banner",
@@ -121,7 +123,7 @@ class RecordingMaintainer(threading.Thread):
                 "copy",
                 "-movflags",
                 "+faststart",
-                file_path,
+                cache_path_mp4,
             ]
 
             p = sp.run(
@@ -135,7 +137,12 @@ class RecordingMaintainer(threading.Thread):
             if p.returncode != 0:
                 logger.error(f"Unable to convert {cache_path} to {file_path}")
                 logger.error(p.stderr)
+                Path(cache_path_mp4).unlink(missing_ok=True)
                 continue
+
+            # copy then delete is required when recordings are stored on some network drives
+            shutil.copyfile(cache_path_mp4, file_path)
+            Path(cache_path_mp4).unlink(missing_ok=True)
 
             rand_id = "".join(
                 random.choices(string.ascii_lowercase + string.digits, k=6)
@@ -151,8 +158,11 @@ class RecordingMaintainer(threading.Thread):
 
     def run(self):
         # Check for new files every 5 seconds
-        while not self.stop_event.wait(5):
+        wait_time = 5
+        while not self.stop_event.wait(wait_time):
+            run_start = datetime.datetime.now().timestamp()
             self.move_files()
+            wait_time = max(0, 5 - (datetime.datetime.now().timestamp() - run_start))
 
         logger.info(f"Exiting recording maintenance...")
 
