@@ -603,6 +603,8 @@ class TrackedObjectProcessor(threading.Thread):
             self.event_queue.put(("start", camera, obj.to_dict()))
 
         def update(camera, obj: TrackedObject, current_frame_time):
+            obj.has_snapshot = self.should_save_snapshot(camera, obj)
+            obj.has_clip = self.should_retain_recording(camera, obj)
             after = obj.to_dict()
             message = {
                 "before": obj.previous,
@@ -613,6 +615,9 @@ class TrackedObjectProcessor(threading.Thread):
                 f"{self.topic_prefix}/events", json.dumps(message), retain=False
             )
             obj.previous = after
+            self.event_queue.put(
+                ("update", camera, obj.to_dict(include_thumbnail=True))
+            )
 
         def end(camera, obj: TrackedObject, current_frame_time):
             # populate has_snapshot

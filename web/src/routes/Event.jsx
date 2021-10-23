@@ -99,7 +99,7 @@ export default function Event({ eventId, close, scrollRef }) {
   }
 
   const startime = new Date(data.start_time * 1000);
-  const endtime = new Date(data.end_time * 1000);
+  const endtime = data.end_time ? new Date(data.end_time * 1000) : null;
   return (
     <div className="space-y-4">
       <div className="flex md:flex-row justify-between flex-wrap flex-col">
@@ -155,7 +155,7 @@ export default function Event({ eventId, close, scrollRef }) {
               <Tr index={1}>
                 <Td>Timeframe</Td>
                 <Td>
-                  {startime.toLocaleString()} – {endtime.toLocaleString()}
+                  {startime.toLocaleString()}{endtime === null ? ` – ${endtime.toLocaleString()}`:''}
                 </Td>
               </Tr>
               <Tr>
@@ -186,7 +186,7 @@ export default function Event({ eventId, close, scrollRef }) {
                     },
                   ],
                   poster: data.has_snapshot
-                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    ? `${apiHost}/api/events/${eventId}/snapshot.jpg`
                     : `data:image/jpeg;base64,${data.thumbnail}`,
                 }}
                 seekOptions={{ forward: 10, back: 5 }}
