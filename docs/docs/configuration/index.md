@@ -140,7 +140,7 @@ ffmpeg:
     # Optional: output args for detect streams (default: shown below)
     detect: -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
-    record: -f segment -segment_time 10 -segment_format ts -reset_timestamps 1 -strftime 1 -c copy
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
     # Optional: output args for rtmp streams (default: shown below)
     rtmp: -c copy -f flv
 

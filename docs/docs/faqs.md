@@ -13,7 +13,7 @@ A solid green image means that frigate has not received any frames from ffmpeg. 
 
 ### How can I get sound or audio in my recordings?
 
-The recommended audio codec is `aac`. Not all audio codecs are supported by RTMP, so you may need to re-encode your audio with `-c:a aac`. The default ffmpeg args are shown [here](configuration/index#full-configuration-reference).
+By default, Frigate removes audio from recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to override the output args to remove `-an` for where you want to include audio. The recommended audio codec is `aac`. Not all audio codecs are supported by RTMP, so you may need to re-encode your audio with `-c:a aac`. The default ffmpeg args are shown [here](configuration/index#full-configuration-reference).
 
 ### My mjpeg stream or snapshots look green and crazy
 

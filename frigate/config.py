@@ -298,13 +298,14 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-segment_time",
     "10",
     "-segment_format",
-    "ts",
+    "mp4",
     "-reset_timestamps",
     "1",
     "-strftime",
     "1",
     "-c",
     "copy",
+    "-an",
 ]
 
 
@@ -564,16 +565,9 @@ class CameraConfig(FrigateBaseModel):
                 else self.ffmpeg.output_args.record.split(" ")
             )
 
-            # backwards compatibility check for segment_format change from mp4 to ts
-            record_args = (
-                " ".join(record_args)
-                .replace("-segment_format mp4", "-segment_format ts")
-                .split(" ")
-            )
-
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.ts"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
                 + ffmpeg_output_args
             )
 

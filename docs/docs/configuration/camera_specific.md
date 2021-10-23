@@ -15,8 +15,8 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
 
 ```yaml
 output_args:
-  record: -f segment -segment_time 10 -segment_format ts -reset_timestamps 1 -strftime 1 -c:v libx264
-  rtmp: -c:v libx264 -f flv
+  record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+  rtmp: -c:v libx264 -an -f flv
 ```
 
 ### RTMP Cameras
