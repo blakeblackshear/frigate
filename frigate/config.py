@@ -794,6 +794,21 @@ class FrigateConfig(FrigateBaseModel):
 
             config.cameras[name] = camera_config
 
+            # check runtime config
+            for name, camera in config.cameras.items():
+                assigned_roles = list(
+                    set([r for i in camera.ffmpeg.inputs for r in i.roles])
+                )
+                if camera.record.enabled and not "record" in assigned_roles:
+                    raise ValueError(
+                        f"Camera {name} has record enabled, but record is not assigned to an input."
+                    )
+
+                if camera.rtmp.enabled and not "rtmp" in assigned_roles:
+                    raise ValueError(
+                        f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                    )
+
         return config
 
     @validator("cameras")
@@ -802,23 +817,6 @@ class FrigateConfig(FrigateBaseModel):
         for zone in zones:
             if zone in v.keys():
                 raise ValueError("Zones cannot share names with cameras")
-        return v
-
-    @validator("cameras")
-    def ensure_cameras_are_not_missing_roles(cls, v: Dict[str, CameraConfig]):
-        for name, camera in v.items():
-            assigned_roles = list(
-                set([r for i in camera.ffmpeg.inputs for r in i.roles])
-            )
-            if camera.record.enabled and not "record" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
-
-            if camera.rtmp.enabled and not "rtmp" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
         return v
 
     @classmethod

@@ -702,7 +702,11 @@ class TestConfig(unittest.TestCase):
                         "inputs": [
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
-                                "roles": ["detect", "clips"],
+                                "roles": ["detect"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["clips"],
                             },
                         ]
                     },
@@ -716,6 +720,37 @@ class TestConfig(unittest.TestCase):
         }
 
         self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
+
+    def test_fails_on_missing_role(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "rtmp": {"enabled": True},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        self.assertRaises(ValueError, lambda: frigate_config.runtime_config)
 
     def test_global_detect(self):
 
@@ -957,6 +992,34 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].rtmp.enabled
+
+    def test_global_rtmp_default(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert not runtime_config.cameras["back"].rtmp.enabled
 
     def test_global_live(self):
 
