@@ -30,6 +30,11 @@ class EventProcessor(threading.Thread):
         self.stop_event = stop_event
 
     def run(self):
+        # set an end_time on events without an end_time on startup
+        Event.update(end_time=Event.start_time + 30).where(
+            Event.end_time == None
+        ).execute()
+
         while not self.stop_event.is_set():
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
@@ -38,14 +43,35 @@ class EventProcessor(threading.Thread):
 
             logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
 
+            event_config: EventsConfig = self.config.cameras[camera].record.events
+
             if event_type == "start":
                 self.events_in_process[event_data["id"]] = event_data
 
-            if event_type == "end":
-                event_config: EventsConfig = self.config.cameras[camera].record.events
-
+            elif event_type == "update":
+                self.events_in_process[event_data["id"]] = event_data
+                # TODO: this will generate a lot of db activity possibly
                 if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.create(
+                    Event.replace(
+                        id=event_data["id"],
+                        label=event_data["label"],
+                        camera=camera,
+                        start_time=event_data["start_time"] - event_config.pre_capture,
+                        end_time=None,
+                        top_score=event_data["top_score"],
+                        false_positive=event_data["false_positive"],
+                        zones=list(event_data["entered_zones"]),
+                        thumbnail=event_data["thumbnail"],
+                        region=event_data["region"],
+                        box=event_data["box"],
+                        area=event_data["area"],
+                        has_clip=event_data["has_clip"],
+                        has_snapshot=event_data["has_snapshot"],
+                    ).execute()
+
+            elif event_type == "end":
+                if event_data["has_clip"] or event_data["has_snapshot"]:
+                    Event.replace(
                         id=event_data["id"],
                         label=event_data["label"],
                         camera=camera,
@@ -60,11 +86,15 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
-                    )
+                    ).execute()
 
                 del self.events_in_process[event_data["id"]]
                 self.event_processed_queue.put((event_data["id"], camera))
 
+        # set an end_time on events without an end_time before exiting
+        Event.update(end_time=datetime.datetime.now().timestamp()).where(
+            Event.end_time == None
+        ).execute()
         logger.info(f"Exiting event processor...")
 
 
