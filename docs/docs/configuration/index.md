@@ -48,8 +48,8 @@ mqtt:
   # Optional: user
   user: mqtt_user
   # Optional: password
-  # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}.
-  #       eg. password: '{FRIGATE_MQTT_PASSWORD}'
+  # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
+  #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
   # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
   tls_ca_certs: /path/to/ca.crt
@@ -319,7 +319,7 @@ cameras:
       # Required: A list of input streams for the camera. See documentation for more information.
       inputs:
         # Required: the path to the stream
-        # NOTE: Environment variables that begin with 'FRIGATE_' may be referenced in {}
+        # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           # Required: list of roles for this stream. valid values are: detect,record,rtmp
           # NOTICE: In addition to assigning the record, and rtmp roles,
