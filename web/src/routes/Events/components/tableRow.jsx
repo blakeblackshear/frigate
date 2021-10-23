@@ -42,7 +42,7 @@ const EventsRow = memo(
     );
 
     const start = new Date(parseInt(startTime * 1000, 10));
-    const end = new Date(parseInt(endTime * 1000, 10));
+    const end = endTime ? new Date(parseInt(endTime * 1000, 10)) : null;
 
     return (
       <Tbody reference={innerRef}>
@@ -102,7 +102,7 @@ const EventsRow = memo(
           </Td>
           <Td>{start.toLocaleDateString()}</Td>
           <Td>{start.toLocaleTimeString()}</Td>
-          <Td>{end.toLocaleTimeString()}</Td>
+          <Td>{end === null ? 'In progress' : end.toLocaleTimeString()}</Td>
         </Tr>
         {viewEvent === id ? (
           <Tr className="border-b-1">
