@@ -30,6 +30,16 @@ module.exports = {
           position: 'left',
         },
         {
+          href: 'https://frigate.video',
+          label: 'Website',
+          position: 'right',
+        },
+        {
+          href: 'https://demo.frigate.video',
+          label: 'Demo',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/blakeblackshear/frigate',
           label: 'GitHub',
           position: 'right',
