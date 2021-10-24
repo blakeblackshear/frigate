@@ -752,6 +752,56 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         self.assertRaises(ValueError, lambda: frigate_config.runtime_config)
 
+    def test_works_on_missing_role_multiple_cams(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                },
+                "cam2": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                            {
+                                "path": "rtsp://10.0.0.1:554/video2",
+                                "roles": ["record"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                },
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        runtime_config = frigate_config.runtime_config
+
     def test_global_detect(self):
 
         config = {

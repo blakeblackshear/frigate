@@ -792,22 +792,21 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.dict(exclude_unset=True),
                 )
 
-            config.cameras[name] = camera_config
-
             # check runtime config
-            for name, camera in config.cameras.items():
-                assigned_roles = list(
-                    set([r for i in camera.ffmpeg.inputs for r in i.roles])
+            assigned_roles = list(
+                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+            )
+            if camera_config.record.enabled and not "record" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has record enabled, but record is not assigned to an input."
                 )
-                if camera.record.enabled and not "record" in assigned_roles:
-                    raise ValueError(
-                        f"Camera {name} has record enabled, but record is not assigned to an input."
-                    )
 
-                if camera.rtmp.enabled and not "rtmp" in assigned_roles:
-                    raise ValueError(
-                        f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                    )
+            if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                )
+
+            config.cameras[name] = camera_config
 
         return config
 
