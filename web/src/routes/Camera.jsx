@@ -114,7 +114,7 @@ export default function Camera({ camera }) {
   return (
     <div className="space-y-4">
       <Heading size="2xl">{camera}</Heading>
-      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
+      <ButtonsTabbed viewModes={['live', 'debug', 'recordings']} setViewMode={setViewMode} camera={camera} currentPage={'live'} />
 
       {player}
 

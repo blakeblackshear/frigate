@@ -4,6 +4,7 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import RecordingPlaylist from '../components/RecordingPlaylist';
 import VideoPlayer from '../components/VideoPlayer';
+import ButtonsTabbed from '../components/ButtonsTabbed';
 import { FetchStatus, useApiHost, useRecording } from '../api';
 
 export default function Recording({ camera, date, hour, seconds }) {
@@ -71,6 +72,7 @@ export default function Recording({ camera, date, hour, seconds }) {
   return (
     <div className="space-y-4">
       <Heading>{camera} Recordings</Heading>
+      <ButtonsTabbed viewModes={['live', 'recordings']} camera={camera} currentPage={'recording'} />
 
       <VideoPlayer
         onReady={(player) => {
