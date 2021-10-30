@@ -379,26 +379,37 @@ def track_camera(
     logger.info(f"{name}: exiting subprocess")
 
 
+def box_overlaps(b1, b2):
+    if b1[2] < b2[0] or b1[0] > b2[2] or b1[1] > b2[3] or b1[3] < b2[1]:
+        return False
+    return True
+
+
 def reduce_boxes(boxes):
-    if len(boxes) == 0:
-        return []
-    reduced_boxes = cv2.groupRectangles(
-        [list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2
-    )[0]
-    return [tuple(b) for b in reduced_boxes]
+    clusters = []
+
+    for box in boxes:
+        matched = 0
+        for cluster in clusters:
+            if box_overlaps(box, cluster):
+                matched = 1
+                cluster[0] = min(cluster[0], box[0])
+                cluster[1] = min(cluster[1], box[1])
+                cluster[2] = max(cluster[2], box[2])
+                cluster[3] = max(cluster[3], box[3])
+
+        if not matched:
+            clusters.append(list(box))
+
+    return [tuple(c) for c in clusters]
 
 
-# modified from https://stackoverflow.com/a/40795835
 def intersects_any(box_a, boxes):
     for box in boxes:
-        if (
-            box_a[2] < box[0]
-            or box_a[0] > box[2]
-            or box_a[1] > box[3]
-            or box_a[3] < box[1]
-        ):
+        if box_overlaps(box_a, box):
             continue
         return True
+    return False
 
 
 def detect(
@@ -489,9 +500,7 @@ def process_frames(
 
         # only get the tracked object boxes that intersect with motion
         tracked_object_boxes = [
-            obj["box"]
-            for obj in object_tracker.tracked_objects.values()
-            if intersects_any(obj["box"], motion_boxes)
+            obj["box"] for obj in object_tracker.tracked_objects.values()
         ]
 
         # combine motion boxes with known locations of existing objects
@@ -501,15 +510,6 @@ def process_frames(
         regions = [
             calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.2)
             for a in combined_boxes
-        ]
-
-        # combine overlapping regions
-        combined_regions = reduce_boxes(regions)
-
-        # re-compute regions
-        regions = [
-            calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
-            for a in combined_regions
         ]
 
         # resize regions and detect
@@ -582,14 +582,8 @@ def process_frames(
             if refining:
                 refine_count += 1
 
-        # Limit to the detections overlapping with motion areas
-        # to avoid picking up stationary background objects
-        detections_with_motion = [
-            d for d in detections if intersects_any(d[2], motion_boxes)
-        ]
-
         # now that we have refined our detections, we need to track objects
-        object_tracker.match_and_update(frame_time, detections_with_motion)
+        object_tracker.match_and_update(frame_time, detections)
 
         # add to the queue if not full
         if detected_objects_queue.full():
