@@ -71,7 +71,7 @@ class TrackedObject:
         self.camera_config = camera_config
         self.frame_cache = frame_cache
         self.current_zones = []
-        self.entered_zones = set()
+        self.entered_zones = []
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
@@ -147,7 +147,8 @@ class TrackedObject:
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
                     current_zones.append(name)
-                    self.entered_zones.add(name)
+                    if name not in self.entered_zones:
+                        self.entered_zones.append(name)
 
         # if the zones changed, signal an update
         if not self.false_positive and set(self.current_zones) != set(current_zones):
@@ -177,7 +178,7 @@ class TrackedObject:
             "area": self.obj_data["area"],
             "region": self.obj_data["region"],
             "current_zones": self.current_zones.copy(),
-            "entered_zones": list(self.entered_zones).copy(),
+            "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
             "has_snapshot": self.has_snapshot,
         }
@@ -729,7 +730,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         # if there are required zones and there is no overlap
         required_zones = snapshot_config.required_zones
-        if len(required_zones) > 0 and not obj.entered_zones & set(required_zones):
+        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
             logger.debug(
                 f"Not creating snapshot for {obj.obj_data['id']} because it did not enter required zones"
             )
@@ -770,7 +771,7 @@ class TrackedObjectProcessor(threading.Thread):
     def should_mqtt_snapshot(self, camera, obj: TrackedObject):
         # if there are required zones and there is no overlap
         required_zones = self.config.cameras[camera].mqtt.required_zones
-        if len(required_zones) > 0 and not obj.entered_zones & set(required_zones):
+        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
             logger.debug(
                 f"Not sending mqtt for {obj.obj_data['id']} because it did not enter required zones"
             )
