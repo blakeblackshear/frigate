@@ -13,7 +13,7 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 from frigate.config import DetectConfig
-from frigate.util import draw_box_with_label
+from frigate.util import intersection_over_union
 
 
 class ObjectTracker:
@@ -27,6 +27,7 @@ class ObjectTracker:
         id = f"{obj['frame_time']}-{rand_id}"
         obj["id"] = id
         obj["start_time"] = obj["frame_time"]
+        obj["motionless_count"] = 0
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
 
@@ -36,6 +37,13 @@ class ObjectTracker:
 
     def update(self, id, new_obj):
         self.disappeared[id] = 0
+        if (
+            intersection_over_union(self.tracked_objects[id]["box"], new_obj["box"])
+            > 0.9
+        ):
+            self.tracked_objects[id]["motionless_count"] += 1
+        else:
+            self.tracked_objects[id]["motionless_count"] = 0
         self.tracked_objects[id].update(new_obj)
 
     def match_and_update(self, frame_time, new_objects):
