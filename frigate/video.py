@@ -498,9 +498,21 @@ def process_frames(
         # look for motion
         motion_boxes = motion_detector.detect(frame)
 
-        # only get the tracked object boxes that intersect with motion
+        # get stationary object ids
+        # check every 10th frame for stationary objects
+        stationary_object_ids = [
+            obj["id"]
+            for obj in object_tracker.tracked_objects.values()
+            if obj["motionless_count"] >= 10
+            and obj["motionless_count"] % 10 != 0
+            and object_tracker.disappeared[obj["id"]] == 0
+        ]
+
+        # get tracked object boxes that aren't stationary
         tracked_object_boxes = [
-            obj["box"] for obj in object_tracker.tracked_objects.values()
+            obj["box"]
+            for obj in object_tracker.tracked_objects.values()
+            if not obj["id"] in stationary_object_ids
         ]
 
         # combine motion boxes with known locations of existing objects
@@ -513,7 +525,18 @@ def process_frames(
         ]
 
         # resize regions and detect
-        detections = []
+        # seed with stationary objects
+        detections = [
+            (
+                obj["label"],
+                obj["score"],
+                obj["box"],
+                obj["area"],
+                obj["region"],
+            )
+            for obj in object_tracker.tracked_objects.values()
+            if obj["id"] in stationary_object_ids
+        ]
         for region in regions:
             detections.extend(
                 detect(
