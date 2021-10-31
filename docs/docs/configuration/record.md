@@ -22,4 +22,4 @@ record:
 
 This configuration will retain recording segments that overlap with events for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
 
-When `retain_days` is set to `0`, events will have up to `max_seconds` (defaults to 5 minutes) of recordings retained. Increasing `retain_days` to `1` will allow events to exceed the `max_seconds` limitation of up to 1 day.
+When `retain_days` is set to `0`, segments will be deleted from the cache if no events are in progress
