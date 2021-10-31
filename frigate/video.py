@@ -14,7 +14,7 @@ import numpy as np
 from cv2 import cv2
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, DetectConfig
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -367,6 +367,7 @@ def track_camera(
         frame_queue,
         frame_shape,
         model_shape,
+        config.detect,
         frame_manager,
         motion_detector,
         object_detector,
@@ -448,6 +449,7 @@ def process_frames(
     frame_queue: mp.Queue,
     frame_shape,
     model_shape,
+    detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
@@ -502,12 +504,13 @@ def process_frames(
         motion_boxes = motion_detector.detect(frame)
 
         # get stationary object ids
-        # check every 10th frame for stationary objects
+        # check every Nth frame for stationary objects
+        # disappeared objects are not stationary
         stationary_object_ids = [
             obj["id"]
             for obj in object_tracker.tracked_objects.values()
             if obj["motionless_count"] >= 10
-            and obj["motionless_count"] % 10 != 0
+            and obj["motionless_count"] % detect_config.stationary_interval != 0
             and object_tracker.disappeared[obj["id"]] == 0
         ]
 
