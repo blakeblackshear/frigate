@@ -3,16 +3,16 @@ import itertools
 import logging
 import multiprocessing as mp
 import queue
-import subprocess as sp
 import signal
+import subprocess as sp
 import threading
 import time
 from collections import defaultdict
-from setproctitle import setproctitle
 from typing import Dict, List
 
-from cv2 import cv2
 import numpy as np
+from cv2 import cv2
+from setproctitle import setproctitle
 
 from frigate.config import CameraConfig
 from frigate.edgetpu import RemoteObjectDetector
@@ -23,8 +23,11 @@ from frigate.util import (
     EventsPerSecond,
     FrameManager,
     SharedMemoryFrameManager,
+    area,
     calculate_region,
     clipped,
+    intersection,
+    intersection_over_union,
     listen,
     yuv_region_2_rgb,
 )
@@ -605,8 +608,46 @@ def process_frames(
             if refining:
                 refine_count += 1
 
+        ## drop detections that overlap too much
+        consolidated_detections = []
+        # group by name
+        detected_object_groups = defaultdict(lambda: [])
+        for detection in detections:
+            detected_object_groups[detection[0]].append(detection)
+
+        # loop over detections grouped by label
+        for group in detected_object_groups.values():
+            # if the group only has 1 item, skip
+            if len(group) == 1:
+                consolidated_detections.append(group[0])
+                continue
+
+            # sort smallest to largest by area
+            sorted_by_area = sorted(group, key=lambda g: g[3])
+
+            for current_detection_idx in range(0, len(sorted_by_area)):
+                current_detection = sorted_by_area[current_detection_idx][2]
+                overlap = 0
+                for to_check_idx in range(
+                    min(current_detection_idx + 1, len(sorted_by_area)),
+                    len(sorted_by_area),
+                ):
+                    to_check = sorted_by_area[to_check_idx][2]
+                    # if 90% of smaller detection is inside of another detection, consolidate
+                    if (
+                        area(intersection(current_detection, to_check))
+                        / area(current_detection)
+                        > 0.9
+                    ):
+                        overlap = 1
+                        break
+                if overlap == 0:
+                    consolidated_detections.append(
+                        sorted_by_area[current_detection_idx]
+                    )
+
         # now that we have refined our detections, we need to track objects
-        object_tracker.match_and_update(frame_time, detections)
+        object_tracker.match_and_update(frame_time, consolidated_detections)
 
         # add to the queue if not full
         if detected_objects_queue.full():
