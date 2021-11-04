@@ -11,7 +11,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 import numpy as np
-from cv2 import cv2
+from cv2 import cv2, reduce
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
@@ -389,13 +389,13 @@ def box_overlaps(b1, b2):
     return True
 
 
-def reduce_boxes(boxes):
+def reduce_boxes(boxes, iou_threshold=0.0):
     clusters = []
 
     for box in boxes:
         matched = 0
         for cluster in clusters:
-            if box_overlaps(box, cluster):
+            if intersection_over_union(box, cluster) > iou_threshold:
                 matched = 1
                 cluster[0] = min(cluster[0], box[0])
                 cluster[1] = min(cluster[1], box[1])
@@ -533,6 +533,12 @@ def process_frames(
         regions = [
             calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.2)
             for a in combined_boxes
+        ]
+
+        # consolidate regions with heavy overlap
+        regions = [
+            calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
+            for a in reduce_boxes(regions, 0.4)
         ]
 
         # resize regions and detect
