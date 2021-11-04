@@ -36,7 +36,13 @@ class MotionDetector:
             interpolation=cv2.INTER_LINEAR,
         )
 
-        # TODO: can I improve the contrast of the grayscale image here?
+        # Improve contrast
+        minval = np.percentile(resized_frame, 5)
+        maxval = np.percentile(resized_frame, 95)
+        resized_frame = np.clip(resized_frame, minval, maxval)
+        resized_frame = (((resized_frame - minval) / (maxval - minval)) * 255).astype(
+            np.uint8
+        )
 
         # convert to grayscale
         # resized_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
