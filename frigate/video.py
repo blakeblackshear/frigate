@@ -411,8 +411,7 @@ def reduce_boxes(boxes):
 def intersects_any(box_a, boxes):
     for box in boxes:
         if box_overlaps(box_a, box):
-            continue
-        return True
+            return True
     return False
 
 
@@ -506,12 +505,18 @@ def process_frames(
         # get stationary object ids
         # check every Nth frame for stationary objects
         # disappeared objects are not stationary
+        # also check for overlapping motion boxes
         stationary_object_ids = [
             obj["id"]
             for obj in object_tracker.tracked_objects.values()
+            # if there hasn't been motion for 10 frames
             if obj["motionless_count"] >= 10
+            # and it isn't due for a periodic check
             and obj["motionless_count"] % detect_config.stationary_interval != 0
+            # and it hasn't disappeared
             and object_tracker.disappeared[obj["id"]] == 0
+            # and it doesn't overlap with any current motion boxes
+            and not intersects_any(obj["box"], motion_boxes)
         ]
 
         # get tracked object boxes that aren't stationary
