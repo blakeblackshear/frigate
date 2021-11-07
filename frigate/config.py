@@ -103,10 +103,10 @@ class MotionConfig(FrigateBaseModel):
         ge=1,
         le=255,
     )
-    contour_area: Optional[int] = Field(title="Contour Area")
+    contour_area: Optional[int] = Field(default=30, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.2, title="Frame Alpha")
-    frame_height: Optional[int] = Field(title="Frame Height")
+    frame_height: Optional[int] = Field(default=50, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
@@ -118,13 +118,6 @@ class RuntimeMotionConfig(MotionConfig):
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
-
-        if "frame_height" not in config:
-            config["frame_height"] = frame_shape[0] // 6
-
-        if "contour_area" not in config:
-            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
-            config["contour_area"] = config["frame_height"] * frame_width * 0.004
 
         mask = config.get("mask", "")
         config["raw_mask"] = mask
