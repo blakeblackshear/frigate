@@ -84,7 +84,7 @@ Frigate utilizes shared memory to store frames during processing. The default `s
 
 The default shm-size of 64m is fine for setups with 2 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
 
-You can calculate the necessary shm-size for each camera with the following formula:
+You can calculate the necessary shm-size for each camera with the following formula using the resolution specified for detect:
 
 ```
 (width * height * 1.5 * 9 + 270480)/1048576 = <shm size in mb>
