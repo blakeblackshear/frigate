@@ -269,6 +269,10 @@ def process(path, label, output, debug_path):
         logger.info(c)
         frame_shape = get_frame_shape(c)
 
+        json_config["cameras"]["camera"]["detect"] = {
+            "height": frame_shape[0],
+            "width": frame_shape[1],
+        }
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
