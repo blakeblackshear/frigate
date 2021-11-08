@@ -489,6 +489,7 @@ class CameraConfig(FrigateBaseModel):
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
+    _ffmpeg_cmds: List[Dict[str, List[str]]] = PrivateAttr()
 
     def __init__(self, **config):
         # Set zone colors
@@ -505,6 +506,8 @@ class CameraConfig(FrigateBaseModel):
 
         super().__init__(**config)
 
+        self._ffmpeg_cmds = self._create_ffmpeg_cmds()
+
     @property
     def frame_shape(self) -> Tuple[int, int]:
         return self.detect.height, self.detect.width
@@ -515,6 +518,9 @@ class CameraConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+        return self._ffmpeg_cmds
+
+    def _create_ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
