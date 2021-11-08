@@ -549,6 +549,8 @@ class CameraConfig(FrigateBaseModel):
 
         super().__init__(**config)
 
+        self._ffmpeg_cmds = self._create_ffmpeg_cmds()
+
     @property
     def frame_shape(self) -> Tuple[int, int]:
         return self.detect.height, self.detect.width
