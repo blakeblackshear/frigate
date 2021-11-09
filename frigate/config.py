@@ -12,7 +12,7 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
+from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
@@ -506,8 +506,6 @@ class CameraConfig(FrigateBaseModel):
 
         super().__init__(**config)
 
-        self._ffmpeg_cmds = self._create_ffmpeg_cmds()
-
     @property
     def frame_shape(self) -> Tuple[int, int]:
         return self.detect.height, self.detect.width
@@ -520,7 +518,7 @@ class CameraConfig(FrigateBaseModel):
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
         return self._ffmpeg_cmds
 
-    def _create_ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+    def create_ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
@@ -528,7 +526,7 @@ class CameraConfig(FrigateBaseModel):
                 continue
 
             ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
-        return ffmpeg_cmds
+        self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
