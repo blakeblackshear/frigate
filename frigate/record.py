@@ -185,25 +185,38 @@ class RecordingMaintainer(threading.Thread):
         file_path = os.path.join(directory, file_name)
 
         # copy then delete is required when recordings are stored on some network drives
-        shutil.copyfile(cache_path, file_path)
-        os.remove(cache_path)
+        try:
+            shutil.copyfile(cache_path, file_path)
+            os.remove(cache_path)
 
-        rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
-        Recordings.create(
-            id=f"{start_time.timestamp()}-{rand_id}",
-            camera=camera,
-            path=file_path,
-            start_time=start_time.timestamp(),
-            end_time=end_time.timestamp(),
-            duration=duration,
-        )
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            Recordings.create(
+                id=f"{start_time.timestamp()}-{rand_id}",
+                camera=camera,
+                path=file_path,
+                start_time=start_time.timestamp(),
+                end_time=end_time.timestamp(),
+                duration=duration,
+            )
+        except Exception as e:
+            logger.error(f"Unable to store recording segment {cache_path}")
+            Path(cache_path).unlink(missing_ok=True)
+            logger.error(e)
 
     def run(self):
         # Check for new files every 5 seconds
         wait_time = 5
         while not self.stop_event.wait(wait_time):
             run_start = datetime.datetime.now().timestamp()
-            self.move_files()
+            try:
+                self.move_files()
+            except Exception as e:
+                logger.error(
+                    "Error occurred when attempting to maintain recording cache"
+                )
+                logger.error(e)
             wait_time = max(0, 5 - (datetime.datetime.now().timestamp() - run_start))
 
         logger.info(f"Exiting recording maintenance...")
