@@ -1,6 +1,7 @@
 import base64
 from collections import OrderedDict
 from datetime import datetime, timedelta
+import copy
 import json
 import glob
 import logging
@@ -321,7 +322,7 @@ def config():
     # add in the ffmpeg_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
-        camera_dict["ffmpeg_cmds"] = camera.ffmpeg_cmds
+        camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 

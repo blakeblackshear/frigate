@@ -518,7 +518,7 @@ class CameraConfig(FrigateBaseModel):
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
         return self._ffmpeg_cmds
 
-    def create_ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+    def create_ffmpeg_cmds(self):
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
