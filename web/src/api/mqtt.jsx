@@ -42,9 +42,9 @@ export function MqttProvider({
   useEffect(() => {
     Object.keys(config.cameras).forEach((camera) => {
       const { name, record, detect, snapshots } = config.cameras[camera];
-      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF' });
-      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF' });
-      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF' });
+      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: true });
+      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: true });
+      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: true });
     });
   }, [config]);
 
