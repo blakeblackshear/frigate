@@ -77,7 +77,12 @@ class RecordingMaintainer(threading.Thread):
             cache_path = os.path.join(CACHE_DIR, f)
             basename = os.path.splitext(f)[0]
             camera, date = basename.rsplit("-", maxsplit=1)
-            start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
+            try:
+                start_time = datetime.datetime.fromtimestamp(int(date)).astimezone(datetime.timezone.utc)
+            except:
+                # During the move to UTC time (to fix #2158)
+                # handle any straggling files in /tmp/cache with an old filename
+                start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").astimezone(datetime.timezone.utc)
 
             grouped_recordings[camera].append(
                 {
@@ -133,7 +138,7 @@ class RecordingMaintainer(threading.Thread):
                 # if cached file's start_time is earlier than the retain_days for the camera
                 if start_time <= (
                     (
-                        datetime.datetime.now()
+                        datetime.datetime.now().astimezone(datetime.timezone.utc)
                         - datetime.timedelta(
                             days=self.config.cameras[camera].record.retain_days
                         )
@@ -181,7 +186,7 @@ class RecordingMaintainer(threading.Thread):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        file_name = f"{start_time.strftime('%M.%S.mp4')}"
+        file_name = f"{start_time.strftime('%M.%S.utc.mp4')}"
         file_path = os.path.join(directory, file_name)
 
         # copy then delete is required when recordings are stored on some network drives
@@ -203,7 +208,7 @@ class RecordingMaintainer(threading.Thread):
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
-            logger.error(e)
+            logger.error(e, exc_info=True)
 
     def run(self):
         # Check for new files every 5 seconds
@@ -216,7 +221,7 @@ class RecordingMaintainer(threading.Thread):
                 logger.error(
                     "Error occurred when attempting to maintain recording cache"
                 )
-                logger.error(e)
+                logger.error(e, exc_info=True)
             wait_time = max(0, 5 - (datetime.datetime.now().timestamp() - run_start))
 
         logger.info(f"Exiting recording maintenance...")
