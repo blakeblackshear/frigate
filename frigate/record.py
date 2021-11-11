@@ -1,4 +1,5 @@
 import datetime
+import time
 import itertools
 import logging
 import os
@@ -86,6 +87,20 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
+        # delete all cached files past the most recent 2
+        for camera in grouped_recordings.keys():
+            if len(grouped_recordings[camera]) > 2:
+                logger.warning(
+                    "Proactively cleaning cache. Your recordings disk may be too slow."
+                )
+                sorted_recordings = sorted(
+                    grouped_recordings[camera], key=lambda i: i["start_time"]
+                )
+                to_remove = sorted_recordings[:-2]
+                for f in to_remove:
+                    Path(f["cache_path"]).unlink(missing_ok=True)
+                grouped_recordings[camera] = sorted_recordings[-2:]
+
         for camera, recordings in grouped_recordings.items():
             # get all events with the end time after the start of the oldest cache file
             # or with end_time None
@@ -169,12 +184,6 @@ class RecordingMaintainer(threading.Thread):
                         camera, start_time, end_time, duration, cache_path
                     )
 
-            if len(recordings) > 2:
-                # delete all cached files past the most recent 2
-                to_remove = sorted(recordings, key=lambda i: i["start_time"])[:-2]
-                for f in to_remove:
-                    Path(cache_path).unlink(missing_ok=True)
-
     def store_segment(self, camera, start_time, end_time, duration, cache_path):
         directory = os.path.join(RECORD_DIR, start_time.strftime("%Y-%m/%d/%H"), camera)
 
@@ -184,9 +193,13 @@ class RecordingMaintainer(threading.Thread):
         file_name = f"{start_time.strftime('%M.%S.mp4')}"
         file_path = os.path.join(directory, file_name)
 
-        # copy then delete is required when recordings are stored on some network drives
         try:
+            start_frame = datetime.datetime.now().timestamp()
+            # copy then delete is required when recordings are stored on some network drives
             shutil.copyfile(cache_path, file_path)
+            logger.debug(
+                f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+            )
             os.remove(cache_path)
 
             rand_id = "".join(
@@ -361,6 +374,9 @@ class RecordingCleanup(threading.Thread):
             p = Path(oldest_recording.path)
             oldest_timestamp = p.stat().st_mtime - 1
         except DoesNotExist:
+            oldest_timestamp = datetime.datetime.now().timestamp()
+        except FileNotFoundError:
+            logger.warning(f"Unable to find file from recordings database: {p}")
             oldest_timestamp = datetime.datetime.now().timestamp()
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
