@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 def create_mqtt_client(config: FrigateConfig, camera_metrics):
     mqtt_config = config.mqtt
 
-    def on_recordings_command(client, userdata, message):
+    def on_recordings_set_command(client, userdata, message):
         payload = message.payload.decode()
-        logger.debug(f"on_recordings_toggle: {message.topic} {payload}")
+        logger.debug(f"on_recordings_set_command: {message.topic} {payload}")
 
         camera_name = message.topic.split("/")[-3]
 
@@ -43,9 +43,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
-    def on_snapshots_command(client, userdata, message):
+    def on_snapshots_set_command(client, userdata, message):
         payload = message.payload.decode()
-        logger.debug(f"on_snapshots_toggle: {message.topic} {payload}")
+        logger.debug(f"on_snapshots_set_command: {message.topic} {payload}")
 
         camera_name = message.topic.split("/")[-3]
 
@@ -65,9 +65,24 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
-    def on_detect_command(client, userdata, message):
+    def on_snapshots_trigger_command(client, userdata, message):
         payload = message.payload.decode()
-        logger.debug(f"on_detect_toggle: {message.topic} {payload}")
+        logger.debug(f"on_snapshots_trigger_command: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        if payload == "STOP":
+            logger.info(f"Stopping a snapshots for {camera_name} via mqtt")
+        else:
+            try:
+                runtime = int(payload)
+                logger.info(f"Starting a snapshots for {camera_name} via mqtt")
+            except ValueError:
+                logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+    def on_detect_set_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_detect_set_command: {message.topic} {payload}")
 
         camera_name = message.topic.split("/")[-3]
 
@@ -120,13 +135,16 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
     # register callbacks
     for name in config.cameras.keys():
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/recordings/set", on_recordings_command
+            f"{mqtt_config.topic_prefix}/{name}/recordings/set", on_recordings_set_command
         )
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/snapshots/set", on_snapshots_command
+            f"{mqtt_config.topic_prefix}/{name}/snapshots/set", on_snapshots_set_command
         )
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
+            f"{mqtt_config.topic_prefix}/{name}/snapshots/trigger", on_snapshots_create_command
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_set_command
         )
 
     client.message_callback_add(
