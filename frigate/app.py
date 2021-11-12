@@ -67,6 +67,12 @@ class FrigateApp:
 
     def init_config(self):
         config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
+
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config
 

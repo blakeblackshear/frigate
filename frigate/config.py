@@ -12,7 +12,7 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
+from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR, YAML_EXT
 from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
@@ -823,7 +823,7 @@ class FrigateConfig(FrigateBaseModel):
         with open(config_file) as f:
             raw_config = f.read()
 
-        if config_file.endswith(".yml"):
+        if config_file.endswith(YAML_EXT):
             config = yaml.safe_load(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
