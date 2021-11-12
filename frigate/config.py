@@ -12,7 +12,7 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR, YAML_EXT
+from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT
 from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
