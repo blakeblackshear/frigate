@@ -1,6 +1,7 @@
 import base64
 from collections import OrderedDict
 from datetime import datetime, timedelta
+import copy
 import json
 import glob
 import logging
@@ -190,7 +191,7 @@ def event_snapshot(id):
     download = request.args.get("download", type=bool)
     jpg_bytes = None
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == id, Event.end_time != None)
         if not event.has_snapshot:
             return "Snapshot not available", 404
         # read snapshot from disk
@@ -321,7 +322,7 @@ def config():
     # add in the ffmpeg_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
-        camera_dict["ffmpeg_cmds"] = camera.ffmpeg_cmds
+        camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 
@@ -697,7 +698,10 @@ def vod_event(id):
     clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
 
     if not os.path.isfile(clip_path):
-        return vod_ts(event.camera, event.start_time, event.end_time)
+        end_ts = (
+            datetime.now().timestamp() if event.end_time is None else event.end_time
+        )
+        return vod_ts(event.camera, event.start_time, end_ts)
 
     duration = int((event.end_time - event.start_time) * 1000)
     return jsonify(

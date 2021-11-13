@@ -103,10 +103,10 @@ class MotionConfig(FrigateBaseModel):
         ge=1,
         le=255,
     )
-    contour_area: Optional[int] = Field(title="Contour Area")
+    contour_area: Optional[int] = Field(default=30, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.2, title="Frame Alpha")
-    frame_height: Optional[int] = Field(title="Frame Height")
+    frame_height: Optional[int] = Field(default=50, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
@@ -118,15 +118,6 @@ class RuntimeMotionConfig(MotionConfig):
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
-
-        if "frame_height" not in config:
-            config["frame_height"] = max(frame_shape[0] // 6, 180)
-
-        if "contour_area" not in config:
-            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
-            config["contour_area"] = (
-                config["frame_height"] * frame_width * 0.00173611111
-            )
 
         mask = config.get("mask", "")
         config["raw_mask"] = mask
@@ -161,6 +152,9 @@ class DetectConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Detection Enabled.")
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
+    )
+    stationary_interval: Optional[int] = Field(
+        title="Frame interval for checking stationary objects."
     )
 
 
@@ -495,6 +489,7 @@ class CameraConfig(FrigateBaseModel):
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
+    _ffmpeg_cmds: List[Dict[str, List[str]]] = PrivateAttr()
 
     def __init__(self, **config):
         # Set zone colors
@@ -521,6 +516,9 @@ class CameraConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+        return self._ffmpeg_cmds
+
+    def create_ffmpeg_cmds(self):
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
@@ -528,7 +526,7 @@ class CameraConfig(FrigateBaseModel):
                 continue
 
             ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
-        return ffmpeg_cmds
+        self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
@@ -744,6 +742,11 @@ class FrigateConfig(FrigateBaseModel):
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
+
+            # Default stationary_interval configuration
+            stationary_interval = camera_config.detect.fps * 10
+            if camera_config.detect.stationary_interval is None:
+                camera_config.detect.stationary_interval = stationary_interval
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:

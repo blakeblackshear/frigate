@@ -191,7 +191,7 @@ def draw_box_with_label(
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):
     # size is the longest edge and divisible by 4
-    size = int(max(xmax - xmin, ymax - ymin) // 4 * 4 * multiplier)
+    size = int((max(xmax - xmin, ymax - ymin) * multiplier) // 4 * 4)
     # dont go any smaller than 300
     if size < 300:
         size = 300

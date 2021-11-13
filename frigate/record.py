@@ -1,4 +1,5 @@
 import datetime
+import time
 import itertools
 import logging
 import os
@@ -7,6 +8,7 @@ import shutil
 import string
 import subprocess as sp
 import threading
+from collections import defaultdict
 from pathlib import Path
 
 import psutil
@@ -45,7 +47,7 @@ class RecordingMaintainer(threading.Thread):
         self.stop_event = stop_event
 
     def move_files(self):
-        recordings = [
+        cache_files = [
             d
             for d in os.listdir(CACHE_DIR)
             if os.path.isfile(os.path.join(CACHE_DIR, d))
@@ -66,7 +68,9 @@ class RecordingMaintainer(threading.Thread):
             except:
                 continue
 
-        for f in recordings:
+        # group recordings by camera
+        grouped_recordings = defaultdict(list)
+        for f in cache_files:
             # Skip files currently in use
             if f in files_in_use:
                 continue
@@ -76,45 +80,126 @@ class RecordingMaintainer(threading.Thread):
             camera, date = basename.rsplit("-", maxsplit=1)
             start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
-            # Just delete files if recordings are turned off
-            if (
-                not camera in self.config.cameras
-                or not self.config.cameras[camera].record.enabled
-            ):
-                Path(cache_path).unlink(missing_ok=True)
-                continue
-
-            ffprobe_cmd = [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                f"{cache_path}",
-            ]
-            p = sp.run(ffprobe_cmd, capture_output=True)
-            if p.returncode == 0:
-                duration = float(p.stdout.decode().strip())
-                end_time = start_time + datetime.timedelta(seconds=duration)
-            else:
-                logger.warning(f"Discarding a corrupt recording segment: {f}")
-                Path(cache_path).unlink(missing_ok=True)
-                continue
-
-            directory = os.path.join(
-                RECORD_DIR, start_time.strftime("%Y-%m/%d/%H"), camera
+            grouped_recordings[camera].append(
+                {
+                    "cache_path": cache_path,
+                    "start_time": start_time,
+                }
             )
 
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+        # delete all cached files past the most recent 2
+        for camera in grouped_recordings.keys():
+            if len(grouped_recordings[camera]) > 2:
+                logger.warning(
+                    "Proactively cleaning cache. Your recordings disk may be too slow."
+                )
+                sorted_recordings = sorted(
+                    grouped_recordings[camera], key=lambda i: i["start_time"]
+                )
+                to_remove = sorted_recordings[:-2]
+                for f in to_remove:
+                    Path(f["cache_path"]).unlink(missing_ok=True)
+                grouped_recordings[camera] = sorted_recordings[-2:]
 
-            file_name = f"{start_time.strftime('%M.%S.mp4')}"
-            file_path = os.path.join(directory, file_name)
+        for camera, recordings in grouped_recordings.items():
+            # get all events with the end time after the start of the oldest cache file
+            # or with end_time None
+            events: Event = (
+                Event.select()
+                .where(
+                    Event.camera == camera,
+                    (Event.end_time == None)
+                    | (Event.end_time >= recordings[0]["start_time"]),
+                    Event.has_clip,
+                )
+                .order_by(Event.start_time)
+            )
+            for r in recordings:
+                cache_path = r["cache_path"]
+                start_time = r["start_time"]
 
+                # Just delete files if recordings are turned off
+                if (
+                    not camera in self.config.cameras
+                    or not self.config.cameras[camera].record.enabled
+                ):
+                    Path(cache_path).unlink(missing_ok=True)
+                    continue
+
+                ffprobe_cmd = [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "format=duration",
+                    "-of",
+                    "default=noprint_wrappers=1:nokey=1",
+                    f"{cache_path}",
+                ]
+                p = sp.run(ffprobe_cmd, capture_output=True)
+                if p.returncode == 0:
+                    duration = float(p.stdout.decode().strip())
+                    end_time = start_time + datetime.timedelta(seconds=duration)
+                else:
+                    logger.warning(f"Discarding a corrupt recording segment: {f}")
+                    Path(cache_path).unlink(missing_ok=True)
+                    continue
+
+                # if cached file's start_time is earlier than the retain_days for the camera
+                if start_time <= (
+                    (
+                        datetime.datetime.now()
+                        - datetime.timedelta(
+                            days=self.config.cameras[camera].record.retain_days
+                        )
+                    )
+                ):
+                    # if the cached segment overlaps with the events:
+                    overlaps = False
+                    for event in events:
+                        # if the event starts in the future, stop checking events
+                        # and let this recording segment expire
+                        if event.start_time > end_time.timestamp():
+                            overlaps = False
+                            break
+
+                        # if the event is in progress or ends after the recording starts, keep it
+                        # and stop looking at events
+                        if event.end_time is None or event.end_time >= start_time:
+                            overlaps = True
+                            break
+
+                    if overlaps:
+                        # move from cache to recordings immediately
+                        self.store_segment(
+                            camera,
+                            start_time,
+                            end_time,
+                            duration,
+                            cache_path,
+                        )
+                # else retain_days includes this segment
+                else:
+                    self.store_segment(
+                        camera, start_time, end_time, duration, cache_path
+                    )
+
+    def store_segment(self, camera, start_time, end_time, duration, cache_path):
+        directory = os.path.join(RECORD_DIR, start_time.strftime("%Y-%m/%d/%H"), camera)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        file_name = f"{start_time.strftime('%M.%S.mp4')}"
+        file_path = os.path.join(directory, file_name)
+
+        try:
+            start_frame = datetime.datetime.now().timestamp()
             # copy then delete is required when recordings are stored on some network drives
             shutil.copyfile(cache_path, file_path)
+            logger.debug(
+                f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+            )
             os.remove(cache_path)
 
             rand_id = "".join(
@@ -128,13 +213,23 @@ class RecordingMaintainer(threading.Thread):
                 end_time=end_time.timestamp(),
                 duration=duration,
             )
+        except Exception as e:
+            logger.error(f"Unable to store recording segment {cache_path}")
+            Path(cache_path).unlink(missing_ok=True)
+            logger.error(e)
 
     def run(self):
         # Check for new files every 5 seconds
         wait_time = 5
         while not self.stop_event.wait(wait_time):
             run_start = datetime.datetime.now().timestamp()
-            self.move_files()
+            try:
+                self.move_files()
+            except Exception as e:
+                logger.error(
+                    "Error occurred when attempting to maintain recording cache"
+                )
+                logger.error(e)
             wait_time = max(0, 5 - (datetime.datetime.now().timestamp() - run_start))
 
         logger.info(f"Exiting recording maintenance...")
@@ -231,9 +326,9 @@ class RecordingCleanup(threading.Thread):
                         keep = False
                         break
 
-                    # if the event ends after the recording starts, keep it
+                    # if the event is in progress or ends after the recording starts, keep it
                     # and stop looking at events
-                    if event.end_time >= recording.start_time:
+                    if event.end_time is None or event.end_time >= recording.start_time:
                         keep = True
                         break
 
@@ -279,6 +374,9 @@ class RecordingCleanup(threading.Thread):
             p = Path(oldest_recording.path)
             oldest_timestamp = p.stat().st_mtime - 1
         except DoesNotExist:
+            oldest_timestamp = datetime.datetime.now().timestamp()
+        except FileNotFoundError:
+            logger.warning(f"Unable to find file from recordings database: {p}")
             oldest_timestamp = datetime.datetime.now().timestamp()
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")

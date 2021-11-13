@@ -121,12 +121,12 @@ describe('MqttProvider', () => {
       </MqttProvider>
     );
     await screen.findByTestId('data');
-    expect(screen.getByTestId('front/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
-    expect(screen.getByTestId('front/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
-    expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON"}');
-    expect(screen.getByTestId('side/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
-    expect(screen.getByTestId('side/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
-    expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF"}');
+    expect(screen.getByTestId('front/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON","retain":true}');
+    expect(screen.getByTestId('front/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
+    expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON","retain":true}');
+    expect(screen.getByTestId('side/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
+    expect(screen.getByTestId('side/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
+    expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
   });
 });
 

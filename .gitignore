@@ -8,6 +8,7 @@ models
 *.mp4
 *.ts
 *.db
+*.csv
 frigate/version.py
 web/build
 web/node_modules

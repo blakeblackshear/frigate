@@ -3,18 +3,18 @@ import itertools
 import logging
 import multiprocessing as mp
 import queue
-import subprocess as sp
 import signal
+import subprocess as sp
 import threading
 import time
 from collections import defaultdict
-from setproctitle import setproctitle
 from typing import Dict, List
 
-from cv2 import cv2
 import numpy as np
+from cv2 import cv2, reduce
+from setproctitle import setproctitle
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, DetectConfig
 from frigate.edgetpu import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -23,8 +23,11 @@ from frigate.util import (
     EventsPerSecond,
     FrameManager,
     SharedMemoryFrameManager,
+    area,
     calculate_region,
     clipped,
+    intersection,
+    intersection_over_union,
     listen,
     yuv_region_2_rgb,
 )
@@ -364,6 +367,7 @@ def track_camera(
         frame_queue,
         frame_shape,
         model_shape,
+        config.detect,
         frame_manager,
         motion_detector,
         object_detector,
@@ -379,26 +383,36 @@ def track_camera(
     logger.info(f"{name}: exiting subprocess")
 
 
-def reduce_boxes(boxes):
-    if len(boxes) == 0:
-        return []
-    reduced_boxes = cv2.groupRectangles(
-        [list(b) for b in itertools.chain(boxes, boxes)], 1, 0.2
-    )[0]
-    return [tuple(b) for b in reduced_boxes]
+def box_overlaps(b1, b2):
+    if b1[2] < b2[0] or b1[0] > b2[2] or b1[1] > b2[3] or b1[3] < b2[1]:
+        return False
+    return True
 
 
-# modified from https://stackoverflow.com/a/40795835
+def reduce_boxes(boxes, iou_threshold=0.0):
+    clusters = []
+
+    for box in boxes:
+        matched = 0
+        for cluster in clusters:
+            if intersection_over_union(box, cluster) > iou_threshold:
+                matched = 1
+                cluster[0] = min(cluster[0], box[0])
+                cluster[1] = min(cluster[1], box[1])
+                cluster[2] = max(cluster[2], box[2])
+                cluster[3] = max(cluster[3], box[3])
+
+        if not matched:
+            clusters.append(list(box))
+
+    return [tuple(c) for c in clusters]
+
+
 def intersects_any(box_a, boxes):
     for box in boxes:
-        if (
-            box_a[2] < box[0]
-            or box_a[0] > box[2]
-            or box_a[1] > box[3]
-            or box_a[3] < box[1]
-        ):
-            continue
-        return True
+        if box_overlaps(box_a, box):
+            return True
+    return False
 
 
 def detect(
@@ -434,6 +448,7 @@ def process_frames(
     frame_queue: mp.Queue,
     frame_shape,
     model_shape,
+    detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
@@ -487,11 +502,28 @@ def process_frames(
         # look for motion
         motion_boxes = motion_detector.detect(frame)
 
-        # only get the tracked object boxes that intersect with motion
+        # get stationary object ids
+        # check every Nth frame for stationary objects
+        # disappeared objects are not stationary
+        # also check for overlapping motion boxes
+        stationary_object_ids = [
+            obj["id"]
+            for obj in object_tracker.tracked_objects.values()
+            # if there hasn't been motion for 10 frames
+            if obj["motionless_count"] >= 10
+            # and it isn't due for a periodic check
+            and obj["motionless_count"] % detect_config.stationary_interval != 0
+            # and it hasn't disappeared
+            and object_tracker.disappeared[obj["id"]] == 0
+            # and it doesn't overlap with any current motion boxes
+            and not intersects_any(obj["box"], motion_boxes)
+        ]
+
+        # get tracked object boxes that aren't stationary
         tracked_object_boxes = [
             obj["box"]
             for obj in object_tracker.tracked_objects.values()
-            if intersects_any(obj["box"], motion_boxes)
+            if not obj["id"] in stationary_object_ids
         ]
 
         # combine motion boxes with known locations of existing objects
@@ -503,17 +535,25 @@ def process_frames(
             for a in combined_boxes
         ]
 
-        # combine overlapping regions
-        combined_regions = reduce_boxes(regions)
-
-        # re-compute regions
+        # consolidate regions with heavy overlap
         regions = [
             calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
-            for a in combined_regions
+            for a in reduce_boxes(regions, 0.4)
         ]
 
         # resize regions and detect
-        detections = []
+        # seed with stationary objects
+        detections = [
+            (
+                obj["label"],
+                obj["score"],
+                obj["box"],
+                obj["area"],
+                obj["region"],
+            )
+            for obj in object_tracker.tracked_objects.values()
+            if obj["id"] in stationary_object_ids
+        ]
         for region in regions:
             detections.extend(
                 detect(
@@ -582,14 +622,46 @@ def process_frames(
             if refining:
                 refine_count += 1
 
-        # Limit to the detections overlapping with motion areas
-        # to avoid picking up stationary background objects
-        detections_with_motion = [
-            d for d in detections if intersects_any(d[2], motion_boxes)
-        ]
+        ## drop detections that overlap too much
+        consolidated_detections = []
+        # group by name
+        detected_object_groups = defaultdict(lambda: [])
+        for detection in detections:
+            detected_object_groups[detection[0]].append(detection)
+
+        # loop over detections grouped by label
+        for group in detected_object_groups.values():
+            # if the group only has 1 item, skip
+            if len(group) == 1:
+                consolidated_detections.append(group[0])
+                continue
+
+            # sort smallest to largest by area
+            sorted_by_area = sorted(group, key=lambda g: g[3])
+
+            for current_detection_idx in range(0, len(sorted_by_area)):
+                current_detection = sorted_by_area[current_detection_idx][2]
+                overlap = 0
+                for to_check_idx in range(
+                    min(current_detection_idx + 1, len(sorted_by_area)),
+                    len(sorted_by_area),
+                ):
+                    to_check = sorted_by_area[to_check_idx][2]
+                    # if 90% of smaller detection is inside of another detection, consolidate
+                    if (
+                        area(intersection(current_detection, to_check))
+                        / area(current_detection)
+                        > 0.9
+                    ):
+                        overlap = 1
+                        break
+                if overlap == 0:
+                    consolidated_detections.append(
+                        sorted_by_area[current_detection_idx]
+                    )
 
         # now that we have refined our detections, we need to track objects
-        object_tracker.match_and_update(frame_time, detections_with_motion)
+        object_tracker.match_and_update(frame_time, consolidated_detections)
 
         # add to the queue if not full
         if detected_objects_queue.full():
