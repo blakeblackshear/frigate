@@ -75,7 +75,25 @@ def filtered(obj, objects_to_track, object_filters):
 
 
 def create_tensor_input(frame, model_shape, region):
-    cropped_frame = yuv_region_2_rgb(frame, region)
+    # TODO: is it faster to just convert grayscale to RGB? or repeat dimensions with numpy?
+    height = frame.shape[0] // 3 * 2
+    width = frame.shape[1]
+
+    # get the crop box if the region extends beyond the frame
+    crop_x1 = max(0, region[0])
+    crop_y1 = max(0, region[1])
+    crop_x2 = min(width, region[2])
+    crop_y2 = min(height, region[3])
+
+    size = region[3] - region[1]
+    cropped_frame = np.zeros((size, size), np.uint8)
+
+    cropped_frame[
+        0 : crop_y2 - crop_y1,
+        0 : crop_x2 - crop_x1,
+    ] = frame[crop_y1:crop_y2, crop_x1:crop_x2]
+
+    cropped_frame = np.repeat(np.expand_dims(cropped_frame, -1), 3, 2)
 
     # Resize to 300x300 if needed
     if cropped_frame.shape != (model_shape[0], model_shape[1], 3):
