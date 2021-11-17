@@ -45,6 +45,7 @@ class RecordingMaintainer(threading.Thread):
         self.name = "recording_maint"
         self.config = config
         self.stop_event = stop_event
+        self.first_pass = True
 
     def move_files(self):
         cache_files = [
@@ -87,19 +88,22 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
-        # delete all cached files past the most recent 2
-        for camera in grouped_recordings.keys():
-            if len(grouped_recordings[camera]) > 2:
-                logger.warning(
-                    "Proactively cleaning cache. Your recordings disk may be too slow."
-                )
-                sorted_recordings = sorted(
-                    grouped_recordings[camera], key=lambda i: i["start_time"]
-                )
-                to_remove = sorted_recordings[:-2]
-                for f in to_remove:
-                    Path(f["cache_path"]).unlink(missing_ok=True)
-                grouped_recordings[camera] = sorted_recordings[-2:]
+        # delete all cached files past the most recent 2, but not on the first check
+        if self.first_pass:
+            self.first_pass = False
+        else:
+            for camera in grouped_recordings.keys():
+                if len(grouped_recordings[camera]) > 2:
+                    logger.warning(
+                        "Proactively cleaning cache. Your recordings disk may be too slow."
+                    )
+                    sorted_recordings = sorted(
+                        grouped_recordings[camera], key=lambda i: i["start_time"]
+                    )
+                    to_remove = sorted_recordings[:-2]
+                    for f in to_remove:
+                        Path(f["cache_path"]).unlink(missing_ok=True)
+                    grouped_recordings[camera] = sorted_recordings[-2:]
 
         for camera, recordings in grouped_recordings.items():
             # get all events with the end time after the start of the oldest cache file
@@ -158,7 +162,7 @@ class RecordingMaintainer(threading.Thread):
                     overlaps = False
                     for event in events:
                         # if the event starts in the future, stop checking events
-                        # and let this recording segment expire
+                        # and remove this segment
                         if event.start_time > end_time.timestamp():
                             overlaps = False
                             break
@@ -178,6 +182,8 @@ class RecordingMaintainer(threading.Thread):
                             duration,
                             cache_path,
                         )
+                    else:
+                        Path(cache_path).unlink(missing_ok=True)
                 # else retain_days includes this segment
                 else:
                     self.store_segment(
