@@ -88,22 +88,16 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
-        # delete all cached files past the most recent 2, but not on the first check
-        if self.first_pass:
-            self.first_pass = False
-        else:
-            for camera in grouped_recordings.keys():
-                if len(grouped_recordings[camera]) > 2:
-                    logger.warning(
-                        "Proactively cleaning cache. Your recordings disk may be too slow."
-                    )
-                    sorted_recordings = sorted(
-                        grouped_recordings[camera], key=lambda i: i["start_time"]
-                    )
-                    to_remove = sorted_recordings[:-2]
-                    for f in to_remove:
-                        Path(f["cache_path"]).unlink(missing_ok=True)
-                    grouped_recordings[camera] = sorted_recordings[-2:]
+        # delete all cached files past the most recent 2
+        for camera in grouped_recordings.keys():
+            if len(grouped_recordings[camera]) > 2:
+                sorted_recordings = sorted(
+                    grouped_recordings[camera], key=lambda i: i["start_time"]
+                )
+                to_remove = sorted_recordings[:-2]
+                for f in to_remove:
+                    Path(f["cache_path"]).unlink(missing_ok=True)
+                grouped_recordings[camera] = sorted_recordings[-2:]
 
         for camera, recordings in grouped_recordings.items():
             # get all events with the end time after the start of the oldest cache file
@@ -182,8 +176,6 @@ class RecordingMaintainer(threading.Thread):
                             duration,
                             cache_path,
                         )
-                    else:
-                        Path(cache_path).unlink(missing_ok=True)
                 # else retain_days includes this segment
                 else:
                     self.store_segment(
@@ -236,7 +228,14 @@ class RecordingMaintainer(threading.Thread):
                     "Error occurred when attempting to maintain recording cache"
                 )
                 logger.error(e)
-            wait_time = max(0, 5 - (datetime.datetime.now().timestamp() - run_start))
+            duration = datetime.datetime.now().timestamp() - run_start
+            wait_time = max(0, 5 - duration)
+            if duration > 10 and not self.first_pass:
+                logger.warning(
+                    "Cache maintenance is taking longer than 10 seconds to clear. Your recordings disk may be too slow."
+                )
+            if self.first_pass:
+                self.first_pass = False
 
         logger.info(f"Exiting recording maintenance...")
 
