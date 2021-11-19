@@ -88,9 +88,9 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
-        # delete all cached files past the most recent 2
+        # delete all cached files past the most recent 5
         for camera in grouped_recordings.keys():
-            if len(grouped_recordings[camera]) > 2:
+            if len(grouped_recordings[camera]) > 5:
                 sorted_recordings = sorted(
                     grouped_recordings[camera], key=lambda i: i["start_time"]
                 )
