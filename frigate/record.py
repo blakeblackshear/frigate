@@ -129,7 +129,7 @@ class RecordingMaintainer(threading.Thread):
                     continue
 
                 if cache_path in self.end_time_cache:
-                    end_time = self.end_time_cache[cache_path]
+                    end_time, duration = self.end_time_cache[cache_path]
                 else:
                     ffprobe_cmd = [
                         "ffprobe",
@@ -144,9 +144,8 @@ class RecordingMaintainer(threading.Thread):
                     p = sp.run(ffprobe_cmd, capture_output=True)
                     if p.returncode == 0:
                         duration = float(p.stdout.decode().strip())
-                        self.end_time_cache[
-                            cache_path
-                        ] = end_time = start_time + datetime.timedelta(seconds=duration)
+                        end_time = start_time + datetime.timedelta(seconds=duration)
+                        self.end_time_cache[cache_path] = (end_time, duration)
                     else:
                         logger.warning(f"Discarding a corrupt recording segment: {f}")
                         Path(cache_path).unlink(missing_ok=True)
