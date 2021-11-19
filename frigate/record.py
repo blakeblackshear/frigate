@@ -230,9 +230,9 @@ class RecordingMaintainer(threading.Thread):
                 logger.error(e)
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
-            if duration > 10 and not self.first_pass:
+            if wait_time == 0 and not self.first_pass:
                 logger.warning(
-                    "Cache maintenance is taking longer than 10 seconds to clear. Your recordings disk may be too slow."
+                    "Cache is taking longer than 5 seconds to clear. Your recordings disk may be too slow."
                 )
             if self.first_pass:
                 self.first_pass = False
