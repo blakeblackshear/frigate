@@ -46,6 +46,7 @@ class RecordingMaintainer(threading.Thread):
         self.config = config
         self.stop_event = stop_event
         self.first_pass = True
+        self.end_time_cache = {}
 
     def move_files(self):
         cache_files = [
@@ -89,15 +90,17 @@ class RecordingMaintainer(threading.Thread):
             )
 
         # delete all cached files past the most recent 5
+        keep_count = 5
         for camera in grouped_recordings.keys():
-            if len(grouped_recordings[camera]) > 5:
+            if len(grouped_recordings[camera]) > keep_count:
                 sorted_recordings = sorted(
                     grouped_recordings[camera], key=lambda i: i["start_time"]
                 )
-                to_remove = sorted_recordings[:-2]
+                to_remove = sorted_recordings[:-keep_count]
                 for f in to_remove:
                     Path(f["cache_path"]).unlink(missing_ok=True)
-                grouped_recordings[camera] = sorted_recordings[-2:]
+                    self.end_time_cache.pop(f["cache_path"], None)
+                grouped_recordings[camera] = sorted_recordings[-keep_count:]
 
         for camera, recordings in grouped_recordings.items():
             # get all events with the end time after the start of the oldest cache file
@@ -122,26 +125,32 @@ class RecordingMaintainer(threading.Thread):
                     or not self.config.cameras[camera].record.enabled
                 ):
                     Path(cache_path).unlink(missing_ok=True)
+                    self.end_time_cache.pop(cache_path, None)
                     continue
 
-                ffprobe_cmd = [
-                    "ffprobe",
-                    "-v",
-                    "error",
-                    "-show_entries",
-                    "format=duration",
-                    "-of",
-                    "default=noprint_wrappers=1:nokey=1",
-                    f"{cache_path}",
-                ]
-                p = sp.run(ffprobe_cmd, capture_output=True)
-                if p.returncode == 0:
-                    duration = float(p.stdout.decode().strip())
-                    end_time = start_time + datetime.timedelta(seconds=duration)
+                if cache_path in self.end_time_cache:
+                    end_time = self.end_time_cache[cache_path]
                 else:
-                    logger.warning(f"Discarding a corrupt recording segment: {f}")
-                    Path(cache_path).unlink(missing_ok=True)
-                    continue
+                    ffprobe_cmd = [
+                        "ffprobe",
+                        "-v",
+                        "error",
+                        "-show_entries",
+                        "format=duration",
+                        "-of",
+                        "default=noprint_wrappers=1:nokey=1",
+                        f"{cache_path}",
+                    ]
+                    p = sp.run(ffprobe_cmd, capture_output=True)
+                    if p.returncode == 0:
+                        duration = float(p.stdout.decode().strip())
+                        self.end_time_cache[
+                            cache_path
+                        ] = end_time = start_time + datetime.timedelta(seconds=duration)
+                    else:
+                        logger.warning(f"Discarding a corrupt recording segment: {f}")
+                        Path(cache_path).unlink(missing_ok=True)
+                        continue
 
                 # if cached file's start_time is earlier than the retain_days for the camera
                 if start_time <= (
@@ -215,6 +224,9 @@ class RecordingMaintainer(threading.Thread):
             logger.error(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
             logger.error(e)
+
+        # clear end_time cache
+        self.end_time_cache.pop(cache_path, None)
 
     def run(self):
         # Check for new files every 5 seconds
