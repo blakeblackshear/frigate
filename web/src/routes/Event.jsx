@@ -199,7 +199,7 @@ export default function Event({ eventId, close, scrollRef }) {
               <img
                 src={
                   data.has_snapshot
-                    ? `${apiHost}/clips/${data.camera}-${eventId}.jpg`
+                    ? `${apiHost}/api/events/${eventId}/snapshot.jpg`
                     : `data:image/jpeg;base64,${data.thumbnail}`
                 }
                 alt={`${data.label} at ${(data.top_score * 100).toFixed(1)}% confidence`}
