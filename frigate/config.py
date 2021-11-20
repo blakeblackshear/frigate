@@ -154,7 +154,8 @@ class DetectConfig(FrigateBaseModel):
         title="Maximum number of frames the object can dissapear before detection ends."
     )
     stationary_interval: Optional[int] = Field(
-        title="Frame interval for checking stationary objects."
+        title="Frame interval for checking stationary objects.",
+        ge=1,
     )
 
 
