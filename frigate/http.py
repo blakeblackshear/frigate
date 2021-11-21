@@ -658,8 +658,12 @@ def vod_ts(camera, start_ts, end_ts):
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
-        clips.append(clip)
-        durations.append(duration)
+
+        if duration > 0:
+            clips.append(clip)
+            durations.append(duration)
+        else:
+            logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
     if not clips:
         return "No recordings found.", 404
