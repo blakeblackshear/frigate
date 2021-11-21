@@ -413,6 +413,32 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug("End expire files (legacy).")
 
+    def sync_recordings(self):
+        logger.debug("Start sync recordings.")
+
+        # get all recordings in the db
+        recordings: Recordings = Recordings.select()
+
+        # get all recordings files on disk
+        process = sp.run(
+            ["find", RECORD_DIR, "-type", "f"],
+            capture_output=True,
+            text=True,
+        )
+        files_on_disk = process.stdout.splitlines()
+
+        recordings_to_delete = []
+        for recording in recordings.objects().iterator():
+            if not recording.path in files_on_disk:
+                recordings_to_delete.append(recording.id)
+
+        logger.debug(
+            f"Deleting {len(recordings_to_delete)} recordings with missing files"
+        )
+        Recordings.delete().where(Recordings.id << recordings_to_delete).execute()
+
+        logger.debug("End sync recordings.")
+
     def run(self):
         # Expire recordings every minute, clean directories every hour.
         for counter in itertools.cycle(range(60)):
@@ -426,3 +452,4 @@ class RecordingCleanup(threading.Thread):
             if counter == 0:
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
+                self.sync_recordings()
