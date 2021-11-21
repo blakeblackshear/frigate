@@ -405,8 +405,11 @@ class RecordingCleanup(threading.Thread):
 
         for f in files_to_check:
             p = Path(f)
-            if p.stat().st_mtime < delete_before.get(p.parent.name, default_expire):
-                p.unlink(missing_ok=True)
+            try:
+                if p.stat().st_mtime < delete_before.get(p.parent.name, default_expire):
+                    p.unlink(missing_ok=True)
+            except FileNotFoundError:
+                logger.warning(f"Attempted to expire missing file: {f}")
 
         logger.debug("End expire files (legacy).")
 
