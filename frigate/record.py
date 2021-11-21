@@ -110,7 +110,7 @@ class RecordingMaintainer(threading.Thread):
                 .where(
                     Event.camera == camera,
                     (Event.end_time == None)
-                    | (Event.end_time >= recordings[0]["start_time"]),
+                    | (Event.end_time >= recordings[0]["start_time"].timestamp()),
                     Event.has_clip,
                 )
                 .order_by(Event.start_time)
@@ -171,7 +171,10 @@ class RecordingMaintainer(threading.Thread):
 
                         # if the event is in progress or ends after the recording starts, keep it
                         # and stop looking at events
-                        if event.end_time is None or event.end_time >= start_time:
+                        if (
+                            event.end_time is None
+                            or event.end_time >= start_time.timestamp()
+                        ):
                             overlaps = True
                             break
 
