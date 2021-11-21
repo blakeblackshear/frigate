@@ -666,6 +666,7 @@ def vod_ts(camera, start_ts, end_ts):
             logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
     if not clips:
+        logger.error("No recordings found for the requested time range")
         return "No recordings found.", 404
 
     hour_ago = datetime.now() - timedelta(hours=1)
@@ -694,10 +695,12 @@ def vod_event(id):
     try:
         event: Event = Event.get(Event.id == id)
     except DoesNotExist:
+        logger.error(f"Event not found: {id}")
         return "Event not found.", 404
 
     if not event.has_clip:
-        return "Clip not available", 404
+        logger.error(f"Event does not have recordings: {id}")
+        return "Recordings not available", 404
 
     clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
 
