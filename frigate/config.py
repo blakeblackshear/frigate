@@ -355,6 +355,20 @@ class CameraInput(FrigateBaseModel):
     )
 
 
+class CameraOnvifConfig(FrigateBaseModel):
+    host: Optional[str] = Field(title="ONVIF host.")
+    port: Optional[int] = Field(title="ONVIF port.")
+    username: Optional[str] = Field(title="ONVIF username.")
+    password: Optional[str] = Field(title="ONVIF password.")
+
+
+class CameraPtzConfig(FrigateBaseModel):
+    turn_speed: float = Field(default=0.1, title="How fast the camera should move.")
+    invert_y_axis: bool = Field(
+        default=False, title="Whether the y-axis of this camera should be inverted."
+    )
+
+
 class CameraFfmpegConfig(FfmpegConfig):
     inputs: List[CameraInput] = Field(title="Camera inputs.")
 
@@ -458,6 +472,12 @@ class CameraLiveConfig(FrigateBaseModel):
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
+    ptz: CameraPtzConfig = Field(
+        default_factory=CameraPtzConfig, title="PTZ configuration for the camera."
+    )
+    onvif: CameraOnvifConfig = Field(
+        default_factory=CameraOnvifConfig, title="ONVIF configuration for the camera."
+    )
     best_image_timeout: int = Field(
         default=60,
         title="How long to wait for the image with the highest confidence score.",

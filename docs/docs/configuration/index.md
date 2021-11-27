@@ -390,4 +390,22 @@ cameras:
       quality: 70
       # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
       required_zones: []
+
+    # Optional: Configuration for ONVIF support (used for PTZ)
+    onvif:
+      # Optional: The hostname of the ONVIF server for the camera (usually the IP address of the camera)
+      host: 192.168.1.2
+      # Optional: The port where the ONVIF server.
+      port: 8080
+      # Optional: The username needed to use the ONVIF server (usually the same as the one needed for RTSP, or logging into the admin portal)
+      username: admin
+      # Optional: The password needed to use the ONVIF server (same comment as for the username one)
+      password: password
+
+    # Optional: Configuration specific to PTZ support
+    ptz:
+      # Optional: How fast the camera should turn (default: shown below)
+      turn_speed: 0.5
+      # Optional: Whether the y-axis should be inverted (i.e. if the camera is mounted upside down) (default: shown below)
+      invert_y_axis: False
 ```

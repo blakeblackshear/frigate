@@ -31,6 +31,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.ptz import Ptz
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
 from frigate.version import VERSION
@@ -61,6 +62,8 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+
+    app.ptz_cameras = {}
 
     app.register_blueprint(bp)
 
@@ -378,6 +381,100 @@ def best(camera_name, label):
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpg"
         return response
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/ptz/move")
+def ptz_move(camera_name):
+    direction = request.args.get("direction", "up")
+    if (
+        camera_name in current_app.frigate_config.cameras
+        and current_app.frigate_config.cameras[camera_name].onvif.host is not None
+    ):
+        if current_app.ptz_cameras.get(camera_name) is None:
+            current_app.ptz_cameras[camera_name] = Ptz(
+                current_app.frigate_config.cameras[camera_name]
+            )
+
+        ptz = current_app.ptz_cameras[camera_name]
+
+        if direction == "up":
+            ptz.move_up()
+        elif direction == "down":
+            ptz.move_down()
+        elif direction == "left":
+            ptz.move_left()
+        elif direction == "right":
+            ptz.move_right()
+        else:
+            return "Bad direction {}".format(direction), 401
+
+        return "", 204
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/ptz/zoom")
+def ptz_zoom(camera_name):
+    direction = bool(request.args.get("zoomIn", 0, type=int))
+    if (
+        camera_name in current_app.frigate_config.cameras
+        and current_app.frigate_config.cameras[camera_name].onvif.host is not None
+    ):
+        if current_app.ptz_cameras.get(camera_name) is None:
+            current_app.ptz_cameras[camera_name] = Ptz(
+                current_app.frigate_config.cameras[camera_name]
+            )
+
+        ptz = current_app.ptz_cameras[camera_name]
+
+        if direction:
+            ptz.zoom_in()
+        else:
+            ptz.zoom_out()
+
+        return "", 204
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/ptz/sethome")
+def ptz_sethome(camera_name):
+    if (
+        camera_name in current_app.frigate_config.cameras
+        and current_app.frigate_config.cameras[camera_name].onvif.host is not None
+    ):
+        if current_app.ptz_cameras.get(camera_name) is None:
+            current_app.ptz_cameras[camera_name] = Ptz(
+                current_app.frigate_config.cameras[camera_name]
+            )
+
+        ptz = current_app.ptz_cameras[camera_name]
+
+        ptz.set_home()
+
+        return "", 204
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/ptz/gotohome")
+def ptz_gotohome(camera_name):
+    if (
+        camera_name in current_app.frigate_config.cameras
+        and current_app.frigate_config.cameras[camera_name].onvif.host is not None
+    ):
+        if current_app.ptz_cameras.get(camera_name) is None:
+            current_app.ptz_cameras[camera_name] = Ptz(
+                current_app.frigate_config.cameras[camera_name]
+            )
+
+        ptz = current_app.ptz_cameras[camera_name]
+
+        ptz.goto_home()
+
+        return "", 204
     else:
         return "Camera named {} not found".format(camera_name), 404
 

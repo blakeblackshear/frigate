@@ -20,7 +20,7 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip==20.2.4"
 
-RUN pip3 install scikit-build
+RUN pip3 install scikit-build onvif_zeep
 
 RUN pip3 wheel --wheel-dir=/wheels \
     opencv-python-headless \
