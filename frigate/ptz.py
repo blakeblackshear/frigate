@@ -98,3 +98,12 @@ class Ptz:
         request.Speed.PanTilt.x = self.turn_speed
         request.Speed.PanTilt.y = self.turn_speed
         self.ptz_service.GotoPreset(request)
+
+    def stop(self):
+        request = {
+            "ProfileToken": self.move_request.ProfileToken,
+            "PanTilt": True,
+            "Zoom": True,
+        }
+        self.ptz_service.Stop(request)
+        self.active = False

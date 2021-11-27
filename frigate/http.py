@@ -459,6 +459,26 @@ def ptz_sethome(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+@bp.route("/<camera_name>/ptz/stop")
+def ptz_stop(camera_name):
+    if (
+        camera_name in current_app.frigate_config.cameras
+        and current_app.frigate_config.cameras[camera_name].onvif.host is not None
+    ):
+        if current_app.ptz_cameras.get(camera_name) is None:
+            current_app.ptz_cameras[camera_name] = Ptz(
+                current_app.frigate_config.cameras[camera_name]
+            )
+
+        ptz = current_app.ptz_cameras[camera_name]
+
+        ptz.stop()
+
+        return "", 204
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
 @bp.route("/<camera_name>/ptz/gotohome")
 def ptz_gotohome(camera_name):
     if (
