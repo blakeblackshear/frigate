@@ -31,6 +31,24 @@ def get_fs_type(path):
             bestMatch = part.mountpoint
     return fsType
 
+def read_temperature(path):
+    if os.path.isfile(path):
+        with open(path) as f:
+            line=f.readline().strip()
+            return int(line)/1000
+    return None
+
+def get_temperatures():
+    temps={}
+
+    # Get temperatures for all attached Corals
+    base="/sys/class/apex/"
+    for apex in os.listdir(base):
+        temp=read_temperature(os.path.join(base,apex,"temp"))
+        if temp is not None:
+            temps[apex]=temp
+
+    return temps
 
 def read_temperature(path):
     if os.path.isfile(path):
