@@ -162,9 +162,12 @@ class ProcessClip:
             )
             total_regions += len(regions)
             total_motion_boxes += len(motion_boxes)
+            top_score = 0
             for id, obj in self.camera_state.tracked_objects.items():
                 if not obj.false_positive:
                     object_ids.add(id)
+                    if obj.top_score > top_score:
+                        top_score = obj.top_score
 
             total_frames += 1
 
@@ -175,6 +178,7 @@ class ProcessClip:
             "total_motion_boxes": total_motion_boxes,
             "true_positive_objects": len(object_ids),
             "total_frames": total_frames,
+            "top_score": top_score,
         }
 
     def save_debug_frame(self, debug_path, frame_time, tracked_objects):
@@ -277,6 +281,7 @@ def process(path, label, output, debug_path):
 
         frigate_config = FrigateConfig(**json_config)
         runtime_config = frigate_config.runtime_config
+        runtime_config.cameras["camera"].create_ffmpeg_cmds()
 
         process_clip = ProcessClip(c, frame_shape, runtime_config)
         process_clip.load_frames()
