@@ -554,4 +554,3 @@ class RecordingCleanup(threading.Thread):
                 self.expire_recordings()
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
-                self.sync_recordings()
