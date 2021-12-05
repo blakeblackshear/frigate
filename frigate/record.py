@@ -443,6 +443,9 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End sync recordings.")
 
     def run(self):
+        # on startup sync recordings with disk
+        self.sync_recordings()
+
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(60)):
             if self.stop_event.wait(60):
@@ -454,4 +457,3 @@ class RecordingCleanup(threading.Thread):
                 self.expire_recordings()
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
-                self.sync_recordings()
