@@ -8,9 +8,10 @@ describe('Select', () => {
     render(
       <Select
         label="Tacos"
+        type="dropdown"
         onChange={handleChange}
         options={['tacos', 'burritos']}
-        paramName={['burritos']}
+        paramName={['dinner']}
         selected=""
       />
     );
@@ -21,8 +22,8 @@ describe('Select', () => {
     expect(screen.queryByRole('option', { name: 'tacos' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'burritos' })).toBeInTheDocument();
 
-    fireEvent.click(screen.queryByRole('option', { name: 'burritos' }));
-    expect(handleChange).toHaveBeenCalledWith({ burritos: 'burritos' });
+    fireEvent.click(screen.queryByRole('option', { name: 'tacos' }));
+    expect(handleChange).toHaveBeenCalledWith({ dinner: 'tacos' }, 'tacos');
   });
 
   // test('allows keyboard navigation', async () => {
