@@ -29,3 +29,27 @@
 .jsmpeg canvas {
   position: static !important;
 }
+
+/*
+Event.js
+Maintain aspect ratio and scale down the video container
+Could not find a proper tailwind css.
+*/
+.outer-max-width {
+  max-width: 70%;
+}
+
+/*
+ Hide some videoplayer controls on mobile devices to
+ align the video player and bottom control bar properly.
+*/
+@media only screen and (max-width: 700px) {
+  .small-player .vjs-time-control,
+  .small-player .vjs-time-divider {
+    display: none;
+  }
+  div.vjs-control-bar > .skip-back.skip-5,
+  div.vjs-control-bar > .skip-forward.skip-10 {
+    display: none;
+  }
+}

@@ -1,6 +1,7 @@
 import base64
 from collections import OrderedDict
 from datetime import datetime, timedelta
+import copy
 import json
 import glob
 import logging
@@ -190,7 +191,7 @@ def event_snapshot(id):
     download = request.args.get("download", type=bool)
     jpg_bytes = None
     try:
-        event = Event.get(Event.id == id)
+        event = Event.get(Event.id == id, Event.end_time != None)
         if not event.has_snapshot:
             return "Snapshot not available", 404
         # read snapshot from disk
@@ -242,14 +243,11 @@ def event_clip(id):
     if not event.has_clip:
         return "Clip not available", 404
 
-    event_config = current_app.frigate_config.cameras[event.camera].record.events
-    start_ts = event.start_time - event_config.pre_capture
-    end_ts = event.end_time + event_config.post_capture
     file_name = f"{event.camera}-{id}.mp4"
     clip_path = os.path.join(CLIPS_DIR, file_name)
 
     if not os.path.isfile(clip_path):
-        return recording_clip(event.camera, start_ts, end_ts)
+        return recording_clip(event.camera, event.start_time, event.end_time)
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
@@ -324,7 +322,7 @@ def config():
     # add in the ffmpeg_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
-        camera_dict["ffmpeg_cmds"] = camera.ffmpeg_cmds
+        camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 
@@ -660,10 +658,15 @@ def vod_ts(camera, start_ts, end_ts):
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
-        clips.append(clip)
-        durations.append(duration)
+
+        if duration > 0:
+            clips.append(clip)
+            durations.append(duration)
+        else:
+            logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
     if not clips:
+        logger.error("No recordings found for the requested time range")
         return "No recordings found.", 404
 
     hour_ago = datetime.now() - timedelta(hours=1)
@@ -692,20 +695,22 @@ def vod_event(id):
     try:
         event: Event = Event.get(Event.id == id)
     except DoesNotExist:
+        logger.error(f"Event not found: {id}")
         return "Event not found.", 404
 
     if not event.has_clip:
-        return "Clip not available", 404
+        logger.error(f"Event does not have recordings: {id}")
+        return "Recordings not available", 404
 
-    event_config = current_app.frigate_config.cameras[event.camera].record.events
-    start_ts = event.start_time - event_config.pre_capture
-    end_ts = event.end_time + event_config.post_capture
     clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{id}.mp4")
 
     if not os.path.isfile(clip_path):
-        return vod_ts(event.camera, start_ts, end_ts)
+        end_ts = (
+            datetime.now().timestamp() if event.end_time is None else event.end_time
+        )
+        return vod_ts(event.camera, event.start_time, end_ts)
 
-    duration = int((end_ts - start_ts) * 1000)
+    duration = int((event.end_time - event.start_time) * 1000)
     return jsonify(
         {
             "cache": True,

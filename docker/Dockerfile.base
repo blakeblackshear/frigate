@@ -40,8 +40,8 @@ COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
 # get model and labels
 COPY labelmap.txt /labelmap.txt
-RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
-RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/

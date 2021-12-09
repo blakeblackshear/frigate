@@ -12,6 +12,7 @@ import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
@@ -20,14 +21,14 @@ from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
-from frigate.mqtt import create_mqtt_client, MqttSocketRelay
+from frigate.mqtt import MqttSocketRelay, create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
+from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
-from frigate.zeroconf import broadcast_zeroconf
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +71,9 @@ class FrigateApp:
         self.config = user_config.runtime_config
 
         for camera_name in self.config.cameras.keys():
+            # generage the ffmpeg commands
+            self.config.cameras[camera_name].create_ffmpeg_cmds()
+
             # create camera_metrics
             self.camera_metrics[camera_name] = {
                 "camera_fps": mp.Value("d", 0.0),
@@ -84,29 +88,6 @@ class FrigateApp:
                 "ffmpeg_pid": mp.Value("i", 0),
                 "frame_queue": mp.Queue(maxsize=2),
             }
-
-    def check_config(self):
-        for name, camera in self.config.cameras.items():
-            assigned_roles = list(
-                set([r for i in camera.ffmpeg.inputs for r in i.roles])
-            )
-            if not camera.record.enabled and "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record assigned to an input, but record is not enabled."
-                )
-            elif camera.record.enabled and not "record" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
-
-            if not camera.rtmp.enabled and "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp assigned to an input, but rtmp is not enabled."
-                )
-            elif camera.rtmp.enabled and not "rtmp" in assigned_roles:
-                logger.warning(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
 
     def set_log_levels(self):
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
@@ -170,6 +151,7 @@ class FrigateApp:
         self.mqtt_relay.start()
 
     def start_detectors(self):
+        model_path = self.config.model.path
         model_shape = (self.config.model.height, self.config.model.width)
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
@@ -199,6 +181,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
+                    model_path,
                     model_shape,
                     "cpu",
                     detector.num_threads,
@@ -208,6 +191,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
+                    model_path,
                     model_shape,
                     detector.device,
                     detector.num_threads,
@@ -312,16 +296,28 @@ class FrigateApp:
 
     def start(self):
         self.init_logger()
+        logger.info(f"Starting Frigate ({VERSION})")
         try:
             try:
                 self.init_config()
             except Exception as e:
-                print(f"Error parsing config: {e}")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Your config file is not valid!                     ***")
+                print("***    Please check the docs at                           ***")
+                print("***    https://docs.frigate.video/configuration/index     ***")
+                print("*************************************************************")
+                print("*************************************************************")
+                print("***    Config Validation Errors                           ***")
+                print("*************************************************************")
+                print(e)
+                print("*************************************************************")
+                print("***    End Config Validation Errors                       ***")
+                print("*************************************************************")
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
             self.ensure_dirs()
-            self.check_config()
             self.set_log_levels()
             self.init_queues()
             self.init_database()

@@ -1,25 +1,24 @@
 ---
 id: home-assistant
-title: Integration with Home Assistant
-sidebar_label: Home Assistant
+title: Home Assistant Integration
 ---
 
 The best way to integrate with Home Assistant is to use the [official integration](https://github.com/blakeblackshear/frigate-hass-integration).
 
 ## Installation
 
-Available via HACS as a [custom repository](https://hacs.xyz/docs/faq/custom_repositories). To install:
+### Preparation
 
-- Add the custom repository:
+The Frigate integration requires the `mqtt` integration to be installed and
+manually configured first.
 
-```
-Home Assistant > HACS > Integrations > [...] > Custom Repositories
-```
+See the [MQTT integration
+documentation](https://www.home-assistant.io/integrations/mqtt/) for more
+details.
 
-| Key            | Value                                                       |
-| -------------- | ----------------------------------------------------------- |
-| Repository URL | https://github.com/blakeblackshear/frigate-hass-integration |
-| Category       | Integration                                                 |
+### Integration installation
+
+Available via HACS as a default repository. To install:
 
 - Use [HACS](https://hacs.xyz/) to install the integration:
 
@@ -37,6 +36,12 @@ Home Assistant > Configuration > Integrations > Add Integration > Frigate
 Note: You will also need
 [media_source](https://www.home-assistant.io/integrations/media_source/) enabled
 in your Home Assistant configuration for the Media Browser to appear.
+
+### (Optional) Lovelace Card Installation
+
+To install the optional companion Lovelace card, please see the [separate
+installation instructions](https://github.com/dermotduffy/frigate-hass-card) for
+that card.
 
 ## Configuration
 
@@ -71,131 +76,34 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 The integration provides:
 
-- Rich UI with thumbnails for browsing event recordings
-- Rich UI for browsing 24/7 recordings by month, day, camera, time
+- Browsing event recordings with thumbnails
+- Browsing snapshots
+- Browsing recordings by month, day, camera, time
 
 This is accessible via "Media Browser" on the left menu panel in Home Assistant.
 
 <a name="api"></a>
 
-## API
+## Notification API
 
-- Notification API with public facing endpoints for images in notifications
+Many people do not want to expose Frigate to the web, so the integration creates some public API endpoints that can be used for notifications.
 
-### Notifications
-
-Frigate publishes event information in the form of a change feed via MQTT. This
-allows lots of customization for notifications to meet your needs. Event changes
-are published with `before` and `after` information as shown
-[here](#frigateevents). Note that some people may not want to expose frigate to
-the web, so you can leverage the HA API that frigate custom_integration ties
-into (which is exposed to the web, and thus can be used for mobile notifications
-etc):
-
-To load an image taken by frigate from Home Assistants API see below:
+To load a thumbnail for an event:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
 ```
 
-To load a video clip taken by frigate from Home Assistants API :
+To load a snapshot for an event:
 
 ```
-https://HA_URL/api/frigate/notifications/<event-id>/<camera>/clip.mp4
+https://HA_URL/api/frigate/notifications/<event-id>/snapshot.jpg
 ```
 
-Here is a simple example of a notification automation of events which will update the existing notification for each change. This means the image you see in the notification will update as frigate finds a "better" image.
+To load a video clip of an event:
 
-```yaml
-automation:
-  - alias: Notify of events
-    trigger:
-      platform: mqtt
-      topic: frigate/events
-    action:
-      - service: notify.mobile_app_pixel_3
-        data_template:
-          message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
-          data:
-            image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
-            tag: '{{trigger.payload_json["after"]["id"]}}'
-            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
-
-```yaml
-automation:
-  - alias: When a person enters a zone named yard
-    trigger:
-      platform: mqtt
-      topic: frigate/events
-    condition:
-      - "{{ trigger.payload_json['after']['label'] == 'person' }}"
-      - "{{ 'yard' in trigger.payload_json['after']['entered_zones'] }}"
-    action:
-      - service: notify.mobile_app_pixel_3
-        data_template:
-          message: "A {{trigger.payload_json['after']['label']}} has entered the yard."
-          data:
-            image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
-            tag: "{{trigger.payload_json['after']['id']}}"
-            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
-```
-
-```yaml
-- alias: When a person leaves a zone named yard
-  trigger:
-    platform: mqtt
-    topic: frigate/events
-  condition:
-    - "{{ trigger.payload_json['after']['label'] == 'person' }}"
-    - "{{ 'yard' in trigger.payload_json['before']['current_zones'] }}"
-    - "{{ not 'yard' in trigger.payload_json['after']['current_zones'] }}"
-  action:
-    - service: notify.mobile_app_pixel_3
-      data_template:
-        message: "A {{trigger.payload_json['after']['label']}} has left the yard."
-        data:
-          image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
-          tag: "{{trigger.payload_json['after']['id']}}"
-          when: '{{trigger.payload_json["after"]["start_time"]|int}}'
-```
-
-```yaml
-- alias: Notify for dogs in the front with a high top score
-  trigger:
-    platform: mqtt
-    topic: frigate/events
-  condition:
-    - "{{ trigger.payload_json['after']['label'] == 'dog' }}"
-    - "{{ trigger.payload_json['after']['camera'] == 'front' }}"
-    - "{{ trigger.payload_json['after']['top_score'] > 0.98 }}"
-  action:
-    - service: notify.mobile_app_pixel_3
-      data_template:
-        message: "High confidence dog detection."
-        data:
-          image: "https://url.com/api/frigate/notifications/{{trigger.payload_json['after']['id']}}/thumbnail.jpg"
-          tag: "{{trigger.payload_json['after']['id']}}"
-          when: '{{trigger.payload_json["after"]["start_time"]|int}}'
-```
-
-If you are using telegram, you can fetch the image directly from Frigate:
-
-```yaml
-automation:
-  - alias: Notify of events
-    trigger:
-      platform: mqtt
-      topic: frigate/events
-    action:
-      - service: notify.telegram_full
-        data_template:
-          message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
-          data:
-            photo:
-              # this url should work for addon users
-              - url: 'http://ccab4aaf-frigate:5000/api/events/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg'
-                caption: 'A {{trigger.payload_json["after"]["label"]}} was detected on {{ trigger.payload_json["after"]["camera"] }} camera'
+https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
 ```
 
 <a name="streams"></a>
@@ -276,6 +184,6 @@ which server they are referring to.
 
 ## FAQ
 
-### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
+#### If I am detecting multiple objects, how do I assign the correct `binary_sensor` to the camera in HomeKit?
 
 The [HomeKit integration](https://www.home-assistant.io/integrations/homekit/) randomly links one of the binary sensors (motion sensor entities) grouped with the camera device in Home Assistant. You can specify a `linked_motion_sensor` in the Home Assistant [HomeKit configuration](https://www.home-assistant.io/integrations/homekit/#linked_motion_sensor) for each camera.

@@ -5,6 +5,10 @@ import time
 import os
 import signal
 
+from frigate.util import (
+    restart_frigate,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +34,6 @@ class FrigateWatchdog(threading.Thread):
                     detector.start_or_restart()
                 elif not detector.detect_process.is_alive():
                     logger.info("Detection appears to have stopped. Exiting frigate...")
-                    os.kill(os.getpid(), signal.SIGTERM)
+                    restart_frigate()
 
         logger.info(f"Exiting watchdog...")

@@ -1,12 +1,11 @@
 ---
 id: objects
-title: Default available objects
-sidebar_label: Available objects
+title: Objects
 ---
 
 import labels from "../../../labelmap.txt";
 
-By default, Frigate includes the following object models from the Google Coral test data.
+By default, Frigate includes the following object models from the Google Coral test data. Note that `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
 
 <ul>
   {labels.split("\n").map((label) => (
@@ -22,4 +21,4 @@ Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use yo
 - EdgeTPU Model: `/edgetpu_model.tflite`
 - Labels: `/labelmap.txt`
 
-You also need to update the model width/height in the config if they differ from the defaults.
+You also need to update the [model config](/configuration/advanced#model) if they differ from the defaults.

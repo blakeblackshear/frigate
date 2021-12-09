@@ -23,6 +23,7 @@ class MotionDetector:
             interpolation=cv2.INTER_LINEAR,
         )
         self.mask = np.where(resized_mask == [0])
+        self.save_images = False
 
     def detect(self, frame):
         motion_boxes = []
@@ -36,10 +37,15 @@ class MotionDetector:
             interpolation=cv2.INTER_LINEAR,
         )
 
-        # TODO: can I improve the contrast of the grayscale image here?
-
-        # convert to grayscale
-        # resized_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+        # Improve contrast
+        minval = np.percentile(resized_frame, 4)
+        maxval = np.percentile(resized_frame, 96)
+        # don't adjust if the image is a single color
+        if minval < maxval:
+            resized_frame = np.clip(resized_frame, minval, maxval)
+            resized_frame = (
+                ((resized_frame - minval) / (maxval - minval)) * 255
+            ).astype(np.uint8)
 
         # mask frame
         resized_frame[self.mask] = [255]
@@ -49,6 +55,8 @@ class MotionDetector:
         if self.frame_counter < 30:
             self.frame_counter += 1
         else:
+            if self.save_images:
+                self.frame_counter += 1
             # compare to average
             frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
 
@@ -58,7 +66,6 @@ class MotionDetector:
             cv2.accumulateWeighted(frameDelta, self.avg_delta, self.config.delta_alpha)
 
             # compute the threshold image for the current frame
-            # TODO: threshold
             current_thresh = cv2.threshold(
                 frameDelta, self.config.threshold, 255, cv2.THRESH_BINARY
             )[1]
@@ -75,8 +82,10 @@ class MotionDetector:
 
             # dilate the thresholded image to fill in holes, then find contours
             # on thresholded image
-            thresh = cv2.dilate(thresh, None, iterations=2)
-            cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            thresh_dilated = cv2.dilate(thresh, None, iterations=2)
+            cnts = cv2.findContours(
+                thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+            )
             cnts = imutils.grab_contours(cnts)
 
             # loop over the contours
@@ -93,6 +102,35 @@ class MotionDetector:
                             int((y + h) * self.resize_factor),
                         )
                     )
+
+            if self.save_images:
+                thresh_dilated = cv2.cvtColor(thresh_dilated, cv2.COLOR_GRAY2BGR)
+                # print("--------")
+                # print(self.frame_counter)
+                for c in cnts:
+                    contour_area = cv2.contourArea(c)
+                    # print(contour_area)
+                    if contour_area > self.config.contour_area:
+                        x, y, w, h = cv2.boundingRect(c)
+                        cv2.rectangle(
+                            thresh_dilated,
+                            (x, y),
+                            (x + w, y + h),
+                            (0, 0, 255),
+                            2,
+                        )
+                # print("--------")
+                image_row_1 = cv2.hconcat(
+                    [
+                        cv2.cvtColor(frameDelta, cv2.COLOR_GRAY2BGR),
+                        cv2.cvtColor(avg_delta_image, cv2.COLOR_GRAY2BGR),
+                    ]
+                )
+                image_row_2 = cv2.hconcat(
+                    [cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR), thresh_dilated]
+                )
+                combined_image = cv2.vconcat([image_row_1, image_row_2])
+                cv2.imwrite(f"motion/motion-{self.frame_counter}.jpg", combined_image)
 
         if len(motion_boxes) > 0:
             self.motion_frame_count += 1

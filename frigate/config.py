@@ -9,10 +9,10 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
+from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.edgetpu import load_labels
 from frigate.util import create_mask, deep_merge
 
@@ -29,18 +29,23 @@ DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 
 
+class FrigateBaseModel(BaseModel):
+    class Config:
+        extra = Extra.forbid
+
+
 class DetectorTypeEnum(str, Enum):
     edgetpu = "edgetpu"
     cpu = "cpu"
 
 
-class DetectorConfig(BaseModel):
+class DetectorConfig(FrigateBaseModel):
     type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
     device: str = Field(default="usb", title="Device Type")
     num_threads: int = Field(default=3, title="Number of detection threads")
 
 
-class MqttConfig(BaseModel):
+class MqttConfig(FrigateBaseModel):
     host: str = Field(title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
@@ -60,50 +65,48 @@ class MqttConfig(BaseModel):
         return v
 
 
-class RetainConfig(BaseModel):
-    default: int = Field(default=10, title="Default retention period.")
-    objects: Dict[str, int] = Field(
+class RetainConfig(FrigateBaseModel):
+    default: float = Field(default=10, title="Default retention period.")
+    objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
     )
 
 
-# DEPRECATED: Will eventually be removed
-class ClipsConfig(BaseModel):
-    enabled: bool = Field(default=False, title="Save clips.")
-    max_seconds: int = Field(default=300, title="Maximum clip duration.")
-    pre_capture: int = Field(default=5, title="Seconds to capture before event starts.")
-    post_capture: int = Field(default=5, title="Seconds to capture after event ends.")
+class EventsConfig(FrigateBaseModel):
+    max_seconds: int = Field(default=300, title="Maximum event duration.")
+    pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
+    post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
         default_factory=list,
-        title="List of required zones to be entered in order to save the clip.",
+        title="List of required zones to be entered in order to save the event.",
     )
     objects: Optional[List[str]] = Field(
-        title="List of objects to be detected in order to save the clip.",
+        title="List of objects to be detected in order to save the event.",
     )
     retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Clip retention settings."
+        default_factory=RetainConfig, title="Event retention settings."
     )
 
 
-class RecordConfig(BaseModel):
+class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    retain_days: int = Field(default=0, title="Recording retention period in days.")
-    events: ClipsConfig = Field(
-        default_factory=ClipsConfig, title="Event specific settings."
+    retain_days: float = Field(default=0, title="Recording retention period in days.")
+    events: EventsConfig = Field(
+        default_factory=EventsConfig, title="Event specific settings."
     )
 
 
-class MotionConfig(BaseModel):
+class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
         default=25,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
     )
-    contour_area: Optional[int] = Field(title="Contour Area")
+    contour_area: Optional[int] = Field(default=30, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.2, title="Frame Alpha")
-    frame_height: Optional[int] = Field(title="Frame Height")
+    frame_height: Optional[int] = Field(default=50, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
@@ -115,15 +118,6 @@ class RuntimeMotionConfig(MotionConfig):
 
     def __init__(self, **config):
         frame_shape = config.get("frame_shape", (1, 1))
-
-        if "frame_height" not in config:
-            config["frame_height"] = max(frame_shape[0] // 6, 180)
-
-        if "contour_area" not in config:
-            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
-            config["contour_area"] = (
-                config["frame_height"] * frame_width * 0.00173611111
-            )
 
         mask = config.get("mask", "")
         config["raw_mask"] = mask
@@ -146,19 +140,26 @@ class RuntimeMotionConfig(MotionConfig):
 
     class Config:
         arbitrary_types_allowed = True
+        extra = Extra.ignore
 
 
-class DetectConfig(BaseModel):
-    height: int = Field(title="Height of the stream for the detect role.")
-    width: int = Field(title="Width of the stream for the detect role.")
-    fps: int = Field(title="Number of frames per second to process through detection.")
+class DetectConfig(FrigateBaseModel):
+    height: int = Field(default=720, title="Height of the stream for the detect role.")
+    width: int = Field(default=1280, title="Width of the stream for the detect role.")
+    fps: int = Field(
+        default=5, title="Number of frames per second to process through detection."
+    )
     enabled: bool = Field(default=True, title="Detection Enabled.")
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
+    stationary_interval: Optional[int] = Field(
+        title="Frame interval for checking stationary objects.",
+        ge=1,
+    )
 
 
-class FilterConfig(BaseModel):
+class FilterConfig(FrigateBaseModel):
     min_area: int = Field(
         default=0, title="Minimum area of bounding box for object to be counted."
     )
@@ -199,8 +200,10 @@ class RuntimeFilterConfig(FilterConfig):
 
     class Config:
         arbitrary_types_allowed = True
+        extra = Extra.ignore
 
 
+# this uses the base model because the color is an extra attribute
 class ZoneConfig(BaseModel):
     filters: Dict[str, FilterConfig] = Field(
         default_factory=dict, title="Zone filters."
@@ -242,7 +245,7 @@ class ZoneConfig(BaseModel):
             self._contour = np.array([])
 
 
-class ObjectConfig(BaseModel):
+class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
@@ -254,7 +257,7 @@ class BirdseyeModeEnum(str, Enum):
     continuous = "continuous"
 
 
-class BirdseyeConfig(BaseModel):
+class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
     width: int = Field(default=1280, title="Birdseye width.")
     height: int = Field(default=720, title="Birdseye height.")
@@ -301,7 +304,7 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
 ]
 
 
-class FfmpegOutputArgsConfig(BaseModel):
+class FfmpegOutputArgsConfig(FrigateBaseModel):
     detect: Union[str, List[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Detect role FFmpeg output arguments.",
@@ -316,7 +319,7 @@ class FfmpegOutputArgsConfig(BaseModel):
     )
 
 
-class FfmpegConfig(BaseModel):
+class FfmpegConfig(FrigateBaseModel):
     global_args: Union[str, List[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
     )
@@ -332,9 +335,15 @@ class FfmpegConfig(BaseModel):
     )
 
 
-class CameraInput(BaseModel):
+class CameraRoleEnum(str, Enum):
+    record = "record"
+    rtmp = "rtmp"
+    detect = "detect"
+
+
+class CameraInput(FrigateBaseModel):
     path: str = Field(title="Camera input path.")
-    roles: List[str] = Field(title="Roles assigned to this input.")
+    roles: List[CameraRoleEnum] = Field(title="Roles assigned to this input.")
     global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
     )
@@ -363,7 +372,7 @@ class CameraFfmpegConfig(FfmpegConfig):
         return v
 
 
-class CameraSnapshotsConfig(BaseModel):
+class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
     clean_copy: bool = Field(
         default=True, title="Create a clean copy of the snapshot image."
@@ -391,22 +400,35 @@ class CameraSnapshotsConfig(BaseModel):
     )
 
 
-class ColorConfig(BaseModel):
-    red: int = Field(default=255, le=0, ge=255, title="Red")
-    green: int = Field(default=255, le=0, ge=255, title="Green")
-    blue: int = Field(default=255, le=0, ge=255, title="Blue")
+class ColorConfig(FrigateBaseModel):
+    red: int = Field(default=255, ge=0, le=255, title="Red")
+    green: int = Field(default=255, ge=0, le=255, title="Green")
+    blue: int = Field(default=255, ge=0, le=255, title="Blue")
 
 
-class TimestampStyleConfig(BaseModel):
-    position: str = Field(default="tl", title="Timestamp position.")
+class TimestampPositionEnum(str, Enum):
+    tl = "tl"
+    tr = "tr"
+    bl = "bl"
+    br = "br"
+
+
+class TimestampEffectEnum(str, Enum):
+    solid = "solid"
+    shadow = "shadow"
+
+
+class TimestampStyleConfig(FrigateBaseModel):
+    position: TimestampPositionEnum = Field(
+        default=TimestampPositionEnum.tl, title="Timestamp position."
+    )
     format: str = Field(default=DEFAULT_TIME_FORMAT, title="Timestamp format.")
     color: ColorConfig = Field(default_factory=ColorConfig, title="Timestamp color.")
-    scale: float = Field(default=1.0, title="Timestamp scale.")
     thickness: int = Field(default=2, title="Timestamp thickness.")
-    effect: Optional[str] = Field(title="Timestamp effect.")
+    effect: Optional[TimestampEffectEnum] = Field(title="Timestamp effect.")
 
 
-class CameraMqttConfig(BaseModel):
+class CameraMqttConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Send image over MQTT.")
     timestamp: bool = Field(default=True, title="Add timestamp to MQTT image.")
     bounding_box: bool = Field(default=True, title="Add bounding box to MQTT image.")
@@ -424,16 +446,16 @@ class CameraMqttConfig(BaseModel):
     )
 
 
-class CameraRtmpConfig(BaseModel):
+class RtmpConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
 
 
-class CameraLiveConfig(BaseModel):
+class CameraLiveConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
 
-class CameraConfig(BaseModel):
+class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
@@ -446,12 +468,14 @@ class CameraConfig(BaseModel):
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Record configuration."
     )
-    rtmp: CameraRtmpConfig = Field(
-        default_factory=CameraRtmpConfig, title="RTMP restreaming configuration."
+    rtmp: RtmpConfig = Field(
+        default_factory=RtmpConfig, title="RTMP restreaming configuration."
     )
-    live: Optional[CameraLiveConfig] = Field(title="Live playback settings.")
-    snapshots: CameraSnapshotsConfig = Field(
-        default_factory=CameraSnapshotsConfig, title="Snapshot configuration."
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Live playback settings."
+    )
+    snapshots: SnapshotsConfig = Field(
+        default_factory=SnapshotsConfig, title="Snapshot configuration."
     )
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig, title="MQTT configuration."
@@ -460,10 +484,13 @@ class CameraConfig(BaseModel):
         default_factory=ObjectConfig, title="Object configuration."
     )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
-    detect: DetectConfig = Field(title="Object detection configuration.")
+    detect: DetectConfig = Field(
+        default_factory=DetectConfig, title="Object detection configuration."
+    )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
     )
+    _ffmpeg_cmds: List[Dict[str, List[str]]] = PrivateAttr()
 
     def __init__(self, **config):
         # Set zone colors
@@ -473,6 +500,10 @@ class CameraConfig(BaseModel):
                 name: {**z, "color": tuple(round(255 * c) for c in colors(idx)[:3])}
                 for idx, (name, z) in enumerate(config["zones"].items())
             }
+
+        # add roles to the input if there is only one
+        if len(config["ffmpeg"]["inputs"]) == 1:
+            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect"]
 
         super().__init__(**config)
 
@@ -486,6 +517,9 @@ class CameraConfig(BaseModel):
 
     @property
     def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
+        return self._ffmpeg_cmds
+
+    def create_ffmpeg_cmds(self):
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
@@ -493,7 +527,7 @@ class CameraConfig(BaseModel):
                 continue
 
             ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
-        return ffmpeg_cmds
+        self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
@@ -529,6 +563,7 @@ class CameraConfig(BaseModel):
                 if isinstance(self.ffmpeg.output_args.record, list)
                 else self.ffmpeg.output_args.record.split(" ")
             )
+
             ffmpeg_output_args = (
                 record_args
                 + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
@@ -565,13 +600,15 @@ class CameraConfig(BaseModel):
         return [part for part in cmd if part != ""]
 
 
-class DatabaseConfig(BaseModel):
+class DatabaseConfig(FrigateBaseModel):
     path: str = Field(
         default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
     )
 
 
-class ModelConfig(BaseModel):
+class ModelConfig(FrigateBaseModel):
+    path: Optional[str] = Field(title="Custom Object detection model path.")
+    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
@@ -592,7 +629,7 @@ class ModelConfig(BaseModel):
         super().__init__(**config)
 
         self._merged_labelmap = {
-            **load_labels("/labelmap.txt"),
+            **load_labels(config.get("labelmap_path", "/labelmap.txt")),
             **config.get("labelmap", {}),
         }
 
@@ -611,7 +648,7 @@ class LogLevelEnum(str, Enum):
     critical = "critical"
 
 
-class LoggerConfig(BaseModel):
+class LoggerConfig(FrigateBaseModel):
     default: LogLevelEnum = Field(
         default=LogLevelEnum.info, title="Default logging level."
     )
@@ -620,13 +657,7 @@ class LoggerConfig(BaseModel):
     )
 
 
-class SnapshotsConfig(BaseModel):
-    retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Global snapshot retention configuration."
-    )
-
-
-class FrigateConfig(BaseModel):
+class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
@@ -650,6 +681,12 @@ class FrigateConfig(BaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Global live configuration."
+    )
+    rtmp: RtmpConfig = Field(
+        default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
+    )
     birdseye: BirdseyeConfig = Field(
         default_factory=BirdseyeConfig, title="Birdseye configuration."
     )
@@ -662,10 +699,14 @@ class FrigateConfig(BaseModel):
     motion: Optional[MotionConfig] = Field(
         title="Global motion detection configuration."
     )
-    detect: Optional[DetectConfig] = Field(
-        title="Global object tracking configuration."
+    detect: DetectConfig = Field(
+        default_factory=DetectConfig, title="Global object tracking configuration."
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+    timestamp_style: TimestampStyleConfig = Field(
+        default_factory=TimestampStyleConfig,
+        title="Global timestamp style configuration.",
+    )
 
     @property
     def runtime_config(self) -> FrigateConfig:
@@ -681,10 +722,13 @@ class FrigateConfig(BaseModel):
             include={
                 "record": ...,
                 "snapshots": ...,
+                "live": ...,
+                "rtmp": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,
+                "timestamp_style": ...,
             },
             exclude_unset=True,
         )
@@ -694,6 +738,16 @@ class FrigateConfig(BaseModel):
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
             )
+
+            # Default max_disappeared configuration
+            max_disappeared = camera_config.detect.fps * 5
+            if camera_config.detect.max_disappeared is None:
+                camera_config.detect.max_disappeared = max_disappeared
+
+            # Default stationary_interval configuration
+            stationary_interval = camera_config.detect.fps * 10
+            if camera_config.detect.stationary_interval is None:
+                camera_config.detect.stationary_interval = stationary_interval
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
@@ -742,14 +796,19 @@ class FrigateConfig(BaseModel):
                     **camera_config.motion.dict(exclude_unset=True),
                 )
 
-            # Default detect configuration
-            max_disappeared = camera_config.detect.fps * 5
-            if camera_config.detect.max_disappeared is None:
-                camera_config.detect.max_disappeared = max_disappeared
+            # check runtime config
+            assigned_roles = list(
+                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+            )
+            if camera_config.record.enabled and not "record" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has record enabled, but record is not assigned to an input."
+                )
 
-            # Default live configuration
-            if camera_config.live is None:
-                camera_config.live = CameraLiveConfig()
+            if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                )
 
             config.cameras[name] = camera_config
 

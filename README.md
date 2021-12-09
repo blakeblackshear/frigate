@@ -20,7 +20,7 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 
 ## Documentation
 
-View the documentation at https://blakeblackshear.github.io/frigate
+View the documentation at https://docs.frigate.video
 
 ## Donations
 

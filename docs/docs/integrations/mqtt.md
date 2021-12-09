@@ -36,7 +36,7 @@ Message published for each changed event. The first message is published when th
 
 ```json
 {
-  "type": "update", // new, update, end or clip_ready
+  "type": "update", // new, update, end
   "before": {
     "id": "1607123955.475377-mxklsc",
     "camera": "front_door",
@@ -53,7 +53,9 @@ Message published for each changed event. The first message is published when th
     "region": [264, 450, 667, 853],
     "current_zones": ["driveway"],
     "entered_zones": ["yard", "driveway"],
-    "thumbnail": null
+    "thumbnail": null,
+    "has_snapshot": false,
+    "has_clip": false
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -71,7 +73,9 @@ Message published for each changed event. The first message is published when th
     "region": [218, 440, 693, 915],
     "current_zones": ["yard", "driveway"],
     "entered_zones": ["yard", "driveway"],
-    "thumbnail": null
+    "thumbnail": null,
+    "has_snapshot": false,
+    "has_clip": false
   }
 }
 ```

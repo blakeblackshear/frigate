@@ -6,11 +6,11 @@ import threading
 import time
 from pathlib import Path
 
-from frigate.config import FrigateConfig, RecordConfig
-from frigate.const import CLIPS_DIR
-from frigate.models import Event, Recordings
-
 from peewee import fn
+
+from frigate.config import EventsConfig, FrigateConfig, RecordConfig
+from frigate.const import CLIPS_DIR
+from frigate.models import Event
 
 logger = logging.getLogger(__name__)
 
@@ -29,41 +29,12 @@ class EventProcessor(threading.Thread):
         self.events_in_process = {}
         self.stop_event = stop_event
 
-    def should_create_clip(self, camera, event_data):
-        if event_data["false_positive"]:
-            return False
-
-        record_config: RecordConfig = self.config.cameras[camera].record
-
-        # Recording clips is disabled
-        if not record_config.enabled or (
-            record_config.retain_days == 0 and not record_config.events.enabled
-        ):
-            return False
-
-        # If there are required zones and there is no overlap
-        required_zones = record_config.events.required_zones
-        if len(required_zones) > 0 and not set(event_data["entered_zones"]) & set(
-            required_zones
-        ):
-            logger.debug(
-                f"Not creating clip for {event_data['id']} because it did not enter required zones"
-            )
-            return False
-
-        # If the required objects are not present
-        if (
-            record_config.events.objects is not None
-            and event_data["label"] not in record_config.events.objects
-        ):
-            logger.debug(
-                f"Not creating clip for {event_data['id']} because it did not contain required objects"
-            )
-            return False
-
-        return True
-
     def run(self):
+        # set an end_time on events without an end_time on startup
+        Event.update(end_time=Event.start_time + 30).where(
+            Event.end_time == None
+        ).execute()
+
         while not self.stop_event.is_set():
             try:
                 event_type, camera, event_data = self.event_queue.get(timeout=10)
@@ -72,32 +43,58 @@ class EventProcessor(threading.Thread):
 
             logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
 
+            event_config: EventsConfig = self.config.cameras[camera].record.events
+
             if event_type == "start":
                 self.events_in_process[event_data["id"]] = event_data
 
-            if event_type == "end":
-                record_config: RecordConfig = self.config.cameras[camera].record
-
-                has_clip = self.should_create_clip(camera, event_data)
-
-                if has_clip or event_data["has_snapshot"]:
-                    Event.create(
+            elif event_type == "update":
+                self.events_in_process[event_data["id"]] = event_data
+                # TODO: this will generate a lot of db activity possibly
+                if event_data["has_clip"] or event_data["has_snapshot"]:
+                    Event.replace(
                         id=event_data["id"],
                         label=event_data["label"],
                         camera=camera,
-                        start_time=event_data["start_time"],
-                        end_time=event_data["end_time"],
+                        start_time=event_data["start_time"] - event_config.pre_capture,
+                        end_time=None,
                         top_score=event_data["top_score"],
                         false_positive=event_data["false_positive"],
                         zones=list(event_data["entered_zones"]),
                         thumbnail=event_data["thumbnail"],
-                        has_clip=has_clip,
+                        region=event_data["region"],
+                        box=event_data["box"],
+                        area=event_data["area"],
+                        has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
-                    )
+                    ).execute()
+
+            elif event_type == "end":
+                if event_data["has_clip"] or event_data["has_snapshot"]:
+                    Event.replace(
+                        id=event_data["id"],
+                        label=event_data["label"],
+                        camera=camera,
+                        start_time=event_data["start_time"] - event_config.pre_capture,
+                        end_time=event_data["end_time"] + event_config.post_capture,
+                        top_score=event_data["top_score"],
+                        false_positive=event_data["false_positive"],
+                        zones=list(event_data["entered_zones"]),
+                        thumbnail=event_data["thumbnail"],
+                        region=event_data["region"],
+                        box=event_data["box"],
+                        area=event_data["area"],
+                        has_clip=event_data["has_clip"],
+                        has_snapshot=event_data["has_snapshot"],
+                    ).execute()
 
                 del self.events_in_process[event_data["id"]]
-                self.event_processed_queue.put((event_data["id"], camera, has_clip))
+                self.event_processed_queue.put((event_data["id"], camera))
 
+        # set an end_time on events without an end_time before exiting
+        Event.update(end_time=datetime.datetime.now().timestamp()).where(
+            Event.end_time == None
+        ).execute()
         logger.info(f"Exiting event processor...")
 
 
@@ -225,12 +222,12 @@ class EventCleanup(threading.Thread):
         for event in duplicate_events:
             logger.debug(f"Removing duplicate: {event.id}")
             media_name = f"{event.camera}-{event.id}"
-            if event.has_snapshot:
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-                media_path.unlink(missing_ok=True)
-            if event.has_clip:
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-                media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+            media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+            media_path.unlink(missing_ok=True)
+            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+            media_path.unlink(missing_ok=True)
 
         (
             Event.delete()

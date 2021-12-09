@@ -18,6 +18,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -51,18 +52,32 @@ def draw_timestamp(
     timestamp,
     timestamp_format,
     font_effect=None,
-    font_scale=1.0,
     font_thickness=2,
     font_color=(255, 255, 255),
     position="tl",
 ):
     time_to_show = datetime.datetime.fromtimestamp(timestamp).strftime(timestamp_format)
+
+    # calculate a dynamic font size
+    size = cv2.getTextSize(
+        time_to_show,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        fontScale=1.0,
+        thickness=font_thickness,
+    )
+
+    text_width = size[0][0]
+    desired_size = max(150, 0.33 * frame.shape[1])
+    font_scale = desired_size / text_width
+
+    # calculate the actual size with the dynamic scale
     size = cv2.getTextSize(
         time_to_show,
         cv2.FONT_HERSHEY_SIMPLEX,
         fontScale=font_scale,
         thickness=font_thickness,
     )
+
     image_width = frame.shape[1]
     image_height = frame.shape[0]
     text_width = size[0][0]
@@ -176,7 +191,7 @@ def draw_box_with_label(
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):
     # size is the longest edge and divisible by 4
-    size = int(max(xmax - xmin, ymax - ymin) // 4 * 4 * multiplier)
+    size = int((max(xmax - xmin, ymax - ymin) * multiplier) // 4 * 4)
     # dont go any smaller than 300
     if size < 300:
         size = 300
@@ -520,7 +535,13 @@ def clipped(obj, frame_shape):
 
 
 def restart_frigate():
-    os.kill(os.getpid(), signal.SIGTERM)
+    proc = psutil.Process(1)
+    # if this is running via s6, sigterm pid 1
+    if proc.name() == "s6-svscan":
+        proc.terminate()
+    # otherwise, just try and exit frigate
+    else:
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 class EventsPerSecond:

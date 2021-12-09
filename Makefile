@@ -3,7 +3,7 @@ default_target: amd64_frigate
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 
 version:
-	echo "VERSION='0.9.0-$(COMMIT_HASH)'" > frigate/version.py
+	echo "VERSION='0.10.0-$(COMMIT_HASH)'" > frigate/version.py
 
 web:
 	docker build --tag frigate-web --file docker/Dockerfile.web web/
@@ -39,13 +39,13 @@ aarch64_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-aarch64 --file docker/Dockerfile.wheels .
 
 aarch64_ffmpeg:
-	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.2.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
+	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.3.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
 
 aarch64_frigate: version web
 	docker build --no-cache --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
 	docker build --no-cache --tag frigate --file docker/Dockerfile.aarch64 .
 
-armv7_all: armv7_wheels armv7_ffmpeg armv7_frigate
+aarch64_all: aarch64_wheels aarch64_ffmpeg aarch64_frigate
 
 armv7_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-armv7 --file docker/Dockerfile.wheels .

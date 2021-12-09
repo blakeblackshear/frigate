@@ -10,6 +10,7 @@ import NavigationDrawer, { Destination, Separator } from './components/Navigatio
 export default function Sidebar() {
   const { data: config } = useConfig();
   const cameras = useMemo(() => Object.entries(config.cameras), [config]);
+  const { birdseye } = config;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -49,7 +50,7 @@ export default function Sidebar() {
           ) : null
         }
       </Match>
-      <Destination href="/birdseye" text="Birdseye" />
+      {birdseye?.enabled ? <Destination href="/birdseye" text="Birdseye" /> : null}
       <Destination href="/events" text="Events" />
       <Destination href="/debug" text="Debug" />
       <Separator />
@@ -60,7 +61,7 @@ export default function Sidebar() {
           <Separator />
         </Fragment>
       ) : null}
-      <Destination className="self-end" href="https://blakeblackshear.github.io/frigate" text="Documentation" />
+      <Destination className="self-end" href="https://docs.frigate.video" text="Documentation" />
       <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
     </NavigationDrawer>
   );

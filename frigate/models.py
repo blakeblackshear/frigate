@@ -15,6 +15,9 @@ class Event(Model):
     thumbnail = TextField()
     has_clip = BooleanField(default=True)
     has_snapshot = BooleanField(default=True)
+    region = JSONField()
+    box = JSONField()
+    area = IntegerField()
 
 
 class Recordings(Model):
