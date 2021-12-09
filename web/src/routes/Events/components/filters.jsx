@@ -2,10 +2,10 @@ import { h } from 'preact';
 import Filter from './filter';
 import { useConfig } from '../../../api';
 import { useMemo } from 'preact/hooks';
+import { DateFilterOptions } from '../../../components/DatePicker';
 
 const Filters = ({ onChange, searchParams }) => {
   const { data } = useConfig();
-
   const cameras = useMemo(() => Object.keys(data.cameras), [data]);
 
   const zones = useMemo(
@@ -30,9 +30,38 @@ const Filters = ({ onChange, searchParams }) => {
 
   return (
     <div className="flex space-x-4">
-      <Filter onChange={onChange} options={cameras} paramName="camera" searchParams={searchParams} />
-      <Filter onChange={onChange} options={zones} paramName="zone" searchParams={searchParams} />
-      <Filter onChange={onChange} options={labels} paramName="label" searchParams={searchParams} />
+      <Filter
+        type="dropdown"
+        onChange={onChange}
+        options={['all', ...cameras]}
+        paramName={['camera']}
+        label="Camera"
+        searchParams={searchParams}
+      />
+      <Filter
+        type="dropdown"
+        onChange={onChange}
+        options={['all', ...zones]}
+        paramName={['zone']}
+        label="Zone"
+        searchParams={searchParams}
+      />
+      <Filter
+        type="dropdown"
+        onChange={onChange}
+        options={['all', ...labels]}
+        paramName={['label']}
+        label="Label"
+        searchParams={searchParams}
+      />
+      <Filter
+        type="datepicker"
+        onChange={onChange}
+        options={DateFilterOptions}
+        paramName={['before', 'after']}
+        label="DatePicker"
+        searchParams={searchParams}
+      />
     </div>
   );
 };
