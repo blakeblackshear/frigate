@@ -113,6 +113,15 @@ const Calender = ({ onChange, calenderRef }) => {
     return day.timestamp < state.selectedRange.before * 1000 && day.timestamp >= state.selectedRange.after * 1000;
   };
 
+  const isFirstDayInRange = (day) => {
+    if (isCurrentDay(day)) return;
+    return state.selectedRange.after * 1000 === day.timestamp;
+  };
+  const isLastDayInRange = (day) => {
+    if (state.selectedRange.after * 1000 === todayTimestamp) return;
+    return state.selectedRange.before * 1000 === day.timestamp + 86400000;
+  };
+
   const getMonthStr = (month) => monthMap[Math.max(Math.min(11, month), 0)] || 'Month';
 
   const onDateClick = (day) => {
@@ -175,13 +184,16 @@ const Calender = ({ onChange, calenderRef }) => {
             onClick={() => onDateClick(day)}
             className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
-            }${isCurrentDay(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}${
-              isSelectedDay(day) ? 'bg-gray-100 dark:hover:bg-gray-100' : ''
-            }${isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-500' : ''}`}
+            }
+              ${isSelectedDay(day) ? 'bg-gray-100 dark:hover:bg-gray-100' : ''}
+              ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
+              ${isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-600' : ''}
+              ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
+              ${isCurrentDay(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
             key={index}
           >
             <div className=" font-light ">
-              <span className="text-gray-400">{day.date}</span>
+              <span className="text-gray-400 ">{day.date}</span>
             </div>
           </div>
         );
