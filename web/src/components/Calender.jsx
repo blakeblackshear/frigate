@@ -189,11 +189,11 @@ const Calender = ({ onChange, calenderRef }) => {
               ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
               ${isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-600' : ''}
               ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
-              ${isCurrentDay(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
+              ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
             key={index}
           >
-            <div className=" font-light ">
-              <span className="text-gray-400 ">{day.date}</span>
+            <div className="font-light">
+              <span className="text-gray-400">{day.date}</span>
             </div>
           </div>
         );

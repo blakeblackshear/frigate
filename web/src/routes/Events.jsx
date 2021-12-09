@@ -307,7 +307,7 @@ function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
     [searchParams, paramName, onChange]
   );
 
-  let obj = {};
+  const obj = {};
   paramName.map((p) => Object.assign(obj, { [p]: searchParams.get(p) }), [searchParams]);
 
   return (

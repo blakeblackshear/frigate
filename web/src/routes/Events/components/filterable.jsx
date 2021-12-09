@@ -15,7 +15,7 @@ function Filterable({ onFilter, pathname, searchParams, paramName, name }) {
     params.set(paramName, name);
     removeDefaultSearchKeys(params);
     return `${pathname}?${params.toString()}`;
-  }, [searchParams, paramName, pathname, name]);
+  }, [searchParams, paramName, pathname, name, removeDefaultSearchKeys]);
 
   const handleClick = useCallback(
     (event) => {

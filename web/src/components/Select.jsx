@@ -68,7 +68,7 @@ export default function Select({
         )
       );
     }
-  }, [inputOptions, propSelected, setSelected]);
+  }, [type, options, inputOptions, propSelected, setSelected]);
 
   const [focused, setFocused] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -91,7 +91,7 @@ export default function Select({
       onChange && onChange(range, 'range');
       setShowMenu(false);
     },
-    [onChange, options]
+    [onChange]
   );
 
   const handleClick = useCallback(() => {
@@ -135,23 +135,22 @@ export default function Select({
     setShowMenu(false);
   }, [setShowMenu]);
 
+  const findDOMNodes = (component) => {
+    return (component && (component.base || (component.nodeType === 1 && component))) || null;
+  };
+
   useEffect(() => {
+    const addBackDrop = (e) => {
+      if (showDatePicker && !findDOMNodes(calenderRef.current).contains(e.target)) {
+        setShowDatePicker(false);
+      }
+    };
     window.addEventListener('click', addBackDrop);
     // setDateToInput(state.selectedDay);
     return function cleanup() {
       window.removeEventListener('click', addBackDrop);
     };
   }, [showDatePicker]);
-
-  const findDOMNode = (component) => {
-    return (component && (component.base || (component.nodeType === 1 && component))) || null;
-  };
-
-  const addBackDrop = (e) => {
-    if (showDatePicker && !findDOMNode(calenderRef.current).contains(e.target)) {
-      setShowDatePicker(false);
-    }
-  };
 
   switch (type) {
     case 'datepicker':
