@@ -836,6 +836,17 @@ class FrigateConfig(FrigateBaseModel):
                 if camera_config.record.retain.days == 0:
                     camera_config.record.retain.days = camera_config.record.retain_days
 
+            # warning if the higher level record mode is potentially more restrictive than the events
+            if (
+                camera_config.record.retain.days != 0
+                and camera_config.record.retain.mode != RetainModeEnum.all
+                and camera_config.record.events.retain.mode
+                != camera_config.record.retain.mode
+            ):
+                logger.warning(
+                    f"Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+                )
+
             config.cameras[name] = camera_config
 
         return config
