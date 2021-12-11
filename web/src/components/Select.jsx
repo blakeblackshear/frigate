@@ -71,7 +71,7 @@ export default function Select({
   }, [type, options, inputOptions, propSelected, setSelected]);
 
   const [focused, setFocused] = useState(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalender, setShowCalender] = useState(false);
   const calenderRef = useRef(null);
   const ref = useRef(null);
 
@@ -81,7 +81,7 @@ export default function Select({
       setShowMenu(false);
 
       //show calender date range picker
-      if (value === 'custom_range') return setShowDatePicker(true);
+      if (value === 'custom_range') return setShowCalender(true);
       onChange && onChange(value);
     },
     [onChange, options, propSelected, setSelected]
@@ -110,7 +110,7 @@ export default function Select({
             setSelected(focused);
             if (options[focused].value === 'custom_range') {
               setShowMenu(false);
-              return setShowDatePicker(true);
+              return setShowCalender(true);
             }
 
             onChange && onChange(options[focused].value);
@@ -184,8 +184,8 @@ export default function Select({
 
   useEffect(() => {
     const addBackDrop = (e) => {
-      if (showDatePicker && !findDOMNodes(calenderRef.current).contains(e.target)) {
-        setShowDatePicker(false);
+      if (showCalender && !findDOMNodes(calenderRef.current).contains(e.target)) {
+        setShowCalender(false);
       }
     };
     window.addEventListener('click', addBackDrop);
@@ -193,7 +193,7 @@ export default function Select({
     return function cleanup() {
       window.removeEventListener('click', addBackDrop);
     };
-  }, [showDatePicker]);
+  }, [showCalender]);
 
   switch (type) {
     case 'datepicker':
@@ -208,9 +208,9 @@ export default function Select({
             trailingIcon={showMenu ? ArrowDropup : ArrowDropdown}
             value={datePickerValue}
           />
-          {showDatePicker && (
+          {showCalender && (
             <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref}>
-              <Calender onChange={handleDateRange} calenderRef={calenderRef} close={() => setShowDatePicker(false)} />
+              <Calender onChange={handleDateRange} calenderRef={calenderRef} close={() => setShowCalender(false)} />
             </Menu>
           )}
           {showMenu ? (

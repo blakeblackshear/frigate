@@ -93,7 +93,6 @@ const Calender = ({ onChange, calenderRef, close }) => {
           index++;
         }
       }
-      // setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: monthArray }));
       return monthArray;
     },
     [getNumberOfDays, getDayDetails]
@@ -108,6 +107,9 @@ const Calender = ({ onChange, calenderRef, close }) => {
     if (state.monthDetails) {
       keyRef.current = keyRef.current.slice(0, state.monthDetails.length);
     }
+    // set today date in focus for keyboard navigation
+    const todayDate = new Date(todayTimestamp).getDate();
+    keyRef.current.find((t) => t.tabIndex === todayDate)?.focus();
   }, [state.monthDetails]);
 
   const isCurrentDay = (day) => day.timestamp === todayTimestamp;
@@ -216,7 +218,8 @@ const Calender = ({ onChange, calenderRef, close }) => {
 
   const handleKeydown = (e, day, index) => {
     if ((keyRef.current && e.key === 'Enter') || e.keyCode === 32) {
-      onDateClick(day);
+      e.preventDefault();
+      day.month === 0 && onDateClick(day);
     }
     if (e.key === 'ArrowLeft') {
       index > 0 && keyRef.current[index - 1].focus();
@@ -246,8 +249,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
             onClick={() => onDateClick(day)}
             onkeydown={(e) => handleKeydown(e, day, idx)}
             ref={(ref) => (keyRef.current[idx] = ref)}
-            autoFocus={isCurrentDay(day)}
-            tabIndex={idx}
+            tabIndex={day.month === 0 ? day.date : null}
             className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
             }
@@ -284,6 +286,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
             <div
+              tabIndex={100}
               className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => setYear(-1)}
             >
@@ -292,6 +295,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
           </div>
           <div className="w-1/6 relative flex justify-around ">
             <div
+              tabIndex={101}
               className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => setMonth(-1)}
             >
@@ -304,13 +308,14 @@ const Calender = ({ onChange, calenderRef, close }) => {
           </div>
           <div className="w-1/6 relative flex justify-around ">
             <div
+              tabIndex={102}
               className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
               onClick={() => setMonth(1)}
             >
               <ArrowRight className="h-2/6" />
             </div>
           </div>
-          <div className="w-1/6 relative flex justify-around " onClick={() => setYear(1)}>
+          <div className="w-1/6 relative flex justify-around " tabIndex={104} onClick={() => setYear(1)}>
             <div className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800">
               <ArrowRightDouble className="h-2/6" />
             </div>
