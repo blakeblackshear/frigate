@@ -16,9 +16,10 @@ from pathlib import Path
 import psutil
 from peewee import JOIN, DoesNotExist
 
-from frigate.config import FrigateConfig
+from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.util import area
 
 logger = logging.getLogger(__name__)
 
@@ -195,6 +196,9 @@ class RecordingMaintainer(threading.Thread):
                             break
 
                     if overlaps:
+                        record_mode = self.config.cameras[
+                            camera
+                        ].record.events.retain.mode
                         # move from cache to recordings immediately
                         self.store_segment(
                             camera,
@@ -202,14 +206,57 @@ class RecordingMaintainer(threading.Thread):
                             end_time,
                             duration,
                             cache_path,
+                            record_mode,
                         )
                 # else retain days includes this segment
                 else:
+                    record_mode = self.config.cameras[camera].record.retain.mode
                     self.store_segment(
-                        camera, start_time, end_time, duration, cache_path
+                        camera, start_time, end_time, duration, cache_path, record_mode
                     )
 
-    def store_segment(self, camera, start_time, end_time, duration, cache_path):
+    def segment_stats(self, camera, start_time, end_time):
+        active_count = 0
+        motion_count = 0
+        for frame in self.recordings_info[camera]:
+            # frame is after end time of segment
+            if frame[0] > end_time.timestamp():
+                break
+            # frame is before start time of segment
+            if frame[0] < start_time.timestamp():
+                continue
+
+            active_count += len(
+                [
+                    o
+                    for o in frame[1]
+                    if not o["false_positive"] and o["motionless_count"] > 0
+                ]
+            )
+
+            motion_count += sum([area(box) for box in frame[2]])
+
+        return (motion_count, active_count)
+
+    def store_segment(
+        self,
+        camera,
+        start_time,
+        end_time,
+        duration,
+        cache_path,
+        store_mode: RetainModeEnum,
+    ):
+        motion_count, active_count = self.segment_stats(camera, start_time, end_time)
+
+        # check if the segment shouldn't be stored
+        if (store_mode == RetainModeEnum.motion and motion_count == 0) or (
+            store_mode == RetainModeEnum.active_objects and active_count == 0
+        ):
+            Path(cache_path).unlink(missing_ok=True)
+            self.end_time_cache.pop(cache_path, None)
+            return
+
         directory = os.path.join(RECORD_DIR, start_time.strftime("%Y-%m/%d/%H"), camera)
 
         if not os.path.exists(directory):
@@ -371,6 +418,7 @@ class RecordingCleanup(threading.Thread):
             )
 
             # loop over recordings and see if they overlap with any non-expired events
+            # TODO: expire segments based on segment stats according to config
             event_start = 0
             deleted_recordings = set()
             for recording in recordings.objects().iterator():
