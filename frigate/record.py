@@ -165,12 +165,12 @@ class RecordingMaintainer(threading.Thread):
                         Path(cache_path).unlink(missing_ok=True)
                         continue
 
-                # if cached file's start_time is earlier than the retain_days for the camera
+                # if cached file's start_time is earlier than the retain days for the camera
                 if start_time <= (
                     (
                         datetime.datetime.now()
                         - datetime.timedelta(
-                            days=self.config.cameras[camera].record.retain_days
+                            days=self.config.cameras[camera].record.retain.days
                         )
                     )
                 ):
@@ -203,7 +203,7 @@ class RecordingMaintainer(threading.Thread):
                             duration,
                             cache_path,
                         )
-                # else retain_days includes this segment
+                # else retain days includes this segment
                 else:
                     self.store_segment(
                         camera, start_time, end_time, duration, cache_path
@@ -314,7 +314,7 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug("Start deleted cameras.")
         # Handle deleted cameras
-        expire_days = self.config.record.retain_days
+        expire_days = self.config.record.retain.days
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
@@ -340,7 +340,7 @@ class RecordingCleanup(threading.Thread):
                 datetime.datetime.now()
                 - datetime.timedelta(seconds=config.record.events.max_seconds)
             ).timestamp()
-            expire_days = config.record.retain_days
+            expire_days = config.record.retain.days
             expire_before = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
@@ -416,14 +416,14 @@ class RecordingCleanup(threading.Thread):
 
         default_expire = (
             datetime.datetime.now().timestamp()
-            - SECONDS_IN_DAY * self.config.record.retain_days
+            - SECONDS_IN_DAY * self.config.record.retain.days
         )
         delete_before = {}
 
         for name, camera in self.config.cameras.items():
             delete_before[name] = (
                 datetime.datetime.now().timestamp()
-                - SECONDS_IN_DAY * camera.record.retain_days
+                - SECONDS_IN_DAY * camera.record.retain.days
             )
 
         # find all the recordings older than the oldest recording in the db
