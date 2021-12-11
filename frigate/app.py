@@ -108,6 +108,9 @@ class FrigateApp:
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
+        # Queue for recordings info
+        self.recordings_info_queue = mp.Queue()
+
     def init_database(self):
         # Migrate DB location
         old_db_path = os.path.join(CLIPS_DIR, "frigate.db")
@@ -206,6 +209,7 @@ class FrigateApp:
             self.event_queue,
             self.event_processed_queue,
             self.video_output_queue,
+            self.recordings_info_queue,
             self.stop_event,
         )
         self.detected_frames_processor.start()
@@ -273,7 +277,9 @@ class FrigateApp:
         self.event_cleanup.start()
 
     def start_recording_maintainer(self):
-        self.recording_maintainer = RecordingMaintainer(self.config, self.stop_event)
+        self.recording_maintainer = RecordingMaintainer(
+            self.config, self.recordings_info_queue, self.stop_event
+        )
         self.recording_maintainer.start()
 
     def start_recording_cleanup(self):
