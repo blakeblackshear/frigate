@@ -59,7 +59,7 @@ export const DateFilterOptions = [
 
 export default function DatePicker({
   helpText,
-  keyboardType = 'date',
+  keyboardType = 'text',
   inputRef,
   label,
   leadingIcon: LeadingIcon,
@@ -123,10 +123,15 @@ export default function DatePicker({
           className="flex space-x-2 items-center"
           data-testid={`label-${label.toLowerCase().replace(/[^\w]+/g, '_')}`}
         >
+          {LeadingIcon ? (
+            <div className="w-10 h-full">
+              <LeadingIcon />
+            </div>
+          ) : null}
           <div className="relative w-full">
             <input
               className="h-6 mt-6 w-full bg-transparent focus:outline-none focus:ring-0"
-              type="text"
+              type={keyboardType}
               readOnly
               onBlur={handleBlur}
               onFocus={handleFocus}
@@ -151,6 +156,7 @@ export default function DatePicker({
           ) : null}
         </label>
       </div>
+      {helpText ? <div className="text-xs pl-3 pt-1">{helpText}</div> : null}
     </div>
   );
 }
