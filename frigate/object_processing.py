@@ -885,7 +885,7 @@ class TrackedObjectProcessor(threading.Thread):
                 (
                     camera,
                     frame_time,
-                    current_tracked_objects,
+                    tracked_objects,
                     motion_boxes,
                     regions,
                 )
