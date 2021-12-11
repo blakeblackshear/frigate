@@ -284,6 +284,8 @@ class RecordingMaintainer(threading.Thread):
                 start_time=start_time.timestamp(),
                 end_time=end_time.timestamp(),
                 duration=duration,
+                motion=motion_count,
+                objects=active_count,
             )
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
