@@ -880,6 +880,17 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
+            # send info on this frame to the recordings maintainer
+            self.recordings_info_queue.put(
+                (
+                    camera,
+                    frame_time,
+                    current_tracked_objects,
+                    motion_boxes,
+                    regions,
+                )
+            )
+
             # update zone counts for each label
             # for each zone in the current camera
             for zone in self.config.cameras[camera].zones.keys():
