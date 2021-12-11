@@ -176,6 +176,7 @@ class TrackedObject:
             "box": self.obj_data["box"],
             "area": self.obj_data["area"],
             "region": self.obj_data["region"],
+            "motionless_count": self.obj_data["motionless_count"],
             "current_zones": self.current_zones.copy(),
             "entered_zones": list(self.entered_zones).copy(),
             "has_clip": self.has_clip,
@@ -815,11 +816,15 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
+            tracked_objects = [
+                o.to_dict() for o in camera_state.tracked_objects.values()
+            ]
+
             self.video_output_queue.put(
                 (
                     camera,
                     frame_time,
-                    current_tracked_objects,
+                    tracked_objects,
                     motion_boxes,
                     regions,
                 )
@@ -830,7 +835,7 @@ class TrackedObjectProcessor(threading.Thread):
                 (
                     camera,
                     frame_time,
-                    current_tracked_objects,
+                    tracked_objects,
                     motion_boxes,
                     regions,
                 )
