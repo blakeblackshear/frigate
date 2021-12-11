@@ -65,8 +65,17 @@ class MqttConfig(FrigateBaseModel):
         return v
 
 
+class RetainModeEnum(str, Enum):
+    all = "all"
+    motion = "motion"
+    active_objects = "active_objects"
+
+
 class RetainConfig(FrigateBaseModel):
     default: float = Field(default=10, title="Default retention period.")
+    mode: RetainModeEnum = Field(
+        default=RetainModeEnum.active_objects, title="Retain mode."
+    )
     objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
     )
@@ -88,9 +97,18 @@ class EventsConfig(FrigateBaseModel):
     )
 
 
+class RecordRetainConfig(FrigateBaseModel):
+    days: float = Field(default=0, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
+
+
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    retain_days: float = Field(default=0, title="Recording retention period in days.")
+    # deprecated - to be removed in a future version
+    retain_days: Optional[float] = Field(title="Recording retention period in days.")
+    retain: RecordRetainConfig = Field(
+        default_factory=RecordRetainConfig, title="Record retention settings."
+    )
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
     )
@@ -809,6 +827,14 @@ class FrigateConfig(FrigateBaseModel):
                 raise ValueError(
                     f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
                 )
+
+            # backwards compatibility for retain_days
+            if not camera_config.record.retain_days is None:
+                logger.warning(
+                    "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+                )
+                if camera_config.record.retain.days == 0:
+                    camera_config.record.retain.days = camera_config.record.retain_days
 
             config.cameras[name] = camera_config
 
