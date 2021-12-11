@@ -584,6 +584,7 @@ class TrackedObjectProcessor(threading.Thread):
         event_queue,
         event_processed_queue,
         video_output_queue,
+        recordings_info_queue,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -595,6 +596,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.video_output_queue = video_output_queue
+        self.recordings_info_queue = recordings_info_queue
         self.stop_event = stop_event
         self.camera_states: Dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
@@ -814,6 +816,17 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
             self.video_output_queue.put(
+                (
+                    camera,
+                    frame_time,
+                    current_tracked_objects,
+                    motion_boxes,
+                    regions,
+                )
+            )
+
+            # send info on this frame to the recordings maintainer
+            self.recordings_info_queue.put(
                 (
                     camera,
                     frame_time,
