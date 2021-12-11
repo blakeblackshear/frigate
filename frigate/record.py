@@ -448,8 +448,19 @@ class RecordingCleanup(threading.Thread):
                     if event.end_time < recording.start_time:
                         event_start = idx
 
-                # Delete recordings outside of the retention window
-                if not keep:
+                # Delete recordings outside of the retention window or based on the retention mode
+                if (
+                    not keep
+                    or (
+                        config.record.events.retain.mode == RetainModeEnum.motion
+                        and recording.motion == 0
+                    )
+                    or (
+                        config.record.events.retain.mode
+                        == RetainModeEnum.active_objects
+                        and recording.objects == 0
+                    )
+                ):
                     Path(recording.path).unlink(missing_ok=True)
                     deleted_recordings.add(recording.id)
 
