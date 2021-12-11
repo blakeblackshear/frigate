@@ -69,14 +69,15 @@ export default function RelativeModal({
       let newTop = top;
       let newLeft = left;
 
-      // too far right
-      if (newLeft + width + WINDOW_PADDING >= windowWidth - WINDOW_PADDING) {
-        newLeft = windowWidth - width - WINDOW_PADDING;
-      }
       // too far left
-      else if (left < WINDOW_PADDING) {
+      if (left < WINDOW_PADDING) {
         newLeft = WINDOW_PADDING;
       }
+      // too far right
+      else if (newLeft + width + WINDOW_PADDING >= windowWidth - WINDOW_PADDING) {
+        newLeft = windowWidth - width - WINDOW_PADDING;
+      }
+
       // too close to bottom
       if (top + menuHeight > windowHeight - WINDOW_PADDING + window.scrollY) {
         newTop = WINDOW_PADDING;
