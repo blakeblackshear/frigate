@@ -99,25 +99,38 @@ const Calender = ({ onChange, calenderRef }) => {
     setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: getMonthDetails(year, month) }));
   }, [year, month, getMonthDetails]);
 
-  const isCurrentDay = (day) => {
-    return day.timestamp === todayTimestamp;
-  };
+  const isCurrentDay = (day) => day.timestamp === todayTimestamp;
 
-  const isSelectedRange = (day) => {
-    if (!state.timeRange.after || !state.timeRange.before) return;
+  const isSelectedRange = useCallback(
+    (day) => {
+      if (!state.timeRange.after || !state.timeRange.before) return;
 
-    return day.timestamp < state.timeRange.before && day.timestamp >= state.timeRange.after;
-  };
+      return day.timestamp < state.timeRange.before && day.timestamp >= state.timeRange.after;
+    },
+    [state.timeRange]
+  );
 
-  const isFirstDayInRange = (day) => {
-    if (isCurrentDay(day)) return;
-    return state.timeRange.after === day.timestamp;
-  };
-  const isLastDayInRange = (day) => {
-    return state.timeRange.before === new Date(day.timestamp).setHours(24, 0, 0, 0);
-  };
+  const isFirstDayInRange = useCallback(
+    (day) => {
+      if (isCurrentDay(day)) return;
+      return state.timeRange.after === day.timestamp;
+    },
+    [state.timeRange.after]
+  );
 
-  const getMonthStr = (month) => monthMap[Math.max(Math.min(11, month), 0)] || 'Month';
+  const isLastDayInRange = useCallback(
+    (day) => {
+      return state.timeRange.before === new Date(day.timestamp).setHours(24, 0, 0, 0);
+    },
+    [state.timeRange.before]
+  );
+
+  const getMonthStr = useCallback(
+    (month) => {
+      return monthMap[Math.max(Math.min(11, month), 0)] || 'Month';
+    },
+    [monthMap]
+  );
 
   const onDateClick = (day) => {
     const { before, after } = state.timeRange;
@@ -155,17 +168,20 @@ const Calender = ({ onChange, calenderRef }) => {
     }
   };
 
-  const setYear = (offset) => {
-    const year = state.year + offset;
-    const month = state.month;
-    setState((prev) => {
-      return {
-        ...prev,
-        year,
-        monthDetails: getMonthDetails(year, month),
-      };
-    });
-  };
+  const setYear = useCallback(
+    (offset) => {
+      const year = state.year + offset;
+      const month = state.month;
+      setState((prev) => {
+        return {
+          ...prev,
+          year,
+          monthDetails: getMonthDetails(year, month),
+        };
+      });
+    },
+    [state.year, state.month, getMonthDetails]
+  );
 
   const setMonth = (offset) => {
     let year = state.year;
