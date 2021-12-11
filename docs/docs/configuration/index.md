@@ -229,15 +229,23 @@ record:
   #          will fit within the available disk space of your drive or Frigate
   #          will crash.
   enabled: False
-  # Optional: Number of days to retain recordings regardless of events (default: shown below)
-  # NOTE: This should be set to 0 and retention should be defined in events section below
-  #       if you only want to retain recordings of events.
-  retain_days: 0
+  # Optional: Retention settings for recording
+  retain:
+    # Optional: Number of days to retain recordings regardless of events (default: shown below)
+    # NOTE: This should be set to 0 and retention should be defined in events section below
+    #       if you only want to retain recordings of events.
+    days: 0
+    # Optional: Mode for retention. Available options are: all, motion, and active_objects
+    #   all - save all recording segments regardless of activity
+    #   motion - save all recordings segments with any detected motion
+    #   active_objects - save all recording segments with active/moving objects
+    # NOTE: this mode only applies when the days setting above is greater than 0
+    mode: all
   # Optional: Event recording settings
   events:
     # Optional: Maximum length of time to retain video during long events. (default: shown below)
     # NOTE: If an object is being tracked for longer than this amount of time, the retained recordings
-    #       will be the last x seconds of the event unless retain_days under record is > 0.
+    #       will be the last x seconds of the event unless retain->days under record is > 0.
     max_seconds: 300
     # Optional: Number of seconds before the event to include (default: shown below)
     pre_capture: 5
@@ -252,6 +260,16 @@ record:
     retain:
       # Required: Default retention days (default: shown below)
       default: 10
+      # Optional: Mode for retention. (default: shown below)
+      #   all - save all recording segments for events regardless of activity
+      #   motion - save all recordings segments for events with any detected motion
+      #   active_objects - save all recording segments for event with active/moving objects
+      #
+      # NOTE: If the retain mode for the camera is more restrictive than the mode configured
+      #       here, the segments will already be gone by the time this mode is applied.
+      #       For example, if the camera retain mode is "motion", the segments without motion are
+      #       never stored, so setting the mode to "all" here won't bring them back.
+      mode: active_objects
       # Optional: Per object retention days
       objects:
         person: 15
