@@ -2,7 +2,7 @@ import { h } from 'preact';
 import Select from '../../../components/Select';
 import { useCallback } from 'preact/hooks';
 
-function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
+function Filter({ onChange, searchParams, paramName, options, ...rest }) {
   const handleSelect = useCallback(
     (key) => {
       const newParams = new URLSearchParams(searchParams.toString());
@@ -20,10 +20,7 @@ function Filter({ onChange, searchParams, paramName, options, type, ...rest }) {
   );
 
   const obj = {};
-  paramName.map((p) => Object.assign(obj, { [p]: searchParams.get(p) }), [searchParams]);
-
-  return (
-    <Select onChange={handleSelect} options={options} selected={obj} paramName={paramName} type={type} {...rest} />
-  );
+  paramName.map((name) => Object.assign(obj, { [name]: searchParams.get(name) }), [searchParams]);
+  return <Select onChange={handleSelect} options={options} selected={obj} paramName={paramName} {...rest} />;
 }
 export default Filter;

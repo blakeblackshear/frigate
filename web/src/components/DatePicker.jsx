@@ -53,7 +53,7 @@ export const DateFilterOptions = [
   },
   {
     label: 'Custom Range',
-    value: null,
+    value: 'custom_range',
   },
 ];
 
@@ -134,6 +134,7 @@ export default function DatePicker({
               tabIndex="0"
               onClick={onClick}
               value={propValue}
+              {...props}
             />
             <div
               className={`absolute top-3 transition transform text-gray-600 dark:text-gray-400 ${

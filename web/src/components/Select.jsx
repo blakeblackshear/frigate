@@ -76,19 +76,20 @@ export default function Select({
   const ref = useRef(null);
 
   const handleSelect = useCallback(
-    (value, label) => {
+    (value) => {
       setSelected(options.findIndex(({ value }) => Object.values(propSelected).includes(value)));
       setShowMenu(false);
 
-      if (!value) return setShowDatePicker(true);
-      onChange && onChange(value, label);
+      //show calender date range picker
+      if (value === 'custom_range') return setShowDatePicker(true);
+      onChange && onChange(value);
     },
     [onChange, options, propSelected, setSelected]
   );
 
   const handleDateRange = useCallback(
     (range) => {
-      onChange && onChange(range, 'range');
+      onChange && onChange(range);
       setShowMenu(false);
     },
     [onChange]
@@ -97,6 +98,44 @@ export default function Select({
   const handleClick = useCallback(() => {
     setShowMenu(true);
   }, [setShowMenu]);
+
+  const handleKeydownDatePicker = useCallback(
+    (event) => {
+      switch (event.key) {
+        case 'Enter': {
+          if (!showMenu) {
+            setShowMenu(true);
+            setFocused(selected);
+          } else {
+            setSelected(focused);
+            if (options[focused].value === 'custom_range') {
+              setShowMenu(false);
+              return setShowDatePicker(true);
+            }
+
+            onChange && onChange(options[focused].value);
+            setShowMenu(false);
+          }
+          break;
+        }
+
+        case 'ArrowDown': {
+          const newIndex = focused + 1;
+          newIndex < options.length && setFocused(newIndex);
+          break;
+        }
+
+        case 'ArrowUp': {
+          const newIndex = focused - 1;
+          newIndex > -1 && setFocused(newIndex);
+          break;
+        }
+
+        // no default
+      }
+    },
+    [onChange, options, showMenu, setShowMenu, setFocused, focused, selected]
+  );
 
   const handleKeydown = useCallback(
     (event) => {
@@ -107,7 +146,7 @@ export default function Select({
             setFocused(selected);
           } else {
             setSelected(focused);
-            onChange && onChange(options[focused].value, options[focused].label);
+            onChange && onChange({ [paramName]: options[focused].value });
             setShowMenu(false);
           }
           break;
@@ -146,7 +185,7 @@ export default function Select({
       }
     };
     window.addEventListener('click', addBackDrop);
-    // setDateToInput(state.selectedDay);
+
     return function cleanup() {
       window.removeEventListener('click', addBackDrop);
     };
@@ -161,7 +200,7 @@ export default function Select({
             label={label}
             onchange={onChange}
             onclick={handleClick}
-            onkeydown={handleKeydown}
+            onkeydown={handleKeydownDatePicker}
             trailingIcon={showMenu ? ArrowDropup : ArrowDropdown}
             value={datePickerValue}
           />
