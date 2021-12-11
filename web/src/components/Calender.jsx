@@ -35,8 +35,7 @@ const Calender = ({ onChange, calenderRef }) => {
     year,
     month,
     selectedDay: null,
-    selectedRange: { before: null, after: null },
-    selectedRangeBefore: false,
+    timeRange: { before: null, after: null },
     monthDetails: null,
   });
   const getNumberOfDays = useCallback((year, month) => {
@@ -104,42 +103,55 @@ const Calender = ({ onChange, calenderRef }) => {
     return day.timestamp === todayTimestamp;
   };
 
-  const isSelectedDay = (day) => {
-    return day.timestamp === state.selectedDay;
-  };
   const isSelectedRange = (day) => {
-    if (!state.selectedRange.after || !state.selectedRange.before) return;
+    if (!state.timeRange.after || !state.timeRange.before) return;
 
-    return day.timestamp < state.selectedRange.before * 1000 && day.timestamp >= state.selectedRange.after * 1000;
+    return day.timestamp < state.timeRange.before && day.timestamp >= state.timeRange.after;
   };
 
   const isFirstDayInRange = (day) => {
     if (isCurrentDay(day)) return;
-    return state.selectedRange.after * 1000 === day.timestamp;
+    return state.timeRange.after === day.timestamp;
   };
   const isLastDayInRange = (day) => {
-    if (state.selectedRange.after * 1000 === todayTimestamp) return;
-    return state.selectedRange.before * 1000 === day.timestamp + 86400000;
+    return state.timeRange.before === new Date(day.timestamp).setHours(24, 0, 0, 0);
   };
 
   const getMonthStr = (month) => monthMap[Math.max(Math.min(11, month), 0)] || 'Month';
 
   const onDateClick = (day) => {
-    const range = {
-      selectedRange: state.selectedRangeBefore
-        ? { ...state.selectedRange, before: new Date(day.timestamp).setHours(24, 0, 0, 0) / 1000 }
-        : { ...state.selectedRange, after: day.timestamp / 1000 },
-    };
+    const { before, after } = state.timeRange;
+    let timeRange = { before: null, after: null };
+
+    // user has selected a date < after, reset values
+    if (after === null || day.timestamp < after) {
+      timeRange = { before: new Date(day.timestamp).setHours(24, 0, 0, 0), after: day.timestamp };
+    }
+
+    // user has selected a date > after
+    if (after !== null && before !== new Date(day.timestamp).setHours(24, 0, 0, 0) && day.timestamp > after) {
+      timeRange = {
+        after,
+        before:
+          day.timestamp >= todayTimestamp
+            ? new Date(todayTimestamp).setHours(24, 0, 0, 0)
+            : new Date(day.timestamp).setHours(24, 0, 0, 0),
+      };
+    }
+
+    // reset values
+    if (before === new Date(day.timestamp).setHours(24, 0, 0, 0)) {
+      timeRange = { before: null, after: null };
+    }
 
     setState((prev) => ({
       ...prev,
-      ...range,
+      timeRange,
       selectedDay: day.timestamp,
-      selectedRangeBefore: !state.selectedRangeBefore,
     }));
 
     if (onChange) {
-      onChange({ before: range.selectedRange.before, after: range.selectedRange.after });
+      onChange(timeRange.after ? { before: timeRange.before / 1000, after: timeRange.after / 1000 } : ['all']);
     }
   };
 
@@ -185,9 +197,8 @@ const Calender = ({ onChange, calenderRef }) => {
             className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
             }
-              ${isSelectedDay(day) ? 'bg-gray-100 dark:hover:bg-gray-100' : ''}
               ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
-              ${isSelectedRange(day) ? ' bg-blue-500 dark:hover:bg-blue-600' : ''}
+              ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
               ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
             key={index}
