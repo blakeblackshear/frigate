@@ -120,12 +120,14 @@ export default function Select({
         }
 
         case 'ArrowDown': {
+          event.preventDefault();
           const newIndex = focused + 1;
           newIndex < options.length && setFocused(newIndex);
           break;
         }
 
         case 'ArrowUp': {
+          event.preventDefault();
           const newIndex = focused - 1;
           newIndex > -1 && setFocused(newIndex);
           break;
@@ -153,12 +155,14 @@ export default function Select({
         }
 
         case 'ArrowDown': {
+          event.preventDefault();
           const newIndex = focused + 1;
           newIndex < options.length && setFocused(newIndex);
           break;
         }
 
         case 'ArrowUp': {
+          event.preventDefault();
           const newIndex = focused - 1;
           newIndex > -1 && setFocused(newIndex);
           break;
@@ -167,7 +171,7 @@ export default function Select({
         // no default
       }
     },
-    [onChange, options, showMenu, setShowMenu, setFocused, focused, selected]
+    [onChange, options, showMenu, setShowMenu, setFocused, focused, selected, paramName]
   );
 
   const handleDismiss = useCallback(() => {
@@ -206,7 +210,7 @@ export default function Select({
           />
           {showDatePicker && (
             <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref}>
-              <Calender onChange={handleDateRange} calenderRef={calenderRef} />
+              <Calender onChange={handleDateRange} calenderRef={calenderRef} close={() => setShowDatePicker(false)} />
             </Menu>
           )}
           {showMenu ? (

@@ -1,12 +1,14 @@
 import { h } from 'preact';
-import { useEffect, useState, useCallback, useMemo } from 'preact/hooks';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'preact/hooks';
 import ArrowRight from '../icons/ArrowRight';
 import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const oneDay = 60 * 60 * 24 * 1000;
 const todayTimestamp = Date.now() - (Date.now() % oneDay) + new Date().getTimezoneOffset() * 1000 * 60;
 
-const Calender = ({ onChange, calenderRef }) => {
+const Calender = ({ onChange, calenderRef, close }) => {
+  const keyRef = useRef([]);
+
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -38,6 +40,7 @@ const Calender = ({ onChange, calenderRef }) => {
     timeRange: { before: null, after: null },
     monthDetails: null,
   });
+
   const getNumberOfDays = useCallback((year, month) => {
     return 40 - new Date(year, month, 40).getDate();
   }, []);
@@ -90,6 +93,7 @@ const Calender = ({ onChange, calenderRef }) => {
           index++;
         }
       }
+      // setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: monthArray }));
       return monthArray;
     },
     [getNumberOfDays, getDayDetails]
@@ -98,6 +102,13 @@ const Calender = ({ onChange, calenderRef }) => {
   useEffect(() => {
     setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: getMonthDetails(year, month) }));
   }, [year, month, getMonthDetails]);
+
+  useEffect(() => {
+    // add refs for keyboard navigation
+    if (state.monthDetails) {
+      keyRef.current = keyRef.current.slice(0, state.monthDetails.length);
+    }
+  }, [state.monthDetails]);
 
   const isCurrentDay = (day) => day.timestamp === todayTimestamp;
 
@@ -203,13 +214,40 @@ const Calender = ({ onChange, calenderRef }) => {
     });
   };
 
+  const handleKeydown = (e, day, index) => {
+    if ((keyRef.current && e.key === 'Enter') || e.keyCode === 32) {
+      onDateClick(day);
+    }
+    if (e.key === 'ArrowLeft') {
+      index > 0 && keyRef.current[index - 1].focus();
+    }
+    if (e.key === 'ArrowRight') {
+      index < 41 && keyRef.current[index + 1].focus();
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      index > 6 && keyRef.current[index - 7].focus();
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      index < 36 && keyRef.current[index + 7].focus();
+    }
+    if (e.key === 'Escape') {
+      close();
+    }
+  };
+
   const renderCalendar = () => {
     const days =
       state.monthDetails &&
-      state.monthDetails.map((day, index) => {
+      state.monthDetails.map((day, idx) => {
         return (
           <div
             onClick={() => onDateClick(day)}
+            onkeydown={(e) => handleKeydown(e, day, idx)}
+            ref={(ref) => (keyRef.current[idx] = ref)}
+            autoFocus={isCurrentDay(day)}
+            tabIndex={idx}
             className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
             }
@@ -217,7 +255,7 @@ const Calender = ({ onChange, calenderRef }) => {
               ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
               ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
-            key={index}
+            key={idx}
           >
             <div className="font-light">
               <span className="text-gray-400">{day.date}</span>

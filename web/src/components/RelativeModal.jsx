@@ -27,7 +27,7 @@ export default function RelativeModal({
 
   const handleKeydown = useCallback(
     (event) => {
-      const focusable = ref.current.querySelectorAll('[tabindex]');
+      const focusable = ref.current && ref.current.querySelectorAll('[tabindex]');
       if (event.key === 'Tab' && focusable.length) {
         if (event.shiftKey && document.activeElement === focusable[0]) {
           focusable[focusable.length - 1].focus();
