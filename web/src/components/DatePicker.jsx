@@ -144,6 +144,11 @@ export default function DatePicker({
               <p>{label}</p>
             </div>
           </div>
+          {TrailingIcon ? (
+            <div className="w-10 h-10">
+              <TrailingIcon />
+            </div>
+          ) : null}
         </label>
       </div>
     </div>
