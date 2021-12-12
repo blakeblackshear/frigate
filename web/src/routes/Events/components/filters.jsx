@@ -36,7 +36,7 @@ const Filters = ({ onChange, searchParams }) => {
         className="block xs:hidden w-full mb-4 text-center"
         type="text"
       >
-        Filters
+        {`${viewFilters ? 'Hide Filter' : 'Filter'}`}
       </Button>
       <div className={`xs:flex space-y-1 xs:space-y-0 xs:space-x-4  ${viewFilters ? 'flex-col' : 'hidden'}`}>
         <Filter
