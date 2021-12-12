@@ -3,8 +3,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'preact/hooks'
 import ArrowRight from '../icons/ArrowRight';
 import ArrowRightDouble from '../icons/ArrowRightDouble';
 
-const oneDay = 60 * 60 * 24 * 1000;
-const todayTimestamp = Date.now() - (Date.now() % oneDay) + new Date().getTimezoneOffset() * 1000 * 60;
+const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
 const Calender = ({ onChange, calenderRef, close }) => {
   const keyRef = useRef([]);
