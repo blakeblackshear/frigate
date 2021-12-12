@@ -31,24 +31,28 @@ def get_fs_type(path):
             bestMatch = part.mountpoint
     return fsType
 
+
 def read_temperature(path):
     if os.path.isfile(path):
         with open(path) as f:
-            line=f.readline().strip()
-            return int(line)/1000
+            line = f.readline().strip()
+            return int(line) / 1000
     return None
 
+
 def get_temperatures():
-    temps={}
+    temps = {}
 
     # Get temperatures for all attached Corals
-    base="/sys/class/apex/"
-    for apex in os.listdir(base):
-        temp=read_temperature(os.path.join(base,apex,"temp"))
-        if temp is not None:
-            temps[apex]=temp
+    base = "/sys/class/apex/"
+    if os.path.isdir(base):
+        for apex in os.listdir(base):
+            temp = read_temperature(os.path.join(base, apex, "temp"))
+            if temp is not None:
+                temps[apex] = temp
 
     return temps
+
 
 def stats_snapshot(stats_tracking):
     camera_metrics = stats_tracking["camera_metrics"]
@@ -80,7 +84,7 @@ def stats_snapshot(stats_tracking):
         "uptime": (int(time.time()) - stats_tracking["started"]),
         "version": VERSION,
         "storage": {},
-        "temperatures" : get_temperatures()
+        "temperatures": get_temperatures(),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
