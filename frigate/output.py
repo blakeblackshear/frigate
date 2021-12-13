@@ -39,9 +39,8 @@ class FFMpegConverter:
         # )
         
 
-        logger.error(f" ffmpeg_cmd >>>> {ffmpeg_cmd}")
         self.logpipe = LogPipe(
-            "ffmpeg.output", logging.ERROR)
+            "ffmpeg.converter", logging.ERROR)
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
@@ -54,6 +53,7 @@ class FFMpegConverter:
         try:
             self.process.stdin.write(b)
         except Exception:
+            logger.error("Failure while writing to the stream:")
             self.logpipe.dump()
             return False
 
@@ -61,6 +61,7 @@ class FFMpegConverter:
         try:
             return self.process.stdout.read1(length)
         except ValueError:
+            logger.error("Failure while readig from the stream:")
             self.logpipe.dump()
             return False
 
@@ -427,6 +428,8 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 # write to the converter for the camera if clients are listening to the specific camera
                 converters[camera].write(frame.tobytes())
             except Exception:
+                # in case of videoconverter failure continure processing video_output_queue
+                # FFMpegConverter should dump an error response
                 pass
 
         # update birdseye if websockets are connected

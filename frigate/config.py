@@ -353,8 +353,16 @@ class FfmpegConfig(FrigateBaseModel):
 
 
 class GstreamerConfig(FrigateBaseModel):
-    pipeline: List[str] = Field(
-        default=[], title="GStreamer pipeline. Each pipeline will be splited by ! sign")
+    manual_pipeline: List[str] = Field(
+        default=[], title="GStreamer manual pipeline. Use `manual_pipeline` to fine tune gstreamer. Each item will be splited by the `!`.")
+    input_pipeline: List[str] = Field(
+        default=[], title="Override the `rtspsrc location={{gstreamer_input.path}} latency=0` default pipeline item.")
+    decoder_pipeline: List[str] = Field(
+        default=[], title="Set the hardware specific decoder. Example: ['rtph265depay', 'h265parse', 'omxh265dec']")
+    source_format_pipeline: List[str] = Field(
+        default=[], title="Set the camera source format. Default is: ['video/x-raw,format=(string)NV12', 'videoconvert', 'videoscale']")
+    destination_format_pipeline: List[str] = Field(
+        default=[], title="Set the Frigate format. Please keep `format=I420` if override. Default is: ['video/x-raw,width=(int){self.detect.width},height=(int){self.detect.height},format=(string)I420', 'videoconvert']")
 
 
 class CameraRoleEnum(str, Enum):
@@ -589,48 +597,63 @@ class CameraConfig(FrigateBaseModel):
     def _get_gstreamer_cmd(self, gstreamer_input: CameraGStreamerInput):
         assert list(
             ["detect"]) == gstreamer_input.roles, "only detect role is supported"
-        pipeline = [part for part in self.gstreamer.pipeline if part != ""]
+        manual_pipeline = [
+            part for part in self.gstreamer.manual_pipeline if part != ""]
+        input_pipeline = [
+            part for part in self.gstreamer.input_pipeline if part != ""]
+        decoder_pipeline = [
+            part for part in self.gstreamer.decoder_pipeline if part != ""]
+        source_format_pipeline = [
+            part for part in self.gstreamer.source_format_pipeline if part != ""]
+        destination_format_pipeline = [
+            part for part in self.gstreamer.destination_format_pipeline if part != ""]
 
         video_format = f"video/x-raw,width=(int){self.detect.width},height=(int){self.detect.height},format=(string)I420"
-        if len(pipeline) == 0:
+        if not manual_pipeline and not input_pipeline and not decoder_pipeline and not source_format_pipeline and not destination_format_pipeline:
+            logger.warn(
+                "gsreamer pipeline not configured. Using videotestsrc pattern=0")
             pipeline = [
-                #"videotestsrc pattern=0",
-                "rtspsrc location=\"rtsp://admin:123456@192.168.5.95:554/stream0\"",
-                "rtph265depay", "h265parse","omxh265dec",
-                "video/x-raw,format=(string)NV12",
-                "videoconvert","videoscale",
+                "videotestsrc pattern=0",
                 video_format,
-                "videoconvert"
-                # "videoscale",
-                # video_format,
-                # "videoconvert"
+            ]
+        elif len(manual_pipeline) > 0:
+            logger.warn(
+                "gsreamer manual pipeline is set. Please make sure your detect width and height does math the gstreamer parameters")
+            pipeline = manual_pipeline
+        else:
+            input_pipeline = input_pipeline if input_pipeline else [
+                f"rtspsrc location=\"{gstreamer_input.path}\" latency=0"
             ]
 
-            # pipeline = [
-            #     #"videotestsrc pattern=0",
-            #     "rtspsrc location=\"rtsp://admin:123456@192.168.5.180:554/cam/realmonitor?channel=0&subtype=0\"",
-            #     "rtph264depay",
-            #     "h264parse",
-            #     "omxh264dec",
-            #     "video/x-raw,format=(string)NV12",
-            #     "videoconvert",
-            #     "videoscale",
-            #     video_format,
-            #     "videoconvert"
-            #     # "videoscale",
-            #     # video_format,
-            #     # "videoconvert"
-            # ]            
+            decoder_pipeline = decoder_pipeline if decoder_pipeline else [
+                "rtph265depay", "h265parse", "omxh265dec"
+            ]
+            source_format_pipeline = source_format_pipeline if source_format_pipeline else [
+                'video/x-raw,format=(string)NV12', 'videoconvert', 'videoscale'
+            ]
+            destination_format_pipeline = destination_format_pipeline if destination_format_pipeline else [
+                video_format, "videoconvert"
+            ]
+            pipeline = [
+                *input_pipeline,
+                *decoder_pipeline,
+                *source_format_pipeline,
+                *destination_format_pipeline
+            ]
         pipeline_args = (
             [f"{item} !".split(" ") for item in pipeline]
         )
         pipeline_args = [item for sublist in pipeline_args for item in sublist]
-        return [
+        pipeline_args = [
             "gst-launch-1.0",
             "-q",
             *pipeline_args,
             "fdsink"
         ]
+        logger.debug(
+            f"using gstreamer pipeline: {' '.join(pipeline_args)}")
+
+        return pipeline_args
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraFFmpegInput):
         ffmpeg_output_args = []
