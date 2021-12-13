@@ -247,7 +247,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert "-rtsp_transport" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "-rtsp_transport" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
 
     def test_ffmpeg_params_global(self):
         config = {
@@ -276,7 +276,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert "-re" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "-re" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
 
     def test_ffmpeg_params_camera(self):
         config = {
@@ -306,8 +306,8 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert "-re" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
-        assert "test" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "-re" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert "test" not in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
 
     def test_ffmpeg_params_input(self):
         config = {
@@ -341,10 +341,10 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert "-re" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
-        assert "test" in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
-        assert "test2" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
-        assert "test3" not in runtime_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+        assert "-re" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert "test" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert "test2" not in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert "test3" not in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
 
     def test_inherit_clips_retention(self):
         config = {
@@ -512,9 +512,9 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        ffmpeg_cmds = runtime_config.cameras["back"].ffmpeg_cmds
-        assert len(ffmpeg_cmds) == 1
-        assert not "clips" in ffmpeg_cmds[0]["roles"]
+        decoder_cmds = runtime_config.cameras["back"].decoder_cmds
+        assert len(decoder_cmds) == 1
+        assert not "clips" in decoder_cmds[0]["roles"]
 
     def test_max_disappeared_default(self):
         config = {

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, Extra, Field, validator, root_validator
 from pydantic.fields import PrivateAttr
 
 from frigate.const import BASE_DIR, CACHE_DIR, RECORD_DIR
@@ -23,7 +23,8 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 # German Style:
 # DEFAULT_TIME_FORMAT = "%d.%m.%Y %H:%M:%S"
 
-FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+FRIGATE_ENV_VARS = {k: v for k,
+                    v in os.environ.items() if k.startswith("FRIGATE_")}
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
@@ -40,7 +41,8 @@ class DetectorTypeEnum(str, Enum):
 
 
 class DetectorConfig(FrigateBaseModel):
-    type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
+    type: DetectorTypeEnum = Field(
+        default=DetectorTypeEnum.cpu, title="Detector Type")
     device: str = Field(default="usb", title="Device Type")
     num_threads: int = Field(default=3, title="Number of detection threads")
 
@@ -74,8 +76,10 @@ class RetainConfig(FrigateBaseModel):
 
 class EventsConfig(FrigateBaseModel):
     max_seconds: int = Field(default=300, title="Maximum event duration.")
-    pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
-    post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
+    pre_capture: int = Field(
+        default=5, title="Seconds to retain before event starts.")
+    post_capture: int = Field(
+        default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event.",
@@ -90,7 +94,8 @@ class EventsConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    retain_days: float = Field(default=0, title="Recording retention period in days.")
+    retain_days: float = Field(
+        default=0, title="Recording retention period in days.")
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
     )
@@ -123,7 +128,8 @@ class RuntimeMotionConfig(MotionConfig):
             config["frame_height"] = max(frame_shape[0] // 6, 180)
 
         if "contour_area" not in config:
-            frame_width = frame_shape[1] * config["frame_height"] / frame_shape[0]
+            frame_width = frame_shape[1] * \
+                config["frame_height"] / frame_shape[0]
             config["contour_area"] = (
                 config["frame_height"] * frame_width * 0.00173611111
             )
@@ -153,8 +159,10 @@ class RuntimeMotionConfig(MotionConfig):
 
 
 class DetectConfig(FrigateBaseModel):
-    height: int = Field(default=720, title="Height of the stream for the detect role.")
-    width: int = Field(default=1280, title="Width of the stream for the detect role.")
+    height: int = Field(
+        default=720, title="Height of the stream for the detect role.")
+    width: int = Field(
+        default=1280, title="Width of the stream for the detect role.")
     fps: int = Field(
         default=5, title="Number of frames per second to process through detection."
     )
@@ -192,7 +200,8 @@ class RuntimeFilterConfig(FilterConfig):
         config["raw_mask"] = mask
 
         if mask is not None:
-            config["mask"] = create_mask(config.get("frame_shape", (1, 1)), mask)
+            config["mask"] = create_mask(
+                config.get("frame_shape", (1, 1)), mask)
 
         super().__init__(**config)
 
@@ -239,19 +248,22 @@ class ZoneConfig(BaseModel):
 
         if isinstance(coordinates, list):
             self._contour = np.array(
-                [[int(p.split(",")[0]), int(p.split(",")[1])] for p in coordinates]
+                [[int(p.split(",")[0]), int(p.split(",")[1])]
+                 for p in coordinates]
             )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
             self._contour = np.array(
-                [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+                [[int(points[i]), int(points[i + 1])]
+                 for i in range(0, len(points), 2)]
             )
         else:
             self._contour = np.array([])
 
 
 class ObjectConfig(FrigateBaseModel):
-    track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
+    track: List[str] = Field(
+        default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
 
@@ -340,6 +352,11 @@ class FfmpegConfig(FrigateBaseModel):
     )
 
 
+class GstreamerConfig(FrigateBaseModel):
+    pipeline: List[str] = Field(
+        default=[], title="GStreamer pipeline. Each pipeline will be splited by ! sign")
+
+
 class CameraRoleEnum(str, Enum):
     record = "record"
     rtmp = "rtmp"
@@ -349,6 +366,9 @@ class CameraRoleEnum(str, Enum):
 class CameraInput(FrigateBaseModel):
     path: str = Field(title="Camera input path.")
     roles: List[CameraRoleEnum] = Field(title="Roles assigned to this input.")
+
+
+class CameraFFmpegInput(CameraInput):
     global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
     )
@@ -360,9 +380,12 @@ class CameraInput(FrigateBaseModel):
     )
 
 
-class CameraFfmpegConfig(FfmpegConfig):
-    inputs: List[CameraInput] = Field(title="Camera inputs.")
+class CameraGStreamerInput(CameraInput):
+    pipeline: List[str] = Field(
+        default=[], title="GStreamer pipeline. Each pipeline will be splited by ! sign")
 
+
+class CameraInputValidator:
     @validator("inputs")
     def validate_roles(cls, v):
         roles = [role for i in v for role in i.roles]
@@ -377,6 +400,15 @@ class CameraFfmpegConfig(FfmpegConfig):
         return v
 
 
+class CameraFfmpegConfig(FfmpegConfig, CameraInputValidator):
+    inputs: List[CameraFFmpegInput] = Field(title="Camera FFMpeg inputs.")
+
+
+class CameraGStreamerConfig(GstreamerConfig, CameraInputValidator):
+    inputs: List[CameraGStreamerInput] = Field(
+        title="Camera GStreamer inputs.")
+
+
 class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
     clean_copy: bool = Field(
@@ -388,7 +420,8 @@ class SnapshotsConfig(FrigateBaseModel):
     bounding_box: bool = Field(
         default=True, title="Add a bounding box overlay on the snapshot."
     )
-    crop: bool = Field(default=False, title="Crop the snapshot to the detected object.")
+    crop: bool = Field(
+        default=False, title="Crop the snapshot to the detected object.")
     required_zones: List[str] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save a snapshot.",
@@ -428,7 +461,8 @@ class TimestampStyleConfig(FrigateBaseModel):
         default=TimestampPositionEnum.tl, title="Timestamp position."
     )
     format: str = Field(default=DEFAULT_TIME_FORMAT, title="Timestamp format.")
-    color: ColorConfig = Field(default_factory=ColorConfig, title="Timestamp color.")
+    color: ColorConfig = Field(
+        default_factory=ColorConfig, title="Timestamp color.")
     thickness: int = Field(default=2, title="Timestamp thickness.")
     effect: Optional[TimestampEffectEnum] = Field(title="Timestamp effect.")
 
@@ -436,8 +470,10 @@ class TimestampStyleConfig(FrigateBaseModel):
 class CameraMqttConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Send image over MQTT.")
     timestamp: bool = Field(default=True, title="Add timestamp to MQTT image.")
-    bounding_box: bool = Field(default=True, title="Add bounding box to MQTT image.")
-    crop: bool = Field(default=True, title="Crop MQTT image to detected object.")
+    bounding_box: bool = Field(
+        default=True, title="Add bounding box to MQTT image.")
+    crop: bool = Field(
+        default=True, title="Crop MQTT image to detected object.")
     height: int = Field(default=270, title="MQTT image height.")
     required_zones: List[str] = Field(
         default_factory=list,
@@ -457,12 +493,16 @@ class RtmpConfig(FrigateBaseModel):
 
 class CameraLiveConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Live camera view height")
-    quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
+    quality: int = Field(default=8, ge=1, le=31,
+                         title="Live camera view quality")
 
 
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.")
-    ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
+    ffmpeg: Optional[CameraFfmpegConfig] = Field(
+        title="FFmpeg configuration for the camera.")
+    gstreamer: Optional[CameraGStreamerConfig] = Field(
+        title="GStreamer configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
         title="How long to wait for the image with the highest confidence score.",
@@ -488,7 +528,8 @@ class CameraConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
     )
-    motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
+    motion: Optional[MotionConfig] = Field(
+        title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
@@ -501,13 +542,16 @@ class CameraConfig(FrigateBaseModel):
         if "zones" in config:
             colors = plt.cm.get_cmap("tab10", len(config["zones"]))
             config["zones"] = {
-                name: {**z, "color": tuple(round(255 * c) for c in colors(idx)[:3])}
+                name: {**z, "color": tuple(round(255 * c)
+                                           for c in colors(idx)[:3])}
                 for idx, (name, z) in enumerate(config["zones"].items())
             }
 
         # add roles to the input if there is only one
-        if len(config["ffmpeg"]["inputs"]) == 1:
-            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect"]
+        if "ffmpeg" in config:
+            if len(config["ffmpeg"]["inputs"]) == 1:
+                config["ffmpeg"]["inputs"][0]["roles"] = [
+                    "record", "rtmp", "detect"]
 
         super().__init__(**config)
 
@@ -520,17 +564,75 @@ class CameraConfig(FrigateBaseModel):
         return self.detect.height * 3 // 2, self.detect.width
 
     @property
-    def ffmpeg_cmds(self) -> List[Dict[str, List[str]]]:
-        ffmpeg_cmds = []
-        for ffmpeg_input in self.ffmpeg.inputs:
-            ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
-            if ffmpeg_cmd is None:
-                continue
+    def decoder_cmds(self) -> List[Dict[str, List[str]]]:
+        decoder_cmds = []
+        if self.ffmpeg:
+            for ffmpeg_input in self.ffmpeg.inputs:
+                decoder_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
+                if decoder_cmd is None:
+                    continue
 
-            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
-        return ffmpeg_cmds
+                decoder_cmds.append(
+                    {"roles": ffmpeg_input.roles, "cmd": decoder_cmd})
+        else:
+            assert self.gstreamer
+            for gstreamer_input in self.gstreamer.inputs:
+                decoder_cmd = self._get_gstreamer_cmd(gstreamer_input)
+                if decoder_cmd is None:
+                    continue
 
-    def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
+                decoder_cmds.append(
+                    {"roles": gstreamer_input.roles, "cmd": decoder_cmd})
+
+        return decoder_cmds
+
+    def _get_gstreamer_cmd(self, gstreamer_input: CameraGStreamerInput):
+        assert list(
+            ["detect"]) == gstreamer_input.roles, "only detect role is supported"
+        pipeline = [part for part in self.gstreamer.pipeline if part != ""]
+
+        video_format = f"video/x-raw,width=(int){self.detect.width},height=(int){self.detect.height},format=(string)I420"
+        if len(pipeline) == 0:
+            pipeline = [
+                #"videotestsrc pattern=0",
+                "rtspsrc location=\"rtsp://admin:123456@192.168.5.95:554/stream0\"",
+                "rtph265depay", "h265parse","omxh265dec",
+                "video/x-raw,format=(string)NV12",
+                "videoconvert","videoscale",
+                video_format,
+                "videoconvert"
+                # "videoscale",
+                # video_format,
+                # "videoconvert"
+            ]
+
+            # pipeline = [
+            #     #"videotestsrc pattern=0",
+            #     "rtspsrc location=\"rtsp://admin:123456@192.168.5.180:554/cam/realmonitor?channel=0&subtype=0\"",
+            #     "rtph264depay",
+            #     "h264parse",
+            #     "omxh264dec",
+            #     "video/x-raw,format=(string)NV12",
+            #     "videoconvert",
+            #     "videoscale",
+            #     video_format,
+            #     "videoconvert"
+            #     # "videoscale",
+            #     # video_format,
+            #     # "videoconvert"
+            # ]            
+        pipeline_args = (
+            [f"{item} !".split(" ") for item in pipeline]
+        )
+        pipeline_args = [item for sublist in pipeline_args for item in sublist]
+        return [
+            "gst-launch-1.0",
+            "-q",
+            *pipeline_args,
+            "fdsink"
+        ]
+
+    def _get_ffmpeg_cmd(self, ffmpeg_input: CameraFFmpegInput):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
             detect_args = (
@@ -556,7 +658,8 @@ class CameraConfig(FrigateBaseModel):
                 else self.ffmpeg.output_args.rtmp.split(" ")
             )
             ffmpeg_output_args = (
-                rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
+                rtmp_args +
+                [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
             record_args = (
@@ -580,13 +683,16 @@ class CameraConfig(FrigateBaseModel):
         input_args = ffmpeg_input.input_args or self.ffmpeg.input_args
 
         global_args = (
-            global_args if isinstance(global_args, list) else global_args.split(" ")
+            global_args if isinstance(
+                global_args, list) else global_args.split(" ")
         )
         hwaccel_args = (
-            hwaccel_args if isinstance(hwaccel_args, list) else hwaccel_args.split(" ")
+            hwaccel_args if isinstance(
+                hwaccel_args, list) else hwaccel_args.split(" ")
         )
         input_args = (
-            input_args if isinstance(input_args, list) else input_args.split(" ")
+            input_args if isinstance(
+                input_args, list) else input_args.split(" ")
         )
 
         cmd = (
@@ -600,6 +706,12 @@ class CameraConfig(FrigateBaseModel):
 
         return [part for part in cmd if part != ""]
 
+    @root_validator
+    def either_ffmpeg_or_gstreamer(cls, v):
+        if ("ffmpeg" not in v) and ("gstreamer" not in v):
+            raise ValueError('either ffmpeg or gstreamer should be set')
+        return v
+
 
 class DatabaseConfig(FrigateBaseModel):
     path: str = Field(
@@ -609,9 +721,12 @@ class DatabaseConfig(FrigateBaseModel):
 
 class ModelConfig(FrigateBaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
-    width: int = Field(default=320, title="Object detection model input width.")
-    height: int = Field(default=320, title="Object detection model input height.")
+    labelmap_path: Optional[str] = Field(
+        title="Label map for custom object detector.")
+    width: int = Field(
+        default=320, title="Object detection model input width.")
+    height: int = Field(
+        default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
         default_factory=dict, title="Labelmap customization."
     )
@@ -638,7 +753,8 @@ class ModelConfig(FrigateBaseModel):
 
         self._colormap = {}
         for key, val in self._merged_labelmap.items():
-            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+            self._colormap[val] = tuple(int(round(255 * c))
+                                        for c in cmap(key)[:3])
 
 
 class LogLevelEnum(str, Enum):
@@ -670,7 +786,8 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ModelConfig, title="Detection model configuration."
     )
     detectors: Dict[str, DetectorConfig] = Field(
-        default={name: DetectorConfig(**d) for name, d in DEFAULT_DETECTORS.items()},
+        default={name: DetectorConfig(**d)
+                 for name, d in DEFAULT_DETECTORS.items()},
         title="Detector hardware configuration.",
     )
     logger: LoggerConfig = Field(
@@ -716,7 +833,8 @@ class FrigateConfig(FrigateBaseModel):
 
         # MQTT password substitution
         if config.mqtt.password:
-            config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+            config.mqtt.password = config.mqtt.password.format(
+                **FRIGATE_ENV_VARS)
 
         # Global config to propegate down to camera level
         global_config = config.dict(
@@ -735,7 +853,8 @@ class FrigateConfig(FrigateBaseModel):
         )
 
         for name, camera in config.cameras.items():
-            merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
+            merged_config = deep_merge(camera.dict(
+                exclude_unset=True), global_config)
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
             )
@@ -746,8 +865,9 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.detect.max_disappeared = max_disappeared
 
             # FFMPEG input substitution
-            for input in camera_config.ffmpeg.inputs:
-                input.path = input.path.format(**FRIGATE_ENV_VARS)
+            if "ffmpeg" in camera_config:
+                for input in camera_config.ffmpeg.inputs:
+                    input.path = input.path.format(**FRIGATE_ENV_VARS)
 
             # Add default filters
             object_keys = camera_config.objects.track
@@ -793,8 +913,9 @@ class FrigateConfig(FrigateBaseModel):
                 )
 
             # check runtime config
+            decoder_config = camera_config.ffmpeg if "ffmpeg" in camera_config else camera_config.gstreamer
             assigned_roles = list(
-                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+                set([r for i in decoder_config.inputs for r in i.roles])
             )
             if camera_config.record.enabled and not "record" in assigned_roles:
                 raise ValueError(

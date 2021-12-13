@@ -7,7 +7,7 @@ import sys
 import threading
 from logging.handlers import QueueHandler
 from typing import Dict, List
-
+import traceback
 import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -308,6 +308,7 @@ class FrigateApp:
                 print("***    Config Validation Errors                           ***")
                 print("*************************************************************")
                 print(e)
+                print(traceback.format_exc())
                 print("*************************************************************")
                 print("***    End Config Validation Errors                       ***")
                 print("*************************************************************")
