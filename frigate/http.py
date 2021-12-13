@@ -319,11 +319,11 @@ def events():
 def config():
     config = current_app.frigate_config.dict()
 
-    # add in the ffmpeg_cmds
+    # add in the decoder_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
-        camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
-        for cmd in camera_dict["ffmpeg_cmds"]:
+        camera_dict["decoder_cmds"] = copy.deepcopy(camera.decoder_cmds)
+        for cmd in camera_dict["decoder_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 
     return jsonify(config)

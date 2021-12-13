@@ -9,6 +9,7 @@ import subprocess as sp
 import threading
 from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
+from frigate.log import LogPipe
 
 import cv2
 import numpy as np
@@ -32,21 +33,35 @@ class FFMpegConverter:
         ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
             " "
         )
+
+        # ffmpeg_cmd = f"gst-launch-1.0 fdsrc ! video/x-raw, width={in_width}, height={in_height}, format=I420 ! nvvideoconvert ! omxh264enc ! h264parse ! mpegtsmux ! fdsink".split(
+        #     " "
+        # )
+        
+
+        logger.error(f" ffmpeg_cmd >>>> {ffmpeg_cmd}")
+        self.logpipe = LogPipe(
+            "ffmpeg.output", logging.ERROR)
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
-            stderr=sp.DEVNULL,
+            stderr=self.logpipe,
             stdin=sp.PIPE,
             start_new_session=True,
         )
 
     def write(self, b):
-        self.process.stdin.write(b)
+        try:
+            self.process.stdin.write(b)
+        except Exception:
+            self.logpipe.dump()
+            return False
 
     def read(self, length):
         try:
             return self.process.stdout.read1(length)
         except ValueError:
+            self.logpipe.dump()
             return False
 
     def exit(self):
@@ -408,8 +423,11 @@ def output_frames(config: FrigateConfig, video_output_queue):
         if any(
             ws.environ["PATH_INFO"].endswith(camera) for ws in websocket_server.manager
         ):
-            # write to the converter for the camera if clients are listening to the specific camera
-            converters[camera].write(frame.tobytes())
+            try:
+                # write to the converter for the camera if clients are listening to the specific camera
+                converters[camera].write(frame.tobytes())
+            except Exception:
+                pass
 
         # update birdseye if websockets are connected
         if config.birdseye.enabled and any(

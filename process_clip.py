@@ -67,8 +67,8 @@ class ProcessClip:
         self.config = config
         self.camera_config = self.config.cameras["camera"]
         self.frame_shape = self.camera_config.frame_shape
-        self.ffmpeg_cmd = [
-            c["cmd"] for c in self.camera_config.ffmpeg_cmds if "detect" in c["roles"]
+        self.decoder_cmd = [
+            c["cmd"] for c in self.camera_config.decoder_cmds if "detect" in c["roles"]
         ][0]
         self.frame_manager = SharedMemoryFrameManager()
         self.frame_queue = mp.Queue()
@@ -84,7 +84,7 @@ class ProcessClip:
             * self.camera_config.frame_shape_yuv[1]
         )
         ffmpeg_process = start_or_restart_ffmpeg(
-            self.ffmpeg_cmd, logger, sp.DEVNULL, frame_size
+            self.decoder_cmd, logger, sp.DEVNULL, frame_size
         )
         capture_frames(
             ffmpeg_process,
