@@ -23,6 +23,32 @@ RUN apt-get -qq update \
 ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-aarch64-installer /tmp/
 RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-installer /
 
+# setup gstreamer
+RUN \
+  apt-get update && apt-get install -y software-properties-common && \
+  add-apt-repository universe && \
+  add-apt-repository multiverse && \
+  apt-get update
+
+RUN \
+  apt-get install -y gstreamer1.0-tools gstreamer1.0-alsa \
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+
+RUN \
+  apt-get install -y git libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgstreamer-plugins-bad1.0-dev
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
+
+RUN apt-get update && apt-get install -y ffmpeg
+
+
 ENTRYPOINT ["/init"]
 
+# CMD ["python3", "--version"]
+
 CMD ["python3", "-u", "-m", "frigate"]
+COPY frigate frigate/
