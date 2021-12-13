@@ -28,17 +28,19 @@ SQL = pw.SQL
 
 
 def migrate(migrator, database, fake=False, **kwargs):
-    migrator.create_model(Recordings)
-
-    def add_index():
-        # First add the index here, because there is a bug in peewee_migrate
-        # when trying to create an multi-column index in the same migration
-        # as the table: https://github.com/klen/peewee_migrate/issues/19
-        Recordings.add_index("start_time", "end_time")
-        Recordings.create_table()
-
-    migrator.python(add_index)
+    migrator.sql(
+        'CREATE TABLE IF NOT EXISTS "recordings" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, "path" VARCHAR(255) NOT NULL, "start_time" DATETIME NOT NULL, "end_time" DATETIME NOT NULL, "duration" REAL NOT NULL)'
+    )
+    migrator.sql(
+        'CREATE INDEX IF NOT EXISTS "recordings_camera" ON "recordings" ("camera")'
+    )
+    migrator.sql(
+        'CREATE UNIQUE INDEX IF NOT EXISTS "recordings_path" ON "recordings" ("path")'
+    )
+    migrator.sql(
+        'CREATE INDEX IF NOT EXISTS "recordings_start_time_end_time" ON "recordings" (start_time, end_time)'
+    )
 
 
 def rollback(migrator, database, fake=False, **kwargs):
-    migrator.remove_model(Recordings)
+    pass
