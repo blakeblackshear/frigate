@@ -608,7 +608,8 @@ def recording_clip(camera, start_ts, end_ts):
         ffmpeg_cmd,
         input="\n".join(playlist_lines),
         encoding="ascii",
-        capture_output=True,
+        stdout=sp.PIPE,
+        stderr=sp.PIPE,
     )
     if p.returncode != 0:
         logger.error(p.stderr)

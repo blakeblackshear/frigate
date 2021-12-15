@@ -94,7 +94,7 @@ class RecordingMaintainer(threading.Thread):
                 "default=noprint_wrappers=1:nokey=1",
                 f"{cache_path}",
             ]
-            p = sp.run(ffprobe_cmd, capture_output=True)
+            p = sp.run(ffprobe_cmd, stdout=sp.PIPE, stderr=sp.PIPE)
             if p.returncode == 0:
                 duration = float(p.stdout.decode().strip())
                 end_time = start_time + datetime.timedelta(seconds=duration)
@@ -284,7 +284,8 @@ class RecordingCleanup(threading.Thread):
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
             ["find", RECORD_DIR, "-type", "f", "!", "-newermt", f"@{oldest_timestamp}"],
-            capture_output=True,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
             text=True,
         )
         files_to_check = process.stdout.splitlines()

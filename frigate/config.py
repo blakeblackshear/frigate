@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import logging
 import os
@@ -761,7 +759,7 @@ class ModelConfig(FrigateBaseModel):
         return self._merged_labelmap
 
     @property
-    def colormap(self) -> Dict[int, tuple[int, int, int]]:
+    def colormap(self) -> Dict[int, Tuple[int, int, int]]:
         return self._colormap
 
     def __init__(self, **config):
@@ -850,7 +848,7 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     @property
-    def runtime_config(self) -> FrigateConfig:
+    def runtime_config(self):
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 
