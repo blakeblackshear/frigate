@@ -1,0 +1,220 @@
+ARG NGINX_VERSION
+FROM blakeblackshear/frigate-nginx-l4t:${NGINX_VERSION} as nginx
+FROM frigate-web as web
+FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3 as wheels
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get -qq update \
+    && apt-get -qq install -y \
+    python3.8 \
+    python3.8-dev \
+    wget \
+    # opencv dependencies
+    build-essential cmake git pkg-config libgtk-3-dev \
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
+    libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
+    gfortran openexr libatlas-base-dev libssl-dev\
+    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+    # scipy dependencies
+    gcc gfortran libopenblas-dev liblapack-dev cython
+
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py
+
+RUN pip3 install scikit-build
+
+RUN pip3 wheel --wheel-dir=/wheels \
+    opencv-python-headless \
+    numpy \
+    imutils \
+    scipy \
+    psutil \
+    Flask \
+    paho-mqtt \
+    PyYAML \
+    matplotlib \
+    click \
+    setproctitle \
+    peewee
+
+
+FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3 as base
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN \
+    apt-get update && apt-get install -y gnupg
+RUN \
+    apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc && \
+    echo "deb https://repo.download.nvidia.com/jetson/ffmpeg main main" | tee -a /etc/apt/sources.list && \
+    echo "deb-src https://repo.download.nvidia.com/jetson/ffmpeg main main" | tee -a /etc/apt/sources.list && \
+    apt-get -qq update && \
+    apt-get -qq install ffmpeg
+
+COPY --from=wheels /wheels/. /wheels/
+
+ENV FLASK_ENV=development
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get -qq update \
+    && apt-get upgrade -y \
+    && apt-get -qq install --no-install-recommends -y gnupg wget unzip tzdata libxml2
+
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py && \
+    pip3 install -U /wheels/*.whl
+
+
+RUN \
+    APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
+    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    && apt-get -qq update
+
+RUN \
+    apt-get -qq install --no-install-recommends -y libedgetpu1-max python3-tflite-runtime python3-pycoral \
+    && rm -rf /var/lib/apt/lists/* /wheels \
+    && (apt-get autoremove -y; apt-get autoclean -y)
+
+RUN pip3 install \
+    peewee_migrate \
+    pydantic \
+    zeroconf \
+    ws4py
+
+
+# setup gstreamer
+RUN \
+  apt-get update && apt-get install -y software-properties-common && \
+  add-apt-repository universe && \
+  add-apt-repository multiverse && \
+  apt-get update
+
+RUN \
+  apt-get install -y gstreamer1.0-tools gstreamer1.0-alsa \
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+
+RUN \
+  apt-get install -y git libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgstreamer-plugins-bad1.0-dev
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
+
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
+
+
+COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+
+# s6-overlay
+COPY docker/rootfs/ /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-aarch64-installer /tmp/
+RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-installer /
+
+COPY --from=web /opt/frigate/build web/
+
+# Backports
+RUN pip3 install shared-memory38
+
+WORKDIR /opt/frigate/
+ADD frigate frigate/
+ADD migrations migrations/
+COPY labelmap.txt /labelmap.txt
+
+
+EXPOSE 5000
+EXPOSE 1935
+
+ENTRYPOINT ["/init"]
+CMD ["python3", "-u", "-m", "frigate"]
+COPY frigate frigate/
+
+
+
+
+
+
+
+
+
+
+# # glibc-2.29
+# RUN     apt-get -qq update && \
+#         apt-get -qq install gawk bison
+# RUN \
+#         mkdir -p /opt/glibc-2.29/etc && cd /opt/glibc-2.29/etc && sh -c "echo '/opt/lib' >> ld.so.conf" && \
+#         DIR=/tmp/glibc && \
+#         mkdir -p ${DIR} && \
+#         cd ${DIR} && \
+#         curl -L http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.gz | tar xvz && \
+#         ./glibc-2.29/configure --prefix=/opt/glibc-2.29 && \
+#         make && \
+#         make install && \
+#         rm -rf ${DIR}
+
+
+# RUN     apt-get install -y openssl libssl-dev
+
+# RUN \
+#         DIR=/tmp/cmake && \
+#         mkdir -p ${DIR} && \
+#         cd ${DIR} && \
+#         curl -L https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0.tar.gz | tar xvz && cd cmake-3.22.0 && \
+#         ./bootstrap -- -DCMAKE_USE_OPENSSL=ON && \
+#         make && \
+#         make install && \
+#         rm -rf ${DIR}
+
+
+# RUN \
+#     git clone https://github.com/tensorflow/tensorflow.git tensorflow_src
+
+# RUN \
+#     apt-get install -y curl && \
+#     mkdir tflite_build && cd tflite_build && \
+#     cmake ../tensorflow_src/tensorflow/lite -DTFLITE_ENABLE_GPU=ON && \
+#     cmake --build . -j && pwd
+
+
+# # RUN \
+# #     DIR=/${HOME}/tensorflow && \
+# #     mkdir -p ${DIR} && \
+# #     cd ${DIR} && \
+# #     curl -LO https://storage.googleapis.com/mirror.tensorflow.org/developer.arm.com/media/Files/downloads/gnu-a/8.3-2019.03/binrel/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz && \
+# #     mkdir -p ${DIR}/toolchains && \
+# #     tar xvf gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz -C ${DIR}/toolchains
+
+# # RUN \
+# #     DIR=/${HOME}/tensorflow && \
+# #     cd ${DIR} && \
+# #     ARMCC_PREFIX=${DIR}/toolchains/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-  && \
+# #     ARMCC_FLAGS="-funsafe-math-optimizations"  && \
+# #         cmake -DCMAKE_C_COMPILER=${ARMCC_PREFIX}gcc \
+# #         -DCMAKE_CXX_COMPILER=${ARMCC_PREFIX}g++ \
+# #         -DCMAKE_C_FLAGS="${ARMCC_FLAGS}" \
+# #         -DCMAKE_CXX_FLAGS="${ARMCC_FLAGS}" \
+# #         -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+# #         -DCMAKE_SYSTEM_NAME=Linux \
+# #         -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+# #         ../tensorflow/lite/
+
+# # RUN \
+# #         DIR=/tmp/tflite_runtime && \
+# #         mkdir -p ${DIR} && \
+# #         wget -q https://github.com/google-coral/pycoral/releases/download/v1.0.1/tflite_runtime-2.5.0-cp38-cp38-linux_aarch64.whl -O ${DIR}/tflite_runtime-2.5.0.post1-cp38-cp38-linux_aarch64.whl && \
+# #         pip3 install -U ${DIR}/*.whl && \
+# #         rm -rf ${DIR}
+
+# # RUN \
+# #         DIR=/tmp/pycoral && \
+# #         mkdir -p ${DIR} && \
+# #         wget -q https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp38-cp38-linux_aarch64.whl -O ${DIR}/pycoral-2.0.0-cp38-cp38-linux_aarch64.whl && \
+# #         pip3 install -U ${DIR}/*.whl && \
+# #         rm -rf ${DIR}
+
+# FROM scratch
+
+# COPY --from=build /wheels /wheels
