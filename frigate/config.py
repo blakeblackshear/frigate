@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import logging
 import os
@@ -868,7 +866,7 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     @property
-    def runtime_config(self) -> FrigateConfig:
+    def runtime_config(self):
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 

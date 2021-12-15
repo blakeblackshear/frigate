@@ -44,7 +44,7 @@ def get_frame_shape(source):
         "json",
         source,
     ]
-    p = sp.run(ffprobe_cmd, capture_output=True)
+    p = sp.run(ffprobe_cmd, stdout=sp.PIPE, stderr=sp.PIPE)
     info = json.loads(p.stdout)
 
     video_info = [s for s in info["streams"] if s["codec_type"] == "video"][0]

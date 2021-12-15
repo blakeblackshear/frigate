@@ -7,7 +7,6 @@ import queue
 import signal
 import subprocess as sp
 import threading
-from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 from frigate.log import LogPipe
 
@@ -37,7 +36,7 @@ class FFMpegConverter:
         # ffmpeg_cmd = f"gst-launch-1.0 fdsrc ! video/x-raw, width={in_width}, height={in_height}, format=I420 ! nvvideoconvert ! omxh264enc ! h264parse ! mpegtsmux ! fdsink".split(
         #     " "
         # )
-        
+
 
         self.logpipe = LogPipe(
             "ffmpeg.converter", logging.ERROR)

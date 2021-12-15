@@ -1,6 +1,7 @@
 import json
 import logging
 import multiprocessing as mp
+import shared_memory
 import os
 import signal
 import sys
@@ -41,7 +42,7 @@ class FrigateApp:
         self.detection_queue = mp.Queue()
         self.detectors: Dict[str, EdgeTPUProcess] = {}
         self.detection_out_events: Dict[str, mp.Event] = {}
-        self.detection_shms: List[mp.shared_memory.SharedMemory] = []
+        self.detection_shms: List[shared_memory.SharedMemory] = []
         self.log_queue = mp.Queue()
         self.camera_metrics = {}
 
@@ -163,20 +164,20 @@ class FrigateApp:
             self.detection_out_events[name] = mp.Event()
 
             try:
-                shm_in = mp.shared_memory.SharedMemory(
+                shm_in = shared_memory.SharedMemory(
                     name=name,
                     create=True,
                     size=self.config.model.height * self.config.model.width * 3,
                 )
             except FileExistsError:
-                shm_in = mp.shared_memory.SharedMemory(name=name)
+                shm_in = shared_memory.SharedMemory(name=name)
 
             try:
-                shm_out = mp.shared_memory.SharedMemory(
+                shm_out = shared_memory.SharedMemory(
                     name=f"out-{name}", create=True, size=20 * 6 * 4
                 )
             except FileExistsError:
-                shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}")
+                shm_out = shared_memory.SharedMemory(name=f"out-{name}")
 
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
