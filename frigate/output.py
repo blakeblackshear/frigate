@@ -32,11 +32,10 @@ class FFMpegConverter:
         ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
             " "
         )
-
-        # ffmpeg_cmd = f"gst-launch-1.0 fdsrc ! video/x-raw, width={in_width}, height={in_height}, format=I420 ! nvvideoconvert ! omxh264enc ! h264parse ! mpegtsmux ! fdsink".split(
-        #     " "
-        # )
-
+        # ffmpeg_cmd = f"gst-launch-1.0 rtspsrc location=\"rtsp://admin:123456@192.168.5.95:554/stream0\" ! rtph265depay ! h265parse ! omxh265dec ! 'video/x-raw,format=(string)NV12' ! videoconvert ! 'video/x-raw, width={in_width}, height={in_height}, format=I420, framerate=(fraction)10/1' ! omxh264enc bitrate=500000 temporal-tradeoff=2 iframeinterval=10 ! h264parse ! mpegtsmux ! fdsink"
+        # # .split(
+        # #     " "
+        # # )
 
         self.logpipe = LogPipe(
             "ffmpeg.converter", logging.ERROR)
@@ -46,6 +45,7 @@ class FFMpegConverter:
             stderr=self.logpipe,
             stdin=sp.PIPE,
             start_new_session=True,
+            # shell=True
         )
 
     def write(self, b):
