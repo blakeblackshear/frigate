@@ -39,9 +39,7 @@ RUN pip3 wheel --wheel-dir=/wheels \
     setproctitle \
     peewee
 
-
-FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3 as base
-
+FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3
 ENV DEBIAN_FRONTEND=noninteractive
 RUN \
     apt-get update && apt-get install -y gnupg
@@ -80,7 +78,9 @@ RUN pip3 install \
     peewee_migrate \
     pydantic \
     zeroconf \
-    ws4py
+    ws4py \
+    # Python 3.6
+    shared-memory38
 
 
 # setup gstreamer
@@ -108,16 +108,13 @@ RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdli
 
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY --from=web /opt/frigate/build /opt/frigate/web/
 
 # s6-overlay
 COPY docker/rootfs/ /
 ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-aarch64-installer /tmp/
 RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-installer /
 
-COPY --from=web /opt/frigate/build web/
-
-# Backports
-RUN pip3 install shared-memory38
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
@@ -125,96 +122,12 @@ ADD migrations migrations/
 COPY labelmap.txt /labelmap.txt
 
 
+# edgetpu experiments
+RUN wget -q https://github.com/Azure/Azure-AI-Camp/releases/download/v1.0/yolov4-tiny.tflite -O /yolov4-tiny.tflite
+
 EXPOSE 5000
 EXPOSE 1935
 
 ENTRYPOINT ["/init"]
 CMD ["python3", "-u", "-m", "frigate"]
 COPY frigate frigate/
-
-
-
-
-
-
-
-
-
-
-# # glibc-2.29
-# RUN     apt-get -qq update && \
-#         apt-get -qq install gawk bison
-# RUN \
-#         mkdir -p /opt/glibc-2.29/etc && cd /opt/glibc-2.29/etc && sh -c "echo '/opt/lib' >> ld.so.conf" && \
-#         DIR=/tmp/glibc && \
-#         mkdir -p ${DIR} && \
-#         cd ${DIR} && \
-#         curl -L http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.gz | tar xvz && \
-#         ./glibc-2.29/configure --prefix=/opt/glibc-2.29 && \
-#         make && \
-#         make install && \
-#         rm -rf ${DIR}
-
-
-# RUN     apt-get install -y openssl libssl-dev
-
-# RUN \
-#         DIR=/tmp/cmake && \
-#         mkdir -p ${DIR} && \
-#         cd ${DIR} && \
-#         curl -L https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0.tar.gz | tar xvz && cd cmake-3.22.0 && \
-#         ./bootstrap -- -DCMAKE_USE_OPENSSL=ON && \
-#         make && \
-#         make install && \
-#         rm -rf ${DIR}
-
-
-# RUN \
-#     git clone https://github.com/tensorflow/tensorflow.git tensorflow_src
-
-# RUN \
-#     apt-get install -y curl && \
-#     mkdir tflite_build && cd tflite_build && \
-#     cmake ../tensorflow_src/tensorflow/lite -DTFLITE_ENABLE_GPU=ON && \
-#     cmake --build . -j && pwd
-
-
-# # RUN \
-# #     DIR=/${HOME}/tensorflow && \
-# #     mkdir -p ${DIR} && \
-# #     cd ${DIR} && \
-# #     curl -LO https://storage.googleapis.com/mirror.tensorflow.org/developer.arm.com/media/Files/downloads/gnu-a/8.3-2019.03/binrel/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz && \
-# #     mkdir -p ${DIR}/toolchains && \
-# #     tar xvf gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz -C ${DIR}/toolchains
-
-# # RUN \
-# #     DIR=/${HOME}/tensorflow && \
-# #     cd ${DIR} && \
-# #     ARMCC_PREFIX=${DIR}/toolchains/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-  && \
-# #     ARMCC_FLAGS="-funsafe-math-optimizations"  && \
-# #         cmake -DCMAKE_C_COMPILER=${ARMCC_PREFIX}gcc \
-# #         -DCMAKE_CXX_COMPILER=${ARMCC_PREFIX}g++ \
-# #         -DCMAKE_C_FLAGS="${ARMCC_FLAGS}" \
-# #         -DCMAKE_CXX_FLAGS="${ARMCC_FLAGS}" \
-# #         -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-# #         -DCMAKE_SYSTEM_NAME=Linux \
-# #         -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-# #         ../tensorflow/lite/
-
-# # RUN \
-# #         DIR=/tmp/tflite_runtime && \
-# #         mkdir -p ${DIR} && \
-# #         wget -q https://github.com/google-coral/pycoral/releases/download/v1.0.1/tflite_runtime-2.5.0-cp38-cp38-linux_aarch64.whl -O ${DIR}/tflite_runtime-2.5.0.post1-cp38-cp38-linux_aarch64.whl && \
-# #         pip3 install -U ${DIR}/*.whl && \
-# #         rm -rf ${DIR}
-
-# # RUN \
-# #         DIR=/tmp/pycoral && \
-# #         mkdir -p ${DIR} && \
-# #         wget -q https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp38-cp38-linux_aarch64.whl -O ${DIR}/pycoral-2.0.0-cp38-cp38-linux_aarch64.whl && \
-# #         pip3 install -U ${DIR}/*.whl && \
-# #         rm -rf ${DIR}
-
-# FROM scratch
-
-# COPY --from=build /wheels /wheels
