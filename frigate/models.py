@@ -27,3 +27,5 @@ class Recordings(Model):
     start_time = DateTimeField()
     end_time = DateTimeField()
     duration = FloatField()
+    motion = IntegerField(null=True)
+    objects = IntegerField(null=True)

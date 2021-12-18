@@ -4,6 +4,7 @@ import threading
 import time
 import psutil
 import shutil
+import os
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -29,6 +30,28 @@ def get_fs_type(path):
             fsType = part.fstype
             bestMatch = part.mountpoint
     return fsType
+
+
+def read_temperature(path):
+    if os.path.isfile(path):
+        with open(path) as f:
+            line = f.readline().strip()
+            return int(line) / 1000
+    return None
+
+
+def get_temperatures():
+    temps = {}
+
+    # Get temperatures for all attached Corals
+    base = "/sys/class/apex/"
+    if os.path.isdir(base):
+        for apex in os.listdir(base):
+            temp = read_temperature(os.path.join(base, apex, "temp"))
+            if temp is not None:
+                temps[apex] = temp
+
+    return temps
 
 
 def stats_snapshot(stats_tracking):
@@ -61,6 +84,7 @@ def stats_snapshot(stats_tracking):
         "uptime": (int(time.time()) - stats_tracking["started"]),
         "version": VERSION,
         "storage": {},
+        "temperatures": get_temperatures(),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:

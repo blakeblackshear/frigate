@@ -14,12 +14,11 @@ If you only used clips in previous versions with recordings disabled, you can us
 ```yaml
 record:
   enabled: True
-  retain_days: 0
   events:
     retain:
       default: 10
 ```
 
-This configuration will retain recording segments that overlap with events for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
+This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
 
-When `retain_days` is set to `0`, segments will be deleted from the cache if no events are in progress
+When `retain_days` is set to `0`, segments will be deleted from the cache if no events are in progress.
