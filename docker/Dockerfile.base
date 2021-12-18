@@ -34,7 +34,8 @@ RUN pip3 install \
     peewee_migrate \
     pydantic \
     zeroconf \
-    ws4py
+    ws4py \
+    onvif_zeep
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
