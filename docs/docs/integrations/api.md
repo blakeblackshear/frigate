@@ -234,18 +234,18 @@ HTTP Live Streaming Video on Demand URL for the camera with the specified time r
 
 If PTZ support is enabled for this particular camera, then you can use add `?direction=` and one of `left`, `right`, `up`, or `down` to move the camera. A 404 error will be returned for a camera which doesn't have ONVIF setup.
 
-### `GET /api/<camera>/zoom`
+### `GET /api/<camera>/ptz/zoom`
 
 If PTZ support is enabled for this camera, then you can set `?zoomIn=` to either `0` or `1` to zoom in or out the camera respectively.
 
-### `GET /api/<camera>/stop`
+### `GET /api/<camera>/ptz/stop`
 
 Stops any PTZ movements that are currently happening.
 
-### `GET /api/<camera>/sethome`
+### `GET /api/<camera>/ptz/sethome`
 
 Sets the 'home' location of this camera to the current location.
 
-### `GET /api/<camera>/gotohome`
+### `GET /api/<camera>/ptz/gotohome`
 
 Moves the camera to the preset 'home' location.
