@@ -2,6 +2,8 @@ from onvif import ONVIFCamera
 
 from frigate.config import CameraConfig
 
+import site
+
 
 class Ptz:
     def __init__(self, config: CameraConfig):
@@ -11,6 +13,7 @@ class Ptz:
                 config.onvif.port,
                 config.onvif.username,
                 config.onvif.password,
+                wsdl_dir=site.getsitepackages()[0].replace('dist-packages', 'site-packages') + '/wsdl'
             )
             media_service = onvif_camera.create_media_service()
 
