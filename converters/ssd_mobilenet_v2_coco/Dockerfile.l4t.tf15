@@ -1,0 +1,10 @@
+FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf1.15-py3
+
+RUN apt-get update && apt-get install -y git sudo
+RUN git clone https://github.com/jkjung-avt/tensorrt_demos.git /tensorrt_demos
+
+ADD 0001-fix-trt.patch /tensorrt_demos/0001-fix-trt.patch
+RUN cd /tensorrt_demos && \
+    git apply 0001-fix-trt.patch
+
+ADD run.sh /run.sh
