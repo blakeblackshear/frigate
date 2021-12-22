@@ -1,0 +1,14 @@
+FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf1.15-py3
+
+RUN apt-get update && apt-get install -y git sudo
+RUN git clone https://github.com/jkjung-avt/tensorrt_demos.git /tensorrt_demos
+
+RUN cd /tensorrt_demos/yolo && ./install_pycuda.sh
+RUN apt-get update && apt-get install -y cmake build-essential unzip
+ADD install_protobuf.sh /install_protobuf.sh
+RUN /install_protobuf.sh
+RUN pip3 install onnx==1.4.1
+RUN cd /tensorrt_demos/yolo && ./download_yolo.sh
+ADD run.sh /run.sh
+
+
