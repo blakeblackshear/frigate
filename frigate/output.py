@@ -7,6 +7,7 @@ import queue
 import signal
 import subprocess as sp
 import threading
+from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 from frigate.log import LogPipe
 
@@ -32,27 +33,20 @@ class FFMpegConverter:
         ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
             " "
         )
-        # ffmpeg_cmd = f"gst-launch-1.0 rtspsrc location=\"rtsp://admin:123456@192.168.5.95:554/stream0\" ! rtph265depay ! h265parse ! omxh265dec ! 'video/x-raw,format=(string)NV12' ! videoconvert ! 'video/x-raw, width={in_width}, height={in_height}, format=I420, framerate=(fraction)10/1' ! omxh264enc bitrate=500000 temporal-tradeoff=2 iframeinterval=10 ! h264parse ! mpegtsmux ! fdsink"
-        # # .split(
-        # #     " "
-        # # )
-
         self.logpipe = LogPipe(
-            "ffmpeg.converter", logging.ERROR)
+            "ffmpeg.converter", logging.ERROR)        
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
             stderr=self.logpipe,
             stdin=sp.PIPE,
             start_new_session=True,
-            # shell=True
         )
 
     def write(self, b):
         try:
             self.process.stdin.write(b)
         except Exception:
-            logger.error("Failure while writing to the stream:")
             self.logpipe.dump()
             return False
 
@@ -60,7 +54,6 @@ class FFMpegConverter:
         try:
             return self.process.stdout.read1(length)
         except ValueError:
-            logger.error("Failure while readig from the stream:")
             self.logpipe.dump()
             return False
 
@@ -423,13 +416,8 @@ def output_frames(config: FrigateConfig, video_output_queue):
         if any(
             ws.environ["PATH_INFO"].endswith(camera) for ws in websocket_server.manager
         ):
-            try:
-                # write to the converter for the camera if clients are listening to the specific camera
-                converters[camera].write(frame.tobytes())
-            except Exception:
-                # in case of videoconverter failure continure processing video_output_queue
-                # FFMpegConverter should dump an error response
-                pass
+            # write to the converter for the camera if clients are listening to the specific camera
+            converters[camera].write(frame.tobytes())
 
         # update birdseye if websockets are connected
         if config.birdseye.enabled and any(

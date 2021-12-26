@@ -502,9 +502,8 @@ class RecordingCleanup(threading.Thread):
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
             ["find", RECORD_DIR, "-type", "f", "!", "-newermt", f"@{oldest_timestamp}"],
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            universal_newlines=True,
+            capture_output=True,
+            text=True,
         )
         files_to_check = process.stdout.splitlines()
 

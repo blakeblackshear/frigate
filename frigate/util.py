@@ -11,8 +11,7 @@ import threading
 import time
 import traceback
 from abc import ABC, abstractmethod
-#from multiprocessing import shared_memory
-import shared_memory
+from multiprocessing import shared_memory
 from typing import AnyStr
 
 import cv2

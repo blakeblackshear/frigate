@@ -27,7 +27,7 @@ class FrigateWatchdog(threading.Thread):
             # check the detection processes
             for detector in self.detectors.values():
                 detection_start = detector.detection_start.value
-                if detection_start > 0.0 and now - detection_start > 10:
+                if detection_start > 0.0 and now - detection_start > 30:
                     logger.info(
                         "Detection appears to be stuck. Restarting detection process..."
                     )

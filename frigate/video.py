@@ -187,8 +187,7 @@ class CameraWatchdog(threading.Thread):
         self.config = config
         self.capture_thread = None
         self.ffmpeg_detect_process = None
-        self.logpipe = LogPipe(
-            f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
+        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
         self.ffmpeg_other_processes = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -226,8 +225,7 @@ class CameraWatchdog(threading.Thread):
                 self.logger.error(
                     "The following ffmpeg logs include the last 100 lines prior to exit."
                 )
-                self.logger.error(
-                    "You may have invalid args defined for this camera.")
+                self.logger.error("You may have invalid args defined for this camera.")
                 self.logpipe.dump()
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
@@ -236,8 +234,7 @@ class CameraWatchdog(threading.Thread):
                 )
                 self.ffmpeg_detect_process.terminate()
                 try:
-                    self.logger.info(
-                        "Waiting for ffmpeg to exit gracefully...")
+                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
                     self.ffmpeg_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
                     self.logger.info("FFmpeg didnt exit. Force killing...")
@@ -485,13 +482,11 @@ def process_frames(
         current_frame_time.value = frame_time
 
         frame = frame_manager.get(
-            f"{camera_name}{frame_time}", (
-                frame_shape[0] * 3 // 2, frame_shape[1])
+            f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
         )
 
         if frame is None:
-            logger.info(
-                f"{camera_name}: frame {frame_time} is not in memory store.")
+            logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
         if not detection_enabled.value:
