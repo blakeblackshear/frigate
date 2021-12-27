@@ -16,7 +16,7 @@ from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.edgetpu import EdgeTPUProcess
+from frigate.detection import DetectionProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
@@ -39,7 +39,7 @@ class FrigateApp:
         self.base_config: FrigateConfig = None
         self.config: FrigateConfig = None
         self.detection_queue = mp.Queue()
-        self.detectors: Dict[str, EdgeTPUProcess] = {}
+        self.detectors: Dict[str, DetectionProcess] = {}
         self.detection_out_events: Dict[str, mp.Event] = {}
         self.detection_shms: List[mp.shared_memory.SharedMemory] = []
         self.log_queue = mp.Queue()
@@ -172,27 +172,15 @@ class FrigateApp:
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
-        for name, detector in self.config.detectors.items():
-            if detector.type == DetectorTypeEnum.cpu:
-                self.detectors[name] = EdgeTPUProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    "cpu",
-                    detector.num_threads,
-                )
-            if detector.type == DetectorTypeEnum.edgetpu:
-                self.detectors[name] = EdgeTPUProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    detector.device,
-                    detector.num_threads,
-                )
+        for name, detector_config in self.config.detectors.items():
+            self.detectors[name] = DetectionProcess(
+                name,
+                self.detection_queue,
+                self.detection_out_events,
+                model_path,
+                model_shape,
+                detector_config,
+            )
 
     def start_detected_frames_processor(self):
         self.detected_frames_processor = TrackedObjectProcessor(

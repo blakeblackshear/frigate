@@ -15,7 +15,7 @@ from cv2 import cv2
 import numpy as np
 
 from frigate.config import CameraConfig
-from frigate.edgetpu import RemoteObjectDetector
+from frigate.detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.objects import ObjectTracker

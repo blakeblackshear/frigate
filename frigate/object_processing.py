@@ -18,7 +18,6 @@ import numpy as np
 
 from frigate.config import CameraConfig, SnapshotsConfig, RecordConfig, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.edgetpu import load_labels
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
