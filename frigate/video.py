@@ -15,7 +15,7 @@ from cv2 import cv2, reduce
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
-from frigate.edgetpu import RemoteObjectDetector
+from frigate.detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.objects import ObjectTracker

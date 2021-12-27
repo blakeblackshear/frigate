@@ -866,7 +866,7 @@ class FrigateConfig(FrigateBaseModel):
     )
 
     @property
-    def runtime_config(self):
+    def runtime_config(self) -> FrigateConfig:
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 
