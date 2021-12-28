@@ -77,14 +77,13 @@ def filtered(obj, objects_to_track, object_filters):
 def create_tensor_input(frame, model_shape, region):
     cropped_frame = yuv_region_2_rgb(frame, region)
 
-    # Resize to 300x300 if needed
+    # Resize to the model_shape if needed
     if cropped_frame.shape != (model_shape[0], model_shape[1], 3):
         cropped_frame = cv2.resize(
             cropped_frame, dsize=model_shape, interpolation=cv2.INTER_LINEAR
         )
-
-    # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
-    return np.expand_dims(cropped_frame, axis=0)
+    # Return a tensor of shape: [height, width, 3] in RGB format
+    return cropped_frame
 
 
 def stop_ffmpeg(ffmpeg_process, logger):

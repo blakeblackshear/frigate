@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3 AS base
+FROM nvcr.io/nvidia/l4t-tensorrt:r8.0.1-runtime AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -yqq update && \

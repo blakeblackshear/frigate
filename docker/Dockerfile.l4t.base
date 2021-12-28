@@ -1,21 +1,24 @@
 ARG NGINX_VERSION
 FROM blakeblackshear/frigate-nginx-l4t:${NGINX_VERSION} as nginx
 FROM frigate-web as web
-FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3 as wheels
+FROM nvcr.io/nvidia/l4t-tensorrt:r8.0.1-runtime as wheels
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    python3.8 \
     python3.8-dev \
     wget \
     # opencv dependencies
-    build-essential cmake git pkg-config libgtk-3-dev \
+    build-essential cmake git pkg-config libgtk-3-dev
+
+RUN apt-get -qq install -y \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-    libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
+    libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev
+RUN apt-get -qq install -y \
     gfortran openexr libatlas-base-dev libssl-dev\
-    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev
+RUN apt-get -qq install -y \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev cython
@@ -39,7 +42,7 @@ RUN pip3 wheel --wheel-dir=/wheels \
     setproctitle \
     peewee
 
-FROM nvcr.io/nvidia/l4t-tensorflow:r32.6.1-tf2.5-py3
+FROM nvcr.io/nvidia/l4t-tensorrt:r8.0.1-runtime
 ENV DEBIAN_FRONTEND=noninteractive
 RUN \
     apt-get update && apt-get install -y gnupg
@@ -78,20 +81,11 @@ RUN pip3 install \
     peewee_migrate \
     pydantic \
     zeroconf \
-    ws4py \
-    # Python 3.6
-    shared-memory38
+    ws4py
 
-
-# setup gstreamer
-RUN \
-  apt-get update && apt-get install -y software-properties-common && \
-  add-apt-repository universe && \
-  add-apt-repository multiverse && \
-  apt-get update
 
 RUN \
-  apt-get install -y gstreamer1.0-tools gstreamer1.0-alsa \
+  apt-get update && apt-get install -y gstreamer1.0-tools gstreamer1.0-alsa \
     gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
 
@@ -110,24 +104,35 @@ RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdli
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=web /opt/frigate/build /opt/frigate/web/
 
+# install TRT dependencies
+RUN apt-get update && apt-get install -y git sudo
+ADD docker/l4t/ /l4t/
+RUN /l4t/install_pycuda.sh
+
 # s6-overlay
 COPY docker/rootfs/ /
 ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-aarch64-installer /tmp/
 RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-installer /
 
 
-WORKDIR /opt/frigate/
-ADD frigate frigate/
-ADD migrations migrations/
 COPY labelmap.txt /labelmap.txt
+COPY detect.tflite /detect.tflite
 
 
 # edgetpu experiments
 RUN wget -q https://github.com/Azure/Azure-AI-Camp/releases/download/v1.0/yolov4-tiny.tflite -O /yolov4-tiny.tflite
 
+
+
+# TRT Yolo4 Plugin
+ADD .l4t_assets /yolo4/
+
 EXPOSE 5000
 EXPOSE 1935
 
+WORKDIR /opt/frigate/
+
+ADD frigate frigate/
+ADD migrations migrations/
 ENTRYPOINT ["/init"]
 CMD ["python3", "-u", "-m", "frigate"]
-COPY frigate frigate/
