@@ -262,7 +262,7 @@ class TrackedObject:
         if crop:
             box = self.thumbnail_data["box"]
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], 1.1
+                best_frame.shape, box[0], box[1], box[2], box[3], 300, multiplier=1.1
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 

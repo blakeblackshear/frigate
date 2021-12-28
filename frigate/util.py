@@ -189,12 +189,12 @@ def draw_box_with_label(
     )
 
 
-def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):
+def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier=2):
     # size is the longest edge and divisible by 4
     size = int(max(xmax - xmin, ymax - ymin) // 4 * 4 * multiplier)
-    # dont go any smaller than 300
-    if size < 300:
-        size = 300
+    # dont go any smaller than the model_size
+    if size < model_size:
+        size = model_size
 
     # x_offset is midpoint of bounding box minus half the size
     x_offset = int((xmax - xmin) / 2.0 + xmin - size / 2.0)

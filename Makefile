@@ -15,7 +15,10 @@ amd64_ffmpeg:
 	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.2.0-amd64 --file docker/Dockerfile.ffmpeg.amd64 .
 
 nginx_frigate:
-	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.2 --file docker/Dockerfile.nginx .
+	docker build --tag blakeblackshear/frigate-nginx:1.0.2 --file docker/Dockerfile.nginx .
+
+nginx_frigate_l4t:
+	docker build --tag blakeblackshear/frigate-nginx-l4t:1.0.2 --file docker/Dockerfile.l4t.nginx .
 
 amd64_frigate: version web
 	docker build --no-cache --tag frigate-base --build-arg ARCH=amd64 --build-arg FFMPEG_VERSION=1.1.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
@@ -41,17 +44,35 @@ aarch64_wheels:
 aarch64_ffmpeg:
 	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.3.0-aarch64 --file docker/Dockerfile.ffmpeg.aarch64 .
 
-aarch64_frigate: version web
-	docker build --no-cache --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
+aarch64_frigate:
+	docker build --no-cache --tag frigate-base --build-arg ARCH=aarch64 --build-arg FFMPEG_VERSION=1.3.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
 	docker build --no-cache --tag frigate --file docker/Dockerfile.aarch64 .
 
+aarch64_dev:
+	docker build --tag frigate --file docker/Dockerfile.aarch64 .
+
 aarch64_all: aarch64_wheels aarch64_ffmpeg aarch64_frigate
+
+l4t_assets_yolo4:
+	mkdir -p $$(pwd)/.l4t_assets
+	cp ./converters/yolo4/plugin/* .l4t_assets/
+	cp ./converters/yolo4/model/yolov4-tiny-416.trt .l4t_assets/yolov4-tiny-416.trt
+	cp ./converters/yolo4/model/yolov4-tiny-288.trt .l4t_assets/yolov4-tiny-288.trt
+	# cp ./converters/yolo4/model/yolov4-416.trt .l4t_assets/yolov4-416.trt
+	# cp ./converters/yolo4/model/yolov4-288.trt .l4t_assets/yolov4-288.trt
+
+l4t_dev: # l4t_assets_yolo4
+	nvidia-docker build --tag frigate.l4t --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.l4t.base .
+
+l4t_dev_test:
+	nvidia-docker build --tag frigate.l4t.onnx --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.l4t.onnx ./onnx_test/
+
 
 armv7_wheels:
 	docker build --tag blakeblackshear/frigate-wheels:1.0.3-armv7 --file docker/Dockerfile.wheels .
 
 armv7_ffmpeg:
-	docker build --no-cache --pull --tag blakeblackshear/frigate-ffmpeg:1.2.0-armv7 --file docker/Dockerfile.ffmpeg.armv7 .
+	docker build --pull --tag blakeblackshear/frigate-ffmpeg:1.2.0-armv7 --file docker/Dockerfile.ffmpeg.armv7 .
 
 armv7_frigate: version web
 	docker build --no-cache --tag frigate-base --build-arg ARCH=armv7 --build-arg FFMPEG_VERSION=1.0.0 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .

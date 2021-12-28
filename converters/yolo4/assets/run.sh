@@ -2,6 +2,7 @@
 
 set -xe
 cd /tensorrt_demos/plugins && make
+cp /tensorrt_demos/plugins/libyolo_layer.so /plugin/libyolo_layer.so
 
 cd /tensorrt_demos/yolo
 for model in yolov4-tiny-288 \

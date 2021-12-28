@@ -1,12 +1,14 @@
 #!/bin/bash
 
 mkdir -p $(pwd)/model
+mkdir -p $(pwd)/plugin
 
 docker build --tag models.yolo4  --file ./Dockerfile.l4t.tf15 ./assets/
 
 sudo docker run --rm -it --name models.yolo4 \
     --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
     -v $(pwd)/model:/model:rw \
+    -v $(pwd)/plugin:/plugin:rw \
     -v /tmp/argus_socket:/tmp/argus_socket \
     -e NVIDIA_VISIBLE_DEVICES=all \
     -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video \
