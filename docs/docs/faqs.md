@@ -17,7 +17,14 @@ By default, Frigate removes audio from recordings to reduce the likelihood of fa
 
 :::tip
 
-When using `-c:a aac`, do not forget to replace `-c copy` with `-c:v copy`.
+When using `-c:a aac`, do not forget to replace `-c copy` with `-c:v copy`, example:
+
+```diff title="frigate.yml"
+ffmpeg:
+  output_args:
+-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
++    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
+```
 
 :::
 
