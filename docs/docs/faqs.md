@@ -26,6 +26,8 @@ ffmpeg:
 +    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac
 ```
 
+This is needed because the `-c` flag (without `:a` or `:v`) applies for both audio and video, thus making it conflicting with `-c:a aac`.
+
 :::
 
 ### My mjpeg stream or snapshots look green and crazy
