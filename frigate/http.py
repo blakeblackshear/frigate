@@ -182,7 +182,7 @@ def event_thumbnail(id):
         thumbnail_bytes = jpg.tobytes()
 
     response = make_response(thumbnail_bytes)
-    response.headers["Content-Type"] = "image/jpg"
+    response.headers["Content-Type"] = "image/jpeg"
     return response
 
 
@@ -223,7 +223,7 @@ def event_snapshot(id):
         return "Event not found", 404
 
     response = make_response(jpg_bytes)
-    response.headers["Content-Type"] = "image/jpg"
+    response.headers["Content-Type"] = "image/jpeg"
     if download:
         response.headers[
             "Content-Disposition"
@@ -376,7 +376,7 @@ def best(camera_name, label):
             ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
         )
         response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpg"
+        response.headers["Content-Type"] = "image/jpeg"
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
@@ -438,7 +438,7 @@ def latest_frame(camera_name):
             ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
         )
         response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpg"
+        response.headers["Content-Type"] = "image/jpeg"
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
