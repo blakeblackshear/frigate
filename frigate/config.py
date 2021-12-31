@@ -595,6 +595,7 @@ class CameraConfig(FrigateBaseModel):
 
         return decoder_cmds    
 
+
     def create_ffmpeg_cmds(self):
         if "_ffmpeg_cmds" in self:
             return
