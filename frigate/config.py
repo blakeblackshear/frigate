@@ -599,12 +599,13 @@ class CameraConfig(FrigateBaseModel):
         if "_ffmpeg_cmds" in self:
             return
         ffmpeg_cmds = []
-        for ffmpeg_input in self.ffmpeg.inputs:
-            ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
-            if ffmpeg_cmd is None:
-                continue
+        if self.ffmpeg:
+            for ffmpeg_input in self.ffmpeg.inputs:
+                ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
+                if ffmpeg_cmd is None:
+                    continue
 
-            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
+                ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
         self._ffmpeg_cmds = ffmpeg_cmds
 
 
