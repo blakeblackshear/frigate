@@ -107,7 +107,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                     + str(rc)
                 )
 
-        logger.info("MQTT connected")
+        logger.debug("MQTT connected")
         client.subscribe(f"{mqtt_config.topic_prefix}/#")
         client.publish(mqtt_config.topic_prefix + "/available", "online", retain=True)
 
