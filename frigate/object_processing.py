@@ -18,12 +18,12 @@ import numpy as np
 
 from frigate.config import CameraConfig, SnapshotsConfig, RecordConfig, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.edgetpu import load_labels
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
     draw_box_with_label,
     draw_timestamp,
+    load_labels,
 )
 
 logger = logging.getLogger(__name__)
@@ -264,8 +264,9 @@ class TrackedObject:
 
         if crop:
             box = self.thumbnail_data["box"]
+            box_size = 300
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], 1.1
+                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 

@@ -359,9 +359,10 @@ def best(camera_name, label):
 
         crop = bool(request.args.get("crop", 0, type=int))
         if crop:
-            box = best_object.get("box", (0, 0, 300, 300))
+            box_size = 300
+            box = best_object.get("box", (0, 0, box_size, box_size))
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], 1.1
+                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
