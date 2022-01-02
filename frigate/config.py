@@ -960,7 +960,7 @@ class FrigateConfig(FrigateBaseModel):
             # check runtime config
             decoder_config = (
                 camera_config.ffmpeg
-                if "ffmpeg" in camera_config
+                if camera_config.ffmpeg is not None
                 else camera_config.gstreamer
             )
             assigned_roles = list(
