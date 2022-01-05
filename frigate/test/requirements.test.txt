@@ -1,0 +1,17 @@
+opencv-python-headless
+numpy
+imutils
+scipy
+psutil
+Flask
+paho-mqtt
+PyYAML
+matplotlib
+click
+setproctitle
+peewee
+peewee_migrate
+pydantic
+zeroconf
+ws4py
+pytest
