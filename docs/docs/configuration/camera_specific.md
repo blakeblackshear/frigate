@@ -31,6 +31,18 @@ input_args:
 - -1
 - -f
 - image2
+- -avoid_negative_ts
+- make_zero
+- -fflags
+- nobuffer
+- -flags
+- low_delay
+- -strict
+- experimental
+- -fflags
+- +genpts+discardcorrupt
+- -use_wallclock_as_timestamps
+- 1
 ```
 
 Outputting the stream will have the same args and caveats as per [MJPEG Cameras](#mjpeg-cameras)
