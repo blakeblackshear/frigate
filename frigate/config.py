@@ -17,9 +17,9 @@ from frigate.util import (
     create_mask,
     deep_merge,
     load_labels,
-    gst_discover,
-    gst_inspect_find_codec,
 )
+
+from frigate.gstreamer import gst_discover, GstreamerBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -610,131 +610,38 @@ class CameraConfig(FrigateBaseModel):
         gstreamer_input: CameraGStreamerInput,
         caps: Dict,
     ):
-
         if CameraRoleEnum.rtmp.value in gstreamer_input.roles:
             raise ValueError(
-                f"{CameraRoleEnum.rtmp.value} role not supported for the GStreamer"
+                f"{CameraRoleEnum.rtmp.value} role does not supported for the GStreamer integration"
             )
+
+        builder = GstreamerBuilder(
+            gstreamer_input.path, self.detect.width, self.detect.height
+        )
+        if caps is None or len(caps) == 0:
+            logger.warn("gsreamer was not able to detect the input stream format")
+            return builder.build_with_test_source()
 
         decoder_pipeline = (
             gstreamer_input.decoder_pipeline
             if gstreamer_input.decoder_pipeline is not None
             else base_config.decoder_pipeline
         )
+        decoder_pipeline = [part for part in decoder_pipeline if part != ""]
+        builder = builder.with_decoder_pipeline(decoder_pipeline, codec = caps.get("video codec"))
+
         source_format_pipeline = (
             gstreamer_input.source_format_pipeline
             if gstreamer_input.source_format_pipeline is not None
             else base_config.source_format_pipeline
         )
-
-        decoder_pipeline = [part for part in decoder_pipeline if part != ""]
         source_format_pipeline = [part for part in source_format_pipeline if part != ""]
-        video_format = f"video/x-raw,width=(int){self.detect.width},height=(int){self.detect.height},format=(string)I420"
-
-        if caps is None or len(caps) == 0:
-            logger.warn("gsreamer was not able to detect the input stream format")
-            return [
-                "videotestsrc pattern=0",
-                video_format,
-            ]
-
-        input_pipeline = [f'rtspsrc location="{gstreamer_input.path}" latency=0']
-
-        # attempt to autodecect hardware decoder pipeline and fallback to the software one
-        if decoder_pipeline is None or len(decoder_pipeline) == 0:
-            decoder_pipeline = []
-            codec = caps.get("video codec")
-            if codec is None:
-                logger.warn(
-                    "gsreamer was not able to detect video coded. Please supply `decoder_pipeline` parameter."
-                )
-            else:
-                # convert H.265 to h265
-                codec = codec.lower().replace(".", "")
-                logger.debug(
-                    "detecting gstreamer decoder pipeline for the %s format", codec
-                )
-                # run gst_inspect and get available codecs
-                codecs = gst_inspect_find_codec(codec)
-                logger.error(">>> codecs %s", codecs)
-
-                if codecs is None or len(codecs) == 0:
-                    logger.warn(
-                        "gsreamer was not able to find the codec for the %s format",
-                        codec,
-                    )
-                else:
-                    # Please add known decoder elements here for other architectures:
-                    hw_decode_element = f"omx{codec}dec"
-                    sw_decode_element = f"avdec_{codec}"
-                    decode_element = (
-                        hw_decode_element
-                        if hw_decode_element in codecs
-                        else sw_decode_element
-                    )
-                    if decode_element not in codecs:
-                        logger.warn(
-                            "gsreamer was not able to find either %s or %s decoder for %s format",
-                            hw_decode_element,
-                            sw_decode_element,
-                            codec,
-                        )
-                    else:
-                        decoder_pipeline = [
-                            f"rtp{codec}depay",
-                            f"{codec}parse",
-                            decode_element,
-                        ]
-
-        # return videotestsrc if autodetect failed
-        if decoder_pipeline is None or len(decoder_pipeline) == 0:
-            return [
-                "videotestsrc pattern=0",
-                video_format,
-            ]
-
-        source_format_pipeline = (
-            source_format_pipeline
-            if source_format_pipeline
-            else ["video/x-raw,format=(string)NV12", "videoconvert", "videoscale"]
-        )
-        destination_format_pipeline = [video_format, "videoconvert"]
+        builder = builder.with_source_format_pipeline(source_format_pipeline)
 
         use_record = CameraRoleEnum.record.value in gstreamer_input.roles
         use_detect = CameraRoleEnum.detect.value in gstreamer_input.roles
 
-        fd_sink = ["tee name=t", "fdsink t."] if use_record and use_detect else (
-            ["fdsink"] if use_detect else []
-        ) 
-
-        record_mux = (
-            [
-                "queue2",
-                "x264enc key-int-max=10",
-                "h264parse",
-                f"splitmuxsink async-handling=true location={os.path.join(CACHE_DIR, self.name)}-gst-%05d.mp4 max-size-time=10000000000",
-            ]
-            if use_record
-            else []
-        )
-
-        pipeline = [
-            *input_pipeline,
-            *decoder_pipeline,
-            *source_format_pipeline,
-            *destination_format_pipeline,
-            *fd_sink,
-            *record_mux,
-        ]
-
-        pipeline_args = [
-            f"{item} !".split(" ") for item in pipeline if len(pipeline) > 0
-        ]
-        pipeline_args = [item for sublist in pipeline_args for item in sublist]
-        pipeline_args = ["gst-launch-1.0", "-q", *pipeline_args][:-1]
-        logger.debug(f"using gstreamer pipeline: {' '.join(pipeline_args)}")
-
-        return pipeline_args
+        return builder.build(use_detect, use_record)
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraFFmpegInput):
         ffmpeg_output_args = []

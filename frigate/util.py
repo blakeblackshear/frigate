@@ -642,60 +642,6 @@ def load_labels(path, encoding="utf-8"):
             return {index: line.strip() for index, line in enumerate(lines)}
 
 
-def gst_discover(source: str, keys: List[str]) -> Optional[Dict[str, str]]:
-    """
-    run gst-discoverer-1.0 to discover source stream
-    and extract keys, specified in the source arrat
-    """
-    try:
-        data = sp.check_output(
-            [
-                "gst-discoverer-1.0",
-                "-v",
-                source,
-            ],
-            universal_newlines=True,
-            start_new_session=True,
-            stderr=None,
-        )
-        stripped = list(map(lambda s: s.strip().partition(":"), data.split("\n")))
-        result = {}
-        for key, _, value in stripped:
-            for param in keys:
-                if param in key.lower():
-                    terms = value.strip().split(" ")
-                    result[param] = terms[0]
-        return result
-    except:
-        logger.error(
-            "gst-discoverer-1.0 failed with the message: %s", traceback.format_exc()
-        )
-        return None
-
-def gst_inspect_find_codec(codec: str) -> List[str]:
-    """
-    run gst-inspect-1.0 and find the codec.
-    gst-inspect-1.0 return data in the following format:
-    omx:  omxh265dec: OpenMAX H.265 Video Decoder
-    rtp:  rtph265pay: RTP H265 payloader
-    """
-    try:
-        data = sp.check_output(
-            ["gst-inspect-1.0"],
-            universal_newlines=True,
-            start_new_session=True,
-            stderr=None,
-        )
-        return [
-            line.split(":")[1].strip() for line in data.split("\n") if codec in line
-        ]
-    except:
-        logger.error(
-            "gst-inspect-1.0 failed with the message: %s", traceback.format_exc()
-        )
-        return None
-
-
 class FrameManager(ABC):
     @abstractmethod
     def create(self, name, size) -> AnyStr:
