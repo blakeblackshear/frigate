@@ -8,6 +8,20 @@ export default function JSMpegPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}/live/${camera}`
 
   useEffect(() => {
+    let wakeLock = null;
+
+    const requestWakeLock = async () => {
+      if (!navigator.wakeLock) {
+        return;
+      }
+
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,
@@ -16,6 +30,8 @@ export default function JSMpegPlayer({ camera, width, height }) {
     );
 
     const fullscreen = () => {
+      requestWakeLock();
+
       if(video.els.canvas.webkitRequestFullScreen) {
         video.els.canvas.webkitRequestFullScreen();
       }
@@ -24,9 +40,26 @@ export default function JSMpegPlayer({ camera, width, height }) {
       }
     }
 
+    const fullscreenchange = () => {
+      if (document.webkitIsFullScreen) {
+        return;
+      }
+
+      if (wakeLock === null) {
+        return;
+      }
+
+      wakeLock.release().then(() => {
+        wakeLock = null;
+      });
+    }
+
     video.els.canvas.addEventListener('click',fullscreen)
+    video.els.canvas.addEventListener('webkitfullscreenchange',fullscreenchange)
 
     return () => {
+      video.els.canvas.removeEventListener('click',fullscreen)
+      video.els.canvas.removeEventListener('webkitfullscreenchange',fullscreenchange)
       video.destroy();
     };
   }, [url]);
