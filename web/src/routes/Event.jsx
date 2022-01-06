@@ -9,11 +9,11 @@ import Clip from '../icons/Clip';
 import Close from '../icons/Close';
 import Delete from '../icons/Delete';
 import Snapshot from '../icons/Snapshot';
-import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
+import Prompt from '../components/Prompt';
 
 const ActionButtonGroup = ({ className, handleClickDelete, close }) => (
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
@@ -121,7 +121,7 @@ export default function Event({ eventId, close, scrollRef }) {
         </div>
         <ActionButtonGroup handleClickDelete={handleClickDelete} close={close} className="hidden sm:block" />
         {showDialog ? (
-          <Dialog
+          <Prompt
             onDismiss={handleDismissDeleteDialog}
             title="Delete Event?"
             text={
