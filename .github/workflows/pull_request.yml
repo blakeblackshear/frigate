@@ -45,21 +45,26 @@ jobs:
         run: npm run test
         working-directory: ./web
         
-  pytest:
+  docker_tests_on_aarch64:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.8']
-
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install tox tox-gh-actions
-    - name: Test with tox
-      run: tox -e unittests
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build and run tests
+        run: make run_tests PLATFORM="linux/arm64/v8" ARCH="aarch64"
+
+  docker_tests_on_amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build and run tests
+        run: make run_tests PLATFORM="linux/amd64" ARCH="amd64"
