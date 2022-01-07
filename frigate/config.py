@@ -12,7 +12,7 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator, root_validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT
+from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT, RECORD_SEGMENT_TIME_SECONDS
 from frigate.util import (
     create_mask,
     deep_merge,
@@ -315,7 +315,7 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-f",
     "segment",
     "-segment_time",
-    "10",
+    str(RECORD_SEGMENT_TIME_SECONDS),
     "-segment_format",
     "mp4",
     "-reset_timestamps",
@@ -616,7 +616,7 @@ class CameraConfig(FrigateBaseModel):
             )
 
         builder = GstreamerBuilder(
-            gstreamer_input.path, self.detect.width, self.detect.height
+            gstreamer_input.path, self.detect.width, self.detect.height, self.name
         )
         if caps is None or len(caps) == 0:
             logger.warn("gsreamer was not able to detect the input stream format")

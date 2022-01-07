@@ -1,4 +1,5 @@
 import datetime
+from dateutil import tz
 import itertools
 import logging
 import multiprocessing as mp
@@ -17,7 +18,12 @@ import psutil
 from peewee import JOIN, DoesNotExist
 
 from frigate.config import RetainModeEnum, FrigateConfig
-from frigate.const import CACHE_DIR, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    RECORD_DIR,
+    GSTREAMER_RECORD_SUFFIX,
+    RECORD_SEGMENT_TIME_SECONDS,
+)
 from frigate.models import Event, Recordings
 from frigate.util import area
 
@@ -69,7 +75,7 @@ class RecordingMaintainer(threading.Thread):
         files_in_use = []
         for process in psutil.process_iter():
             try:
-                if process.name() != "ffmpeg":
+                if process.name() not in ["ffmpeg", "gst-launch-1.0"]:
                     continue
                 flist = process.open_files()
                 if flist:
@@ -89,7 +95,14 @@ class RecordingMaintainer(threading.Thread):
             cache_path = os.path.join(CACHE_DIR, f)
             basename = os.path.splitext(f)[0]
             camera, date = basename.rsplit("-", maxsplit=1)
-            start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
+            if camera.endswith(GSTREAMER_RECORD_SUFFIX):
+                camera = camera.split(GSTREAMER_RECORD_SUFFIX)[0]
+                creation_time = (
+                    os.path.getmtime(cache_path) - RECORD_SEGMENT_TIME_SECONDS
+                )
+                start_time = datetime.datetime.utcfromtimestamp(creation_time)
+            else:
+                start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
             grouped_recordings[camera].append(
                 {

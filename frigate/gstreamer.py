@@ -3,7 +3,11 @@ import logging
 import traceback
 import subprocess as sp
 from typing import Dict, List, Optional
-from frigate.const import CACHE_DIR
+from frigate.const import (
+    CACHE_DIR,
+    GSTREAMER_RECORD_SUFFIX,
+    RECORD_SEGMENT_TIME_SECONDS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +66,7 @@ def gst_inspect_find_codec(codec: str) -> List[str]:
         )
         return None
 
+
 def autodetect_decoder_pipeline(
     codec: Optional[str],
 ) -> List[str]:
@@ -118,10 +123,11 @@ CODECS = {
 
 
 class GstreamerBuilder:
-    def __init__(self, uri, width, height, format="I420"):
+    def __init__(self, uri, width, height, name, format="I420"):
         self.uri = uri
         self.width = width
         self.height = height
+        self.name = name
         self.video_format = f"video/x-raw,width=(int){width},height=(int){height},format=(string){format}"
         self.input_pipeline = [f'rtspsrc location="{uri}" latency=0']
         self.destination_format_pipeline = [self.video_format, "videoconvert"]
@@ -141,7 +147,7 @@ class GstreamerBuilder:
 
         self.decoder_pipeline = autodetect_decoder_pipeline(codec)
         return self
-    
+
     def with_source_format_pipeline(self, source_format_pipeline):
         source_format_pipeline = (
             source_format_pipeline
@@ -176,7 +182,7 @@ class GstreamerBuilder:
                 "queue2",
                 "x264enc key-int-max=10",
                 "h264parse",
-                f"splitmuxsink async-handling=true location={os.path.join(CACHE_DIR, self.name)}-gst-%05d.mp4 max-size-time=10000000000",
+                f"splitmuxsink async-handling=true location={os.path.join(CACHE_DIR, self.name)}{GSTREAMER_RECORD_SUFFIX}-%05d.mp4 max-size-time={RECORD_SEGMENT_TIME_SECONDS*1000000000}",
             ]
             if use_record
             else []
@@ -188,4 +194,3 @@ class GstreamerBuilder:
         ]
         pipeline_args = [item for sublist in pipeline_args for item in sublist]
         return ["gst-launch-1.0", "-q", *pipeline_args][:-1]
-
