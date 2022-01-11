@@ -26,4 +26,3 @@ RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-instal
 ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]
-COPY frigate frigate/
