@@ -53,7 +53,7 @@ aarch64_dev:
 
 aarch64_all: aarch64_wheels aarch64_ffmpeg aarch64_frigate
 
-l4t_assets_yolo4:
+aarch64_l4t_assets:
 	mkdir -p $$(pwd)/.l4t_assets
 	cp ./converters/yolo4/plugin/* .l4t_assets/
 	cp ./converters/yolo4/model/yolov4-tiny-416.trt .l4t_assets/yolov4-tiny-416.trt
@@ -61,11 +61,19 @@ l4t_assets_yolo4:
 	# cp ./converters/yolo4/model/yolov4-416.trt .l4t_assets/yolov4-416.trt
 	# cp ./converters/yolo4/model/yolov4-288.trt .l4t_assets/yolov4-288.trt
 
-l4t_dev: # l4t_assets_yolo4
-	nvidia-docker build --tag frigate.l4t --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.l4t.base .
+aarch64_l4t_wheels:
+	@docker build --tag frigate-wheels-l4t --file docker/Dockerfile.wheels.l4t .
+	# Run l4t wheels using nvidia runtime
+	@docker rm frigate.wheels.l4t || true
+	@docker run --name frigate.wheels.l4t -it --runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=compute,utility,video --privileged frigate-wheels-l4t
+	# Commit changes to the container
+	@CONTAINER_ID=`docker ps -n 1 --format "{{.ID}}"`
+	@docker commit $$CONTAINER_ID frigate.wheels.l4t frigate-wheels-l4t:latest
+	@docker rm frigate.wheels.l4t || true
 
-l4t_dev_test:
-	nvidia-docker build --tag frigate.l4t.onnx --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.l4t.onnx ./onnx_test/
+aarch64_l4t_frigate: # aarch64_l4t_wheels aarch64_l4t_assets
+	#docker build --tag frigate-base-l4t --build-arg BASE_IMAGE=timongentzsch/l4t-ubuntu20-opencv:latest --build-arg FFMPEG_ARCH=arm64 --build-arg ARCH=aarch64 --build-arg WHEELS_VERSION=1.0.3 --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.base .
+	nvidia-docker build --tag frigate.l4t --build-arg NGINX_VERSION=1.0.2 --file docker/Dockerfile.aarch64.l4t .
 
 
 armv7_wheels:

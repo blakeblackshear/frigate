@@ -106,6 +106,7 @@ def run_detector(
 
         avg_speed.value = (avg_speed.value * 9 + duration) / 10
     del object_detector
+    logger.debug("Object detector process[%s] exit.", name)
 
 
 class DetectionProcess:

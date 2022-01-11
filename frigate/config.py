@@ -596,11 +596,10 @@ class CameraConfig(FrigateBaseModel):
         else:
             for input in self.gstreamer.inputs:
                 caps = gst_discover(input.path, ["width", "height", "video codec"])
-                logger.error(">>> caps %s", caps)
                 gst_cmd = self._get_gstreamer_cmd(self.gstreamer, input, caps)
                 if gst_cmd is None:
                     continue
-                logger.error(">>> gst_cmd %s", gst_cmd)
+                logger.debug("gstreamer command[%s] %s", self.name, gst_cmd)
 
                 self._decoder_cmds.append({"roles": input.roles, "cmd": gst_cmd})
 
@@ -628,7 +627,9 @@ class CameraConfig(FrigateBaseModel):
             else base_config.decoder_pipeline
         )
         decoder_pipeline = [part for part in decoder_pipeline if part != ""]
-        builder = builder.with_decoder_pipeline(decoder_pipeline, codec = caps.get("video codec"))
+        builder = builder.with_decoder_pipeline(
+            decoder_pipeline, codec=caps.get("video codec")
+        )
 
         source_format_pipeline = (
             gstreamer_input.source_format_pipeline
