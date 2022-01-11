@@ -1,10 +1,14 @@
-FROM frigate-base
+FROM frigate-wheels-l4t:latest as wheelsl4t
+FROM frigate-base-l4t
 LABEL maintainer "blakeb@blakeshome.com"
+
+COPY --from=wheelsl4t /wheels/. /wheels/
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
+    git \
     # ffmpeg runtime dependencies
     libgomp1 \
     # runtime dependencies
@@ -19,11 +23,21 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
+# Install tensorrt and pycuda
+RUN pip3 install -U /wheels/*.whl
+
+# Yolo4 model and plugins
+ADD .l4t_assets /yolo4/
+
 # s6-overlay
 ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-aarch64-installer /tmp/
 RUN chmod +x /tmp/s6-overlay-aarch64-installer && /tmp/s6-overlay-aarch64-installer /
 
+# Set up library path for the GStreamer
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
+
 ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]
+
 COPY frigate frigate/

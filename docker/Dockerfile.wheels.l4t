@@ -1,0 +1,34 @@
+FROM timongentzsch/l4t-ubuntu20-base:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -yqq git python3.8 python3.8-dev python3-pip build-essential curl wget cmake
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
+
+RUN \
+    EXT_PATH=~/external && \
+    mkdir -p $EXT_PATH && cd $EXT_PATH && \
+    git clone https://github.com/pybind/pybind11.git 
+
+RUN \
+    PYTHON_VERSION=`python -c 'import platform;print(platform.python_version())'` && \
+    EXT_PATH=~/external && \
+    mkdir Python-${PYTHON_VERSION} && wget -qO- https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz | tar xvz --strip-components=1 -C Python-${PYTHON_VERSION} && \
+    mkdir -p ${EXT_PATH}/python3.8/include && mv Python-${PYTHON_VERSION}/Include/* ${EXT_PATH}/python3.8/include/ && rm -rf Python-${PYTHON_VERSION} && \
+    cp /usr/include/aarch64-linux-gnu/python3.8/pyconfig.h ~/external/python3.8/include/
+
+RUN \
+    mkdir /workspace && cd /workspace && git clone https://github.com/NVIDIA/TensorRT.git && \
+    mkdir -p /workspace/TensorRT/python/include/onnx
+
+WORKDIR /workspace/TensorRT/python
+# monkeypatch the environment
+RUN \
+    cd /workspace/TensorRT/python && \
+    echo "mkdir -p /wheels && pip3 wheel --wheel-dir=/wheels pycuda==2021.1\n"\
+    "cp -r /usr/local/cuda-10.2/targets/aarch64-linux/include/* ./include/\n"\
+    "cp -r /usr/include/aarch64-linux-gnu/* ./include/onnx/\n"\
+    "EXT_PATH=/root/external PYTHON_MAJOR_VERSION=3 PYTHON_MINOR_VERSION=8 TARGET_ARCHITECTURE=aarch64 ./build.sh\n" \
+    "cp /workspace/TensorRT/python/build/dist/*.whl /wheels\n" >> ./bootstrap.sh && \
+    chmod +x ./bootstrap.sh
+    
+CMD ["/bin/bash", "./bootstrap.sh"]
