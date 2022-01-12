@@ -7,7 +7,7 @@ module.exports = {
         xs: '480px',
         '2xl': '1536px',
         '3xl': '1720px',
-      }
+      },
     },
     boxShadow: {
       sm: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
