@@ -1,7 +1,5 @@
 import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { FetchStatus, useEvents } from '../api';
-import { useSearchString } from '../hooks/useSearchString';
 import { Next } from '../icons/Next';
 import { Play } from '../icons/Play';
 import { Previous } from '../icons/Previous';
