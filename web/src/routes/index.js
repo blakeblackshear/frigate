@@ -8,6 +8,11 @@ export async function getCamera(url, cb, props) {
   return module.default;
 }
 
+export async function getCameraV2(url, cb, props) {
+  const module = await import('./Camera_V2.jsx');
+  return module.default;
+}
+
 export async function getEvent(url, cb, props) {
   const module = await import('./Event.jsx');
   return module.default;
