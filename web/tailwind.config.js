@@ -7,9 +7,6 @@ module.exports = {
         xs: '480px',
         '2xl': '1536px',
         '3xl': '1720px',
-      },
-      flexGrow: {
-        '100': 100
       }
     },
     boxShadow: {
