@@ -184,17 +184,17 @@ class TestGstTools(TestCase):
 
 class TestGstreamerBuilder(TestCase):
     def setUp(self):
-        self.builder = GstreamerBuilder("uri://", 320, 240, "cam_name")
+        self.builder = GstreamerBuilder("rtsp://", 320, 240, "cam_name")
 
     @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
     def test_manual_decoder_and_cource(self, mock_autodetect_pipeline):
-        builder = self.builder.with_decoder_pipeline(["a", "b", "c"], codec="H.264")
+        builder = self.builder.with_decoder_pipeline(["a", "b", "c"], caps=None)
         builder = builder.with_source_format_pipeline(["d", "e", "f"])
         assert builder.build(use_detect=True, use_record=False) == [
             "gst-launch-1.0",
             "-q",
             "rtspsrc",
-            'location="uri://"',
+            'location="rtsp://"',
             "latency=0",
             "!",
             "a",
@@ -220,13 +220,13 @@ class TestGstreamerBuilder(TestCase):
     @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
     def test_autodetect_codecs_success(self, mock_pipeline):
         mock_pipeline.return_value = ["rtph264depay", "h264parse", "omxh264dec"]
-        builder = self.builder.with_decoder_pipeline([], codec="H.264")
+        builder = self.builder.with_decoder_pipeline([], caps={"video codec": "H.264"})
         builder = builder.with_source_format_pipeline([])
         assert builder.build(use_detect=True, use_record=False) == [
             "gst-launch-1.0",
             "-q",
             "rtspsrc",
-            'location="uri://"',
+            'location="rtsp://"',
             "latency=0",
             "!",
             "rtph264depay",
@@ -251,7 +251,7 @@ class TestGstreamerBuilder(TestCase):
             "gst-launch-1.0",
             "-q",
             "rtspsrc",
-            'location="uri://"',
+            'location="rtsp://"',
             "latency=0",
             "!",
             "rtph264depay",
@@ -276,10 +276,9 @@ class TestGstreamerBuilder(TestCase):
             "fdsink",
             "t.",
             "!",
-            "queue2",
+            "queue",
             "!",
-            "x264enc",
-            "key-int-max=10",
+            "omxh264enc",
             "!",
             "h264parse",
             "!",
@@ -292,7 +291,7 @@ class TestGstreamerBuilder(TestCase):
             "gst-launch-1.0",
             "-q",
             "rtspsrc",
-            'location="uri://"',
+            'location="rtsp://"',
             "latency=0",
             "!",
             "rtph264depay",
@@ -301,20 +300,9 @@ class TestGstreamerBuilder(TestCase):
             "!",
             "omxh264dec",
             "!",
-            "video/x-raw,format=(string)NV12",
+            "queue",
             "!",
-            "videoconvert",
-            "!",
-            "videoscale",
-            "!",
-            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
-            "!",
-            "videoconvert",
-            "!",
-            "queue2",
-            "!",
-            "x264enc",
-            "key-int-max=10",
+            "omxh264enc",
             "!",
             "h264parse",
             "!",
@@ -327,7 +315,7 @@ class TestGstreamerBuilder(TestCase):
     @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
     def test_autodetect_codecs_failure(self, mock_pipeline):
         mock_pipeline.return_value = None
-        builder = self.builder.with_decoder_pipeline([], codec="H.264")
+        builder = self.builder.with_decoder_pipeline([], caps={"video codec": "H.264"})
         builder = builder.with_source_format_pipeline([])
         assert builder.build(use_detect=True, use_record=False) == [
             "gst-launch-1.0",
@@ -339,6 +327,53 @@ class TestGstreamerBuilder(TestCase):
             "!",
             "fdsink",
         ]
+
+    @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
+    def test_rtmp_source(self, mock_autodetect_pipeline):
+        self.builder = GstreamerBuilder("rtmp://", 320, 240, "cam_name")
+        builder = self.builder.with_decoder_pipeline(["a"], caps=None)
+        builder = builder.with_source_format_pipeline(["d"])
+        assert builder.build(use_detect=True, use_record=False) == [
+            "gst-launch-1.0",
+            "-q",
+            "rtmpsrc",
+            'location="rtmp://"',
+            "!",
+            "a",
+            "!",
+            "d",
+            "!",
+            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
+            "!",
+            "videoconvert",
+            "!",
+            "fdsink",
+        ]
+        mock_autodetect_pipeline.assert_not_called()
+
+    @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
+    def test_custom_source(self, mock_autodetect_pipeline):
+        self.builder = GstreamerBuilder("videotestsrc is-live=true pattern=snow", 320, 240, "cam_name")
+        builder = self.builder.with_decoder_pipeline(["a"], caps=None)
+        builder = builder.with_source_format_pipeline(["d"])
+        assert builder.build(use_detect=True, use_record=False) == [
+            "gst-launch-1.0",
+            "-q",
+            "videotestsrc",
+            "is-live=true",
+            "pattern=snow",
+            "!",
+            "a",
+            "!",
+            "d",
+            "!",
+            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
+            "!",
+            "videoconvert",
+            "!",
+            "fdsink",
+        ]
+        mock_autodetect_pipeline.assert_not_called()
 
 
 if __name__ == "__main__":

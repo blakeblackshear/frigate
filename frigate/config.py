@@ -402,6 +402,10 @@ class CameraGStreamerInput(CameraInput):
         default=[],
         title="Set the camera source format. Default is: ['video/x-raw,format=(string)NV12', 'videoconvert', 'videoscale']",
     )
+    raw_pipeline: List[str] = Field(
+        default=[],
+        title="Override full pipeline. The pipeline should start with the arguments after the `gst-launch-1.0`, `-q`",
+    )
 
 
 class CameraInputValidator:
@@ -595,7 +599,11 @@ class CameraConfig(FrigateBaseModel):
                 )
         else:
             for input in self.gstreamer.inputs:
-                caps = gst_discover(input.path, ["width", "height", "video codec"])
+                caps = (
+                    None
+                    if len(self.gstreamer.decoder_pipeline) > 0
+                    else gst_discover(input.path, ["width", "height", "video codec"])
+                )
                 gst_cmd = self._get_gstreamer_cmd(self.gstreamer, input, caps)
                 if gst_cmd is None:
                     continue
@@ -607,33 +615,37 @@ class CameraConfig(FrigateBaseModel):
         self,
         base_config: GstreamerConfig,
         gstreamer_input: CameraGStreamerInput,
-        caps: Dict,
+        caps: Optional[Dict],
     ):
         if CameraRoleEnum.rtmp.value in gstreamer_input.roles:
             raise ValueError(
                 f"{CameraRoleEnum.rtmp.value} role does not supported for the GStreamer integration"
             )
+        if len(gstreamer_input.raw_pipeline) > 0:
+            logger.warn("You are using raw pipeline for `%s` camera", self.name)
+            pipeline_args = [
+                f"{item} !".split(" ")
+                for item in gstreamer_input.raw_pipeline
+                if len(item) > 0
+            ]
+            pipeline_args = [item for sublist in pipeline_args for item in sublist]
+            return ["gst-launch-1.0", "-q", *pipeline_args][:-1]
 
         builder = GstreamerBuilder(
             gstreamer_input.path, self.detect.width, self.detect.height, self.name
         )
-        if caps is None or len(caps) == 0:
-            logger.warn("gsreamer was not able to detect the input stream format")
-            return builder.build_with_test_source()
 
         decoder_pipeline = (
             gstreamer_input.decoder_pipeline
-            if gstreamer_input.decoder_pipeline is not None
+            if len(gstreamer_input.decoder_pipeline) > 0
             else base_config.decoder_pipeline
         )
         decoder_pipeline = [part for part in decoder_pipeline if part != ""]
-        builder = builder.with_decoder_pipeline(
-            decoder_pipeline, codec=caps.get("video codec")
-        )
+        builder = builder.with_decoder_pipeline(decoder_pipeline, caps)
 
         source_format_pipeline = (
             gstreamer_input.source_format_pipeline
-            if gstreamer_input.source_format_pipeline is not None
+            if len(gstreamer_input.source_format_pipeline) > 0
             else base_config.source_format_pipeline
         )
         source_format_pipeline = [part for part in source_format_pipeline if part != ""]

@@ -9,6 +9,8 @@ from frigate.const import (
     RECORD_SEGMENT_TIME_SECONDS,
 )
 
+VIDEO_CODEC_CAP_NAME = "video codec"
+
 logger = logging.getLogger(__name__)
 
 
@@ -124,12 +126,24 @@ CODECS = {
 
 class GstreamerBuilder:
     def __init__(self, uri, width, height, name, format="I420"):
-        self.uri = uri
         self.width = width
         self.height = height
         self.name = name
         self.video_format = f"video/x-raw,width=(int){width},height=(int){height},format=(string){format}"
-        self.input_pipeline = [f'rtspsrc location="{uri}" latency=0']
+
+        is_rtsp = "rtsp://" in uri
+        is_rtmp = "rtmp://" in uri
+        if is_rtsp:
+            self.input_pipeline = [f'rtspsrc location="{uri}" latency=0 do-timestamp=true']
+        elif is_rtmp:
+            self.input_pipeline = [f'rtmpsrc location="{uri}"']
+        else:
+            logger.warn(
+                "An input url does not start with rtsp:// or rtmp:// for camera %s. Assuming full input pipeline supplied.",
+                name,
+            )
+            self.input_pipeline = [uri]
+
         self.destination_format_pipeline = [self.video_format, "videoconvert"]
         self.decoder_pipeline = None
 
@@ -140,11 +154,16 @@ class GstreamerBuilder:
         ]
         return self._build_launch_command(pipeline)
 
-    def with_decoder_pipeline(self, decoder_pipeline, codec):
+    def with_decoder_pipeline(self, decoder_pipeline, caps):
         if decoder_pipeline is not None and len(decoder_pipeline) > 0:
             self.decoder_pipeline = decoder_pipeline
             return self
 
+        if caps is None or len(caps) == 0 or VIDEO_CODEC_CAP_NAME not in caps:
+            logger.warn("gsreamer was not able to detect the input stream format")
+            self.decoder_pipeline = None
+            return self
+        codec = caps.get(VIDEO_CODEC_CAP_NAME)
         self.decoder_pipeline = autodetect_decoder_pipeline(codec)
         return self
 
@@ -162,11 +181,16 @@ class GstreamerBuilder:
             logger.warn("gsreamer was not able to auto detect the decoder pipeline.")
             return self.build_with_test_source()
 
+        # remove unnecessary video conversion for the record-only input
+        src_dst_format_pipeline = (
+            ["videoconvert", "videoscale"]
+            if use_record and not use_detect
+            else [*self.source_format_pipeline, *self.destination_format_pipeline]
+        )
         pipeline = [
             *self.input_pipeline,
             *self.decoder_pipeline,
-            *self.source_format_pipeline,
-            *self.destination_format_pipeline,
+            *src_dst_format_pipeline,
         ]
         return self._build_launch_command(pipeline, use_detect, use_record)
 
@@ -179,8 +203,8 @@ class GstreamerBuilder:
 
         record_mux = (
             [
-                "queue2",
-                "x264enc key-int-max=10",
+                "queue",
+                "omxh264enc",
                 "h264parse",
                 f"splitmuxsink async-handling=true location={os.path.join(CACHE_DIR, self.name)}{GSTREAMER_RECORD_SUFFIX}-%05d.mp4 max-size-time={RECORD_SEGMENT_TIME_SECONDS*1000000000}",
             ]
