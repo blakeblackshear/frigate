@@ -44,7 +44,7 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} className="rounded-t-lg" />
+      <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} />
       {!hasLoaded ? (
         <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>
           <ActivityIndicator />
