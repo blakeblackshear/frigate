@@ -129,12 +129,17 @@ def update_event(id):
             jsonify({"success": False, "message": "Event" + id + " not found"}), 404
         )
 
-    retain = request.form.get('retain')
-    event.retain_indefinitely = retain
+    retain = request.form.get("retain")
+
+    # if retain:
+    #    event.retain_indefinitely = retain
+    #    event.save()
+    #    retain_string = "set as retained" if retain else "set as not retained"
+    event.retain_indefinitely = True
     event.save()
-    retain_string = "set as retained" if retain else "set as not retained"
+
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " " + retain_string}), 200
+        jsonify({"success": True, "message": "Event" + id + " updated"}), 200
     )
 
 
@@ -380,7 +385,13 @@ def best(camera_name, label):
             box_size = 300
             box = best_object.get("box", (0, 0, box_size, box_size))
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
+                best_frame.shape,
+                box[0],
+                box[1],
+                box[2],
+                box[3],
+                box_size,
+                multiplier=1.1,
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 

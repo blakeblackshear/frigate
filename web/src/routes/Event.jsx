@@ -16,10 +16,10 @@ import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 import { FetchStatus, useApiHost, useEvent, useDelete, useRetain } from '../api';
 
-const ActionButtonGroup = ({ className, handleClickRetain, handleClickDelete, close }) => (
+const ActionButtonGroup = ({ className, handleClickRetain, isRetained, handleClickDelete, close }) => (
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
     <Button className="xs:w-auto" color="yellow" onClick={handleClickRetain}>
-      <StarRecording className="w-6" /> Retain event
+      <StarRecording className="w-6" /> { isRetained ? "Un-retain event" : "Retain event" }
     </Button>
     <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
       <Delete className="w-6" /> Delete event
@@ -58,6 +58,7 @@ export default function Event({ eventId, close, scrollRef }) {
   const [showDetails, setShowDetails] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
+  const [isRetained, setIsRetained] = useState(false);
   const setRetainEvent = useRetain();
   const setDeleteEvent = useDelete();
 
@@ -77,12 +78,16 @@ export default function Event({ eventId, close, scrollRef }) {
   }, [data, scrollRef, eventId, shouldScroll]);
 
   const handleClickRetain = useCallback(async () => {
+    console.log("handleClickRetain go go go");
     let success;
     try {
       success = await setRetainEvent(eventId);
-      setRetainStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
+
+      if (success) {
+        setIsRetained(!isRetained);
+      }
     } catch (e) {
-      setRetainStatus(FetchStatus.ERROR);
+
     }
   }, [eventId, setRetainEvent]);
 
@@ -113,6 +118,7 @@ export default function Event({ eventId, close, scrollRef }) {
     return <ActivityIndicator />;
   }
 
+  setIsRetained(data.retain_indefinitely);
   const startime = new Date(data.start_time * 1000);
   const endtime = data.end_time ? new Date(data.end_time * 1000) : null;
   return (
@@ -134,7 +140,7 @@ export default function Event({ eventId, close, scrollRef }) {
             )}
           </Button>
         </div>
-        <ActionButtonGroup handleClickDelete={handleClickDelete} close={close} className="hidden sm:block" />
+        <ActionButtonGroup isRetained={isRetained} handleClickRetain={handleClickRetain} handleClickDelete={handleClickDelete} close={close} className="hidden sm:block" />
         {showDialog ? (
           <Dialog
             onDismiss={handleDismissDeleteDialog}
@@ -225,7 +231,7 @@ export default function Event({ eventId, close, scrollRef }) {
       </div>
       <div className="space-y-2 xs:space-y-0">
         <DownloadButtonGroup apiHost={apiHost} eventId={eventId} className="block sm:hidden" />
-        <ActionButtonGroup handleClickDelete={handleClickDelete} close={close} className="block sm:hidden" />
+        <ActionButtonGroup handleClickRetain={handleClickRetain} handleClickDelete={handleClickDelete} close={close} className="block sm:hidden" />
       </div>
     </div>
   );
