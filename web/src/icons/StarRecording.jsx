@@ -9,4 +9,4 @@ export function ArrowDropdown({ className = '' }) {
   );
 }
 
-export default memo(ArrowDropdown);
+export default memo(StarRecording);
