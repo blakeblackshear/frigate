@@ -197,10 +197,8 @@ export default function Camera({ camera }) {
   return (
     <div className='flex bg-gray-900 w-full h-full justify-center'>
       <div className='relative max-w-screen-md flex-grow w-full'>
-        <div
-          className={`absolute top-0 text-white w-full transition-opacity duration-300 ${hideBanner && 'opacity-0'}`}
-        >
-          <div className='flex pt-4 pl-4 items-center bg-gradient-to-b from-black to-transparent w-full h-16 z10'>
+        <div className='absolute top-0 text-white w-full'>
+          <div className='flex pt-4 pl-4 items-center w-full h-16 z10'>
             {(playerType === 'live' || playerType === 'debug') && (
               <Fragment>
                 <Heading size='xl' className='mr-2'>
