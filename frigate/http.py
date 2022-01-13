@@ -120,6 +120,24 @@ def event(id):
         return "Event not found", 404
 
 
+@bp.route("/events/<id>", methods=("POST",))
+def update_event(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
+
+    retain = request.form.get('retain')
+    event.retain_indefinitely = retain
+    event.save()
+    retain_string = "set as retained" if retain else "set as not retained"
+    return make_response(
+        jsonify({"success": True, "message": "Event" + id + " " + retain_string}), 200
+    )
+
+
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
     try:
