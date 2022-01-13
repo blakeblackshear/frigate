@@ -57,7 +57,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
     } else {
       setScrollActive(true);
     }
-  }, [offset]);
+  }, [offset, currentEvent, timelineContainerRef]);
 
   useEffect(() => {
     if (currentIndex !== undefined && currentIndex !== currentEvent.index) {
@@ -71,7 +71,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
       });
       timelineContainerRef.current.scroll({ left: event.positionX - timelineOffset, behavior: 'smooth' });
     }
-  }, [currentIndex]);
+  }, [currentIndex, timelineContainerRef, timeline, currentEvent]);
 
   const checkMarkerForEvent = (markerTime) => {
     if (!scrollActive) {
@@ -119,7 +119,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
 
   useEffect(() => {
     onChange && onChange(currentEvent);
-  }, [currentEvent]);
+  }, [onChange, currentEvent]);
 
   const RenderTimeline = useCallback(() => {
     if (timeline && timeline.length > 0) {
@@ -151,7 +151,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
         </div>
       );
     }
-  }, [timeline]);
+  }, [timeline, timelineOffset]);
 
   return (
     <div className='relative flex-grow-1'>

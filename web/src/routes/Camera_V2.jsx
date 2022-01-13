@@ -1,21 +1,14 @@
-import { h, Fragment, render } from 'preact';
+import { h, Fragment } from 'preact';
 import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
 import Switch from '../components/Switch';
 import { usePersistence } from '../context';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { useApiHost, useConfig, useEvents } from '../api';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
+import { useConfig } from '../api';
 import { Tabs, TextTab } from '../components/Tabs';
-import Timeline from '../components/Timeline';
 import { LiveChip } from '../components/LiveChip';
-import { HistoryHeader } from './HistoryHeader';
-import { longToDate } from '../utils/dateUtil';
-import { useSearchString } from '../hooks/useSearchString';
-import { Previous } from '../icons/Previous';
-import { Play } from '../icons/Play';
-import { Next } from '../icons/Next';
 import HistoryViewer from '../components/HistoryViewer';
 
 const emptyObject = Object.freeze({});
