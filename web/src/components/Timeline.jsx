@@ -162,7 +162,9 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
     <div className='relative flex-grow-1'>
       <div className='absolute left-0 top-0 h-full w-full' style={{ textAlign: 'center' }}>
         <div className='h-full' style={{ margin: '0 auto', textAlign: 'center' }}>
-          <span className='z-20 text-white'>{markerTime && <span>{markerTime.toLocaleTimeString()}</span>}</span>
+          <span className='z-20 text-black dark:text-white'>
+            {markerTime && <span>{markerTime.toLocaleTimeString()}</span>}
+          </span>
           <div
             className='z-20 h-full absolute'
             style={{

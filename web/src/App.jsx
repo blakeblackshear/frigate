@@ -10,29 +10,30 @@ import { DarkModeProvider, DrawerProvider } from './context';
 import { FetchStatus, useConfig } from './api';
 
 export default function App() {
-  const { status } = useConfig();
+  const { status, data: config } = useConfig();
+  const cameraComponent = config && config.ui.useExperimentalUI ? Routes.getCameraV2 : Routes.getCamera;
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <div data-testid="app" className="w-full">
+        <div data-testid='app' className='w-full'>
           <AppBar />
           {status !== FetchStatus.LOADED ? (
-            <div className="flex flex-grow-1 min-h-screen justify-center items-center">
+            <div className='flex flex-grow-1 min-h-screen justify-center items-center'>
               <ActivityIndicator />
             </div>
           ) : (
-            <div className="flex flex-row min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+            <div className='flex flex-row min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white'>
               <Sidebar />
-              <div className="w-full flex-auto mt-16 min-w-0">
+              <div className='w-full flex-auto mt-16 min-w-0'>
                 <Router>
-                  <AsyncRoute path="/cameras/:camera/editor" getComponent={Routes.getCameraMap} />
-                  <AsyncRoute path="/cameras/:camera" getComponent={Routes.getCameraV2} />
-                  <AsyncRoute path="/birdseye" getComponent={Routes.getBirdseye} />
-                  <AsyncRoute path="/events" getComponent={Routes.getEvents} />
-                  <AsyncRoute path="/recording/:camera/:date?/:hour?/:seconds?" getComponent={Routes.getRecording} />
-                  <AsyncRoute path="/debug" getComponent={Routes.getDebug} />
-                  <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
-                  <Cameras default path="/" />
+                  <AsyncRoute path='/cameras/:camera/editor' getComponent={Routes.getCameraMap} />
+                  <AsyncRoute path='/cameras/:camera' getComponent={cameraComponent} />
+                  <AsyncRoute path='/birdseye' getComponent={Routes.getBirdseye} />
+                  <AsyncRoute path='/events' getComponent={Routes.getEvents} />
+                  <AsyncRoute path='/recording/:camera/:date?/:hour?/:seconds?' getComponent={Routes.getRecording} />
+                  <AsyncRoute path='/debug' getComponent={Routes.getDebug} />
+                  <AsyncRoute path='/styleguide' getComponent={Routes.getStyleGuide} />
+                  <Cameras default path='/' />
                 </Router>
               </div>
             </div>
