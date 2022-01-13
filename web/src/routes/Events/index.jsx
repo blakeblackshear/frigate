@@ -81,11 +81,11 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
     [apiHost, handleFilter, pathname, scrollToRef]
   );
   return (
-    <div className="space-y-4 w-full">
+    <div className='space-y-4 p-2 px-4 w-full'>
       <Heading>Events</Heading>
       <Filters onChange={handleFilter} searchParams={searchParams} />
-      <div className="min-w-0 overflow-auto">
-        <Table className="min-w-full table-fixed">
+      <div className='min-w-0 overflow-auto'>
+        <Table className='min-w-full table-fixed'>
           <TableHead />
 
           {events.map((props, idx) => {
@@ -95,7 +95,7 @@ export default function Events({ path: pathname, limit = API_LIMIT } = {}) {
 
           <Tfoot>
             <Tr>
-              <Td className="text-center p-4" colSpan="8">
+              <Td className='text-center p-4' colSpan='8'>
                 {status === FetchStatus.LOADING ? <ActivityIndicator /> : reachedEnd ? 'No more events' : null}
               </Td>
             </Tr>

@@ -25,47 +25,47 @@ export default function StyleGuide() {
   };
 
   return (
-    <div>
-      <Heading size="md">Button</Heading>
-      <div className="flex space-x-4 mb-4">
+    <div className='p-2 px-4'>
+      <Heading size='md'>Button</Heading>
+      <div className='flex space-x-4 mb-4'>
         <Button>Default</Button>
-        <Button color="red">Danger</Button>
-        <Button color="green">Save</Button>
-        <Button color="gray">Gray</Button>
+        <Button color='red'>Danger</Button>
+        <Button color='green'>Save</Button>
+        <Button color='gray'>Gray</Button>
         <Button disabled>Disabled</Button>
       </div>
-      <div className="flex space-x-4 mb-4">
-        <Button type="text">Default</Button>
-        <Button color="red" type="text">
+      <div className='flex space-x-4 mb-4'>
+        <Button type='text'>Default</Button>
+        <Button color='red' type='text'>
           Danger
         </Button>
-        <Button color="green" type="text">
+        <Button color='green' type='text'>
           Save
         </Button>
-        <Button color="gray" type="text">
+        <Button color='gray' type='text'>
           Gray
         </Button>
-        <Button disabled type="text">
+        <Button disabled type='text'>
           Disabled
         </Button>
       </div>
-      <div className="flex space-x-4 mb-4">
-        <Button type="outlined">Default</Button>
-        <Button color="red" type="outlined">
+      <div className='flex space-x-4 mb-4'>
+        <Button type='outlined'>Default</Button>
+        <Button color='red' type='outlined'>
           Danger
         </Button>
-        <Button color="green" type="outlined">
+        <Button color='green' type='outlined'>
           Save
         </Button>
-        <Button color="gray" type="outlined">
+        <Button color='gray' type='outlined'>
           Gray
         </Button>
-        <Button disabled type="outlined">
+        <Button disabled type='outlined'>
           Disabled
         </Button>
       </div>
 
-      <Heading size="md">Dialog</Heading>
+      <Heading size='md'>Dialog</Heading>
       <Button
         onClick={() => {
           setShowDialog(true);
@@ -76,8 +76,8 @@ export default function StyleGuide() {
       {showDialog ? (
         <Dialog
           onDismiss={handleDismissDialog}
-          title="This is a dialog"
-          text="Would you like to see more?"
+          title='This is a dialog'
+          text='Would you like to see more?'
           actions={[
             { text: 'Yes', color: 'red', onClick: handleDismissDialog },
             { text: 'No', onClick: handleDismissDialog },
@@ -85,41 +85,41 @@ export default function StyleGuide() {
         />
       ) : null}
 
-      <Heading size="md">Switch</Heading>
-      <div className="flex-col space-y-4 max-w-4xl">
-        <Switch label="Disabled, off" labelPosition="after" />
-        <Switch label="Disabled, on" labelPosition="after" checked />
+      <Heading size='md'>Switch</Heading>
+      <div className='flex-col space-y-4 max-w-4xl'>
+        <Switch label='Disabled, off' labelPosition='after' />
+        <Switch label='Disabled, on' labelPosition='after' checked />
         <Switch
-          label="Enabled, (off initial)"
-          labelPosition="after"
+          label='Enabled, (off initial)'
+          labelPosition='after'
           checked={switches[0]}
           id={0}
           onChange={handleSwitch}
         />
         <Switch
-          label="Enabled, (on initial)"
-          labelPosition="after"
+          label='Enabled, (on initial)'
+          labelPosition='after'
           checked={switches[1]}
           id={1}
           onChange={handleSwitch}
         />
 
-        <Switch checked={switches[2]} id={2} label="Label before" onChange={handleSwitch} />
-        <Switch checked={switches[3]} id={3} label="Label after" labelPosition="after" onChange={handleSwitch} />
+        <Switch checked={switches[2]} id={2} label='Label before' onChange={handleSwitch} />
+        <Switch checked={switches[3]} id={3} label='Label after' labelPosition='after' onChange={handleSwitch} />
       </div>
 
-      <Heading size="md">Select</Heading>
-      <div className="flex space-x-4 mb-4 max-w-4xl">
-        <Select label="Basic select box" options={['All', 'None', 'Other']} selected="None" />
+      <Heading size='md'>Select</Heading>
+      <div className='flex space-x-4 mb-4 max-w-4xl'>
+        <Select label='Basic select box' options={['All', 'None', 'Other']} selected='None' />
       </div>
 
-      <Heading size="md">TextField</Heading>
-      <div className="flex-col space-y-4 max-w-4xl">
-        <TextField label="Default text field" />
-        <TextField label="Pre-filled" value="This is my pre-filled value" />
-        <TextField label="With help" helpText="This is some help text" />
-        <TextField label="Leading icon" leadingIcon={ArrowDropdown} />
-        <TextField label="Trailing icon" trailingIcon={ArrowDropup} />
+      <Heading size='md'>TextField</Heading>
+      <div className='flex-col space-y-4 max-w-4xl'>
+        <TextField label='Default text field' />
+        <TextField label='Pre-filled' value='This is my pre-filled value' />
+        <TextField label='With help' helpText='This is some help text' />
+        <TextField label='Leading icon' leadingIcon={ArrowDropdown} />
+        <TextField label='Trailing icon' trailingIcon={ArrowDropup} />
       </div>
     </div>
   );

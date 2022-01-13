@@ -20,10 +20,7 @@ export default function CameraMasks({ camera, url }) {
     zones,
   } = cameraConfig;
 
-  const {
-    width,
-    height,
-  } = cameraConfig.detect;
+  const { width, height } = cameraConfig.detect;
 
   const [{ width: scaledWidth }] = useResizeObserver(imageRef);
   const imageScale = scaledWidth / width;
@@ -32,8 +29,8 @@ export default function CameraMasks({ camera, url }) {
     Array.isArray(motionMask)
       ? motionMask.map((mask) => getPolylinePoints(mask))
       : motionMask
-        ? [getPolylinePoints(motionMask)]
-        : []
+      ? [getPolylinePoints(motionMask)]
+      : []
   );
 
   const [zonePoints, setZonePoints] = useState(
@@ -47,8 +44,8 @@ export default function CameraMasks({ camera, url }) {
         [name]: Array.isArray(objectFilters[name].mask)
           ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
           : objectFilters[name].mask
-            ? [getPolylinePoints(objectFilters[name].mask)]
-            : [],
+          ? [getPolylinePoints(objectFilters[name].mask)]
+          : [],
       }),
       {}
     )
@@ -131,11 +128,11 @@ ${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`)
   const handleCopyZones = useCallback(async () => {
     await window.navigator.clipboard.writeText(`  zones:
 ${Object.keys(zonePoints)
-    .map(
-      (zoneName) => `    ${zoneName}:
+  .map(
+    (zoneName) => `    ${zoneName}:
       coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
-    )
-    .join('\n')}`);
+  )
+  .join('\n')}`);
   }, [zonePoints]);
 
   // Object methods
@@ -167,14 +164,14 @@ ${Object.keys(zonePoints)
     await window.navigator.clipboard.writeText(`  objects:
     filters:
 ${Object.keys(objectMaskPoints)
-    .map((objectName) =>
-      objectMaskPoints[objectName].length
-        ? `      ${objectName}:
+  .map((objectName) =>
+    objectMaskPoints[objectName].length
+      ? `      ${objectName}:
         mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
-        : ''
-    )
-    .filter(Boolean)
-    .join('\n')}`);
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n')}`);
   }, [objectMaskPoints]);
 
   const handleAddToObjectMask = useCallback(
@@ -199,22 +196,22 @@ ${Object.keys(objectMaskPoints)
   );
 
   return (
-    <div className="flex-col space-y-4">
-      <Heading size="2xl">{camera} mask & zone creator</Heading>
+    <div className='flex-col space-y-4 p-2 px-4'>
+      <Heading size='2xl'>{camera} mask & zone creator</Heading>
 
       <Card
         content={
           <p>
             This tool can help you create masks & zones for your {camera} camera. When done, copy each mask
-            configuration into your <code className="font-mono">config.yml</code> file restart your Frigate instance to
+            configuration into your <code className='font-mono'>config.yml</code> file restart your Frigate instance to
             save your changes.
           </p>
         }
-        header="Warning"
+        header='Warning'
       />
 
-      <div className="space-y-4">
-        <div className="relative">
+      <div className='space-y-4'>
+        <div className='relative'>
           <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
@@ -225,15 +222,15 @@ ${Object.keys(objectMaskPoints)
             height={height}
           />
         </div>
-        <div className="max-w-xs">
-          <Switch checked={snap} label="Snap to edges" labelPosition="after" onChange={handleChangeSnap} />
+        <div className='max-w-xs'>
+          <Switch checked={snap} label='Snap to edges' labelPosition='after' onChange={handleChangeSnap} />
         </div>
       </div>
 
-      <div className="flex-col space-y-4">
+      <div className='flex-col space-y-4'>
         <MaskValues
           editing={editing}
-          title="Motion masks"
+          title='Motion masks'
           onCopy={handleCopyMotionMasks}
           onCreate={handleAddMask}
           onEdit={handleEditMask}
@@ -245,20 +242,20 @@ ${Object.keys(objectMaskPoints)
 
         <MaskValues
           editing={editing}
-          title="Zones"
+          title='Zones'
           onCopy={handleCopyZones}
           onCreate={handleAddZone}
           onEdit={handleEditZone}
           onRemove={handleRemoveZone}
           points={zonePoints}
-          yamlPrefix="zones:"
+          yamlPrefix='zones:'
           yamlKeyPrefix={zoneYamlKeyPrefix}
         />
 
         <MaskValues
           isMulti
           editing={editing}
-          title="Object masks"
+          title='Object masks'
           onAdd={handleAddToObjectMask}
           onCopy={handleCopyObjectMasks}
           onCreate={handleAddObjectMask}
@@ -357,31 +354,31 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
 
   return (
     <div
-      className="absolute"
+      className='absolute'
       style={`top: -${MaskInset}px; right: -${MaskInset}px; bottom: -${MaskInset}px; left: -${MaskInset}px`}
     >
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-          <PolyPoint
-            boundingRef={boundingRef}
-            index={i}
-            onMove={handleMovePoint}
-            onRemove={handleRemovePoint}
-            x={x + MaskInset}
-            y={y + MaskInset}
-          />
-        ))}
-      <div className="absolute inset-0 right-0 bottom-0" onClick={handleAddPoint} ref={boundingRef} />
+            <PolyPoint
+              boundingRef={boundingRef}
+              index={i}
+              onMove={handleMovePoint}
+              onRemove={handleRemovePoint}
+              x={x + MaskInset}
+              y={y + MaskInset}
+            />
+          ))}
+      <div className='absolute inset-0 right-0 bottom-0' onClick={handleAddPoint} ref={boundingRef} />
       <svg
-        width="100%"
-        height="100%"
-        className="absolute pointer-events-none"
+        width='100%'
+        height='100%'
+        className='absolute pointer-events-none'
         style={`top: ${MaskInset}px; right: ${MaskInset}px; bottom: ${MaskInset}px; left: ${MaskInset}px`}
       >
         {!scaledPoints ? null : (
           <g>
-            <polyline points={polylinePointsToPolyline(scaledPoints)} fill="rgba(244,0,0,0.5)" />
+            <polyline points={polylinePointsToPolyline(scaledPoints)} fill='rgba(244,0,0,0.5)' />
           </g>
         )}
       </svg>
@@ -444,15 +441,15 @@ function MaskValues({
   );
 
   return (
-    <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>
-      <div className="flex space-x-4">
-        <Heading className="flex-grow self-center" size="base">
+    <div className='overflow-hidden' onMouseOver={handleMousein} onMouseOut={handleMouseout}>
+      <div className='flex space-x-4'>
+        <Heading className='flex-grow self-center' size='base'>
           {title}
         </Heading>
         <Button onClick={onCopy}>Copy</Button>
         <Button onClick={onCreate}>Add</Button>
       </div>
-      <pre className="relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2">
+      <pre className='relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2'>
         {yamlPrefix}
         {Object.keys(points).map((mainkey) => {
           if (isMulti) {
@@ -460,7 +457,7 @@ function MaskValues({
               <div>
                 {`    ${mainkey}:\n      mask:\n`}
                 {onAdd && showButtons ? (
-                  <Button className="absolute -mt-12 right-0 font-sans" data-key={mainkey} onClick={handleAdd}>
+                  <Button className='absolute -mt-12 right-0 font-sans' data-key={mainkey} onClick={handleAdd}>
                     {`Add to ${mainkey}`}
                   </Button>
                 ) : null}
@@ -506,13 +503,13 @@ function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handl
         editing.key === mainkey && editing.subkey === subkey ? 'text-blue-800 dark:text-blue-600' : ''
       }`}
       onClick={handleEdit}
-      title="Click to edit"
+      title='Click to edit'
     >
       {`${yamlKeyPrefix(points, mainkey, subkey)}${polylinePointsToPolyline(points)}`}
       {showButtons ? (
         <Button
-          className="absolute top-0 right-0"
-          color="red"
+          className='absolute top-0 right-0'
+          color='red'
           data-key={mainkey}
           data-subkey={subkey}
           onClick={handleRemove}

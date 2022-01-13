@@ -16,10 +16,10 @@ export default function Recording({ camera, date, hour, seconds }) {
 
   if (data.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className='space-y-4'>
         <Heading>{camera} Recordings</Heading>
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
-          <p class="font-bold">No Recordings Found</p>
+        <div class='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4' role='alert'>
+          <p class='font-bold'>No Recordings Found</p>
           <p>Make sure you have enabled the record role in your configuration for the {camera} camera.</p>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function Recording({ camera, date, hour, seconds }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4 p-2 px-4'>
       <Heading>{camera} Recordings</Heading>
 
       <VideoPlayer

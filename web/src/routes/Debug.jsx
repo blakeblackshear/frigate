@@ -33,9 +33,9 @@ export default function Debug() {
   }, [config]);
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4 p-2 px-4'>
       <Heading>
-        Debug <span className="text-sm">{service.version}</span>
+        Debug <span className='text-sm'>{service.version}</span>
       </Heading>
 
       {!detectors ? (
@@ -44,8 +44,8 @@ export default function Debug() {
         </div>
       ) : (
         <Fragment>
-          <div data-testid="detectors" className="min-w-0 overflow-auto">
-            <Table className="w-full">
+          <div data-testid='detectors' className='min-w-0 overflow-auto'>
+            <Table className='w-full'>
               <Thead>
                 <Tr>
                   <Th>detector</Th>
@@ -67,8 +67,8 @@ export default function Debug() {
             </Table>
           </div>
 
-          <div data-testid="cameras" className="min-w-0 overflow-auto">
-            <Table className="w-full">
+          <div data-testid='cameras' className='min-w-0 overflow-auto'>
+            <Table className='w-full'>
               <Thead>
                 <Tr>
                   <Th>camera</Th>
@@ -96,12 +96,12 @@ export default function Debug() {
         </Fragment>
       )}
 
-      <div className="relative">
-        <Heading size="sm">Config</Heading>
-        <Button className="absolute top-8 right-4" onClick={handleCopyConfig}>
+      <div className='relative'>
+        <Heading size='sm'>Config</Heading>
+        <Button className='absolute top-8 right-4' onClick={handleCopyConfig}>
           Copy to Clipboard
         </Button>
-        <pre className="overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 max-h-96">
+        <pre className='overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 max-h-96'>
           {JSON.stringify(config, null, 2)}
         </pre>
       </div>
