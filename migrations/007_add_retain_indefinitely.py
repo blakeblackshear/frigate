@@ -25,7 +25,7 @@ import datetime as dt
 import peewee as pw
 from playhouse.sqlite_ext import *
 from decimal import ROUND_HALF_EVEN
-from frigate.models import Recordings
+from frigate.models import Event
 
 try:
     import playhouse.postgres_ext as pw_pext
