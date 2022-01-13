@@ -22,6 +22,7 @@ export default function HistoryViewer({ camera }) {
   const [currentEvent, setCurrentEvent] = useState();
   const [currentEventIndex, setCurrentEventIndex] = useState();
   const [timelineOffset, setTimelineOffset] = useState(0);
+  const [minHeight, setMinHeight] = useState();
 
   useEffect(() => {
     if (events) {
@@ -60,6 +61,12 @@ export default function HistoryViewer({ camera }) {
     setCurrentEventIndex(currentEvent.index + 1);
   };
 
+  const handleMetadataLoad = () => {
+    if (videoRef.current) {
+      setMinHeight(videoRef.current.clientHeight);
+    }
+  };
+
   const RenderVideo = useCallback(() => {
     return (
       <video
@@ -67,7 +74,15 @@ export default function HistoryViewer({ camera }) {
         onTimeUpdate={handleTimeUpdate}
         onPause={handlePaused}
         poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
-        preload='none'
+        onLoadedMetadata={handleMetadataLoad}
+        preload='metadata'
+        style={
+          minHeight
+            ? {
+                minHeight: `${minHeight}px`,
+              }
+            : {}
+        }
         playsInline
         controls
       >
