@@ -16,36 +16,18 @@ import { useSearchString } from '../hooks/useSearchString';
 import { Previous } from '../icons/Previous';
 import { Play } from '../icons/Play';
 import { Next } from '../icons/Next';
+import HistoryViewer from '../components/HistoryViewer';
 
 const emptyObject = Object.freeze({});
 
 export default function Camera({ camera }) {
-  const apiHost = useApiHost();
-  const videoRef = useRef();
-
   const { data: config } = useConfig();
 
-  const beginningOfDay = new Date().setHours(0, 0, 0) / 1000;
-  const { searchString } = useSearchString(200, `camera=${camera}&after=${beginningOfDay}`);
-  const { data: events } = useEvents(searchString);
-  const [timelineEvents, setTimelineEvents] = useState();
-
-  const [hideBanner, setHideBanner] = useState(false);
   const [playerType, setPlayerType] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
   const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
-
-  const [currentEvent, setCurrentEvent] = useState();
-  const [currentEventIndex, setCurrentEventIndex] = useState();
-  const [timelineOffset, setTimelineOffset] = useState(0);
-
-  useEffect(() => {
-    if (events) {
-      setTimelineEvents([...events].reverse().filter((e) => e.end_time !== undefined));
-    }
-  }, [events]);
 
   const handleSetOption = useCallback(
     (id, value) => {
@@ -115,31 +97,12 @@ export default function Camera({ camera }) {
       );
       break;
     case 'history':
-      if (currentEvent) {
-        renderPlayer = (
-          <video
-            ref={videoRef}
-            onTimeUpdate={handleTimeUpdate}
-            onPause={handlePaused}
-            onClick={handleVideoTouch}
-            poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
-            preload='none'
-            playsInline
-            controls
-          >
-            <source
-              src={`${apiHost}/api/${camera}/start/${currentEvent.startTime}/end/${currentEvent.endTime}/clip.mp4`}
-            />
-          </video>
-        );
-      }
+      renderPlayer = <HistoryViewer camera={camera} />;
       break;
     case 'debug':
       renderPlayer = (
         <Fragment>
-          <div>
-            <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
-          </div>
+          <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
           {optionContent}
         </Fragment>
       );
@@ -147,19 +110,6 @@ export default function Camera({ camera }) {
     default:
       break;
   }
-
-  const handleTimeUpdate = () => {
-    const timestamp = Math.round(videoRef.current.currentTime);
-    const offset = Math.round(timestamp);
-    const triggerStateChange = offset !== timelineOffset;
-    if (triggerStateChange) {
-      setTimelineOffset(offset);
-    }
-  };
-
-  const handleVideoTouch = () => {
-    setHideBanner(true);
-  };
 
   const handleTabChange = (index) => {
     if (index === 0) {
@@ -169,29 +119,6 @@ export default function Camera({ camera }) {
     } else if (index === 2) {
       setPlayerType('debug');
     }
-  };
-
-  const handleTimelineChange = (event) => {
-    if (event !== undefined) {
-      setCurrentEvent(event);
-      setCurrentEventIndex(event.index);
-    }
-  };
-
-  const handlePlay = function () {
-    videoRef.current.play();
-  };
-
-  const handlePaused = () => {
-    setTimelineOffset(undefined);
-  };
-
-  const handlePrevious = function () {
-    setCurrentEventIndex((index) => index - 1);
-  };
-
-  const handleNext = function () {
-    setCurrentEventIndex((index) => index + 1);
   };
 
   return (
@@ -210,42 +137,7 @@ export default function Camera({ camera }) {
           </div>
         </div>
 
-        <div className='flex flex-col justify-center h-full'>
-          <div className='relative'>
-            {currentEvent && (
-              <HistoryHeader
-                camera={camera}
-                date={longToDate(currentEvent.start_time)}
-                objectLabel={currentEvent.label}
-                className='mb-2'
-              />
-            )}
-            {renderPlayer}
-          </div>
-
-          {playerType === 'history' && (
-            <Fragment>
-              <Timeline
-                events={timelineEvents}
-                offset={timelineOffset}
-                currentIndex={currentEventIndex}
-                onChange={handleTimelineChange}
-              />
-
-              <div className='flex self-center'>
-                <button onClick={handlePrevious}>
-                  <Previous />
-                </button>
-                <button onClick={handlePlay}>
-                  <Play />
-                </button>
-                <button onClick={handleNext}>
-                  <Next />
-                </button>
-              </div>
-            </Fragment>
-          )}
-        </div>
+        <div className='flex flex-col justify-center h-full'>{renderPlayer}</div>
 
         <div className='absolute flex justify-center bottom-8 w-full'>
           <Tabs selectedIndex={1} onChange={handleTabChange} className='justify'>

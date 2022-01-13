@@ -20,7 +20,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
       }
 
       const firstEventTime = longToDate(firstEvent.start_time);
-      const eventsMap = events.map((e, i) => {
+      const timelineEvents = events.map((e, i) => {
         const startTime = longToDate(e.start_time);
         const endTime = e.end_time ? longToDate(e.end_time) : new Date();
         const seconds = Math.round(Math.abs(endTime - startTime) / 1000);
@@ -35,16 +35,15 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
         };
       });
 
-      const recentEvent = eventsMap[eventsMap.length - 1];
-      const event = {
-        ...recentEvent,
-        id: recentEvent.id,
-        index: eventsMap.length - 1,
-        startTime: recentEvent.start_time,
-        endTime: recentEvent.end_time,
-      };
-      setCurrentEvent(event);
-      setTimeline(eventsMap);
+      const firstTimelineEvent = timelineEvents[0];
+      setCurrentEvent({
+        ...firstTimelineEvent,
+        id: firstTimelineEvent.id,
+        index: 0,
+        startTime: firstTimelineEvent.start_time,
+        endTime: firstTimelineEvent.end_time,
+      });
+      setTimeline(timelineEvents);
     }
   }, [events, timelineOffset]);
 
@@ -70,7 +69,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
         startTime: event.start_time,
         endTime: event.end_time,
       });
-      timelineContainerRef.current.scroll({left: event.positionX - timelineOffset, behavior: "smooth"})
+      timelineContainerRef.current.scroll({ left: event.positionX - timelineOffset, behavior: 'smooth' });
     }
   }, [currentIndex]);
 
@@ -128,7 +127,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
       const timelineLength = timelineOffset + lastEvent.positionX + lastEvent.width;
       return (
         <div
-          className="relative flex items-center h-20"
+          className='relative flex items-center h-20'
           style={{
             width: `${timelineLength}px`,
             background: "url('/marker.png')",
@@ -141,7 +140,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
             return (
               <div
                 key={e.id}
-                className="absolute z-10 rounded-full bg-blue-300 h-2"
+                className='absolute z-10 rounded-full bg-blue-300 h-2'
                 style={{
                   left: `${e.positionX}px`,
                   width: `${e.seconds}px`,
@@ -155,12 +154,12 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
   }, [timeline]);
 
   return (
-    <div className="relative flex-grow-1">
-      <div className="absolute left-0 top-0 h-full w-full" style={{ textAlign: 'center' }}>
-        <div className="h-full" style={{ margin: '0 auto', textAlign: 'center' }}>
-          <span className="z-20 text-white">{markerTime && <span>{markerTime.toLocaleTimeString()}</span>}</span>
+    <div className='relative flex-grow-1'>
+      <div className='absolute left-0 top-0 h-full w-full' style={{ textAlign: 'center' }}>
+        <div className='h-full' style={{ margin: '0 auto', textAlign: 'center' }}>
+          <span className='z-20 text-white'>{markerTime && <span>{markerTime.toLocaleTimeString()}</span>}</span>
           <div
-            className="z-20 h-full absolute"
+            className='z-20 h-full absolute'
             style={{
               left: 'calc(100% / 2)',
               height: 'calc(100% - 24px)',
@@ -169,7 +168,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
           ></div>
         </div>
       </div>
-      <div ref={timelineContainerRef} className="overflow-x-auto hide-scroll" onScroll={handleScroll}>
+      <div ref={timelineContainerRef} className='overflow-x-auto hide-scroll' onScroll={handleScroll}>
         <RenderTimeline />
       </div>
     </div>
