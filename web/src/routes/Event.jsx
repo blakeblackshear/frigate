@@ -15,8 +15,11 @@ import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
 
-const ActionButtonGroup = ({ className, handleClickDelete, close }) => (
+const ActionButtonGroup = ({ className, handleClickRetain, handleClickDelete, close }) => (
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
+    <Button className="xs:w-auto" color="yellow" onClick={handleClickRetain}>
+      <StarRecording className="w-6" /> Retain event
+    </Button>
     <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
       <Delete className="w-6" /> Delete event
     </Button>
