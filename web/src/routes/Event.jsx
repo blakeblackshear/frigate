@@ -7,6 +7,7 @@ import ArrowDown from '../icons/ArrowDropdown';
 import ArrowDropup from '../icons/ArrowDropup';
 import Clip from '../icons/Clip';
 import Close from '../icons/Close';
+import StarRecording from '../icons/StarRecording';
 import Delete from '../icons/Delete';
 import Snapshot from '../icons/Snapshot';
 import Dialog from '../components/Dialog';
@@ -73,6 +74,16 @@ export default function Event({ eventId, close, scrollRef }) {
       if (element) element.classList.add('-translate-y-full');
     };
   }, [data, scrollRef, eventId, shouldScroll]);
+
+  const handleClickRetain = () => {
+    let success;
+    try {
+      success = await setRetainEvent(eventId);
+      setRetainStatus(success ? FetchStatus.LOADED : FetchStatus.ERROR);
+    } catch (e) {
+      setRetainStatus(FetchStatus.ERROR);
+    }
+  };
 
   const handleClickDelete = () => {
     setShowDialog(true);

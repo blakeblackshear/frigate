@@ -117,6 +117,20 @@ export function useDelete() {
   return deleteEvent;
 }
 
+export function useRetain() {
+  const { dispatch, state } = useContext(Api);
+
+  async function retainEvent(eventId) {
+    if (!eventId) return null;
+
+    const response = await fetch(`${state.host}/api/events/${eventId}`, { method: 'POST' });
+    await dispatch({ type: 'DELETE', payload: { eventId } });
+    return await (response.status < 300 ? response.json() : { success: true });
+  }
+
+  return retainEvent;
+}
+
 export function useApiHost() {
   const { state } = useContext(Api);
   return state.host;
