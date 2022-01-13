@@ -13,7 +13,8 @@ from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
 from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT
-from frigate.util import create_mask, deep_merge, load_labels
+from frigate.edgetpu import load_labels
+from frigate.util import create_mask, deep_merge
 
 logger = logging.getLogger(__name__)
 
@@ -641,7 +642,7 @@ class ModelConfig(FrigateBaseModel):
         return self._merged_labelmap
 
     @property
-    def colormap(self) -> Dict[int, Tuple[int, int, int]]:
+    def colormap(self) -> Dict[int, tuple[int, int, int]]:
         return self._colormap
 
     def __init__(self, **config):

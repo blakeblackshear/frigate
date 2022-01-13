@@ -189,12 +189,12 @@ def draw_box_with_label(
     )
 
 
-def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier=2):
+def calculate_region(frame_shape, xmin, ymin, xmax, ymax, multiplier=2):
     # size is the longest edge and divisible by 4
     size = int((max(xmax - xmin, ymax - ymin) * multiplier) // 4 * 4)
-    # dont go any smaller than the model_size
-    if size < model_size:
-        size = model_size
+    # dont go any smaller than 300
+    if size < 300:
+        size = 300
 
     # x_offset is midpoint of bounding box minus half the size
     x_offset = int((xmax - xmin) / 2.0 + xmin - size / 2.0)
@@ -601,24 +601,6 @@ def add_mask(mask, mask_img):
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
-def load_labels(path, encoding="utf-8"):
-    """Loads labels from file (with or without index numbers).
-    Args:
-      path: path to label file.
-      encoding: label file encoding.
-    Returns:
-      Dictionary mapping indices to labels.
-    """
-    with open(path, "r", encoding=encoding) as f:
-        lines = f.readlines()
-        if not lines:
-            return {}
-
-        if lines[0].split(" ", maxsplit=1)[0].isdigit():
-            pairs = [line.split(" ", maxsplit=1) for line in lines]
-            return {int(index): label.strip() for index, label in pairs}
-        else:
-            return {index: line.strip() for index, line in enumerate(lines)}
 
 class FrameManager(ABC):
     @abstractmethod

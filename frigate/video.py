@@ -529,16 +529,15 @@ def process_frames(
         # combine motion boxes with known locations of existing objects
         combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
 
-        region_min_size = max(model_shape[0], model_shape[1])
         # compute regions
         regions = [
-            calculate_region(frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.2)
+            calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.2)
             for a in combined_boxes
         ]
 
         # consolidate regions with heavy overlap
         regions = [
-            calculate_region(frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.0)
+            calculate_region(frame_shape, a[0], a[1], a[2], a[3], 1.0)
             for a in reduce_boxes(regions, 0.4)
         ]
 
@@ -597,7 +596,7 @@ def process_frames(
                         box = obj[2]
                         # calculate a new region that will hopefully get the entire object
                         region = calculate_region(
-                            frame_shape, box[0], box[1], box[2], box[3], region_min_size
+                            frame_shape, box[0], box[1], box[2], box[3]
                         )
 
                         regions.append(region)
