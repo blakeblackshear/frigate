@@ -1,5 +1,5 @@
 import { Fragment, h } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost, useEvents } from '../api';
 import { useSearchString } from '../hooks/useSearchString';
 import { Next } from '../icons/Next';
@@ -60,6 +60,24 @@ export default function HistoryViewer({ camera }) {
     setCurrentEventIndex(currentEvent.index + 1);
   };
 
+  const RenderVideo = useCallback(() => {
+    return (
+      <video
+        ref={videoRef}
+        onTimeUpdate={handleTimeUpdate}
+        onPause={handlePaused}
+        poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
+        preload='none'
+        playsInline
+        controls
+      >
+        <source
+          src={`${apiHost}/api/${camera}/start/${currentEvent.start_time}/end/${currentEvent.end_time}/clip.mp4`}
+        />
+      </video>
+    );
+  }, [currentEvent, apiHost, camera]);
+
   return (
     <Fragment>
       {currentEvent && (
@@ -71,19 +89,7 @@ export default function HistoryViewer({ camera }) {
               objectLabel={currentEvent.label}
               className='mb-2'
             />
-            <video
-              ref={videoRef}
-              onTimeUpdate={handleTimeUpdate}
-              onPause={handlePaused}
-              poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
-              preload='none'
-              playsInline
-              controls
-            >
-              <source
-                src={`${apiHost}/api/${camera}/start/${currentEvent.start_time}/end/${currentEvent.end_time}/clip.mp4`}
-              />
-            </video>
+            <RenderVideo />
           </div>
         </Fragment>
       )}
