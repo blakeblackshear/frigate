@@ -14,7 +14,7 @@ import Dialog from '../components/Dialog';
 import Heading from '../components/Heading';
 import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
-import { FetchStatus, useApiHost, useEvent, useDelete } from '../api';
+import { FetchStatus, useApiHost, useEvent, useDelete, useRetain } from '../api';
 
 const ActionButtonGroup = ({ className, handleClickRetain, handleClickDelete, close }) => (
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
@@ -58,6 +58,7 @@ export default function Event({ eventId, close, scrollRef }) {
   const [showDetails, setShowDetails] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
+  const setRetainEvent = useRetain();
   const setDeleteEvent = useDelete();
 
   useEffect(() => {
