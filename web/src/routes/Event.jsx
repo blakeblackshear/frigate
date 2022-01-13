@@ -75,7 +75,7 @@ export default function Event({ eventId, close, scrollRef }) {
     };
   }, [data, scrollRef, eventId, shouldScroll]);
 
-  const handleClickRetain = () => {
+  const handleClickRetain = useCallback(async () => {
     let success;
     try {
       success = await setRetainEvent(eventId);
@@ -83,7 +83,7 @@ export default function Event({ eventId, close, scrollRef }) {
     } catch (e) {
       setRetainStatus(FetchStatus.ERROR);
     }
-  };
+  }, [eventId, setRetainEvent]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
