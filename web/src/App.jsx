@@ -11,7 +11,7 @@ import { FetchStatus, useConfig } from './api';
 
 export default function App() {
   const { status, data: config } = useConfig();
-  const cameraComponent = config && config.ui.useExperimentalUI ? Routes.getCameraV2 : Routes.getCamera;
+  const cameraComponent = config && config.ui.use_experimental ? Routes.getCameraV2 : Routes.getCamera;
   return (
     <DarkModeProvider>
       <DrawerProvider>

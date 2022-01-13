@@ -44,7 +44,7 @@ class DetectorConfig(FrigateBaseModel):
     num_threads: int = Field(default=3, title="Number of detection threads")
 
 class UIConfig(FrigateBaseModel):
-    useExperimentalUI: bool = Field(default=False, title="Experimental UI")
+    use_experimental: bool = Field(default=False, title="Experimental UI")
 
 class MqttConfig(FrigateBaseModel):
     host: str = Field(title="MQTT Host")
