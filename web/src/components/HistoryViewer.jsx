@@ -76,7 +76,7 @@ export default function HistoryViewer({ camera }) {
         />
       </video>
     );
-  }, [currentEvent, apiHost, camera]);
+  }, [currentEvent, apiHost, camera, videoRef]);
 
   return (
     <Fragment>
