@@ -47,20 +47,25 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
     }
   }, [events, timelineOffset]);
 
+  const getCurrentEvent = useCallback(() => {
+    return currentEvent;
+  }, [currentEvent]);
+
   useEffect(() => {
-    if (currentEvent && offset >= 0) {
+    const cEvent = getCurrentEvent();
+    if (cEvent && offset >= 0) {
       setScrollActive(false);
       timelineContainerRef.current.scroll({
-        left: currentEvent.positionX + offset - timelineOffset,
+        left: cEvent.positionX + offset - timelineOffset,
         behavior: 'smooth',
       });
     } else {
       setScrollActive(true);
     }
-  }, [offset, currentEvent, timelineContainerRef]);
+  }, [offset, timelineContainerRef]);
 
   useEffect(() => {
-    if (currentIndex !== undefined && currentIndex !== currentEvent.index) {
+    if (currentIndex !== undefined) {
       const event = timeline[currentIndex];
       setCurrentEvent({
         ...event,
@@ -71,7 +76,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
       });
       timelineContainerRef.current.scroll({ left: event.positionX - timelineOffset, behavior: 'smooth' });
     }
-  }, [currentIndex, timelineContainerRef, timeline, currentEvent]);
+  }, [currentIndex, timelineContainerRef, timeline]);
 
   const checkMarkerForEvent = (markerTime) => {
     if (!scrollActive) {

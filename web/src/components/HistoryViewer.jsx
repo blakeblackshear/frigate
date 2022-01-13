@@ -13,7 +13,8 @@ export default function HistoryViewer({ camera }) {
   const apiHost = useApiHost();
   const videoRef = useRef();
 
-  const beginningOfDay = new Date().setHours(0, 0, 0) / 1000;
+  // const beginningOfDay = new Date().setHour(0, 0, 0) / 1000;
+  const beginningOfDay = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
   const { searchString } = useSearchString(200, `camera=${camera}&after=${beginningOfDay}`);
   const { data: events } = useEvents(searchString);
   const [timelineEvents, setTimelineEvents] = useState();
@@ -38,15 +39,9 @@ export default function HistoryViewer({ camera }) {
   };
 
   const handleTimelineChange = (event) => {
-    console.log({ event });
     if (event !== undefined) {
       setCurrentEvent(event);
-      setCurrentEventIndex(event.index);
     }
-  };
-
-  const handleVideoTouch = () => {
-    setHideBanner(true);
   };
 
   const handlePlay = function () {
@@ -58,11 +53,11 @@ export default function HistoryViewer({ camera }) {
   };
 
   const handlePrevious = function () {
-    setCurrentEventIndex((index) => index - 1);
+    setCurrentEventIndex(currentEvent.index - 1);
   };
 
   const handleNext = function () {
-    setCurrentEventIndex((index) => index + 1);
+    setCurrentEventIndex(currentEvent.index + 1);
   };
 
   return (
@@ -80,7 +75,6 @@ export default function HistoryViewer({ camera }) {
               ref={videoRef}
               onTimeUpdate={handleTimeUpdate}
               onPause={handlePaused}
-              onClick={handleVideoTouch}
               poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
               preload='none'
               playsInline
