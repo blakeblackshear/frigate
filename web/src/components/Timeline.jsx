@@ -1,12 +1,8 @@
-import { Fragment, h } from 'preact';
+import { h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { Next } from '../icons/Next';
-import { Play } from '../icons/Play';
-import { Previous } from '../icons/Previous';
-import { TextTab } from './Tabs';
 import { longToDate } from '../utils/dateUtil';
 
-export default function Timeline({ events, onChange }) {
+export default function Timeline({ events, offset, currentIndex, onChange }) {
   const timelineContainerRef = useRef(undefined);
 
   const [timeline, setTimeline] = useState([]);
@@ -18,14 +14,13 @@ export default function Timeline({ events, onChange }) {
 
   useEffect(() => {
     if (events && timelineOffset) {
-      const filteredEvents = [...events].reverse().filter((e) => e.end_time !== undefined);
-      const firstEvent = events[events.length - 1];
+      const firstEvent = events[0];
       if (firstEvent) {
         setMarkerTime(longToDate(firstEvent.start_time));
       }
 
       const firstEventTime = longToDate(firstEvent.start_time);
-      const eventsMap = filteredEvents.map((e, i) => {
+      const eventsMap = events.map((e, i) => {
         const startTime = longToDate(e.start_time);
         const endTime = e.end_time ? longToDate(e.end_time) : new Date();
         const seconds = Math.round(Math.abs(endTime - startTime) / 1000);
@@ -52,6 +47,32 @@ export default function Timeline({ events, onChange }) {
       setTimeline(eventsMap);
     }
   }, [events, timelineOffset]);
+
+  useEffect(() => {
+    if (currentEvent && offset >= 0) {
+      setScrollActive(false);
+      timelineContainerRef.current.scroll({
+        left: currentEvent.positionX + offset - timelineOffset,
+        behavior: 'smooth',
+      });
+    } else {
+      setScrollActive(true);
+    }
+  }, [offset]);
+
+  useEffect(() => {
+    if (currentIndex !== undefined && currentIndex !== currentEvent.index) {
+      const event = timeline[currentIndex];
+      setCurrentEvent({
+        ...event,
+        id: event.id,
+        index: currentIndex,
+        startTime: event.start_time,
+        endTime: event.end_time,
+      });
+      timelineContainerRef.current.scroll({left: event.positionX - timelineOffset, behavior: "smooth"})
+    }
+  }, [currentIndex]);
 
   const checkMarkerForEvent = (markerTime) => {
     if (!scrollActive) {
@@ -133,57 +154,24 @@ export default function Timeline({ events, onChange }) {
     }
   }, [timeline]);
 
-  const setNextCurrentEvent = function (offset) {
-    setScrollActive(false);
-    setCurrentEvent((currentEvent) => {
-      const index = currentEvent.index + offset;
-      const nextEvent = timeline[index];
-      const positionX = nextEvent.positionX - timelineOffset;
-      timelineContainerRef.current.scrollLeft = positionX;
-      return {
-        ...nextEvent,
-        id: nextEvent.id,
-        index,
-        startTime: nextEvent.start_time,
-        endTime: nextEvent.end_time,
-      };
-    });
-  };
-
-  const handlePrevious = function () {
-    setNextCurrentEvent(-1);
-  };
-
-  const handleNext = function () {
-    setNextCurrentEvent(1);
-  };
-
   return (
-    <Fragment>
-      <div className="relative flex-grow-1">
-        <div className="absolute left-0 top-0 h-full w-full" style={{ textAlign: 'center' }}>
-          <div className="h-full" style={{ margin: '0 auto', textAlign: 'center' }}>
-            <span className="z-20 text-white">{markerTime && <span>{markerTime.toLocaleTimeString()}</span>}</span>
-            <div
-              className="z-20 h-full absolute"
-              style={{
-                left: 'calc(100% / 2)',
-                height: 'calc(100% - 24px)',
-                borderRight: '2px solid rgba(252, 211, 77)',
-              }}
-            ></div>
-          </div>
-        </div>
-        <div ref={timelineContainerRef} className="overflow-x-auto" onScroll={handleScroll}>
-          <RenderTimeline />
+    <div className="relative flex-grow-1">
+      <div className="absolute left-0 top-0 h-full w-full" style={{ textAlign: 'center' }}>
+        <div className="h-full" style={{ margin: '0 auto', textAlign: 'center' }}>
+          <span className="z-20 text-white">{markerTime && <span>{markerTime.toLocaleTimeString()}</span>}</span>
+          <div
+            className="z-20 h-full absolute"
+            style={{
+              left: 'calc(100% / 2)',
+              height: 'calc(100% - 24px)',
+              borderRight: '2px solid rgba(252, 211, 77)',
+            }}
+          ></div>
         </div>
       </div>
-
-      <div className="flex self-center">
-        <TextTab onClick={handlePrevious} text={<Previous />} />
-        <TextTab text={<Play />} />
-        <TextTab onClick={handleNext} text={<Next />} />
+      <div ref={timelineContainerRef} className="overflow-x-auto hide-scroll" onScroll={handleScroll}>
+        <RenderTimeline />
       </div>
-    </Fragment>
+    </div>
   );
 }
