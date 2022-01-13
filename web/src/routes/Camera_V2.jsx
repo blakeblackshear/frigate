@@ -115,16 +115,16 @@ export default function Camera({ camera }) {
   };
 
   return (
-    <div className='flex bg-gray-900 w-full h-full justify-center'>
+    <div className='flex bg-white dark:bg-black w-full h-full justify-center'>
       <div className='relative max-w-screen-md flex-grow w-full'>
         <div className='absolute top-0 text-white w-full'>
           <div className='flex pt-4 pl-4 items-center w-full h-16 z10'>
             {(playerType === 'live' || playerType === 'debug') && (
               <Fragment>
-                <Heading size='xl' className='mr-2'>
+                <Heading size='xl' className='mr-2 text-black dark:text-white'>
                   {camera}
                 </Heading>
-                <LiveChip />
+                <LiveChip className='text-green-400 border-2 border-solid border-green-400 dark:border-transparent dark:text-white dark:bg-white bg-opacity-40 dark:bg-opacity-10' />
               </Fragment>
             )}
           </div>

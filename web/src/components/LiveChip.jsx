@@ -2,10 +2,7 @@ import { h } from 'preact';
 
 export function LiveChip({ className }) {
   return (
-    <div
-      className={`inline relative px-2 py-1 rounded-full ${className}`}
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-    >
+    <div className={`inline relative px-2 py-1 rounded-full ${className}`}>
       <div className='relative inline-block w-3 h-3 mr-2'>
         <span class='flex h-3 w-3'>
           <span

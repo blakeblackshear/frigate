@@ -13,7 +13,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
   const [scrollActive, setScrollActive] = useState(true);
 
   useEffect(() => {
-    if (events && timelineOffset) {
+    if (events && events.length > 0 && timelineOffset) {
       const firstEvent = events[0];
       if (firstEvent) {
         setMarkerTime(longToDate(firstEvent.start_time));
