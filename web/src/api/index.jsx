@@ -118,7 +118,7 @@ export function useDelete() {
 }
 
 export function useRetain() {
-  const { dispatch, state } = useContext(Api);
+  const { state } = useContext(Api);
 
   async function retainEvent(eventId, shouldRetain) {
     if (!eventId) return null;
