@@ -14,24 +14,6 @@ export default function Camera({ camera }) {
   const [playerType, setPlayerType] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
-
-  const RenderPlayer = () => {
-    if (playerType === 'live') {
-      return (
-        <Fragment>
-          <div>
-            <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
-          </div>
-        </Fragment>
-      );
-    } else if (playerType === 'history') {
-      return <HistoryViewer camera={camera} />;
-    } else if (playerType === 'debug') {
-      return <DebugCamera camera={camera} />;
-    }
-    return <Fragment />;
-  };
 
   const handleTabChange = (index) => {
     if (index === 0) {
@@ -60,7 +42,7 @@ export default function Camera({ camera }) {
         </div>
 
         <div className='flex flex-col justify-center h-full'>
-          <RenderPlayer />
+          <RenderPlayer camera={camera} cameraConfig={cameraConfig} playerType={playerType} />
         </div>
 
         <div className='absolute flex justify-center bottom-8 w-full'>
@@ -74,3 +56,21 @@ export default function Camera({ camera }) {
     </div>
   );
 }
+
+const RenderPlayer = function ({ camera, cameraConfig, playerType }) {
+  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
+  if (playerType === 'live') {
+    return (
+      <Fragment>
+        <div>
+          <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
+        </div>
+      </Fragment>
+    );
+  } else if (playerType === 'history') {
+    return <HistoryViewer camera={camera} />;
+  } else if (playerType === 'debug') {
+    return <DebugCamera camera={camera} />;
+  }
+  return <Fragment />;
+};
