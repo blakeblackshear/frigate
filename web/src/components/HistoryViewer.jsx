@@ -1,5 +1,5 @@
 import { Fragment, h } from 'preact';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost, useEvents } from '../api';
 import { useSearchString } from '../hooks/useSearchString';
 import { Next } from '../icons/Next';
@@ -9,13 +9,15 @@ import { HistoryHeader } from '../routes/HistoryHeader';
 import { longToDate } from '../utils/dateUtil';
 import Timeline from './Timeline';
 
+const getLast24Hours = () => {
+  return new Number(new Date(new Date().getTime() - 24 * 60 * 60 * 1000)) / 1000;
+};
+
 export default function HistoryViewer({ camera }) {
+  console.log('history', { camera });
   const apiHost = useApiHost();
   const videoRef = useRef();
-
-  // const beginningOfDay = new Date().setHour(0, 0, 0) / 1000;
-  const beginningOfDay = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-  const { searchString } = useSearchString(200, `camera=${camera}&after=${beginningOfDay}`);
+  const { searchString } = useSearchString(200, `camera=${camera}&after=${getLast24Hours()}`);
   const { data: events } = useEvents(searchString);
   const [timelineEvents, setTimelineEvents] = useState();
 
