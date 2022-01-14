@@ -63,7 +63,7 @@ const DownloadButtonGroup = ({ className, apiHost, eventId }) => (
 
 export default function Event({ eventId, close, scrollRef }) {
   const apiHost = useApiHost();
-  const { data, status } = useEvent(eventId);
+  var { data, status } = useEvent(eventId);
   const [showDialog, setShowDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
@@ -94,13 +94,15 @@ export default function Event({ eventId, close, scrollRef }) {
       success = await setRetainEvent(eventId, !isRetained);
 
       if (success) {
+        const { newData, newStatus } = await useEvent(eventId);
+        //data = newData;
         setIsRetained(!isRetained);
       } else {
       }
     } catch (e) {
-
+      console.log("An error occurred " + e);
     }
-  }, [eventId, setRetainEvent]);
+  }, [eventId, useEvent, setRetainEvent]);
 
   const handleClickDelete = () => {
     setShowDialog(true);
@@ -133,6 +135,7 @@ export default function Event({ eventId, close, scrollRef }) {
     setIsRetained(data.retain_indefinitely);
     setShouldUseRetainData(false);
   }
+
   const startime = new Date(data.start_time * 1000);
   const endtime = data.end_time ? new Date(data.end_time * 1000) : null;
   return (
