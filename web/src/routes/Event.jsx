@@ -16,10 +16,20 @@ import VideoPlayer from '../components/VideoPlayer';
 import { Table, Thead, Tbody, Th, Tr, Td } from '../components/Table';
 import { FetchStatus, useApiHost, useEvent, useDelete, useRetain } from '../api';
 
-const ActionButtonGroup = ({ className, handleClickRetain, isRetained, handleClickDelete, close }) => (
+const ActionButtonGroup = ({ className, isRetained, handleClickRetain, handleClickDelete, close }) => (
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
     <Button className="xs:w-auto" color="yellow" onClick={handleClickRetain}>
-      <StarRecording className="w-6" /> { isRetained ? "Un-retain event" : "Retain event" }
+    {isRetained ? (
+              <Fragment>
+                <StarRecording className="w-6" />
+                Un-retain event
+              </Fragment>
+            ) : (
+              <Fragment>
+                <StarRecording className="w-6" />
+                Retain event
+              </Fragment>
+            )}
     </Button>
     <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
       <Delete className="w-6" /> Delete event
@@ -78,15 +88,14 @@ export default function Event({ eventId, close, scrollRef }) {
   }, [data, scrollRef, eventId, shouldScroll]);
 
   const handleClickRetain = useCallback(async () => {
-    console.log("handleClickRetain go go go");
     let success;
     try {
-      console.log("Trying to send to retain: " + !isRetained)
       success = await setRetainEvent(eventId, !isRetained);
-      console.log("handleClickRetain result: " + success == true);
 
       if (success) {
+        console.log("set was a success");
         setIsRetained(!isRetained);
+      } else {
       }
     } catch (e) {
 

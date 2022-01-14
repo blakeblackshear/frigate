@@ -130,8 +130,7 @@ export function useRetain() {
     } else {
       const response = await fetch(`${state.host}/api/events/${eventId}/retain`, { method: 'DELETE' });
       await dispatch({ type: 'DELETE', payload: { eventId } });
-      thing = await (response.status < 300 ? response.json() : { success: true });
-      console.log("set retain thing is " + thing)
+      return await (response.status < 300 ? response.json() : { success: true });
     }
   }
 
