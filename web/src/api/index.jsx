@@ -123,9 +123,19 @@ export function useRetain() {
   async function retainEvent(eventId, shouldRetain) {
     if (!eventId) return null;
 
-    const response = await fetch(`${state.host}/api/events/${eventId}?retain=${shouldRetain}`, { method: 'POST' });
-    await dispatch({ type: 'POST', payload: { eventId } });
-    return await (response.status < 300 ? response.json() : { success: true });
+    console.log("trying to set retain as " + shouldRetain);
+
+    if (shouldRetain) {
+      const response = await fetch(`${state.host}/api/events/${eventId}/retain`, { method: 'POST' });
+      console.log("response is " + response.status);
+      await dispatch({ type: 'POST', payload: { eventId } });
+      return await (response.status < 300 ? response.json() : { success: true });
+    } else {
+      const response = await fetch(`${state.host}/api/events/${eventId}/retain`, { method: 'DELETE' });
+      console.log("response is " + response.status);
+      await dispatch({ type: 'DELETE', payload: { eventId } });
+      return await (response.status < 300 ? response.json() : { success: true });
+    }
   }
 
   return retainEvent;
