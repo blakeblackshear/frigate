@@ -537,6 +537,8 @@ class CameraConfig(FrigateBaseModel):
         return self._ffmpeg_cmds
 
     def create_ffmpeg_cmds(self):
+        if "_ffmpeg_cmds" in self:
+            return
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
@@ -845,7 +847,8 @@ class FrigateConfig(FrigateBaseModel):
                 logger.warning(
                     f"Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
                 )
-
+            # generage the ffmpeg commands
+            camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
 
         return config
