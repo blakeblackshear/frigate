@@ -83,10 +83,10 @@ export default function Event({ eventId, close, scrollRef }) {
     try {
       console.log("Trying to send to retain: " + !isRetained)
       success = await setRetainEvent(eventId, !isRetained);
-      console.log("handleClickRetain result: " + success);
+      console.log("handleClickRetain result: " + success == true);
 
       if (success) {
-        //setIsRetained(!isRetained);
+        setIsRetained(!isRetained);
       }
     } catch (e) {
 
