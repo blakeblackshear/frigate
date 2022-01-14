@@ -59,4 +59,16 @@ armv7_frigate: version web
 
 armv7_all: armv7_wheels armv7_ffmpeg armv7_frigate
 
-.PHONY: web
+run_tests:
+	# PLATFORM: linux/arm64/v8 linux/amd64 or linux/arm/v7
+	# ARCH: aarch64 amd64 or armv7
+	@cat docker/Dockerfile.base docker/Dockerfile.$(ARCH) > docker/Dockerfile.test
+	@sed -i "s/FROM frigate-web as web/#/g" docker/Dockerfile.test
+	@sed -i "s/COPY --from=web \/opt\/frigate\/build web\//#/g" docker/Dockerfile.test
+	@sed -i "s/FROM frigate-base/#/g" docker/Dockerfile.test
+	@echo "" >> docker/Dockerfile.test
+	@echo "RUN python3 -m unittest" >> docker/Dockerfile.test
+	@docker buildx build --platform=$(PLATFORM) --tag frigate-base --build-arg NGINX_VERSION=1.0.2 --build-arg FFMPEG_VERSION=1.0.0 --build-arg ARCH=$(ARCH) --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.test .
+	@rm docker/Dockerfile.test
+
+.PHONY: web run_tests

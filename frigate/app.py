@@ -77,9 +77,6 @@ class FrigateApp:
         self.config = user_config.runtime_config
 
         for camera_name in self.config.cameras.keys():
-            # generage the ffmpeg commands
-            self.config.cameras[camera_name].create_ffmpeg_cmds()
-
             # create camera_metrics
             self.camera_metrics[camera_name] = {
                 "camera_fps": mp.Value("d", 0.0),
