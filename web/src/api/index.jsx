@@ -117,10 +117,10 @@ export function useDelete() {
   return deleteEvent;
 }
 
-export function useRetain(shouldRetain) {
+export function useRetain() {
   const { dispatch, state } = useContext(Api);
 
-  async function retainEvent(eventId) {
+  async function retainEvent(eventId, shouldRetain) {
     if (!eventId) return null;
 
     const response = await fetch(`${state.host}/api/events/${eventId}?retain=${shouldRetain}`, { method: 'POST' });
