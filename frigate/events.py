@@ -67,6 +67,7 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
+                        retain_indefinitely=event_data["retain_indefinitely"],
                     ).execute()
 
             elif event_type == "end":
@@ -86,6 +87,7 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
+                        retain_indefinitely=event_data["retain_indefinitely"],
                     ).execute()
 
                 del self.events_in_process[event_data["id"]]
@@ -135,6 +137,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == l.label,
+                Event.retain_indefinitely == False,
             )
             # delete the media from disk
             for event in expired_events:
@@ -154,6 +157,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == l.label,
+                Event.retain_indefinitely == False,
             )
             update_query.execute()
 
@@ -180,7 +184,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == l.label,
-                    Event.retain_indefinitely is False
+                    Event.retain_indefinitely == False,
                 )
                 # delete the grabbed clips from disk
                 for event in expired_events:
@@ -199,6 +203,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == l.label,
+                    Event.retain_indefinitely == False,
                 )
                 update_query.execute()
 
