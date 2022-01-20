@@ -196,6 +196,7 @@ class TestGstreamerBuilder(TestCase):
             "rtspsrc",
             'location="rtsp://"',
             "latency=0",
+            "do-timestamp=true",
             "!",
             "a",
             "!",
@@ -228,6 +229,7 @@ class TestGstreamerBuilder(TestCase):
             "rtspsrc",
             'location="rtsp://"',
             "latency=0",
+            "do-timestamp=true",
             "!",
             "rtph264depay",
             "!",
@@ -253,6 +255,7 @@ class TestGstreamerBuilder(TestCase):
             "rtspsrc",
             'location="rtsp://"',
             "latency=0",
+            "do-timestamp=true",
             "!",
             "rtph264depay",
             "!",
@@ -293,12 +296,17 @@ class TestGstreamerBuilder(TestCase):
             "rtspsrc",
             'location="rtsp://"',
             "latency=0",
+            "do-timestamp=true",
             "!",
             "rtph264depay",
             "!",
             "h264parse",
             "!",
             "omxh264dec",
+            "!",
+            "videoconvert",
+            "!",
+            "videoscale",
             "!",
             "queue",
             "!",
@@ -353,7 +361,9 @@ class TestGstreamerBuilder(TestCase):
 
     @mock.patch("frigate.gstreamer.autodetect_decoder_pipeline")
     def test_custom_source(self, mock_autodetect_pipeline):
-        self.builder = GstreamerBuilder("videotestsrc is-live=true pattern=snow", 320, 240, "cam_name")
+        self.builder = GstreamerBuilder(
+            "videotestsrc is-live=true pattern=snow", 320, 240, "cam_name"
+        )
         builder = self.builder.with_decoder_pipeline(["a"], caps=None)
         builder = builder.with_source_format_pipeline(["d"])
         assert builder.build(use_detect=True, use_record=False) == [
