@@ -408,27 +408,33 @@ class CameraGStreamerInput(CameraInput):
     )
 
 
-class CameraInputValidator:
-    @validator("inputs")
-    def validate_roles(cls, v):
-        roles = [role for i in v for role in i.roles]
-        roles_set = set(roles)
+def validate_roles(cls, v):
+    roles = [role for i in v for role in i.roles]
+    roles_set = set(roles)
 
-        if len(roles) > len(roles_set):
-            raise ValueError("Each input role may only be used once.")
+    if len(roles) > len(roles_set):
+        raise ValueError("Each input role may only be used once.")
 
-        if not "detect" in roles:
-            raise ValueError("The detect role is required.")
+    if not "detect" in roles:
+        raise ValueError("The detect role is required.")
 
-        return v
+    return v
 
 
-class CameraFfmpegConfig(FfmpegConfig, CameraInputValidator):
+class CameraFfmpegConfig(FfmpegConfig):
     inputs: List[CameraFFmpegInput] = Field(title="Camera FFMpeg inputs.")
 
+    @validator("inputs")
+    def validate_roles(cls, v):
+        return validate_roles(cls, v)
 
-class CameraGStreamerConfig(GstreamerConfig, CameraInputValidator):
+
+class CameraGStreamerConfig(GstreamerConfig):
     inputs: List[CameraGStreamerInput] = Field(title="Camera GStreamer inputs.")
+
+    @validator("inputs")
+    def validate_roles(cls, v):
+        return validate_roles(cls, v)
 
 
 class SnapshotsConfig(FrigateBaseModel):
