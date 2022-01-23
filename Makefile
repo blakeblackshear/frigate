@@ -91,7 +91,7 @@ run_tests:
 	@sed -i "s/FROM frigate-base/#/g" docker/Dockerfile.test
 	@echo "" >> docker/Dockerfile.test
 	@echo "RUN python3 -m unittest" >> docker/Dockerfile.test
-	@docker buildx build --platform=$(PLATFORM) --tag frigate-base --build-arg NGINX_VERSION=1.0.2 --build-arg FFMPEG_VERSION=1.0.0 --build-arg ARCH=$(ARCH) --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.test .
+	@docker buildx build --platform=$(PLATFORM) --tag frigate-base --build-arg NGINX_VERSION=1.0.2 --build-arg FFMPEG_VERSION=1.0.0 --build-arg ARCH=$(ARCH) --build-arg FFMPEG_ARCH=$(ARCH) --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.test .
 	@rm docker/Dockerfile.test
 
 .PHONY: web run_tests
