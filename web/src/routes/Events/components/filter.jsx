@@ -1,31 +1,26 @@
 import { h } from 'preact';
 import Select from '../../../components/Select';
-import { useCallback, useMemo } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
 
-const Filter = ({ onChange, searchParams, paramName, options }) => {
+function Filter({ onChange, searchParams, paramName, options, ...rest }) {
   const handleSelect = useCallback(
     (key) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      if (key !== 'all') {
-        newParams.set(paramName, key);
-      } else {
-        newParams.delete(paramName);
-      }
+      Object.keys(key).map((entries) => {
+        if (key[entries] !== 'all') {
+          newParams.set(entries, key[entries]);
+        } else {
+          paramName.map((p) => newParams.delete(p));
+        }
+      });
 
       onChange(newParams);
     },
     [searchParams, paramName, onChange]
   );
 
-  const selectOptions = useMemo(() => ['all', ...options], [options]);
-
-  return (
-    <Select
-      label={`${paramName.charAt(0).toUpperCase()}${paramName.substr(1)}`}
-      onChange={handleSelect}
-      options={selectOptions}
-      selected={searchParams.get(paramName) || 'all'}
-    />
-  );
-};
+  const obj = {};
+  paramName.map((name) => Object.assign(obj, { [name]: searchParams.get(name) }), [searchParams]);
+  return <Select onChange={handleSelect} options={options} selected={obj} paramName={paramName} {...rest} />;
+}
 export default Filter;
