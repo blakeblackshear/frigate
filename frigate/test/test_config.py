@@ -1244,6 +1244,30 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].snapshots.retain.default == 1.5
 
+    def test_fails_on_bad_camera_name(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "snapshots": {"retain": {"default": 1.5}},
+            "cameras": {
+                "back camer#": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(
+            ValidationError, lambda: frigate_config.runtime_config.cameras
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
