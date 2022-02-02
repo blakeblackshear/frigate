@@ -497,7 +497,8 @@ class RecordingCleanup(threading.Thread):
             oldest_timestamp = datetime.datetime.now().timestamp()
         except FileNotFoundError:
             logger.warning(f"Unable to find file from recordings database: {p}")
-            oldest_timestamp = datetime.datetime.now().timestamp()
+            Recordings.delete().where(Recordings.id == oldest_recording.id).execute()
+            return
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
