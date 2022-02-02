@@ -133,6 +133,8 @@ def delete_event(id):
     if event.has_snapshot:
         media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
         media.unlink(missing_ok=True)
+        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+        media.unlink(missing_ok=True)
     if event.has_clip:
         media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
         media.unlink(missing_ok=True)
