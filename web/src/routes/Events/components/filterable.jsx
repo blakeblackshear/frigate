@@ -3,7 +3,13 @@ import { useCallback, useMemo } from 'preact/hooks';
 import Link from '../../../components/Link';
 import { route } from 'preact-router';
 
-const Filterable = ({ onFilter, pathname, searchParams, paramName, name, removeDefaultSearchKeys }) => {
+function Filterable({ onFilter, pathname, searchParams, paramName, name }) {
+  const removeDefaultSearchKeys = useCallback((searchParams) => {
+    searchParams.delete('limit');
+    searchParams.delete('include_thumbnails');
+    // searchParams.delete('before');
+  }, []);
+
   const href = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(paramName, name);
@@ -27,6 +33,6 @@ const Filterable = ({ onFilter, pathname, searchParams, paramName, name, removeD
       {name}
     </Link>
   );
-};
+}
 
 export default Filterable;
