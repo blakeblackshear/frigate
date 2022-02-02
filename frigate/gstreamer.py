@@ -1,8 +1,14 @@
+from functools import lru_cache
+import functools
 import os
 import logging
 import traceback
+from abc import ABC
 import subprocess as sp
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
+from xmlrpc.client import Boolean
+
+from matplotlib.style import available
 from frigate.const import (
     CACHE_DIR,
     GSTREAMER_RECORD_SUFFIX,
@@ -14,7 +20,9 @@ VIDEO_CODEC_CAP_NAME = "video codec"
 logger = logging.getLogger(__name__)
 
 
-def gst_discover(source: str, keys: List[str]) -> Optional[Dict[str, str]]:
+def gst_discover(
+    source: str, cam_name: str, keys: List[str]
+) -> Optional[Dict[str, str]]:
     """
     run gst-discoverer-1.0 to discover source stream
     and extract keys, specified in the source arrat
@@ -29,15 +37,25 @@ def gst_discover(source: str, keys: List[str]) -> Optional[Dict[str, str]]:
             universal_newlines=True,
             start_new_session=True,
             stderr=None,
+            timeout=15,
         )
         stripped = list(map(lambda s: s.strip().partition(":"), data.split("\n")))
         result = {}
         for key, _, value in stripped:
             for param in keys:
-                if param in key.lower():
+                if param == key.lower():
                     terms = value.strip().split(" ")
-                    result[param] = terms[0]
+                    result[param] = terms[0].split(",")[0]
         return result
+    except sp.TimeoutExpired:
+        logger.error(
+            (
+                "gst-discoverer-1.0 timed out auto discovering camera %s. "
+                "Try setting up `decoder_pipeline` according to your camera video codec."
+            ),
+            cam_name,
+        )
+        return None
     except:
         logger.error(
             "gst-discoverer-1.0 failed with the message: %s", traceback.format_exc()
@@ -45,7 +63,8 @@ def gst_discover(source: str, keys: List[str]) -> Optional[Dict[str, str]]:
         return None
 
 
-def gst_inspect_find_codec(codec: str) -> List[str]:
+@lru_cache
+def gst_inspect_find_codec(codec: Optional[str]) -> List[str]:
     """
     run gst-inspect-1.0 and find the codec.
     gst-inspect-1.0 return data in the following format:
@@ -60,7 +79,9 @@ def gst_inspect_find_codec(codec: str) -> List[str]:
             stderr=None,
         )
         return [
-            line.split(":")[1].strip() for line in data.split("\n") if codec in line
+            line.split(":")[1].strip()
+            for line in data.split("\n")
+            if codec is None or codec in line
         ]
     except:
         logger.error(
@@ -69,152 +90,255 @@ def gst_inspect_find_codec(codec: str) -> List[str]:
         return None
 
 
-def autodetect_decoder_pipeline(
-    codec: Optional[str],
-) -> List[str]:
-    """
-    This method attempt to autodetect gstreamer decoder pipeline based
-    on the codec name.
-    """
-
-    if codec is None or not codec:
-        logger.warn(
-            "gsreamer was not able to detect video coded. Please supply `decoder_pipeline` parameter."
-        )
-        return None
-    # convert H.265 to h265
-    codec = codec.lower().replace(".", "")
-    logger.debug("detecting gstreamer decoder pipeline for the %s format", codec)
-    # run gst_inspect and get available codecs
-    codecs = gst_inspect_find_codec(codec)
-    logger.debug("available codecs are: %s", codecs)
-
-    if codecs is None or len(codecs) == 0:
-        logger.warn(
-            "gsreamer was not able to find the codec for the %s format",
-            codec,
-        )
-        return None
-
-    gstreamer_plugins = CODECS.get(codec, [f"omx{codec}dec", f"avdec_{codec}"])
-    decode_element = None
-    for plugin in gstreamer_plugins:
-        if plugin in codecs:
-            decode_element = plugin
-            break
-
-    if decode_element is None:
-        logger.warn(
-            "gsreamer was not able to find decoder for the %s format",
-            codec,
-        )
-        return None
-
-    return [
-        f"rtp{codec}depay",
-        f"{codec}parse",
-        decode_element,
-    ]
+RTP_STREAM_NAME_KEY = "name="
+RTP_STREAM_NAME = "rtp_stream"
+DEPAYED_STREAM_NAME = "depayed_stream"
 
 
-# An associative array of gstreamer codecs autodetect should try
-CODECS = {
-    "h264": ["omxh264dec", "avdec_h264"],
-    "h265": ["omxh265dec", "avdec_h265"],
+AUDIO_PIPELINES = {
+    "audio/mpeg": ["rtpmp4gdepay", "aacparse"],
+    "audio/x-alaw": ["rtppcmadepay", "alawdec", "audioconvert", "queue", "avenc_aac"],
 }
 
 
-class GstreamerBuilder:
-    def __init__(self, uri, width, height, name, format="I420"):
+class GstreamerBaseBuilder:
+    def __init__(self, width, height, name, format="I420") -> None:
         self.width = width
         self.height = height
         self.name = name
-        self.video_format = f"video/x-raw,width=(int){width},height=(int){height},format=(string){format}"
+        self.format = format
+        self.input_pipeline = None
+        self.encoding_format = None
+        self.record_pipeline = None
+        self.audio_pipeline = None
+        self.raw_pipeline = None
 
+    def with_raw_pipeline(self, raw_pipeline: List[str]):
+        """
+        Set the raw pipeline
+        """
+        self.raw_pipeline = raw_pipeline
+        return self
+
+    def with_source(self, uri: str, options: List[str]):
+        """
+        Set RTMP or RTSP data source with the list of options
+        """
         is_rtsp = "rtsp://" in uri
         is_rtmp = "rtmp://" in uri
         if is_rtsp:
-            self.input_pipeline = [f'rtspsrc location="{uri}" latency=0 do-timestamp=true']
+            self.input_pipeline = f'rtspsrc location="{uri}"'
         elif is_rtmp:
-            self.input_pipeline = [f'rtmpsrc location="{uri}"']
+            self.input_pipeline = f'rtmpsrc location="{uri}"'
         else:
-            logger.warn(
-                "An input url does not start with rtsp:// or rtmp:// for camera %s. Assuming full input pipeline supplied.",
-                name,
+            logger.warning(
+                "An input url does not start with rtsp:// or rtmp:// for camera %s. Assuming a full input pipeline supplied.",
+                self.name,
             )
-            self.input_pipeline = [uri]
-
-        self.destination_format_pipeline = [self.video_format, "videoconvert"]
-        self.decoder_pipeline = None
-
-    def build_with_test_source(self):
-        pipeline = [
-            "videotestsrc pattern=0",
-            self.video_format,
-        ]
-        return self._build_launch_command(pipeline)
-
-    def with_decoder_pipeline(self, decoder_pipeline, caps):
-        if decoder_pipeline is not None and len(decoder_pipeline) > 0:
-            self.decoder_pipeline = decoder_pipeline
+            self.input_pipeline = self._to_array(uri)
             return self
 
-        if caps is None or len(caps) == 0 or VIDEO_CODEC_CAP_NAME not in caps:
-            logger.warn("gsreamer was not able to detect the input stream format")
-            self.decoder_pipeline = None
-            return self
-        codec = caps.get(VIDEO_CODEC_CAP_NAME)
-        self.decoder_pipeline = autodetect_decoder_pipeline(codec)
+        has_options = options is not None and len(options) > 0
+        extra_options = None
+
+        if has_options:
+            extra_options = " ".join(options)
+            if RTP_STREAM_NAME_KEY not in extra_options:
+                extra_options = (
+                    f"{RTP_STREAM_NAME_KEY}{RTP_STREAM_NAME} {extra_options}"
+                )
+        else:
+            extra_options = f"{RTP_STREAM_NAME_KEY}{RTP_STREAM_NAME}"
+            if is_rtsp:
+                extra_options = extra_options + " latency=0 do-timestamp=true"
+
+        self.input_pipeline = self._to_array(f"{self.input_pipeline} {extra_options}")
         return self
 
-    def with_source_format_pipeline(self, source_format_pipeline):
-        source_format_pipeline = (
-            source_format_pipeline
-            if source_format_pipeline
-            else ["video/x-raw,format=(string)NV12", "videoconvert", "videoscale"]
-        )
-        self.source_format_pipeline = source_format_pipeline
+    def with_encoding_format(self, format: str):
+        """
+        set encoding format. Encoding format should be one of:
+        h265, h264, h236, h261 or be like `video/x-h265`
+        """
+        format = format.lower().replace("video/x-", "")
+        self.encoding_format = format
         return self
 
-    def build(self, use_detect, use_record) -> List[str]:
-        if self.decoder_pipeline is None:
-            logger.warn("gsreamer was not able to auto detect the decoder pipeline.")
-            return self.build_with_test_source()
+    def with_audio_format(self, format):
+        """
+        set the audio format and make the audio_pipeline
+        """
+        if format in AUDIO_PIPELINES:
+            self.audio_pipeline = AUDIO_PIPELINES.get(format)
+        else:
+            logger.warning("No pipeline set for the '%s' audio format.", format)
+        return self
 
-        # remove unnecessary video conversion for the record-only input
-        src_dst_format_pipeline = (
-            ["videoconvert", "videoscale"]
-            if use_record and not use_detect
-            else [*self.source_format_pipeline, *self.destination_format_pipeline]
-        )
-        pipeline = [
-            *self.input_pipeline,
-            *self.decoder_pipeline,
-            *src_dst_format_pipeline,
-        ]
-        return self._build_launch_command(pipeline, use_detect, use_record)
+    def with_record_pipeline(self, pipeline):
+        """
+        set record pipeline. by default record_pipeline is empty. The splitmuxsink will get the
+        depayed camera stream and mux it using mp4mux into the file. That way no re-encoding will be performed.
+        If your camera has a different endcoding format which is not supported by the browser player,
+        add the record_pipeline to decode and endode the video stream
+        """
+        self.record_pipeline = pipeline
+        return self
 
-    def _build_launch_command(self, pipeline, use_detect=True, use_record=False):
+    def with_audio_pipeline(self, pipeline):
+        """
+        set set the optional audio pipeline to mux audio into the recording.
+        """
+        self.audio_pipeline = pipeline
+        return self
+
+    @staticmethod
+    def accept(plugins: List[str]) -> Boolean:
+        """
+        Accept method receives a list of plugins and return true if the builder can hande the current list
+        Builder should check all necessary pluguns before returning True
+        """
+        return True
+
+    def _to_array(self, input):
+        return list(map((lambda el: el.strip()), input.split("!")))
+
+    def _build_gst_pipeline(
+        self, pipeline: List[str], use_detect=True, use_record=False
+    ):
         fd_sink = (
-            ["tee name=t", "fdsink t."]
+            [f"fdsink {DEPAYED_STREAM_NAME}."]
             if use_record and use_detect
             else (["fdsink"] if use_detect else [])
         )
 
+        record_pipeline = (
+            [f"{self.encoding_format}parse"]
+            if self.record_pipeline is None
+            else self.record_pipeline
+        )
+
+        has_audio_pipeline = (
+            self.audio_pipeline is not None and len(self.audio_pipeline) > 0
+        )
+
+        split_mux = f"splitmuxsink async-handling=true "
+        if has_audio_pipeline:
+            split_mux = split_mux + "name=mux muxer=mp4mux "
+        split_mux = split_mux + (
+            f"location={os.path.join(CACHE_DIR, self.name)}{GSTREAMER_RECORD_SUFFIX}-%05d.mp4 "
+            f"max-size-time={RECORD_SEGMENT_TIME_SECONDS*1000000000}"
+        )
+
+        audio_pipeline = []
+        if has_audio_pipeline:
+            # add the RTP stream after the splitmuxsink
+            split_mux = f"{split_mux} {RTP_STREAM_NAME}."
+            # add a queue after the rtp_stream. and mux.audio_0 as a receiver
+            audio_pipeline = ["queue", *self.audio_pipeline, "mux.audio_0"]
+
         record_mux = (
             [
                 "queue",
-                "omxh264enc",
-                "h264parse",
-                f"splitmuxsink async-handling=true location={os.path.join(CACHE_DIR, self.name)}{GSTREAMER_RECORD_SUFFIX}-%05d.mp4 max-size-time={RECORD_SEGMENT_TIME_SECONDS*1000000000}",
+                *record_pipeline,
+                split_mux,
+                *audio_pipeline,
             ]
             if use_record
             else []
         )
 
         full_pipeline = [*pipeline, *fd_sink, *record_mux]
+        return full_pipeline
+
+    def _get_default_pipeline(self):
+        """
+        Get a pipeline to render a video test stream
+        """
+        pipeline = [
+            "videotestsrc pattern=19",
+            f"video/x-raw,width=(int){self.width},height=(int){self.height},format=(string){self.format},framerate=20/1",
+            "videorate drop-only=true",
+            "video/x-raw,framerate=1/10",
+        ]
+        return pipeline
+
+    def get_detect_decoder_pipeline(self) -> List[str]:
+        return []
+
+    def _build(self, use_detect: Boolean, use_record: Boolean) -> List[str]:
+        """
+        Build a pipeline based on the provided parameters
+        """
+        if self.encoding_format is None or len(self.encoding_format) == 0:
+            return self._build_gst_pipeline(
+                self._get_default_pipeline(), use_detect=True, use_record=False
+            )
+        depay_element = f"rtp{self.encoding_format}depay"
+
+        pipeline = [*self.input_pipeline, depay_element]
+        # if both detect and record used, split the stream after the depay element
+        # to avoid encoding for recording
+        if use_detect and use_record:
+            pipeline = [*pipeline, f"tee name={DEPAYED_STREAM_NAME}", "queue"]
+
+        if use_detect:
+            # decendants should override get_detect_decoder_pipeline to provide correct decoder element
+            detect_decoder_pipeline = self.get_detect_decoder_pipeline()
+            if detect_decoder_pipeline is None or len(detect_decoder_pipeline) == 0:
+                return self._build_gst_pipeline(
+                    self._get_default_pipeline(), use_detect=True, use_record=False
+                )
+            pipeline.extend(detect_decoder_pipeline)
+
+        return self._build_gst_pipeline(
+            pipeline, use_detect=use_detect, use_record=use_record
+        )
+
+    def build(self, use_detect: Boolean, use_record: Boolean) -> List[str]:
+        if self.raw_pipeline is None or len(self.raw_pipeline) == 0:
+            full_pipeline = self._build(use_detect, use_record)
+        else:
+            full_pipeline = self.raw_pipeline
+
         pipeline_args = [
             f"{item} !".split(" ") for item in full_pipeline if len(item) > 0
         ]
         pipeline_args = [item for sublist in pipeline_args for item in sublist]
         return ["gst-launch-1.0", "-q", *pipeline_args][:-1]
+
+
+class GstreamerNvidia(GstreamerBaseBuilder):
+    def __init__(self, width, height, name, format="I420") -> None:
+        super().__init__(width, height, name, format)
+
+    @staticmethod
+    def accept(plugins: List[str]) -> Boolean:
+        """
+        Accept method receives a list of plugins and return true if the builder can hande the current list
+        Builder should check all necessary pluguns before returning True
+        """
+        required_plugins = ["nvv4l2decoder", "nvvidconv"]
+        for plugin in required_plugins:
+            if plugin not in plugins:
+                return False
+        return True
+
+    def get_detect_decoder_pipeline(self) -> List[str]:
+        return [
+            "nvv4l2decoder enable-max-performance=true",
+            "video/x-raw(memory:NVMM),format=NV12",
+            "nvvidconv",
+            f"video/x-raw(memory:NVMM),width=(int){self.width},height=(int){self.height},format=(string){self.format}",
+        ]
+
+
+# A list of available builders. Please put on top more specific builders and keep the GstreamerBaseBuilder as a last builder
+GSTREAMER_BUILDERS = [GstreamerNvidia, GstreamerBaseBuilder]
+
+
+def gstreamer_builder_factory() -> GstreamerBaseBuilder:
+    available_plugins = gst_inspect_find_codec(codec=None)
+    for builder in GSTREAMER_BUILDERS:
+        if builder.accept(available_plugins):
+            return builder
+    return
