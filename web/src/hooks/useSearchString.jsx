@@ -18,7 +18,8 @@ export const useSearchString = (limit, searchParams) => {
   const removeDefaultSearchKeys = useCallback((searchParams) => {
     searchParams.delete('limit');
     searchParams.delete('include_thumbnails');
-    searchParams.delete('before');
+    // removed deletion of "before" as its used by DatePicker
+    // searchParams.delete('before');
   }, []);
 
   return { searchString, setSearchString, removeDefaultSearchKeys };
