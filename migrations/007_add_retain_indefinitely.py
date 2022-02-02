@@ -1,4 +1,4 @@
-"""Peewee migrations -- 004_add_bbox_region_area.py.
+"""Peewee migrations -- 007_add_retain_indefinitely.py.
 
 Some examples (model - class or model name)::
 
