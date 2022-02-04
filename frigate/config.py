@@ -1,4 +1,5 @@
 from __future__ import annotations
+from email.policy import default
 
 import json
 import logging
@@ -17,9 +18,10 @@ from frigate.util import (
     create_mask,
     deep_merge,
     load_labels,
+    empty_or_none,
 )
 
-from frigate.gstreamer import gst_discover, GstreamerBuilder
+from frigate.gstreamer import gst_discover, get_gstreamer_builder
 
 logger = logging.getLogger(__name__)
 
@@ -360,13 +362,23 @@ class FfmpegConfig(FrigateBaseModel):
 
 
 class GstreamerConfig(FrigateBaseModel):
-    decoder_pipeline: List[str] = Field(
+    input_options: List[str] = Field(
         default=[],
-        title="Set the hardware specific decoder. Example: ['rtph265depay', 'h265parse', 'omxh265dec']",
+        title="Add additional options to the rtspsrc or even ",
     )
-    source_format_pipeline: List[str] = Field(
+    video_format: Optional[str] = Field(
+        title="A video format of the camera stream. Can be video/x-h265, video/x-h264. If not set, Frigate will try to autodetect.",
+    )
+    audio_format: Optional[str] = Field(
+        title="An audio format of the camera stream for recording. Supported audio/mpeg and audio/x-alaw. If not set, Frigate will try to autodetect it.",
+    )
+    audio_pipeline: List[str] = Field(
         default=[],
-        title="Set the camera source format. Default is: ['video/x-raw,format=(string)NV12', 'videoconvert', 'videoscale']",
+        title="Custom audio pipeline. Example: rtppcmadepay, alawdec, audioconvert, avenc_aac",
+    )
+    record_pipeline: List[str] = Field(
+        default=[],
+        title="Custom pipeline for the recorder. by default it's h265parse or h264parse",
     )
 
 
@@ -394,17 +406,27 @@ class CameraFFmpegInput(CameraInput):
 
 
 class CameraGStreamerInput(CameraInput):
-    decoder_pipeline: List[str] = Field(
-        default=[],
-        title="Set the hardware specific decoder. Example: ['rtph265depay', 'h265parse', 'omxh265dec']",
-    )
-    source_format_pipeline: List[str] = Field(
-        default=[],
-        title="Set the camera source format. Default is: ['video/x-raw,format=(string)NV12', 'videoconvert', 'videoscale']",
-    )
     raw_pipeline: List[str] = Field(
         default=[],
         title="Override full pipeline. The pipeline should start with the arguments after the `gst-launch-1.0`, `-q`",
+    )
+    input_options: List[str] = Field(
+        default=[],
+        title="Add additional options to the rtspsrc or even ",
+    )
+    video_format: Optional[str] = Field(
+        title="A video format of the camera stream. Can be video/x-h265, video/x-h264. If not set, Frigate will try to autodetect.",
+    )
+    audio_format: Optional[str] = Field(
+        title="An audio format of the camera stream for recording. Supported audio/mpeg and audio/x-alaw. If not set, Frigate will try to autodetect it.",
+    )
+    audio_pipeline: List[str] = Field(
+        default=[],
+        title="Custom audio pipeline. Example: rtppcmadepay, alawdec, audioconvert, avenc_aac",
+    )
+    record_pipeline: List[str] = Field(
+        default=[],
+        title="Custom pipeline for the recorder. by default it's h265parse or h264parse",
     )
 
 
@@ -605,29 +627,20 @@ class CameraConfig(FrigateBaseModel):
                 )
         else:
             for input in self.gstreamer.inputs:
-                caps = (
-                    None
-                    if len(self.gstreamer.decoder_pipeline) > 0
-                    else gst_discover(input.path, ["width", "height", "video codec"])
-                )
-                gst_cmd = self._get_gstreamer_cmd(self.gstreamer, input, caps)
-                if gst_cmd is None:
-                    continue
-                logger.debug("gstreamer command[%s] %s", self.name, gst_cmd)
-
+                gst_cmd = self._get_gstreamer_cmd(self.gstreamer, input)
+                logger.error("gstreamer command[%s] %s", self.name, gst_cmd)
                 self._decoder_cmds.append({"roles": input.roles, "cmd": gst_cmd})
 
     def _get_gstreamer_cmd(
         self,
         base_config: GstreamerConfig,
         gstreamer_input: CameraGStreamerInput,
-        caps: Optional[Dict],
     ):
         if CameraRoleEnum.rtmp.value in gstreamer_input.roles:
             raise ValueError(
                 f"{CameraRoleEnum.rtmp.value} role does not supported for the GStreamer integration"
             )
-        if len(gstreamer_input.raw_pipeline) > 0:
+        if not empty_or_none(gstreamer_input.raw_pipeline):
             logger.warn("You are using raw pipeline for `%s` camera", self.name)
             pipeline_args = [
                 f"{item} !".split(" ")
@@ -637,28 +650,60 @@ class CameraConfig(FrigateBaseModel):
             pipeline_args = [item for sublist in pipeline_args for item in sublist]
             return ["gst-launch-1.0", "-q", *pipeline_args][:-1]
 
-        builder = GstreamerBuilder(
-            gstreamer_input.path, self.detect.width, self.detect.height, self.name
+        # Get camera configuration. Input congig override the camera config
+        input_options = (
+            base_config.input_options
+            if empty_or_none(gstreamer_input.input_options)
+            else gstreamer_input.input_options
         )
-
-        decoder_pipeline = (
-            gstreamer_input.decoder_pipeline
-            if len(gstreamer_input.decoder_pipeline) > 0
-            else base_config.decoder_pipeline
+        video_format = (
+            base_config.video_format
+            if empty_or_none(gstreamer_input.video_format)
+            else gstreamer_input.video_format
         )
-        decoder_pipeline = [part for part in decoder_pipeline if part != ""]
-        builder = builder.with_decoder_pipeline(decoder_pipeline, caps)
-
-        source_format_pipeline = (
-            gstreamer_input.source_format_pipeline
-            if len(gstreamer_input.source_format_pipeline) > 0
-            else base_config.source_format_pipeline
+        audio_format = (
+            base_config.audio_format
+            if empty_or_none(gstreamer_input.audio_format)
+            else gstreamer_input.audio_format
         )
-        source_format_pipeline = [part for part in source_format_pipeline if part != ""]
-        builder = builder.with_source_format_pipeline(source_format_pipeline)
+        audio_pipeline = (
+            base_config.audio_pipeline
+            if empty_or_none(gstreamer_input.audio_pipeline)
+            else gstreamer_input.audio_pipeline
+        )
+        record_pipeline = (
+            base_config.record_pipeline
+            if empty_or_none(gstreamer_input.record_pipeline)
+            else gstreamer_input.record_pipeline
+        )
 
         use_record = CameraRoleEnum.record.value in gstreamer_input.roles
         use_detect = CameraRoleEnum.detect.value in gstreamer_input.roles
+
+        # run gst_discover if no video format set or no audio format / pipeline set for recording role
+        run_gst_discover = empty_or_none(video_format)
+        if use_record:
+            if base_config.audio_format is None or empty_or_none(
+                base_config.audio_pipeline
+            ):
+                run_gst_discover = True
+
+        caps = {}
+        if run_gst_discover:
+            caps = gst_discover(
+                gstreamer_input.path, self.name, tuple(["width", "height", "video", "audio"])
+            )
+
+        builder = (
+            get_gstreamer_builder(self.detect.width, self.detect.height, self.name)
+            .with_source(gstreamer_input.path, input_options)
+            .with_video_format(video_format or caps.get("video"))
+            .with_record_pipeline(record_pipeline)
+        )
+        if audio_pipeline:
+            builder = builder.with_audio_pipeline(audio_pipeline)
+        else:
+            builder = builder.with_audio_format(audio_format or caps.get("audio"))
 
         return builder.build(use_detect, use_record)
 

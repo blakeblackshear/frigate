@@ -1,11 +1,9 @@
 from functools import lru_cache
-import functools
 import os
 import logging
 import traceback
-from abc import ABC
 import subprocess as sp
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from xmlrpc.client import Boolean
 
 from matplotlib.style import available
@@ -19,7 +17,7 @@ VIDEO_CODEC_CAP_NAME = "video codec"
 
 logger = logging.getLogger(__name__)
 
-
+@lru_cache
 def gst_discover(
     source: str, cam_name: str, keys: List[str]
 ) -> Optional[Dict[str, str]]:
@@ -78,10 +76,13 @@ def gst_inspect_find_codec(codec: Optional[str]) -> List[str]:
             start_new_session=True,
             stderr=None,
         )
-        return [
-            line.split(":")[1].strip()
+        data = [
+            line.split(":")
             for line in data.split("\n")
             if codec is None or codec in line
+        ]
+        return [
+            item[1].strip() for item in data if len(item) > 1
         ]
     except:
         logger.error(
@@ -97,7 +98,7 @@ DEPAYED_STREAM_NAME = "depayed_stream"
 
 AUDIO_PIPELINES = {
     "audio/mpeg": ["rtpmp4gdepay", "aacparse"],
-    "audio/x-alaw": ["rtppcmadepay", "alawdec", "audioconvert", "queue", "avenc_aac"],
+    "audio/x-alaw": ["rtppcmadepay", "alawdec", "audioconvert", "queue", "voaacenc"],
 }
 
 
@@ -108,7 +109,7 @@ class GstreamerBaseBuilder:
         self.name = name
         self.format = format
         self.input_pipeline = None
-        self.encoding_format = None
+        self.video_format = None
         self.record_pipeline = None
         self.audio_pipeline = None
         self.raw_pipeline = None
@@ -155,19 +156,24 @@ class GstreamerBaseBuilder:
         self.input_pipeline = self._to_array(f"{self.input_pipeline} {extra_options}")
         return self
 
-    def with_encoding_format(self, format: str):
+    def with_video_format(self, format: str):
         """
         set encoding format. Encoding format should be one of:
         h265, h264, h236, h261 or be like `video/x-h265`
         """
+        if not format:
+            return self
         format = format.lower().replace("video/x-", "")
-        self.encoding_format = format
+        self.video_format = format
         return self
 
     def with_audio_format(self, format):
         """
         set the audio format and make the audio_pipeline
         """
+        if not format:
+            return self
+
         if format in AUDIO_PIPELINES:
             self.audio_pipeline = AUDIO_PIPELINES.get(format)
         else:
@@ -181,7 +187,8 @@ class GstreamerBaseBuilder:
         If your camera has a different endcoding format which is not supported by the browser player,
         add the record_pipeline to decode and endode the video stream
         """
-        self.record_pipeline = pipeline
+        if pipeline:
+            self.record_pipeline = pipeline
         return self
 
     def with_audio_pipeline(self, pipeline):
@@ -212,17 +219,18 @@ class GstreamerBaseBuilder:
         )
 
         record_pipeline = (
-            [f"{self.encoding_format}parse"]
+            [f"{self.video_format}parse"]
             if self.record_pipeline is None
             else self.record_pipeline
         )
 
-        has_audio_pipeline = (
+        use_audio_pipeline = use_record and (
             self.audio_pipeline is not None and len(self.audio_pipeline) > 0
         )
 
         split_mux = f"splitmuxsink async-handling=true "
-        if has_audio_pipeline:
+
+        if use_audio_pipeline:
             split_mux = split_mux + "name=mux muxer=mp4mux "
         split_mux = split_mux + (
             f"location={os.path.join(CACHE_DIR, self.name)}{GSTREAMER_RECORD_SUFFIX}-%05d.mp4 "
@@ -230,7 +238,7 @@ class GstreamerBaseBuilder:
         )
 
         audio_pipeline = []
-        if has_audio_pipeline:
+        if use_audio_pipeline:
             # add the RTP stream after the splitmuxsink
             split_mux = f"{split_mux} {RTP_STREAM_NAME}."
             # add a queue after the rtp_stream. and mux.audio_0 as a receiver
@@ -269,11 +277,11 @@ class GstreamerBaseBuilder:
         """
         Build a pipeline based on the provided parameters
         """
-        if self.encoding_format is None or len(self.encoding_format) == 0:
+        if self.video_format is None or len(self.video_format) == 0:
             return self._build_gst_pipeline(
                 self._get_default_pipeline(), use_detect=True, use_record=False
             )
-        depay_element = f"rtp{self.encoding_format}depay"
+        depay_element = f"rtp{self.video_format}depay"
 
         pipeline = [*self.input_pipeline, depay_element]
         # if both detect and record used, split the stream after the depay element
@@ -328,7 +336,7 @@ class GstreamerNvidia(GstreamerBaseBuilder):
             "nvv4l2decoder enable-max-performance=true",
             "video/x-raw(memory:NVMM),format=NV12",
             "nvvidconv",
-            f"video/x-raw(memory:NVMM),width=(int){self.width},height=(int){self.height},format=(string){self.format}",
+            f"video/x-raw,width=(int){self.width},height=(int){self.height},format=(string){self.format}",
         ]
 
 
@@ -336,9 +344,9 @@ class GstreamerNvidia(GstreamerBaseBuilder):
 GSTREAMER_BUILDERS = [GstreamerNvidia, GstreamerBaseBuilder]
 
 
-def gstreamer_builder_factory() -> GstreamerBaseBuilder:
+def get_gstreamer_builder(width, height, name, format="I420") -> GstreamerBaseBuilder:
     available_plugins = gst_inspect_find_codec(codec=None)
     for builder in GSTREAMER_BUILDERS:
         if builder.accept(available_plugins):
-            return builder
+            return builder(width, height, name, format)
     return

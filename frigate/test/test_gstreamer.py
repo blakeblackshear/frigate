@@ -1,12 +1,10 @@
-from distutils.command.build import build
 from unittest import TestCase, main, mock
-from typing import Dict, List, Optional, Tuple
-from click import option
+from typing import List
 from frigate.gstreamer import (
     gst_discover,
     gst_inspect_find_codec,
     GstreamerBaseBuilder,
-    gstreamer_builder_factory,
+    get_gstreamer_builder,
 )
 
 
@@ -42,7 +40,7 @@ class TestGstTools(TestCase):
             result = gst_discover(
                 "path to stream",
                 "cam1",
-                ["width", "height", "video", "audio", "notinthelist"],
+                tuple(["width", "height", "video", "audio", "notinthelist"]),
             )
             assert result == {
                 "height": "480",
@@ -174,6 +172,14 @@ class TestGstreamerBaseBuilder(TestCase):
                 ],
             ),
             (
+                "rtsp://some/path4",
+                ["do-timestamp=true", "!", "rtpjitterbuffer", "do-lost=true"],
+                [
+                    'rtspsrc location="rtsp://some/path4" name=rtp_stream do-timestamp=true',
+                    "rtpjitterbuffer do-lost=true",
+                ],
+            ),
+            (
                 "rtmp://some/path",
                 None,
                 ['rtmpsrc location="rtmp://some/path" name=rtp_stream'],
@@ -201,8 +207,7 @@ class TestGstreamerBuilderFactory(TestCase):
         Since gst_inspect_find_codec return no plugins available, gstreamer_builder_factory should return
         base GstreamerBaseBuilder, which creates a `videotestsrc` pipeline
         """
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert self.build_detect_pipeline(builder) == [
             "gst-launch-1.0",
@@ -225,15 +230,14 @@ class TestGstreamerNvidia(TestCase):
     def build_detect_pipeline(self, builder: GstreamerBaseBuilder) -> List[str]:
         return builder.with_source(
             "rtsp://some/url", ["protocols=tcp", "latency=0", "do-timestamp=true"]
-        ).with_encoding_format("h264")
+        ).with_video_format("h264")
 
     @mock.patch(
         "frigate.gstreamer.gst_inspect_find_codec",
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
     def test_detect(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert self.build_detect_pipeline(builder).build(
             use_detect=True, use_record=False
@@ -256,7 +260,7 @@ class TestGstreamerNvidia(TestCase):
             "!",
             "nvvidconv",
             "!",
-            "video/x-raw(memory:NVMM),width=(int)320,height=(int)240,format=(string)I420",
+            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
             "!",
             "fdsink",
         ]
@@ -266,8 +270,7 @@ class TestGstreamerNvidia(TestCase):
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
     def test_detect_record(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert self.build_detect_pipeline(builder).build(
             use_detect=True, use_record=True
@@ -295,7 +298,7 @@ class TestGstreamerNvidia(TestCase):
             "!",
             "nvvidconv",
             "!",
-            "video/x-raw(memory:NVMM),width=(int)320,height=(int)240,format=(string)I420",
+            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
             "!",
             "fdsink",
             "depayed_stream.",
@@ -315,8 +318,7 @@ class TestGstreamerNvidia(TestCase):
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
     def test_record_only(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert self.build_detect_pipeline(builder).build(
             use_detect=False, use_record=True
@@ -347,10 +349,9 @@ class TestGstreamerNvidia(TestCase):
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
     def test_detect_record_audio(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
-        assert self.build_detect_pipeline(builder).with_encoding_format(
+        assert self.build_detect_pipeline(builder).with_video_format(
             "video/x-h265"
         ).with_audio_pipeline(
             ["rtppcmadepay", "alawdec", "audioconvert", "queue", "avenc_aac"]
@@ -380,7 +381,7 @@ class TestGstreamerNvidia(TestCase):
             "!",
             "nvvidconv",
             "!",
-            "video/x-raw(memory:NVMM),width=(int)320,height=(int)240,format=(string)I420",
+            "video/x-raw,width=(int)320,height=(int)240,format=(string)I420",
             "!",
             "fdsink",
             "depayed_stream.",
@@ -417,8 +418,7 @@ class TestGstreamerNvidia(TestCase):
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
     def test_detect_record_audio_by_format(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert self.build_detect_pipeline(builder).with_audio_format(
             "audio/mpeg"
@@ -460,8 +460,7 @@ class TestGstreamerNvidia(TestCase):
         return_value=[],
     )
     def test_raw_pipeline(self, mock_find_codec):
-        GstreamerBuilder = gstreamer_builder_factory()
-        builder = GstreamerBuilder(320, 240, "cam_name")
+        builder = get_gstreamer_builder(320, 240, "cam_name")
         mock_find_codec.assert_called_with(codec=None)
         assert builder.with_raw_pipeline(["videotestsrc", "autovideosink"]).build(
             use_detect=True, use_record=True

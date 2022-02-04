@@ -533,6 +533,13 @@ def clipped(obj, frame_shape):
     else:
         return False
 
+def empty_or_none(obj) -> bool:
+    if obj is None:
+        return True
+    if len(obj) == 0:
+        return True
+    return False
+
 
 def restart_frigate():
     proc = psutil.Process(1)

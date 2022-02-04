@@ -1244,6 +1244,114 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].snapshots.retain.default == 1.5
 
+    @unittest.mock.patch(
+        "frigate.config.gst_discover",
+        return_value={"video": "video/x-h265"},
+    )
+    @unittest.mock.patch(
+        "frigate.gstreamer.gst_inspect_find_codec",
+        return_value=["nvv4l2decoder", "nvvidconv"],
+    )
+    def test_gstreamer_params_camera_gstautodetect_detect(
+        self, mock_find_codec, mock_gst_discover
+    ):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "gstreamer": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                                "input_options": ["protocols=tcp"],
+                            }
+                        ],
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "objects": {
+                        "track": ["person", "dog"],
+                        "filters": {"dog": {"threshold": 0.7}},
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+
+        mock_find_codec.assert_called_with(codec=None)
+        mock_gst_discover.assert_called_with(
+            "rtsp://10.0.0.1:554/video", "back", ("width", "height", "video", "audio")
+        )
+
+        assert "nvv4l2decoder" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert (
+            "video/x-raw,width=(int)1920,height=(int)1080,format=(string)I420"
+            in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        )
+        # custom rtspsrc arguments
+        assert "protocols=tcp" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+
+    @unittest.mock.patch(
+        "frigate.config.gst_discover",
+        side_effect=Exception("should not call gst_discover"),
+    )
+    @unittest.mock.patch(
+        "frigate.gstreamer.gst_inspect_find_codec",
+        return_value=["nvv4l2decoder", "nvvidconv"],
+    )
+    def test_gstreamer_params_camera_gstautodetect_detect(
+        self, mock_find_codec, mock_gst_discover
+    ):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "rtmp": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "gstreamer": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                                "video_format": "video/x-h265",
+                            }
+                        ],
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "objects": {
+                        "track": ["person", "dog"],
+                        "filters": {"dog": {"threshold": 0.7}},
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+
+        mock_find_codec.assert_called_with(codec=None)
+        mock_gst_discover.assert_not_called()
+
+        assert "nvv4l2decoder" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        assert (
+            "video/x-raw,width=(int)1920,height=(int)1080,format=(string)I420"
+            in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+        )
+        # default rtspsrc arguments
+        assert "latency=0" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
