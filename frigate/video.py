@@ -3,6 +3,7 @@ import itertools
 import logging
 import multiprocessing as mp
 import queue
+import random
 import signal
 import subprocess as sp
 import threading
@@ -532,13 +533,23 @@ def process_frames(
         region_min_size = max(model_shape[0], model_shape[1])
         # compute regions
         regions = [
-            calculate_region(frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.2)
+            calculate_region(
+                frame_shape,
+                a[0],
+                a[1],
+                a[2],
+                a[3],
+                region_min_size,
+                multiplier=random.uniform(1.2, 1.5),
+            )
             for a in combined_boxes
         ]
 
         # consolidate regions with heavy overlap
         regions = [
-            calculate_region(frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.0)
+            calculate_region(
+                frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.0
+            )
             for a in reduce_boxes(regions, 0.4)
         ]
 
