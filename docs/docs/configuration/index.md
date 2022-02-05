@@ -268,7 +268,7 @@ record:
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
-      mode: active_objects
+      mode: motion
       # Optional: Per object retention days
       objects:
         person: 15
