@@ -30,6 +30,7 @@ class ObjectTracker:
         obj["id"] = id
         obj["start_time"] = obj["frame_time"]
         obj["motionless_count"] = 0
+        obj["position_changes"] = 0
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
         self.positions[id] = {
@@ -100,6 +101,7 @@ class ObjectTracker:
             self.tracked_objects[id]["motionless_count"] += 1
         else:
             self.tracked_objects[id]["motionless_count"] = 0
+            self.tracked_objects[id]["position_changes"] += 1
         self.tracked_objects[id].update(new_obj)
 
     def match_and_update(self, frame_time, new_objects):

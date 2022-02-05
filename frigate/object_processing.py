@@ -178,6 +178,7 @@ class TrackedObject:
             "area": self.obj_data["area"],
             "region": self.obj_data["region"],
             "motionless_count": self.obj_data["motionless_count"],
+            "position_changes": self.obj_data["position_changes"],
             "current_zones": self.current_zones.copy(),
             "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
@@ -266,7 +267,13 @@ class TrackedObject:
             box = self.thumbnail_data["box"]
             box_size = 300
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
+                best_frame.shape,
+                box[0],
+                box[1],
+                box[2],
+                box[3],
+                box_size,
+                multiplier=1.1,
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
@@ -732,6 +739,10 @@ class TrackedObjectProcessor(threading.Thread):
         if not snapshot_config.enabled:
             return False
 
+        # object never changed position
+        if obj.obj_data["position_changes"] == 0:
+            return False
+
         # if there are required zones and there is no overlap
         required_zones = snapshot_config.required_zones
         if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
@@ -750,6 +761,10 @@ class TrackedObjectProcessor(threading.Thread):
 
         # Recording is disabled
         if not record_config.enabled:
+            return False
+
+        # object never changed position
+        if obj.obj_data["position_changes"] == 0:
             return False
 
         # If there are required zones and there is no overlap
@@ -773,6 +788,10 @@ class TrackedObjectProcessor(threading.Thread):
         return True
 
     def should_mqtt_snapshot(self, camera, obj: TrackedObject):
+        # object never changed position
+        if obj.obj_data["position_changes"] == 0:
+            return False
+
         # if there are required zones and there is no overlap
         required_zones = self.config.cameras[camera].mqtt.required_zones
         if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
