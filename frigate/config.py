@@ -476,7 +476,7 @@ class CameraLiveConfig(FrigateBaseModel):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_]+$")
+    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
