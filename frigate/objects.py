@@ -52,22 +52,21 @@ class ObjectTracker:
     # returns False if the object has moved outside its previous position
     def update_position(self, id, box):
         position = self.positions[id]
+        position_box = (
+            position["xmin"],
+            position["ymin"],
+            position["xmax"],
+            position["ymax"],
+        )
+
         xmin, ymin, xmax, ymax = box
 
-        # get the centroid
-        x = (xmax + xmin) / 2
-        y = (ymax + ymin) / 2
+        iou = intersection_over_union(position_box, box)
 
-        # if the centroid of this box is outside the computed bounding box
+        # if the iou drops below the threshold
         # assume the object has moved to a new position and reset the computed box
-        # TODO: should this only happen if there are a few boxes?
-        if (
-            x < position["xmin"]
-            or x > position["xmax"]
-            or y < position["ymin"]
-            or y > position["ymax"]
-        ):
-            position = {
+        if iou < 0.6:
+            self.positions[id] = {
                 "xmins": [xmin],
                 "ymins": [ymin],
                 "xmaxs": [xmax],
