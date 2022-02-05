@@ -470,6 +470,8 @@ def process_frames(
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
 
+    startup_scan_counter = 0
+
     while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
             logger.info(f"Exiting track_objects...")
@@ -552,6 +554,19 @@ def process_frames(
             )
             for a in reduce_boxes(regions, 0.4)
         ]
+
+        # if starting up, get the next startup scan region
+        if startup_scan_counter < 9 and len(regions) == 0:
+            ymin = int(frame_shape[0] / 3 * startup_scan_counter / 3)
+            ymax = int(frame_shape[0] / 3 + ymin)
+            xmin = int(frame_shape[1] / 3 * startup_scan_counter / 3)
+            xmax = int(frame_shape[1] / 3 + xmin)
+            regions.append(
+                calculate_region(
+                    frame_shape, xmin, ymin, xmax, ymax, region_min_size, multiplier=1.2
+                )
+            )
+            startup_scan_counter += 1
 
         # resize regions and detect
         # seed with stationary objects
