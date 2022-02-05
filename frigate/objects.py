@@ -103,6 +103,10 @@ class ObjectTracker:
             self.tracked_objects[id]["position_changes"] += 1
         self.tracked_objects[id].update(new_obj)
 
+    def update_frame_times(self, frame_time):
+        for id in self.tracked_objects.keys():
+            self.tracked_objects[id]["frame_time"] = frame_time
+
     def match_and_update(self, frame_time, new_objects):
         # group by name
         new_object_groups = defaultdict(lambda: [])
