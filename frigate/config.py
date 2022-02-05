@@ -171,8 +171,9 @@ class DetectConfig(FrigateBaseModel):
         title="Maximum number of frames the object can dissapear before detection ends."
     )
     stationary_interval: Optional[int] = Field(
+        default=0,
         title="Frame interval for checking stationary objects.",
-        ge=1,
+        ge=0,
     )
 
 
@@ -762,11 +763,6 @@ class FrigateConfig(FrigateBaseModel):
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
-
-            # Default stationary_interval configuration
-            stationary_interval = camera_config.detect.fps * 10
-            if camera_config.detect.stationary_interval is None:
-                camera_config.detect.stationary_interval = stationary_interval
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
