@@ -559,7 +559,7 @@ def process_frames(
         ]
 
         # if starting up, get the next startup scan region
-        if startup_scan_counter < 9 and len(regions) == 0:
+        if startup_scan_counter < 9:
             ymin = int(frame_shape[0] / 3 * startup_scan_counter / 3)
             ymax = int(frame_shape[0] / 3 + ymin)
             xmin = int(frame_shape[1] / 3 * startup_scan_counter / 3)
