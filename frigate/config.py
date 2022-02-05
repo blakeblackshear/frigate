@@ -103,6 +103,10 @@ class RecordRetainConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    expire_interval: int = Field(
+        default=60,
+        title="Number of minutes to wait between cleanup runs.",
+    )
     # deprecated - to be removed in a future version
     retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
