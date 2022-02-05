@@ -515,7 +515,10 @@ def process_frames(
             # if there hasn't been motion for 10 frames
             if obj["motionless_count"] >= 10
             # and it isn't due for a periodic check
-            and obj["motionless_count"] % detect_config.stationary_interval != 0
+            and (
+                detect_config.stationary_interval == 0
+                or obj["motionless_count"] % detect_config.stationary_interval != 0
+            )
             # and it hasn't disappeared
             and object_tracker.disappeared[obj["id"]] == 0
             # and it doesn't overlap with any current motion boxes
