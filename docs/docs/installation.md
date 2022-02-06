@@ -177,6 +177,15 @@ HassOS users can install via the addon repository.
 6. Start the addon container
 7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
 
+There are several versions of the addon available:
+
+| Addon Version                  | Description                                                |
+| ------------------------------ | ---------------------------------------------------------- |
+| Frigate NVR                    | Current release with protection mode on                    |
+| Frigate NVR (Full Access)      | Current release with the option to disable protection mode |
+| Frigate NVR Beta               | Beta release with protection mode on                       |
+| Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
+
 ## Home Assistant Supervised
 
 :::tip
