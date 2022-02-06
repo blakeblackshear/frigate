@@ -497,7 +497,8 @@ class RecordingCleanup(threading.Thread):
             oldest_timestamp = datetime.datetime.now().timestamp()
         except FileNotFoundError:
             logger.warning(f"Unable to find file from recordings database: {p}")
-            oldest_timestamp = datetime.datetime.now().timestamp()
+            Recordings.delete().where(Recordings.id == oldest_recording.id).execute()
+            return
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
@@ -548,7 +549,7 @@ class RecordingCleanup(threading.Thread):
         # self.sync_recordings()
 
         # Expire tmp clips every minute, recordings and clean directories every hour.
-        for counter in itertools.cycle(range(60)):
+        for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):
                 logger.info(f"Exiting recording cleanup...")
                 break

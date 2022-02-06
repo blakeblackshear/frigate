@@ -159,8 +159,9 @@ detect:
   enabled: True
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
-  # Optional: Frequency for running detection on stationary objects (default: 10x the frame rate)
-  stationary_interval: 50
+  # Optional: Frequency for running detection on stationary objects (default: 0)
+  # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
+  stationary_interval: 0
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
@@ -224,6 +225,9 @@ motion:
 record:
   # Optional: Enable recording (default: shown below)
   enabled: False
+  # Optional: Number of minutes to wait between cleanup runs (default: shown below)
+  # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
+  expire_interval: 60
   # Optional: Retention settings for recording
   retain:
     # Optional: Number of days to retain recordings regardless of events (default: shown below)
@@ -264,7 +268,7 @@ record:
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
-      mode: active_objects
+      mode: motion
       # Optional: Per object retention days
       objects:
         person: 15

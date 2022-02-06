@@ -72,9 +72,7 @@ class RetainModeEnum(str, Enum):
 
 class RetainConfig(FrigateBaseModel):
     default: float = Field(default=10, title="Default retention period.")
-    mode: RetainModeEnum = Field(
-        default=RetainModeEnum.active_objects, title="Retain mode."
-    )
+    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
     objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
     )
@@ -103,6 +101,10 @@ class RecordRetainConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    expire_interval: int = Field(
+        default=60,
+        title="Number of minutes to wait between cleanup runs.",
+    )
     # deprecated - to be removed in a future version
     retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
@@ -171,8 +173,9 @@ class DetectConfig(FrigateBaseModel):
         title="Maximum number of frames the object can dissapear before detection ends."
     )
     stationary_interval: Optional[int] = Field(
+        default=0,
         title="Frame interval for checking stationary objects.",
-        ge=1,
+        ge=0,
     )
 
 
@@ -473,7 +476,7 @@ class CameraLiveConfig(FrigateBaseModel):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(title="Camera name.")
+    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -762,11 +765,6 @@ class FrigateConfig(FrigateBaseModel):
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
-
-            # Default stationary_interval configuration
-            stationary_interval = camera_config.detect.fps * 10
-            if camera_config.detect.stationary_interval is None:
-                camera_config.detect.stationary_interval = stationary_interval
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
