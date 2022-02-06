@@ -45,11 +45,14 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the following parameters:
+When configuring the integration, you will be asked for the `URL` of your frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using:
 
-| Variable | Description                                                                                                                                                                                                                                                                                                                                                                      |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| URL      | The `URL` of your frigate instance, the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be `http://ccab4aaf-frigate:5000` (or `http://ccab4aaf-frigate-beta:5000` if your are using the beta version of the addon). Live streams required port 1935, see [RTMP streams](#streams) |
+| Addon Version                  | URL                                    |
+| ------------------------------ | -------------------------------------- |
+| Frigate NVR                    | `http://ccab4aaf-frigate:5000`         |
+| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`      |
+| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`    |
+| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
 
 <a name="options"></a>
 
