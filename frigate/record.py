@@ -285,6 +285,7 @@ class RecordingMaintainer(threading.Thread):
                 end_time=end_time.timestamp(),
                 duration=duration,
                 motion=motion_count,
+                # TODO: update this to store list of active objects at some point
                 objects=active_count,
             )
         except Exception as e:
