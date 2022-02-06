@@ -153,10 +153,10 @@ def capture_frames(
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except Exception as e:
-            logger.info(f"{camera_name}: ffmpeg sent a broken frame. {e}")
+            logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() != None:
-                logger.info(
+                logger.error(
                     f"{camera_name}: ffmpeg process is not running. exiting capture thread..."
                 )
                 frame_manager.delete(frame_name)
@@ -221,12 +221,11 @@ class CameraWatchdog(threading.Thread):
 
             if not self.capture_thread.is_alive():
                 self.logger.error(
-                    f"FFMPEG process crashed unexpectedly for {self.camera_name}."
+                    f"Ffmpeg process crashed unexpectedly for {self.camera_name}."
                 )
                 self.logger.error(
                     "The following ffmpeg logs include the last 100 lines prior to exit."
                 )
-                self.logger.error("You may have invalid args defined for this camera.")
                 self.logpipe.dump()
                 self.start_ffmpeg_detect()
             elif now - self.capture_thread.current_frame.value > 20:
