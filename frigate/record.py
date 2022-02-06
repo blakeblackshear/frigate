@@ -230,7 +230,7 @@ class RecordingMaintainer(threading.Thread):
                 [
                     o
                     for o in frame[1]
-                    if not o["false_positive"] and o["motionless_count"] > 0
+                    if not o["false_positive"] and o["motionless_count"] == 0
                 ]
             )
 
