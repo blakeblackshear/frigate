@@ -567,6 +567,9 @@ class EventsPerSecond:
         # compute the (approximate) events in the last n seconds
         now = datetime.datetime.now().timestamp()
         seconds = min(now - self._start, last_n_seconds)
+        # avoid divide by zero
+        if seconds == 0:
+            seconds = 1
         return (
             len([t for t in self._timestamps if t > (now - last_n_seconds)]) / seconds
         )
@@ -601,6 +604,7 @@ def add_mask(mask, mask_img):
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
+
 def load_labels(path, encoding="utf-8"):
     """Loads labels from file (with or without index numbers).
     Args:
@@ -619,6 +623,7 @@ def load_labels(path, encoding="utf-8"):
             return {int(index): label.strip() for index, label in pairs}
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
+
 
 class FrameManager(ABC):
     @abstractmethod
