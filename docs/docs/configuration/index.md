@@ -386,7 +386,7 @@ cameras:
       #       camera.
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
-        # NOTE: Coordinates can be generated at https://www.image-map.net/
+        # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 545,1077,747,939,788,805
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
