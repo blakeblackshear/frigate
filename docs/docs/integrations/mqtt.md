@@ -55,7 +55,9 @@ Message published for each changed event. The first message is published when th
     "entered_zones": ["yard", "driveway"],
     "thumbnail": null,
     "has_snapshot": false,
-    "has_clip": false
+    "has_clip": false,
+    "motionless_count": 0, // number of frames the object has been motionless
+    "position_changes": 2 // number of times the object has changed position
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -75,7 +77,9 @@ Message published for each changed event. The first message is published when th
     "entered_zones": ["yard", "driveway"],
     "thumbnail": null,
     "has_snapshot": false,
-    "has_clip": false
+    "has_clip": false,
+    "motionless_count": 0, // number of frames the object has been motionless
+    "position_changes": 2 // number of times the object has changed position
   }
 }
 ```
