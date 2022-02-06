@@ -230,7 +230,7 @@ class RecordingMaintainer(threading.Thread):
                 [
                     o
                     for o in frame[1]
-                    if not o["false_positive"] and o["motionless_count"] > 0
+                    if not o["false_positive"] and o["motionless_count"] == 0
                 ]
             )
 
@@ -285,6 +285,7 @@ class RecordingMaintainer(threading.Thread):
                 end_time=end_time.timestamp(),
                 duration=duration,
                 motion=motion_count,
+                # TODO: update this to store list of active objects at some point
                 objects=active_count,
             )
         except Exception as e:

@@ -836,14 +836,18 @@ class FrigateConfig(FrigateBaseModel):
                     camera_config.record.retain.days = camera_config.record.retain_days
 
             # warning if the higher level record mode is potentially more restrictive than the events
+            rank_map = {
+                RetainModeEnum.all: 0,
+                RetainModeEnum.motion: 1,
+                RetainModeEnum.active_objects: 2,
+            }
             if (
                 camera_config.record.retain.days != 0
-                and camera_config.record.retain.mode != RetainModeEnum.all
-                and camera_config.record.events.retain.mode
-                != camera_config.record.retain.mode
+                and rank_map[camera_config.record.retain.mode]
+                > rank_map[camera_config.record.events.retain.mode]
             ):
                 logger.warning(
-                    f"Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+                    f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
                 )
             # generage the ffmpeg commands
             camera_config.create_ffmpeg_cmds()

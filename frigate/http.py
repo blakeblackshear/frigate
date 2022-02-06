@@ -398,7 +398,13 @@ def best(camera_name, label):
             box_size = 300
             box = best_object.get("box", (0, 0, box_size, box_size))
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
+                best_frame.shape,
+                box[0],
+                box[1],
+                box[2],
+                box[3],
+                box_size,
+                multiplier=1.1,
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
@@ -745,7 +751,15 @@ def vod_event(id):
         end_ts = (
             datetime.now().timestamp() if event.end_time is None else event.end_time
         )
-        return vod_ts(event.camera, event.start_time, end_ts)
+        vod_response = vod_ts(event.camera, event.start_time, end_ts)
+        # If the recordings are not found, set has_clip to false
+        if (
+            type(vod_response) == tuple
+            and len(vod_response) == 2
+            and vod_response[1] == 404
+        ):
+            Event.update(has_clip=False).where(Event.id == id).execute()
+        return vod_response
 
     duration = int((event.end_time - event.start_time) * 1000)
     return jsonify(

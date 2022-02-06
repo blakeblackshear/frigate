@@ -106,6 +106,7 @@ class ObjectTracker:
     def update_frame_times(self, frame_time):
         for id in self.tracked_objects.keys():
             self.tracked_objects[id]["frame_time"] = frame_time
+            self.tracked_objects[id]["motionless_count"] += 1
 
     def match_and_update(self, frame_time, new_objects):
         # group by name
