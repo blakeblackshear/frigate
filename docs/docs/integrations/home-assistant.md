@@ -45,7 +45,7 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the `URL` of your frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using:
+When configuring the integration, you will be asked for the `URL` of your frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access frigate directly from your network.
 
 | Addon Version                  | URL                                    |
 | ------------------------------ | -------------------------------------- |
