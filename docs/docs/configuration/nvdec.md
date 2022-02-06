@@ -97,15 +97,3 @@ processes:
 |    0   N/A  N/A     12827      C   ffmpeg                            417MiB |
 +-----------------------------------------------------------------------------+
 ```
-
-To further improve performance, you can set ffmpeg to skip frames in the output,
-using the fps filter:
-
-```yaml
-output_args:
-  - -filter:v
-  - fps=fps=5
-```
-
-This setting, for example, allows Frigate to consume my 10-15fps camera streams on
-my relatively low powered Haswell machine with relatively low cpu usage.
