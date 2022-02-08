@@ -177,6 +177,11 @@ class DetectConfig(FrigateBaseModel):
         title="Frame interval for checking stationary objects.",
         ge=0,
     )
+    stationary_threshold: Optional[int] = Field(
+        default=10,
+        title="Number of frames without a position change for an object to be considered stationary",
+        ge=1,
+    )
 
 
 class FilterConfig(FrigateBaseModel):
