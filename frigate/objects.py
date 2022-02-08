@@ -48,7 +48,7 @@ class ObjectTracker:
         del self.tracked_objects[id]
         del self.disappeared[id]
 
-    # tracks the current position of the object based on the last 10 bounding boxes
+    # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
     def update_position(self, id, box):
         position = self.positions[id]
@@ -78,9 +78,9 @@ class ObjectTracker:
             }
             return False
 
-        # if there are less than 10 entries for the position, add the bounding box
+        # if there are less than stationary_threshold entries for the position, add the bounding box
         # and recompute the position box
-        if len(position["xmins"]) < 10:
+        if len(position["xmins"]) < self.detect_config.stationary_threshold:
             position["xmins"].append(xmin)
             position["ymins"].append(ymin)
             position["xmaxs"].append(xmax)

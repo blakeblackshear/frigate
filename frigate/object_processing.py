@@ -101,14 +101,13 @@ class TrackedObject:
         return median(scores)
 
     def update(self, current_frame_time, obj_data):
-        significant_update = False
-        zone_change = False
-        self.obj_data.update(obj_data)
+        thumb_update = False
+        significant_change = False
         # if the object is not in the current frame, add a 0.0 to the score history
-        if self.obj_data["frame_time"] != current_frame_time:
+        if obj_data["frame_time"] != current_frame_time:
             self.score_history.append(0.0)
         else:
-            self.score_history.append(self.obj_data["score"])
+            self.score_history.append(obj_data["score"])
         # only keep the last 10 scores
         if len(self.score_history) > 10:
             self.score_history = self.score_history[-10:]
@@ -122,24 +121,24 @@ class TrackedObject:
         if not self.false_positive:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.thumbnail_data, self.obj_data, self.camera_config.frame_shape
+                self.thumbnail_data, obj_data, self.camera_config.frame_shape
             ):
                 self.thumbnail_data = {
-                    "frame_time": self.obj_data["frame_time"],
-                    "box": self.obj_data["box"],
-                    "area": self.obj_data["area"],
-                    "region": self.obj_data["region"],
-                    "score": self.obj_data["score"],
+                    "frame_time": obj_data["frame_time"],
+                    "box": obj_data["box"],
+                    "area": obj_data["area"],
+                    "region": obj_data["region"],
+                    "score": obj_data["score"],
                 }
-                significant_update = True
+                thumb_update = True
 
         # check zones
         current_zones = []
-        bottom_center = (self.obj_data["centroid"][0], self.obj_data["box"][3])
+        bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
         # check each zone
         for name, zone in self.camera_config.zones.items():
             # if the zone is not for this object type, skip
-            if len(zone.objects) > 0 and not self.obj_data["label"] in zone.objects:
+            if len(zone.objects) > 0 and not obj_data["label"] in zone.objects:
                 continue
             contour = zone.contour
             # check if the object is in the zone
@@ -150,12 +149,25 @@ class TrackedObject:
                     if name not in self.entered_zones:
                         self.entered_zones.append(name)
 
-        # if the zones changed, signal an update
-        if not self.false_positive and set(self.current_zones) != set(current_zones):
-            zone_change = True
+        if not self.false_positive:
+            # if the zones changed, signal an update
+            if set(self.current_zones) != set(current_zones):
+                significant_change = True
 
+            # if the position changed, signal an update
+            if self.obj_data["position_changes"] != obj_data["position_changes"]:
+                significant_change = True
+
+            # if the motionless_count crosses the stationary threshold
+            if (
+                self.obj_data["motionless_count"]
+                > self.camera_config.detect.stationary_threshold
+            ):
+                significant_change = True
+
+        self.obj_data.update(obj_data)
         self.current_zones = current_zones
-        return (significant_update, zone_change)
+        return (thumb_update, significant_change)
 
     def to_dict(self, include_thumbnail: bool = False):
         snapshot_time = (
@@ -466,11 +478,11 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            significant_update, zone_change = updated_obj.update(
+            thumb_update, significant_update = updated_obj.update(
                 frame_time, current_detections[id]
             )
 
-            if significant_update:
+            if thumb_update:
                 # ensure this frame is stored in the cache
                 if (
                     updated_obj.thumbnail_data["frame_time"] == frame_time
@@ -480,13 +492,13 @@ class CameraState:
 
                 updated_obj.last_updated = frame_time
 
-            # if it has been more than 5 seconds since the last publish
+            # if it has been more than 5 seconds since the last thumb update
             # and the last update is greater than the last publish or
-            # the object has changed zones
+            # the object has changed significantly
             if (
                 frame_time - updated_obj.last_published > 5
                 and updated_obj.last_updated > updated_obj.last_published
-            ) or zone_change:
+            ) or significant_update:
                 # call event handlers
                 for c in self.callbacks["update"]:
                     c(self.name, updated_obj, frame_time)

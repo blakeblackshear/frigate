@@ -15,6 +15,16 @@ from frigate.models import Event
 logger = logging.getLogger(__name__)
 
 
+def should_update_db(prev_event, current_event):
+    return (
+        prev_event["top_score"] != current_event["top_score"]
+        or prev_event["entered_zones"] != current_event["entered_zones"]
+        or prev_event["thumbnail"] != current_event["thumbnail"]
+        or prev_event["has_clip"] != current_event["has_clip"]
+        or prev_event["has_snapshot"] != current_event["has_snapshot"]
+    )
+
+
 class EventProcessor(threading.Thread):
     def __init__(
         self, config, camera_processes, event_queue, event_processed_queue, stop_event
@@ -48,7 +58,9 @@ class EventProcessor(threading.Thread):
             if event_type == "start":
                 self.events_in_process[event_data["id"]] = event_data
 
-            elif event_type == "update":
+            elif event_type == "update" and should_update_db(
+                self.events_in_process[event_data["id"]], event_data
+            ):
                 self.events_in_process[event_data["id"]] = event_data
                 # TODO: this will generate a lot of db activity possibly
                 if event_data["has_clip"] or event_data["has_snapshot"]:
