@@ -155,7 +155,14 @@ class TrackedObject:
                 significant_change = True
 
             # if the position changed, signal an update
-            if not self.obj_data["position_changes"] != obj_data["position_changes"]:
+            if self.obj_data["position_changes"] != obj_data["position_changes"]:
+                significant_change = True
+
+            # if the motionless_count crosses the stationary threshold
+            if (
+                self.obj_data["motionless_count"]
+                > self.camera_config.detect.stationary_threshold
+            ):
                 significant_change = True
 
         self.obj_data.update(obj_data)
