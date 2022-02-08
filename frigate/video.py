@@ -507,8 +507,8 @@ def process_frames(
             stationary_object_ids = [
                 obj["id"]
                 for obj in object_tracker.tracked_objects.values()
-                # if there hasn't been motion for 10 frames
-                if obj["motionless_count"] >= 10
+                # if there hasn't been motion for N frames
+                if obj["motionless_count"] >= detect_config.stationary_threshold
                 # and it isn't due for a periodic check
                 and (
                     detect_config.stationary_interval == 0
