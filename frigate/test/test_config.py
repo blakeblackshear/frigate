@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 import numpy as np
 from pydantic import ValidationError
 from frigate.config import (
@@ -1244,11 +1245,11 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].snapshots.retain.default == 1.5
 
-    @unittest.mock.patch(
+    @mock.patch(
         "frigate.config.gst_discover",
         return_value={"video": "video/x-h265"},
     )
-    @unittest.mock.patch(
+    @mock.patch(
         "frigate.gstreamer.gst_inspect_find_codec",
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
@@ -1299,11 +1300,11 @@ class TestConfig(unittest.TestCase):
         # custom rtspsrc arguments
         assert "protocols=tcp" in runtime_config.cameras["back"].decoder_cmds[0]["cmd"]
 
-    @unittest.mock.patch(
+    @mock.patch(
         "frigate.config.gst_discover",
         side_effect=Exception("should not call gst_discover"),
     )
-    @unittest.mock.patch(
+    @mock.patch(
         "frigate.gstreamer.gst_inspect_find_codec",
         return_value=["nvv4l2decoder", "nvvidconv"],
     )
