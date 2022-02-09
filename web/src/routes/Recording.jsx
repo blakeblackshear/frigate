@@ -64,6 +64,9 @@ export default function Recording({ camera, date, hour, seconds }) {
       this.player.playlist.currentItem(selectedHour);
       if (seconds !== undefined) {
         this.player.currentTime(seconds);
+        // Force playback rate to be correct
+        const playbackRate = this.player.playbackRate();
+        this.player.defaultPlaybackRate(playbackRate);
       }
     }
   }

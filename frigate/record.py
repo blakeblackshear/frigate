@@ -242,7 +242,7 @@ class RecordingMaintainer(threading.Thread):
                 [
                     o
                     for o in frame[1]
-                    if not o["false_positive"] and o["motionless_count"] > 0
+                    if not o["false_positive"] and o["motionless_count"] == 0
                 ]
             )
 
@@ -297,6 +297,7 @@ class RecordingMaintainer(threading.Thread):
                 end_time=end_time.timestamp(),
                 duration=duration,
                 motion=motion_count,
+                # TODO: update this to store list of active objects at some point
                 objects=active_count,
             )
         except Exception as e:
@@ -509,7 +510,8 @@ class RecordingCleanup(threading.Thread):
             oldest_timestamp = datetime.datetime.now().timestamp()
         except FileNotFoundError:
             logger.warning(f"Unable to find file from recordings database: {p}")
-            oldest_timestamp = datetime.datetime.now().timestamp()
+            Recordings.delete().where(Recordings.id == oldest_recording.id).execute()
+            return
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
         process = sp.run(
@@ -560,7 +562,7 @@ class RecordingCleanup(threading.Thread):
         # self.sync_recordings()
 
         # Expire tmp clips every minute, recordings and clean directories every hour.
-        for counter in itertools.cycle(range(60)):
+        for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):
                 logger.info(f"Exiting recording cleanup...")
                 break

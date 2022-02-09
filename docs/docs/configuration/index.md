@@ -159,8 +159,11 @@ detect:
   enabled: True
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
-  # Optional: Frequency for running detection on stationary objects (default: 10x the frame rate)
-  stationary_interval: 50
+  # Optional: Frequency for running detection on stationary objects (default: shown below)
+  # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
+  stationary_interval: 0
+  # Optional: Number of frames without a position change for an object to be considered stationary (default: shown below)
+  stationary_threshold: 10
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
@@ -224,6 +227,9 @@ motion:
 record:
   # Optional: Enable recording (default: shown below)
   enabled: False
+  # Optional: Number of minutes to wait between cleanup runs (default: shown below)
+  # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
+  expire_interval: 60
   # Optional: Retention settings for recording
   retain:
     # Optional: Number of days to retain recordings regardless of events (default: shown below)
@@ -264,7 +270,7 @@ record:
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
-      mode: active_objects
+      mode: motion
       # Optional: Per object retention days
       objects:
         person: 15
@@ -377,7 +383,7 @@ cameras:
       #       camera.
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
-        # NOTE: Coordinates can be generated at https://www.image-map.net/
+        # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 545,1077,747,939,788,805
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
