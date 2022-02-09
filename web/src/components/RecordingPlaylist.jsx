@@ -21,25 +21,31 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
         events={recording.events}
         selected={recording.date === selectedDate}
       >
-        {recording.recordings.slice().reverse().map((item, i) => (
-          <div className="mb-2 w-full">
-            <div
-              className={`flex w-full text-md text-white px-8 py-2 mb-2 ${
-                i === 0 ? 'border-t border-white border-opacity-50' : ''
-              }`}
-            >
-              <div className="flex-1">
-                <Link href={`/recording/${camera}/${recording.date}/${item.hour}`} type="text">
-                  {item.hour}:00
-                </Link>
+        {recording.recordings
+          .slice()
+          .reverse()
+          .map((item, i) => (
+            <div className="mb-2 w-full">
+              <div
+                className={`flex w-full text-md text-white px-8 py-2 mb-2 ${
+                  i === 0 ? 'border-t border-white border-opacity-50' : ''
+                }`}
+              >
+                <div className="flex-1">
+                  <Link href={`/recording/${camera}/${recording.date}/${item.hour}`} type="text">
+                    {item.hour}:00
+                  </Link>
+                </div>
+                <div className="flex-1 text-right">{item.events.length} Events</div>
               </div>
-              <div className="flex-1 text-right">{item.events.length} Events</div>
+              {item.events
+                .slice()
+                .reverse()
+                .map((event) => (
+                  <EventCard camera={camera} event={event} delay={item.delay} />
+                ))}
             </div>
-            {item.events.slice().reverse().map((event) => (
-              <EventCard camera={camera} event={event} delay={item.delay} />
-            ))}
-          </div>
-        ))}
+          ))}
       </ExpandableList>
     );
   }
@@ -83,8 +89,10 @@ export function ExpandableList({ title, events = 0, children, selected = false }
 export function EventCard({ camera, event, delay }) {
   const apiHost = useApiHost();
   const start = fromUnixTime(event.start_time);
-  const end = fromUnixTime(event.end_time);
-  const duration = addSeconds(new Date(0), differenceInSeconds(end, start));
+  let duration = 0;
+  if (event.end_time) {
+    duration = addSeconds(new Date(0), differenceInSeconds(fromUnixTime(event.end_time), start));
+  }
   const position = differenceInSeconds(start, startOfHour(start));
   const offset = Object.entries(delay)
     .map(([p, d]) => (position > p ? d : 0))
@@ -102,7 +110,9 @@ export function EventCard({ camera, event, delay }) {
               <div className="flex-1">
                 <div className="text-2xl text-white leading-tight capitalize">{event.label}</div>
                 <div className="text-xs md:text-normal text-gray-300">Start: {format(start, 'HH:mm:ss')}</div>
-                <div className="text-xs md:text-normal text-gray-300">Duration: {format(duration, 'mm:ss')}</div>
+                <div className="text-xs md:text-normal text-gray-300">
+                  Duration: {duration ? format(duration, 'mm:ss') : 'In Progress'}
+                </div>
               </div>
               <div className="text-lg text-white text-right leading-tight">{(event.top_score * 100).toFixed(1)}%</div>
             </div>
