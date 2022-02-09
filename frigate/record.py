@@ -51,7 +51,6 @@ class RecordingMaintainer(threading.Thread):
         self.config = config
         self.recordings_info_queue = recordings_info_queue
         self.stop_event = stop_event
-        self.first_pass = True
         self.recordings_info = defaultdict(list)
         self.end_time_cache = {}
 
@@ -334,12 +333,6 @@ class RecordingMaintainer(threading.Thread):
                 logger.error(e)
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
-            if wait_time == 0 and not self.first_pass:
-                logger.warning(
-                    "Cache is taking longer than 5 seconds to clear. Your recordings disk may be too slow."
-                )
-            if self.first_pass:
-                self.first_pass = False
 
         logger.info(f"Exiting recording maintenance...")
 

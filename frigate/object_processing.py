@@ -165,6 +165,10 @@ class TrackedObject:
             ):
                 significant_change = True
 
+            # update at least once per minute
+            if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
+                significant_change = True
+
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
         return (thumb_update, significant_change)
