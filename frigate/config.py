@@ -551,7 +551,7 @@ class CameraLiveConfig(FrigateBaseModel):
 
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
-    ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
+    ffmpeg: Optional[CameraFfmpegConfig] = Field(title="FFmpeg configuration for the camera.")
     gstreamer: Optional[CameraGStreamerConfig] = Field(
         title="GStreamer configuration for the camera."
     )
