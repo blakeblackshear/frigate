@@ -17,6 +17,7 @@ VIDEO_CODEC_CAP_NAME = "video codec"
 
 logger = logging.getLogger(__name__)
 
+
 @lru_cache
 def gst_discover(
     source: str, cam_name: str, keys: List[str]
@@ -53,12 +54,12 @@ def gst_discover(
             ),
             cam_name,
         )
-        return None
+        return {}
     except:
         logger.error(
             "gst-discoverer-1.0 failed with the message: %s", traceback.format_exc()
         )
-        return None
+        return {}
 
 
 @lru_cache
@@ -81,9 +82,7 @@ def gst_inspect_find_codec(codec: Optional[str]) -> List[str]:
             for line in data.split("\n")
             if codec is None or codec in line
         ]
-        return [
-            item[1].strip() for item in data if len(item) > 1
-        ]
+        return [item[1].strip() for item in data if len(item) > 1]
     except:
         logger.error(
             "gst-inspect-1.0 failed with the message: %s", traceback.format_exc()
@@ -228,7 +227,7 @@ class GstreamerBaseBuilder:
             self.audio_pipeline is not None and len(self.audio_pipeline) > 0
         )
 
-        split_mux = f"splitmuxsink async-handling=true "
+        split_mux = f"splitmuxsink async-finalize=true send-keyframe-requests=true max-size-bytes=0 "
 
         if use_audio_pipeline:
             split_mux = split_mux + "name=mux muxer=mp4mux "
@@ -282,6 +281,14 @@ class GstreamerBaseBuilder:
                 self._get_default_pipeline(), use_detect=True, use_record=False
             )
         depay_element = f"rtp{self.video_format}depay"
+
+        # add rtpjitterbuffer into the input pipeline for reord role if no rtpjitterbuffer has been added already
+        if use_record:
+            has_rtpjitterbuffer = "rtpjitterbuffer" in " ".join(self.input_pipeline)
+            if not has_rtpjitterbuffer:
+                self.input_pipeline.append(
+                    "rtpjitterbuffer do-lost=true drop-on-latency=true"
+                )
 
         pipeline = [*self.input_pipeline, depay_element]
         # if both detect and record used, split the stream after the depay element

@@ -22,7 +22,6 @@ from frigate.const import (
     CACHE_DIR,
     RECORD_DIR,
     GSTREAMER_RECORD_SUFFIX,
-    RECORD_SEGMENT_TIME_SECONDS,
 )
 from frigate.models import Event, Recordings
 from frigate.util import area
@@ -98,7 +97,7 @@ class RecordingMaintainer(threading.Thread):
             if camera.endswith(GSTREAMER_RECORD_SUFFIX):
                 camera = camera.split(GSTREAMER_RECORD_SUFFIX)[0]
                 creation_time = (
-                    os.path.getmtime(cache_path) - RECORD_SEGMENT_TIME_SECONDS
+                    os.path.getctime(cache_path)
                 )
                 start_time = datetime.datetime.utcfromtimestamp(creation_time)
             else:

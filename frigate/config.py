@@ -1,5 +1,4 @@
 from __future__ import annotations
-from email.policy import default
 
 import json
 import logging
@@ -628,7 +627,7 @@ class CameraConfig(FrigateBaseModel):
         else:
             for input in self.gstreamer.inputs:
                 gst_cmd = self._get_gstreamer_cmd(self.gstreamer, input)
-                logger.error("gstreamer command[%s] %s", self.name, gst_cmd)
+                logger.info("gstreamer command[%s] %s", self.name, gst_cmd)
                 self._decoder_cmds.append({"roles": input.roles, "cmd": gst_cmd})
 
     def _get_gstreamer_cmd(
