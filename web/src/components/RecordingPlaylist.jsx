@@ -1,6 +1,14 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import { addSeconds, differenceInSeconds, fromUnixTime, format, parseISO, startOfHour } from 'date-fns';
+import {
+  differenceInSeconds,
+  fromUnixTime,
+  format,
+  parseISO,
+  startOfHour,
+  differenceInMinutes,
+  differenceInHours,
+} from 'date-fns';
 import ArrowDropdown from '../icons/ArrowDropdown';
 import ArrowDropup from '../icons/ArrowDropup';
 import Link from '../components/Link';
@@ -89,9 +97,16 @@ export function ExpandableList({ title, events = 0, children, selected = false }
 export function EventCard({ camera, event, delay }) {
   const apiHost = useApiHost();
   const start = fromUnixTime(event.start_time);
-  let duration = 0;
+  let duration = 'In Progress';
   if (event.end_time) {
-    duration = addSeconds(new Date(0), differenceInSeconds(fromUnixTime(event.end_time), start));
+    const end = fromUnixTime(event.end_time);
+    const hours = differenceInHours(end, start);
+    const minutes = differenceInMinutes(end, start) - hours * 60;
+    const seconds = differenceInSeconds(end, start) - hours * 60 - minutes * 60;
+    duration = '';
+    if (hours) duration += `${hours}h `;
+    if (minutes) duration += `${minutes}m `;
+    duration += `${seconds}s`;
   }
   const position = differenceInSeconds(start, startOfHour(start));
   const offset = Object.entries(delay)
@@ -110,9 +125,7 @@ export function EventCard({ camera, event, delay }) {
               <div className="flex-1">
                 <div className="text-2xl text-white leading-tight capitalize">{event.label}</div>
                 <div className="text-xs md:text-normal text-gray-300">Start: {format(start, 'HH:mm:ss')}</div>
-                <div className="text-xs md:text-normal text-gray-300">
-                  Duration: {duration ? format(duration, 'mm:ss') : 'In Progress'}
-                </div>
+                <div className="text-xs md:text-normal text-gray-300">Duration: {duration}</div>
               </div>
               <div className="text-lg text-white text-right leading-tight">{(event.top_score * 100).toFixed(1)}%</div>
             </div>
