@@ -524,10 +524,15 @@ def recordings(camera_name):
         FROM C2
         WHERE cnt = 0
         )
+        SELECT id, label, camera, top_score, start_time, end_time
+        FROM event
+        WHERE camera = ? AND end_time IS NULL
+        UNION ALL
         SELECT MIN(id) as id, label, camera, MAX(top_score) as top_score, MIN(ts) AS start_time, max(ts) AS end_time
         FROM C3
         GROUP BY label, grpnum
         ORDER BY start_time;""",
+        camera_name,
         camera_name,
         camera_name,
     )
