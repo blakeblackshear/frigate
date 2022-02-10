@@ -99,8 +99,16 @@ class ObjectTracker:
         if self.update_position(id, new_obj["box"]):
             self.tracked_objects[id]["motionless_count"] += 1
         else:
+            # register the first position change and then only increment if
+            # the object was previously stationary
+            if (
+                self.tracked_objects[id]["position_changes"] == 0
+                or self.tracked_objects[id]["motionless_count"]
+                >= self.detect_config.stationary_threshold
+            ):
+                self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
-            self.tracked_objects[id]["position_changes"] += 1
+
         self.tracked_objects[id].update(new_obj)
 
     def update_frame_times(self, frame_time):
