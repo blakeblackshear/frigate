@@ -14,13 +14,14 @@ const getLast24Hours = () => {
 };
 
 export default function HistoryViewer({ camera }) {
-  console.log('history', { camera });
   const apiHost = useApiHost();
   const videoRef = useRef();
-  const { searchString } = useSearchString(200, `camera=${camera}&after=${getLast24Hours()}`);
+  const { searchString } = useSearchString(500, `camera=${camera}&after=${getLast24Hours()}`);
   const { data: events } = useEvents(searchString);
   const [timelineEvents, setTimelineEvents] = useState();
 
+  const [hasPlayed, setHasPlayed] = useState();
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentEvent, setCurrentEvent] = useState();
   const [currentEventIndex, setCurrentEventIndex] = useState();
   const [timelineOffset, setTimelineOffset] = useState(0);
@@ -28,11 +29,18 @@ export default function HistoryViewer({ camera }) {
 
   useEffect(() => {
     if (events) {
-      setTimelineEvents([...events].reverse().filter((e) => e.end_time !== undefined));
+      const filteredEvents = [...events].reverse().filter((e) => e.end_time !== undefined);
+      setTimelineEvents(filteredEvents);
+      setCurrentEventIndex(filteredEvents.length - 1);
     }
   }, [events]);
 
   const handleTimeUpdate = () => {
+    const videoContainer = videoRef.current;
+    if (videoContainer.paused) {
+      return;
+    }
+
     const timestamp = Math.round(videoRef.current.currentTime);
     const offset = Math.round(timestamp);
     const triggerStateChange = offset !== timelineOffset;
@@ -41,18 +49,50 @@ export default function HistoryViewer({ camera }) {
     }
   };
 
-  const handleTimelineChange = (event) => {
-    if (event !== undefined) {
-      setCurrentEvent(event);
+  const handleTimelineChange = (timelineChangedEvent) => {
+    if (timelineChangedEvent.seekComplete) {
+      const currentEventExists = currentEvent !== undefined;
+      if (!currentEventExists || currentEvent.id !== timelineChangedEvent.event.id) {
+        setCurrentEvent(timelineChangedEvent.event);
+      }
+    }
+
+    const videoContainer = videoRef.current;
+    if (videoContainer) {
+      if (!videoContainer.paused) {
+        videoContainer.pause();
+        setHasPlayed(true);
+      }
+
+      const videoHasPermissionToPlay = hasPlayed !== undefined;
+      if (videoHasPermissionToPlay && timelineChangedEvent.seekComplete) {
+        const markerTime = Math.abs(timelineChangedEvent.time - timelineChangedEvent.event.startTime) / 1000;
+        videoContainer.currentTime = markerTime;
+        if (hasPlayed) {
+          videoContainer.play();
+          setHasPlayed(false);
+        }
+      }
     }
   };
 
   const handlePlay = function () {
-    videoRef.current.play();
+    const videoContainer = videoRef.current;
+    if (videoContainer) {
+      if (videoContainer.paused) {
+        videoContainer.play();
+      } else {
+        videoContainer.pause();
+      }
+    }
+  };
+
+  const handlePlayed = () => {
+    setIsPlaying(true);
   };
 
   const handlePaused = () => {
-    setTimelineOffset(undefined);
+    setIsPlaying(false);
   };
 
   const handlePrevious = function () {
@@ -64,35 +104,36 @@ export default function HistoryViewer({ camera }) {
   };
 
   const handleMetadataLoad = () => {
-    if (videoRef.current) {
-      setMinHeight(videoRef.current.clientHeight);
+    const videoContainer = videoRef.current;
+    if (videoContainer) {
+      setMinHeight(videoContainer.clientHeight);
     }
   };
 
   const RenderVideo = useCallback(() => {
-    return (
-      <video
-        ref={videoRef}
-        onTimeUpdate={handleTimeUpdate}
-        onPause={handlePaused}
-        poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
-        onLoadedMetadata={handleMetadataLoad}
-        preload='metadata'
-        style={
-          minHeight
-            ? {
-                minHeight: `${minHeight}px`,
-              }
-            : {}
-        }
-        playsInline
-        controls
-      >
-        <source
-          src={`${apiHost}/api/${camera}/start/${currentEvent.start_time}/end/${currentEvent.end_time}/clip.mp4`}
-        />
-      </video>
-    );
+    if (currentEvent) {
+      return (
+        <video
+          ref={videoRef}
+          onTimeUpdate={handleTimeUpdate}
+          onPause={handlePaused}
+          onPlay={handlePlayed}
+          poster={`${apiHost}/api/events/${currentEvent.id}/snapshot.jpg`}
+          onLoadedMetadata={handleMetadataLoad}
+          preload='metadata'
+          style={
+            minHeight
+              ? {
+                  minHeight: `${minHeight}px`,
+                }
+              : {}
+          }
+          playsInline
+        >
+          <source type='application/vnd.apple.mpegurl' src={`${apiHost}/vod/event/${currentEvent.id}/index.m3u8`} />
+        </video>
+      );
+    }
   }, [currentEvent, apiHost, camera, videoRef]);
 
   return (
@@ -115,6 +156,7 @@ export default function HistoryViewer({ camera }) {
         events={timelineEvents}
         offset={timelineOffset}
         currentIndex={currentEventIndex}
+        disabled={isPlaying}
         onChange={handleTimelineChange}
       />
 

@@ -2,7 +2,7 @@ import { h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { longToDate } from '../utils/dateUtil';
 
-export default function Timeline({ events, offset, currentIndex, onChange }) {
+export default function Timeline({ events, offset, currentIndex, disabled, onChange }) {
   const timelineContainerRef = useRef(undefined);
 
   const [timeline, setTimeline] = useState([]);
@@ -11,6 +11,7 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
   const [currentEvent, setCurrentEvent] = useState();
   const [scrollTimeout, setScrollTimeout] = useState();
   const [scrollActive, setScrollActive] = useState(true);
+  const [eventsEnabled, setEventsEnable] = useState(true);
 
   useEffect(() => {
     if (events && events.length > 0 && timelineOffset) {
@@ -40,8 +41,8 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
         ...firstTimelineEvent,
         id: firstTimelineEvent.id,
         index: 0,
-        startTime: firstTimelineEvent.start_time,
-        endTime: firstTimelineEvent.end_time,
+        startTime: longToDate(firstTimelineEvent.start_time),
+        endTime: longToDate(firstTimelineEvent.end_time),
       });
       setTimeline(timelineEvents);
     }
@@ -54,25 +55,22 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
   useEffect(() => {
     const cEvent = getCurrentEvent();
     if (cEvent && offset >= 0) {
-      setScrollActive(false);
       timelineContainerRef.current.scroll({
         left: cEvent.positionX + offset - timelineOffset,
         behavior: 'smooth',
       });
-    } else {
-      setScrollActive(true);
     }
   }, [offset, timelineContainerRef]);
 
   useEffect(() => {
-    if (currentIndex !== undefined) {
+    if (timeline.length > 0 && currentIndex !== undefined) {
       const event = timeline[currentIndex];
       setCurrentEvent({
         ...event,
         id: event.id,
         index: currentIndex,
-        startTime: event.start_time,
-        endTime: event.end_time,
+        startTime: longToDate(event.start_time),
+        endTime: longToDate(event.end_time),
       });
       timelineContainerRef.current.scroll({ left: event.positionX - timelineOffset, behavior: 'smooth' });
     }
@@ -88,30 +86,51 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
       const foundIndex = timeline.findIndex((event) => event.startTime <= markerTime && markerTime <= event.endTime);
       if (foundIndex > -1) {
         const found = timeline[foundIndex];
-        setCurrentEvent({
-          ...found,
-          id: found.id,
-          index: foundIndex,
-          startTime: found.start_time,
-          endTime: found.end_time,
-        });
+        if (found !== currentEvent && found.id !== currentEvent.id) {
+          setCurrentEvent({
+            ...found,
+            id: found.id,
+            index: foundIndex,
+            startTime: longToDate(found.start_time),
+            endTime: longToDate(found.end_time),
+          });
+          return found;
+        }
       }
     }
   };
 
-  const handleScroll = (event) => {
+  const scrollLogic = () => {
     clearTimeout(scrollTimeout);
 
-    const scrollPosition = event.target.scrollLeft;
+    const scrollPosition = timelineContainerRef.current.scrollLeft;
     const startTime = longToDate(timeline[0].start_time);
     const markerTime = new Date(startTime.getTime() + scrollPosition * 1000);
     setMarkerTime(markerTime);
 
+    handleChange(currentEvent, markerTime, false);
+
     setScrollTimeout(
       setTimeout(() => {
-        checkMarkerForEvent(markerTime);
+        const foundEvent = checkMarkerForEvent(markerTime);
+        handleChange(foundEvent ? foundEvent : currentEvent, markerTime, true);
       }, 250)
     );
+  };
+
+  const handleWheel = (event) => {
+    if (!disabled) {
+      return;
+    }
+
+    scrollLogic(event);
+  };
+
+  const handleScroll = (event) => {
+    if (disabled) {
+      return;
+    }
+    scrollLogic(event);
   };
 
   useEffect(() => {
@@ -122,9 +141,18 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
     }
   }, [timelineContainerRef]);
 
-  useEffect(() => {
-    onChange && onChange(currentEvent);
-  }, [onChange, currentEvent]);
+  const handleChange = useCallback(
+    (event, time, seekComplete) => {
+      if (onChange !== undefined) {
+        onChange({
+          event,
+          time,
+          seekComplete,
+        });
+      }
+    },
+    [onChange]
+  );
 
   const RenderTimeline = useCallback(() => {
     if (timeline && timeline.length > 0) {
@@ -175,7 +203,13 @@ export default function Timeline({ events, offset, currentIndex, onChange }) {
           ></div>
         </div>
       </div>
-      <div ref={timelineContainerRef} className='overflow-x-auto hide-scroll' onScroll={handleScroll}>
+      <div
+        ref={timelineContainerRef}
+        onWheel={handleWheel}
+        onTouchMove={handleWheel}
+        onScroll={handleScroll}
+        className='overflow-x-auto hide-scroll'
+      >
         <RenderTimeline />
       </div>
     </div>
