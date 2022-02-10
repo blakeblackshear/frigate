@@ -466,6 +466,101 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End all cameras.")
         logger.debug("End expire recordings (new).")
 
+    def reduce_stored_recordings(self):
+        logger.debug("Start reduce stored recordings.")
+        storage_stats = shutil.disk_usage(RECORD_DIR)
+        storage_utilization = (round(storage_stats.used / 1000000, 1)) / (
+            round(storage_stats.total / 1000000, 1)
+        )
+
+        if storage_utilization < config.record.retain.storage_percent:
+            # If utilized storage space is less than user-defined max percent, nothing should be expired on storage.
+            logger.debug(
+                f"Utilized storage space is less than {config.record.retain.storage_percent}."
+            )
+            return
+
+        logger.debug("Start all cameras.")
+        for camera, config in self.config.cameras.items():
+            logger.debug(f"Start camera: {camera}.")
+            # When deleting recordings without events, we have to keep at LEAST the configured max clip duration
+            min_end = (
+                datetime.datetime.now()
+                - datetime.timedelta(seconds=config.record.events.max_seconds)
+            ).timestamp()
+            expire_days = config.record.retain.days
+            expire_before = (
+                datetime.datetime.now() - datetime.timedelta(days=expire_days)
+            ).timestamp()
+            expire_date = min(min_end, expire_before)
+
+            # Get all recordings to check for storage utilization
+            # TODO perhaps could limit to certain number to reduce overall time?
+            recordings: Recordings = (
+                Recordings.select()
+                .where(
+                    Recordings.camera == camera,
+                )
+                .order_by(Recordings.start_time)
+            )
+
+            # Get all the events to check against
+            events: Event = (
+                Event.select()
+                .where(
+                    Event.camera == camera,
+                    # need to ensure segments for all events starting
+                    # before the expire date are included
+                    Event.start_time < expire_date,
+                    Event.has_clip,
+                )
+                .order_by(Event.start_time)
+                .objects()
+            )
+
+            # loop over recordings and see if they overlap with any non-expired events
+            # TODO: expire segments based on segment stats according to config
+            event_start = 0
+            deleted_recordings = set()
+            for recording in recordings.objects().iterator():
+                keep = False
+                # Now look for a reason to keep this recording segment
+                for idx in range(event_start, len(events)):
+                    event = events[idx]
+
+                    # if the event starts in the future, stop checking events
+                    # and let this recording segment expire
+                    if event.start_time > recording.end_time:
+                        keep = False
+                        break
+
+                    # if the event is in progress or ends after the recording starts, keep it
+                    # and stop looking at events
+                    if event.end_time is None or event.end_time >= recording.start_time:
+                        keep = True
+                        break
+
+                    # if the event ends before this recording segment starts, skip
+                    # this event and check the next event for an overlap.
+                    # since the events and recordings are sorted, we can skip events
+                    # that end before the previous recording segment started on future segments
+                    if event.end_time < recording.start_time:
+                        event_start = idx
+
+                # Delete recordings not apart of events and limit to 10 to not delete too many
+                # TODO perhaps it would be possible to delete progressively and check storage space?
+                if not keep and deleted_recordings.__len__ < 5:
+                    Path(recording.path).unlink(missing_ok=True)
+                    deleted_recordings.add(recording.id)
+
+            logger.debug(f"Expiring {len(deleted_recordings)} recordings")
+            Recordings.delete().where(Recordings.id << deleted_recordings).execute()
+
+            logger.debug(f"End camera: {camera}.")
+
+        logger.debug("End all cameras.")
+        logger.debug("End reduce stored recordings.")
+
     def expire_files(self):
         logger.debug("Start expire files (legacy).")
 
@@ -551,5 +646,6 @@ class RecordingCleanup(threading.Thread):
 
             if counter == 0:
                 self.expire_recordings()
+                self.reduce_stored_recordings()
                 self.expire_files()
                 remove_empty_directories(RECORD_DIR)
