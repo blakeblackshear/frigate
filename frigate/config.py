@@ -72,6 +72,7 @@ class RetainModeEnum(str, Enum):
 
 class RetainConfig(FrigateBaseModel):
     default: float = Field(default=10, title="Default retention period.")
+    storage_percent: float = Field(default=95, title="Max storage to utilize.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
     objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
@@ -96,6 +97,7 @@ class EventsConfig(FrigateBaseModel):
 
 class RecordRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, title="Default retention period.")
+    storage_percent: float = Field(default=95, title="Max storage to utilize.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
