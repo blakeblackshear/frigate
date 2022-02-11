@@ -200,7 +200,6 @@ class DetectConfig(FrigateBaseModel):
         title="Stationary objects config.",
     )
     stationary_threshold: Optional[int] = Field(
-        default=10,
         title="Number of frames without a position change for an object to be considered stationary",
         ge=1,
     )
