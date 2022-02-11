@@ -7,7 +7,7 @@ import { Play } from '../icons/Play';
 import { Previous } from '../icons/Previous';
 import { HistoryHeader } from '../routes/HistoryHeader';
 import { longToDate } from '../utils/dateUtil';
-import Timeline from './Timeline';
+import Timeline from './Timeline/Timeline';
 
 const getLast24Hours = () => {
   return new Number(new Date(new Date().getTime() - 24 * 60 * 60 * 1000)) / 1000;
@@ -51,10 +51,7 @@ export default function HistoryViewer({ camera }) {
 
   const handleTimelineChange = (timelineChangedEvent) => {
     if (timelineChangedEvent.seekComplete) {
-      const currentEventExists = currentEvent !== undefined;
-      if (!currentEventExists || currentEvent.id !== timelineChangedEvent.event.id) {
-        setCurrentEvent(timelineChangedEvent.event);
-      }
+      setCurrentEvent(timelineChangedEvent.event);
     }
 
     const videoContainer = videoRef.current;
@@ -143,7 +140,8 @@ export default function HistoryViewer({ camera }) {
           <div className='relative flex flex-col'>
             <HistoryHeader
               camera={camera}
-              date={longToDate(currentEvent.start_time)}
+              date={currentEvent.startTime}
+              end={currentEvent.endTime}
               objectLabel={currentEvent.label}
               className='mb-2'
             />
@@ -156,7 +154,7 @@ export default function HistoryViewer({ camera }) {
         events={timelineEvents}
         offset={timelineOffset}
         currentIndex={currentEventIndex}
-        disabled={isPlaying}
+        disableMarkerEvents={isPlaying}
         onChange={handleTimelineChange}
       />
 
