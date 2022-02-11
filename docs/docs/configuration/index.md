@@ -217,6 +217,11 @@ motion:
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
+  # WARNING: Frigate does not currently support limiting recordings based
+  #          on available disk space automatically. If using recordings,
+  #          you must specify retention settings for a number of days that
+  #          will fit within the available disk space of your drive or Frigate
+  #          will crash.
   enabled: False
   # Optional: Number of days to retain recordings regardless of events (default: shown below)
   # NOTE: This should be set to 0 and retention should be defined in events section below
