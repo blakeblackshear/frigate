@@ -45,7 +45,7 @@ This may need to be in a custom location if network storage is used for the medi
 
 ```yaml
 database:
-  path: </path/to/database>
+  path: /path/to/frigate.db
 ```
 
 ### `model`
