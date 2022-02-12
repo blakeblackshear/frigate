@@ -9,7 +9,7 @@ export interface TimelineEvent {
   startTime: Date;
   endTime: Date;
   id: string;
-  label: string;
+  label: 'car' | 'person' | 'dog';
 }
 
 export interface TimelineEventBlock extends TimelineEvent {
