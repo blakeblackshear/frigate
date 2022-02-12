@@ -167,12 +167,16 @@ cameras:
           roles:
             - detect
             - rtmp
-            - record # <----- Add role
+        - path: rtsp://10.0.10.10:554/high_res_stream # <----- Add high res stream
+          roles:
+            - record
     detect: ...
     record: # <----- Enable recording
       enabled: True
     motion: ...
 ```
+
+If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](/configuration/index#full-configuration-reference).
 
