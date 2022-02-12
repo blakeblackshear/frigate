@@ -43,6 +43,11 @@ If you are storing your database on a network share (SMB, NFS, etc), you may get
 
 This may need to be in a custom location if network storage is used for the media folder.
 
+```yaml
+database:
+  path:</path/to/database>
+```
+
 ### `model`
 
 If using a custom model, the width and height will need to be specified.
