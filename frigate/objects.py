@@ -104,7 +104,7 @@ class ObjectTracker:
             if (
                 self.tracked_objects[id]["position_changes"] == 0
                 or self.tracked_objects[id]["motionless_count"]
-                >= self.detect_config.stationary_threshold
+                >= self.detect_config.stationary.threshold
             ):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0

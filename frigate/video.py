@@ -511,8 +511,8 @@ def process_frames(
                 if obj["motionless_count"] >= 10
                 # and it isn't due for a periodic check
                 and (
-                    detect_config.stationary_interval == 0
-                    or obj["motionless_count"] % detect_config.stationary_interval != 0
+                    detect_config.stationary.interval == 0
+                    or obj["motionless_count"] % detect_config.stationary.interval != 0
                 )
                 # and it hasn't disappeared
                 and object_tracker.disappeared[obj["id"]] == 0
