@@ -161,7 +161,7 @@ class TrackedObject:
             # if the motionless_count reaches the stationary threshold
             if (
                 self.obj_data["motionless_count"]
-                == self.camera_config.detect.stationary_threshold
+                == self.camera_config.detect.stationary.threshold
             ):
                 significant_change = True
 
@@ -194,7 +194,7 @@ class TrackedObject:
             "area": self.obj_data["area"],
             "region": self.obj_data["region"],
             "stationary": self.obj_data["motionless_count"]
-            > self.camera_config.detect.stationary_threshold,
+            > self.camera_config.detect.stationary.threshold,
             "motionless_count": self.obj_data["motionless_count"],
             "position_changes": self.obj_data["position_changes"],
             "current_zones": self.current_zones.copy(),

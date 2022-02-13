@@ -159,11 +159,23 @@ detect:
   enabled: True
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
-  # Optional: Frequency for running detection on stationary objects (default: shown below)
-  # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
-  stationary_interval: 0
-  # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
-  stationary_threshold: 50
+  # Optional: Configuration for stationary object tracking
+  stationary:
+    # Optional: Frequency for running detection on stationary objects (default: shown below)
+    # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
+    interval: 0
+    # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
+    threshold: 50
+    # Optional: Define a maximum number of frames for tracking a stationary object (default: not set, track forever)
+    # This can help with false positives for objects that should only be stationary for a limited amount of time.
+    # It can also be used to disable stationary object tracking. For example, you may want to set a value for person, but leave
+    # car at the default.
+    max_frames:
+      # Optional: Default for all object types (default: not set, track forever)
+      default: 3000
+      # Optional: Object specific values
+      objects:
+        person: 1000
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level

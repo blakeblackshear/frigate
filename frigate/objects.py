@@ -93,18 +93,40 @@ class ObjectTracker:
 
         return True
 
+    def is_expired(self, id):
+        obj = self.tracked_objects[id]
+        # get the max frames for this label type or the default
+        max_frames = self.detect_config.stationary.max_frames.objects.get(
+            obj["label"], self.detect_config.stationary.max_frames.default
+        )
+
+        # if there is no max_frames for this label type, continue
+        if max_frames is None:
+            return False
+
+        # if the object has exceeded the max_frames setting, deregister
+        if (
+            obj["motionless_count"] - self.detect_config.stationary.threshold
+            > max_frames
+        ):
+            print(f"expired: {obj['motionless_count']}")
+            return True
+
     def update(self, id, new_obj):
         self.disappeared[id] = 0
         # update the motionless count if the object has not moved to a new position
         if self.update_position(id, new_obj["box"]):
             self.tracked_objects[id]["motionless_count"] += 1
+            if self.is_expired(id):
+                self.deregister(id)
+                return
         else:
             # register the first position change and then only increment if
             # the object was previously stationary
             if (
                 self.tracked_objects[id]["position_changes"] == 0
                 or self.tracked_objects[id]["motionless_count"]
-                >= self.detect_config.stationary_threshold
+                >= self.detect_config.stationary.threshold
             ):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
@@ -112,9 +134,11 @@ class ObjectTracker:
         self.tracked_objects[id].update(new_obj)
 
     def update_frame_times(self, frame_time):
-        for id in self.tracked_objects.keys():
+        for id in list(self.tracked_objects.keys()):
             self.tracked_objects[id]["frame_time"] = frame_time
             self.tracked_objects[id]["motionless_count"] += 1
+            if self.is_expired(id):
+                self.deregister(id)
 
     def match_and_update(self, frame_time, new_objects):
         # group by name
