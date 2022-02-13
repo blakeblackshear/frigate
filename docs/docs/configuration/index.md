@@ -159,6 +159,7 @@ detect:
   enabled: True
   # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
+  # Optional: Configuration for stationary object tracking
   stationary:
     # Optional: Frequency for running detection on stationary objects (default: shown below)
     # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
