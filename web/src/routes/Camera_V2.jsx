@@ -5,7 +5,7 @@ import { useState } from 'preact/hooks';
 import { useConfig } from '../api';
 import { Tabs, TextTab } from '../components/Tabs';
 import { LiveChip } from '../components/LiveChip';
-import HistoryViewer from '../components/HistoryViewer';
+import HistoryViewer from '../components/HistoryViewer/HistoryViewer';
 import { DebugCamera } from '../components/DebugCamera';
 
 export default function Camera({ camera }) {
@@ -35,7 +35,7 @@ export default function Camera({ camera }) {
                 <Heading size='xl' className='mr-2 text-black dark:text-white'>
                   {camera}
                 </Heading>
-                <LiveChip className='text-green-400 border-2 border-solid border-green-400 dark:border-transparent dark:text-white dark:bg-white bg-opacity-40 dark:bg-opacity-10' />
+                <LiveChip className='text-green-400 border-2 border-solid border-green-400 bg-opacity-40 dark:bg-opacity-10' />
               </Fragment>
             )}
           </div>
