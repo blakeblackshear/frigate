@@ -156,7 +156,6 @@ export default function Timeline({ events, onChange }: TimelineProps) {
   };
 
   const seekCompleteHandler = (markerTime: Date) => {
-    console.debug('seekCompleteHandler');
     if (scrollPermission.allowed) {
       const markerEvent = checkMarkerForEvent(markerTime);
       setCurrentEvent(markerEvent);
