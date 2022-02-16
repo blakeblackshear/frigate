@@ -356,6 +356,16 @@ def stats():
 @bp.route("/<camera_name>/<label>/latest.jpg")
 def latest(camera_name, label):
     png_bytes = None
+    draw_options = {
+        "bounding_boxes": request.args.get("bbox", type=int),
+        "timestamp": request.args.get("timestamp", type=int),
+        "zones": request.args.get("zones", type=int),
+        "mask": request.args.get("mask", type=int),
+        "motion_boxes": request.args.get("motion", type=int),
+        "regions": request.args.get("regions", type=int),
+    }
+    resize_quality = request.args.get("quality", default=70, type=int)
+
     if camera_name in current_app.frigate_config.cameras:
         event_query = (
             Event.select()
@@ -373,13 +383,16 @@ def latest(camera_name, label):
             return "No event for {} was found".format(label), 404
 
         # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
-        ) as image_file:
-            png_bytes = image_file.read()
+        frame = cv2.imread(os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"))
+        height = int(request.args.get("h", str(frame.shape[0])))
+        width = int(height * frame.shape[1] / frame.shape[0])
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        )
 
-        response = make_response(png_bytes)
-        response.headers["Content-Type"] = "image/png"
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
