@@ -355,27 +355,30 @@ def stats():
 
 @bp.route("/<camera_name>/<label>/latest.jpg")
 def latest(camera_name, label):
-    jpg_bytes = None
+    png_bytes = None
     if camera_name in current_app.frigate_config.cameras:
+
+        if label == "any":
+            label = "*"
+
         event = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.label == "*" if label is "any" else label)
+            .where(Event.label == label)
             .where(Event.has_snapshot == True)
             .where(Event.end_time != None)
             .order_by(Event.start_time.desc())
             .get()
         )
 
-        #event = events.first()
         # read snapshot from disk
         with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
+            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
         ) as image_file:
-            jpg_bytes = image_file.read()
+            png_bytes = image_file.read()
 
-        response = make_response(jpg_bytes)
-        response.headers["Content-Type"] = "image/jpeg"
+        response = make_response(png_bytes)
+        response.headers["Content-Type"] = "image/png"
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
