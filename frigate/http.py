@@ -357,19 +357,20 @@ def stats():
 def latest(camera_name, label):
     png_bytes = None
     if camera_name in current_app.frigate_config.cameras:
-
-        if label == "any":
-            label = "*"
-
-        event = (
+        event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.label == label)
             .where(Event.has_snapshot == True)
             .where(Event.end_time != None)
-            .order_by(Event.start_time.desc())
-            .get()
         )
+
+        if label != "any":
+            event_query.where(Event.label == label)
+
+        event = event_query.order_by(Event.start_time.desc()).get()
+
+        if event is None:
+            return "No event for {} was found".format(label), 404
 
         # read snapshot from disk
         with open(
