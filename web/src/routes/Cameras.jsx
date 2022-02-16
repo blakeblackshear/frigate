@@ -16,7 +16,7 @@ export default function Cameras() {
     <ActivityIndicator />
   ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
-      {Object.entries(config.cameras).map(([camera, conf]) => (
+      {Object.entries(config.cameras).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order > bConf.gui.order ? 1 : -1).map(([camera, conf]) => (
         <Camera name={camera} conf={conf} />
       ))}
     </div>
