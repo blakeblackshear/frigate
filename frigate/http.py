@@ -367,30 +367,38 @@ def latest(camera_name, label):
     resize_quality = request.args.get("quality", default=70, type=int)
 
     if camera_name in current_app.frigate_config.cameras:
-        event_query = (
-            Event.select()
-            .where(Event.camera == camera_name)
-            .where(Event.has_snapshot == True)
-            .where(Event.end_time != None)
-        )
+        if label is "any":
+            event_query = (
+                Event.select()
+                .where(Event.camera == camera_name)
+                .where(Event.has_snapshot == True)
+                .where(Event.end_time != None)
+                .order_by(Event.start_time.desc())
+            )
+        else:
+            event_query = (
+                Event.select()
+                .where(Event.camera == camera_name)
+                .where(Event.label == label)
+                .where(Event.has_snapshot == True)
+                .where(Event.end_time != None)
+                .order_by(Event.start_time.desc())
+            )
 
-        if label != "any":
-            event_query.where(Event.label == label)
-
-        event = event_query.order_by(Event.start_time.desc()).get()
-
-        if event is None:
-            return "No event for {} was found".format(label), 404
-
-        # read snapshot from disk
-        frame = cv2.imread(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png")
-        )
+        try:
+            event = event_query.get()
+            # read snapshot from disk
+            frame = cv2.imread(
+                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png")
+            )
+        except DoesNotExist:
+            event = None
+            frame = np.zeros((720, 1280, 3), np.uint8)
 
         crop = bool(request.args.get("crop", 0, type=int))
         if crop:
             box_size = 300
-            box = event.box
+            box = event.box if event is not None else (0, 0, box_size, box_size)
             region = calculate_region(
                 frame.shape,
                 box[0],
