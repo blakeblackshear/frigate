@@ -22,7 +22,7 @@ export default function CameraMasks({ camera, url }) {
 
   const {
     width,
-    height
+    height,
   } = cameraConfig.detect;
 
   const [{ width: scaledWidth }] = useResizeObserver(imageRef);
