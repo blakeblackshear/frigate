@@ -133,7 +133,7 @@ ${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`)
 ${Object.keys(zonePoints)
     .map(
       (zoneName) => `    ${zoneName}:
-        coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
     )
     .join('\n')}`);
   }, [zonePoints]);
@@ -170,7 +170,7 @@ ${Object.keys(objectMaskPoints)
     .map((objectName) =>
       objectMaskPoints[objectName].length
         ? `      ${objectName}:
-          mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
+        mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
         : ''
     )
     .filter(Boolean)
@@ -206,7 +206,7 @@ ${Object.keys(objectMaskPoints)
         content={
           <p>
             This tool can help you create masks & zones for your {camera} camera. When done, copy each mask
-            configuration into your <code className='font-mono'>config.yml</code> file restart your Frigate instance to
+            configuration into your <code className="font-mono">config.yml</code> file restart your Frigate instance to
             save your changes.
           </p>
         }
@@ -233,7 +233,7 @@ ${Object.keys(objectMaskPoints)
       <div className="flex-col space-y-4">
         <MaskValues
           editing={editing}
-          title='Motion masks'
+          title="Motion masks"
           onCopy={handleCopyMotionMasks}
           onCreate={handleAddMask}
           onEdit={handleEditMask}
