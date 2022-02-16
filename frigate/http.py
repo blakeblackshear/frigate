@@ -356,18 +356,10 @@ def stats():
 @bp.route("/<camera_name>/<label>/latest.jpg")
 def latest(camera_name, label):
     png_bytes = None
-    draw_options = {
-        "bounding_boxes": request.args.get("bbox", type=int),
-        "timestamp": request.args.get("timestamp", type=int),
-        "zones": request.args.get("zones", type=int),
-        "mask": request.args.get("mask", type=int),
-        "motion_boxes": request.args.get("motion", type=int),
-        "regions": request.args.get("regions", type=int),
-    }
     resize_quality = request.args.get("quality", default=70, type=int)
 
     if camera_name in current_app.frigate_config.cameras:
-        if label is "any":
+        if label == "any":
             event_query = (
                 Event.select()
                 .where(Event.camera == camera_name)
