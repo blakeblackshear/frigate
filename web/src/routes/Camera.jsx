@@ -21,7 +21,7 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
+  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -92,14 +92,15 @@ export default function Camera({ camera }) {
         </div>
       </Fragment>
     );
-  } else if (viewMode === 'debug') {
+  }
+  else if (viewMode === 'debug') {
     player = (
       <Fragment>
         <div>
           <AutoUpdatingCameraImage camera={camera} searchParams={searchParams} />
         </div>
 
-        <Button onClick={handleToggleSettings} type='text'>
+        <Button onClick={handleToggleSettings} type="text">
           <span className="w-5 h-5">
             <SettingsIcon />
           </span>{' '}
