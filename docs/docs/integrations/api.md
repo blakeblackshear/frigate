@@ -24,9 +24,10 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1&quality=70]`
+### `GET /api/<camera_name>/<object_name>/latest.jpg[?h=300&crop=1&quality=70]`
 
-The best snapshot for any object type. It is a full resolution image by default.
+The snapshot from the latest event for a given object type. It is a full resolution image by default.
+`any` can be passed as the `object_name` to get snapshot from the latest event regardless of object type.
 
 Example parameters:
 
