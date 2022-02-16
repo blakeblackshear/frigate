@@ -2,39 +2,14 @@ import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { longToDate } from '../../utils/dateUtil';
 import { TimelineBlocks } from './TimelineBlocks';
+import { TimelineChangeEvent } from './TimelineChangeEvent';
 import { DisabledControls, TimelineControls } from './TimelineControls';
-
-export interface TimelineEvent {
-  start_time: number;
-  end_time: number;
-  startTime: Date;
-  endTime: Date;
-  id: string;
-  label: 'car' | 'person' | 'dog';
-}
-
-export interface TimelineEventBlock extends TimelineEvent {
-  index: number;
-  yOffset: number;
-  width: number;
-  positionX: number;
-  seconds: number;
-}
-
-export interface TimelineChangeEvent {
-  timelineEvent: TimelineEvent;
-  markerTime: Date;
-  seekComplete: boolean;
-}
+import { TimelineEvent } from './TimelineEvent';
+import { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineProps {
   events: TimelineEvent[];
   onChange: (event: TimelineChangeEvent) => void;
-}
-
-interface ScrollPermission {
-  allowed: boolean;
-  resetAfterSeeked: boolean;
 }
 
 export default function Timeline({ events, onChange }: TimelineProps) {
@@ -49,7 +24,7 @@ export default function Timeline({ events, onChange }: TimelineProps) {
   const [timelineOffset, setTimelineOffset] = useState<number | undefined>(undefined);
   const [markerTime, setMarkerTime] = useState<Date | undefined>(undefined);
   const [currentEvent, setCurrentEvent] = useState<TimelineEventBlock | undefined>(undefined);
-  const [scrollTimeout, setScrollTimeout] = useState<number | undefined>(undefined);
+  const [scrollTimeout, setScrollTimeout] = useState<any | undefined>(undefined);
   const [scrollPermission, setScrollPermission] = useState<ScrollPermission>({
     allowed: true,
     resetAfterSeeked: false,
@@ -134,12 +109,12 @@ export default function Timeline({ events, onChange }: TimelineProps) {
         rowMap.push([current]);
         return rowMap;
       }, [] as TimelineEventBlock[][])
-      .flatMap((r, rowPosition) => {
-        r.forEach((eventBlock) => {
+      .flatMap((rows, rowPosition) => {
+        rows.forEach((eventBlock) => {
           const OFFSET_DISTANCE_IN_PIXELS = 10;
           eventBlock.yOffset = OFFSET_DISTANCE_IN_PIXELS * rowPosition;
         });
-        return r;
+        return rows;
       })
       .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
   };

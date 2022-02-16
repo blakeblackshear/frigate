@@ -3,17 +3,14 @@ import { useEffect, useState } from 'preact/hooks';
 import { useEvents } from '../../api';
 import { useSearchString } from '../../hooks/useSearchString';
 import { HistoryHeader } from './HistoryHeader';
-import Timeline, { TimelineChangeEvent, TimelineEvent, TimelineEventBlock } from '../Timeline/Timeline';
+import Timeline from '../Timeline/Timeline';
 import { HistoryVideo } from './HistoryVideo';
-
-const getLast24Hours = (): number => {
-  const currentTimeEpoch = new Date().getTime();
-  const twentyFourHoursAgoEpoch = new Date(currentTimeEpoch - 24 * 60 * 60 * 1000).getTime();
-  return twentyFourHoursAgoEpoch / 1000;
-};
+import { TimelineEvent } from '../Timeline/TimelineEvent';
+import { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
+import { getNowYesterdayInLong } from '../../utils/dateUtil';
 
 export default function HistoryViewer({ camera }) {
-  const { searchString } = useSearchString(500, `camera=${camera}&after=${getLast24Hours()}`);
+  const { searchString } = useSearchString(500, `camera=${camera}&after=${getNowYesterdayInLong()}`);
   const { data: events } = useEvents(searchString);
 
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(undefined);
