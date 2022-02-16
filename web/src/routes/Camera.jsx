@@ -48,36 +48,36 @@ export default function Camera({ camera }) {
   }, [showSettings, setShowSettings]);
 
   const optionContent = showSettings ? (
-    <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <Switch
         checked={options['bbox']}
-        id='bbox'
+        id="bbox"
         onChange={handleSetOption}
-        label='Bounding box'
-        labelPosition='after'
+        label="Bounding box"
+        labelPosition="after"
       />
       <Switch
         checked={options['timestamp']}
-        id='timestamp'
+        id="timestamp"
         onChange={handleSetOption}
-        label='Timestamp'
-        labelPosition='after'
+        label="Timestamp"
+        labelPosition="after"
       />
-      <Switch checked={options['zones']} id='zones' onChange={handleSetOption} label='Zones' labelPosition='after' />
-      <Switch checked={options['mask']} id='mask' onChange={handleSetOption} label='Masks' labelPosition='after' />
+      <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
+      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
       <Switch
         checked={options['motion']}
-        id='motion'
+        id="motion"
         onChange={handleSetOption}
-        label='Motion boxes'
-        labelPosition='after'
+        label="Motion boxes"
+        labelPosition="after"
       />
       <Switch
         checked={options['regions']}
-        id='regions'
+        id="regions"
         onChange={handleSetOption}
-        label='Regions'
-        labelPosition='after'
+        label="Regions"
+        labelPosition="after"
       />
       <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
     </div>
@@ -100,29 +100,29 @@ export default function Camera({ camera }) {
         </div>
 
         <Button onClick={handleToggleSettings} type='text'>
-          <span className='w-5 h-5'>
+          <span className="w-5 h-5">
             <SettingsIcon />
           </span>{' '}
           <span>{showSettings ? 'Hide' : 'Show'} Options</span>
         </Button>
-        {showSettings ? <Card header='Options' elevated={false} content={optionContent} /> : null}
+        {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
       </Fragment>
     );
   }
 
   return (
-    <div className='space-y-4 p-2 px-4'>
-      <Heading size='2xl'>{camera}</Heading>
+    <div className="space-y-4 p-2 px-4">
+      <Heading size="2xl">{camera}</Heading>
       <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
 
       {player}
 
-      <div className='space-y-4'>
-        <Heading size='sm'>Tracked objects</Heading>
-        <div className='flex flex-wrap justify-start'>
+      <div className="space-y-4">
+        <Heading size="sm">Tracked objects</Heading>
+        <div className="flex flex-wrap justify-start">
           {cameraConfig.objects.track.map((objectType) => (
             <Card
-              className='mb-4 mr-4'
+              className="mb-4 mr-4"
               key={objectType}
               header={objectType}
               href={`/events?camera=${camera}&label=${objectType}`}
