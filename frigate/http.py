@@ -1,4 +1,5 @@
 import base64
+from cgi import test
 from collections import OrderedDict
 from datetime import datetime, timedelta
 import copy
@@ -351,6 +352,30 @@ def stats():
     stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
 
+@bp.route("/<camera_name>/<label>/latest.jpg")
+def latest(camera_name, label):
+    jpg_bytes = None
+    if camera_name in current_app.frigate_config.cameras:
+        events = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == "*" if label is "any" else label)
+            .where(Event.has_snapshot == True)
+            .where(Event.end_time != None)
+            .order_by(Event.start_time.desc())
+        )
+
+        # read snapshot from disk
+        with open(
+            os.path.join(CLIPS_DIR, f"{event.camera}-{id}.jpg"), "rb"
+        ) as image_file:
+            jpg_bytes = image_file.read()
+
+        response = make_response(jpg_bytes)
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
+    else:
+        return "Camera named {} not found".format(camera_name), 404
 
 @bp.route("/<camera_name>/<label>/best.jpg")
 def best(camera_name, label):
