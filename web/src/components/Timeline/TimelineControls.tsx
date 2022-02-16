@@ -12,14 +12,21 @@ export interface DisabledControls {
 
 interface TimelineControlsProps {
   disabled: DisabledControls;
+  className?: string;
   onPlayPause: () => void;
   onNext: () => void;
   onPrevious: () => void;
 }
 
-export const TimelineControls = ({ disabled, onPlayPause, onNext, onPrevious }: TimelineControlsProps) => {
+export const TimelineControls = ({
+  disabled,
+  onPlayPause,
+  onNext,
+  onPrevious,
+  className = '',
+}: TimelineControlsProps) => {
   return (
-    <div className='flex space-x-2 self-center'>
+    <div className={`flex space-x-2 self-center ${className}`}>
       <BubbleButton variant='secondary' onClick={onPrevious} disabled={disabled.previous}>
         <Previous />
       </BubbleButton>
