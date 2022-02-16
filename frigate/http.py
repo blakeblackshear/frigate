@@ -383,7 +383,25 @@ def latest(camera_name, label):
             return "No event for {} was found".format(label), 404
 
         # read snapshot from disk
-        frame = cv2.imread(os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"))
+        frame = cv2.imread(
+            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png")
+        )
+
+        crop = bool(request.args.get("crop", 0, type=int))
+        if crop:
+            box_size = 300
+            box = event.box
+            region = calculate_region(
+                frame.shape,
+                box[0],
+                box[1],
+                box[2],
+                box[3],
+                box_size,
+                multiplier=1.1,
+            )
+            frame = frame[region[1] : region[3], region[0] : region[2]]
+
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
