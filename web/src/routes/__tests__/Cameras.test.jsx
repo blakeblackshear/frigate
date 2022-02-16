@@ -12,8 +12,8 @@ describe('Cameras Route', () => {
     useConfigMock = jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
       data: {
         cameras: {
-          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: true } },
-          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: false } },
+          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: true }, gui: { order: 0 } },
+          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: false }, gui: {order : 0 } },
         },
       },
       status: 'loaded',
