@@ -56,8 +56,9 @@ Message published for each changed event. The first message is published when th
     "thumbnail": null,
     "has_snapshot": false,
     "has_clip": false,
+    "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
-    "position_changes": 2 // number of times the object has changed position
+    "position_changes": 2 // number of times the object has moved from a stationary position
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -78,6 +79,7 @@ Message published for each changed event. The first message is published when th
     "thumbnail": null,
     "has_snapshot": false,
     "has_clip": false,
+    "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
     "position_changes": 2 // number of times the object has changed position
   }

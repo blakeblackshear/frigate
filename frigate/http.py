@@ -249,7 +249,10 @@ def event_clip(id):
     clip_path = os.path.join(CLIPS_DIR, file_name)
 
     if not os.path.isfile(clip_path):
-        return recording_clip(event.camera, event.start_time, event.end_time)
+        end_ts = (
+            datetime.now().timestamp() if event.end_time is None else event.end_time
+        )
+        return recording_clip(event.camera, event.start_time, end_ts)
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"

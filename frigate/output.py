@@ -192,10 +192,7 @@ class BirdsEyeFrameManager:
         if self.mode == BirdseyeModeEnum.continuous:
             return True
 
-        if (
-            self.mode == BirdseyeModeEnum.motion
-            and object_box_count + motion_box_count > 0
-        ):
+        if self.mode == BirdseyeModeEnum.motion and motion_box_count > 0:
             return True
 
         if self.mode == BirdseyeModeEnum.objects and object_box_count > 0:
@@ -426,7 +423,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
         ):
             if birdseye_manager.update(
                 camera,
-                len(current_tracked_objects),
+                len([o for o in current_tracked_objects if not o["stationary"]]),
                 len(motion_boxes),
                 frame_time,
                 frame,

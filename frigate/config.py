@@ -170,6 +170,29 @@ class RuntimeMotionConfig(MotionConfig):
         extra = Extra.ignore
 
 
+class StationaryMaxFramesConfig(FrigateBaseModel):
+    default: Optional[int] = Field(title="Default max frames.", ge=1)
+    objects: Dict[str, int] = Field(
+        default_factory=dict, title="Object specific max frames."
+    )
+
+
+class StationaryConfig(FrigateBaseModel):
+    interval: Optional[int] = Field(
+        default=0,
+        title="Frame interval for checking stationary objects.",
+        ge=0,
+    )
+    threshold: Optional[int] = Field(
+        title="Number of frames without a position change for an object to be considered stationary",
+        ge=1,
+    )
+    max_frames: StationaryMaxFramesConfig = Field(
+        default_factory=StationaryMaxFramesConfig,
+        title="Max frames for stationary objects.",
+    )
+
+
 class DetectConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Height of the stream for the detect role.")
     width: int = Field(default=1280, title="Width of the stream for the detect role.")
@@ -180,15 +203,9 @@ class DetectConfig(FrigateBaseModel):
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
-    stationary_interval: Optional[int] = Field(
-        default=0,
-        title="Frame interval for checking stationary objects.",
-        ge=0,
-    )
-    stationary_threshold: Optional[int] = Field(
-        default=10,
-        title="Number of frames without a position change for an object to be considered stationary",
-        ge=1,
+    stationary: StationaryConfig = Field(
+        default_factory=StationaryConfig,
+        title="Stationary objects config.",
     )
 
 
@@ -932,6 +949,11 @@ class FrigateConfig(FrigateBaseModel):
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
+
+            # Default stationary_threshold configuration
+            stationary_threshold = camera_config.detect.fps * 10
+            if camera_config.detect.stationary.threshold is None:
+                camera_config.detect.stationary.threshold = stationary_threshold
 
             # FFMPEG input substitution
             if "ffmpeg" in camera_config:
