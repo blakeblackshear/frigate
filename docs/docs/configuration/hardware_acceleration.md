@@ -68,3 +68,9 @@ ffmpeg:
 ### NVIDIA GPU
 
 NVIDIA GPU based decoding via NVDEC is supported, but requires special configuration. See the [NVIDIA NVDEC documentation](/configuration/nvdec) for more details.
+
+
+### TensorRT on NVIDIA Jetson family devices
+
+For the NVIDIA Jetson family devices, you might use both ffmpeg and gstreamer decoders. As of now, ffmpeg does not fully support NVDEC on the Jetson devices. As an alternative, you may use gstreamer with the `nvv4l2decoder` plugin to enable the NVDEC and NVENC features of Jetson devices.
+See the See the [GStreamer documentation](/configuration/gstreamer) for more details.

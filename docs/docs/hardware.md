@@ -34,6 +34,8 @@ My current favorite is the Odyssey X86 Blue J4125 because the Coral M.2 compatib
 | <a href="https://amzn.to/2WIpwRU" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 3B (32bit)</a> (affiliate link) | 60ms            | USB                 | Can handle a small number of cameras, but the detection speeds are slow due to USB 2.0.                                       |
 | <a href="https://amzn.to/2YhSGHH" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 4 (32bit)</a> (affiliate link)  | 15-20ms         | USB                 | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
 | <a href="https://amzn.to/2YhSGHH" target="_blank" rel="nofollow noopener sponsored">Raspberry Pi 4 (64bit)</a> (affiliate link)  | 10-15ms         | USB                 | Can handle a small number of cameras. The 2GB version runs fine.                                                              |
+| NVIDIA Jetson Nano 4GB                                                                                                           | 25-50ms         |                     | With the gstreamer and NVDEC hardware decoding can handle up to 6-8 cameras depending on the resolution and FPS.              |
+| NVIDIA Jetson Xavier                                                                                                             |                 |                     | NVIDIA Jetson Xavier is known to be a more powerful device than Nano and should handle more cameras with higher resolution and FPS.|
 
 ## Google Coral TPU
 

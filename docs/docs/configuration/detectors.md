@@ -64,6 +64,20 @@ detectors:
     device: pci
 ```
 
+### TensorRT on NVIDIA Jetson family devices
+
+```yaml
+detectors:
+  JetsonNano:
+    type: tensorrt
+```
+
+You have to run TensorRT with the latest Jetpack version.
+
+**Note:** You might also want to set up the [GStreamer](/configuration/gstreamer) to get hardware-accelerated decoding on your Jetson device.
+
+_warning: TensorRT uses `trt` models. Please make sure you're using either the default `model` configuration or use proper `yolo4` models._
+
 ### CPU Detectors (not recommended)
 
 ```yaml

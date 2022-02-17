@@ -26,6 +26,7 @@ module.exports = {
       'configuration/hardware_acceleration',
       'configuration/nvdec',
       'configuration/camera_specific',
+      'configuration/gstreamer',
     ],
     Integrations: ['integrations/home-assistant', 'integrations/api', 'integrations/mqtt'],
     Troubleshooting: ['faqs'],
