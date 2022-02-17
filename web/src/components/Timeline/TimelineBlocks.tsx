@@ -1,65 +1,47 @@
 import { h } from 'preact';
-import { TimelineEventBlock } from './Timeline';
+import { useMemo } from 'preact/hooks';
+import { findLargestYOffsetInBlocks, getTimelineWidthFromBlocks } from '../../utils/Timeline/timelineEventUtils';
+import { convertRemToPixels } from '../../utils/windowUtils';
 import { TimelineBlockView } from './TimelineBlockView';
+import { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineBlocksProps {
   timeline: TimelineEventBlock[];
   firstBlockOffset: number;
   onEventClick: (block: TimelineEventBlock) => void;
 }
+
 export const TimelineBlocks = ({ timeline, firstBlockOffset, onEventClick }: TimelineBlocksProps) => {
-  const convertRemToPixels = (rem) => {
-    return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
-  };
-
-  const getMaxYOffset = () => {
-    return timeline.reduce((accumulation, current) => {
-      if (current.yOffset > accumulation) {
-        accumulation = current.yOffset;
-      }
-      return accumulation;
-    }, 0);
-  };
-
-  const getTimelineContainerHeight = () => {
-    return getMaxYOffset() + convertRemToPixels(1);
-  };
-
-  const calculateTimelineContainerWidth = () => {
-    if (timeline.length > 0) {
-      const startTimeEpoch = timeline[0].startTime.getTime();
-      const endTimeEpoch = new Date().getTime();
-      return Math.round(Math.abs(endTimeEpoch - startTimeEpoch) / 1000) + firstBlockOffset * 2;
+  const timelineEventBlocks = useMemo(() => {
+    if (timeline.length > 0 && firstBlockOffset) {
+      const largestYOffsetInBlocks = findLargestYOffsetInBlocks(timeline);
+      const timelineContainerHeight = largestYOffsetInBlocks + convertRemToPixels(1);
+      const timelineContainerWidth = getTimelineWidthFromBlocks(timeline, firstBlockOffset);
+      const timelineBlockOffset = (timelineContainerHeight - largestYOffsetInBlocks) / 2;
+      return (
+        <div
+          className='relative'
+          style={{
+            height: `${timelineContainerHeight}px`,
+            width: `${timelineContainerWidth}px`,
+            background: "url('/marker.png')",
+            backgroundPosition: 'center',
+            backgroundSize: '30px',
+            backgroundRepeat: 'repeat',
+          }}
+        >
+          {timeline.map((block) => {
+            const onClickHandler = (block: TimelineEventBlock) => onEventClick(block);
+            const updatedBlock: TimelineEventBlock = {
+              ...block,
+              yOffset: block.yOffset + timelineBlockOffset,
+            };
+            return <TimelineBlockView block={updatedBlock} onClick={onClickHandler} />;
+          })}
+        </div>
+      );
     }
-  };
+  }, [timeline, onEventClick, firstBlockOffset]);
 
-  const onClickHandler = (block: TimelineEventBlock) => onEventClick(block);
-
-  if (timeline.length > 0) {
-    return (
-      <div
-        className='relative'
-        style={{
-          height: `${getTimelineContainerHeight()}px`,
-          width: `${calculateTimelineContainerWidth()}px`,
-          background: "url('/marker.png')",
-          backgroundPosition: 'center',
-          backgroundSize: '30px',
-          backgroundRepeat: 'repeat',
-        }}
-      >
-        {timeline.map((block) => {
-          return (
-            <TimelineBlockView
-              block={{
-                ...block,
-                yOffset: block.yOffset + (getTimelineContainerHeight() - getMaxYOffset()) / 2,
-              }}
-              onClick={onClickHandler}
-            />
-          );
-        })}
-      </div>
-    );
-  }
+  return timelineEventBlocks;
 };
