@@ -9,10 +9,12 @@ import { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineProps {
   events: TimelineEvent[];
+  isPlaying: boolean;
   onChange: (event: TimelineChangeEvent) => void;
+  onPlayPause: (isPlaying: boolean) => void;
 }
 
-export default function Timeline({ events, onChange }: TimelineProps) {
+export default function Timeline({ events, isPlaying, onChange, onPlayPause }: TimelineProps) {
   const timelineContainerRef = useRef<HTMLDivElement>(undefined);
 
   const [timeline, setTimeline] = useState<TimelineEventBlock[]>([]);
@@ -235,7 +237,10 @@ export default function Timeline({ events, onChange }: TimelineProps) {
     setMarkerTime(getCurrentMarkerTime());
   };
 
-  const onPlayPauseHandler = () => {};
+  const onPlayPauseHandler = (isPlaying: boolean) => {
+    onPlayPause(isPlaying);
+  };
+
   const onPreviousHandler = () => {
     if (currentEvent) {
       const previousEvent = timeline[currentEvent.index - 1];
@@ -284,6 +289,7 @@ export default function Timeline({ events, onChange }: TimelineProps) {
       </div>
       <TimelineControls
         disabled={disabledControls}
+        isPlaying={isPlaying}
         onPrevious={onPreviousHandler}
         onPlayPause={onPlayPauseHandler}
         onNext={onNextHandler}

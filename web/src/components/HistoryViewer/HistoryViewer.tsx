@@ -2,12 +2,12 @@ import { Fragment, h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { useEvents } from '../../api';
 import { useSearchString } from '../../hooks/useSearchString';
-import { HistoryHeader } from './HistoryHeader';
-import Timeline from '../Timeline/Timeline';
-import { HistoryVideo } from './HistoryVideo';
-import { TimelineEvent } from '../Timeline/TimelineEvent';
-import { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
 import { getNowYesterdayInLong } from '../../utils/dateUtil';
+import Timeline from '../Timeline/Timeline';
+import { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
+import { TimelineEvent } from '../Timeline/TimelineEvent';
+import { HistoryHeader } from './HistoryHeader';
+import { HistoryVideo } from './HistoryVideo';
 
 export default function HistoryViewer({ camera }) {
   const { searchString } = useSearchString(500, `camera=${camera}&after=${getNowYesterdayInLong()}`);
@@ -38,10 +38,6 @@ export default function HistoryViewer({ camera }) {
     }
   };
 
-  const handlePlay = () => {
-    setIsPlaying((previous) => !previous);
-  };
-
   const onPlayHandler = () => {
     setIsPlaying(true);
   };
@@ -50,9 +46,10 @@ export default function HistoryViewer({ camera }) {
     setIsPlaying(false);
   };
 
-  const handlePrevious = () => {};
-
-  const handleNext = () => {};
+  const onPlayPauseHandler = (isPlaying: boolean) => {
+    console.debug('onPlayPauseHandler: setting isPlaying', { isPlaying });
+    setIsPlaying(isPlaying);
+  };
 
   return (
     <Fragment>
@@ -72,7 +69,12 @@ export default function HistoryViewer({ camera }) {
         </div>
       </Fragment>
 
-      <Timeline events={timelineEvents} onChange={handleTimelineChange} />
+      <Timeline
+        events={timelineEvents}
+        isPlaying={isPlaying}
+        onChange={handleTimelineChange}
+        onPlayPause={onPlayPauseHandler}
+      />
     </Fragment>
   );
 }

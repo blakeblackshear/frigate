@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../../api';
 
 interface OnTimeUpdateEvent {
@@ -66,23 +66,40 @@ export const HistoryVideo = ({
     }
   }, [id, videoHeight]);
 
-  const playVideo = (video: HTMLMediaElement) => {
-    const videoHasNotLoaded = video.readyState <= 1;
-    if (videoHasNotLoaded) {
-      video.load();
-    }
-
-    video.play().catch((e) => {
-      console.error('Fail', e);
-    });
-  };
-
   useEffect(() => {
+    const playVideo = (video: HTMLMediaElement) => {
+      console.debug('playVideo: attempt playback');
+      video
+        .play()
+        .then(() => {
+          console.debug('playVideo: video started');
+        })
+        .catch((e) => {
+          console.error('Fail', { e });
+        });
+    };
+
+    const attemptPlayVideo = (video: HTMLMediaElement) => {
+      const videoHasNotLoaded = video.readyState <= 1;
+      console.debug('playVideo', { videoHasNotLoaded });
+      if (videoHasNotLoaded) {
+        console.debug('playVideo: attempt to load video');
+        video.oncanplay = () => {
+          console.debug('onLoad: video loaded');
+          playVideo(video);
+        };
+        video.load();
+      } else {
+        playVideo(video);
+      }
+    };
+
     const video = videoRef.current;
     const videoExists = !isNullOrUndefined(video);
     if (videoExists) {
+      console.log('check should start', { videoIsPlaying });
       if (videoIsPlaying) {
-        playVideo(video);
+        attemptPlayVideo(video);
       } else {
         video.pause();
       }
@@ -110,28 +127,24 @@ export const HistoryVideo = ({
     [videoIsPlaying]
   );
 
-  const Video = useCallback(() => {
-    const videoPropertiesIsUndefined = isNullOrUndefined(videoProperties);
-    if (videoPropertiesIsUndefined) {
-      return <div style={{ height: `${videoHeight}px`, width: '100%' }}></div>;
-    }
-    const { posterUrl, videoUrl, height } = videoProperties;
-    return (
-      <video
-        ref={videoRef}
-        onTimeUpdate={onTimeUpdateHandler}
-        onPause={onPause}
-        onPlay={onPlay}
-        poster={posterUrl}
-        preload='metadata'
-        controls
-        style={height ? { minHeight: `${height}px` } : {}}
-        playsInline
-      >
-        <source type='application/vnd.apple.mpegurl' src={videoUrl} />
-      </video>
-    );
-  }, [videoProperties, videoHeight, videoRef]);
-
-  return <Video />;
+  const videoPropertiesIsUndefined = isNullOrUndefined(videoProperties);
+  if (videoPropertiesIsUndefined) {
+    return <div style={{ height: `${videoHeight}px`, width: '100%' }}></div>;
+  }
+  const { posterUrl, videoUrl, height } = videoProperties;
+  return (
+    <video
+      ref={videoRef}
+      onTimeUpdate={onTimeUpdateHandler}
+      onPause={onPause}
+      onPlay={onPlay}
+      poster={posterUrl}
+      preload='metadata'
+      controls
+      style={height ? { minHeight: `${height}px` } : {}}
+      playsInline
+    >
+      <source type='application/vnd.apple.mpegurl' src={videoUrl} />
+    </video>
+  );
 };
