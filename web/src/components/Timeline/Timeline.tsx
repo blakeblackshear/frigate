@@ -1,5 +1,5 @@
 import { Fragment, h } from 'preact';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { longToDate } from '../../utils/dateUtil';
 import { TimelineBlocks } from './TimelineBlocks';
 import { TimelineChangeEvent } from './TimelineChangeEvent';
@@ -145,13 +145,15 @@ export default function Timeline({ events, onChange }: TimelineProps) {
   }, [timeline]);
 
   const checkMarkerForEvent = (markerTime: Date) => {
-    markerTime.setMilliseconds(999); // adjust milliseconds to account for drift
+    const adjustedMarkerTime = new Date(markerTime);
+    adjustedMarkerTime.setSeconds(markerTime.getSeconds() + 1);
+
     return [...timeline]
       .reverse()
       .find(
         (timelineEvent) =>
-          timelineEvent.startTime.getTime() <= markerTime.getTime() &&
-          timelineEvent.endTime.getTime() >= markerTime.getTime()
+          timelineEvent.startTime.getTime() <= adjustedMarkerTime.getTime() &&
+          timelineEvent.endTime.getTime() >= adjustedMarkerTime.getTime()
       );
   };
 
@@ -249,8 +251,8 @@ export default function Timeline({ events, onChange }: TimelineProps) {
     }
   };
 
-  const RenderTimelineBlocks = useCallback(() => {
-    if (timelineOffset > 0 && timeline.length > 0) {
+  const timelineBlocks = useMemo(() => {
+    if (timelineOffset && timeline.length > 0) {
       return <TimelineBlocks timeline={timeline} firstBlockOffset={timelineOffset} onEventClick={handleViewEvent} />;
     }
   }, [timeline, timelineOffset]);
@@ -276,7 +278,7 @@ export default function Timeline({ events, onChange }: TimelineProps) {
             </div>
           </div>
           <div ref={timelineContainerRef} onScroll={onTimelineScrollHandler} className='overflow-x-auto hide-scroll'>
-            <RenderTimelineBlocks />
+            {timelineBlocks}
           </div>
         </div>
       </div>
@@ -285,6 +287,7 @@ export default function Timeline({ events, onChange }: TimelineProps) {
         onPrevious={onPreviousHandler}
         onPlayPause={onPlayPauseHandler}
         onNext={onNextHandler}
+        className='mt-2'
       />
     </Fragment>
   );
