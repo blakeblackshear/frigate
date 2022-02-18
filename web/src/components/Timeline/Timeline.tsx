@@ -1,6 +1,7 @@
 import { Fragment, h } from 'preact';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { longToDate } from '../../utils/dateUtil';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { getTimelineEventBlocksFromTimelineEvents } from '../../utils/Timeline/timelineEventUtils';
+import { ScrollPermission } from './ScrollPermission';
 import { TimelineBlocks } from './TimelineBlocks';
 import { TimelineChangeEvent } from './TimelineChangeEvent';
 import { DisabledControls, TimelineControls } from './TimelineControls';
@@ -11,7 +12,7 @@ interface TimelineProps {
   events: TimelineEvent[];
   isPlaying: boolean;
   onChange: (event: TimelineChangeEvent) => void;
-  onPlayPause: (isPlaying: boolean) => void;
+  onPlayPause?: (isPlaying: boolean) => void;
 }
 
 export default function Timeline({ events, isPlaying, onChange, onPlayPause }: TimelineProps) {
@@ -26,11 +27,35 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
   const [timelineOffset, setTimelineOffset] = useState<number | undefined>(undefined);
   const [markerTime, setMarkerTime] = useState<Date | undefined>(undefined);
   const [currentEvent, setCurrentEvent] = useState<TimelineEventBlock | undefined>(undefined);
-  const [scrollTimeout, setScrollTimeout] = useState<any | undefined>(undefined);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
   const [scrollPermission, setScrollPermission] = useState<ScrollPermission>({
     allowed: true,
     resetAfterSeeked: false,
   });
+
+  const scrollToPosition = useCallback(
+    (positionX: number) => {
+      if (timelineContainerRef.current) {
+        const permission: ScrollPermission = {
+          allowed: true,
+          resetAfterSeeked: true,
+        };
+        setScrollPermission(permission);
+        timelineContainerRef.current.scroll({
+          left: positionX,
+          behavior: 'smooth',
+        });
+      }
+    },
+    [timelineContainerRef]
+  );
+
+  const scrollToEvent = useCallback(
+    (event, offset = 0) => {
+      scrollToPosition(event.positionX + offset - timelineOffset);
+    },
+    [timelineOffset, scrollToPosition]
+  );
 
   useEffect(() => {
     if (timeline.length > 0 && currentEvent) {
@@ -57,86 +82,18 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
     }
   }, [timeline, currentEvent]);
 
-  const checkEventForOverlap = (firstEvent: TimelineEvent, secondEvent: TimelineEvent) => {
-    if (secondEvent.startTime < firstEvent.endTime && secondEvent.startTime > firstEvent.startTime) {
-      return true;
-    }
-    return false;
-  };
-
-  const determineOffset = (currentEvent: TimelineEventBlock, previousEvents: TimelineEventBlock[]): number => {
-    const OFFSET_DISTANCE_IN_PIXELS = 10;
-    const previousIndex = previousEvents.length - 1;
-    const previousEvent = previousEvents[previousIndex];
-    if (previousEvent) {
-      const isOverlap = checkEventForOverlap(previousEvent, currentEvent);
-      if (isOverlap) {
-        return OFFSET_DISTANCE_IN_PIXELS + determineOffset(currentEvent, previousEvents.slice(0, previousIndex));
-      }
-    }
-    return 0;
-  };
-
-  const buildTimelineView = (events: TimelineEvent[]): TimelineEventBlock[] => {
-    const firstEvent = events[0];
-    const firstEventTime = longToDate(firstEvent.start_time);
-    return events
-      .map((e, index) => {
-        const startTime = longToDate(e.start_time);
-        const endTime = e.end_time ? longToDate(e.end_time) : new Date();
-        const seconds = Math.round(Math.abs(endTime.getTime() - startTime.getTime()) / 1000);
-        const positionX = Math.round(Math.abs(startTime.getTime() - firstEventTime.getTime()) / 1000 + timelineOffset);
-        return {
-          ...e,
-          startTime,
-          endTime,
-          width: seconds,
-          positionX,
-          index,
-        } as TimelineEventBlock;
-      })
-      .reduce((rowMap, current) => {
-        for (let i = 0; i < rowMap.length; i++) {
-          const row = rowMap[i] ?? [];
-          const lastItem = row[row.length - 1];
-          if (lastItem) {
-            const isOverlap = checkEventForOverlap(lastItem, current);
-            if (isOverlap) {
-              continue;
-            }
-          }
-          rowMap[i] = [...row, current];
-          return rowMap;
-        }
-        rowMap.push([current]);
-        return rowMap;
-      }, [] as TimelineEventBlock[][])
-      .flatMap((rows, rowPosition) => {
-        rows.forEach((eventBlock) => {
-          const OFFSET_DISTANCE_IN_PIXELS = 10;
-          eventBlock.yOffset = OFFSET_DISTANCE_IN_PIXELS * rowPosition;
-        });
-        return rows;
-      })
-      .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-  };
-
   useEffect(() => {
     if (events && events.length > 0 && timelineOffset) {
-      const timelineEvents = buildTimelineView(events);
+      const timelineEvents = getTimelineEventBlocksFromTimelineEvents(events, timelineOffset);
       const lastEventIndex = timelineEvents.length - 1;
       const recentEvent = timelineEvents[lastEventIndex];
 
       setTimeline(timelineEvents);
       setMarkerTime(recentEvent.startTime);
       setCurrentEvent(recentEvent);
-      onChange({
-        timelineEvent: recentEvent,
-        markerTime: recentEvent.startTime,
-        seekComplete: true,
-      });
+      scrollToEvent(recentEvent);
     }
-  }, [events, timelineOffset]);
+  }, [events, timelineOffset, scrollToEvent]);
 
   useEffect(() => {
     const timelineIsLoaded = timeline.length > 0;
@@ -144,7 +101,7 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
       const lastEvent = timeline[timeline.length - 1];
       scrollToEvent(lastEvent);
     }
-  }, [timeline]);
+  }, [timeline, scrollToEvent]);
 
   const checkMarkerForEvent = (markerTime: Date) => {
     const adjustedMarkerTime = new Date(markerTime);
@@ -197,32 +154,14 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
     }
   };
 
-  const scrollToPosition = (positionX: number) => {
-    if (timelineContainerRef.current) {
-      const permission: ScrollPermission = {
-        allowed: true,
-        resetAfterSeeked: true,
-      };
-      setScrollPermission(permission);
-      timelineContainerRef.current.scroll({
-        left: positionX,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  const scrollToEvent = (event, offset = 0) => {
-    scrollToPosition(event.positionX + offset - timelineOffset);
-  };
-
-  const getCurrentMarkerTime = () => {
+  const getCurrentMarkerTime = useCallback(() => {
     if (timelineContainerRef.current && timeline.length > 0) {
       const scrollPosition = timelineContainerRef.current.scrollLeft;
       const firstTimelineEvent = timeline[0] as TimelineEventBlock;
       const firstTimelineEventStartTime = firstTimelineEvent.startTime.getTime();
       return new Date(firstTimelineEventStartTime + scrollPosition * 1000);
     }
-  };
+  }, [timeline, timelineContainerRef]);
 
   useEffect(() => {
     if (timelineContainerRef) {
@@ -232,10 +171,13 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
     }
   }, [timelineContainerRef]);
 
-  const handleViewEvent = (event: TimelineEventBlock) => {
-    scrollToEvent(event);
-    setMarkerTime(getCurrentMarkerTime());
-  };
+  const handleViewEvent = useCallback(
+    (event: TimelineEventBlock) => {
+      scrollToEvent(event);
+      setMarkerTime(getCurrentMarkerTime());
+    },
+    [scrollToEvent, getCurrentMarkerTime]
+  );
 
   const onPlayPauseHandler = (isPlaying: boolean) => {
     onPlayPause(isPlaying);
@@ -260,7 +202,7 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
     if (timelineOffset && timeline.length > 0) {
       return <TimelineBlocks timeline={timeline} firstBlockOffset={timelineOffset} onEventClick={handleViewEvent} />;
     }
-  }, [timeline, timelineOffset]);
+  }, [timeline, timelineOffset, handleViewEvent]);
 
   return (
     <Fragment>
@@ -279,7 +221,7 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
                   left: 'calc(100% / 2)',
                   borderRight: '2px solid rgba(252, 211, 77)',
                 }}
-              ></div>
+              />
             </div>
           </div>
           <div ref={timelineContainerRef} onScroll={onTimelineScrollHandler} className='overflow-x-auto hide-scroll'>

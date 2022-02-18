@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../../api';
+import { isNullOrUndefined } from '../../utils/objectUtils';
 
 interface OnTimeUpdateEvent {
   timestamp: number;
@@ -17,12 +18,10 @@ interface HistoryVideoProps {
   id: string;
   isPlaying: boolean;
   currentTime: number;
-  onTimeUpdate: (event: OnTimeUpdateEvent) => void;
+  onTimeUpdate?: (event: OnTimeUpdateEvent) => void;
   onPause: () => void;
   onPlay: () => void;
 }
-
-const isNullOrUndefined = (object: any): boolean => object === null || object === undefined;
 
 export const HistoryVideo = ({
   id,
@@ -47,7 +46,7 @@ export const HistoryVideo = ({
         setVideoHeight(videoHeight);
       }
     }
-  }, [videoRef.current]);
+  }, [videoRef]);
 
   useEffect(() => {
     initializeVideoContainerHeight();
@@ -56,6 +55,10 @@ export const HistoryVideo = ({
   useEffect(() => {
     const idExists = !isNullOrUndefined(id);
     if (idExists) {
+      if (videoRef.current && !videoRef.current.paused) {
+        videoRef.current = undefined;
+      }
+
       setVideoProperties({
         posterUrl: `${apiHost}/api/events/${id}/snapshot.jpg`,
         videoUrl: `${apiHost}/vod/event/${id}/index.m3u8`,
@@ -64,28 +67,15 @@ export const HistoryVideo = ({
     } else {
       setVideoProperties(undefined);
     }
-  }, [id, videoHeight]);
+  }, [id, videoHeight, videoRef, apiHost]);
 
   useEffect(() => {
-    const playVideo = (video: HTMLMediaElement) => {
-      console.debug('playVideo: attempt playback');
-      video
-        .play()
-        .then(() => {
-          console.debug('playVideo: video started');
-        })
-        .catch((e) => {
-          console.error('Fail', { e });
-        });
-    };
+    const playVideo = (video: HTMLMediaElement) => video.play();
 
     const attemptPlayVideo = (video: HTMLMediaElement) => {
       const videoHasNotLoaded = video.readyState <= 1;
-      console.debug('playVideo', { videoHasNotLoaded });
       if (videoHasNotLoaded) {
-        console.debug('playVideo: attempt to load video');
         video.oncanplay = () => {
-          console.debug('onLoad: video loaded');
           playVideo(video);
         };
         video.load();
@@ -97,7 +87,6 @@ export const HistoryVideo = ({
     const video = videoRef.current;
     const videoExists = !isNullOrUndefined(video);
     if (videoExists) {
-      console.log('check should start', { videoIsPlaying });
       if (videoIsPlaying) {
         attemptPlayVideo(video);
       } else {
@@ -122,19 +111,22 @@ export const HistoryVideo = ({
         isPlaying: videoIsPlaying,
         timestamp: target.currentTime,
       };
-      onTimeUpdate(timeUpdateEvent);
+
+      onTimeUpdate && onTimeUpdate(timeUpdateEvent);
     },
-    [videoIsPlaying]
+    [videoIsPlaying, onTimeUpdate]
   );
 
   const videoPropertiesIsUndefined = isNullOrUndefined(videoProperties);
   if (videoPropertiesIsUndefined) {
-    return <div style={{ height: `${videoHeight}px`, width: '100%' }}></div>;
+    return <div style={{ height: `${videoHeight}px`, width: '100%' }} />;
   }
+
   const { posterUrl, videoUrl, height } = videoProperties;
   return (
     <video
       ref={videoRef}
+      key={posterUrl}
       onTimeUpdate={onTimeUpdateHandler}
       onPause={onPause}
       onPlay={onPlay}

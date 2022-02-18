@@ -6,7 +6,7 @@ import { useConfig } from '../api';
 import { Tabs, TextTab } from '../components/Tabs';
 import { LiveChip } from '../components/LiveChip';
 import { DebugCamera } from '../components/DebugCamera';
-import { HistoryViewer } from '../components/HistoryViewer'
+import HistoryViewer from '../components/HistoryViewer/HistoryViewer.tsx';
 
 export default function Camera({ camera }) {
   const { data: config } = useConfig();

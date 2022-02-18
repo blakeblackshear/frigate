@@ -1,7 +1,15 @@
 {
   "compilerOptions": {
-    "jsx": "preserve",
+    "module": "CommonJS",
+    "target": "ES2019",
+    "jsx": "react",
     "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
-  }
+    "lib": [
+      "ES2019"
+    ]
+  },
+  "include": [
+    "./src/**/*.tsx",
+    "./src/**/*.ts"
+  ]
 }

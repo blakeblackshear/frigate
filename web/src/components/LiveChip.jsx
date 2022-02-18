@@ -9,7 +9,7 @@ export function LiveChip({ className }) {
             class='animate-ping absolute inline-flex h-full w-full rounded-full opacity-75'
             style={{ backgroundColor: 'rgb(74 222 128)' }}
           />
-          <span class='relative inline-flex rounded-full h-3 w-3' style={{ backgroundColor: 'rgb(74 222 128)' }}/>
+          <span class='relative inline-flex rounded-full h-3 w-3' style={{ backgroundColor: 'rgb(74 222 128)' }} />
         </span>
       </div>
       <span>Live</span>

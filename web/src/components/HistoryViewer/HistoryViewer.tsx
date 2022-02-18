@@ -1,5 +1,5 @@
 import { Fragment, h } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 import { useEvents } from '../../api';
 import { useSearchString } from '../../hooks/useSearchString';
 import { getNowYesterdayInLong } from '../../utils/dateUtil';
@@ -25,18 +25,19 @@ export default function HistoryViewer({ camera }) {
     }
   }, [events]);
 
-  const onTimeUpdateHandler = ({ timestamp, isPlaying }) => {};
+  const handleTimelineChange = useCallback(
+    (event: TimelineChangeEvent) => {
+      if (event.seekComplete) {
+        setCurrentEvent(event.timelineEvent);
 
-  const handleTimelineChange = (event: TimelineChangeEvent) => {
-    if (event.seekComplete) {
-      setCurrentEvent(event.timelineEvent);
-
-      if (isPlaying && event.timelineEvent) {
-        const eventTime = (event.markerTime.getTime() - event.timelineEvent.startTime.getTime()) / 1000;
-        setCurrentTime(eventTime);
+        if (isPlaying && event.timelineEvent) {
+          const eventTime = (event.markerTime.getTime() - event.timelineEvent.startTime.getTime()) / 1000;
+          setCurrentTime(eventTime);
+        }
       }
-    }
-  };
+    },
+    [isPlaying]
+  );
 
   const onPlayHandler = () => {
     setIsPlaying(true);
@@ -47,7 +48,6 @@ export default function HistoryViewer({ camera }) {
   };
 
   const onPlayPauseHandler = (isPlaying: boolean) => {
-    console.debug('onPlayPauseHandler: setting isPlaying', { isPlaying });
     setIsPlaying(isPlaying);
   };
 
@@ -61,7 +61,6 @@ export default function HistoryViewer({ camera }) {
               id={currentEvent ? currentEvent.id : undefined}
               isPlaying={isPlaying}
               currentTime={currentTime}
-              onTimeUpdate={onTimeUpdateHandler}
               onPlay={onPlayHandler}
               onPause={onPausedHandler}
             />

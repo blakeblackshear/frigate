@@ -9,7 +9,7 @@ interface TimelineBlockViewProps {
 }
 
 export const TimelineBlockView = ({ block, onClick }: TimelineBlockViewProps) => {
-  const onClickHandler = useCallback(() => onClick(block), [block]);
+  const onClickHandler = useCallback(() => onClick(block), [block, onClick]);
   return (
     <div
       key={block.id}
@@ -20,6 +20,6 @@ export const TimelineBlockView = ({ block, onClick }: TimelineBlockViewProps) =>
         left: `${block.positionX}px`,
         width: `${block.width}px`,
       }}
-    ></div>
+    />
   );
 };

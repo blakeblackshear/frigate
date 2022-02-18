@@ -2,7 +2,7 @@ import { h } from 'preact';
 
 interface BubbleButtonProps {
   variant?: 'primary' | 'secondary';
-  children?: JSX.Element;
+  children?: preact.JSX.Element;
   disabled?: boolean;
   className?: string;
   onClick?: () => void;
@@ -22,12 +22,10 @@ export const BubbleButton = ({
 
   if (disabled) {
     computedClass += ' text-gray-200 dark:text-gray-200';
-  } else {
-    if (variant === 'primary') {
-      computedClass += ` ${PRIMARY_CLASS}`;
-    } else if (variant === 'secondary') {
-      computedClass += ` ${SECONDARY_CLASS}`;
-    }
+  } else if (variant === 'primary') {
+    computedClass += ` ${PRIMARY_CLASS}`;
+  } else if (variant === 'secondary') {
+    computedClass += ` ${SECONDARY_CLASS}`;
   }
 
   const onClickHandler = () => {
