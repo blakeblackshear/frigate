@@ -5,8 +5,8 @@ import { useState } from 'preact/hooks';
 import { useConfig } from '../api';
 import { Tabs, TextTab } from '../components/Tabs';
 import { LiveChip } from '../components/LiveChip';
-import HistoryViewer from '../components/HistoryViewer/HistoryViewer';
 import { DebugCamera } from '../components/DebugCamera';
+import { HistoryViewer } from '../components/HistoryViewer'
 
 export default function Camera({ camera }) {
   const { data: config } = useConfig();
