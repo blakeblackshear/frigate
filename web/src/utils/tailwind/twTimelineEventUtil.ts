@@ -1,4 +1,4 @@
-import { TimelineEvent } from "../../components/Timeline/TimelineEvent";
+import { TimelineEvent } from '../../components/Timeline/TimelineEvent';
 
 export const getColorFromTimelineEvent = (event: TimelineEvent) => {
   const { label } = event;
