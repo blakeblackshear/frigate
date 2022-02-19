@@ -36,21 +36,13 @@ export const HistoryVideo = ({
   const [videoHeight, setVideoHeight] = useState<number>(undefined);
   const [videoProperties, setVideoProperties] = useState<VideoProperties>(undefined);
 
-  const initializeVideoContainerHeight = useCallback(() => {
-    const video = videoRef.current;
-    const videoExists = !isNullOrUndefined(video);
-    if (videoExists) {
-      const videoHeight = video.offsetHeight;
-      const videoHasHeight = videoHeight > 0;
-      if (videoHasHeight) {
-        setVideoHeight(videoHeight);
-      }
+  const currentVideo = videoRef.current;
+  if (currentVideo && !videoHeight) {
+    const currentVideoHeight = currentVideo.offsetHeight;
+    if (currentVideoHeight > 0) {
+      setVideoHeight(currentVideoHeight);
     }
-  }, [videoRef]);
-
-  useEffect(() => {
-    initializeVideoContainerHeight();
-  }, [initializeVideoContainerHeight]);
+  }
 
   useEffect(() => {
     const idExists = !isNullOrUndefined(id);

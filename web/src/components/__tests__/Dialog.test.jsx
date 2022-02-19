@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Dialog from '../Dialog';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { render, screen } from '@testing-library/preact';
 
 describe('Dialog', () => {
   let portal;
