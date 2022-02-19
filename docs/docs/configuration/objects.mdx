@@ -5,7 +5,11 @@ title: Objects
 
 import labels from "../../../labelmap.txt";
 
-By default, Frigate includes the following object models from the Google Coral test data. Note that `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
+Frigate includes the object models listed below from the Google Coral test data.
+
+Please note: 
+ - `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
+ - `person` is the only tracked object by default. See the [full configuration reference](https://docs.frigate.video/configuration/index#full-configuration-reference) for an example of expanding the list of tracked objects.
 
 <ul>
   {labels.split("\n").map((label) => (
