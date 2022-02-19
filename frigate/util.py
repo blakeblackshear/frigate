@@ -604,6 +604,7 @@ def add_mask(mask, mask_img):
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
+
 def load_labels(path, encoding="utf-8"):
     """Loads labels from file (with or without index numbers).
     Args:
