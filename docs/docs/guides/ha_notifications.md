@@ -25,6 +25,30 @@ automation:
             when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
 
+Note that iOS devices support live previews of cameras by adding a camera entity id to the message data.
+
+```yaml
+automation:
+  - alias: Security_Frigate_Notifications
+    description: ""
+    trigger:
+      - platform: mqtt
+        topic: frigate/events
+        payload: new
+        value_template: "{{ value_json.type }}"
+    action:
+      - service: notify.mobile_app_iphone
+        data:
+          message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
+          data:
+            image: >-
+              https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
+            tag: '{{trigger.payload_json["after"]["id"]}}'
+            when: '{{trigger.payload_json["after"]["start_time"]|int}}'
+            entity_id: camera.{{trigger.payload_json["after"]["camera"]}}
+    mode: single
+```
+
 ## Conditions
 
 Conditions with the `before` and `after` values allow a high degree of customization for automations.

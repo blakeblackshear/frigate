@@ -46,7 +46,7 @@ describe('Cameras Route', () => {
 
     expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
 
-    expect(screen.queryAllByText('Recordings')).toHaveLength(1);
+    expect(screen.queryAllByText('Recordings')).toHaveLength(2);
   });
 
   test('buttons toggle detect, clips, and snapshots', async () => {

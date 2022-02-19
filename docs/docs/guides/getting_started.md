@@ -62,6 +62,8 @@ cameras:
           roles:
             - detect
             - rtmp
+    rtmp:
+      enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
       width: 1280 # <---- update for your camera's resolution
       height: 720 # <---- update for your camera's resolution
@@ -71,7 +73,9 @@ cameras:
 
 At this point you should be able to start Frigate and see the the video feed in the UI.
 
-If you get a green image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with RTSP cameras that support TCP connections. FFmpeg arguments for other types of cameras can be found [here](/configuration/camera_specific).
+If you get a green image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections. If you do not have H264 cameras, make sure you have disabled RTMP. It is possible to enable it, but you must tell ffmpeg to re-encode the video with customized output args.
+
+FFmpeg arguments for other types of cameras can be found [here](/configuration/camera_specific).
 
 ### Step 5: Configure hardware acceleration (optional)
 
@@ -163,12 +167,16 @@ cameras:
           roles:
             - detect
             - rtmp
-            - record # <----- Add role
+        - path: rtsp://10.0.10.10:554/high_res_stream # <----- Add high res stream
+          roles:
+            - record
     detect: ...
     record: # <----- Enable recording
       enabled: True
     motion: ...
 ```
+
+If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](/configuration/index#full-configuration-reference).
 

@@ -74,9 +74,7 @@ class RetainModeEnum(str, Enum):
 
 class RetainConfig(FrigateBaseModel):
     default: float = Field(default=10, title="Default retention period.")
-    mode: RetainModeEnum = Field(
-        default=RetainModeEnum.active_objects, title="Retain mode."
-    )
+    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
     objects: Dict[str, float] = Field(
         default_factory=dict, title="Object retention period."
     )
@@ -105,6 +103,10 @@ class RecordRetainConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    expire_interval: int = Field(
+        default=60,
+        title="Number of minutes to wait between cleanup runs.",
+    )
     # deprecated - to be removed in a future version
     retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
@@ -162,6 +164,29 @@ class RuntimeMotionConfig(MotionConfig):
         extra = Extra.ignore
 
 
+class StationaryMaxFramesConfig(FrigateBaseModel):
+    default: Optional[int] = Field(title="Default max frames.", ge=1)
+    objects: Dict[str, int] = Field(
+        default_factory=dict, title="Object specific max frames."
+    )
+
+
+class StationaryConfig(FrigateBaseModel):
+    interval: Optional[int] = Field(
+        default=0,
+        title="Frame interval for checking stationary objects.",
+        ge=0,
+    )
+    threshold: Optional[int] = Field(
+        title="Number of frames without a position change for an object to be considered stationary",
+        ge=1,
+    )
+    max_frames: StationaryMaxFramesConfig = Field(
+        default_factory=StationaryMaxFramesConfig,
+        title="Max frames for stationary objects.",
+    )
+
+
 class DetectConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Height of the stream for the detect role.")
     width: int = Field(default=1280, title="Width of the stream for the detect role.")
@@ -172,9 +197,9 @@ class DetectConfig(FrigateBaseModel):
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
-    stationary_interval: Optional[int] = Field(
-        title="Frame interval for checking stationary objects.",
-        ge=1,
+    stationary: StationaryConfig = Field(
+        default_factory=StationaryConfig,
+        title="Stationary objects config.",
     )
 
 
@@ -475,7 +500,7 @@ class CameraLiveConfig(FrigateBaseModel):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(title="Camera name.")
+    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -539,6 +564,8 @@ class CameraConfig(FrigateBaseModel):
         return self._ffmpeg_cmds
 
     def create_ffmpeg_cmds(self):
+        if "_ffmpeg_cmds" in self:
+            return
         ffmpeg_cmds = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
@@ -764,10 +791,10 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.detect.max_disappeared is None:
                 camera_config.detect.max_disappeared = max_disappeared
 
-            # Default stationary_interval configuration
-            stationary_interval = camera_config.detect.fps * 10
-            if camera_config.detect.stationary_interval is None:
-                camera_config.detect.stationary_interval = stationary_interval
+            # Default stationary_threshold configuration
+            stationary_threshold = camera_config.detect.fps * 10
+            if camera_config.detect.stationary.threshold is None:
+                camera_config.detect.stationary.threshold = stationary_threshold
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
@@ -839,16 +866,21 @@ class FrigateConfig(FrigateBaseModel):
                     camera_config.record.retain.days = camera_config.record.retain_days
 
             # warning if the higher level record mode is potentially more restrictive than the events
+            rank_map = {
+                RetainModeEnum.all: 0,
+                RetainModeEnum.motion: 1,
+                RetainModeEnum.active_objects: 2,
+            }
             if (
                 camera_config.record.retain.days != 0
-                and camera_config.record.retain.mode != RetainModeEnum.all
-                and camera_config.record.events.retain.mode
-                != camera_config.record.retain.mode
+                and rank_map[camera_config.record.retain.mode]
+                > rank_map[camera_config.record.events.retain.mode]
             ):
                 logger.warning(
-                    f"Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+                    f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
                 )
-
+            # generage the ffmpeg commands
+            camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
 
         return config

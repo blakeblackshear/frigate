@@ -572,7 +572,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].motion.frame_height >= 120
+        assert runtime_config.cameras["back"].motion.frame_height == 50
 
     def test_motion_contour_area_dynamic(self):
 
@@ -601,7 +601,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert round(runtime_config.cameras["back"].motion.contour_area) == 99
+        assert round(runtime_config.cameras["back"].motion.contour_area) == 30
 
     def test_merge_labelmap(self):
 
@@ -1243,6 +1243,30 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].snapshots.retain.default == 1.5
+
+    def test_fails_on_bad_camera_name(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "snapshots": {"retain": {"default": 1.5}},
+            "cameras": {
+                "back camer#": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(
+            ValidationError, lambda: frigate_config.runtime_config.cameras
+        )
 
 
 if __name__ == "__main__":

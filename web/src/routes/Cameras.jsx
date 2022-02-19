@@ -29,12 +29,8 @@ function Camera({ name, conf }) {
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
-    const result = [{ name: 'Events', href: `/events?camera=${name}` }];
-    if (conf.record.enabled) {
-      result.push({ name: 'Recordings', href: `/recording/${name}` });
-    }
-    return result;
-  }, [name, conf.record.enabled]);
+    return [{ name: 'Events', href: `/events?camera=${name}` }, { name: 'Recordings', href: `/recording/${name}` }];
+  }, [name]);
   const icons = useMemo(
     () => [
       {

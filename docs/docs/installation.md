@@ -21,6 +21,12 @@ Windows is not officially supported, but some users have had success getting it 
 
 Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
 
+:::caution
+
+Note that Frigate does not currently support limiting recordings based on available disk space automatically. If using recordings, you must specify retention settings for a number of days that will fit within the available disk space of your drive or Frigate will crash.
+
+:::
+
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
@@ -118,6 +124,7 @@ services:
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -176,6 +183,15 @@ HassOS users can install via the addon repository.
 5. (not for proxy addon) Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
 6. Start the addon container
 7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
+
+There are several versions of the addon available:
+
+| Addon Version                  | Description                                                |
+| ------------------------------ | ---------------------------------------------------------- |
+| Frigate NVR                    | Current release with protection mode on                    |
+| Frigate NVR (Full Access)      | Current release with the option to disable protection mode |
+| Frigate NVR Beta               | Beta release with protection mode on                       |
+| Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
 
 ## Home Assistant Supervised
 

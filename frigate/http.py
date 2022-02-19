@@ -133,6 +133,8 @@ def delete_event(id):
     if event.has_snapshot:
         media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
         media.unlink(missing_ok=True)
+        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+        media.unlink(missing_ok=True)
     if event.has_clip:
         media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
         media.unlink(missing_ok=True)
@@ -247,7 +249,10 @@ def event_clip(id):
     clip_path = os.path.join(CLIPS_DIR, file_name)
 
     if not os.path.isfile(clip_path):
-        return recording_clip(event.camera, event.start_time, event.end_time)
+        end_ts = (
+            datetime.now().timestamp() if event.end_time is None else event.end_time
+        )
+        return recording_clip(event.camera, event.start_time, end_ts)
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
@@ -362,7 +367,13 @@ def best(camera_name, label):
             box_size = 300
             box = best_object.get("box", (0, 0, box_size, box_size))
             region = calculate_region(
-                best_frame.shape, box[0], box[1], box[2], box[3], box_size, multiplier=1.1
+                best_frame.shape,
+                box[0],
+                box[1],
+                box[2],
+                box[3],
+                box_size,
+                multiplier=1.1,
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
@@ -516,10 +527,15 @@ def recordings(camera_name):
         FROM C2
         WHERE cnt = 0
         )
+        SELECT id, label, camera, top_score, start_time, end_time
+        FROM event
+        WHERE camera = ? AND end_time IS NULL
+        UNION ALL
         SELECT MIN(id) as id, label, camera, MAX(top_score) as top_score, MIN(ts) AS start_time, max(ts) AS end_time
         FROM C3
         GROUP BY label, grpnum
         ORDER BY start_time;""",
+        camera_name,
         camera_name,
         camera_name,
     )
@@ -709,7 +725,15 @@ def vod_event(id):
         end_ts = (
             datetime.now().timestamp() if event.end_time is None else event.end_time
         )
-        return vod_ts(event.camera, event.start_time, end_ts)
+        vod_response = vod_ts(event.camera, event.start_time, end_ts)
+        # If the recordings are not found, set has_clip to false
+        if (
+            type(vod_response) == tuple
+            and len(vod_response) == 2
+            and vod_response[1] == 404
+        ):
+            Event.update(has_clip=False).where(Event.id == id).execute()
+        return vod_response
 
     duration = int((event.end_time - event.start_time) * 1000)
     return jsonify(
