@@ -238,6 +238,11 @@ motion:
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
+  # WARNING: Frigate does not currently support limiting recordings based
+  #          on available disk space automatically. If using recordings,
+  #          you must specify retention settings for a number of days that
+  #          will fit within the available disk space of your drive or Frigate
+  #          will crash.
   enabled: False
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o

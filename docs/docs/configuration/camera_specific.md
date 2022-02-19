@@ -19,6 +19,34 @@ output_args:
   rtmp: -c:v libx264 -an -f flv
 ```
 
+### JPEG Stream Cameras
+
+Cameras using a live changing jpeg image will need input parameters as below
+
+```yaml
+input_args:
+- -r
+- 5 # << enter FPS here
+- -stream_loop
+- -1
+- -f
+- image2
+- -avoid_negative_ts
+- make_zero
+- -fflags
+- nobuffer
+- -flags
+- low_delay
+- -strict
+- experimental
+- -fflags
+- +genpts+discardcorrupt
+- -use_wallclock_as_timestamps
+- 1
+```
+
+Outputting the stream will have the same args and caveats as per [MJPEG Cameras](#mjpeg-cameras)
+
 ### RTMP Cameras
 
 The input parameters need to be adjusted for RTMP cameras
