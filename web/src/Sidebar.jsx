@@ -20,7 +20,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera]) => (
+              {cameras.filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera]) => (
                 <Destination href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
