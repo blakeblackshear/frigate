@@ -20,7 +20,7 @@ const ActionButtonGroup = ({ className, isRetained, handleClickRetain, handleCli
   <div className={`space-y-2 space-x-2 sm:space-y-0 xs:space-x-4 ${className}`}>
     <Button className="xs:w-auto" color={isRetained ? 'red' : 'yellow'} onClick={handleClickRetain}>
       <StarRecording className="w-6" />
-      {isRetained ? ("Un-retain event") : ("Retain event")}
+      {isRetained ? ('Un-retain event') : ('Retain event')}
     </Button>
     <Button className="xs:w-auto" color="red" onClick={handleClickDelete}>
       <Delete className="w-6" /> Delete event
