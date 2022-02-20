@@ -33,7 +33,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.map(([camera, conf]) => {
+              {cameras.filter(([cam, conf]) => conf.gui.show).map(([camera, conf]) => {
                 if (conf.record.enabled) {
                   return (
                     <Destination
