@@ -170,6 +170,9 @@ detect:
     # This can help with false positives for objects that should only be stationary for a limited amount of time.
     # It can also be used to disable stationary object tracking. For example, you may want to set a value for person, but leave
     # car at the default.
+    # WARNING: Setting these values overrides default behavior and disables stationary object tracking.
+    #          There are very few situations where you would want it disabled. It is NOT recommended to  
+    #          copy these values from the example config into your config unless you know they are needed.
     max_frames:
       # Optional: Default for all object types (default: not set, track forever)
       default: 3000
