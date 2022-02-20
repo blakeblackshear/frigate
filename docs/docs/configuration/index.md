@@ -434,7 +434,9 @@ cameras:
 
     # Optional: Configuration for how camera is handled in the GUI.
     gui:
-      # Optional: Adjust sort order of cameras in the GUI. Larger numbers come later. (default: shown below)
+      # Optional: Adjust sort order of cameras in the GUI. Larger numbers come later (default: shown below)
       # By default the cameras are sorted alphabetically.
       order: 0
+      # Optional: Whether or not to show the camera in the GUI (default: shown below)
+      show: True
 ```
