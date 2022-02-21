@@ -86,6 +86,7 @@ export default function Event({ eventId, close, scrollRef }) {
 
       if (success) {
         setIsRetained(!isRetained);
+        window.location.reload(); // Need to reload page otherwise retain won't stick
       }
     } catch (e) {
 
