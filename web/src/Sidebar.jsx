@@ -33,7 +33,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.filter(([cam, conf]) => conf.gui.show).map(([camera, conf]) => {
+              {cameras.filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera, conf]) => {
                 if (conf.record.enabled) {
                   return (
                     <Destination
