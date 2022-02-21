@@ -234,7 +234,7 @@ export default function Event({ eventId, close, scrollRef }) {
       </div>
       <div className="space-y-2 xs:space-y-0">
         <DownloadButtonGroup apiHost={apiHost} eventId={eventId} className="block sm:hidden" />
-        <ActionButtonGroup handleClickRetain={handleClickRetain} handleClickDelete={handleClickDelete} close={close} className="block sm:hidden" />
+        <ActionButtonGroup isRetained={isRetained} handleClickRetain={handleClickRetain} handleClickDelete={handleClickDelete} close={close} className="block sm:hidden" />
       </div>
     </div>
   );
