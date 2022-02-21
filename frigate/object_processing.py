@@ -701,7 +701,7 @@ class TrackedObjectProcessor(threading.Thread):
                     f"{self.topic_prefix}/events", json.dumps(message), retain=False
                 )
 
-            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True, final_frame=True)))
+            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True, end_frame=True)))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config = self.config.cameras[camera].mqtt
