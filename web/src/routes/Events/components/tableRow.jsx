@@ -4,7 +4,6 @@ import { useCallback, useState, useMemo } from 'preact/hooks';
 import { Tr, Td, Tbody } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
-import StarRecording from '../../../icons/StarRecording';
 import { useSearchString } from '../../../hooks/useSearchString';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 
