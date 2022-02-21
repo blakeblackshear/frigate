@@ -130,6 +130,7 @@ class TrackedObject:
                     "region": obj_data["region"],
                     "score": obj_data["score"],
                 }
+                self.obj_data["best_box"] = obj_data["box"]
                 thumb_update = True
 
         # check zones
@@ -173,7 +174,7 @@ class TrackedObject:
         self.current_zones = current_zones
         return (thumb_update, significant_change)
 
-    def to_dict(self, include_thumbnail: bool = False):
+    def to_dict(self, include_thumbnail: bool = False, end_frame: bool = False):
         snapshot_time = (
             self.thumbnail_data["frame_time"]
             if not self.thumbnail_data is None
@@ -190,7 +191,7 @@ class TrackedObject:
             "start_time": self.obj_data["start_time"],
             "end_time": self.obj_data.get("end_time", None),
             "score": self.obj_data["score"],
-            "box": self.obj_data["box"],
+            "box": self.obj_data.get("best_box", self.obj_data["box"]) if end_frame else self.obj_data["box"],
             "area": self.obj_data["area"],
             "region": self.obj_data["region"],
             "stationary": self.obj_data["motionless_count"]
@@ -700,7 +701,7 @@ class TrackedObjectProcessor(threading.Thread):
                     f"{self.topic_prefix}/events", json.dumps(message), retain=False
                 )
 
-            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
+            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True, final_frame=True)))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config = self.config.cameras[camera].mqtt
