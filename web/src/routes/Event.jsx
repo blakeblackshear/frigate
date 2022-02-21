@@ -59,7 +59,6 @@ export default function Event({ eventId, close, scrollRef }) {
   const [showDetails, setShowDetails] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(true);
   const [deleteStatus, setDeleteStatus] = useState(FetchStatus.NONE);
-  const [shouldUseRetainData, setShouldUseRetainData] = useState(true);
   const [isRetained, setIsRetained] = useState(false);
   const setRetainEvent = useRetain();
   const setDeleteEvent = useDelete();
@@ -122,11 +121,7 @@ export default function Event({ eventId, close, scrollRef }) {
     return <ActivityIndicator />;
   }
 
-  if (shouldUseRetainData) {
-    setIsRetained(data.retain_indefinitely);
-    setShouldUseRetainData(false);
-  }
-
+  setIsRetained(data.retain_indefinitely);
   const startime = new Date(data.start_time * 1000);
   const endtime = data.end_time ? new Date(data.end_time * 1000) : null;
   return (
