@@ -4,6 +4,7 @@ import { useCallback, useState, useMemo } from 'preact/hooks';
 import { Tr, Td, Tbody } from '../../../components/Table';
 import Filterable from './filterable';
 import Event from '../../Event';
+import StarRecording from '../../../icons/StarRecording';
 import { useSearchString } from '../../../hooks/useSearchString';
 import { useClickOutside } from '../../../hooks/useClickOutside';
 
@@ -22,6 +23,7 @@ const EventsRow = memo(
     label,
     top_score: score,
     zones,
+    retain_indefinitely
   }) => {
     const [viewEvent, setViewEvent] = useState(null);
     const { searchString, removeDefaultSearchKeys } = useSearchString(limit);
@@ -100,6 +102,7 @@ const EventsRow = memo(
               ))}
             </ul>
           </Td>
+          <Td>{retain_indefinitely ? 'True' : 'False'}</Td>
           <Td>{start.toLocaleDateString()}</Td>
           <Td>{start.toLocaleTimeString()}</Td>
           <Td>{end === null ? 'In progress' : end.toLocaleTimeString()}</Td>
