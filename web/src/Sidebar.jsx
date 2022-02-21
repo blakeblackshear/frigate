@@ -21,7 +21,7 @@ export default function Sidebar() {
             <Fragment>
               <Separator />
               {cameras.filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera]) => (
-                <Destination href={`/cameras/${camera}`} text={camera} />
+                <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
             </Fragment>
@@ -37,6 +37,7 @@ export default function Sidebar() {
                 if (conf.record.enabled) {
                   return (
                     <Destination
+                      key={camera}
                       path={`/recording/${camera}/:date?/:hour?/:seconds?`}
                       href={`/recording/${camera}`}
                       text={camera}
