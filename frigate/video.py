@@ -623,7 +623,8 @@ def process_frames(
                     idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
                     for index in idxs:
-                        obj = group[index[0]]
+                        index = index if isinstance(index, np.int32) else index[0]
+                        obj = group[index]
                         if clipped(obj, frame_shape):
                             box = obj[2]
                             # calculate a new region that will hopefully get the entire object
