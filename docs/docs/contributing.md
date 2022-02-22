@@ -90,6 +90,20 @@ VSCode will start the docker compose file for you and open a terminal window con
 
 After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
+### Testing
+
+#### FFMPEG Hardware Acceleration
+
+The following commands are used inside the container to ensure hardware acceleration is working properly.
+
+**Raspberry Pi (64bit)**
+
+This should show <50% CPU in top, and ~80% CPU without `-c:v h264_v4l2m2m`.
+
+```shell
+ffmpeg -c:v h264_v4l2m2m -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
 ## Web Interface
 
 ### Prerequisites
