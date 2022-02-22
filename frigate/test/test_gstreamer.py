@@ -150,6 +150,13 @@ class TestGstreamerBaseBuilder(TestCase):
                 ],
             ),
             (
+                "rtsps://some/path1",
+                None,
+                [
+                    'rtspsrc location="rtsps://some/path1" name=rtp_stream latency=0 do-timestamp=true'
+                ],
+            ),
+            (
                 "rtsp://some/path2",
                 [],
                 [
@@ -183,6 +190,26 @@ class TestGstreamerBaseBuilder(TestCase):
                 "rtmp://some/path",
                 None,
                 ['rtmpsrc location="rtmp://some/path" name=rtp_stream'],
+            ),
+            (
+                "rtmpt://some/path",
+                None,
+                ['rtmpsrc location="rtmpt://some/path" name=rtp_stream'],
+            ),
+            (
+                "rtmps://some/path",
+                None,
+                ['rtmpsrc location="rtmps://some/path" name=rtp_stream'],
+            ),
+            (
+                "rtmpe://some/path",
+                None,
+                ['rtmpsrc location="rtmpe://some/path" name=rtp_stream'],
+            ),
+            (
+                "rtmfp://some/path",
+                None,
+                ['rtmpsrc location="rtmfp://some/path" name=rtp_stream'],
             ),
             (
                 "myawesomesource key1=value1 ! myawesomeplugin key2=value2 option",

@@ -1,12 +1,11 @@
+import re
 from functools import lru_cache
 import os
 import logging
 import traceback
 import subprocess as sp
 from typing import Dict, List, Optional
-from xmlrpc.client import Boolean
 
-from matplotlib.style import available
 from frigate.const import (
     CACHE_DIR,
     GSTREAMER_RECORD_SUFFIX,
@@ -124,8 +123,8 @@ class GstreamerBaseBuilder:
         """
         Set RTMP or RTSP data source with the list of options
         """
-        is_rtsp = "rtsp://" in uri
-        is_rtmp = "rtmp://" in uri
+        is_rtsp = re.match(r"rtsps?:\/\/", uri)
+        is_rtmp = re.match(r"rtm(p|pt|ps|pe|fp|pte|pts)?:\/\/", uri)
         if is_rtsp:
             self.input_pipeline = f'rtspsrc location="{uri}"'
         elif is_rtmp:
@@ -198,7 +197,7 @@ class GstreamerBaseBuilder:
         return self
 
     @staticmethod
-    def accept(plugins: List[str]) -> Boolean:
+    def accept(plugins: List[str]) -> bool:
         """
         Accept method receives a list of plugins and return true if the builder can hande the current list
         Builder should check all necessary pluguns before returning True
@@ -272,7 +271,7 @@ class GstreamerBaseBuilder:
     def get_detect_decoder_pipeline(self) -> List[str]:
         return []
 
-    def _build(self, use_detect: Boolean, use_record: Boolean) -> List[str]:
+    def _build(self, use_detect: bool, use_record: bool) -> List[str]:
         """
         Build a pipeline based on the provided parameters
         """
@@ -309,7 +308,7 @@ class GstreamerBaseBuilder:
             pipeline, use_detect=use_detect, use_record=use_record
         )
 
-    def build(self, use_detect: Boolean, use_record: Boolean) -> List[str]:
+    def build(self, use_detect: bool, use_record: bool) -> List[str]:
         if self.raw_pipeline is None or len(self.raw_pipeline) == 0:
             full_pipeline = self._build(use_detect, use_record)
         else:
@@ -327,7 +326,7 @@ class GstreamerNvidia(GstreamerBaseBuilder):
         super().__init__(width, height, name, format)
 
     @staticmethod
-    def accept(plugins: List[str]) -> Boolean:
+    def accept(plugins: List[str]) -> bool:
         """
         Accept method receives a list of plugins and return true if the builder can hande the current list
         Builder should check all necessary pluguns before returning True
