@@ -3,7 +3,7 @@ default_target: amd64_frigate
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 
 version:
-	echo "VERSION='0.10.0-$(COMMIT_HASH)'" > frigate/version.py
+	echo "VERSION='0.11.0-$(COMMIT_HASH)'" > frigate/version.py
 
 web:
 	docker build --tag frigate-web --file docker/Dockerfile.web web/
@@ -91,7 +91,7 @@ run_tests:
 	@sed -i "s/FROM frigate-base/#/g" docker/Dockerfile.test
 	@echo "" >> docker/Dockerfile.test
 	@echo "RUN python3 -m unittest" >> docker/Dockerfile.test
-	@docker buildx build --platform=$(PLATFORM) --tag frigate-base --build-arg NGINX_VERSION=1.0.2 --build-arg FFMPEG_VERSION=1.0.0 --build-arg ARCH=$(ARCH) --build-arg FFMPEG_ARCH=$(FFMPEG_ARCH) --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.test .
+	@docker buildx build --platform=$(PLATFORM) --tag frigate-base --build-arg NGINX_VERSION=1.0.2 --build-arg FFMPEG_VERSION=1.0.0 --build-arg ARCH=$(ARCH) --build-arg WHEELS_VERSION=1.0.3 --file docker/Dockerfile.test .
 	@rm docker/Dockerfile.test
 
 .PHONY: web run_tests

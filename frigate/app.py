@@ -7,6 +7,7 @@ import sys
 import threading
 from logging.handlers import QueueHandler
 from typing import Dict, List
+
 import traceback
 import yaml
 from peewee_migrate import Router

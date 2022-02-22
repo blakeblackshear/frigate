@@ -15,7 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import psutil
-from peewee import JOIN, DoesNotExist
+from peewee import DoesNotExist
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import (

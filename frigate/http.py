@@ -13,7 +13,6 @@ from functools import reduce
 from pathlib import Path
 
 import cv2
-from flask.helpers import send_file
 
 import numpy as np
 from flask import (
@@ -26,10 +25,10 @@ from flask import (
     request,
 )
 
-from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
+from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR, RECORD_DIR
+from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
@@ -118,6 +117,40 @@ def event(id):
         return model_to_dict(Event.get(Event.id == id))
     except DoesNotExist:
         return "Event not found", 404
+
+
+@bp.route("/events/<id>/retain", methods=("POST",))
+def set_retain(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
+
+    event.retain_indefinitely = True
+    event.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Event" + id + " retained"}), 200
+    )
+
+
+@bp.route("/events/<id>/retain", methods=("DELETE",))
+def delete_retain(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
+
+    event.retain_indefinitely = False
+    event.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Event" + id + " un-retained"}), 200
+    )
 
 
 @bp.route("/events/<id>", methods=("DELETE",))
