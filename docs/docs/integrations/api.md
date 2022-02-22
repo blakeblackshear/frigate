@@ -189,6 +189,14 @@ Returns data for a single event.
 
 Permanently deletes the event along with any clips/snapshots.
 
+### `POST /api/events/<id>/retain`
+
+Sets retain to true for the event id.
+
+### `DELETE /api/events/<id>/retain`
+
+Sets retain to false for the event id (event may be deleted quickly after removing).
+
 ### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.

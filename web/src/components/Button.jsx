@@ -17,6 +17,13 @@ const ButtonColors = {
     text:
       'text-red-500 hover:bg-red-500 hover:bg-opacity-20 focus:bg-red-500 focus:bg-opacity-40 active:bg-red-500 active:bg-opacity-40',
   },
+  yellow: {
+    contained: 'bg-yellow-500 focus:bg-yellow-400 active:bg-yellow-600 ring-yellow-300',
+    outlined:
+      'text-yellow-500 border-2 border-yellow-500 hover:bg-yellow-500 hover:bg-opacity-20 focus:bg-yellow-500 focus:bg-opacity-40 active:bg-yellow-500 active:bg-opacity-40',
+    text:
+      'text-yellow-500 hover:bg-yellow-500 hover:bg-opacity-20 focus:bg-yellow-500 focus:bg-opacity-40 active:bg-yellow-500 active:bg-opacity-40',
+  },
   green: {
     contained: 'bg-green-500 focus:bg-green-400 active:bg-green-600 ring-green-300',
     outlined:

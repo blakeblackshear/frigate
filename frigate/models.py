@@ -18,6 +18,7 @@ class Event(Model):
     region = JSONField()
     box = JSONField()
     area = IntegerField()
+    retain_indefinitely = BooleanField(default=False)
 
 
 class Recordings(Model):

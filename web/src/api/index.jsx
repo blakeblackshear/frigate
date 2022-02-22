@@ -117,6 +117,24 @@ export function useDelete() {
   return deleteEvent;
 }
 
+export function useRetain() {
+  const { state } = useContext(Api);
+
+  async function retainEvent(eventId, shouldRetain) {
+    if (!eventId) return null;
+
+    if (shouldRetain) {
+      const response = await fetch(`${state.host}/api/events/${eventId}/retain`, { method: 'POST' });
+      return await (response.status < 300 ? response.json() : { success: true });
+    } else {
+      const response = await fetch(`${state.host}/api/events/${eventId}/retain`, { method: 'DELETE' });
+      return await (response.status < 300 ? response.json() : { success: true });
+    }
+  }
+
+  return retainEvent;
+}
+
 export function useApiHost() {
   const { state } = useContext(Api);
   return state.host;

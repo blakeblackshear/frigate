@@ -22,6 +22,7 @@ const EventsRow = memo(
     label,
     top_score: score,
     zones,
+    retain_indefinitely
   }) => {
     const [viewEvent, setViewEvent] = useState(null);
     const { searchString, removeDefaultSearchKeys } = useSearchString(limit);
@@ -100,6 +101,7 @@ const EventsRow = memo(
               ))}
             </ul>
           </Td>
+          <Td>{retain_indefinitely ? 'True' : 'False'}</Td>
           <Td>{start.toLocaleDateString()}</Td>
           <Td>{start.toLocaleTimeString()}</Td>
           <Td>{end === null ? 'In progress' : end.toLocaleTimeString()}</Td>
