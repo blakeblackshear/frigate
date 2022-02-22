@@ -93,6 +93,19 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
+# AMD64 specific packages
+RUN if [ "${TARGETARCH}" = "amd64" ]; \
+    then \
+    wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
+    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list \
+    && apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
+    # VAAPI drivers for Intel hardware accel
+    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get autoremove -y; apt-get autoclean -y) \
+    fi
+
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
 # get model and labels
