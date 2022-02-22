@@ -9,6 +9,7 @@ const TableHead = () => (
       <Th>Label</Th>
       <Th>Score</Th>
       <Th>Zones</Th>
+      <Th>Retain</Th>
       <Th>Date</Th>
       <Th>Start</Th>
       <Th>End</Th>
