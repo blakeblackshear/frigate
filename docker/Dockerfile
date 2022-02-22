@@ -9,6 +9,7 @@ COPY web/ .
 RUN npm install && npm run build
 
 FROM debian:11 as wheels
+ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -37,6 +38,11 @@ RUN apt-get -qq update \
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
+
+RUN if [ "${TARGETARCH}" = "arm" ]; \
+    then echo "[global]" > /etc/pip.conf \
+    && echo "extra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf; \
+    fi
 
 COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
@@ -108,6 +114,7 @@ COPY docker/rootfs/ /
 # s6-overlay
 RUN S6_ARCH="${TARGETARCH}" \
     && if [ "${TARGETARCH}" = "amd64" ]; then S6_ARCH="amd64"; fi \
+    && if [ "${TARGETARCH}" = "arm" ]; then S6_ARCH="armhf"; fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then S6_ARCH="aarch64"; fi \
     && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
