@@ -7,6 +7,6 @@ module.exports = {
   testEnvironment: 'jsdom',
   timers: 'fake',
   moduleNameMapper: {
-    '\\.(scss|sass|css)$': '<rootDir>/src/__mocks__/styleMock.js'
-  }
+    '\\.(scss|sass|css)$': '<rootDir>/src/__mocks__/styleMock.js',
+  },
 };

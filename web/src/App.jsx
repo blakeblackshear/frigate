@@ -7,17 +7,18 @@ import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
 import { DarkModeProvider, DrawerProvider } from './context';
-import { FetchStatus, useConfig } from './api';
+import useSWR from 'swr';
 
 export default function App() {
-  const { status, data: config } = useConfig();
+  const { data: config } = useSWR('config');
   const cameraComponent = config && config.ui.use_experimental ? Routes.getCameraV2 : Routes.getCamera;
+
   return (
     <DarkModeProvider>
       <DrawerProvider>
         <div data-testid="app" className="w-full">
           <AppBar />
-          {status !== FetchStatus.LOADED ? (
+          {!config ? (
             <div className="flex flex-grow-1 min-h-screen justify-center items-center">
               <ActivityIndicator />
             </div>

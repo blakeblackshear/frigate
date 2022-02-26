@@ -2,14 +2,14 @@ import { h, Fragment } from 'preact';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Heading from '../components/Heading';
 import { useState } from 'preact/hooks';
-import { useConfig } from '../api';
+import useSWR from 'swr';
 import { Tabs, TextTab } from '../components/Tabs';
 import { LiveChip } from '../components/LiveChip';
 import { DebugCamera } from '../components/DebugCamera';
 import HistoryViewer from '../components/HistoryViewer/HistoryViewer.tsx';
 
 export default function Camera({ camera }) {
-  const { data: config } = useConfig();
+  const { data: config } = useSWR('config');
 
   const [playerType, setPlayerType] = useState('live');
 

@@ -1,17 +1,29 @@
 import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import { useEvents } from '../../api';
-import { useSearchString } from '../../hooks/useSearchString';
-import { getNowYesterdayInLong } from '../../utils/dateUtil';
+import useSWR from 'swr';
+import axios from 'axios';
 import Timeline from '../Timeline/Timeline';
-import { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
-import { TimelineEvent } from '../Timeline/TimelineEvent';
+import type { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
+import type { TimelineEvent } from '../Timeline/TimelineEvent';
 import { HistoryHeader } from './HistoryHeader';
 import { HistoryVideo } from './HistoryVideo';
 
 export default function HistoryViewer({ camera }) {
-  const { searchString } = useSearchString(500, `camera=${camera}&after=${getNowYesterdayInLong()}`);
-  const { data: events } = useEvents(searchString);
+  const searchParams = {
+    before: null,
+    after: null,
+    camera,
+    label: 'all',
+    zone: 'all',
+  };
+
+  // TODO: refactor
+  const eventsFetcher = (path, params) => {
+    params = { ...params, include_thumbnails: 0, limit: 500 };
+    return axios.get(path, { params }).then((res) => res.data);
+  };
+
+  const { data: events } = useSWR(['events', searchParams], eventsFetcher);
 
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(undefined);
   const [currentEvent, setCurrentEvent] = useState<TimelineEvent>(undefined);

@@ -30,22 +30,13 @@
   position: static !important;
 }
 
-/*
-Event.js
-Maintain aspect ratio and scale down the video container
-Could not find a proper tailwind css.
-*/
-.outer-max-width {
-  max-width: 70%;
-}
-
 .hide-scroll::-webkit-scrollbar {
   display: none;
 }
 
 .hide-scroll {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /*

@@ -37,7 +37,7 @@ describe('useFetch', () => {
 
   beforeEach(() => {
     jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
-    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(async (url, options) => {
+    fetchSpy = jest.spyOn(window, 'fetch').mockImplementation(async (url) => {
       if (url.endsWith('/api/config')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       }

@@ -1,15 +1,28 @@
 {
+  "include": ["./src/**/*.tsx", "./src/**/*.ts"],
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2019",
-    "jsx": "react",
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
     "jsxFactory": "h",
-    "lib": [
-      "ES2019"
-    ]
-  },
-  "include": [
-    "./src/**/*.tsx",
-    "./src/**/*.ts"
-  ]
+    "baseUrl": "./",
+    /* paths - import rewriting/resolving */
+    "paths": {
+      // If you configured any Snowpack aliases, add them here.
+      // Add this line to get types for streaming imports (packageOptions.source="remote"):
+      //     "*": [".snowpack/types/*"]
+      // More info: https://www.snowpack.dev/guides/streaming-imports
+    },
+    /* noEmit - Snowpack builds (emits) files, not tsc. */
+    "noEmit": true,
+    /* Additional Options */
+    "strict": false,
+    "skipLibCheck": true,
+    // "types": ["mocha", "snowpack-env"],
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "importsNotUsedAsValues": "error"
+  }
 }

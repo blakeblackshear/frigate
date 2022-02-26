@@ -6,14 +6,14 @@ describe('Tooltip', () => {
   test('renders in a relative position', async () => {
     jest
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
-      // relativeTo
+    // relativeTo
       .mockReturnValueOnce({
         x: 100,
         y: 100,
         width: 50,
         height: 10,
       })
-      // tooltip
+    // tooltip
       .mockReturnValueOnce({ width: 40, height: 15 });
 
     const ref = createRef();
@@ -34,14 +34,14 @@ describe('Tooltip', () => {
     window.innerWidth = 1024;
     jest
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
-      // relativeTo
+    // relativeTo
       .mockReturnValueOnce({
         x: 1000,
         y: 100,
         width: 24,
         height: 10,
       })
-      // tooltip
+    // tooltip
       .mockReturnValueOnce({ width: 50, height: 15 });
 
     const ref = createRef();
@@ -61,14 +61,14 @@ describe('Tooltip', () => {
   test('if too far left, renders to the right', async () => {
     jest
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
-      // relativeTo
+    // relativeTo
       .mockReturnValueOnce({
         x: 0,
         y: 100,
         width: 24,
         height: 10,
       })
-      // tooltip
+    // tooltip
       .mockReturnValueOnce({ width: 50, height: 15 });
 
     const ref = createRef();
@@ -89,14 +89,14 @@ describe('Tooltip', () => {
     window.scrollY = 90;
     jest
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
-      // relativeTo
+    // relativeTo
       .mockReturnValueOnce({
         x: 100,
         y: 100,
         width: 24,
         height: 10,
       })
-      // tooltip
+    // tooltip
       .mockReturnValueOnce({ width: 50, height: 15 });
 
     const ref = createRef();
