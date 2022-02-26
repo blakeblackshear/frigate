@@ -5,10 +5,11 @@ import Heading from '../components/Heading.jsx';
 import Switch from '../components/Switch.jsx';
 import { useResizeObserver } from '../hooks';
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
-import { useApiHost, useConfig } from '../api';
+import { useApiHost } from '../api';
+import useSWR from 'swr';
 
-export default function CameraMasks({ camera, url }) {
-  const { data: config } = useConfig();
+export default function CameraMasks({ camera }) {
+  const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const imageRef = useRef(null);
   const [snap, setSnap] = useState(true);
@@ -20,10 +21,7 @@ export default function CameraMasks({ camera, url }) {
     zones,
   } = cameraConfig;
 
-  const {
-    width,
-    height,
-  } = cameraConfig.detect;
+  const { width, height } = cameraConfig.detect;
 
   const [{ width: scaledWidth }] = useResizeObserver(imageRef);
   const imageScale = scaledWidth / width;
@@ -100,7 +98,7 @@ export default function CameraMasks({ camera, url }) {
   const handleCopyMotionMasks = useCallback(async () => {
     await window.navigator.clipboard.writeText(`  motion:
     mask:
-${motionMaskPoints.map((mask, i) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`);
+${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`);
   }, [motionMaskPoints]);
 
   // Zone methods
@@ -273,16 +271,16 @@ ${Object.keys(objectMaskPoints)
   );
 }
 
-function maskYamlKeyPrefix(points) {
+function maskYamlKeyPrefix() {
   return '    - ';
 }
 
-function zoneYamlKeyPrefix(points, key) {
+function zoneYamlKeyPrefix(_points, key) {
   return `  ${key}:
     coordinates: `;
 }
 
-function objectYamlKeyPrefix(points, key, subkey) {
+function objectYamlKeyPrefix() {
   return '        - ';
 }
 
@@ -364,6 +362,7 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
         ? null
         : scaledPoints.map(([x, y], i) => (
           <PolyPoint
+            key={i}
             boundingRef={boundingRef}
             index={i}
             onMove={handleMovePoint}
@@ -466,6 +465,7 @@ function MaskValues({
                 ) : null}
                 {points[mainkey].map((item, subkey) => (
                   <Item
+                    key={subkey}
                     mainkey={mainkey}
                     subkey={subkey}
                     editing={editing}
@@ -481,6 +481,7 @@ function MaskValues({
           }
           return (
             <Item
+              key={mainkey}
               mainkey={mainkey}
               editing={editing}
               handleAdd={onAdd ? handleAdd : undefined}
@@ -497,7 +498,7 @@ function MaskValues({
   );
 }
 
-function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, handleAdd, handleRemove, yamlKeyPrefix }) {
+function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, _handleAdd, handleRemove, yamlKeyPrefix }) {
   return (
     <span
       data-key={mainkey}

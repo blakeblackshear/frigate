@@ -5,7 +5,7 @@ import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
-const Calender = ({ onChange, calenderRef, close }) => {
+const Calendar = ({ onChange, calendarRef, close }) => {
   const keyRef = useRef([]);
 
   const date = new Date();
@@ -159,8 +159,8 @@ const Calender = ({ onChange, calenderRef, close }) => {
         after,
         before:
           day.timestamp >= todayTimestamp
-            ? new Date(todayTimestamp).setHours(24, 0, 0, 0)
-            : new Date(day.timestamp).setHours(24, 0, 0, 0),
+          	? new Date(todayTimestamp).setHours(24, 0, 0, 0)
+          	: new Date(day.timestamp).setHours(24, 0, 0, 0),
       };
     }
 
@@ -243,26 +243,26 @@ const Calender = ({ onChange, calenderRef, close }) => {
     const days =
       state.monthDetails &&
       state.monthDetails.map((day, idx) => {
-        return (
-          <div
-            onClick={() => onDateClick(day)}
-            onkeydown={(e) => handleKeydown(e, day, idx)}
-            ref={(ref) => (keyRef.current[idx] = ref)}
-            tabIndex={day.month === 0 ? day.date : null}
-            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
-              day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
-            }
+      	return (
+      		<div
+      			onClick={() => onDateClick(day)}
+      			onkeydown={(e) => handleKeydown(e, day, idx)}
+      			ref={(ref) => (keyRef.current[idx] = ref)}
+      			tabIndex={day.month === 0 ? day.date : null}
+      			className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
+      				day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
+      			}
               ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
               ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
               ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
-            key={idx}
-          >
-            <div className="font-light">
-              <span className="text-gray-400">{day.date}</span>
-            </div>
-          </div>
-        );
+      			key={idx}
+      		>
+      			<div className="font-light">
+      				<span className="text-gray-400">{day.date}</span>
+      			</div>
+      		</div>
+      	);
       });
 
     return (
@@ -280,7 +280,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
   };
 
   return (
-    <div className="select-none w-96 flex flex-shrink" ref={calenderRef}>
+    <div className="select-none w-96 flex flex-shrink" ref={calendarRef}>
       <div className="py-4 px-6">
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
@@ -326,4 +326,4 @@ const Calender = ({ onChange, calenderRef, close }) => {
   );
 };
 
-export default Calender;
+export default Calendar;

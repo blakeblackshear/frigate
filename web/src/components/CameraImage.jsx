@@ -1,11 +1,12 @@
 import { h } from 'preact';
 import ActivityIndicator from './ActivityIndicator';
-import { useApiHost, useConfig } from '../api';
+import { useApiHost } from '../api';
+import useSWR from 'swr';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { useResizeObserver } from '../hooks';
 
 export default function CameraImage({ camera, onload, searchParams = '', stretch = false }) {
-  const { data: config } = useConfig();
+  const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);

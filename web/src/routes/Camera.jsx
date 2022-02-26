@@ -10,18 +10,19 @@ import Switch from '../components/Switch';
 import ButtonsTabbed from '../components/ButtonsTabbed';
 import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
-import { useApiHost, useConfig } from '../api';
+import { useApiHost } from '../api';
+import useSWR from 'swr';
 
 const emptyObject = Object.freeze({});
 
 export default function Camera({ camera }) {
-  const { data: config } = useConfig();
+  const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(

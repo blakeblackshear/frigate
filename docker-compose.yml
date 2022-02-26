@@ -20,6 +20,7 @@ services:
       - .:/lab/frigate:cached
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
+      - /dev/bus/usb:/dev/bus/usb
     ports:
       - "1935:1935"
       - "5000:5000"

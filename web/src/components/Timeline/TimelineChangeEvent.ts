@@ -1,4 +1,4 @@
-import { TimelineEvent } from './TimelineEvent';
+import type { TimelineEvent } from './TimelineEvent';
 
 export interface TimelineChangeEvent {
   timelineEvent: TimelineEvent;

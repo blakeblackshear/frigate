@@ -1,5 +1,5 @@
-import { TimelineEvent } from '../../components/Timeline/TimelineEvent';
-import { TimelineEventBlock } from '../../components/Timeline/TimelineEventBlock';
+import type { TimelineEvent } from '../../components/Timeline/TimelineEvent';
+import type { TimelineEventBlock } from '../../components/Timeline/TimelineEventBlock';
 import { epochToLong, longToDate } from '../dateUtil';
 
 export const checkEventForOverlap = (firstEvent: TimelineEvent, secondEvent: TimelineEvent) => {
@@ -51,15 +51,15 @@ export const getTimelineEventBlocksFromTimelineEvents = (events: TimelineEvent[]
       return rows;
     })
     .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
-}
+};
 
 export const findLargestYOffsetInBlocks = (blocks: TimelineEventBlock[]): number => {
   return blocks.reduce((largestYOffset, current) => {
     if (current.yOffset > largestYOffset) {
-      return current.yOffset
+      return current.yOffset;
     }
     return largestYOffset;
-  }, 0)
+  }, 0);
 };
 
 export const getTimelineWidthFromBlocks = (blocks: TimelineEventBlock[], offset: number): number => {
@@ -68,6 +68,6 @@ export const getTimelineWidthFromBlocks = (blocks: TimelineEventBlock[], offset:
     const startTimeEpoch = firstBlock.startTime.getTime();
     const endTimeEpoch = Date.now();
     const timelineDurationLong = epochToLong(endTimeEpoch - startTimeEpoch);
-    return timelineDurationLong + offset * 2
+    return timelineDurationLong + offset * 2;
   }
-}
+};

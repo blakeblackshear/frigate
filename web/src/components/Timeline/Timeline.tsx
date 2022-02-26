@@ -1,12 +1,12 @@
 import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { getTimelineEventBlocksFromTimelineEvents } from '../../utils/Timeline/timelineEventUtils';
-import { ScrollPermission } from './ScrollPermission';
+import type { ScrollPermission } from './ScrollPermission';
 import { TimelineBlocks } from './TimelineBlocks';
-import { TimelineChangeEvent } from './TimelineChangeEvent';
+import type { TimelineChangeEvent } from './TimelineChangeEvent';
 import { DisabledControls, TimelineControls } from './TimelineControls';
-import { TimelineEvent } from './TimelineEvent';
-import { TimelineEventBlock } from './TimelineEventBlock';
+import type { TimelineEvent } from './TimelineEvent';
+import type { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineProps {
   events: TimelineEvent[];

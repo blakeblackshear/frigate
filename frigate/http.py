@@ -183,8 +183,11 @@ def delete_event(id):
 def event_thumbnail(id):
     format = request.args.get("format", "ios")
     thumbnail_bytes = None
+    event_complete = False
     try:
         event = Event.get(Event.id == id)
+        if not event.end_time is None:
+            event_complete = True
         thumbnail_bytes = base64.b64decode(event.thumbnail)
     except DoesNotExist:
         # see if the object is currently being tracked
@@ -219,6 +222,8 @@ def event_thumbnail(id):
 
     response = make_response(thumbnail_bytes)
     response.headers["Content-Type"] = "image/jpeg"
+    if event_complete:
+        response.headers["Cache-Control"] = "private, max-age=31536000"
     return response
 
 
@@ -305,9 +310,9 @@ def event_clip(id):
 @bp.route("/events")
 def events():
     limit = request.args.get("limit", 100)
-    camera = request.args.get("camera")
-    label = request.args.get("label")
-    zone = request.args.get("zone")
+    camera = request.args.get("camera", "all")
+    label = request.args.get("label", "all")
+    zone = request.args.get("zone", "all")
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
     has_clip = request.args.get("has_clip", type=int)
@@ -317,20 +322,20 @@ def events():
     clauses = []
     excluded_fields = []
 
-    if camera:
+    if camera != "all":
         clauses.append((Event.camera == camera))
 
-    if label:
+    if label != "all":
         clauses.append((Event.label == label))
 
-    if zone:
+    if zone != "all":
         clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
 
     if after:
-        clauses.append((Event.start_time >= after))
+        clauses.append((Event.start_time > after))
 
     if before:
-        clauses.append((Event.start_time <= before))
+        clauses.append((Event.start_time < before))
 
     if not has_clip is None:
         clauses.append((Event.has_clip == has_clip))
@@ -648,7 +653,7 @@ def recording_clip(camera, start_ts, end_ts):
         "-safe",
         "0",
         "-i",
-        "-",
+        "/dev/stdin",
         "-c",
         "copy",
         "-movflags",

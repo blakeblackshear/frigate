@@ -3,12 +3,12 @@ import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
-import { useConfig } from './api';
+import useSWR from 'swr';
 import { useMemo } from 'preact/hooks';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
 export default function Sidebar() {
-  const { data: config } = useConfig();
+  const { data: config } = useSWR('config');
   const cameras = useMemo(() => Object.entries(config.cameras), [config]);
   const { birdseye } = config;
 
@@ -21,7 +21,7 @@ export default function Sidebar() {
             <Fragment>
               <Separator />
               {cameras.map(([camera]) => (
-                <Destination href={`/cameras/${camera}`} text={camera} />
+                <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
             </Fragment>
