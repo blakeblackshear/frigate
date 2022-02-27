@@ -1,5 +1,5 @@
 module.exports = {
-  purge: ['./public/**/*.html', './src/**/*.jsx'],
+  purge: ['./public/**/*.html', './src/**/*.{jsx,tsx}', './src/utils/tailwind/*.{jsx,tsx,js,ts}'],
   darkMode: 'class',
   theme: {
     extend: {

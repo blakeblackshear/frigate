@@ -15,7 +15,7 @@ export default function Cameras() {
   return status !== FetchStatus.LOADED ? (
     <ActivityIndicator />
   ) : (
-    <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
       {Object.entries(config.cameras).map(([camera, conf]) => (
         <Camera name={camera} conf={conf} />
       ))}

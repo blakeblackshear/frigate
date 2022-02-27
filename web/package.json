@@ -7,7 +7,7 @@
     "prebuild": "rimraf build",
     "build": "cross-env NODE_ENV=production SNOWPACK_MODE=production SNOWPACK_PUBLIC_API_HOST='' snowpack build",
     "lint": "npm run lint:cmd -- --fix",
-    "lint:cmd": "eslint ./ --ext .jsx,.js",
+    "lint:cmd": "eslint ./ --ext .jsx,.js,.tsx,.ts",
     "test": "jest"
   },
   "dependencies": {
@@ -26,11 +26,14 @@
     "@babel/eslint-parser": "^7.12.13",
     "@babel/plugin-transform-react-jsx": "^7.12.13",
     "@babel/preset-env": "^7.12.13",
+    "@babel/preset-typescript": "^7.16.7",
     "@prefresh/snowpack": "^3.0.1",
     "@snowpack/plugin-postcss": "^1.1.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/preact": "^2.0.1",
     "@testing-library/user-event": "^12.7.1",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
     "autoprefixer": "^10.2.1",
     "cross-env": "^7.0.3",
     "eslint": "^7.19.0",

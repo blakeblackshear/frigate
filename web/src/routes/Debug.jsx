@@ -33,7 +33,7 @@ export default function Debug() {
   }, [config]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-2 px-4">
       <Heading>
         Debug <span className="text-sm">{service.version}</span>
       </Heading>

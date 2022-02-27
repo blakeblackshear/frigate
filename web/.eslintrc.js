@@ -13,6 +13,7 @@ module.exports = {
     'prettier',
     'preact',
     'plugin:import/react',
+    'plugin:import/typescript',
     'plugin:testing-library/recommended',
     'plugin:jest/recommended',
   ],
@@ -137,4 +138,20 @@ module.exports = {
       },
     },
   },
+
+  overrides: [
+    {
+      files: ['*.{ts,tsx}'],
+      parser: '@typescript-eslint/parser',
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+      settings: {
+        'import/resolver': {
+          node: {
+            extensions: ['.ts', '.tsx'],
+          },
+        },
+      },
+    },
+  ],
 };

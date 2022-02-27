@@ -39,6 +39,15 @@ Could not find a proper tailwind css.
   max-width: 70%;
 }
 
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scroll {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /*
  Hide some videoplayer controls on mobile devices to
  align the video player and bottom control bar properly.

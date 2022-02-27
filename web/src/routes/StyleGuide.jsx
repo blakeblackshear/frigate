@@ -25,7 +25,7 @@ export default function StyleGuide() {
   };
 
   return (
-    <div>
+    <div className="p-2 px-4">
       <Heading size="md">Button</Heading>
       <div className="flex space-x-4 mb-4">
         <Button>Default</Button>
