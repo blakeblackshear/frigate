@@ -199,7 +199,7 @@ ${Object.keys(objectMaskPoints)
   );
 
   return (
-    <div className="flex-col space-y-4">
+    <div className="flex-col space-y-4 p-2 px-4">
       <Heading size="2xl">{camera} mask & zone creator</Heading>
 
       <Card
