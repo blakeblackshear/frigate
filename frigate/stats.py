@@ -5,6 +5,7 @@ import time
 import psutil
 import shutil
 import os
+import socket
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -85,6 +86,8 @@ def stats_snapshot(stats_tracking):
         "version": VERSION,
         "storage": {},
         "temperatures": get_temperatures(),
+        "hostname": socket.gethostname(),
+        "ipaddress": socket.gethostbyname(socket.gethostname()),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
