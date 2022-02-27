@@ -72,7 +72,7 @@ export default function Recording({ camera, date, hour, seconds }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-2 px-4">
       <Heading>{camera} Recordings</Heading>
 
       <VideoPlayer
