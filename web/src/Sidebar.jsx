@@ -4,13 +4,14 @@ import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
 import useSWR from 'swr';
-import { useMemo } from 'preact/hooks';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
 export default function Sidebar() {
   const { data: config } = useSWR('config');
-  const cameras = useMemo(() => Object.entries(config.cameras), [config]);
-  const { birdseye } = config;
+  if (!config) {
+    return null;
+  }
+  const { cameras, birdseye } = config;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -20,7 +21,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.map(([camera]) => (
+              {Object.entries(cameras).map(([camera]) => (
                 <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
@@ -33,7 +34,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.map(([camera, conf]) => {
+              {Object.entries(cameras).map(([camera, conf]) => {
                 if (conf.record.enabled) {
                   return (
                     <Destination

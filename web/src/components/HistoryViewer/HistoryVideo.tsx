@@ -15,7 +15,7 @@ interface VideoProperties {
 }
 
 interface HistoryVideoProps {
-  id: string;
+  id?: string;
   isPlaying: boolean;
   currentTime: number;
   onTimeUpdate?: (event: OnTimeUpdateEvent) => void;
@@ -32,9 +32,13 @@ export const HistoryVideo = ({
   onPlay,
 }: HistoryVideoProps) => {
   const apiHost = useApiHost();
-  const videoRef = useRef<HTMLVideoElement>();
-  const [videoHeight, setVideoHeight] = useState<number>(undefined);
-  const [videoProperties, setVideoProperties] = useState<VideoProperties>(undefined);
+  const videoRef = useRef<HTMLVideoElement|null>(null);
+  const [videoHeight, setVideoHeight] = useState<number>(0);
+  const [videoProperties, setVideoProperties] = useState<VideoProperties>({
+    posterUrl: '',
+    videoUrl: '',
+    height: 0,
+  });
 
   const currentVideo = videoRef.current;
   if (currentVideo && !videoHeight) {
@@ -48,7 +52,7 @@ export const HistoryVideo = ({
     const idExists = !isNullOrUndefined(id);
     if (idExists) {
       if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current = undefined;
+        videoRef.current = null;
       }
 
       setVideoProperties({
@@ -57,7 +61,11 @@ export const HistoryVideo = ({
         height: videoHeight,
       });
     } else {
-      setVideoProperties(undefined);
+      setVideoProperties({
+        posterUrl: '',
+        videoUrl: '',
+        height: 0,
+      });
     }
   }, [id, videoHeight, videoRef, apiHost]);
 
@@ -78,7 +86,7 @@ export const HistoryVideo = ({
 
     const video = videoRef.current;
     const videoExists = !isNullOrUndefined(video);
-    if (videoExists) {
+    if (video && videoExists) {
       if (videoIsPlaying) {
         attemptPlayVideo(video);
       } else {
@@ -91,7 +99,7 @@ export const HistoryVideo = ({
     const video = videoRef.current;
     const videoExists = !isNullOrUndefined(video);
     const hasSeeked = currentTime >= 0;
-    if (videoExists && hasSeeked) {
+    if (video && videoExists && hasSeeked) {
       video.currentTime = currentTime;
     }
   }, [currentTime, videoRef]);

@@ -1,0 +1,28 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["eslint:recommended", "preact", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "comma-dangle": ["error", { "objects": "always-multiline", "arrays": "always-multiline" }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint"],
+      "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"]
+    }
+  ]
+}

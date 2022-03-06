@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Link from '../Link';
-import { render, screen } from '@testing-library/preact';
+import { render, screen } from 'testing-library';
 
 describe('Link', () => {
   test('renders a link', async () => {

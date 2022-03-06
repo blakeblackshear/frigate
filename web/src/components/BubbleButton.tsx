@@ -1,8 +1,8 @@
-import { h } from 'preact';
+import { h, JSX } from 'preact';
 
 interface BubbleButtonProps {
   variant?: 'primary' | 'secondary';
-  children?: preact.JSX.Element;
+  children?: JSX.Element;
   disabled?: boolean;
   className?: string;
   onClick?: () => void;

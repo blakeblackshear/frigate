@@ -70,4 +70,5 @@ export const getTimelineWidthFromBlocks = (blocks: TimelineEventBlock[], offset:
     const timelineDurationLong = epochToLong(endTimeEpoch - startTimeEpoch);
     return timelineDurationLong + offset * 2;
   }
+  return 0;
 };

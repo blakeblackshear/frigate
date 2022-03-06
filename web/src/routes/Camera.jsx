@@ -1,5 +1,6 @@
 import { h, Fragment } from 'preact';
 import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
+import ActivityIndicator from '../components/ActivityIndicator';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -22,7 +23,9 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height));
+  const liveWidth = cameraConfig
+    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+    : 0;
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -47,6 +50,10 @@ export default function Camera({ camera }) {
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
+
+  if (!cameraConfig) {
+    return <ActivityIndicator />;
+  }
 
   const optionContent = showSettings ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -93,8 +100,7 @@ export default function Camera({ camera }) {
         </div>
       </Fragment>
     );
-  }
-  else if (viewMode === 'debug') {
+  } else if (viewMode === 'debug') {
     player = (
       <Fragment>
         <div>

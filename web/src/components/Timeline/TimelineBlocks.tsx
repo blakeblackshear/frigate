@@ -41,6 +41,7 @@ export const TimelineBlocks = ({ timeline, firstBlockOffset, onEventClick }: Tim
         </div>
       );
     }
+    return <div />
   }, [timeline, onEventClick, firstBlockOffset]);
 
   return timelineEventBlocks;

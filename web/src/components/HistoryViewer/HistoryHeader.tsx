@@ -3,7 +3,7 @@ import Heading from '../Heading';
 import type { TimelineEvent } from '../Timeline/TimelineEvent';
 
 interface HistoryHeaderProps {
-  event: TimelineEvent;
+  event?: TimelineEvent;
   className?: string;
 }
 export const HistoryHeader = ({ event, className = '' }: HistoryHeaderProps) => {

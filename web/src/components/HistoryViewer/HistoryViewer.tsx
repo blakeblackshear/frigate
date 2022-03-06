@@ -8,7 +8,7 @@ import type { TimelineEvent } from '../Timeline/TimelineEvent';
 import { HistoryHeader } from './HistoryHeader';
 import { HistoryVideo } from './HistoryVideo';
 
-export default function HistoryViewer({ camera }) {
+export default function HistoryViewer({ camera }: {camera: string}) {
   const searchParams = {
     before: null,
     after: null,
@@ -18,17 +18,17 @@ export default function HistoryViewer({ camera }) {
   };
 
   // TODO: refactor
-  const eventsFetcher = (path, params) => {
+  const eventsFetcher = (path: string, params: {[name:string]: string|number}) => {
     params = { ...params, include_thumbnails: 0, limit: 500 };
-    return axios.get(path, { params }).then((res) => res.data);
+    return axios.get<TimelineEvent[]>(path, { params }).then((res) => res.data);
   };
 
   const { data: events } = useSWR(['events', searchParams], eventsFetcher);
 
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(undefined);
-  const [currentEvent, setCurrentEvent] = useState<TimelineEvent>(undefined);
-  const [isPlaying, setIsPlaying] = useState(undefined);
-  const [currentTime, setCurrentTime] = useState<number>(undefined);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [currentEvent, setCurrentEvent] = useState<TimelineEvent>();
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(new Date().getTime());
 
   useEffect(() => {
     if (events) {

@@ -98,7 +98,11 @@ const Calendar = ({ onChange, calendarRef, close }) => {
   );
 
   useEffect(() => {
-    setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: getMonthDetails(year, month) }));
+    setState((prev) => ({
+      ...prev,
+      selectedDay: todayTimestamp,
+      monthDetails: getMonthDetails(year, month),
+    }));
   }, [year, month, getMonthDetails]);
 
   useEffect(() => {
@@ -150,7 +154,10 @@ const Calendar = ({ onChange, calendarRef, close }) => {
 
     // user has selected a date < after, reset values
     if (after === null || day.timestamp < after) {
-      timeRange = { before: new Date(day.timestamp).setHours(24, 0, 0, 0), after: day.timestamp };
+      timeRange = {
+        before: new Date(day.timestamp).setHours(24, 0, 0, 0),
+        after: day.timestamp,
+      };
     }
 
     // user has selected a date > after
@@ -159,8 +166,8 @@ const Calendar = ({ onChange, calendarRef, close }) => {
         after,
         before:
           day.timestamp >= todayTimestamp
-          	? new Date(todayTimestamp).setHours(24, 0, 0, 0)
-          	: new Date(day.timestamp).setHours(24, 0, 0, 0),
+            ? new Date(todayTimestamp).setHours(24, 0, 0, 0)
+            : new Date(day.timestamp).setHours(24, 0, 0, 0),
       };
     }
 
@@ -243,26 +250,26 @@ const Calendar = ({ onChange, calendarRef, close }) => {
     const days =
       state.monthDetails &&
       state.monthDetails.map((day, idx) => {
-      	return (
-      		<div
-      			onClick={() => onDateClick(day)}
-      			onkeydown={(e) => handleKeydown(e, day, idx)}
-      			ref={(ref) => (keyRef.current[idx] = ref)}
-      			tabIndex={day.month === 0 ? day.date : null}
-      			className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
-      				day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
-      			}
+        return (
+          <div
+            onClick={() => onDateClick(day)}
+            onkeydown={(e) => handleKeydown(e, day, idx)}
+            ref={(ref) => (keyRef.current[idx] = ref)}
+            tabIndex={day.month === 0 ? day.date : null}
+            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
+              day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
+            }
               ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
               ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
               ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
-      			key={idx}
-      		>
-      			<div className="font-light">
-      				<span className="text-gray-400">{day.date}</span>
-      			</div>
-      		</div>
-      	);
+            key={idx}
+          >
+            <div className="font-light">
+              <span className="text-gray-400">{day.date}</span>
+            </div>
+          </div>
+        );
       });
 
     return (
@@ -314,7 +321,7 @@ const Calendar = ({ onChange, calendarRef, close }) => {
               <ArrowRight className="h-2/6" />
             </div>
           </div>
-          <div className="w-1/6 relative flex justify-around " tabIndex={104} onClick={() => setYear(1)}>
+          <div className="w-1/6 relative flex justify-around" tabIndex={104} onClick={() => setYear(1)}>
             <div className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800">
               <ArrowRightDouble className="h-2/6" />
             </div>

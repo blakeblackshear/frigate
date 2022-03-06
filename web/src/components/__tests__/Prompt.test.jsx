@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Prompt from '../Prompt';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('Prompt', () => {
   let portal;
@@ -16,7 +16,7 @@ describe('Prompt', () => {
   });
 
   test('renders to a portal', async () => {
-    render(<Prompt title='Tacos' text='This is the dialog' />);
+    render(<Prompt title="Tacos" text="This is the dialog" />);
     expect(screen.getByText('Tacos')).toBeInTheDocument();
     expect(screen.getByRole('modal').closest('#dialogs')).not.toBeNull();
   });
@@ -29,7 +29,7 @@ describe('Prompt', () => {
           { color: 'red', text: 'Delete' },
           { text: 'Okay', onClick: handleClick },
         ]}
-        title='Tacos'
+        title="Tacos"
       />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Okay' }));

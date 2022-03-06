@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Menu, { MenuItem } from '../Menu';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 import { useRef } from 'preact/hooks';
 
 describe('Menu', () => {

@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Card from '../Card';
-import { render, screen } from '@testing-library/preact';
+import { render, screen } from 'testing-library';
 
 describe('Card', () => {
   test('renders a Card with media', async () => {

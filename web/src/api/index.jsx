@@ -6,11 +6,12 @@ import axios from 'axios';
 
 axios.defaults.baseURL = `${baseUrl}/api/`;
 
-export function ApiProvider({ children }) {
+export function ApiProvider({ children, options }) {
   return (
     <SWRConfig
       value={{
         fetcher: (path) => axios.get(path).then((res) => res.data),
+        ...options,
       }}
     >
       <MqttWithConfig>{children}</MqttWithConfig>
