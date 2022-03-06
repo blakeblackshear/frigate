@@ -945,7 +945,6 @@ class TrackedObjectProcessor(threading.Thread):
 
                 # if we have previously published a count for this zone all labels
                 zone_label = self.zone_data[zone]["all"]
-                logger.info(f'zone info {zone_label} with count {total_label_count}')
                 if camera in zone_label:
                     current_count = sum(zone_label.values())
                     zone_label[camera] = total_label_count
