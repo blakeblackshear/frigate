@@ -894,6 +894,7 @@ class TrackedObjectProcessor(threading.Thread):
                 for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
                     # if we have previously published a count for this zone/label
                     zone_label = self.zone_data[zone][label]
+                    all_labels_count = 0
                     if camera in zone_label:
                         current_count = sum(zone_label.values())
                         zone_label[camera] = (
@@ -906,6 +907,9 @@ class TrackedObjectProcessor(threading.Thread):
                                 new_count,
                                 retain=False,
                             )
+                        
+                        # Set the count for the /zone/all topic.
+                        all_labels_count += new_count
                     # if this is a new zone/label combo for this camera
                     else:
                         if label in obj_counter:
@@ -915,6 +919,18 @@ class TrackedObjectProcessor(threading.Thread):
                                 obj_counter[label],
                                 retain=False,
                             )
+                        
+                        # Set the count for the /zone/all topic.
+                        all_labels_count += obj_counter[label]
+                    
+                    # Publish count of all objects for this zone.
+                    # TODO may need to check and only publish if
+                    # value has changed from previous publish count??
+                    self.client.publish(
+                        f"{self.topic_prefix}/{zone}/all",
+                        all_labels_count,
+                        retain=False,
+                    )
 
             # cleanup event finished queue
             while not self.event_processed_queue.empty():
