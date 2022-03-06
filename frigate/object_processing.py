@@ -554,12 +554,21 @@ class CameraState:
             if not obj.false_positive
         )
 
+        # keep track of all labels detected for this camera
+        all_labels_count = 0
+
         # report on detected objects
         for obj_name, count in obj_counter.items():
+            all_labels_count += count
+    
             if count != self.object_counts[obj_name]:
                 self.object_counts[obj_name] = count
                 for c in self.callbacks["object_status"]:
                     c(self.name, obj_name, count)
+        
+        # publish for all labels detected for this camera
+        for c in self.callbacks["object_status"]:
+            c(self.name, "all", all_labels_count)
 
         # expire any objects that are >0 and no longer detected
         expired_objects = [
