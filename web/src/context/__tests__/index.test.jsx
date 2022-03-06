@@ -1,8 +1,9 @@
 import { h } from 'preact';
 import * as IDB from 'idb-keyval';
 import { DarkModeProvider, useDarkMode, usePersistence } from '..';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 import { useCallback } from 'preact/hooks';
+import * as Mqtt from '../../api/mqtt';
 
 function DarkModeChecker() {
   const { currentMode } = useDarkMode();
@@ -16,6 +17,8 @@ describe('DarkMode', () => {
       get: jest.spyOn(IDB, 'get').mockImplementation(() => Promise.resolve(undefined)),
       set: jest.spyOn(IDB, 'set').mockImplementation(() => Promise.resolve(true)),
     };
+
+    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
   });
 
   test('uses media by default', async () => {
@@ -148,8 +151,6 @@ describe('usePersistence', () => {
         my-default
       </div>
     `);
-
-    jest.runAllTimers();
   });
 
   test('updates with the previously-persisted value', async () => {

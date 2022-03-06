@@ -13,8 +13,8 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
   const canvasRef = useRef(null);
   const [{ width: availableWidth }] = useResizeObserver(containerRef);
 
-  const { name } = config.cameras[camera];
-  const { width, height } = config.cameras[camera].detect;
+  const { name } = config ? config.cameras[camera] : '';
+  const { width, height } = config ? config.cameras[camera].detect : { width: 1, height: 1 };
   const aspectRatio = width / height;
 
   const scaledHeight = useMemo(() => {
@@ -37,11 +37,11 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
   );
 
   useEffect(() => {
-    if (scaledHeight === 0 || !canvasRef.current) {
+    if (!config || scaledHeight === 0 || !canvasRef.current) {
       return;
     }
     img.src = `${apiHost}/api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;
-  }, [apiHost, canvasRef, name, img, searchParams, scaledHeight]);
+  }, [apiHost, canvasRef, name, img, searchParams, scaledHeight, config]);
 
   return (
     <div className="relative w-full" ref={containerRef}>

@@ -1,10 +1,10 @@
 import { h } from 'preact';
 import * as AutoUpdatingCameraImage from '../../components/AutoUpdatingCameraImage';
-import * as Api from '../../api';
 import * as Context from '../../context';
+import * as Mqtt from '../../api/mqtt';
 import Camera from '../Camera';
 import * as JSMpegPlayer from '../../components/JSMpegPlayer';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-library';
 
 describe('Camera Route', () => {
   let mockUsePersistence, mockSetOptions;
@@ -12,16 +12,13 @@ describe('Camera Route', () => {
   beforeEach(() => {
     mockSetOptions = jest.fn();
     mockUsePersistence = jest.spyOn(Context, 'usePersistence').mockImplementation(() => [{}, mockSetOptions]);
-    jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
-      data: { cameras: { front: { name: 'front', detect: {width: 1280, height: 720}, live: {height: 720}, objects: { track: ['taco', 'cat', 'dog'] } } } },
-    }));
-    jest.spyOn(Api, 'useApiHost').mockImplementation(() => 'http://base-url.local:5000');
     jest.spyOn(AutoUpdatingCameraImage, 'default').mockImplementation(({ searchParams }) => {
       return <div data-testid="mock-image">{searchParams.toString()}</div>;
     });
     jest.spyOn(JSMpegPlayer, 'default').mockImplementation(() => {
       return <div data-testid="mock-jsmpeg" />;
     });
+    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
   });
 
   test('reads camera feed options from persistence', async () => {
@@ -39,6 +36,8 @@ describe('Camera Route', () => {
 
     render(<Camera camera="front" />);
 
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
+
     fireEvent.click(screen.queryByText('Debug'));
     fireEvent.click(screen.queryByText('Show Options'));
     expect(screen.queryByTestId('mock-image')).toHaveTextContent(
@@ -50,10 +49,13 @@ describe('Camera Route', () => {
     mockUsePersistence
       .mockReturnValueOnce([{}, mockSetOptions])
       .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
       .mockReturnValueOnce([{ bbox: true }, mockSetOptions])
       .mockReturnValueOnce([{ bbox: true, timestamp: true }, mockSetOptions]);
 
     render(<Camera camera="front" />);
+
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 
     fireEvent.click(screen.queryByText('Debug'));
     fireEvent.click(screen.queryByText('Show Options'));
@@ -61,7 +63,7 @@ describe('Camera Route', () => {
     fireEvent.change(screen.queryByTestId('timestamp-input'), { target: { checked: true } });
     fireEvent.click(screen.queryByText('Hide Options'));
 
-    expect(mockUsePersistence).toHaveBeenCalledTimes(4);
+    expect(mockUsePersistence).toHaveBeenCalledTimes(5);
     expect(mockSetOptions).toHaveBeenCalledTimes(2);
     expect(mockSetOptions).toHaveBeenCalledWith({ bbox: true, timestamp: true });
     expect(screen.queryByTestId('mock-image')).toHaveTextContent('bbox=1&timestamp=1');

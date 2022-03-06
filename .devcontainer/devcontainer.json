@@ -29,16 +29,11 @@
     "files.trimTrailingWhitespace": true,
     "eslint.workingDirectories": ["./web"],
     "[json][jsonc]": {
-      "editor.formatOnSave": true,
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[jsx][js][tsx][ts]": {
-      "editor.formatOnSave": true,
-      "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-      "editor.codeActionsOnSave": [
-        "source.addMissingImports",
-        "source.fixAll.eslint"
-      ]
+      "editor.codeActionsOnSave": ["source.addMissingImports", "source.fixAll"],
+      "editor.tabSize": 2
     },
     "cSpell.ignoreWords": ["rtmp"],
     "cSpell.words": ["preact"]

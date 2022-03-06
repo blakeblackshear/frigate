@@ -67,13 +67,13 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
-  const cameras = useMemo(() => Object.keys(config.cameras), [config]);
+  const cameras = useMemo(() => Object.keys(config?.cameras || {}), [config]);
 
   const zones = useMemo(
     () =>
-      Object.values(config.cameras)
+      Object.values(config?.cameras || {})
         .reduce((memo, camera) => {
-          memo = memo.concat(Object.keys(camera.zones));
+          memo = memo.concat(Object.keys(camera?.zones || {}));
           return memo;
         }, [])
         .filter((value, i, self) => self.indexOf(value) === i),
@@ -81,11 +81,11 @@ export default function Events({ path, ...props }) {
   );
 
   const labels = useMemo(() => {
-    return Object.values(config.cameras)
+    return Object.values(config?.cameras || {})
       .reduce((memo, camera) => {
-        memo = memo.concat(camera.objects?.track || []);
+        memo = memo.concat(camera?.objects?.track || []);
         return memo;
-      }, config.objects?.track || [])
+      }, config?.objects?.track || [])
       .filter((value, i, self) => self.indexOf(value) === i);
   }, [config]);
 
@@ -123,6 +123,7 @@ export default function Events({ path, ...props }) {
 
   const handleSelectDateRange = useCallback(
     (dates) => {
+      console.log(dates);
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
       setShowDatePicker(false);
     },

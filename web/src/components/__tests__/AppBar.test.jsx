@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { DrawerProvider } from '../../context';
 import AppBar from '../AppBar';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 import { useRef } from 'preact/hooks';
 
 function Title() {

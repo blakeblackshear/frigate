@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { Mqtt, MqttProvider, useMqtt } from '../mqtt';
 import { useCallback, useContext } from 'preact/hooks';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 function Test() {
   const { state } = useContext(Mqtt);

@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "ES2019",
-    "jsx": "preserve",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
-  },
-  "include": ["./src/**/*.js", "./src/**/*.jsx"]
-}
