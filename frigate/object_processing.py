@@ -580,7 +580,7 @@ class CameraState:
         ]
         for obj_name in expired_objects:
             # Ignore the artificial all label
-            if obj_name is "all":
+            if obj_name == "all":
                 continue
 
             self.object_counts[obj_name] = 0
@@ -909,7 +909,7 @@ class TrackedObjectProcessor(threading.Thread):
                 # update counts and publish status
                 for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
                     # Ignore the artificial all label
-                    if label is "all":
+                    if label == "all":
                         continue
 
                     # if we have previously published a count for this zone/label
