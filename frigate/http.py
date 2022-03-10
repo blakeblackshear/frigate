@@ -299,6 +299,37 @@ def event_snapshot(id):
         ] = f"attachment; filename=snapshot-{id}.jpg"
     return response
 
+@bp.route("/<camera_name>/<label>/snapshot.jpg")
+def label_snapshot(camera_name, label):
+    if label == "any":
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+        return event_snapshot(event.id)
+    except DoesNotExist:
+        frame = np.zeros((720, 1280, 3), np.uint8)
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+        )
+
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
+
 
 @bp.route("/events/<id>/clip.mp4")
 def event_clip(id):
