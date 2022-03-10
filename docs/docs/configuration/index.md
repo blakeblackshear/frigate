@@ -171,7 +171,7 @@ detect:
     # It can also be used to disable stationary object tracking. For example, you may want to set a value for person, but leave
     # car at the default.
     # WARNING: Setting these values overrides default behavior and disables stationary object tracking.
-    #          There are very few situations where you would want it disabled. It is NOT recommended to  
+    #          There are very few situations where you would want it disabled. It is NOT recommended to
     #          copy these values from the example config into your config unless you know they are needed.
     max_frames:
       # Optional: Default for all object types (default: not set, track forever)
@@ -236,6 +236,10 @@ motion:
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
   mask: 0,900,1080,900,1080,1920,0,1920
+  # Optional: improve contrast (default: shown below)
+  # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
+  # for daytime.
+  improve_contrast: False
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
