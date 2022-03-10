@@ -190,6 +190,10 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
+### `GET /api/<camera_name>/<label>/thumbnail.jpg`
+
+Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type. 
+
 ### `GET /api/events/<id>/clip.mp4`
 
 Returns the clip for the event id. Works after the event has ended.
@@ -207,6 +211,10 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
+
+### `GET /api/<camera_name>/<label>/snapshot.jpg`
+
+Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /clips/<camera>-<id>.jpg`
 
