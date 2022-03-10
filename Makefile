@@ -3,7 +3,7 @@ default_target: amd64_frigate
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 
 version:
-	echo "VERSION='0.10.0-$(COMMIT_HASH)'" > frigate/version.py
+	echo "VERSION='0.10.1-$(COMMIT_HASH)'" > frigate/version.py
 
 web:
 	docker build --tag frigate-web --file docker/Dockerfile.web web/
