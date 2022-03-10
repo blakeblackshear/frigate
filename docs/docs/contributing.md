@@ -131,20 +131,16 @@ cd web && npm install
 #### 3. Run the development server
 
 ```console
-cd web && npm run start
+cd web && npm run dev
 ```
 
 #### 3a. Run the development server against a non-local instance
 
-To run the development server against a non-local instance, you will need to provide an environment variable, `SNOWPACK_PUBLIC_API_HOST` that tells the web application how to connect to the Frigate API:
-
-```console
-cd web && SNOWPACK_PUBLIC_API_HOST=http://<ip-address-to-your-frigate-instance>:5000 npm run start
-```
+To run the development server against a non-local instance, you will need to modify the API_HOST default return in `web/src/env.js`.
 
 #### 4. Making changes
 
-The Web UI is built using [Snowpack](https://www.snowpack.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).
+The Web UI is built using [Vite](https://vitejs.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).
 
 Light guidelines and advice:
 
