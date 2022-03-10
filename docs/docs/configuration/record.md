@@ -21,7 +21,7 @@ record:
 
 This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
 
-When `retain: days` is set to `0`, segments will be deleted from the cache if no events are in progress.
+When `retain -> days` is set to `0`, segments will be deleted from the cache if no events are in progress.
 
 ## What do the different retain modes mean?
 
