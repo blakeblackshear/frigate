@@ -157,7 +157,7 @@ def delete_retain(id):
 def set_sub_label(id):
     try:
         event = Event.get(Event.id == id)
-    except DoesNotExit:
+    except DoesNotExist:
         return make_response(
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
@@ -167,7 +167,10 @@ def set_sub_label(id):
             jsonify({"success": False, "message": "Event " + id + " is not a person event"}), 400
         )
 
-    new_sub_label = request.json.get("subLabel", "")
+    if request.json:
+        new_sub_label = request.json.get("subLabel", "")
+    else:
+        new_sub_label = ""
 
     if new_sub_label:
         event.sub_label = new_sub_label
@@ -184,7 +187,7 @@ def set_sub_label(id):
 def delete_sub_label(id):
     try:
         event = Event.get(Event.id == id)
-    except DoesNotExit:
+    except DoesNotExist:
         return make_response(
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
