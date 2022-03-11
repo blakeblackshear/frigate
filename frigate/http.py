@@ -126,14 +126,14 @@ def set_retain(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     event.retain_indefinitely = True
     event.save()
 
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " retained"}), 200
+        jsonify({"success": True, "message": "Event " + id + " retained"}), 200
     )
 
 
@@ -143,14 +143,14 @@ def delete_retain(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     event.retain_indefinitely = False
     event.save()
 
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " un-retained"}), 200
+        jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
     )
 
 @bp.route("/events/<id>/sub_label", methods=("POST",))
@@ -159,23 +159,26 @@ def set_sub_label(id):
         event = Event.get(Event.id == id)
     except DoesNotExit:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     if event.label != "person":
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " is not a person event"}), 400
+            jsonify({"success": False, "message": "Event " + id + " is not a person event"}), 400
         )
 
-    new_sub_label = request.form.get("subLabel", "")
+    new_sub_label = request.json.get("subLabel", "")
+    print(f'Found value as {request.json} with {request.json.get("subLabel", "")}')
 
     if new_sub_label:
         event.sub_label = new_sub_label
         event.save()
-        jsonify({"success": True, "message": "Event" + id + " sub label set to " + new_sub_label}), 200
+        return make_response(
+            jsonify({"success": True, "message": "Event " + id + " sub label set to " + new_sub_label}), 200
+        )
 
     return make_response(
-        jsonify({"success": False, "message": "Sublabel not provided."}), 400
+        jsonify({"success": False, "message": "Sublabel " + new_sub_label + " not provided."}), 400
     )
 
 @bp.route("/events/<id>/sub_label", methods=("DELETE",))
@@ -184,13 +187,13 @@ def delete_sub_label(id):
         event = Event.get(Event.id == id)
     except DoesNotExit:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     event.sub_label = ""
     event.save()
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " sub label removed"}), 200
+        jsonify({"success": True, "message": "Event " + id + " sub label removed"}), 200
     )
 
 @bp.route("/events/<id>", methods=("DELETE",))
