@@ -186,6 +186,22 @@ Sets retain to true for the event id.
 
 Sets retain to false for the event id (event may be deleted quickly after removing).
 
+### `POST /api/events/<id>/sub_label`
+
+Set a sub label for a person event. For example to update `person` -> `person's name` if they were recognized with facial recognition. 
+
+```
+Headers:
+Content-Type: application/json
+
+Body:
+subLabel
+```
+
+### `DELETE /api/events/<id>/sub_label`
+
+Clear the already set sub label to be blank.
+
 ### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
