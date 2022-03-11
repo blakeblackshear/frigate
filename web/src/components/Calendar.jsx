@@ -5,7 +5,7 @@ import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
-const Calendar = ({ onChange, calendarRef, close }) => {
+const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
   const keyRef = useRef([]);
 
   const date = new Date();
@@ -36,7 +36,7 @@ const Calendar = ({ onChange, calendarRef, close }) => {
     year,
     month,
     selectedDay: null,
-    timeRange: { before: null, after: null },
+    timeRange: dateRange,
     monthDetails: null,
   });
 

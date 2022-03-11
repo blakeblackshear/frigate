@@ -42,52 +42,54 @@ export default function Events({ path, ...props }) {
     label: props.label ?? 'all',
     zone: props.zone ?? 'all',
   });
+  const [state, setState] = useState({
+    showDownloadMenu: null,
+    showDatePicker: null,
+    showCalendar: null,
+  });
   const [viewEvent, setViewEvent] = useState();
   const [downloadEvent, setDownloadEvent] = useState({ id: null, has_clip: false, has_snapshot: false });
-  const [showDownloadMenu, setShowDownloadMenu] = useState();
-  const [showDatePicker, setShowDatePicker] = useState();
-  const [showCalendar, setShowCalendar] = useState();
 
-  const eventsFetcher = (path, params) => {
+  const eventsFetcher = useCallback((path, params) => {
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
     return axios.get(path, { params }).then((res) => res.data);
-  };
+  }, []);
 
-  const getKey = (index, prevData) => {
-    if (index > 0) {
-      const lastDate = prevData[prevData.length - 1].start_time;
-      const pagedParams = { ...searchParams, before: lastDate };
-      return ['events', pagedParams];
-    }
+  const getKey = useCallback(
+    (index, prevData) => {
+      if (index > 0) {
+        const lastDate = prevData[prevData.length - 1].start_time;
+        const pagedParams = { ...searchParams, before: lastDate };
+        return ['events', pagedParams];
+      }
 
-    return ['events', searchParams];
-  };
+      return ['events', searchParams];
+    },
+    [searchParams]
+  );
 
   const { data: eventPages, mutate, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
 
   const { data: config } = useSWR('config');
 
-  const cameras = useMemo(() => Object.keys(config?.cameras || {}), [config]);
-
-  const zones = useMemo(
-    () =>
-      Object.values(config?.cameras || {})
+  const filterValues = useMemo(
+    () => ({
+      cameras: Object.keys(config?.cameras || {}),
+      zones: Object.values(config?.cameras || {})
         .reduce((memo, camera) => {
           memo = memo.concat(Object.keys(camera?.zones || {}));
           return memo;
         }, [])
         .filter((value, i, self) => self.indexOf(value) === i),
+      labels: Object.values(config?.cameras || {})
+        .reduce((memo, camera) => {
+          memo = memo.concat(camera?.objects?.track || []);
+          return memo;
+        }, config?.objects?.track || [])
+        .filter((value, i, self) => self.indexOf(value) === i),
+    }),
     [config]
   );
-
-  const labels = useMemo(() => {
-    return Object.values(config?.cameras || {})
-      .reduce((memo, camera) => {
-        memo = memo.concat(camera?.objects?.track || []);
-        return memo;
-      }, config?.objects?.track || [])
-      .filter((value, i, self) => self.indexOf(value) === i);
-  }, [config]);
 
   const onSave = async (e, eventId, save) => {
     e.stopPropagation();
@@ -118,16 +120,15 @@ export default function Events({ path, ...props }) {
     e.stopPropagation();
     setDownloadEvent((_prev) => ({ id: event.id, has_clip: event.has_clip, has_snapshot: event.has_snapshot }));
     downloadButton.current = e.target;
-    setShowDownloadMenu(true);
+    setState({ ...state, showDownloadMenu: true });
   };
 
   const handleSelectDateRange = useCallback(
     (dates) => {
-      console.log(dates);
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
-      setShowDatePicker(false);
+      setState({ ...state, showDatePicker: false });
     },
-    [searchParams, setSearchParams, setShowDatePicker]
+    [searchParams, setSearchParams, state, setState]
   );
 
   const onFilter = useCallback(
@@ -166,7 +167,7 @@ export default function Events({ path, ...props }) {
     [size, setSize, isValidating, isDone]
   );
 
-  if (!eventPages || !config) {
+  if (!config) {
     return <ActivityIndicator />;
   }
 
@@ -180,7 +181,7 @@ export default function Events({ path, ...props }) {
           onChange={(e) => onFilter('camera', e.target.value)}
         >
           <option value="all">all</option>
-          {cameras.map((item) => (
+          {filterValues.cameras.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -192,7 +193,7 @@ export default function Events({ path, ...props }) {
           onChange={(e) => onFilter('label', e.target.value)}
         >
           <option value="all">all</option>
-          {labels.map((item) => (
+          {filterValues.labels.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -204,18 +205,21 @@ export default function Events({ path, ...props }) {
           onChange={(e) => onFilter('zone', e.target.value)}
         >
           <option value="all">all</option>
-          {zones.map((item) => (
+          {filterValues.zones.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
           ))}
         </select>
         <div ref={datePicker} className="ml-auto">
-          <CalendarIcon className="h-8 w-8 cursor-pointer" onClick={() => setShowDatePicker(true)} />
+          <CalendarIcon
+            className="h-8 w-8 cursor-pointer"
+            onClick={() => setState({ ...state, showDatePicker: true })}
+          />
         </div>
       </div>
-      {showDownloadMenu && (
-        <Menu onDismiss={() => setShowDownloadMenu(false)} relativeTo={downloadButton}>
+      {state.showDownloadMenu && (
+        <Menu onDismiss={() => setState({ ...state, showDownloadMenu: false })} relativeTo={downloadButton}>
           {downloadEvent.has_snapshot && (
             <MenuItem
               icon={Snapshot}
@@ -236,8 +240,12 @@ export default function Events({ path, ...props }) {
           )}
         </Menu>
       )}
-      {showDatePicker && (
-        <Menu className="rounded-t-none" onDismiss={() => setShowDatePicker(false)} relativeTo={datePicker}>
+      {state.showDatePicker && (
+        <Menu
+          className="rounded-t-none"
+          onDismiss={() => setState({ ...state, setShowDatePicker: false })}
+          relativeTo={datePicker}
+        >
           <MenuItem label="All" value={{ before: null, after: null }} onSelect={handleSelectDateRange} />
           <MenuItem label="Today" value={{ before: null, after: daysAgo(0) }} onSelect={handleSelectDateRange} />
           <MenuItem
@@ -256,119 +264,130 @@ export default function Events({ path, ...props }) {
             label="Custom Range"
             value="custom"
             onSelect={() => {
-              setShowCalendar(true);
-              setShowDatePicker(false);
+              setState({ ...state, showCalendar: true, showDatePicker: false });
             }}
           />
         </Menu>
       )}
-      {showCalendar && (
-        <Menu className="rounded-t-none" onDismiss={() => setShowCalendar(false)} relativeTo={datePicker}>
-          <Calendar onChange={handleSelectDateRange} close={() => setShowCalendar(false)} />
+      {state.showCalendar && (
+        <Menu
+          className="rounded-t-none"
+          onDismiss={() => setState({ ...state, showCalendar: false })}
+          relativeTo={datePicker}
+        >
+          <Calendar
+            onChange={handleSelectDateRange}
+            dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
+            close={() => setState({ ...state, showCalendar: false })}
+          />
         </Menu>
       )}
       <div className="space-y-2">
-        {eventPages.map((page, i) => {
-          const lastPage = eventPages.length === i + 1;
-          return page.map((event, j) => {
-            const lastEvent = lastPage && page.length === j + 1;
-            return (
-              <Fragment key={event.id}>
-                <div
-                  ref={lastEvent ? lastEventRef : false}
-                  className="flex bg-slate-100 dark:bg-slate-800 rounded cursor-pointer min-w-[330px]"
-                  onClick={() => (viewEvent === event.id ? setViewEvent(null) : setViewEvent(event.id))}
-                >
+        {eventPages ? (
+          eventPages.map((page, i) => {
+            const lastPage = eventPages.length === i + 1;
+            return page.map((event, j) => {
+              const lastEvent = lastPage && page.length === j + 1;
+              return (
+                <Fragment key={event.id}>
                   <div
-                    className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain"
-                    style={{
-                      'background-image': `url(${apiHost}/api/events/${event.id}/thumbnail.jpg)`,
-                    }}
+                    ref={lastEvent ? lastEventRef : false}
+                    className="flex bg-slate-100 dark:bg-slate-800 rounded cursor-pointer min-w-[330px]"
+                    onClick={() => (viewEvent === event.id ? setViewEvent(null) : setViewEvent(event.id))}
                   >
-                    <StarRecording
-                      className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
-                      onClick={(e) => onSave(e, event.id, !event.retain_indefinitely)}
-                      fill={event.retain_indefinitely ? 'currentColor' : 'none'}
-                    />
-                    {event.end_time ? null : (
-                      <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
-                        In progress
-                      </div>
-                    )}
-                  </div>
-                  <div className="m-2 flex grow">
-                    <div className="flex flex-col grow">
-                      <div className="capitalize text-lg font-bold">
-                        {event.label} ({(event.top_score * 100).toFixed(0)}%)
-                      </div>
-                      <div className="text-sm">
-                        {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                        {new Date(event.start_time * 1000).toLocaleTimeString()}
-                      </div>
-                      <div className="capitalize text-sm flex align-center mt-1">
-                        <Camera className="h-5 w-5 mr-2 inline" />
-                        {event.camera}
-                      </div>
-                      <div className="capitalize  text-sm flex align-center">
-                        <Zone className="w-5 h-5 mr-2 inline" />
-                        {event.zones.join(',')}
-                      </div>
-                    </div>
-                    <div class="flex flex-col">
-                      <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id)} />
-
-                      <Download
-                        className="h-6 w-6 mt-auto"
-                        stroke={event.has_clip || event.has_snapshot ? '#3b82f6' : '#cbd5e1'}
-                        onClick={(e) => onDownloadClick(e, event)}
+                    <div
+                      className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain"
+                      style={{
+                        'background-image': `url(${apiHost}/api/events/${event.id}/thumbnail.jpg)`,
+                      }}
+                    >
+                      <StarRecording
+                        className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
+                        onClick={(e) => onSave(e, event.id, !event.retain_indefinitely)}
+                        fill={event.retain_indefinitely ? 'currentColor' : 'none'}
                       />
-                    </div>
-                  </div>
-                </div>
-                {viewEvent !== event.id ? null : (
-                  <div className="space-y-4">
-                    <div className="mx-auto">
-                      {event.has_clip ? (
-                        <>
-                          <Heading size="lg">Clip</Heading>
-                          <VideoPlayer
-                            options={{
-                              preload: 'auto',
-                              autoplay: true,
-                              sources: [
-                                {
-                                  src: `${apiHost}/vod/event/${event.id}/index.m3u8`,
-                                  type: 'application/vnd.apple.mpegurl',
-                                },
-                              ],
-                            }}
-                            seekOptions={{ forward: 10, back: 5 }}
-                            onReady={() => {}}
-                          />
-                        </>
-                      ) : (
-                        <div className="flex justify-center">
-                          <div>
-                            <Heading size="sm">{event.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
-                            <img
-                              className="flex-grow-0"
-                              src={
-                                event.has_snapshot
-                                  ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
-                                  : `data:image/jpeg;base64,${event.thumbnail}`
-                              }
-                              alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
-                            />
-                          </div>
+                      {event.end_time ? null : (
+                        <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
+                          In progress
                         </div>
                       )}
                     </div>
+                    <div className="m-2 flex grow">
+                      <div className="flex flex-col grow">
+                        <div className="capitalize text-lg font-bold">
+                          {event.label} ({(event.top_score * 100).toFixed(0)}%)
+                        </div>
+                        <div className="text-sm">
+                          {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
+                          {new Date(event.start_time * 1000).toLocaleTimeString()}
+                        </div>
+                        <div className="capitalize text-sm flex align-center mt-1">
+                          <Camera className="h-5 w-5 mr-2 inline" />
+                          {event.camera}
+                        </div>
+                        <div className="capitalize  text-sm flex align-center">
+                          <Zone className="w-5 h-5 mr-2 inline" />
+                          {event.zones.join(',')}
+                        </div>
+                      </div>
+                      <div class="flex flex-col">
+                        <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id)} />
+
+                        <Download
+                          className="h-6 w-6 mt-auto"
+                          stroke={event.has_clip || event.has_snapshot ? '#3b82f6' : '#cbd5e1'}
+                          onClick={(e) => onDownloadClick(e, event)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                )}
-              </Fragment>
-            );
-          });
-        })}
+                  {viewEvent !== event.id ? null : (
+                    <div className="space-y-4">
+                      <div className="mx-auto">
+                        {event.has_clip ? (
+                          <>
+                            <Heading size="lg">Clip</Heading>
+                            <VideoPlayer
+                              options={{
+                                preload: 'auto',
+                                autoplay: true,
+                                sources: [
+                                  {
+                                    src: `${apiHost}/vod/event/${event.id}/index.m3u8`,
+                                    type: 'application/vnd.apple.mpegurl',
+                                  },
+                                ],
+                              }}
+                              seekOptions={{ forward: 10, back: 5 }}
+                              onReady={() => {}}
+                            />
+                          </>
+                        ) : (
+                          <div className="flex justify-center">
+                            <div>
+                              <Heading size="sm">{event.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+                              <img
+                                className="flex-grow-0"
+                                src={
+                                  event.has_snapshot
+                                    ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
+                                    : `data:image/jpeg;base64,${event.thumbnail}`
+                                }
+                                alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </Fragment>
+              );
+            });
+          })
+        ) : (
+          <ActivityIndicator />
+        )}
       </div>
       <div>{isDone ? null : <ActivityIndicator />}</div>
     </div>

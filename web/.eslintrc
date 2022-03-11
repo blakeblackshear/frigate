@@ -15,7 +15,8 @@
   "rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "comma-dangle": ["error", { "objects": "always-multiline", "arrays": "always-multiline" }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "error"
   },
   "overrides": [
     {
