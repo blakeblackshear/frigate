@@ -226,6 +226,39 @@ def event_thumbnail(id):
         response.headers["Cache-Control"] = "private, max-age=31536000"
     return response
 
+@bp.route("/<camera_name>/<label>/best.jpg")
+@bp.route("/<camera_name>/<label>/thumbnail.jpg")
+def label_thumbnail(camera_name, label):
+    if label == "any":
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+
+        return event_thumbnail(event.id)
+    except DoesNotExist:
+        frame = np.zeros((175, 175, 3), np.uint8)
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+        )
+
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
+
 
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
@@ -270,6 +303,37 @@ def event_snapshot(id):
             "Content-Disposition"
         ] = f"attachment; filename=snapshot-{id}.jpg"
     return response
+
+@bp.route("/<camera_name>/<label>/snapshot.jpg")
+def label_snapshot(camera_name, label):
+    if label == "any":
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+        return event_snapshot(event.id)
+    except DoesNotExist:
+        frame = np.zeros((720, 1280, 3), np.uint8)
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+        )
+
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
 
 
 @bp.route("/events/<id>/clip.mp4")
@@ -389,48 +453,6 @@ def version():
 def stats():
     stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
-
-
-@bp.route("/<camera_name>/<label>/best.jpg")
-def best(camera_name, label):
-    if camera_name in current_app.frigate_config.cameras:
-        best_object = current_app.detected_frames_processor.get_best(camera_name, label)
-        best_frame = best_object.get("frame")
-        if best_frame is None:
-            best_frame = np.zeros((720, 1280, 3), np.uint8)
-        else:
-            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
-
-        crop = bool(request.args.get("crop", 0, type=int))
-        if crop:
-            box_size = 300
-            box = best_object.get("box", (0, 0, box_size, box_size))
-            region = calculate_region(
-                best_frame.shape,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                box_size,
-                multiplier=1.1,
-            )
-            best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
-
-        height = int(request.args.get("h", str(best_frame.shape[0])))
-        width = int(height * best_frame.shape[1] / best_frame.shape[0])
-        resize_quality = request.args.get("quality", default=70, type=int)
-
-        best_frame = cv2.resize(
-            best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
-        )
-        ret, jpg = cv2.imencode(
-            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
-        )
-        response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpeg"
-        return response
-    else:
-        return "Camera named {} not found".format(camera_name), 404
 
 
 @bp.route("/<camera_name>")
