@@ -168,7 +168,6 @@ def set_sub_label(id):
         )
 
     new_sub_label = request.json.get("subLabel", "")
-    print(f'Found value as {request.json} with {request.json.get("subLabel", "")}')
 
     if new_sub_label:
         event.sub_label = new_sub_label
@@ -202,7 +201,7 @@ def delete_event(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     media_name = f"{event.camera}-{event.id}"
@@ -217,7 +216,7 @@ def delete_event(id):
 
     event.delete_instance()
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " deleted"}), 200
+        jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
     )
 
 
