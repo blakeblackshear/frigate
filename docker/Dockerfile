@@ -62,7 +62,6 @@ RUN pip3 wheel --wheel-dir=/wheels \
 # Frigate Container
 FROM debian:11-slim
 ARG TARGETARCH
-ARG S6_OVERLAY_VERSION=3.0.0.2
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FLASK_ENV=development
@@ -117,7 +116,7 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
 
-COPY --from=web /opt/frigate/build web/
+COPY --from=web /opt/frigate/dist web/
 
 COPY docker/rootfs/ /
 
@@ -127,10 +126,6 @@ RUN S6_ARCH="${TARGETARCH}" \
     && if [ "${TARGETARCH}" = "arm64" ]; then S6_ARCH="aarch64"; fi \
     && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
-# && wget -O - "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz" \
-# | tar -C / -Jxpf - \
-# && wget -O - "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}-${S6_OVERLAY_VERSION}.tar.xz" \
-# | tar -C / -Jxpf -
 
 EXPOSE 5000
 EXPOSE 1935
