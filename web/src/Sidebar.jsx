@@ -22,9 +22,9 @@ export default function Sidebar() {
             <Fragment>
               <Separator />
                {Object.entries(cameras)
-                 .filter(([_, conf]) => conf.gui.show)
-                 .sort(([_, aConf], [_, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
-                 .map(([camera]) => (
+                .filter(([_, conf]) => conf.gui.show)
+                .sort(([_, aConf], [__, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+                .map(([camera]) => (
                   <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
                 ))}
               <Separator />
@@ -39,7 +39,7 @@ export default function Sidebar() {
               <Separator />
               {Object.entries(cameras)
                 .filter(([_, conf]) => conf.gui.show)
-                .sort(([_, aConf], [_, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+                .sort(([_, aConf], [__, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
                 .map(([camera, conf]) => {
                   if (conf.record.enabled) {
                     return (

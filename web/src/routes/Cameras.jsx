@@ -18,7 +18,7 @@ export default function Cameras() {
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
       {Object.entries(config.cameras)
         .filter(([_, conf]) => conf.gui.show)
-        .sort(([_, aConf], [_, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+        .sort(([_, aConf], [__, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
         .map(([camera, conf]) => (
           <Camera key={camera} name={camera} conf={conf} />
         ))}
