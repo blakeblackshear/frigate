@@ -18,7 +18,7 @@ export default function Debug() {
   } = useMqtt('stats');
   const { data: initialStats } = useSWR('stats');
 
-  const { detectors, service = {}, ...cameras } = stats || initialStats || emptyObject;
+  const { detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
   const detectorDataKeys = Object.keys(detectors ? detectors[detectorNames[0]] : emptyObject);
