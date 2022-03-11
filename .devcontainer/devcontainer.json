@@ -9,19 +9,33 @@
     "mhutchie.git-graph",
     "ms-azuretools.vscode-docker",
     "streetsidesoftware.code-spell-checker",
-    "eamodio.gitlens",
     "esbenp.prettier-vscode",
-    "ms-python.vscode-pylance"
+    "ms-python.vscode-pylance",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "mikestead.dotenv",
+    "csstools.postcss",
+    "blanu.vscode-styled-jsx",
+    "bradlc.vscode-tailwindcss"
   ],
   "settings": {
-    "python.pythonPath": "/usr/bin/python3",
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "files.trimTrailingWhitespace": true,
-    "terminal.integrated.shell.linux": "/bin/bash"
+    "eslint.workingDirectories": ["./web"],
+    "[json][jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsx][js][tsx][ts]": {
+      "editor.codeActionsOnSave": ["source.addMissingImports", "source.fixAll"],
+      "editor.tabSize": 2
+    },
+    "cSpell.ignoreWords": ["rtmp"],
+    "cSpell.words": ["preact"]
   }
 }

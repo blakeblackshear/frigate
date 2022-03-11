@@ -19,7 +19,7 @@ export default function AppBar() {
   const { send: sendRestart } = useRestart();
 
   const handleSelectDarkMode = useCallback(
-    (value, label) => {
+    (value) => {
       setDarkMode(value);
       setShowMoreMenu(false);
     },

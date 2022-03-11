@@ -1,22 +1,34 @@
 import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import { useEvents } from '../../api';
-import { useSearchString } from '../../hooks/useSearchString';
-import { getNowYesterdayInLong } from '../../utils/dateUtil';
+import useSWR from 'swr';
+import axios from 'axios';
 import Timeline from '../Timeline/Timeline';
-import { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
-import { TimelineEvent } from '../Timeline/TimelineEvent';
+import type { TimelineChangeEvent } from '../Timeline/TimelineChangeEvent';
+import type { TimelineEvent } from '../Timeline/TimelineEvent';
 import { HistoryHeader } from './HistoryHeader';
 import { HistoryVideo } from './HistoryVideo';
 
-export default function HistoryViewer({ camera }) {
-  const { searchString } = useSearchString(500, `camera=${camera}&after=${getNowYesterdayInLong()}`);
-  const { data: events } = useEvents(searchString);
+export default function HistoryViewer({ camera }: {camera: string}) {
+  const searchParams = {
+    before: null,
+    after: null,
+    camera,
+    label: 'all',
+    zone: 'all',
+  };
 
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>(undefined);
-  const [currentEvent, setCurrentEvent] = useState<TimelineEvent>(undefined);
-  const [isPlaying, setIsPlaying] = useState(undefined);
-  const [currentTime, setCurrentTime] = useState<number>(undefined);
+  // TODO: refactor
+  const eventsFetcher = (path: string, params: {[name:string]: string|number}) => {
+    params = { ...params, include_thumbnails: 0, limit: 500 };
+    return axios.get<TimelineEvent[]>(path, { params }).then((res) => res.data);
+  };
+
+  const { data: events } = useSWR(['events', searchParams], eventsFetcher);
+
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [currentEvent, setCurrentEvent] = useState<TimelineEvent>();
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(new Date().getTime());
 
   useEffect(() => {
     if (events) {

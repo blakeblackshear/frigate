@@ -6,30 +6,36 @@ import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
-import { useConfig, FetchStatus } from '../api';
 import { useMemo } from 'preact/hooks';
+import useSWR from 'swr';
 
 export default function Cameras() {
-  const { data: config, status } = useConfig();
+  const { data: config } = useSWR('config');
 
-  return status !== FetchStatus.LOADED ? (
+  return !config ? (
     <ActivityIndicator />
   ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
-      {Object.entries(config.cameras).filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera, conf]) => (
+      {Object.entries(config.cameras)
+      .filter(([cam, conf]) => conf.gui.show)
+      .sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+      .map(([camera, conf]) => (
         <Camera key={camera} name={camera} conf={conf} />
       ))}
     </div>
   );
 }
 
-function Camera({ name, conf }) {
+function Camera({ name }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
-    return [{ name: 'Events', href: `/events?camera=${name}` }, { name: 'Recordings', href: `/recording/${name}` }];
+    return [
+      { name: 'Events', href: `/events?camera=${name}` },
+      { name: 'Recordings', href: `/recording/${name}` },
+    ];
   }, [name]);
   const icons = useMemo(
     () => [

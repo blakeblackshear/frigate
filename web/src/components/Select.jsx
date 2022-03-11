@@ -4,7 +4,7 @@ import ArrowDropup from '../icons/ArrowDropup';
 import Menu, { MenuItem } from './Menu';
 import TextField from './TextField';
 import DatePicker from './DatePicker';
-import Calender from './Calender';
+import Calendar from './Calendar';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 export default function Select({
@@ -71,8 +71,8 @@ export default function Select({
   }, [type, options, inputOptions, propSelected, setSelected]);
 
   const [focused, setFocused] = useState(null);
-  const [showCalender, setShowCalender] = useState(false);
-  const calenderRef = useRef(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const calendarRef = useRef(null);
   const ref = useRef(null);
 
   const handleSelect = useCallback(
@@ -80,8 +80,8 @@ export default function Select({
       setSelected(options.findIndex(({ value }) => Object.values(propSelected).includes(value)));
       setShowMenu(false);
 
-      //show calender date range picker
-      if (value === 'custom_range') return setShowCalender(true);
+      //show calendar date range picker
+      if (value === 'custom_range') return setShowCalendar(true);
       onChange && onChange(value);
     },
     [onChange, options, propSelected, setSelected]
@@ -110,7 +110,7 @@ export default function Select({
             setSelected(focused);
             if (options[focused].value === 'custom_range') {
               setShowMenu(false);
-              return setShowCalender(true);
+              return setShowCalendar(true);
             }
 
             onChange && onChange(options[focused].value);
@@ -184,8 +184,8 @@ export default function Select({
 
   useEffect(() => {
     const addBackDrop = (e) => {
-      if (showCalender && !findDOMNodes(calenderRef.current).contains(e.target)) {
-        setShowCalender(false);
+      if (showCalendar && !findDOMNodes(calendarRef.current).contains(e.target)) {
+        setShowCalendar(false);
       }
     };
     window.addEventListener('click', addBackDrop);
@@ -193,7 +193,7 @@ export default function Select({
     return function cleanup() {
       window.removeEventListener('click', addBackDrop);
     };
-  }, [showCalender]);
+  }, [showCalendar]);
 
   switch (type) {
     case 'datepicker':
@@ -208,9 +208,9 @@ export default function Select({
             trailingIcon={showMenu ? ArrowDropup : ArrowDropdown}
             value={datePickerValue}
           />
-          {showCalender && (
+          {showCalendar && (
             <Menu className="rounded-t-none" onDismiss={handleDismiss} relativeTo={ref}>
-              <Calender onChange={handleDateRange} calenderRef={calenderRef} close={() => setShowCalender(false)} />
+              <Calendar onChange={handleDateRange} calendarRef={calendarRef} close={() => setShowCalendar(false)} />
             </Menu>
           )}
           {showMenu ? (
@@ -223,7 +223,7 @@ export default function Select({
         </Fragment>
       );
 
-    // case 'dropdown':
+      // case 'dropdown':
     default:
       return (
         <Fragment>

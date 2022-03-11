@@ -3,7 +3,7 @@ import { useMemo } from 'preact/hooks';
 import { findLargestYOffsetInBlocks, getTimelineWidthFromBlocks } from '../../utils/Timeline/timelineEventUtils';
 import { convertRemToPixels } from '../../utils/windowUtils';
 import { TimelineBlockView } from './TimelineBlockView';
-import { TimelineEventBlock } from './TimelineEventBlock';
+import type { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineBlocksProps {
   timeline: TimelineEventBlock[];
@@ -36,11 +36,12 @@ export const TimelineBlocks = ({ timeline, firstBlockOffset, onEventClick }: Tim
               ...block,
               yOffset: block.yOffset + timelineBlockOffset,
             };
-            return <TimelineBlockView block={updatedBlock} onClick={onClickHandler} />;
+            return <TimelineBlockView key={block.id} block={updatedBlock} onClick={onClickHandler} />;
           })}
         </div>
       );
     }
+    return <div />
   }, [timeline, onEventClick, firstBlockOffset]);
 
   return timelineEventBlocks;

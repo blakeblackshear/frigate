@@ -1,12 +1,12 @@
 import { Fragment, h } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { getTimelineEventBlocksFromTimelineEvents } from '../../utils/Timeline/timelineEventUtils';
-import { ScrollPermission } from './ScrollPermission';
+import type { ScrollPermission } from './ScrollPermission';
 import { TimelineBlocks } from './TimelineBlocks';
-import { TimelineChangeEvent } from './TimelineChangeEvent';
+import type { TimelineChangeEvent } from './TimelineChangeEvent';
 import { DisabledControls, TimelineControls } from './TimelineControls';
-import { TimelineEvent } from './TimelineEvent';
-import { TimelineEventBlock } from './TimelineEventBlock';
+import type { TimelineEvent } from './TimelineEvent';
+import type { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineProps {
   events: TimelineEvent[];
@@ -16,7 +16,7 @@ interface TimelineProps {
 }
 
 export default function Timeline({ events, isPlaying, onChange, onPlayPause }: TimelineProps) {
-  const timelineContainerRef = useRef<HTMLDivElement>(undefined);
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
 
   const [timeline, setTimeline] = useState<TimelineEventBlock[]>([]);
   const [disabledControls, setDisabledControls] = useState<DisabledControls>({
@@ -24,10 +24,10 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
     next: true,
     previous: false,
   });
-  const [timelineOffset, setTimelineOffset] = useState<number | undefined>(undefined);
-  const [markerTime, setMarkerTime] = useState<Date | undefined>(undefined);
+  const [timelineOffset, setTimelineOffset] = useState<number>(0);
+  const [markerTime, setMarkerTime] = useState<Date>(new Date());
   const [currentEvent, setCurrentEvent] = useState<TimelineEventBlock | undefined>(undefined);
-  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout>();
   const [scrollPermission, setScrollPermission] = useState<ScrollPermission>({
     allowed: true,
     resetAfterSeeked: false,
@@ -51,7 +51,7 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
   );
 
   const scrollToEvent = useCallback(
-    (event, offset = 0) => {
+    (event: TimelineEventBlock, offset = 0) => {
       scrollToPosition(event.positionX + offset - timelineOffset);
     },
     [timelineOffset, scrollToPosition]
@@ -137,7 +137,9 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
   };
 
   const waitForSeekComplete = (markerTime: Date) => {
-    clearTimeout(scrollTimeout);
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
     setScrollTimeout(setTimeout(() => seekCompleteHandler(markerTime), 150));
   };
 
@@ -161,11 +163,12 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
       const firstTimelineEventStartTime = firstTimelineEvent.startTime.getTime();
       return new Date(firstTimelineEventStartTime + scrollPosition * 1000);
     }
+    return new Date();
   }, [timeline, timelineContainerRef]);
 
   useEffect(() => {
     if (timelineContainerRef) {
-      const timelineContainerWidth = timelineContainerRef.current.offsetWidth;
+      const timelineContainerWidth = timelineContainerRef.current?.offsetWidth || 0;
       const offset = Math.round(timelineContainerWidth / 2);
       setTimelineOffset(offset);
     }
@@ -180,7 +183,7 @@ export default function Timeline({ events, isPlaying, onChange, onPlayPause }: T
   );
 
   const onPlayPauseHandler = (isPlaying: boolean) => {
-    onPlayPause(isPlaying);
+    onPlayPause && onPlayPause(isPlaying);
   };
 
   const onPreviousHandler = () => {

@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useCallback } from 'preact/hooks';
 import { getColorFromTimelineEvent } from '../../utils/tailwind/twTimelineEventUtil';
-import { TimelineEventBlock } from './TimelineEventBlock';
+import type { TimelineEventBlock } from './TimelineEventBlock';
 
 interface TimelineBlockViewProps {
   block: TimelineEventBlock;

@@ -3,14 +3,15 @@ import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
-import { useConfig } from './api';
-import { useMemo } from 'preact/hooks';
+import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
 export default function Sidebar() {
-  const { data: config } = useConfig();
-  const cameras = useMemo(() => Object.entries(config.cameras), [config]);
-  const { birdseye } = config;
+  const { data: config } = useSWR('config');
+  if (!config) {
+    return null;
+  }
+  const { cameras, birdseye } = config;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -20,7 +21,10 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera]) => (
+               {Object.entries(cameras)
+               .filter(([cam, conf]) => conf.gui.show)
+               .sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+               .map(([camera]) => (
                 <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
@@ -33,7 +37,10 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {cameras.filter(([cam, conf]) => conf.gui.show).sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1)).map(([camera, conf]) => {
+              {Object.entries(cameras)
+              .filter(([cam, conf]) => conf.gui.show)
+              .sort(([aCam, aConf], [bCam, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
+              .map(([camera, conf]) => {
                 if (conf.record.enabled) {
                   return (
                     <Destination

@@ -24,16 +24,6 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1&quality=70]`
-
-The best snapshot for any object type. It is a full resolution image by default.
-
-Example parameters:
-
-- `h=300`: resizes the image to 300 pixes tall
-- `crop=1`: crops the image to the region of the detection rather than returning the entire image
-- `quality=70`: sets the jpeg encoding quality (0-100)
-
 ### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
@@ -200,6 +190,10 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
+### `GET /api/<camera_name>/<label>/thumbnail.jpg`
+
+Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type. 
+
 ### `GET /api/events/<id>/clip.mp4`
 
 Returns the clip for the event id. Works after the event has ended.
@@ -217,6 +211,10 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
+
+### `GET /api/<camera_name>/<label>/snapshot.jpg`
+
+Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /clips/<camera>-<id>.jpg`
 

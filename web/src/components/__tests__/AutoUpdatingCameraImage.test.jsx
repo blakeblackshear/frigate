@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import AutoUpdatingCameraImage from '../AutoUpdatingCameraImage';
-import { screen, render } from '@testing-library/preact';
+import { screen, render } from 'testing-library';
 
 let mockOnload;
 jest.mock('../CameraImage', () => {
@@ -34,9 +34,9 @@ describe('AutoUpdatingCameraImage', () => {
 
   test('on load, sets a new cache key to search params', async () => {
     dateNowSpy.mockReturnValueOnce(100).mockReturnValueOnce(200).mockReturnValueOnce(300);
-    render(<AutoUpdatingCameraImage camera="tacos" searchParams="foo" />);
+    render(<AutoUpdatingCameraImage camera="front" searchParams="foo" />);
     mockOnload();
-    jest.runAllTimers();
-    expect(screen.queryByText('cache=100&foo')).toBeInTheDocument();
+    await screen.findByText('cache=100&foo');
+    expect(screen.getByText('cache=100&foo')).toBeInTheDocument();
   });
 });

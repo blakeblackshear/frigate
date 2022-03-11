@@ -1,44 +1,39 @@
-export async function getCameraMap(url, cb, props) {
+export async function getCameraMap(_url, _cb, _props) {
   const module = await import('./CameraMap.jsx');
   return module.default;
 }
 
-export async function getCamera(url, cb, props) {
+export async function getCamera(_url, _cb, _props) {
   const module = await import('./Camera.jsx');
   return module.default;
 }
 
-export async function getCameraV2(url, cb, props) {
+export async function getCameraV2(_url, _cb, _props) {
   const module = await import('./Camera_V2.jsx');
   return module.default;
 }
 
-export async function getEvent(url, cb, props) {
-  const module = await import('./Event.jsx');
-  return module.default;
-}
-
-export async function getBirdseye(url, cb, props) {
+export async function getBirdseye(_url, _cb, _props) {
   const module = await import('./Birdseye.jsx');
   return module.default;
 }
 
-export async function getEvents(url, cb, props) {
-  const module = await import('./Events');
+export async function getEvents(_url, _cb, _props) {
+  const module = await import('./Events.jsx');
   return module.default;
 }
 
-export async function getRecording(url, cb, props) {
+export async function getRecording(_url, _cb, _props) {
   const module = await import('./Recording.jsx');
   return module.default;
 }
 
-export async function getDebug(url, cb, props) {
+export async function getDebug(_url, _cb, _props) {
   const module = await import('./Debug.jsx');
   return module.default;
 }
 
-export async function getStyleGuide(url, cb, props) {
+export async function getStyleGuide(_url, _cb, _props) {
   const module = await import('./StyleGuide.jsx');
   return module.default;
 }

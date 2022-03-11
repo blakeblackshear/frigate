@@ -1,9 +1,9 @@
 import { h } from 'preact';
 import Heading from '../Heading';
-import { TimelineEvent } from '../Timeline/Timeline';
+import type { TimelineEvent } from '../Timeline/TimelineEvent';
 
 interface HistoryHeaderProps {
-  event: TimelineEvent;
+  event?: TimelineEvent;
   className?: string;
 }
 export const HistoryHeader = ({ event, className = '' }: HistoryHeaderProps) => {

@@ -5,7 +5,7 @@ import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
-const Calender = ({ onChange, calenderRef, close }) => {
+const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
   const keyRef = useRef([]);
 
   const date = new Date();
@@ -36,7 +36,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
     year,
     month,
     selectedDay: null,
-    timeRange: { before: null, after: null },
+    timeRange: dateRange,
     monthDetails: null,
   });
 
@@ -98,7 +98,11 @@ const Calender = ({ onChange, calenderRef, close }) => {
   );
 
   useEffect(() => {
-    setState((prev) => ({ ...prev, selectedDay: todayTimestamp, monthDetails: getMonthDetails(year, month) }));
+    setState((prev) => ({
+      ...prev,
+      selectedDay: todayTimestamp,
+      monthDetails: getMonthDetails(year, month),
+    }));
   }, [year, month, getMonthDetails]);
 
   useEffect(() => {
@@ -150,7 +154,10 @@ const Calender = ({ onChange, calenderRef, close }) => {
 
     // user has selected a date < after, reset values
     if (after === null || day.timestamp < after) {
-      timeRange = { before: new Date(day.timestamp).setHours(24, 0, 0, 0), after: day.timestamp };
+      timeRange = {
+        before: new Date(day.timestamp).setHours(24, 0, 0, 0),
+        after: day.timestamp,
+      };
     }
 
     // user has selected a date > after
@@ -280,7 +287,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
   };
 
   return (
-    <div className="select-none w-96 flex flex-shrink" ref={calenderRef}>
+    <div className="select-none w-96 flex flex-shrink" ref={calendarRef}>
       <div className="py-4 px-6">
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
@@ -314,7 +321,7 @@ const Calender = ({ onChange, calenderRef, close }) => {
               <ArrowRight className="h-2/6" />
             </div>
           </div>
-          <div className="w-1/6 relative flex justify-around " tabIndex={104} onClick={() => setYear(1)}>
+          <div className="w-1/6 relative flex justify-around" tabIndex={104} onClick={() => setYear(1)}>
             <div className="flex justify-center items-center cursor-pointer absolute  -mt-4 text-center rounded-full w-10 h-10 bg-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800">
               <ArrowRightDouble className="h-2/6" />
             </div>
@@ -326,4 +333,4 @@ const Calender = ({ onChange, calenderRef, close }) => {
   );
 };
 
-export default Calender;
+export default Calendar;

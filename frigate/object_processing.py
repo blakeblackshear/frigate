@@ -554,12 +554,23 @@ class CameraState:
             if not obj.false_positive
         )
 
+        # keep track of all labels detected for this camera
+        total_label_count = 0
+
         # report on detected objects
         for obj_name, count in obj_counter.items():
+            total_label_count += count
+
             if count != self.object_counts[obj_name]:
                 self.object_counts[obj_name] = count
                 for c in self.callbacks["object_status"]:
                     c(self.name, obj_name, count)
+
+        # publish for all labels detected for this camera
+        if total_label_count != self.object_counts.get("all"):
+            self.object_counts["all"] = total_label_count
+            for c in self.callbacks["object_status"]:
+                c(self.name, "all", total_label_count)
 
         # expire any objects that are >0 and no longer detected
         expired_objects = [
@@ -568,6 +579,10 @@ class CameraState:
             if count > 0 and obj_name not in obj_counter
         ]
         for obj_name in expired_objects:
+            # Ignore the artificial all label
+            if obj_name == "all":
+                continue
+
             self.object_counts[obj_name] = 0
             for c in self.callbacks["object_status"]:
                 c(self.name, obj_name, 0)
@@ -889,9 +904,14 @@ class TrackedObjectProcessor(threading.Thread):
                     for obj in camera_state.tracked_objects.values()
                     if zone in obj.current_zones and not obj.false_positive
                 )
+                total_label_count = 0
 
                 # update counts and publish status
                 for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
+                    # Ignore the artificial all label
+                    if label == "all":
+                        continue
+
                     # if we have previously published a count for this zone/label
                     zone_label = self.zone_data[zone][label]
                     if camera in zone_label:
@@ -906,6 +926,10 @@ class TrackedObjectProcessor(threading.Thread):
                                 new_count,
                                 retain=False,
                             )
+
+                        # Set the count for the /zone/all topic.
+                        total_label_count += new_count
+
                     # if this is a new zone/label combo for this camera
                     else:
                         if label in obj_counter:
@@ -915,6 +939,31 @@ class TrackedObjectProcessor(threading.Thread):
                                 obj_counter[label],
                                 retain=False,
                             )
+
+                            # Set the count for the /zone/all topic.
+                            total_label_count += obj_counter[label]
+
+                # if we have previously published a count for this zone all labels
+                zone_label = self.zone_data[zone]["all"]
+                if camera in zone_label:
+                    current_count = sum(zone_label.values())
+                    zone_label[camera] = total_label_count
+                    new_count = sum(zone_label.values())
+
+                    if new_count != current_count:
+                        self.client.publish(
+                            f"{self.topic_prefix}/{zone}/all",
+                            new_count,
+                            retain=False,
+                        )
+                # if this is a new zone all label for this camera
+                else:
+                    zone_label[camera] = total_label_count
+                    self.client.publish(
+                        f"{self.topic_prefix}/{zone}/all",
+                        total_label_count,
+                        retain=False,
+                    )
 
             # cleanup event finished queue
             while not self.event_processed_queue.empty():
