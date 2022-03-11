@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
         with:
-          node-version: 14.x
+          node-version: 16.x
       - run: npm install
         working-directory: ./web
       - name: Lint
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
         with:
-          node-version: 14.x
+          node-version: 16.x
       - run: npm install
         working-directory: ./web
       - name: Build
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-node@master
         with:
-          node-version: 14.x
+          node-version: 16.x
       - run: npm install
         working-directory: ./web
       - name: Test

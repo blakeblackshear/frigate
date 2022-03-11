@@ -1,6 +1,6 @@
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
-FROM node:14 as web
+FROM node:16 as web
 
 WORKDIR /opt/frigate
 
