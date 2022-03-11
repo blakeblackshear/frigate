@@ -67,6 +67,7 @@ class EventProcessor(threading.Thread):
                     Event.replace(
                         id=event_data["id"],
                         label=event_data["label"],
+                        sub_label=event_data.get("sub_label", ""),
                         camera=camera,
                         start_time=event_data["start_time"] - event_config.pre_capture,
                         end_time=None,
@@ -86,6 +87,7 @@ class EventProcessor(threading.Thread):
                     Event.replace(
                         id=event_data["id"],
                         label=event_data["label"],
+                        sub_label=event_data.get("sub_label", ""),
                         camera=camera,
                         start_time=event_data["start_time"] - event_config.pre_capture,
                         end_time=event_data["end_time"] + event_config.post_capture,
