@@ -18,6 +18,7 @@ class Event(Model):
     region = JSONField()
     box = JSONField()
     area = IntegerField()
+    ratio = FloatField()
 
 
 class Recordings(Model):

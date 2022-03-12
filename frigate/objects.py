@@ -149,7 +149,8 @@ class ObjectTracker:
                     "score": obj[1],
                     "box": obj[2],
                     "area": obj[3],
-                    "region": obj[4],
+                    "ratio": obj[4],
+                    "region": obj[5],
                     "frame_time": frame_time,
                 }
             )
