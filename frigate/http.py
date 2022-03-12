@@ -162,11 +162,6 @@ def set_sub_label(id):
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
-    if event.label != "person":
-        return make_response(
-            jsonify({"success": False, "message": "Event " + id + " is not a person event"}), 400
-        )
-
     if request.json:
         new_sub_label = request.json.get("subLabel", "")
     else:
