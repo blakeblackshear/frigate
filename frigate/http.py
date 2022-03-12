@@ -187,7 +187,7 @@ def delete_sub_label(id):
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
-    event.sub_label = ""
+    event.sub_label = None
     event.save()
     return make_response(
         jsonify({"success": True, "message": "Event " + id + " sub label removed"}), 200

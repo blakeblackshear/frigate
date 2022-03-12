@@ -315,7 +315,7 @@ export default function Events({ path, ...props }) {
                     <div className="m-2 flex grow">
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
-                          {event.sub_label != "" ? `${event.label}: ${event.sub_label}` : event.label} ({(event.top_score * 100).toFixed(0)}%)
+                          {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
