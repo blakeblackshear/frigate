@@ -30,9 +30,7 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         Event,
-        ratio=pw.FloatField(
-            default=1.0
-        ),  # There is no way to get the true ratio from an existing recording, so simply assume they are square.
+        ratio=pw.FloatField(default=1.0),  # Assume that existing detections are square
     )
 
 
