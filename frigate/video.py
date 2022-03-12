@@ -591,6 +591,7 @@ def process_frames(
                     obj["score"],
                     obj["box"],
                     obj["area"],
+                    obj["ratio"],
                     obj["region"],
                 )
                 for obj in object_tracker.tracked_objects.values()
@@ -626,13 +627,13 @@ def process_frames(
                 for group in detected_object_groups.values():
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-                    box = o[2]  # xmin, ymin, xmax, ymax
+                    # o[2] is the box of the object: xmin, ymin, xmax, ymax
                     boxes = [
                         (
-                            box[0],
-                            box[1],
-                            box[2] - box[0],
-                            box[3] - box[1],
+                            o[2][0],
+                            o[2][1],
+                            o[2][2] - o[2][0],
+                            o[2][3] - o[2][1],
                         )
                         for o in group
                     ]
