@@ -20,6 +20,7 @@ export const handlers = [
             detect: { width: 1280, height: 720 },
             snapshots: {},
             live: { height: 720 },
+            gui: { show: true, order: 0 },
           },
           side: {
             name: 'side',
@@ -28,6 +29,7 @@ export const handlers = [
             detect: { width: 1280, height: 720 },
             snapshots: {},
             live: { height: 720 },
+            gui: { show: true, order: 1 },
           },
         },
       })
