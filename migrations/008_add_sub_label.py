@@ -38,7 +38,7 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         Event,
-        sub_label=pw.CharField(default=None, null=True),
+        sub_label=pw.CharField(max_length=20, default=""),
     )
 
 
