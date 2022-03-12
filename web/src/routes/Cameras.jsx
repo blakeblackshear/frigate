@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import { h, Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Card from '../components/Card';
 import CameraImage from '../components/CameraImage';
@@ -16,13 +16,25 @@ export default function Cameras() {
     <ActivityIndicator />
   ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
-      {Object.entries(config.cameras)
-        .filter(([_, conf]) => conf.ui.show)
-        .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1))
-        .map(([camera, conf]) => (
-          <Camera key={camera} name={camera} conf={conf} />
-        ))}
+      <SortedCameras unsortedCameras={config.cameras} />
     </div>
+  );
+}
+
+function SortedCameras({ unsortedCameras }) {
+
+  const sortedCameras = useMemo(() =>
+    Object.entries(unsortedCameras)
+      .filter(([_, conf]) => conf.ui.show)
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
+  [unsortedCameras]);
+
+  return (
+    <Fragment>
+      {sortedCameras.map(([camera, conf]) => (
+        <Camera key={camera} name={camera} conf={conf} />
+      ))}
+    </Fragment>
   );
 }
 
