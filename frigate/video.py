@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 def filtered(obj, objects_to_track, object_filters):
     object_name = obj[0]
     object_score = obj[1]
-    object_bounds = obj[2]
+    object_box = obj[2]
     object_area = obj[3]
 
     if not object_name in objects_to_track:
@@ -65,9 +65,9 @@ def filtered(obj, objects_to_track, object_filters):
         if not obj_settings.mask is None:
             # compute the coordinates of the object and make sure
             # the location isn't outside the bounds of the image (can happen from rounding)
-            object_xmin = object_bounds[0]
-            object_xmax = object_bounds[2]
-            object_ymax = object_bounds[3]
+            object_xmin = object_box[0]
+            object_xmax = object_box[2]
+            object_ymax = object_box[3]
             y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
             x_location = min(
                 int((object_xmax + object_xmin) / 2.0),
@@ -626,13 +626,13 @@ def process_frames(
                 for group in detected_object_groups.values():
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-                    bounds = o[2]  # xmin, ymin, xmax, ymax
+                    box = o[2]  # xmin, ymin, xmax, ymax
                     boxes = [
                         (
-                            bounds[0],
-                            bounds[1],
-                            bounds[2] - bounds[0],
-                            bounds[3] - bounds[1],
+                            box[0],
+                            box[1],
+                            box[2] - box[0],
+                            box[3] - box[1],
                         )
                         for o in group
                     ]
