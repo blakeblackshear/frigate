@@ -21,7 +21,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-               {Object.entries(cameras)
+              {Object.entries(cameras)
                 .filter(([_, conf]) => conf.gui.show)
                 .sort(([_, aConf], [__, bConf]) => aConf.gui.order === bConf.gui.order ? 0 : (aConf.gui.order > bConf.gui.order ? 1 : -1))
                 .map(([camera]) => (
