@@ -210,6 +210,14 @@ class FilterConfig(FrigateBaseModel):
     max_area: int = Field(
         default=24000000, title="Maximum area of bounding box for object to be counted."
     )
+    min_ratio: float = Field(
+        default=0,
+        title="Minimum ratio of bounding box's width/height for object to be counted.",
+    )
+    max_ratio: float = Field(
+        default=24000000,  # @todo: Is there a way to make this `math.inf` but still load from YAML?
+        title="Maximum ratio of bounding box's width/height for object to be counted.",
+    )
     threshold: float = Field(
         default=0.7,
         title="Average detection confidence threshold for object to be counted.",
