@@ -189,6 +189,7 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 ### `POST /api/events/<id>/sub_label`
 
 Set a sub label for an event. For example to update `person` -> `person's name` if they were recognized with facial recognition.
+Sub labels must be 20 characters or shorter.
 
 ```json
 {
@@ -196,17 +197,13 @@ Set a sub label for an event. For example to update `person` -> `person's name` 
 }
 ```
 
-### `DELETE /api/events/<id>/sub_label`
-
-Clear the already set sub label to be blank.
-
 ### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
 ### `GET /api/<camera_name>/<label>/thumbnail.jpg`
 
-Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type. 
+Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /api/events/<id>/clip.mp4`
 
