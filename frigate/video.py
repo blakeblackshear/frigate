@@ -41,6 +41,7 @@ def filtered(obj, objects_to_track, object_filters):
     object_score = obj[1]
     object_box = obj[2]
     object_area = obj[3]
+    object_ratio = obj[4]
 
     if not object_name in objects_to_track:
         return True
@@ -60,6 +61,14 @@ def filtered(obj, objects_to_track, object_filters):
 
         # if the score is lower than the min_score, skip
         if obj_settings.min_score > object_score:
+            return True
+
+        # if the object is not proportionally wide enough
+        if obj_settings.min_ratio > object_ratio:
+            return True
+
+        # if the object is proportionally too wide
+        if obj_settings.max_ratio < object_ratio:
             return True
 
         if not obj_settings.mask is None:

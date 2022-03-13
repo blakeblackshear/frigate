@@ -346,7 +346,7 @@ def zone_filtered(obj: TrackedObject, object_config):
         if obj_settings.min_ratio > obj.obj_data["ratio"]:
             return True
 
-        # if the object is not proportionally narrow enough
+        # if the object is proportionally too wide
         if obj_settings.max_ratio < obj.obj_data["ratio"]:
             return True
 
