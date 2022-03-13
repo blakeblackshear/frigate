@@ -15,18 +15,21 @@ from frigate.models import Event
 logger = logging.getLogger(__name__)
 
 def should_insert_db(prev_event, current_event):
+    """If current event has new clip or snapshot."""
     return (
         (not prev_event["has_clip"] and not prev_event["has_snapshot"])
         and (current_event["has_clip"] or current_event["has_snapshot"])
     )
 
 def should_update_db(prev_event, current_event):
+    """If current_event has updated fields and (clip or snapshot)."""
     return (
-        prev_event["top_score"] != current_event["top_score"]
-        or prev_event["entered_zones"] != current_event["entered_zones"]
-        or prev_event["thumbnail"] != current_event["thumbnail"]
-        or prev_event["has_clip"] != current_event["has_clip"]
-        or prev_event["has_snapshot"] != current_event["has_snapshot"]
+        (current_event["has_clip"] or current_event["has_snapshot"])
+        and (prev_event["top_score"] != current_event["top_score"]
+            or prev_event["entered_zones"] != current_event["entered_zones"]
+            or prev_event["thumbnail"] != current_event["thumbnail"]
+            or prev_event["has_clip"] != current_event["has_clip"]
+            or prev_event["has_snapshot"] != current_event["has_snapshot"])
     )
 
 
@@ -68,45 +71,43 @@ class EventProcessor(threading.Thread):
             ):
                 self.events_in_process[event_data["id"]] = event_data
                 # TODO: this will generate a lot of db activity possibly
-                if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.insert(
-                        id=event_data["id"],
-                        label=event_data["label"],
-                        camera=camera,
-                        start_time=event_data["start_time"] - event_config.pre_capture,
-                        end_time=None,
-                        top_score=event_data["top_score"],
-                        false_positive=event_data["false_positive"],
-                        zones=list(event_data["entered_zones"]),
-                        thumbnail=event_data["thumbnail"],
-                        region=event_data["region"],
-                        box=event_data["box"],
-                        area=event_data["area"],
-                        has_clip=event_data["has_clip"],
-                        has_snapshot=event_data["has_snapshot"],
-                    ).execute()
+                Event.insert(
+                    id=event_data["id"],
+                    label=event_data["label"],
+                    camera=camera,
+                    start_time=event_data["start_time"] - event_config.pre_capture,
+                    end_time=None,
+                    top_score=event_data["top_score"],
+                    false_positive=event_data["false_positive"],
+                    zones=list(event_data["entered_zones"]),
+                    thumbnail=event_data["thumbnail"],
+                    region=event_data["region"],
+                    box=event_data["box"],
+                    area=event_data["area"],
+                    has_clip=event_data["has_clip"],
+                    has_snapshot=event_data["has_snapshot"],
+                ).execute()
 
             elif event_type == "update" and should_update_db(
                 self.events_in_process[event_data["id"]], event_data
             ):
                 self.events_in_process[event_data["id"]] = event_data
                 # TODO: this will generate a lot of db activity possibly
-                if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.update(
-                        label=event_data["label"],
-                        camera=camera,
-                        start_time=event_data["start_time"] - event_config.pre_capture,
-                        end_time=None,
-                        top_score=event_data["top_score"],
-                        false_positive=event_data["false_positive"],
-                        zones=list(event_data["entered_zones"]),
-                        thumbnail=event_data["thumbnail"],
-                        region=event_data["region"],
-                        box=event_data["box"],
-                        area=event_data["area"],
-                        has_clip=event_data["has_clip"],
-                        has_snapshot=event_data["has_snapshot"],
-                    ).where(Event.id == event_data["id"]).execute()
+                Event.update(
+                    label=event_data["label"],
+                    camera=camera,
+                    start_time=event_data["start_time"] - event_config.pre_capture,
+                    end_time=None,
+                    top_score=event_data["top_score"],
+                    false_positive=event_data["false_positive"],
+                    zones=list(event_data["entered_zones"]),
+                    thumbnail=event_data["thumbnail"],
+                    region=event_data["region"],
+                    box=event_data["box"],
+                    area=event_data["area"],
+                    has_clip=event_data["has_clip"],
+                    has_snapshot=event_data["has_snapshot"],
+                ).where(Event.id == event_data["id"]).execute()
 
             elif event_type == "end":
                 if event_data["has_clip"] or event_data["has_snapshot"]:
