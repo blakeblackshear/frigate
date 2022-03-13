@@ -168,6 +168,12 @@ def set_sub_label(id):
         new_sub_label = None
 
 
+    if new_sub_label and len(new_sub_label) > 20:
+        return make_response(
+            jsonify({"success": False, "message": new_sub_label + " exceeds the 20 character limit for sub_label"}), 400
+        )
+
+
     event.sub_label = new_sub_label
     event.save()
     return make_response(
