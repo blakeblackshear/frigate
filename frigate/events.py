@@ -69,7 +69,7 @@ class EventProcessor(threading.Thread):
                 self.events_in_process[event_data["id"]] = event_data
                 # TODO: this will generate a lot of db activity possibly
                 if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.replace(
+                    Event.insert(
                         id=event_data["id"],
                         label=event_data["label"],
                         camera=camera,
