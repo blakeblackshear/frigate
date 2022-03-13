@@ -167,12 +167,10 @@ def set_sub_label(id):
     else:
         new_sub_label = ""
 
-    print(f'Check before {event.sub_label}')
 
     if new_sub_label:
         event.sub_label = new_sub_label
-        something = event.save()
-        print(f'Set sub_label to {new_sub_label} verify {event.sub_label} and {something}')
+        event.save()
         return make_response(
             jsonify({"success": True, "message": "Event " + id + " sub label set to " + new_sub_label}), 200
         )
