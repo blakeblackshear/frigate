@@ -79,8 +79,6 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
-                        sub_label="",
-                        retain_indefinitely=False,
                     ).execute()
 
             elif event_type == "end":
@@ -100,8 +98,6 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
-                        sub_label="",
-                        retain_indefinitely=False,
                     ).execute()
 
                 del self.events_in_process[event_data["id"]]
