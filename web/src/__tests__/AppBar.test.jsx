@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import * as Context from '../context';
 import AppBar from '../AppBar';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('AppBar', () => {
   beforeEach(() => {

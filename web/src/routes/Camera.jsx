@@ -1,5 +1,6 @@
 import { h, Fragment } from 'preact';
 import AutoUpdatingCameraImage from '../components/AutoUpdatingCameraImage';
+import ActivityIndicator from '../components/ActivityIndicator';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -10,18 +11,21 @@ import Switch from '../components/Switch';
 import ButtonsTabbed from '../components/ButtonsTabbed';
 import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
-import { useApiHost, useConfig } from '../api';
+import { useApiHost } from '../api';
+import useSWR from 'swr';
 
 const emptyObject = Object.freeze({});
 
 export default function Camera({ camera }) {
-  const { data: config } = useConfig();
+  const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+  const liveWidth = cameraConfig
+    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+    : 0;
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -46,6 +50,10 @@ export default function Camera({ camera }) {
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
+
+  if (!cameraConfig) {
+    return <ActivityIndicator />;
+  }
 
   const optionContent = showSettings ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -92,8 +100,7 @@ export default function Camera({ camera }) {
         </div>
       </Fragment>
     );
-  }
-  else if (viewMode === 'debug') {
+  } else if (viewMode === 'debug') {
     player = (
       <Fragment>
         <div>
@@ -112,7 +119,7 @@ export default function Camera({ camera }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-2 px-4">
       <Heading size="2xl">{camera}</Heading>
       <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
 
@@ -127,7 +134,7 @@ export default function Camera({ camera }) {
               key={objectType}
               header={objectType}
               href={`/events?camera=${camera}&label=${objectType}`}
-              media={<img src={`${apiHost}/api/${camera}/${objectType}/best.jpg?crop=1&h=150`} />}
+              media={<img src={`${apiHost}/api/${camera}/${objectType}/thumbnail.jpg`} />}
             />
           ))}
         </div>

@@ -1,11 +1,22 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-export function Delete({ className = '' }) {
+export function Delete({ className = 'h-6 w-6', stroke = 'currentColor', fill = 'none', onClick = () => {} }) {
   return (
-    <svg className={`fill-current ${className}`} viewBox="0 0 24 24">
-      <path d="M0 0h24v24H0V0z" fill="none" />
-      <path d="M6 21h12V7H6v14zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill={fill}
+      viewBox="0 0 24 24"
+      stroke={stroke}
+      onClick={onClick}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+      />
     </svg>
   );
 }

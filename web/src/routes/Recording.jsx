@@ -4,13 +4,14 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import RecordingPlaylist from '../components/RecordingPlaylist';
 import VideoPlayer from '../components/VideoPlayer';
-import { FetchStatus, useApiHost, useRecording } from '../api';
+import { useApiHost } from '../api';
+import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour, seconds }) {
   const apiHost = useApiHost();
-  const { data, status } = useRecording(camera);
+  const { data } = useSWR(`${camera}/recordings`);
 
-  if (status !== FetchStatus.LOADED) {
+  if (!data) {
     return <ActivityIndicator />;
   }
 
@@ -72,7 +73,7 @@ export default function Recording({ camera, date, hour, seconds }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-2 px-4">
       <Heading>{camera} Recordings</Heading>
 
       <VideoPlayer

@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Select from '../Select';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('Select', () => {
   test('on focus, shows a menu', async () => {

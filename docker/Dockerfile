@@ -1,6 +1,9 @@
+ARG FRIGATE_BASE_IMAGE=debian:11-slim
+ARG L4T_WHEELS=frigate-wheels-l4t:latest
+#use_l4t: FROM ${L4T_WHEELS} as wheels_l4t
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
-FROM node:14 as web
+FROM node:16 as web
 
 WORKDIR /opt/frigate
 
@@ -18,11 +21,11 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
-    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add -
+
+RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     && apt-get -qq update \
-    && apt-get -qq install -y \
-    python3 \
+    && apt-get -qq install -y python3 \
     python3-dev \
     wget \
     # opencv dependencies
@@ -60,13 +63,13 @@ RUN pip3 wheel --wheel-dir=/wheels \
     ws4py
 
 # Frigate Container
-FROM debian:11-slim
+FROM ${FRIGATE_BASE_IMAGE}
 ARG TARGETARCH
-ARG S6_OVERLAY_VERSION=3.0.0.2
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FLASK_ENV=development
 
+#use_l4t: COPY --from=wheels_l4t /wheels/. /wheels/
 COPY --from=wheels /wheels /wheels
 
 # Install ffmpeg
@@ -78,20 +81,39 @@ RUN apt-get -qq update \
     unzip tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
-    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add -
+RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     # add coral repo
     && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
-    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
+RUN apt-get -qq update \
+    && apt-get -qq install --no-install-recommends -y \
+    # ffmpeg \
+    # coral drivers
+    libedgetpu1-max python3-tflite-runtime python3-pycoral
+
+RUN apt-get -qq install -y python3.9 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
+COPY --from=wheels_l4t /wheels/. /wheels_l4t/
+COPY --from=wheels /wheels /wheels_ext
+RUN pip3 install -U /wheels_ext/*.whl
+RUN pip3 install -U /wheels_l4t/*.whl
+RUN rm -rf /var/lib/apt/lists/* /wheels \
+    && (apt-get autoremove -y; apt-get autoclean -y)
+
+# AMD64 specific packages
+RUN if [ "${TARGETARCH}" = "amd64" ]; \
+    then \
+    wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
+    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    ffmpeg \
-    # coral drivers
-    libedgetpu1-max python3-tflite-runtime python3-pycoral \
-    && pip3 install -U /wheels/*.whl \
-    && rm -rf /var/lib/apt/lists/* /wheels \
-    && (apt-get autoremove -y; apt-get autoclean -y)
+    # VAAPI drivers for Intel hardware accel
+    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && (apt-get autoremove -y; apt-get autoclean -y) \
+    fi
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
@@ -104,9 +126,12 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
 
-COPY --from=web /opt/frigate/build web/
+COPY --from=web /opt/frigate/dist web/
 
 COPY docker/rootfs/ /
+
+#use_l4t: ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
+#use_l4t: ADD .l4t_assets /yolo4/
 
 # s6-overlay
 RUN S6_ARCH="${TARGETARCH}" \
@@ -114,10 +139,6 @@ RUN S6_ARCH="${TARGETARCH}" \
     && if [ "${TARGETARCH}" = "arm64" ]; then S6_ARCH="aarch64"; fi \
     && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
-# && wget -O - "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz" \
-# | tar -C / -Jxpf - \
-# && wget -O - "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}-${S6_OVERLAY_VERSION}.tar.xz" \
-# | tar -C / -Jxpf -
 
 EXPOSE 5000
 EXPOSE 1935

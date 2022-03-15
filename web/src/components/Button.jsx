@@ -64,7 +64,6 @@ export default function Button({
   color = 'blue',
   disabled = false,
   href,
-  size,
   type = 'contained',
   ...attrs
 }) {
@@ -81,11 +80,11 @@ export default function Button({
     classes = classes.replace(/(?:focus|active|hover):[^ ]+/g, '');
   }
 
-  const handleMousenter = useCallback((event) => {
+  const handleMousenter = useCallback(() => {
     setHovered(true);
   }, []);
 
-  const handleMouseleave = useCallback((event) => {
+  const handleMouseleave = useCallback(() => {
     setHovered(false);
   }, []);
 
