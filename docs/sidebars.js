@@ -22,6 +22,7 @@ module.exports = {
       'configuration/objects',
       'configuration/rtmp',
       'configuration/zones',
+      'configuration/birdseye',
       'configuration/advanced',
       'configuration/hardware_acceleration',
       'configuration/nvdec',
