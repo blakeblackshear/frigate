@@ -22,6 +22,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.const import BASE_DIR
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -104,12 +105,22 @@ class BirdsEyeFrameManager:
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
 
         # find and copy the logo on the blank frame
-        logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
-        frigate_logo = None
-        if len(logo_files) > 0:
-            frigate_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
-        if not frigate_logo is None:
-            transparent_layer = frigate_logo[:, :, 3]
+        birdseye_logo = None
+
+        if config.birdseye.use_custom_icon:
+            custom_logo_files = glob.glob(f"{BASE_DIR}/custom.png")
+
+            if len(custom_logo_files) > 0:
+                birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
+
+        if birdseye_logo is None:
+            logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
+
+            if len(logo_files) > 0:
+                birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
+                
+        if not birdseye_logo is None:
+            transparent_layer = birdseye_logo[:, :, 3]
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
             self.blank_frame[
