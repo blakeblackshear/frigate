@@ -499,6 +499,11 @@ class CameraLiveConfig(FrigateBaseModel):
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
 
+class CameraUiConfig(FrigateBaseModel):
+    order: int = Field(default=0, title="Order of camera in GUI.")
+    show: bool = Field(default=True, title="Show this camera in Frigate GUI.")
+
+
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
@@ -530,6 +535,9 @@ class CameraConfig(FrigateBaseModel):
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
+    )
+    ui: CameraUiConfig = Field(
+        default_factory=CameraUiConfig, title="Camera UI Modifications."
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."

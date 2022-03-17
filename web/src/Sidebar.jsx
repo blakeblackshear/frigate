@@ -3,6 +3,7 @@ import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
+import { useMemo } from 'preact/hooks'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
@@ -19,35 +20,14 @@ export default function Sidebar() {
       <Match path="/cameras/:camera/:other?">
         {({ matches }) =>
           matches ? (
-            <Fragment>
-              <Separator />
-              {Object.entries(cameras).map(([camera]) => (
-                <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
-              ))}
-              <Separator />
-            </Fragment>
+            <SortedCameras unsortedCameras={cameras} />
           ) : null
         }
       </Match>
       <Match path="/recording/:camera/:date?/:hour?/:seconds?">
         {({ matches }) =>
           matches ? (
-            <Fragment>
-              <Separator />
-              {Object.entries(cameras).map(([camera, conf]) => {
-                if (conf.record.enabled) {
-                  return (
-                    <Destination
-                      path={`/recording/${camera}/:date?/:hour?/:seconds?`}
-                      href={`/recording/${camera}`}
-                      text={camera}
-                    />
-                  );
-                }
-                return null;
-              })}
-              <Separator />
-            </Fragment>
+            <SortedRecordingCameras unsortedCameras={cameras} />
           ) : null
         }
       </Match>
@@ -65,6 +45,54 @@ export default function Sidebar() {
       <Destination className="self-end" href="https://docs.frigate.video" text="Documentation" />
       <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
     </NavigationDrawer>
+  );
+}
+
+function SortedCameras({ unsortedCameras }) {
+
+  const sortedCameras = useMemo(() =>
+    Object.entries(unsortedCameras)
+      .filter(([_, conf]) => conf.ui.show)
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
+  [unsortedCameras]);
+
+  return (
+    <Fragment>
+      <Separator />
+      {sortedCameras.map(([camera]) => (
+        <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
+      ))}
+      <Separator />
+    </Fragment>
+  );
+}
+
+function SortedRecordingCameras({ unsortedCameras }) {
+
+  const sortedCameras = useMemo(() =>
+    Object.entries(unsortedCameras)
+      .filter(([_, conf]) => conf.ui.show)
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
+  [unsortedCameras]);
+
+  return (
+    <Fragment>
+      <Separator />
+      {sortedCameras.map(([camera, conf]) => {
+        if (conf.record.enabled) {
+          return (
+            <Destination
+              key={camera}
+              path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+              href={`/recording/${camera}`}
+              text={camera}
+            />
+          );
+        }
+        return null;
+      })}
+      <Separator />
+    </Fragment>
   );
 }
 

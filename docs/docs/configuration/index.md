@@ -431,4 +431,12 @@ cameras:
       quality: 70
       # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
       required_zones: []
+
+    # Optional: Configuration for how camera is handled in the GUI.
+    ui:
+      # Optional: Adjust sort order of cameras in the GUI. Larger numbers come later (default: shown below)
+      # By default the cameras are sorted alphabetically.
+      order: 0
+      # Optional: Whether or not to show the camera in the GUI (default: shown below)
+      show: True
 ```
