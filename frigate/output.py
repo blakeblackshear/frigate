@@ -107,18 +107,17 @@ class BirdsEyeFrameManager:
         # find and copy the logo on the blank frame
         birdseye_logo = None
 
-        if config.birdseye.use_custom_icon:
-            custom_logo_files = glob.glob(f"{BASE_DIR}/custom.png")
+        custom_logo_files = glob.glob(f"{BASE_DIR}/custom.png")
 
-            if len(custom_logo_files) > 0:
-                birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
+        if len(custom_logo_files) > 0:
+            birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is None:
             logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
 
             if len(logo_files) > 0:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
-                
+
         if not birdseye_logo is None:
             transparent_layer = birdseye_logo[:, :, 3]
             y_offset = height // 2 - transparent_layer.shape[0] // 2
