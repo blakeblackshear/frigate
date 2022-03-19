@@ -1,4 +1,4 @@
-"""Peewee migrations -- 007_add_object_filter_ratio.py.
+"""Peewee migrations -- 009_add_object_filter_ratio.py.
 
 Some examples (model - class or model name)::
 
