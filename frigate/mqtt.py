@@ -89,6 +89,28 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
+    def on_improve_contrast_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_improve_contrast_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        motion_settings = config.cameras[camera_name].motion
+
+        if payload == "ON":
+            if not motion_settings.improve_contrast:
+                logger.info(f"Turning on improve contrast for {camera_name} via mqtt")
+                motion_settings.improve_contrast = True
+        elif payload == "OFF":
+            if motion_settings.improve_contrast:
+                logger.info(f"Turning off improve contrast for {camera_name} via mqtt")
+                motion_settings.improve_contrast = False
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+        state_topic = f"{message.topic[:-4]}/state"
+        client.publish(state_topic, payload, retain=True)        
+
     def on_restart_command(client, userdata, message):
         restart_frigate()
 
@@ -127,6 +149,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set", on_improve_contrast_command
         )
 
     client.message_callback_add(
@@ -173,6 +198,11 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             "ON" if config.cameras[name].detect.enabled else "OFF",
             retain=True,
         )
+        client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/improve_contrast/state",
+            "ON" if config.cameras[name].motion.improve_contrast else "OFF",
+            retain=True,
+        )        
 
     return client
 
