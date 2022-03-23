@@ -68,29 +68,7 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FLASK_ENV=development
 
-# install jellyfin-ffmpeg
-RUN apt-get update && apt-get install -y wget libmysofa1 libpostproc55 librubberband2 libvidstab1.1 libzmq5 \
-    libcdio-cdda2 libcdio-paranoia2 libxcb-shape0 libnorm1 libpgm-5.2-0 libsodium23 libass9 libbs2b0 libflite1 liblilv-0-0 \
-    libavc1394-0 libcaca0 libiec61883-0 libjack-jackd2-0 libopenal1 libpulse0 libsdl2-2.0-0 libsndio7.0 libxv1 libavresample4
-
-ENV FFMPEG_VERSION=4.2.4
-
-RUN wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb \
-    && dpkg -i libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
-        apt-get -f -y install && dpkg -i libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
-    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
-        dpkg -i libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
-        apt-get -f -y install && dpkg -i libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
-    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
-        dpkg -i libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
-        apt-get -f -y install && dpkg -i libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
-    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
-        dpkg -i libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
-        apt-get -f -y install && dpkg -i libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
-    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
-        dpkg -i ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
-            apt-get -f -y install && dpkg -i ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
-        rm *.deb
+RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y ffmpeg
 
 # install gstreamer
 RUN \
