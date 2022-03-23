@@ -21,9 +21,8 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add -
-
-RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
+    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     && apt-get -qq update \
     && apt-get -qq install -y python3 \
     python3-dev \
@@ -69,6 +68,41 @@ ARG TARGETARCH
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FLASK_ENV=development
 
+# install jellyfin-ffmpeg
+RUN apt-get update && apt-get install -y wget libmysofa1 libpostproc55 librubberband2 libvidstab1.1 libzmq5 \
+    libcdio-cdda2 libcdio-paranoia2 libxcb-shape0 libnorm1 libpgm-5.2-0 libsodium23 libass9 libbs2b0 libflite1 liblilv-0-0 \
+    libavc1394-0 libcaca0 libiec61883-0 libjack-jackd2-0 libopenal1 libpulse0 libsdl2-2.0-0 libsndio7.0 libxv1 libavresample4
+
+ENV FFMPEG_VERSION=4.2.4
+
+RUN wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb \
+    && dpkg -i libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
+        apt-get -f -y install && dpkg -i libavutil56_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
+    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
+        dpkg -i libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
+        apt-get -f -y install && dpkg -i libavcodec58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
+    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
+        dpkg -i libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
+        apt-get -f -y install && dpkg -i libavfilter7_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
+    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
+        dpkg -i libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
+        apt-get -f -y install && dpkg -i libavdevice58_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
+    wget -q https://launchpad.net/ubuntu/+archive/primary/+files/ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb && \
+        dpkg -i ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb || ( \
+            apt-get -f -y install && dpkg -i ffmpeg_${FFMPEG_VERSION}-1ubuntu0.1_${TARGETARCH}.deb) && \
+        rm *.deb
+
+# install gstreamer
+RUN \
+  apt-get update && apt-get install -y gstreamer1.0-plugins-base-apps gstreamer1.0-tools gstreamer1.0-alsa \
+    gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+    ibgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-good1.0-dev \
+    libgstreamer-plugins-bad1.0-dev
+
+#use_l4t: RUN apt-get -qq update && apt-get -qq install -y python3.9 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 #use_l4t: COPY --from=wheels_l4t /wheels/. /wheels/
 COPY --from=wheels /wheels /wheels
 
@@ -81,25 +115,18 @@ RUN apt-get -qq update \
     unzip tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add -
-RUN echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
+    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     # add coral repo
     && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
-    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
-RUN apt-get -qq update \
+    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    # ffmpeg \
     # coral drivers
-    libedgetpu1-max python3-tflite-runtime python3-pycoral
-
-RUN apt-get -qq install -y python3.9 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-
-COPY --from=wheels_l4t /wheels/. /wheels_l4t/
-COPY --from=wheels /wheels /wheels_ext
-RUN pip3 install -U /wheels_ext/*.whl
-RUN pip3 install -U /wheels_l4t/*.whl
-RUN rm -rf /var/lib/apt/lists/* /wheels \
+    libedgetpu1-max python3-tflite-runtime python3-pycoral \
+    && pip3 install -U /wheels/*.whl \
+    && rm -rf /var/lib/apt/lists/* /wheels \
     && (apt-get autoremove -y; apt-get autoclean -y)
 
 # AMD64 specific packages
@@ -114,7 +141,7 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; \
     && rm -rf /var/lib/apt/lists/* \
     && (apt-get autoremove -y; apt-get autoclean -y) \
     fi
-
+    
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
 # get model and labels
@@ -130,7 +157,7 @@ COPY --from=web /opt/frigate/dist web/
 
 COPY docker/rootfs/ /
 
-#use_l4t: ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
+#use_l4t: ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu
 #use_l4t: ADD .l4t_assets /yolo4/
 
 # s6-overlay
