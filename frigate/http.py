@@ -125,14 +125,14 @@ def set_retain(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     event.retain_indefinitely = True
     event.save()
 
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " retained"}), 200
+        jsonify({"success": True, "message": "Event " + id + " retained"}), 200
     )
 
 
@@ -142,16 +142,42 @@ def delete_retain(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     event.retain_indefinitely = False
     event.save()
 
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " un-retained"}), 200
+        jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
     )
 
+@bp.route("/events/<id>/sub_label", methods=("POST",))
+def set_sub_label(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    if request.json:
+        new_sub_label = request.json.get("subLabel")
+    else:
+        new_sub_label = None
+
+
+    if new_sub_label and len(new_sub_label) > 20:
+        return make_response(
+            jsonify({"success": False, "message": new_sub_label + " exceeds the 20 character limit for sub_label"}), 400
+        )
+
+
+    event.sub_label = new_sub_label
+    event.save()
+    return make_response(
+        jsonify({"success": True, "message": "Event " + id + " sub label set to " + new_sub_label}), 200
+    )
 
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
@@ -159,7 +185,7 @@ def delete_event(id):
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     media_name = f"{event.camera}-{event.id}"
@@ -174,7 +200,7 @@ def delete_event(id):
 
     event.delete_instance()
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " deleted"}), 200
+        jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
     )
 
 
