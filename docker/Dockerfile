@@ -71,14 +71,14 @@ ENV FLASK_ENV=development
 RUN apt-get -qq update && apt-get -qq install --no-install-recommends -y ffmpeg
 
 # install gstreamer
-RUN \
-  apt-get update && apt-get install -y gstreamer1.0-plugins-base-apps gstreamer1.0-tools gstreamer1.0-alsa \
-    gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
-    ibgstreamer1.0-dev \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer-plugins-good1.0-dev \
-    libgstreamer-plugins-bad1.0-dev
+#use_l4t: RUN \
+#use_l4t:   apt-get update && apt-get install -y gstreamer1.0-plugins-base-apps gstreamer1.0-tools gstreamer1.0-alsa \
+#use_l4t:     gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+#use_l4t:     gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+#use_l4t:     ibgstreamer1.0-dev \
+#use_l4t:     libgstreamer-plugins-base1.0-dev \
+#use_l4t:     libgstreamer-plugins-good1.0-dev \
+#use_l4t:     libgstreamer-plugins-bad1.0-dev
 
 #use_l4t: RUN apt-get -qq update && apt-get -qq install -y python3.9 && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 #use_l4t: COPY --from=wheels_l4t /wheels/. /wheels/
