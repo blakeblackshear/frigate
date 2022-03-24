@@ -25,7 +25,7 @@ class MotionDetector:
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
 
-    def detect(self, frame):
+    def detect(self, frame, improve_contrast):
         motion_boxes = []
 
         gray = frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]]
@@ -38,14 +38,15 @@ class MotionDetector:
         )
 
         # Improve contrast
-        minval = np.percentile(resized_frame, 4)
-        maxval = np.percentile(resized_frame, 96)
-        # don't adjust if the image is a single color
-        if minval < maxval:
-            resized_frame = np.clip(resized_frame, minval, maxval)
-            resized_frame = (
-                ((resized_frame - minval) / (maxval - minval)) * 255
-            ).astype(np.uint8)
+        if improve_contrast:
+            minval = np.percentile(resized_frame, 4)
+            maxval = np.percentile(resized_frame, 96)
+            # don't adjust if the image is a single color
+            if minval < maxval:
+                resized_frame = np.clip(resized_frame, minval, maxval)
+                resized_frame = (
+                    ((resized_frame - minval) / (maxval - minval)) * 255
+                ).astype(np.uint8)
 
         # mask frame
         resized_frame[self.mask] = [255]

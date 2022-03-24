@@ -98,12 +98,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         motion_settings = config.cameras[camera_name].motion
 
         if payload == "ON":
-            if not motion_settings.improve_contrast:
+            if not camera_metrics[camera_name]["improve_contrast_enabled"].value:
                 logger.info(f"Turning on improve contrast for {camera_name} via mqtt")
+                camera_metrics[camera_name]["improve_contrast_enabled"].value = True
                 motion_settings.improve_contrast = True
         elif payload == "OFF":
-            if motion_settings.improve_contrast:
+            if camera_metrics[camera_name]["improve_contrast_enabled"].value:
                 logger.info(f"Turning off improve contrast for {camera_name} via mqtt")
+                camera_metrics[camera_name]["improve_contrast_enabled"].value = False
                 motion_settings.improve_contrast = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")

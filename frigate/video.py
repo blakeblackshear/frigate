@@ -348,6 +348,7 @@ def track_camera(
 
     frame_queue = process_info["frame_queue"]
     detection_enabled = process_info["detection_enabled"]
+    improve_contrast_enabled = process_info["improve_contrast_enabled"]
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
@@ -377,6 +378,7 @@ def track_camera(
         objects_to_track,
         object_filters,
         detection_enabled,
+        improve_contrast_enabled,
         stop_event,
     )
 
@@ -458,6 +460,7 @@ def process_frames(
     objects_to_track: List[str],
     object_filters,
     detection_enabled: mp.Value,
+    improve_contrast_enabled: mp.Value,
     stop_event,
     exit_on_empty: bool = False,
 ):
@@ -492,7 +495,7 @@ def process_frames(
             continue
 
         # look for motion
-        motion_boxes = motion_detector.detect(frame)
+        motion_boxes = motion_detector.detect(frame, improve_contrast_enabled.value)
 
         regions = []
 
