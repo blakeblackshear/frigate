@@ -115,6 +115,7 @@ Topic to turn snapshots for a camera on and off. Expected values are `ON` and `O
 ### `frigate/<camera_name>/snapshots/state`
 
 Topic with current state of snapshots for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/improve_contrast/set`
 
 Topic to turn improve_contrast for a camera on and off. Expected values are `ON` and `OFF`.
