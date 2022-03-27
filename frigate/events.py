@@ -111,6 +111,7 @@ class EventProcessor(threading.Thread):
 
             elif event_type == "end":
                 if event_data["has_clip"] or event_data["has_snapshot"]:
+                    # Full update for valid end of event
                     Event.update(
                         label=event_data["label"],
                         camera=camera,
@@ -125,6 +126,12 @@ class EventProcessor(threading.Thread):
                         area=event_data["area"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
+                    ).where(Event.id == event_data["id"]).execute()
+                else:
+                    # Event ended after clip & snapshotshot disbabled,
+                    # only end time should be updated.
+                    Event.update(
+                        end_time=event_data["end_time"] + event_config.post_capture
                     ).where(Event.id == event_data["id"]).execute()
 
                 del self.events_in_process[event_data["id"]]
