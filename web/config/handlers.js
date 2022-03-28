@@ -20,7 +20,7 @@ export const handlers = [
             detect: { width: 1280, height: 720 },
             snapshots: {},
             live: { height: 720 },
-            ui: { show: true, order: 0 },
+            ui: { dashboard: true, order: 0, birdseye: true },
           },
           side: {
             name: 'side',
@@ -29,7 +29,7 @@ export const handlers = [
             detect: { width: 1280, height: 720 },
             snapshots: {},
             live: { height: 720 },
-            ui: { show: true, order: 1 },
+            ui: { dashboard: true, order: 1, birdseye: true },
           },
         },
       })
