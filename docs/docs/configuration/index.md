@@ -434,9 +434,11 @@ cameras:
 
     # Optional: Configuration for how camera is handled in the GUI.
     ui:
-      # Optional: Adjust sort order of cameras in the GUI. Larger numbers come later (default: shown below)
+      # Optional: Adjust sort order of cameras in the UI. Larger numbers come later (default: shown below)
       # By default the cameras are sorted alphabetically.
       order: 0
-      # Optional: Whether or not to show the camera in the GUI (default: shown below)
-      show: True
+      # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
+      dashboard: True
+      # Optional: Whether or not to show the camera in the Frigate Birdseye View (default: shown below)
+      birdseye: True
 ```

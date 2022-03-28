@@ -52,7 +52,7 @@ function SortedCameras({ unsortedCameras }) {
 
   const sortedCameras = useMemo(() =>
     Object.entries(unsortedCameras)
-      .filter(([_, conf]) => conf.ui.show)
+      .filter(([_, conf]) => conf.ui.dashboard)
       .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
   [unsortedCameras]);
 
@@ -71,7 +71,7 @@ function SortedRecordingCameras({ unsortedCameras }) {
 
   const sortedCameras = useMemo(() =>
     Object.entries(unsortedCameras)
-      .filter(([_, conf]) => conf.ui.show)
+      .filter(([_, conf]) => conf.ui.dashboard)
       .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
   [unsortedCameras]);
 

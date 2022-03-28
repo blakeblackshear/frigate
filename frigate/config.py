@@ -502,7 +502,7 @@ class CameraLiveConfig(FrigateBaseModel):
 class CameraUiConfig(FrigateBaseModel):
     birdseye: bool = Field(default=True, title="Show this camera in Frigate Birdseye View.")
     order: int = Field(default=0, title="Order of camera in UI.")
-    show: bool = Field(default=True, title="Show this camera in Frigate UI.")
+    dashboard: bool = Field(default=True, title="Show this camera in Frigate dashboard UI.")
 
 
 class CameraConfig(FrigateBaseModel):
