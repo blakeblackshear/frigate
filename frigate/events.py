@@ -128,7 +128,7 @@ class EventProcessor(threading.Thread):
                         has_snapshot=event_data["has_snapshot"],
                     ).where(Event.id == event_data["id"]).execute()
                 else:
-                    # Event ended after clip & snapshotshot disbabled,
+                    # Event ended after clip & snapshot disabled,
                     # only end time should be updated.
                     Event.update(
                         end_time=event_data["end_time"] + event_config.post_capture
