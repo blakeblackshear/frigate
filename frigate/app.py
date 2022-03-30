@@ -89,7 +89,7 @@ class FrigateApp:
                 "detection_fps": mp.Value("d", 0.0),
                 "detection_frame": mp.Value("d", 0.0),
                 "read_start": mp.Value("d", 0.0),
-                "ffmpeg_pid": mp.Value("i", 0),
+                "decoder_pid": mp.Value("i", 0),
                 "frame_queue": mp.Queue(maxsize=2),
             }
 

@@ -33,7 +33,9 @@ FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
-
+# TensorRT defaults
+DEFAULT_TRT_MODEL_PATH="/yolo4/yolov4-tiny-416.trt"
+DEFAULT_TRT_MODEL_SIZE=416
 
 class FrigateBaseModel(BaseModel):
     class Config:
@@ -926,7 +928,7 @@ class FrigateConfig(FrigateBaseModel):
         if config.mqtt.password:
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
-        # Global config to propegate down to camera level
+        # Global config to propagate down to camera level
         global_config = config.dict(
             include={
                 "record": ...,
@@ -1047,9 +1049,24 @@ class FrigateConfig(FrigateBaseModel):
                 logger.warning(
                     f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
                 )
-            # generage the ffmpeg commands
+            # generage the decoder commands
             camera_config.create_decoder_cmds()
             config.cameras[name] = camera_config
+
+        for name, detector_config in config.detectors.items():
+            if (
+                detector_config.type == DetectorTypeEnum.tensorrt
+            ):
+                if config.model.path is None:
+                    logger.info(
+                        "Setting default model to the yolov4-tiny-416 for the %s detector.",
+                        name,
+                    )
+                    config.model.path = DEFAULT_TRT_MODEL_PATH
+                    config.model.height = DEFAULT_TRT_MODEL_SIZE
+                    config.model.width = DEFAULT_TRT_MODEL_SIZE
+                elif "tflite" in config.model.path:
+                    raise ValueError(f"The {name} detector is of type tensorrt, however, tflite model is used.")
 
         return config
 

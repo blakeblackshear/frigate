@@ -87,24 +87,24 @@ def create_tensor_input(frame, model_shape, region):
     return cropped_frame
 
 
-def stop_ffmpeg(ffmpeg_process, logger):
-    logger.info("Terminating the existing ffmpeg process...")
-    ffmpeg_process.terminate()
+def stop_decoder(decoder_process, logger):
+    logger.info("Terminating the existing decoder process...")
+    decoder_process.terminate()
     try:
-        logger.info("Waiting for ffmpeg to exit gracefully...")
-        ffmpeg_process.communicate(timeout=30)
+        logger.info("Waiting for decoder to exit gracefully...")
+        decoder_process.communicate(timeout=30)
     except sp.TimeoutExpired:
-        logger.info("FFmpeg didnt exit. Force killing...")
-        ffmpeg_process.kill()
-        ffmpeg_process.communicate()
-    ffmpeg_process = None
+        logger.info("decoder didnt exit. Force killing...")
+        decoder_process.kill()
+        decoder_process.communicate()
+    decoder_process = None
 
 
-def start_or_restart_ffmpeg(
-    decoder_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None
+def start_or_restart_decoder(
+    decoder_cmd, logger, logpipe: LogPipe, frame_size=None, decoder_process=None
 ):
-    if ffmpeg_process is not None:
-        stop_ffmpeg(ffmpeg_process, logger)
+    if decoder_process is not None:
+        stop_decoder(decoder_process, logger)
 
     if frame_size is None:
         process = sp.Popen(
@@ -127,7 +127,7 @@ def start_or_restart_ffmpeg(
 
 
 def capture_frames(
-    ffmpeg_process,
+    decoder_process,
     camera_name,
     frame_shape,
     frame_manager: FrameManager,
@@ -150,13 +150,13 @@ def capture_frames(
         frame_name = f"{camera_name}{current_frame.value}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
-            frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+            frame_buffer[:] = decoder_process.stdout.read(frame_size)
         except Exception as e:
-            logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
+            logger.error(f"{camera_name}: Unable to read frames from decoder process.")
 
-            if ffmpeg_process.poll() != None:
+            if decoder_process.poll() != None:
                 logger.error(
-                    f"{camera_name}: ffmpeg process is not running. exiting capture thread..."
+                    f"{camera_name}: decoder process is not running. exiting capture thread..."
                 )
                 frame_manager.delete(frame_name)
                 break
@@ -179,38 +179,38 @@ def capture_frames(
 
 class CameraWatchdog(threading.Thread):
     def __init__(
-        self, camera_name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event
+        self, camera_name, config, frame_queue, camera_fps, decoder_pid, stop_event
     ):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
         self.camera_name = camera_name
         self.config = config
         self.capture_thread = None
-        self.ffmpeg_detect_process = None
-        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
-        self.ffmpeg_other_processes = []
+        self.decoder_detect_process = None
+        self.logpipe = LogPipe(f"decoder.{self.camera_name}.detect", logging.ERROR)
+        self.decoder_other_processes = []
         self.camera_fps = camera_fps
-        self.ffmpeg_pid = ffmpeg_pid
+        self.decoder_pid = decoder_pid
         self.frame_queue = frame_queue
         self.frame_shape = self.config.frame_shape_yuv
         self.frame_size = self.frame_shape[0] * self.frame_shape[1]
         self.stop_event = stop_event
 
     def run(self):
-        self.start_ffmpeg_detect()
+        self.start_decoder_detect()
 
         for c in self.config.decoder_cmds:
             if "detect" in c["roles"]:
                 continue
             logpipe = LogPipe(
-                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}",
+                f"decoder.{self.camera_name}.{'_'.join(sorted(c['roles']))}",
                 logging.ERROR,
             )
-            self.ffmpeg_other_processes.append(
+            self.decoder_other_processes.append(
                 {
                     "cmd": c["cmd"],
                     "logpipe": logpipe,
-                    "process": start_or_restart_ffmpeg(c["cmd"], self.logger, logpipe),
+                    "process": start_or_restart_decoder(c["cmd"], self.logger, logpipe),
                 }
             )
 
@@ -220,52 +220,52 @@ class CameraWatchdog(threading.Thread):
 
             if not self.capture_thread.is_alive():
                 self.logger.error(
-                    f"Ffmpeg process crashed unexpectedly for {self.camera_name}."
+                    f"decoder process crashed unexpectedly for {self.camera_name}."
                 )
                 self.logger.error(
-                    "The following ffmpeg logs include the last 100 lines prior to exit."
+                    "The following decoder logs include the last 100 lines prior to exit."
                 )
                 self.logpipe.dump()
-                self.start_ffmpeg_detect()
+                self.start_decoder_detect()
             elif now - self.capture_thread.current_frame.value > 20:
                 self.logger.info(
-                    f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg..."
+                    f"No frames received from {self.camera_name} in 20 seconds. Exiting decoder..."
                 )
-                self.ffmpeg_detect_process.terminate()
+                self.decoder_detect_process.terminate()
                 try:
-                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                    self.ffmpeg_detect_process.communicate(timeout=30)
+                    self.logger.info("Waiting for decoder to exit gracefully...")
+                    self.decoder_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg didnt exit. Force killing...")
-                    self.ffmpeg_detect_process.kill()
-                    self.ffmpeg_detect_process.communicate()
+                    self.logger.info("decoder didnt exit. Force killing...")
+                    self.decoder_detect_process.kill()
+                    self.decoder_detect_process.communicate()
 
-            for p in self.ffmpeg_other_processes:
+            for p in self.decoder_other_processes:
                 poll = p["process"].poll()
                 if poll is None:
                     continue
                 p["logpipe"].dump()
-                p["process"] = start_or_restart_ffmpeg(
-                    p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
+                p["process"] = start_or_restart_decoder(
+                    p["cmd"], self.logger, p["logpipe"], decoder_process=p["process"]
                 )
 
-        stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
-        for p in self.ffmpeg_other_processes:
-            stop_ffmpeg(p["process"], self.logger)
+        stop_decoder(self.decoder_detect_process, self.logger)
+        for p in self.decoder_other_processes:
+            stop_decoder(p["process"], self.logger)
             p["logpipe"].close()
         self.logpipe.close()
 
-    def start_ffmpeg_detect(self):
+    def start_decoder_detect(self):
         decoder_cmd = [
             c["cmd"] for c in self.config.decoder_cmds if "detect" in c["roles"]
         ][0]
-        self.ffmpeg_detect_process = start_or_restart_ffmpeg(
+        self.decoder_detect_process = start_or_restart_decoder(
             decoder_cmd, self.logger, self.logpipe, self.frame_size
         )
-        self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
+        self.decoder_pid.value = self.decoder_detect_process.pid
         self.capture_thread = CameraCapture(
             self.camera_name,
-            self.ffmpeg_detect_process,
+            self.decoder_detect_process,
             self.frame_shape,
             self.frame_queue,
             self.camera_fps,
@@ -274,7 +274,7 @@ class CameraWatchdog(threading.Thread):
 
 
 class CameraCapture(threading.Thread):
-    def __init__(self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps):
+    def __init__(self, camera_name, decoder_process, frame_shape, frame_queue, fps):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
         self.camera_name = camera_name
@@ -283,14 +283,14 @@ class CameraCapture(threading.Thread):
         self.fps = fps
         self.skipped_fps = EventsPerSecond()
         self.frame_manager = SharedMemoryFrameManager()
-        self.ffmpeg_process = ffmpeg_process
+        self.decoder_process = decoder_process
         self.current_frame = mp.Value("d", 0.0)
         self.last_frame = 0
 
     def run(self):
         self.skipped_fps.start()
         capture_frames(
-            self.ffmpeg_process,
+            self.decoder_process,
             self.camera_name,
             self.frame_shape,
             self.frame_manager,
@@ -316,7 +316,7 @@ def capture_camera(name, config: CameraConfig, process_info):
         config,
         frame_queue,
         process_info["camera_fps"],
-        process_info["ffmpeg_pid"],
+        process_info["decoder_pid"],
         stop_event,
     )
     camera_watchdog.start()

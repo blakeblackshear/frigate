@@ -34,7 +34,7 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     for k, v2 in dct2.items():
         if k in merged:
             v1 = merged[k]
-            if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
+            if isinstance(v1, dict) and isinstance(v2, collections.abc.Mapping):
                 merged[k] = deep_merge(v1, v2, override)
             elif isinstance(v1, list) and isinstance(v2, list):
                 if merge_lists:
