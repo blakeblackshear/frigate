@@ -2,9 +2,11 @@ import json
 import logging
 import threading
 import time
+from urllib.error import URLError
 import psutil
 import shutil
 import os
+from urllib.request import urlopen
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -13,11 +15,25 @@ from frigate.version import VERSION
 logger = logging.getLogger(__name__)
 
 
+def get_latest_version() -> str:
+    try:
+        raw = urlopen('https://api.github.com/repos/blakeblackshear/frigate/releases/latest')
+        response = json.load(raw)
+
+        if response:
+            return response.get("tag_name", "unknown").replace("v", "")
+        else:
+            return "unknown"
+    except URLError:
+        return "unknown"
+
+
 def stats_init(camera_metrics, detectors):
     stats_tracking = {
         "camera_metrics": camera_metrics,
         "detectors": detectors,
         "started": int(time.time()),
+        "latest_frigate_version": get_latest_version(),
     }
     return stats_tracking
 
@@ -83,6 +99,7 @@ def stats_snapshot(stats_tracking):
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
         "version": VERSION,
+        "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
         "temperatures": get_temperatures(),
     }
