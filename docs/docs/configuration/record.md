@@ -23,6 +23,12 @@ This configuration will retain recording segments that overlap with events and h
 
 When `retain -> days` is set to `0`, segments will be deleted from the cache if no events are in progress.
 
+## Can I have "24/7" recordings, but only at certain times?
+
+Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times. 
+
+**WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
+
 ## What do the different retain modes mean?
 
 Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for 24/7 recording (but can also affect events). 
