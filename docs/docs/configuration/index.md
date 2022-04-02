@@ -245,6 +245,9 @@ motion:
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
+  # WARNING: If automations will be used to control enabling/disabling record,
+  #          record must still be enabled in the config for the automation to
+  #          be successful.
   # WARNING: Frigate does not currently support limiting recordings based
   #          on available disk space automatically. If using recordings,
   #          you must specify retention settings for a number of days that
