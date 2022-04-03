@@ -21,6 +21,7 @@ class Event(Model):
     area = IntegerField()
     retain_indefinitely = BooleanField(default=False)
     ratio = FloatField(default=1.0)
+    plus_id = CharField(max_length=30)
 
 
 class Recordings(Model):
