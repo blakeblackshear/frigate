@@ -57,7 +57,8 @@ RUN pip3 wheel --wheel-dir=/wheels \
     peewee_migrate \
     pydantic \
     zeroconf \
-    ws4py
+    ws4py \
+    requests
 
 # Frigate Container
 FROM debian:11-slim
