@@ -79,9 +79,10 @@ def create_tensor_input(frame, model_shape, region):
     cropped_frame = yuv_region_2_rgb(frame, region)
 
     # Resize to the model_shape if needed
-    if cropped_frame.shape != (model_shape[0], model_shape[1], 3):
+    height, width = model_shape
+    if cropped_frame.shape != (height, width, 3):
         cropped_frame = cv2.resize(
-            cropped_frame, dsize=model_shape, interpolation=cv2.INTER_LINEAR
+            cropped_frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR
         )
     # Return a tensor of shape: [height, width, 3] in RGB format
     return cropped_frame
