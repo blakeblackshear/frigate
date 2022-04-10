@@ -192,6 +192,7 @@ class TrackedObject:
             "score": self.obj_data["score"],
             "box": self.obj_data["box"],
             "area": self.obj_data["area"],
+            "ratio": self.obj_data["ratio"],
             "region": self.obj_data["region"],
             "stationary": self.obj_data["motionless_count"]
             > self.camera_config.detect.stationary.threshold,
@@ -339,6 +340,14 @@ def zone_filtered(obj: TrackedObject, object_config):
 
         # if the score is lower than the threshold, skip
         if obj_settings.threshold > obj.computed_score:
+            return True
+
+        # if the object is not proportionally wide enough
+        if obj_settings.min_ratio > obj.obj_data["ratio"]:
+            return True
+
+        # if the object is proportionally too wide
+        if obj_settings.max_ratio < obj.obj_data["ratio"]:
             return True
 
     return False
