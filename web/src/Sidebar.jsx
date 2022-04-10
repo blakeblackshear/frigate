@@ -78,18 +78,15 @@ function SortedRecordingCameras({ unsortedCameras }) {
   return (
     <Fragment>
       <Separator />
-      {sortedCameras.map(([camera, conf]) => {
-        if (conf.record.enabled) {
-          return (
-            <Destination
-              key={camera}
-              path={`/recording/${camera}/:date?/:hour?/:seconds?`}
-              href={`/recording/${camera}`}
-              text={camera}
-            />
-          );
-        }
-        return null;
+      {sortedCameras.map(([camera, _]) => {
+        return (
+          <Destination
+            key={camera}
+            path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+            href={`/recording/${camera}`}
+            text={camera}
+          />
+        );
       })}
       <Separator />
     </Fragment>
