@@ -17,7 +17,7 @@ detect:
     threshold: 50
 ```
 
-`interval` is defined as the frequency for running detection on stationary objects. This means that by default, once an object is considered stationary detection will not be run on it until motion is detected. With `interval > 0`, every nth frames detection will be run to make sure the object is still there. 
+`interval` is defined as the frequency for running detection on stationary objects. This means that by default once an object is considered stationary, detection will not be run on it until motion is detected. With `interval > 0`, every nth frames detection will be run to make sure the object is still there.
 
 NOTE: There is no way to disable stationary object tracking with this value.
 
