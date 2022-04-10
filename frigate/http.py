@@ -143,7 +143,13 @@ def set_retain(id):
 def send_to_plus(id):
     if current_app.plus_api is None:
         return make_response(
-            jsonify({"success": False, "message": "Plus token not set"}), 400
+            jsonify(
+                {
+                    "success": False,
+                    "message": "PLUS_API_KEY environment variable is not set",
+                }
+            ),
+            400,
         )
 
     try:
@@ -182,7 +188,7 @@ def send_to_plus(id):
     event.plus_id = plus_id
     event.save()
 
-    return "success"
+    return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
 
 
 @bp.route("/events/<id>/retain", methods=("DELETE",))
@@ -201,6 +207,7 @@ def delete_retain(id):
         jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
     )
 
+
 @bp.route("/events/<id>/sub_label", methods=("POST",))
 def set_sub_label(id):
     try:
@@ -215,18 +222,30 @@ def set_sub_label(id):
     else:
         new_sub_label = None
 
-
     if new_sub_label and len(new_sub_label) > 20:
         return make_response(
-            jsonify({"success": False, "message": new_sub_label + " exceeds the 20 character limit for sub_label"}), 400
+            jsonify(
+                {
+                    "success": False,
+                    "message": new_sub_label
+                    + " exceeds the 20 character limit for sub_label",
+                }
+            ),
+            400,
         )
-
 
     event.sub_label = new_sub_label
     event.save()
     return make_response(
-        jsonify({"success": True, "message": "Event " + id + " sub label set to " + new_sub_label}), 200
+        jsonify(
+            {
+                "success": True,
+                "message": "Event " + id + " sub label set to " + new_sub_label,
+            }
+        ),
+        200,
     )
+
 
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):

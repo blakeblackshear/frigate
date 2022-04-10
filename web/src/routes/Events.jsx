@@ -10,6 +10,7 @@ import { useState, useRef, useCallback, useMemo } from 'preact/hooks';
 import VideoPlayer from '../components/VideoPlayer';
 import { StarRecording } from '../icons/StarRecording';
 import { Snapshot } from '../icons/Snapshot';
+import { UploadPlus } from '../icons/UploadPlus';
 import { Clip } from '../icons/Clip';
 import { Zone } from '../icons/Zone';
 import { Camera } from '../icons/Camera';
@@ -18,6 +19,8 @@ import { Download } from '../icons/Download';
 import Menu, { MenuItem } from '../components/Menu';
 import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
+import Button from '../components/Button';
+import Dialog from '../components/Dialog';
 
 const API_LIMIT = 25;
 
@@ -43,10 +46,12 @@ export default function Events({ path, ...props }) {
     zone: props.zone ?? 'all',
   });
   const [state, setState] = useState({
-    showDownloadMenu: null,
-    showDatePicker: null,
-    showCalendar: null,
+    showDownloadMenu: false,
+    showDatePicker: false,
+    showCalendar: false,
+    showPlusConfig: false,
   });
+  const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
   const [downloadEvent, setDownloadEvent] = useState({ id: null, has_clip: false, has_snapshot: false });
 
@@ -167,6 +172,38 @@ export default function Events({ path, ...props }) {
     [size, setSize, isValidating, isDone]
   );
 
+  const onSendToPlus = async (id, e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    if (!config.plus.enabled) {
+      setState({ ...state, showDownloadMenu: false, showPlusConfig: true });
+      return;
+    }
+
+    setUploading((prev) => [...prev, id]);
+
+    const response = await axios.post(`events/${id}/plus`);
+
+    if (response.status === 200) {
+      mutate(
+        (pages) =>
+          pages.map((page) =>
+            page.map((event) => {
+              if (event.id === id) {
+                return { ...event, plus_id: response.data.plus_id };
+              }
+              return event;
+            })
+          ),
+        false
+      );
+    }
+
+    setUploading((prev) => prev.filter((i) => i !== id));
+  };
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -238,6 +275,14 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
+          {downloadEvent.has_snapshot && !downloadEvent.plus_id && (
+            <MenuItem
+              icon={UploadPlus}
+              label="Send to Frigate+"
+              value="plus"
+              onSelect={() => onSendToPlus(downloadEvent.id)}
+            />
+          )}
         </Menu>
       )}
       {state.showDatePicker && (
@@ -282,6 +327,27 @@ export default function Events({ path, ...props }) {
           />
         </Menu>
       )}
+      {state.showPlusConfig && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Setup a Frigate+ Account</Heading>
+            <p className="mb-2">In order to submit images to Frigate+, you first need to setup an account.</p>
+            <a
+              className="text-blue-500 hover:underline"
+              href="https://plus.frigate.video"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://plus.frigate.video
+            </a>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => setState({ ...state, showPlusConfig: false })} type="text">
+              Close
+            </Button>
+          </div>
+        </Dialog>
+      )}
       <div className="space-y-2">
         {eventPages ? (
           eventPages.map((page, i) => {
@@ -315,7 +381,8 @@ export default function Events({ path, ...props }) {
                     <div className="m-2 flex grow">
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
-                          {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} ({(event.top_score * 100).toFixed(0)}%)
+                          {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} (
+                          {(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
@@ -329,6 +396,19 @@ export default function Events({ path, ...props }) {
                           <Zone className="w-5 h-5 mr-2 inline" />
                           {event.zones.join(',')}
                         </div>
+                      </div>
+                      <div class="hidden sm:flex flex-col justify-end mr-2">
+                        {event.plus_id ? (
+                          <div className="uppercase text-xs">Sent to Frigate+</div>
+                        ) : (
+                          <Button
+                            color="gray"
+                            disabled={uploading.includes(event.id)}
+                            onClick={(e) => onSendToPlus(event.id, e)}
+                          >
+                            {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                          </Button>
+                        )}
                       </div>
                       <div class="flex flex-col">
                         <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id)} />
