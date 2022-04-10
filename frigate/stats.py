@@ -6,7 +6,7 @@ from urllib.error import URLError
 import psutil
 import shutil
 import os
-from urllib.request import urlopen
+import requests
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 def get_latest_version() -> str:
     try:
-        raw = urlopen('https://api.github.com/repos/blakeblackshear/frigate/releases/latest')
-        response = json.load(raw)
+        response = requests.get('https://api.github.com/repos/blakeblackshear/frigate/releases/latest').json()
 
         if response:
             return response.get("tag_name", "unknown").replace("v", "")
