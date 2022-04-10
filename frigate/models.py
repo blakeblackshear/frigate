@@ -20,6 +20,7 @@ class Event(Model):
     box = JSONField()
     area = IntegerField()
     retain_indefinitely = BooleanField(default=False)
+    ratio = FloatField(default=1.0)
 
 
 class Recordings(Model):
