@@ -38,6 +38,10 @@ logger = logging.getLogger(__name__)
 
 def filtered(obj, objects_to_track, object_filters):
     object_name = obj[0]
+    object_score = obj[1]
+    object_box = obj[2]
+    object_area = obj[3]
+    object_ratio = obj[4]
 
     if not object_name in objects_to_track:
         return True
@@ -47,24 +51,35 @@ def filtered(obj, objects_to_track, object_filters):
 
         # if the min area is larger than the
         # detected object, don't add it to detected objects
-        if obj_settings.min_area > obj[3]:
+        if obj_settings.min_area > object_area:
             return True
 
         # if the detected object is larger than the
         # max area, don't add it to detected objects
-        if obj_settings.max_area < obj[3]:
+        if obj_settings.max_area < object_area:
             return True
 
         # if the score is lower than the min_score, skip
-        if obj_settings.min_score > obj[1]:
+        if obj_settings.min_score > object_score:
+            return True
+
+        # if the object is not proportionally wide enough
+        if obj_settings.min_ratio > object_ratio:
+            return True
+
+        # if the object is proportionally too wide
+        if obj_settings.max_ratio < object_ratio:
             return True
 
         if not obj_settings.mask is None:
             # compute the coordinates of the object and make sure
-            # the location isnt outside the bounds of the image (can happen from rounding)
-            y_location = min(int(obj[2][3]), len(obj_settings.mask) - 1)
+            # the location isn't outside the bounds of the image (can happen from rounding)
+            object_xmin = object_box[0]
+            object_xmax = object_box[2]
+            object_ymax = object_box[3]
+            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
             x_location = min(
-                int((obj[2][2] - obj[2][0]) / 2.0) + obj[2][0],
+                int((object_xmax + object_xmin) / 2.0),
                 len(obj_settings.mask[0]) - 1,
             )
 
@@ -429,11 +444,16 @@ def detect(
         y_min = int((box[0] * size) + region[1])
         x_max = int((box[3] * size) + region[0])
         y_max = int((box[2] * size) + region[1])
+        width = x_max - x_min
+        height = y_max - y_min
+        area = width * height
+        ratio = width / height
         det = (
             d[0],
             d[1],
             (x_min, y_min, x_max, y_max),
-            (x_max - x_min) * (y_max - y_min),
+            area,
+            ratio,
             region,
         )
         # apply object filters
@@ -580,6 +600,7 @@ def process_frames(
                     obj["score"],
                     obj["box"],
                     obj["area"],
+                    obj["ratio"],
                     obj["region"],
                 )
                 for obj in object_tracker.tracked_objects.values()
@@ -615,8 +636,14 @@ def process_frames(
                 for group in detected_object_groups.values():
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                    # o[2] is the box of the object: xmin, ymin, xmax, ymax
                     boxes = [
-                        (o[2][0], o[2][1], o[2][2] - o[2][0], o[2][3] - o[2][1])
+                        (
+                            o[2][0],
+                            o[2][1],
+                            o[2][2] - o[2][0],
+                            o[2][3] - o[2][1],
+                        )
                         for o in group
                     ]
                     confidences = [o[1] for o in group]

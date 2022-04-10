@@ -40,9 +40,7 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 
 ### Setup
 
-#### 1. Build the docker container locally with the appropriate make command
-
-For x86 machines, use `make amd64_frigate`
+#### 1. Build the version information and docker container locally by running `make`
 
 #### 2. Create a local config file for testing
 
