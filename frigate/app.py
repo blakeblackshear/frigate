@@ -16,7 +16,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR, PLUS_ENV_VAR, PLUS_API_HOST
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
@@ -25,6 +25,7 @@ from frigate.models import Event, Recordings
 from frigate.mqtt import MqttSocketRelay, create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
+from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.version import VERSION
@@ -44,6 +45,11 @@ class FrigateApp:
         self.detection_out_events: Dict[str, mp.Event] = {}
         self.detection_shms: List[mp.shared_memory.SharedMemory] = []
         self.log_queue = mp.Queue()
+        self.plus_api = (
+            PlusApi(PLUS_API_HOST, os.environ.get(PLUS_ENV_VAR))
+            if PLUS_ENV_VAR in os.environ
+            else None
+        )
         self.camera_metrics = {}
 
     def set_environment_vars(self):
@@ -146,6 +152,7 @@ class FrigateApp:
             self.db,
             self.stats_tracking,
             self.detected_frames_processor,
+            self.plus_api,
         )
 
     def init_mqtt(self):

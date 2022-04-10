@@ -29,7 +29,7 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR, RECORD_DIR
+from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
@@ -45,6 +45,7 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
+    plus_api,
 ):
     app = Flask(__name__)
 
@@ -61,6 +62,7 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+    app.plus_api = plus_api
 
     app.register_blueprint(bp)
 
@@ -137,6 +139,58 @@ def set_retain(id):
     )
 
 
+@bp.route("/events/<id>/plus", methods=("POST",))
+def send_to_plus(id):
+    if current_app.plus_api is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "PLUS_API_KEY environment variable is not set",
+                }
+            ),
+            400,
+        )
+
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
+
+    if event.plus_id:
+        return make_response(
+            jsonify({"success": False, "message": "Already submitted to plus"}), 400
+        )
+
+    # load clean.png
+    try:
+        filename = f"{event.camera}-{event.id}-clean.png"
+        image = cv2.imread(os.path.join(CLIPS_DIR, filename))
+    except Exception:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for event"}
+            ),
+            400,
+        )
+
+    try:
+        plus_id = current_app.plus_api.upload_image(image, event.camera)
+    except Exception as ex:
+        return make_response(
+            jsonify({"success": False, "message": str(ex)}),
+            400,
+        )
+
+    # store image id in the database
+    event.plus_id = plus_id
+    event.save()
+
+    return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
+
+
 @bp.route("/events/<id>/retain", methods=("DELETE",))
 def delete_retain(id):
     try:
@@ -153,6 +207,7 @@ def delete_retain(id):
         jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
     )
 
+
 @bp.route("/events/<id>/sub_label", methods=("POST",))
 def set_sub_label(id):
     try:
@@ -167,18 +222,30 @@ def set_sub_label(id):
     else:
         new_sub_label = None
 
-
     if new_sub_label and len(new_sub_label) > 20:
         return make_response(
-            jsonify({"success": False, "message": new_sub_label + " exceeds the 20 character limit for sub_label"}), 400
+            jsonify(
+                {
+                    "success": False,
+                    "message": new_sub_label
+                    + " exceeds the 20 character limit for sub_label",
+                }
+            ),
+            400,
         )
-
 
     event.sub_label = new_sub_label
     event.save()
     return make_response(
-        jsonify({"success": True, "message": "Event " + id + " sub label set to " + new_sub_label}), 200
+        jsonify(
+            {
+                "success": True,
+                "message": "Event " + id + " sub label set to " + new_sub_label,
+            }
+        ),
+        200,
     )
+
 
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
@@ -252,6 +319,7 @@ def event_thumbnail(id):
         response.headers["Cache-Control"] = "private, max-age=31536000"
     return response
 
+
 @bp.route("/<camera_name>/<label>/best.jpg")
 @bp.route("/<camera_name>/<label>/thumbnail.jpg")
 def label_thumbnail(camera_name, label):
@@ -277,9 +345,7 @@ def label_thumbnail(camera_name, label):
         return event_thumbnail(event.id)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        )
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
@@ -330,6 +396,7 @@ def event_snapshot(id):
         ] = f"attachment; filename=snapshot-{id}.jpg"
     return response
 
+
 @bp.route("/<camera_name>/<label>/snapshot.jpg")
 def label_snapshot(camera_name, label):
     if label == "any":
@@ -353,9 +420,7 @@ def label_snapshot(camera_name, label):
         return event_snapshot(event.id)
     except DoesNotExist:
         frame = np.zeros((720, 1280, 3), np.uint8)
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        )
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
@@ -459,6 +524,8 @@ def config():
         camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
+
+    config["plus"] = {"enabled": PLUS_ENV_VAR in os.environ}
 
     return jsonify(config)
 
