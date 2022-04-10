@@ -522,7 +522,7 @@ def clipped(obj, frame_shape):
     # if the object is within 5 pixels of the region border, and the region is not on the edge
     # consider the object to be clipped
     box = obj[2]
-    region = obj[4]
+    region = obj[5]
     if (
         (region[0] > 5 and box[0] - region[0] <= 5)
         or (region[1] > 5 and box[1] - region[1] <= 5)

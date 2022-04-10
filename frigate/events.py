@@ -105,6 +105,7 @@ class EventProcessor(threading.Thread):
                     region=event_data["region"],
                     box=event_data["box"],
                     area=event_data["area"],
+                    ratio=event_data["ratio"],
                     has_clip=event_data["has_clip"],
                     has_snapshot=event_data["has_snapshot"],
                 ).where(Event.id == event_data["id"]).execute()
@@ -124,6 +125,7 @@ class EventProcessor(threading.Thread):
                         region=event_data["region"],
                         box=event_data["box"],
                         area=event_data["area"],
+                        ratio=event_data["ratio"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
                     ).where(Event.id == event_data["id"]).execute()
