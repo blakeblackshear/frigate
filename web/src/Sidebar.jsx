@@ -21,7 +21,7 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {Object.entries(cameras).map(([camera]) => (
+              {Object.keys(cameras).map((camera) => (
                 <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
               ))}
               <Separator />
@@ -34,18 +34,14 @@ export default function Sidebar() {
           matches ? (
             <Fragment>
               <Separator />
-              {Object.entries(cameras).map(([camera, conf]) => {
-                if (conf.record.enabled) {
-                  return (
-                    <Destination
-                      path={`/recording/${camera}/:date?/:hour?/:seconds?`}
-                      href={`/recording/${camera}`}
-                      text={camera}
-                    />
-                  );
-                }
-                return null;
-              })}
+              {Object.keys(cameras).map((camera) => (
+                <Destination
+                  key={camera}
+                  path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+                  href={`/recording/${camera}`}
+                  text={camera}
+                />
+              ))}
               <Separator />
             </Fragment>
           ) : null
