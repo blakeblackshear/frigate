@@ -53,7 +53,12 @@ export default function Events({ path, ...props }) {
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
-  const [downloadEvent, setDownloadEvent] = useState({ id: null, has_clip: false, has_snapshot: false });
+  const [downloadEvent, setDownloadEvent] = useState({
+    id: null,
+    has_clip: false,
+    has_snapshot: false,
+    plus_id: undefined,
+  });
 
   const eventsFetcher = useCallback((path, params) => {
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
@@ -123,7 +128,12 @@ export default function Events({ path, ...props }) {
 
   const onDownloadClick = (e, event) => {
     e.stopPropagation();
-    setDownloadEvent((_prev) => ({ id: event.id, has_clip: event.has_clip, has_snapshot: event.has_snapshot }));
+    setDownloadEvent((_prev) => ({
+      id: event.id,
+      has_clip: event.has_clip,
+      has_snapshot: event.has_snapshot,
+      plus_id: event.plus_id,
+    }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
   };
@@ -177,6 +187,10 @@ export default function Events({ path, ...props }) {
       e.stopPropagation();
     }
 
+    if (uploading.includes(id)) {
+      return;
+    }
+
     if (!config.plus.enabled) {
       setState({ ...state, showDownloadMenu: false, showPlusConfig: true });
       return;
@@ -202,6 +216,10 @@ export default function Events({ path, ...props }) {
     }
 
     setUploading((prev) => prev.filter((i) => i !== id));
+
+    if (state.showDownloadMenu && downloadEvent.id === id) {
+      setState({ ...state, showDownloadMenu: false });
+    }
   };
 
   if (!config) {
@@ -278,9 +296,17 @@ export default function Events({ path, ...props }) {
           {downloadEvent.has_snapshot && !downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
-              label="Send to Frigate+"
+              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
               value="plus"
               onSelect={() => onSendToPlus(downloadEvent.id)}
+            />
+          )}
+          {downloadEvent.plus_id && (
+            <MenuItem
+              icon={UploadPlus}
+              label={'Sent to Frigate+'}
+              value="plus"
+              onSelect={() => setState({ ...state, showDownloadMenu: false })}
             />
           )}
         </Menu>
@@ -398,16 +424,20 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.plus_id ? (
-                          <div className="uppercase text-xs">Sent to Frigate+</div>
-                        ) : (
-                          <Button
-                            color="gray"
-                            disabled={uploading.includes(event.id)}
-                            onClick={(e) => onSendToPlus(event.id, e)}
-                          >
-                            {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
-                          </Button>
+                        {event.has_snapshot && (
+                          <Fragment>
+                            {event.plus_id ? (
+                              <div className="uppercase text-xs">Sent to Frigate+</div>
+                            ) : (
+                              <Button
+                                color="gray"
+                                disabled={uploading.includes(event.id)}
+                                onClick={(e) => onSendToPlus(event.id, e)}
+                              >
+                                {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                              </Button>
+                            )}
+                          </Fragment>
                         )}
                       </div>
                       <div class="flex flex-col">
