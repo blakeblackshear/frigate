@@ -161,8 +161,9 @@ detect:
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
-    # Optional: Frequency for running detection on stationary objects (default: shown below)
-    # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
+    # Optional: Frequency for confirming stationary objects (default: shown below)
+    # When set to 0, object detection will not confirm stationary objects until movement is detected.
+    # If set to 10, object detection will run to confirm the object still exists on every 10th frame.
     interval: 0
     # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
     threshold: 50
