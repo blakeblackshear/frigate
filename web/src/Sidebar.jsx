@@ -9,10 +9,21 @@ import NavigationDrawer, { Destination, Separator } from './components/Navigatio
 
 export default function Sidebar() {
   const { data: config } = useSWR('config');
+
+  const sortedCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.cameras)
+      .filter(([_, conf]) => conf.ui.dashboard)
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1));
+  }, [config]);
+
   if (!config) {
     return null;
   }
-  const { cameras, birdseye } = config;
+  const { birdseye } = config;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -20,14 +31,14 @@ export default function Sidebar() {
       <Match path="/cameras/:camera/:other?">
         {({ matches }) =>
           matches ? (
-            <SortedCameras unsortedCameras={cameras} />
+            <CameraSection sortedCameras={sortedCameras} />
           ) : null
         }
       </Match>
       <Match path="/recording/:camera/:date?/:hour?/:seconds?">
         {({ matches }) =>
           matches ? (
-            <SortedRecordingCameras unsortedCameras={cameras} />
+            <RecordingSection sortedCameras={sortedCameras} />
           ) : null
         }
       </Match>
@@ -48,13 +59,7 @@ export default function Sidebar() {
   );
 }
 
-function SortedCameras({ unsortedCameras }) {
-
-  const sortedCameras = useMemo(() =>
-    Object.entries(unsortedCameras)
-      .filter(([_, conf]) => conf.ui.dashboard)
-      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
-  [unsortedCameras]);
+function CameraSection({ sortedCameras }) {
 
   return (
     <Fragment>
@@ -67,13 +72,7 @@ function SortedCameras({ unsortedCameras }) {
   );
 }
 
-function SortedRecordingCameras({ unsortedCameras }) {
-
-  const sortedCameras = useMemo(() =>
-    Object.entries(unsortedCameras)
-      .filter(([_, conf]) => conf.ui.dashboard)
-      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1)),
-  [unsortedCameras]);
+function RecordingSection({ sortedCameras }) {
 
   return (
     <Fragment>
