@@ -310,12 +310,8 @@ class BirdsEyeFrameManager:
 
         return True
 
-    def update(self, camera, camera_birdseye_enabled, object_count, motion_count, frame_time, frame) -> bool:
-        # If this camera has birdseye disabled then exclude
-        if not camera_birdseye_enabled:
-            return False
-
-        # update the last active frame for the camera
+    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
         if self.camera_active(object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
@@ -428,7 +424,6 @@ def output_frames(config: FrigateConfig, video_output_queue):
         ):
             if birdseye_manager.update(
                 camera,
-                config.cameras[camera].ui.birdseye,
                 len([o for o in current_tracked_objects if not o["stationary"]]),
                 len(motion_boxes),
                 frame_time,
