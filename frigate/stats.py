@@ -2,7 +2,6 @@ import json
 import logging
 import threading
 import time
-from urllib.error import URLError
 import psutil
 import shutil
 import os
@@ -16,14 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_latest_version() -> str:
-    try:
-        response = requests.get('https://api.github.com/repos/blakeblackshear/frigate/releases/latest').json()
+    request = requests.get('https://api.github.com/repos/blakeblackshear/frigate/releases/latest')
+    response = request.json()
 
-        if response:
-            return response.get("tag_name", "unknown").replace("v", "")
-        else:
-            return "unknown"
-    except URLError:
+    if request.ok and response:
+        return response.get("tag_name", "unknown").replace("v", "")
+    else:
         return "unknown"
 
 
