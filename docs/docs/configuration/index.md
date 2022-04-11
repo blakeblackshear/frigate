@@ -443,6 +443,4 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
-      # Optional: Whether or not to show the camera in the Frigate Birdseye View (default: shown below)
-      birdseye: True
 ```
