@@ -547,7 +547,7 @@ class CameraConfig(FrigateBaseModel):
         default_factory=DetectConfig, title="Object detection configuration."
     )
     birdseye: BirdseyeCameraConfig = Field(
-        default_factory=None, title="Birdseye camera configuration."
+        default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
