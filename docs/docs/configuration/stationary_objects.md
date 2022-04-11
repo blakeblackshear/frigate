@@ -1,10 +1,10 @@
 # Stationary Objects
 
-An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs near the object at which point it will be considered active.
+An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs near the object at which point object detection will start running again. If the object changes location, it will be considered active.
 
 ## Why does it matter if an object is stationary?
 
-Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#what-do-the-different-retain-modes-mean) to only when the object is considered active.
+Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#what-do-the-different-retain-modes-mean) to only when the object is considered active. Motion alone does not determine if an object is "active" for active_objects segment retention. Lighting changes for a parked car won't make an object active.
 
 ## Tuning stationary behavior
 
