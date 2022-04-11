@@ -311,6 +311,7 @@ class BirdsEyeFrameManager:
         return True
 
     def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+        
          # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
         if self.camera_active(object_count, motion_count):
