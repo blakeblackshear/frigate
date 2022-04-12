@@ -4,13 +4,14 @@ import threading
 import os
 import signal
 import queue
-import multiprocessing as mp
+from multiprocessing.queues import Queue
 from logging import handlers
 from setproctitle import setproctitle
+from typing import Deque
 from collections import deque
 
 
-def listener_configurer():
+def listener_configurer() -> None:
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter(
@@ -21,14 +22,14 @@ def listener_configurer():
     root.setLevel(logging.INFO)
 
 
-def root_configurer(queue):
+def root_configurer(queue: Queue) -> None:
     h = handlers.QueueHandler(queue)
     root = logging.getLogger()
     root.addHandler(h)
     root.setLevel(logging.INFO)
 
 
-def log_process(log_queue):
+def log_process(log_queue: Queue) -> None:
     threading.current_thread().name = f"logger"
     setproctitle("frigate.logger")
     listener_configurer()
@@ -43,34 +44,32 @@ def log_process(log_queue):
 
 # based on https://codereview.stackexchange.com/a/17959
 class LogPipe(threading.Thread):
-    def __init__(self, log_name, level):
-        """Setup the object with a logger and a loglevel
-        and start the thread
-        """
+    def __init__(self, log_name: str):
+        """Setup the object with a logger and start the thread"""
         threading.Thread.__init__(self)
         self.daemon = False
         self.logger = logging.getLogger(log_name)
-        self.level = level
-        self.deque = deque(maxlen=100)
+        self.level = logging.ERROR
+        self.deque: Deque[str] = deque(maxlen=100)
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
 
-    def fileno(self):
+    def fileno(self) -> int:
         """Return the write file descriptor of the pipe"""
         return self.fdWrite
 
-    def run(self):
+    def run(self) -> None:
         """Run the thread, logging everything."""
         for line in iter(self.pipeReader.readline, ""):
             self.deque.append(line.strip("\n"))
 
         self.pipeReader.close()
 
-    def dump(self):
+    def dump(self) -> None:
         while len(self.deque) > 0:
             self.logger.log(self.level, self.deque.popleft())
 
-    def close(self):
+    def close(self) -> None:
         """Close the write end of the pipe."""
         os.close(self.fdWrite)

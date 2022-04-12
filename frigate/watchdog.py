@@ -5,21 +5,22 @@ import time
 import os
 import signal
 
-from frigate.util import (
-    restart_frigate,
-)
+from frigate.edgetpu import EdgeTPUProcess
+from frigate.util import restart_frigate
+from multiprocessing.synchronize import Event
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
 
 class FrigateWatchdog(threading.Thread):
-    def __init__(self, detectors, stop_event):
+    def __init__(self, detectors: Dict[str, EdgeTPUProcess], stop_event: Event):
         threading.Thread.__init__(self)
         self.name = "frigate_watchdog"
         self.detectors = detectors
         self.stop_event = stop_event
 
-    def run(self):
+    def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(10):
             now = datetime.datetime.now().timestamp()
@@ -32,7 +33,10 @@ class FrigateWatchdog(threading.Thread):
                         "Detection appears to be stuck. Restarting detection process..."
                     )
                     detector.start_or_restart()
-                elif not detector.detect_process.is_alive():
+                elif (
+                    detector.detect_process is not None
+                    and not detector.detect_process.is_alive()
+                ):
                     logger.info("Detection appears to have stopped. Exiting frigate...")
                     restart_frigate()
 
