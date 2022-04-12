@@ -80,6 +80,62 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert "dog" in runtime_config.cameras["back"].objects.track
 
+    def test_override_birdseye(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": { "enabled": True, "mode": "continuous" }
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "birdseye": {
+                        "enabled": False,
+                        "mode": "motion"
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert not runtime_config.cameras["back"].birdseye.enabled
+        assert runtime_config.cameras["back"].birdseye.mode is "motion"
+
+    def test_inherit_birdseye(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": { "enabled": True, "mode": "continuous" }
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].birdseye.enabled
+        assert runtime_config.cameras["back"].birdseye.mode is "continuous"
+
     def test_override_tracked_objects(self):
         config = {
             "mqtt": {"host": "mqtt"},
