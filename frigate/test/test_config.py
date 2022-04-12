@@ -83,7 +83,7 @@ class TestConfig(unittest.TestCase):
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": { "enabled": True, "mode": "continuous" }
+            "birdseye": { "enabled": True, "mode": "continuous" },
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -99,7 +99,7 @@ class TestConfig(unittest.TestCase):
                     "birdseye": {
                         "enabled": False,
                         "mode": "motion"
-                    }
+                    },
                 }
             },
         }
@@ -113,7 +113,7 @@ class TestConfig(unittest.TestCase):
     def test_inherit_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "birdseye": { "enabled": True, "mode": "continuous" }
+            "birdseye": { "enabled": True, "mode": "continuous" },
             "cameras": {
                 "back": {
                     "ffmpeg": {
