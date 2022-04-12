@@ -1,0 +1,17 @@
+click == 8.1.*
+Flask == 2.1.*
+imutils == 0.5.*
+matplotlib == 3.5.*
+numpy == 1.22.*
+opencv-python-headless == 4.5.5.*
+paho-mqtt == 1.6.*
+peewee == 3.14.*
+peewee_migrate == 1.4.*
+psutil == 5.9.*
+pydantic == 1.9.*
+PyYAML == 6.0.*
+requests == 2.27.*
+scipy == 1.8.*
+setproctitle == 1.2.*
+ws4py == 0.5.*
+zeroconf == 0.38.4

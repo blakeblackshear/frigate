@@ -38,27 +38,11 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN pip3 install scikit-build
+COPY requirements.txt /requirements.txt
+RUN pip3 install -r requirements.txt
 
-# TODO: lock with requirements.txt
-RUN pip3 wheel --wheel-dir=/wheels \
-    opencv-python-headless \
-    numpy \
-    imutils \
-    scipy \
-    psutil \
-    Flask \
-    paho-mqtt \
-    PyYAML \
-    matplotlib \
-    click \
-    setproctitle \
-    peewee \
-    peewee_migrate \
-    pydantic \
-    zeroconf \
-    ws4py \
-    requests
+COPY requirements-wheels.txt /requirements-wheels.txt
+RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt 
 
 # Frigate Container
 FROM debian:11-slim
