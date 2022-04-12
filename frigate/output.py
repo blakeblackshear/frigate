@@ -190,12 +190,7 @@ class BirdsEyeFrameManager:
             channel_dims,
         )
 
-    def camera_active(self, camera_config, object_box_count, motion_box_count):
-        if camera_config:
-            mode = camera_config.mode
-        else:
-            mode = self.mode
-
+    def camera_active(self, mode, object_box_count, motion_box_count):
         if mode == BirdseyeModeEnum.continuous:
             return True
 
@@ -315,14 +310,15 @@ class BirdsEyeFrameManager:
 
         return True
 
-    def update(self, camera, camera_config, object_count, motion_count, frame_time, frame) -> bool:
+    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
         # don't process if birdseye is disabled for this camera
-        if camera_config and not camera_config.enabled:
+        camera_config = self.config.cameras[camera].birdseye
+        if not camera_config.enabled:
             return False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(camera_config, object_count, motion_count):
+        if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -433,7 +429,6 @@ def output_frames(config: FrigateConfig, video_output_queue):
         ):
             if birdseye_manager.update(
                 camera,
-                config.cameras[camera].birdseye,
                 len([o for o in current_tracked_objects if not o["stationary"]]),
                 len(motion_boxes),
                 frame_time,
