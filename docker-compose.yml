@@ -5,9 +5,9 @@ services:
     user: vscode
     # add groups from host for render, plugdev, video
     group_add:
-      - 109 # render
-      - 44  # video
-      - 46  # plugdev
+      - "109" # render
+      - "44"  # video
+      - "46"  # plugdev
     shm_size: "256mb"
     build:
       context: .
