@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from pydantic import ValidationError
 from frigate.config import (
+    BirdseyeModeEnum,
     FrigateConfig,
     DetectorTypeEnum,
 )
@@ -108,7 +109,7 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert not runtime_config.cameras["back"].birdseye.enabled
-        assert runtime_config.cameras["back"].birdseye.mode is "motion"
+        assert runtime_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.motion
 
     def test_inherit_birdseye(self):
         config = {
@@ -134,7 +135,7 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].birdseye.enabled
-        assert runtime_config.cameras["back"].birdseye.mode is "continuous"
+        assert runtime_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.continuous
 
     def test_override_tracked_objects(self):
         config = {
