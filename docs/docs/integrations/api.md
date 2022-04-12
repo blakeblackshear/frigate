@@ -110,7 +110,8 @@ Sample response:
   "service": {
     /* Uptime in seconds */
     "uptime": 10,
-    "version": "0.8.0-8883709",
+    "version": "0.10.1-8883709",
+    "latest_version": "0.10.1",
     /* Storage data in MB for important locations */
     "storage": {
       "/media/frigate/clips": {
