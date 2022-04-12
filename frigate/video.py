@@ -203,7 +203,7 @@ class CameraWatchdog(threading.Thread):
         self.config = config
         self.capture_thread = None
         self.ffmpeg_detect_process = None
-        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
+        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
         self.ffmpeg_other_processes = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -219,8 +219,7 @@ class CameraWatchdog(threading.Thread):
             if "detect" in c["roles"]:
                 continue
             logpipe = LogPipe(
-                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}",
-                logging.ERROR,
+                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
             )
             self.ffmpeg_other_processes.append(
                 {
