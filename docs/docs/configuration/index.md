@@ -110,7 +110,7 @@ environment_vars:
   EXAMPLE_VAR: value
 
 # Optional: birdseye configuration
-# NOTE: Can be overridden at the camera level
+# NOTE: Can (enabled, mode) be overridden at the camera level
 birdseye:
   # Optional: Enable birdseye view (default: shown below)
   enabled: True
