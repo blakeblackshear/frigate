@@ -17,7 +17,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN apt-get update \
     && apt-get install -y git curl vim htop
 
-RUN pip3 install pylint black
+COPY requirements-dev.txt /opt/frigate/requirements-dev.txt
+RUN pip3 install -r requirements-dev.txt
 
 # Install Node 16
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
