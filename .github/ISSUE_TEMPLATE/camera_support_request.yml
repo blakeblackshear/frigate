@@ -1,7 +1,7 @@
 name: Camera Support Request
 description: Support for setting up cameras in Frigate
 title: "[Camera Support]: "
-labels: ["support", "triage", "camera"]
+labels: ["support", "triage"]
 assignees: []
 body:
   - type: textarea
