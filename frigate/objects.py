@@ -109,6 +109,7 @@ class ObjectTracker:
             obj["motionless_count"] - self.detect_config.stationary.threshold
             > max_frames
         ):
+            print(f"expired: {obj['motionless_count']}")
             return True
 
     def update(self, id, new_obj):
