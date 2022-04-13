@@ -2,7 +2,6 @@ import json
 import logging
 import multiprocessing as mp
 import os
-import pprint
 import signal
 import sys
 import threading
@@ -308,7 +307,6 @@ class FrigateApp:
         try:
             try:
                 self.init_config()
-                pprint.pprint(self.config)
             except Exception as e:
                 print("*************************************************************")
                 print("*************************************************************")
