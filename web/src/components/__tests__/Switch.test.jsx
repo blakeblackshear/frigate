@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Switch from '../Switch';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('Switch', () => {
   test('renders a hidden checkbox', async () => {

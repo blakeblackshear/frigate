@@ -5,7 +5,7 @@ import JSMpeg from '@cycjimmy/jsmpeg-player';
 
 export default function JSMpegPlayer({ camera, width, height }) {
   const playerRef = useRef();
-  const url = `${baseUrl.replace(/^http/, 'ws')}/live/${camera}`
+  const url = `${baseUrl.replace(/^http/, 'ws')}/live/${camera}`;
 
   useEffect(() => {
     const video = new JSMpeg.VideoElement(
@@ -16,15 +16,15 @@ export default function JSMpegPlayer({ camera, width, height }) {
     );
 
     const fullscreen = () => {
-      if(video.els.canvas.webkitRequestFullScreen) {
+      if (video.els.canvas.webkitRequestFullScreen) {
         video.els.canvas.webkitRequestFullScreen();
       }
       else {
         video.els.canvas.mozRequestFullScreen();
       }
-    }
+    };
 
-    video.els.canvas.addEventListener('click',fullscreen)
+    video.els.canvas.addEventListener('click',fullscreen);
 
     return () => {
       video.destroy();

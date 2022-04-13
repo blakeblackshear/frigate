@@ -43,6 +43,8 @@ class DetectorConfig(FrigateBaseModel):
     device: str = Field(default="usb", title="Device Type")
     num_threads: int = Field(default=3, title="Number of detection threads")
 
+class UIConfig(FrigateBaseModel):
+    use_experimental: bool = Field(default=False, title="Experimental UI")
 
 class MqttConfig(FrigateBaseModel):
     host: str = Field(title="MQTT Host")
@@ -208,6 +210,14 @@ class FilterConfig(FrigateBaseModel):
     )
     max_area: int = Field(
         default=24000000, title="Maximum area of bounding box for object to be counted."
+    )
+    min_ratio: float = Field(
+        default=0,
+        title="Minimum ratio of bounding box's width/height for object to be counted.",
+    )
+    max_ratio: float = Field(
+        default=24000000,
+        title="Maximum ratio of bounding box's width/height for object to be counted.",
     )
     threshold: float = Field(
         default=0.7,
@@ -712,6 +722,7 @@ class FrigateConfig(FrigateBaseModel):
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."
     )
+    ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )

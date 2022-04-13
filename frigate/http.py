@@ -29,7 +29,7 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR, RECORD_DIR
+from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.util import calculate_region
@@ -45,6 +45,7 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
+    plus_api,
 ):
     app = Flask(__name__)
 
@@ -61,6 +62,7 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+    app.plus_api = plus_api
 
     app.register_blueprint(bp)
 
@@ -120,13 +122,138 @@ def event(id):
         return "Event not found", 404
 
 
+@bp.route("/events/<id>/retain", methods=("POST",))
+def set_retain(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    event.retain_indefinitely = True
+    event.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Event " + id + " retained"}), 200
+    )
+
+
+@bp.route("/events/<id>/plus", methods=("POST",))
+def send_to_plus(id):
+    if current_app.plus_api is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "PLUS_API_KEY environment variable is not set",
+                }
+            ),
+            400,
+        )
+
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+        )
+
+    if event.plus_id:
+        return make_response(
+            jsonify({"success": False, "message": "Already submitted to plus"}), 400
+        )
+
+    # load clean.png
+    try:
+        filename = f"{event.camera}-{event.id}-clean.png"
+        image = cv2.imread(os.path.join(CLIPS_DIR, filename))
+    except Exception:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for event"}
+            ),
+            400,
+        )
+
+    try:
+        plus_id = current_app.plus_api.upload_image(image, event.camera)
+    except Exception as ex:
+        return make_response(
+            jsonify({"success": False, "message": str(ex)}),
+            400,
+        )
+
+    # store image id in the database
+    event.plus_id = plus_id
+    event.save()
+
+    return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
+
+
+@bp.route("/events/<id>/retain", methods=("DELETE",))
+def delete_retain(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    event.retain_indefinitely = False
+    event.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Event " + id + " un-retained"}), 200
+    )
+
+
+@bp.route("/events/<id>/sub_label", methods=("POST",))
+def set_sub_label(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    if request.json:
+        new_sub_label = request.json.get("subLabel")
+    else:
+        new_sub_label = None
+
+    if new_sub_label and len(new_sub_label) > 20:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": new_sub_label
+                    + " exceeds the 20 character limit for sub_label",
+                }
+            ),
+            400,
+        )
+
+    event.sub_label = new_sub_label
+    event.save()
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Event " + id + " sub label set to " + new_sub_label,
+            }
+        ),
+        200,
+    )
+
+
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
     try:
         event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
     media_name = f"{event.camera}-{event.id}"
@@ -141,7 +268,7 @@ def delete_event(id):
 
     event.delete_instance()
     return make_response(
-        jsonify({"success": True, "message": "Event" + id + " deleted"}), 200
+        jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
     )
 
 
@@ -149,8 +276,11 @@ def delete_event(id):
 def event_thumbnail(id):
     format = request.args.get("format", "ios")
     thumbnail_bytes = None
+    event_complete = False
     try:
         event = Event.get(Event.id == id)
+        if not event.end_time is None:
+            event_complete = True
         thumbnail_bytes = base64.b64decode(event.thumbnail)
     except DoesNotExist:
         # see if the object is currently being tracked
@@ -185,7 +315,41 @@ def event_thumbnail(id):
 
     response = make_response(thumbnail_bytes)
     response.headers["Content-Type"] = "image/jpeg"
+    if event_complete:
+        response.headers["Cache-Control"] = "private, max-age=31536000"
     return response
+
+
+@bp.route("/<camera_name>/<label>/best.jpg")
+@bp.route("/<camera_name>/<label>/thumbnail.jpg")
+def label_thumbnail(camera_name, label):
+    if label == "any":
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+
+        return event_thumbnail(event.id)
+    except DoesNotExist:
+        frame = np.zeros((175, 175, 3), np.uint8)
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
 
 
 @bp.route("/events/<id>/snapshot.jpg")
@@ -233,6 +397,36 @@ def event_snapshot(id):
     return response
 
 
+@bp.route("/<camera_name>/<label>/snapshot.jpg")
+def label_snapshot(camera_name, label):
+    if label == "any":
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select()
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+        return event_snapshot(event.id)
+    except DoesNotExist:
+        frame = np.zeros((720, 1280, 3), np.uint8)
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        return response
+
+
 @bp.route("/events/<id>/clip.mp4")
 def event_clip(id):
     download = request.args.get("download", type=bool)
@@ -271,9 +465,9 @@ def event_clip(id):
 @bp.route("/events")
 def events():
     limit = request.args.get("limit", 100)
-    camera = request.args.get("camera")
-    label = request.args.get("label")
-    zone = request.args.get("zone")
+    camera = request.args.get("camera", "all")
+    label = request.args.get("label", "all")
+    zone = request.args.get("zone", "all")
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
     has_clip = request.args.get("has_clip", type=int)
@@ -283,20 +477,20 @@ def events():
     clauses = []
     excluded_fields = []
 
-    if camera:
+    if camera != "all":
         clauses.append((Event.camera == camera))
 
-    if label:
+    if label != "all":
         clauses.append((Event.label == label))
 
-    if zone:
+    if zone != "all":
         clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
 
     if after:
-        clauses.append((Event.start_time >= after))
+        clauses.append((Event.start_time > after))
 
     if before:
-        clauses.append((Event.start_time <= before))
+        clauses.append((Event.start_time < before))
 
     if not has_clip is None:
         clauses.append((Event.has_clip == has_clip))
@@ -331,6 +525,8 @@ def config():
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 
+    config["plus"] = {"enabled": PLUS_ENV_VAR in os.environ}
+
     return jsonify(config)
 
 
@@ -350,48 +546,6 @@ def version():
 def stats():
     stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
-
-
-@bp.route("/<camera_name>/<label>/best.jpg")
-def best(camera_name, label):
-    if camera_name in current_app.frigate_config.cameras:
-        best_object = current_app.detected_frames_processor.get_best(camera_name, label)
-        best_frame = best_object.get("frame")
-        if best_frame is None:
-            best_frame = np.zeros((720, 1280, 3), np.uint8)
-        else:
-            best_frame = cv2.cvtColor(best_frame, cv2.COLOR_YUV2BGR_I420)
-
-        crop = bool(request.args.get("crop", 0, type=int))
-        if crop:
-            box_size = 300
-            box = best_object.get("box", (0, 0, box_size, box_size))
-            region = calculate_region(
-                best_frame.shape,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                box_size,
-                multiplier=1.1,
-            )
-            best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
-
-        height = int(request.args.get("h", str(best_frame.shape[0])))
-        width = int(height * best_frame.shape[1] / best_frame.shape[0])
-        resize_quality = request.args.get("quality", default=70, type=int)
-
-        best_frame = cv2.resize(
-            best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
-        )
-        ret, jpg = cv2.imencode(
-            ".jpg", best_frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
-        )
-        response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpeg"
-        return response
-    else:
-        return "Camera named {} not found".format(camera_name), 404
 
 
 @bp.route("/<camera_name>")
@@ -614,7 +768,7 @@ def recording_clip(camera, start_ts, end_ts):
         "-safe",
         "0",
         "-i",
-        "-",
+        "/dev/stdin",
         "-c",
         "copy",
         "-movflags",

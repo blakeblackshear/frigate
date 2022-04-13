@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Heading from '../Heading';
-import { render, screen } from '@testing-library/preact';
+import { render, screen } from 'testing-library';
 
 describe('Heading', () => {
   test('renders content with default size', async () => {

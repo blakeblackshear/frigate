@@ -18,10 +18,12 @@ Causes frigate to exit. Docker should be configured to automatically restart the
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
+`all` can be used as the object_name for the count of all objects for the camera.
 
 ### `frigate/<zone_name>/<object_name>`
 
 Publishes the count of objects for the zone for use as a sensor in Home Assistant.
+`all` can be used as the object_name for the count of all objects for the zone.
 
 ### `frigate/<camera_name>/<object_name>/snapshot`
 
@@ -50,6 +52,7 @@ Message published for each changed event. The first message is published when th
     "score": 0.7890625,
     "box": [424, 500, 536, 712],
     "area": 23744,
+    "ratio": 2.113207,
     "region": [264, 450, 667, 853],
     "current_zones": ["driveway"],
     "entered_zones": ["yard", "driveway"],
@@ -73,6 +76,7 @@ Message published for each changed event. The first message is published when th
     "score": 0.87890625,
     "box": [432, 496, 544, 854],
     "area": 40096,
+    "ratio": 1.251397,
     "region": [218, 440, 693, 915],
     "current_zones": ["yard", "driveway"],
     "entered_zones": ["yard", "driveway"],

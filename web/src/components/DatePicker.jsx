@@ -66,7 +66,6 @@ export default function DatePicker({
   onBlur,
   onChangeText,
   onFocus,
-  readonly,
   trailingIcon: TrailingIcon,
   value: propValue = '',
   ...props

@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import * as Context from '../../context';
 import NavigationDrawer, { Destination } from '../NavigationDrawer';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('NavigationDrawer', () => {
   let useDrawer, setShowDrawer;
@@ -49,6 +49,7 @@ describe('Destination', () => {
   });
 
   test('dismisses the drawer moments after being clicked', async () => {
+    jest.useFakeTimers();
     render(
       <NavigationDrawer>
         <Destination href="/tacos" text="Tacos" />

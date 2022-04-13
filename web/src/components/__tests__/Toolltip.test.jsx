@@ -1,6 +1,6 @@
 import { h, createRef } from 'preact';
 import Tooltip from '../Tooltip';
-import { render, screen } from '@testing-library/preact';
+import { render, screen } from 'testing-library';
 
 describe('Tooltip', () => {
   test('renders in a relative position', async () => {

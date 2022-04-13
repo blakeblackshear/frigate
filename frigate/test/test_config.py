@@ -1268,6 +1268,36 @@ class TestConfig(unittest.TestCase):
             ValidationError, lambda: frigate_config.runtime_config.cameras
         )
 
+    def test_object_filter_ratios_work(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {
+                "track": ["person", "dog"],
+                "filters": {"dog": {"min_ratio": 0.2, "max_ratio": 10.1}},
+            },
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert "dog" in runtime_config.cameras["back"].objects.filters
+        assert runtime_config.cameras["back"].objects.filters["dog"].min_ratio == 0.2
+        assert runtime_config.cameras["back"].objects.filters["dog"].max_ratio == 10.1
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

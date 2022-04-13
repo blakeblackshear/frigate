@@ -3,7 +3,11 @@ id: false_positives
 title: Reducing false positives
 ---
 
-Tune your object filters to adjust false positives: `min_area`, `max_area`, `min_score`, `threshold`.
+Tune your object filters to adjust false positives: `min_area`, `max_area`, `min_ratio`, `max_ratio`, `min_score`, `threshold`.
+
+The `min_area` and `max_area` values are compared against the area (number of pixels) from a given detected object. If the area is outside this range, the object will be ignored as a false positive. This allows objects that must be too small or too large to be ignored.
+
+Similarly, the `min_ratio` and `max_ratio` values are compared against a given detected object's width/height ratio (in pixels). If the ratio is outside this range, the object will be ignored as a false positive. This allows objects that are proportionally too short-and-wide (higher ratio) or too tall-and-narrow (smaller ratio) to be ignored.
 
 For object filters in your configuration, any single detection below `min_score` will be ignored as a false positive. `threshold` is based on the median of the history of scores (padded to 3 values) for a tracked object. Consider the following frames when `min_score` is set to 0.6 and threshold is set to 0.85:
 

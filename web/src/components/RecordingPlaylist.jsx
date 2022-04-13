@@ -7,7 +7,7 @@ import {
   parseISO,
   startOfHour,
   differenceInMinutes,
-  differenceInHours,
+  differenceInHours
 } from 'date-fns';
 import ArrowDropdown from '../icons/ArrowDropdown';
 import ArrowDropup from '../icons/ArrowDropup';
@@ -16,7 +16,7 @@ import Menu from '../icons/Menu';
 import MenuOpen from '../icons/MenuOpen';
 import { useApiHost } from '../api';
 
-export default function RecordingPlaylist({ camera, recordings, selectedDate, selectedHour }) {
+export default function RecordingPlaylist({ camera, recordings, selectedDate }) {
   const [active, setActive] = useState(true);
   const toggle = () => setActive(!active);
 
@@ -33,7 +33,7 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
           .slice()
           .reverse()
           .map((item, i) => (
-            <div className="mb-2 w-full">
+            <div key={i} className="mb-2 w-full">
               <div
                 className={`flex w-full text-md text-white px-8 py-2 mb-2 ${
                   i === 0 ? 'border-t border-white border-opacity-50' : ''
@@ -50,7 +50,7 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate, se
                 .slice()
                 .reverse()
                 .map((event) => (
-                  <EventCard camera={camera} event={event} delay={item.delay} />
+                  <EventCard key={event.id} camera={camera} event={event} delay={item.delay} />
                 ))}
             </div>
           ))}
@@ -102,7 +102,7 @@ export function EventCard({ camera, event, delay }) {
     const end = fromUnixTime(event.end_time);
     const hours = differenceInHours(end, start);
     const minutes = differenceInMinutes(end, start) - hours * 60;
-    const seconds = differenceInSeconds(end, start) - hours * 60 - minutes * 60;
+    const seconds = differenceInSeconds(end, start) - hours * 60 * 60 - minutes * 60;
     duration = '';
     if (hours) duration += `${hours}h `;
     if (minutes) duration += `${minutes}m `;

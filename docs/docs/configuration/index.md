@@ -198,6 +198,10 @@ objects:
       min_area: 5000
       # Optional: maximum width*height of the bounding box for the detected object (default: 24000000)
       max_area: 100000
+      # Optional: minimum width/height of the bounding box for the detected object (default: 0)
+      min_ratio: 0.5
+      # Optional: maximum width/height of the bounding box for the detected object (default: 24000000)
+      max_ratio: 2.0
       # Optional: minimum score for the object to initiate tracking (default: shown below)
       min_score: 0.5
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
