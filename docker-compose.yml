@@ -11,10 +11,11 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - .:/lab/frigate:cached
-      - ./config/config.yml:/config/config.yml:ro
+      - ./config/config.yml:/config/config.yml:rw
       - ./debug:/media/frigate
-      - /dev/bus/usb:/dev/bus/usb
-      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+      - ./frigate:/opt/frigate/frigate
+      #- /dev/bus/usb:/dev/bus/usb
+      #- /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     ports:
       - "1935:1935"
       - "5000:5000"

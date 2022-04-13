@@ -2,6 +2,7 @@ import json
 import logging
 import multiprocessing as mp
 import os
+import pprint
 import signal
 import sys
 import threading
@@ -158,8 +159,7 @@ class FrigateApp:
         self.mqtt_relay.start()
 
     def start_detectors(self):
-        model_path = self.config.model.path
-        model_shape = (self.config.model.height, self.config.model.width)
+
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
 
@@ -188,8 +188,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
-                    model_path,
-                    model_shape,
+                    self.config.model,
                     "cpu",
                     detector.num_threads,
                 )
@@ -198,8 +197,7 @@ class FrigateApp:
                     name,
                     self.detection_queue,
                     self.detection_out_events,
-                    model_path,
-                    model_shape,
+                    self.config.model,
                     detector.device,
                     detector.num_threads,
                 )
@@ -310,6 +308,7 @@ class FrigateApp:
         try:
             try:
                 self.init_config()
+                pprint.pprint(self.config)
             except Exception as e:
                 print("*************************************************************")
                 print("*************************************************************")

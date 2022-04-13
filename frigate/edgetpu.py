@@ -14,8 +14,31 @@ from setproctitle import setproctitle
 from tflite_runtime.interpreter import load_delegate
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
+from frigate.yolov5.edgetpumodel import EdgeTPUModel
 
 logger = logging.getLogger(__name__)
+
+
+def load_labels(path, encoding='utf-8'):
+    """Loads labels from file (with or without index numbers).
+    Args:
+        path: path to label file.
+        encoding: label file encoding.
+    Returns:
+        Dictionary mapping indices to labels.
+    """
+    logger.warn(f"Loaded labels from {path}")
+    with open(path, 'r', encoding=encoding) as f:
+        lines = f.readlines()
+
+        if not lines:
+            return {}
+
+        if lines[0].split(' ', maxsplit=1)[0].isdigit():
+            pairs = [line.split(' ', maxsplit=1) for line in lines]
+            return {int(index): label.strip() for index, label in pairs}
+        else:
+            return {index: line.strip() for index, line in enumerate(lines)}
 
 
 class ObjectDetector(ABC):
@@ -25,13 +48,22 @@ class ObjectDetector(ABC):
 
 
 class LocalObjectDetector(ObjectDetector):
-    def __init__(self, tf_device=None, model_path=None, num_threads=3, labels=None):
+    def __init__(self, model_config, tf_device=None, num_threads=3):
         self.fps = EventsPerSecond()
-        if labels is None:
-            self.labels = {}
-        else:
-            self.labels = load_labels(labels)
+        if model_config.labelmap_path:
+            self.labels = load_labels(model_config.labelmap_path)
+        self.model_config = model_config
 
+        if self.model_config.type == 'yolov5':
+            model = EdgeTPUModel(model_config.path, None)
+            input_size = model.get_image_size()
+            x = (255 * np.random.random((3, *input_size))).astype(np.uint8)
+            model.forward(x)
+            self.yolov5Model = model
+        if self.model_config.type == 'yolov5_pytorch':
+            from frigate.yolov5_pytorch import ObjectDetection as Yolov5ObjectDetector
+            self.yolov5ObjectDetector = Yolov5ObjectDetector()
+            
         device_config = {"device": "usb"}
         if not tf_device is None:
             device_config = {"device": tf_device}
@@ -44,7 +76,7 @@ class LocalObjectDetector(ObjectDetector):
                 edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
                 logger.info("TPU found")
                 self.interpreter = tflite.Interpreter(
-                    model_path=model_path or "/edgetpu_model.tflite",
+                    model_path=model_config.path or "/edgetpu_model.tflite",
                     experimental_delegates=[edge_tpu_delegate],
                 )
             except ValueError:
@@ -57,13 +89,18 @@ class LocalObjectDetector(ObjectDetector):
                 "CPU detectors are not recommended and should only be used for testing or for trial purposes."
             )
             self.interpreter = tflite.Interpreter(
-                model_path=model_path or "/cpu_model.tflite", num_threads=num_threads
+                model_path=model_config.path or "/cpu_model.tflite", num_threads=num_threads
             )
 
         self.interpreter.allocate_tensors()
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
+
+
+        if model_config.anchors != "":
+            anchors = [float(x) for x in model_config.anchors.split(',')]
+            self.anchors = np.array(anchors).reshape(-1, 2)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -79,7 +116,104 @@ class LocalObjectDetector(ObjectDetector):
         self.fps.update()
         return detections
 
+    def sigmoid(self, x):
+        return 1. / (1 + np.exp(-x))
+
     def detect_raw(self, tensor_input):
+        if self.model_config.type == "ssd":
+            raw_detections = self.detect_ssd(tensor_input)
+        elif self.model_config.type == "yolov3":
+            raw_detections = self.detect_yolov3(tensor_input)
+        elif self.model_config.type == "yolov5":
+            raw_detections = self.detect_yolov5(tensor_input)
+        elif self.model_config.type == "yolov5_pytorch":
+            raw_detections = self.detect_yolov5_pytorch(tensor_input)
+        else:
+            logger.error(f"Unsupported model type {self.model_config.type}")
+            raw_detections = []
+        return raw_detections
+
+
+    def get_interpreter_details(self):
+        # Get input and output tensor details
+        input_details = self.interpreter.get_input_details()
+        output_details = self.interpreter.get_output_details()
+        input_shape = input_details[0]["shape"]
+        return input_details, output_details, input_shape
+
+    # from util.py in https://github.com/guichristmann/edge-tpu-tiny-yolo
+    def featuresToBoxes(self, outputs, anchors, n_classes, net_input_shape):
+        grid_shape = outputs.shape[1:3]
+        n_anchors = len(anchors)
+
+        # Numpy screwaround to get the boxes in reasonable amount of time
+        grid_y = np.tile(np.arange(grid_shape[0]).reshape(-1, 1), grid_shape[0]).reshape(1, grid_shape[0], grid_shape[0], 1).astype(np.float32)
+        grid_x = grid_y.copy().T.reshape(1, grid_shape[0], grid_shape[1], 1).astype(np.float32)
+        outputs = outputs.reshape(1, grid_shape[0], grid_shape[1], n_anchors, -1)
+        _anchors = anchors.reshape(1, 1, 3, 2).astype(np.float32)
+
+        # Get box parameters from network output and apply transformations
+        bx = (self.sigmoid(outputs[..., 0]) + grid_x) / grid_shape[0] 
+        by = (self.sigmoid(outputs[..., 1]) + grid_y) / grid_shape[1]
+        # Should these be inverted?
+        bw = np.multiply(_anchors[..., 0] / net_input_shape[1], np.exp(outputs[..., 2]))
+        bh = np.multiply(_anchors[..., 1] / net_input_shape[2], np.exp(outputs[..., 3]))
+        
+        # Get the scores 
+        scores = self.sigmoid(np.expand_dims(outputs[..., 4], -1)) * \
+                self.sigmoid(outputs[..., 5:])
+        scores = scores.reshape(-1, n_classes)
+
+        # TODO: some of these are probably not needed but I don't understand numpy magic well enough
+        bx = bx.flatten()
+        by = (by.flatten()) * 1
+        bw = bw.flatten()
+        bh = bh.flatten() * 1
+        half_bw = bw / 2.
+        half_bh = bh / 2.
+
+        tl_x = np.multiply(bx - half_bw, 1)
+        tl_y = np.multiply(by - half_bh, 1) 
+        br_x = np.multiply(bx + half_bw, 1)
+        br_y = np.multiply(by + half_bh, 1)
+
+        # Get indices of boxes with score higher than threshold
+        indices = np.argwhere(scores >= 0.5)
+        selected_boxes = []
+        selected_scores = []
+        for i in indices:
+            i = tuple(i)
+            selected_boxes.append( ((tl_x[i[0]], tl_y[i[0]]), (br_x[i[0]], br_y[i[0]])) )
+            selected_scores.append(scores[i])
+
+        selected_boxes = np.array(selected_boxes)
+        selected_scores = np.array(selected_scores)
+        selected_classes = indices[:, 1]
+
+        return selected_boxes, selected_scores, selected_classes
+    
+    def detect_yolov5(self, tensor_input):
+        tensor_input = np.squeeze(tensor_input, axis=0)
+        results = self.yolov5Model.forward(tensor_input)
+        print(self.yolov5Model.get_last_inference_time())
+        det = results[0]
+
+        detections = np.zeros((20, 6), np.float32)
+        i = 0
+        for *xyxy, conf, cls in reversed(det):
+            detections[i] = [
+                int(cls)+1,
+                float(conf),
+                xyxy[1],
+                xyxy[0],
+                xyxy[3],
+                xyxy[2],
+            ]
+            i += 1
+
+        return detections
+        
+    def detect_ssd(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
 
@@ -106,6 +240,69 @@ class LocalObjectDetector(ObjectDetector):
 
         return detections
 
+    def detect_yolov5_pytorch(self, tensor_input):
+        tensor_input = np.squeeze(tensor_input, axis=0)
+        results = self.yolov5ObjectDetector.score_frame(tensor_input)
+        labels, cord = results
+        n = len(labels)
+        detections = np.zeros((20, 6), np.float32)
+        if n > 0:
+            print(f"Total Targets: {n}")
+            print(f"Labels: {set([self.yolov5ObjectDetector.class_to_label(label) for label in labels])}")
+        for i in range(n):
+            if i < 20:
+                row = cord[i]
+                score = float(row[4])
+                if score < 0.4:
+                    break
+                x1, y1, x2, y2 = row[0], row[1], row[2], row[3]
+                label = self.yolov5ObjectDetector.class_to_label(labels[i])
+                #detections[i] = [labels[i]+1, score, x1, y1, x2, y2]
+                detections[i] = [labels[i]+1, score, y1, x1, y2, x2]
+                print(detections[i])
+
+        return detections
+
+
+    def detect_yolov3(self, tensor_input):
+        input_details, output_details, net_input_shape = \
+            self.get_interpreter_details()
+
+        self.interpreter.set_tensor(self.tensor_input_details[0]['index'], tensor_input)
+        self.interpreter.invoke()
+
+        # for yolo, it's a little diffrent
+        out1 = self.interpreter.get_tensor(self.tensor_output_details[0]['index'])
+        out2 = self.interpreter.get_tensor(self.tensor_output_details[1]['index'])
+
+        # Dequantize output (tpu only)
+        o1_scale, o1_zero = self.tensor_output_details[0]['quantization']
+        out1 = (out1.astype(np.float32) - o1_zero) * o1_scale
+        o2_scale, o2_zero = self.tensor_output_details[1]['quantization']
+        out2 = (out2.astype(np.float32) - o2_zero) * o2_scale
+
+        num_classes = len(self.labels)
+        _boxes1, _scores1, _classes1 = self.featuresToBoxes(out1, self.anchors[[3, 4, 5]], len(self.labels), net_input_shape)
+        _boxes2, _scores2, _classes2 = self.featuresToBoxes(out2, self.anchors[[1, 2, 3]],  len(self.labels), net_input_shape)
+
+        if _boxes1.shape[0] == 0:
+            _boxes1 = np.empty([0, 2, 2])
+            _scores1 = np.empty([0,])
+            _classes1 = np.empty([0,])
+        if _boxes2.shape[0] == 0:
+            _boxes2 = np.empty([0, 2, 2])
+            _scores2 = np.empty([0,])
+            _classes2 = np.empty([0,])
+        boxes = np.append(_boxes1, _boxes2, axis=0)
+        scores = np.append(_scores1, _scores2, axis=0)
+        label_codes = np.append(_classes1, _classes2, axis=0)
+
+        detections = np.zeros((20,6), np.float32)
+        for i, score in enumerate(scores):
+            if i < 20:
+                detections[i] = [label_codes[i], score, boxes[i][0][1], boxes[i][0][0], boxes[i][1][1], boxes[i][1][0]]
+        
+        return detections
 
 def run_detector(
     name: str,
@@ -113,8 +310,7 @@ def run_detector(
     out_events: Dict[str, mp.Event],
     avg_speed,
     start,
-    model_path,
-    model_shape,
+    model_config,
     tf_device,
     num_threads,
 ):
@@ -134,7 +330,7 @@ def run_detector(
 
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(
-        tf_device=tf_device, model_path=model_path, num_threads=num_threads
+        model_config, tf_device=tf_device, num_threads=num_threads
     )
 
     outputs = {}
@@ -149,7 +345,7 @@ def run_detector(
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
-            connection_id, (1, model_shape[0], model_shape[1], 3)
+            connection_id, (1, model_config.height, model_config.width, 3)
         )
 
         if input_frame is None:
@@ -172,8 +368,7 @@ class EdgeTPUProcess:
         name,
         detection_queue,
         out_events,
-        model_path,
-        model_shape,
+        model_config,
         tf_device=None,
         num_threads=3,
     ):
@@ -183,10 +378,11 @@ class EdgeTPUProcess:
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
         self.detect_process = None
-        self.model_path = model_path
-        self.model_shape = model_shape
+        self.model_path = model_config.path
+        self.model_shape = (model_config.height, model_config.width)
         self.tf_device = tf_device
         self.num_threads = num_threads
+        self.model_config = model_config
         self.start_or_restart()
 
     def stop(self):
@@ -211,8 +407,7 @@ class EdgeTPUProcess:
                 self.out_events,
                 self.avg_inference_speed,
                 self.detection_start,
-                self.model_path,
-                self.model_shape,
+                self.model_config,
                 self.tf_device,
                 self.num_threads,
             ),
