@@ -14,31 +14,9 @@ from setproctitle import setproctitle
 from tflite_runtime.interpreter import load_delegate
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
-from frigate.yolov5.edgetpumodel import EdgeTPUModel
+from frigate.yolov5.yolov5edgetpumodel import Yolov5EdgeTPUModel
 
 logger = logging.getLogger(__name__)
-
-
-def load_labels(path, encoding='utf-8'):
-    """Loads labels from file (with or without index numbers).
-    Args:
-        path: path to label file.
-        encoding: label file encoding.
-    Returns:
-        Dictionary mapping indices to labels.
-    """
-    logger.warn(f"Loaded labels from {path}")
-    with open(path, 'r', encoding=encoding) as f:
-        lines = f.readlines()
-
-        if not lines:
-            return {}
-
-        if lines[0].split(' ', maxsplit=1)[0].isdigit():
-            pairs = [line.split(' ', maxsplit=1) for line in lines]
-            return {int(index): label.strip() for index, label in pairs}
-        else:
-            return {index: line.strip() for index, line in enumerate(lines)}
 
 
 class ObjectDetector(ABC):
@@ -54,16 +32,6 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(model_config.labelmap_path)
         self.model_config = model_config
 
-        if self.model_config.type == 'yolov5':
-            model = EdgeTPUModel(model_config.path, None)
-            input_size = model.get_image_size()
-            x = (255 * np.random.random((3, *input_size))).astype(np.uint8)
-            model.forward(x)
-            self.yolov5Model = model
-        if self.model_config.type == 'yolov5_pytorch':
-            from frigate.yolov5_pytorch import ObjectDetection as Yolov5ObjectDetector
-            self.yolov5ObjectDetector = Yolov5ObjectDetector()
-            
         device_config = {"device": "usb"}
         if not tf_device is None:
             device_config = {"device": tf_device}
@@ -97,6 +65,16 @@ class LocalObjectDetector(ObjectDetector):
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
 
+        if self.model_config.type == 'yolov5':
+            cpu = True
+            if tf_device != "cpu":
+                cpu = False
+            model = Yolov5EdgeTPUModel(model_config.path, cpu)
+            input_size = model.get_image_size() # we should probably use model_config.(height,width)
+            x = (255 * np.random.random((3, *input_size))).astype(np.uint8)
+            model.forward(x)
+            self.yolov5Model = model
+
 
         if model_config.anchors != "":
             anchors = [float(x) for x in model_config.anchors.split(',')]
@@ -119,6 +97,7 @@ class LocalObjectDetector(ObjectDetector):
     def sigmoid(self, x):
         return 1. / (1 + np.exp(-x))
 
+
     def detect_raw(self, tensor_input):
         if self.model_config.type == "ssd":
             raw_detections = self.detect_ssd(tensor_input)
@@ -126,8 +105,6 @@ class LocalObjectDetector(ObjectDetector):
             raw_detections = self.detect_yolov3(tensor_input)
         elif self.model_config.type == "yolov5":
             raw_detections = self.detect_yolov5(tensor_input)
-        elif self.model_config.type == "yolov5_pytorch":
-            raw_detections = self.detect_yolov5_pytorch(tensor_input)
         else:
             logger.error(f"Unsupported model type {self.model_config.type}")
             raw_detections = []
@@ -195,14 +172,12 @@ class LocalObjectDetector(ObjectDetector):
     def detect_yolov5(self, tensor_input):
         tensor_input = np.squeeze(tensor_input, axis=0)
         results = self.yolov5Model.forward(tensor_input)
-        print(self.yolov5Model.get_last_inference_time())
         det = results[0]
-
         detections = np.zeros((20, 6), np.float32)
         i = 0
         for *xyxy, conf, cls in reversed(det):
             detections[i] = [
-                int(cls)+1,
+                int(cls),
                 float(conf),
                 xyxy[1],
                 xyxy[0],
@@ -240,30 +215,6 @@ class LocalObjectDetector(ObjectDetector):
 
         return detections
 
-    def detect_yolov5_pytorch(self, tensor_input):
-        tensor_input = np.squeeze(tensor_input, axis=0)
-        results = self.yolov5ObjectDetector.score_frame(tensor_input)
-        labels, cord = results
-        n = len(labels)
-        detections = np.zeros((20, 6), np.float32)
-        if n > 0:
-            print(f"Total Targets: {n}")
-            print(f"Labels: {set([self.yolov5ObjectDetector.class_to_label(label) for label in labels])}")
-        for i in range(n):
-            if i < 20:
-                row = cord[i]
-                score = float(row[4])
-                if score < 0.4:
-                    break
-                x1, y1, x2, y2 = row[0], row[1], row[2], row[3]
-                label = self.yolov5ObjectDetector.class_to_label(labels[i])
-                #detections[i] = [labels[i]+1, score, x1, y1, x2, y2]
-                detections[i] = [labels[i]+1, score, y1, x1, y2, x2]
-                print(detections[i])
-
-        return detections
-
-
     def detect_yolov3(self, tensor_input):
         input_details, output_details, net_input_shape = \
             self.get_interpreter_details()
@@ -282,8 +233,8 @@ class LocalObjectDetector(ObjectDetector):
         out2 = (out2.astype(np.float32) - o2_zero) * o2_scale
 
         num_classes = len(self.labels)
-        _boxes1, _scores1, _classes1 = self.featuresToBoxes(out1, self.anchors[[3, 4, 5]], len(self.labels), net_input_shape)
-        _boxes2, _scores2, _classes2 = self.featuresToBoxes(out2, self.anchors[[1, 2, 3]],  len(self.labels), net_input_shape)
+        _boxes1, _scores1, _classes1 = self.featuresToBoxes(out1, self.anchors[[3, 4, 5]], num_classes, net_input_shape)
+        _boxes2, _scores2, _classes2 = self.featuresToBoxes(out2, self.anchors[[1, 2, 3]],  num_classes, net_input_shape)
 
         if _boxes1.shape[0] == 0:
             _boxes1 = np.empty([0, 2, 2])
@@ -303,6 +254,7 @@ class LocalObjectDetector(ObjectDetector):
                 detections[i] = [label_codes[i], score, boxes[i][0][1], boxes[i][0][0], boxes[i][1][1], boxes[i][1][0]]
         
         return detections
+
 
 def run_detector(
     name: str,

@@ -653,7 +653,7 @@ class DatabaseConfig(FrigateBaseModel):
 
 class ModelConfig(FrigateBaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")
-    type: str = Field(default="ssd", title="Model type")
+    type: str = Field(default="ssd", title="Model type ssd, yolov3 or yolov5")
     anchors: Optional[str] = Field(default="", title="Optional but required for yolo3")
     labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
     width: int = Field(default=320, title="Object detection model input width.")
