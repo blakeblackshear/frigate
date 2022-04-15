@@ -3,15 +3,27 @@ import LinkedLogo from './components/LinkedLogo';
 import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
+import { useMemo } from 'preact/hooks'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
 export default function Sidebar() {
   const { data: config } = useSWR('config');
+
+  const sortedCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.cameras)
+      .filter(([_, conf]) => conf.ui.dashboard)
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
+
   if (!config) {
     return null;
   }
-  const { cameras, birdseye } = config;
+  const { birdseye } = config;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -19,31 +31,14 @@ export default function Sidebar() {
       <Match path="/cameras/:camera/:other?">
         {({ matches }) =>
           matches ? (
-            <Fragment>
-              <Separator />
-              {Object.keys(cameras).map((camera) => (
-                <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
-              ))}
-              <Separator />
-            </Fragment>
+            <CameraSection sortedCameras={sortedCameras} />
           ) : null
         }
       </Match>
       <Match path="/recording/:camera/:date?/:hour?/:seconds?">
         {({ matches }) =>
           matches ? (
-            <Fragment>
-              <Separator />
-              {Object.keys(cameras).map((camera) => (
-                <Destination
-                  key={camera}
-                  path={`/recording/${camera}/:date?/:hour?/:seconds?`}
-                  href={`/recording/${camera}`}
-                  text={camera}
-                />
-              ))}
-              <Separator />
-            </Fragment>
+            <RecordingSection sortedCameras={sortedCameras} />
           ) : null
         }
       </Match>
@@ -61,6 +56,39 @@ export default function Sidebar() {
       <Destination className="self-end" href="https://docs.frigate.video" text="Documentation" />
       <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
     </NavigationDrawer>
+  );
+}
+
+function CameraSection({ sortedCameras }) {
+
+  return (
+    <Fragment>
+      <Separator />
+      {sortedCameras.map(([camera]) => (
+        <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
+      ))}
+      <Separator />
+    </Fragment>
+  );
+}
+
+function RecordingSection({ sortedCameras }) {
+
+  return (
+    <Fragment>
+      <Separator />
+      {sortedCameras.map(([camera, _]) => {
+        return (
+          <Destination
+            key={camera}
+            path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+            href={`/recording/${camera}`}
+            text={camera}
+          />
+        );
+      })}
+      <Separator />
+    </Fragment>
   );
 }
 
