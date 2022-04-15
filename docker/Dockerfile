@@ -42,7 +42,7 @@ COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY requirements-wheels.txt /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt 
+RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
 # Frigate Container
 FROM debian:11-slim
