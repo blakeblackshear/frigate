@@ -1,5 +1,5 @@
-name: Support Request
-description: Support for Frigate setup or configuration
+name: General Support Request
+description: General support request for Frigate
 title: "[Support]: "
 labels: ["support", "triage"]
 assignees: []
