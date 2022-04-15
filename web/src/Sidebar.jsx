@@ -17,7 +17,7 @@ export default function Sidebar() {
 
     return Object.entries(config.cameras)
       .filter(([_, conf]) => conf.ui.dashboard)
-      .sort(([_, aConf], [__, bConf]) => aConf.ui.order === bConf.ui.order ? 0 : (aConf.ui.order > bConf.ui.order ? 1 : -1));
+      .sort(([_, aConf], [__, bConf]) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
   if (!config) {
