@@ -324,6 +324,13 @@ class BirdseyeConfig(FrigateBaseModel):
     )
 
 
+class BirdseyeCameraConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
+    mode: BirdseyeModeEnum = Field(
+        default=BirdseyeModeEnum.objects, title="Tracking mode for camera."
+    )
+
+
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
 FFMPEG_INPUT_ARGS_DEFAULT = [
     "-avoid_negative_ts",
@@ -538,6 +545,9 @@ class CameraConfig(FrigateBaseModel):
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
+    )
+    birdseye: BirdseyeCameraConfig = Field(
+        default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
@@ -775,6 +785,7 @@ class FrigateConfig(FrigateBaseModel):
         # Global config to propegate down to camera level
         global_config = config.dict(
             include={
+                "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
                 "live": ...,
