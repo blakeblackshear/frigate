@@ -460,7 +460,6 @@ def process_frames(
     objects_to_track: List[str],
     object_filters,
     detection_enabled: mp.Value,
-    improve_contrast_enabled: mp.Value,
     stop_event,
     exit_on_empty: bool = False,
 ):
