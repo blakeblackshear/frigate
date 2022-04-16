@@ -362,12 +362,13 @@ def track_camera(
 
     frame_queue = process_info["frame_queue"]
     detection_enabled = process_info["detection_enabled"]
+    improve_contrast_enabled = process_info["improve_contrast_enabled"]
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
 
-    motion_detector = MotionDetector(frame_shape, config.motion)
+    motion_detector = MotionDetector(frame_shape, config.motion, improve_contrast_enabled)
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_shape
     )

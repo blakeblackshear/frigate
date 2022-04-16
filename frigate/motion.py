@@ -5,7 +5,7 @@ from frigate.config import MotionConfig
 
 
 class MotionDetector:
-    def __init__(self, frame_shape, config: MotionConfig):
+    def __init__(self, frame_shape, config: MotionConfig, improve_contrast_enabled):
         self.config = config
         self.frame_shape = frame_shape
         self.resize_factor = frame_shape[0] / config.frame_height
@@ -24,6 +24,7 @@ class MotionDetector:
         )
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
+        self.improve_contrast = improve_contrast_enabled
 
     def detect(self, frame):
         motion_boxes = []
@@ -38,14 +39,15 @@ class MotionDetector:
         )
 
         # Improve contrast
-        minval = np.percentile(resized_frame, 4)
-        maxval = np.percentile(resized_frame, 96)
-        # don't adjust if the image is a single color
-        if minval < maxval:
-            resized_frame = np.clip(resized_frame, minval, maxval)
-            resized_frame = (
-                ((resized_frame - minval) / (maxval - minval)) * 255
-            ).astype(np.uint8)
+        if self.improve_contrast.value:
+            minval = np.percentile(resized_frame, 4)
+            maxval = np.percentile(resized_frame, 96)
+            # don't adjust if the image is a single color
+            if minval < maxval:
+                resized_frame = np.clip(resized_frame, minval, maxval)
+                resized_frame = (
+                    ((resized_frame - minval) / (maxval - minval)) * 255
+                ).astype(np.uint8)
 
         # mask frame
         resized_frame[self.mask] = [255]
