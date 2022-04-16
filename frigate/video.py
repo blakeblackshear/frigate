@@ -354,7 +354,7 @@ def track_camera(
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
 
-    motion_detector = MotionDetector(frame_shape, config.motion)
+    motion_detector = MotionDetector(frame_shape, config.motion, improve_contrast_enabled)
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_shape
     )
@@ -493,8 +493,6 @@ def process_frames(
         if frame is None:
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
-
-        motion_detector.improve_contrast = improve_contrast_enabled.value
 
         # look for motion
         motion_boxes = motion_detector.detect(frame)
