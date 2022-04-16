@@ -11,7 +11,7 @@ import threading
 import time
 from collections import Counter, defaultdict
 from statistics import mean, median
-from typing import Callable, Dict
+from typing import Callable
 
 import cv2
 import numpy as np
@@ -362,9 +362,9 @@ class CameraState:
         self.config = config
         self.camera_config = config.cameras[name]
         self.frame_manager = frame_manager
-        self.best_objects: Dict[str, TrackedObject] = {}
+        self.best_objects: dict[str, TrackedObject] = {}
         self.object_counts = defaultdict(int)
-        self.tracked_objects: Dict[str, TrackedObject] = {}
+        self.tracked_objects: dict[str, TrackedObject] = {}
         self.frame_cache = {}
         self.zone_objects = defaultdict(list)
         self._current_frame = np.zeros(self.camera_config.frame_shape_yuv, np.uint8)
@@ -650,7 +650,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.video_output_queue = video_output_queue
         self.recordings_info_queue = recordings_info_queue
         self.stop_event = stop_event
-        self.camera_states: Dict[str, CameraState] = {}
+        self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
 
         def start(camera, obj: TrackedObject, current_frame_time):
