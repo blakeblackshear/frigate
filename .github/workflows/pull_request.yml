@@ -2,6 +2,9 @@ name: On pull request
 
 on: pull_request
 
+env:
+  DEFAULT_PYTHON: 3.9
+
 jobs:
   web_lint:
     name: Web - Lint
@@ -44,6 +47,24 @@ jobs:
       - name: Test
         run: npm run test
         working-directory: ./web
+
+  python_checks:
+    runs-on: ubuntu-latest
+    name: Python checks
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.3.4
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Install requirements
+        run: |
+          pip install pip
+          pip install -r requirements-dev.txt
+      - name: Lint
+        run: |
+          python3 -m black frigate --check
 
   python_tests:
     runs-on: ubuntu-latest
