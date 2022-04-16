@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_latest_version() -> str:
-    request = requests.get('https://api.github.com/repos/blakeblackshear/frigate/releases/latest')
+    request = requests.get(
+        "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
+    )
     response = request.json()
 
     if request.ok and response:
