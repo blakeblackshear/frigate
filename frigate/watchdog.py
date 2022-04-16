@@ -8,13 +8,13 @@ import signal
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.util import restart_frigate
 from multiprocessing.synchronize import Event
-from typing import Dict
+from typing import dict
 
 logger = logging.getLogger(__name__)
 
 
 class FrigateWatchdog(threading.Thread):
-    def __init__(self, detectors: Dict[str, EdgeTPUProcess], stop_event: Event):
+    def __init__(self, detectors: dict[str, EdgeTPUProcess], stop_event: Event):
         threading.Thread.__init__(self)
         self.name = "frigate_watchdog"
         self.detectors = detectors

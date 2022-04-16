@@ -9,7 +9,6 @@ import subprocess as sp
 import threading
 import time
 from collections import defaultdict
-from typing import Dict, List
 
 import numpy as np
 from cv2 import cv2, reduce
@@ -476,8 +475,8 @@ def process_frames(
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue,
-    process_info: Dict,
-    objects_to_track: List[str],
+    process_info: dict,
+    objects_to_track: list[str],
     object_filters,
     detection_enabled: mp.Value,
     stop_event,
