@@ -1,9 +1,18 @@
 from numpy import unique
-from peewee import *
+from peewee import (
+    Model,
+    CharField,
+    DateTimeField,
+    FloatField,
+    BooleanField,
+    JSONField,
+    TextField,
+    IntegerField,
+)
 from playhouse.sqlite_ext import *
 
 
-class Event(Model):
+class Event(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     label = CharField(index=True, max_length=20)
     sub_label = CharField(max_length=20, null=True)
@@ -24,7 +33,7 @@ class Event(Model):
     plus_id = CharField(max_length=30)
 
 
-class Recordings(Model):
+class Recordings(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
     path = CharField(unique=True)
