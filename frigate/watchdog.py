@@ -8,7 +8,6 @@ import signal
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.util import restart_frigate
 from multiprocessing.synchronize import Event
-from typing import dict
 
 logger = logging.getLogger(__name__)
 

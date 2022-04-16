@@ -141,7 +141,7 @@ def set_retain(id):
 
 @bp.route("/events/<id>/plus", methods=("POST",))
 def send_to_plus(id):
-    if current_app.plus_api is None:
+    if current_app.plus_api.is_active():
         return make_response(
             jsonify(
                 {
