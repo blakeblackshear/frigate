@@ -43,8 +43,10 @@ class DetectorConfig(FrigateBaseModel):
     device: str = Field(default="usb", title="Device Type")
     num_threads: int = Field(default=3, title="Number of detection threads")
 
+
 class UIConfig(FrigateBaseModel):
     use_experimental: bool = Field(default=False, title="Experimental UI")
+
 
 class MqttConfig(FrigateBaseModel):
     host: str = Field(title="MQTT Host")
@@ -516,7 +518,9 @@ class CameraLiveConfig(FrigateBaseModel):
 
 class CameraUiConfig(FrigateBaseModel):
     order: int = Field(default=0, title="Order of camera in UI.")
-    dashboard: bool = Field(default=True, title="Show this camera in Frigate dashboard UI.")
+    dashboard: bool = Field(
+        default=True, title="Show this camera in Frigate dashboard UI."
+    )
 
 
 class CameraConfig(FrigateBaseModel):

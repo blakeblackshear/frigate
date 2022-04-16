@@ -111,7 +111,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
         state_topic = f"{message.topic[:-4]}/state"
-        client.publish(state_topic, payload, retain=True)        
+        client.publish(state_topic, payload, retain=True)
 
     def on_restart_command(client, userdata, message):
         restart_frigate()
@@ -120,9 +120,13 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         threading.current_thread().name = "mqtt"
         if rc != 0:
             if rc == 3:
-                logger.error("Unable to connect to MQTT server: MQTT Server unavailable")
+                logger.error(
+                    "Unable to connect to MQTT server: MQTT Server unavailable"
+                )
             elif rc == 4:
-                logger.error("Unable to connect to MQTT server: MQTT Bad username or password")
+                logger.error(
+                    "Unable to connect to MQTT server: MQTT Bad username or password"
+                )
             elif rc == 5:
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
@@ -153,7 +157,8 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
         )
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set", on_improve_contrast_command
+            f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set",
+            on_improve_contrast_command,
         )
 
     client.message_callback_add(
@@ -204,7 +209,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/state",
             "ON" if config.cameras[name].motion.improve_contrast else "OFF",
             retain=True,
-        )        
+        )
 
     return client
 
