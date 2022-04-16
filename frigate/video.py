@@ -378,7 +378,6 @@ def track_camera(
         objects_to_track,
         object_filters,
         detection_enabled,
-        improve_contrast_enabled,
         stop_event,
     )
 
