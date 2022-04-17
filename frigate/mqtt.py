@@ -78,6 +78,12 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                 logger.info(f"Turning on detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = True
                 detect_settings.enabled = True
+
+                if camera_metrics[camera_name]["motion_enabled"].value:
+                    logger.info(
+                        f"Turning on motion for {camera_name} due to detection being enabled."
+                    )
+                    camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
             if camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning off detection for {camera_name} via mqtt")
@@ -100,6 +106,10 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                 logger.info(f"Turning on motion for {camera_name} via mqtt")
                 camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
+            if not camera_metrics[camera_name]["detection_enabled"].value:
+                logger.error(f"Turning off motion is not allowed when detection is enabled.")
+                return
+
             if camera_metrics[camera_name]["motion_enabled"].value:
                 logger.info(f"Turning off motion for {camera_name} via mqtt")
                 camera_metrics[camera_name]["motion_enabled"].value = False
