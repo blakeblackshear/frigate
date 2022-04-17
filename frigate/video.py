@@ -361,6 +361,7 @@ def track_camera(
 
     frame_queue = process_info["frame_queue"]
     detection_enabled = process_info["detection_enabled"]
+    motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
 
     frame_shape = config.frame_shape
@@ -393,6 +394,7 @@ def track_camera(
         objects_to_track,
         object_filters,
         detection_enabled,
+        motion_enabled,
         stop_event,
     )
 
@@ -479,6 +481,7 @@ def process_frames(
     objects_to_track: list[str],
     object_filters,
     detection_enabled: mp.Value,
+    motion_enabled: mp.Value,
     stop_event,
     exit_on_empty: bool = False,
 ):

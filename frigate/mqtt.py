@@ -89,6 +89,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
+    def on_motion_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_improve_contrast_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[3]
+
+        
+
     def on_improve_contrast_command(client, userdata, message):
         payload = message.payload.decode()
         logger.debug(f"on_improve_contrast_toggle: {message.topic} {payload}")
