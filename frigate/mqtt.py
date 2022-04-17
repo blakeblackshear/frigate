@@ -107,7 +107,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                 camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
             if not camera_metrics[camera_name]["detection_enabled"].value:
-                logger.error(f"Turning off motion is not allowed when detection is enabled.")
+                logger.error(
+                    f"Turning off motion is not allowed when detection is enabled."
+                )
                 return
 
             if camera_metrics[camera_name]["motion_enabled"].value:
@@ -187,8 +189,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
         )
         client.message_callback_add(
-            f"{mqtt_config.topic_prefix}/{name}/motion/set",
-            on_motion_command
+            f"{mqtt_config.topic_prefix}/{name}/motion/set", on_motion_command
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set",
