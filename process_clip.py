@@ -115,6 +115,7 @@ class ProcessClip:
         }
 
         detection_enabled = mp.Value("d", 1)
+        motion_enabled = mp.Value("d", True)
         stop_event = mp.Event()
         model_shape = (self.config.model.height, self.config.model.width)
 
@@ -133,6 +134,7 @@ class ProcessClip:
             objects_to_track,
             object_filters,
             detection_enabled,
+            motion_enabled,
             stop_event,
             exit_on_empty=True,
         )
