@@ -511,11 +511,11 @@ def process_frames(
             f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
         )
 
-        if frame is None:
-            logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
+        if not motion_enabled.value:
             continue
 
-        if not motion_enabled:
+        if frame is None:
+            logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
         # look for motion

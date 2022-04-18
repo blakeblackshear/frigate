@@ -99,14 +99,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         payload = message.payload.decode()
         logger.debug(f"on_motion_toggle: {message.topic} {payload}")
 
-        camera_name = message.topic.split("/")[3]
+        camera_name = message.topic.split("/")[-3]
 
         if payload == "ON":
             if not camera_metrics[camera_name]["motion_enabled"].value:
                 logger.info(f"Turning on motion for {camera_name} via mqtt")
                 camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
-            if not camera_metrics[camera_name]["detection_enabled"].value:
+            if camera_metrics[camera_name]["detection_enabled"].value:
                 logger.error(
                     f"Turning off motion is not allowed when detection is enabled."
                 )
