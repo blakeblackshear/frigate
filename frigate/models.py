@@ -8,7 +8,9 @@ from peewee import (
     TextField,
     IntegerField,
 )
-from playhouse.sqlite_ext import *
+from playhouse.sqlite_ext import (
+    JSONField
+)
 
 
 class Event(Model):  # type: ignore[misc]
