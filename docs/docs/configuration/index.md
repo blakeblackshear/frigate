@@ -162,8 +162,9 @@ detect:
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
-    # Optional: Frequency for running detection on stationary objects (default: shown below)
-    # When set to 0, object detection will never be run on stationary objects. If set to 10, it will be run on every 10th frame.
+    # Optional: Frequency for confirming stationary objects (default: shown below)
+    # When set to 0, object detection will not confirm stationary objects until movement is detected.
+    # If set to 10, object detection will run to confirm the object still exists on every 10th frame.
     interval: 0
     # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
     threshold: 50
@@ -171,6 +172,9 @@ detect:
     # This can help with false positives for objects that should only be stationary for a limited amount of time.
     # It can also be used to disable stationary object tracking. For example, you may want to set a value for person, but leave
     # car at the default.
+    # WARNING: Setting these values overrides default behavior and disables stationary object tracking.
+    #          There are very few situations where you would want it disabled. It is NOT recommended to
+    #          copy these values from the example config into your config unless you know they are needed.
     max_frames:
       # Optional: Default for all object types (default: not set, track forever)
       default: 3000
@@ -238,11 +242,17 @@ motion:
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
   mask: 0,900,1080,900,1080,1920,0,1920
+  # Optional: improve contrast (default: shown below)
+  # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
+  # for daytime.
+  improve_contrast: False
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
+  # WARNING: If recording is disabled in the config, turning it on via 
+  #          the UI or MQTT later will have no effect.
   # WARNING: Frigate does not currently support limiting recordings based
   #          on available disk space automatically. If using recordings,
   #          you must specify retention settings for a number of days that

@@ -126,6 +126,7 @@ class MotionConfig(FrigateBaseModel):
         ge=1,
         le=255,
     )
+    improve_contrast: bool = Field(default=False, title="Improve Contrast")
     contour_area: Optional[int] = Field(default=30, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.2, title="Frame Alpha")
