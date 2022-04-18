@@ -5,7 +5,6 @@ from peewee import (
     DateTimeField,
     FloatField,
     BooleanField,
-    JSONField,
     TextField,
     IntegerField,
 )

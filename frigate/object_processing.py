@@ -461,7 +461,7 @@ class CameraState:
     def finished(self, obj_id):
         del self.tracked_objects[obj_id]
 
-    def on(self, event_type: str, callback: Callable[[Dict], None]):
+    def on(self, event_type: str, callback: Callable[[dict], None]):
         self.callbacks[event_type].append(callback)
 
     def update(self, frame_time, current_detections, motion_boxes, regions):
