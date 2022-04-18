@@ -54,7 +54,13 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ENV DEBIAN_FRONTEND=noninteractive
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND="noninteractive"
+# http://stackoverflow.com/questions/48162574/ddg#49462622
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+# https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
+ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
+
 ENV FLASK_ENV=development
 
 COPY --from=wheels /wheels /wheels
@@ -76,25 +82,29 @@ RUN apt-get -qq update \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
-    ffmpeg \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     && pip3 install -U /wheels/*.whl \
-    && rm -rf /var/lib/apt/lists/* /wheels \
-    && (apt-get autoremove -y; apt-get autoclean -y)
-
-# AMD64 specific packages
-RUN if [ "${TARGETARCH}" = "amd64" ]; \
-    then \
-    wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
-    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list \
-    && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
-    # VAAPI drivers for Intel hardware accel
-    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && (apt-get autoremove -y; apt-get autoclean -y) \
-    fi
+    && rm -rf /wheels \
+    # ffmpeg
+    && if [ "${TARGETARCH}" = "amd64" ]; then \
+    wget -O - https://repo.jellyfin.org/jellyfin_team.gpg.key | apt-key add - \
+    && echo "deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/$( awk -F'=' '/^ID=/{ print $NF }' /etc/os-release ) $( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release ) main" | tee /etc/apt/sources.list.d/jellyfin.list \
+    && apt-get update \
+    && apt-get install --no-install-recommends --no-install-suggests -y \
+    mesa-va-drivers \
+    jellyfin-ffmpeg \
+    openssl \
+    locales \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/bin/ffmpeg; \
+    else \
+    apt-get -qq install --no-install-recommends -y \
+    ffmpeg; \
+    fi \
+    && apt-get remove gnupg apt-transport-https -y \
+    && apt-get clean autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
