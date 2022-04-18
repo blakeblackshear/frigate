@@ -511,15 +511,13 @@ def process_frames(
             f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
         )
 
-        if not motion_enabled.value:
-            continue
-
         if frame is None:
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
-        # look for motion
-        motion_boxes = motion_detector.detect(frame)
+        if motion_enabled.value:
+            # look for motion
+            motion_boxes = motion_detector.detect(frame)
 
         regions = []
 
