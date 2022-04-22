@@ -5,8 +5,9 @@ import CameraImage from '../components/CameraImage';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
+import Dialog from '../components/Dialog';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import useSWR from 'swr';
 
 export default function Cameras() {
@@ -40,8 +41,11 @@ function SortedCameras({ unsortedCameras }) {
 
 function Camera({ name }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
+  const [showToggleDetectDialog, setShowToggleDetectDialog] = useState(false);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
+  const [showToggleRecordingDialog, setShowToggleRecordingDialog] = useState(false);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
+  const [showToggleSnapshotDialog, setShowToggleSnapshotDialog] = useState(false);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
     return [
@@ -56,7 +60,7 @@ function Camera({ name }) {
         icon: MotionIcon,
         color: detectValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendDetect(detectValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleDetectDialog(true);
         },
       },
       {
@@ -64,7 +68,7 @@ function Camera({ name }) {
         icon: ClipIcon,
         color: recordValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleRecordingDialog(true);
         },
       },
       {
@@ -72,14 +76,60 @@ function Camera({ name }) {
         icon: SnapshotIcon,
         color: snapshotValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendSnapshots(snapshotValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleSnapshotDialog(true);
         },
       },
     ],
-    [detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
+    [detectValue, recordValue, snapshotValue]
+  );
+
+  const dialogs = useMemo(
+    () => [
+      {
+        showDialog: showToggleRecordingDialog,
+        dismiss: () => setShowToggleRecordingDialog(false),
+        title: `${recordValue === 'ON' ? 'Disable' : 'Enable '} recordings?`,
+        callback: () => {
+          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleRecordingDialog(false);
+        }
+      },
+      {
+        showDialog: showToggleDetectDialog,
+        dismiss: () => setShowToggleDetectDialog(false),
+        title: `${detectValue === 'ON' ? 'Disable' : 'Enable '} detection?`,
+        callback: () => {
+          sendDetect(snapshotValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleDetectDialog(false);
+        }
+      },
+      {
+        showDialog: showToggleSnapshotDialog,
+        dismiss: () => setShowToggleSnapshotDialog(false),
+        title: `${snapshotValue === 'ON' ? 'Disable' : 'Enable '} snapshots?`,
+        callback: () => {
+          sendSnapshots(snapshotValue === 'ON' ? 'OFF' : 'ON');
+          setShowToggleSnapshotDialog(false);
+        },
+      },
+    ],
+    [showToggleDetectDialog, showToggleRecordingDialog, showToggleSnapshotDialog, detectValue, recordValue, snapshotValue]
   );
 
   return (
-    <Card buttons={buttons} href={href} header={name} icons={icons} media={<CameraImage camera={name} stretch />} />
+    <Fragment>
+      <Card buttons={buttons} href={href} header={name} icons={icons} media={<CameraImage camera={name} stretch />} />
+      {dialogs.map(({showDialog, dismiss, title, callback}) =>
+        showDialog ? <Dialog
+          title={title}
+          text="Are you sure?"
+          onDismiss={dismiss}
+          actions={[
+            {text: 'Yes', color: 'red', onClick: callback},
+            {text: 'Cancel', onClick: dismiss},
+          ]}
+        /> : null
+      )}
+    </Fragment>
   );
 }
