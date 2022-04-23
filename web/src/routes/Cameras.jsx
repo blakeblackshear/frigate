@@ -5,7 +5,7 @@ import CameraImage from '../components/CameraImage';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
-import Dialog from '../components/Dialog';
+import Prompt from '../components/Prompt';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
 import { useMemo, useState } from 'preact/hooks';
 import useSWR from 'swr';
@@ -40,6 +40,8 @@ function SortedCameras({ unsortedCameras }) {
 }
 
 function Camera({ name }) {
+  const {data: config} = useSWR('config');
+  const showConfirmationPrompts = config && config.ui.show_confirmation_prompts;
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const [showToggleDetectDialog, setShowToggleDetectDialog] = useState(false);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
@@ -60,7 +62,11 @@ function Camera({ name }) {
         icon: MotionIcon,
         color: detectValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          setShowToggleDetectDialog(true);
+          if (showConfirmationPrompts) {
+            setShowToggleDetectDialog(true);
+          } else {
+            sendDetect(recordValue === 'ON' ? 'OFF' : 'ON');
+          }
         },
       },
       {
@@ -68,7 +74,11 @@ function Camera({ name }) {
         icon: ClipIcon,
         color: recordValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          setShowToggleRecordingDialog(true);
+          if (showConfirmationPrompts) {
+            setShowToggleRecordingDialog(true);
+          } else {
+            sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON');
+          }
         },
       },
       {
@@ -76,7 +86,11 @@ function Camera({ name }) {
         icon: SnapshotIcon,
         color: snapshotValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          setShowToggleSnapshotDialog(true);
+          if (showConfirmationPrompts) {
+            setShowToggleSnapshotDialog(true);
+          } else {
+            sendSnapshots(recordValue === 'ON' ? 'OFF' : 'ON');
+          }
         },
       },
     ],
@@ -120,7 +134,7 @@ function Camera({ name }) {
     <Fragment>
       <Card buttons={buttons} href={href} header={name} icons={icons} media={<CameraImage camera={name} stretch />} />
       {dialogs.map(({showDialog, dismiss, title, callback}) =>
-        showDialog ? <Dialog
+        showDialog ? <Prompt
           title={title}
           text="Are you sure?"
           onDismiss={dismiss}
