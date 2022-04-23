@@ -13,3 +13,12 @@ ui:
 ```
 
 Note that experimental changes may contain bugs or may be removed at any time in future releases of the software. Use of these features are presented as-is and with no functional guarantee.
+
+### Configuration options
+
+Set to true if you'd like to hide configuration options within the frontend. Not recommended while setting up Frigate.
+
+```yaml
+ui:
+  hide_configuration_options: false
+```
