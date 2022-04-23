@@ -13,3 +13,12 @@ ui:
 ```
 
 Note that experimental changes may contain bugs or may be removed at any time in future releases of the software. Use of these features are presented as-is and with no functional guarantee.
+
+### Show confirmation prompts
+
+Used to hide non-critical confirmation prompts.
+
+```yaml
+ui:
+  show_confirmation_prompts: true
+```
