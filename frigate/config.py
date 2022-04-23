@@ -47,7 +47,7 @@ class DetectorConfig(FrigateBaseModel):
 class UIConfig(FrigateBaseModel):
     use_experimental: bool = Field(default=False, title="Experimental UI")
     show_confirmation_prompts: bool = Field(
-        default=False, title="Show confirmation prompts"
+        default=True, title="Show confirmation prompts"
     )
 
 
