@@ -14,6 +14,9 @@ export function Tabs({ children, selectedIndex: selectedIndexProp, onChange, cla
 
   const RenderChildren = useCallback(() => {
     return children.map((child, i) => {
+      if (!child) {
+        return null
+      }
       child.props.selected = i === selectedIndex;
       child.props.onClick = handleSelected(i);
       return child;

@@ -23,7 +23,8 @@ export default function Sidebar() {
   if (!config) {
     return null;
   }
-  const { birdseye } = config;
+  const { birdseye, ui } = config;
+  const hideConfigurationOptions = ui?.hide_configuration_options;
 
   return (
     <NavigationDrawer header={<Header />}>
@@ -44,7 +45,7 @@ export default function Sidebar() {
       </Match>
       {birdseye?.enabled ? <Destination href="/birdseye" text="Birdseye" /> : null}
       <Destination href="/events" text="Events" />
-      <Destination href="/debug" text="Debug" />
+      { hideConfigurationOptions ? null : <Destination href="/debug" text="Debug" /> }
       <Separator />
       <div className="flex flex-grow" />
       {ENV !== 'production' ? (

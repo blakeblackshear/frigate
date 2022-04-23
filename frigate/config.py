@@ -46,6 +46,9 @@ class DetectorConfig(FrigateBaseModel):
 
 class UIConfig(FrigateBaseModel):
     use_experimental: bool = Field(default=False, title="Experimental UI")
+    hide_configuration_options: bool = Field(
+        default=False, title="Hide UI components used for configuring Frigate"
+    )
 
 
 class MqttConfig(FrigateBaseModel):

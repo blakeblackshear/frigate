@@ -14,6 +14,7 @@ export default function Camera({ camera }) {
   const [playerType, setPlayerType] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
+  const hideConfigurationOptions = config?.ui?.hide_configuration_options;
 
   const handleTabChange = (index) => {
     if (index === 0) {
@@ -49,7 +50,7 @@ export default function Camera({ camera }) {
           <Tabs selectedIndex={1} onChange={handleTabChange} className='justify'>
             <TextTab text='History' />
             <TextTab text='Live' />
-            <TextTab text='Debug' />
+            {hideConfigurationOptions ? null : <TextTab text="Debug"/>}
           </Tabs>
         </div>
       </div>
