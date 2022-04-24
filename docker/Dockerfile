@@ -77,30 +77,25 @@ RUN apt-get -qq update \
     && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
     && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     # add coral repo
-    && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    # jellyfin-ffmpeg
+    && wget -O - https://repo.jellyfin.org/jellyfin_team.gpg.key | apt-key add - \
+    && echo "deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/$( awk -F'=' '/^ID=/{ print $NF }' /etc/os-release ) $( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release ) main" | tee /etc/apt/sources.list.d/jellyfin.list \
     && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
-    && pip3 install -U /wheels/*.whl \
-    && rm -rf /wheels \
-    # ffmpeg
-    && if [ "${TARGETARCH}" = "amd64" ]; then \
-    wget -O - https://repo.jellyfin.org/jellyfin_team.gpg.key | apt-key add - \
-    && echo "deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/$( awk -F'=' '/^ID=/{ print $NF }' /etc/os-release ) $( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release ) main" | tee /etc/apt/sources.list.d/jellyfin.list \
-    && apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers \
     jellyfin-ffmpeg \
-    openssl \
-    locales \
-    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/bin/ffmpeg; \
-    else \
+    && pip3 install -U /wheels/*.whl \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/bin/ffmpeg \
+    # amd64 specific packages
+    && if [ "${TARGETARCH}" = "amd64" ]; then \
     apt-get -qq install --no-install-recommends -y \
-    ffmpeg; \
+    mesa-va-drivers; \
     fi \
+    && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
     && apt-get clean autoclean -y \
     && apt-get autoremove -y \
