@@ -1,30 +1,35 @@
-default_target: frigate
+default_target: local
 
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 VERSION = 0.11.0
+CURRENT_UID := $(shell id -u)
+CURRENT_GID := $(shell id -g)
 
 version:
 	echo "VERSION=\"$(VERSION)-$(COMMIT_HASH)\"" > frigate/version.py
 
+build_web:
+	docker run --volume ${PWD}/web:/web -w /web --volume /etc/passwd:/etc/passwd:ro --volume /etc/group:/etc/group:ro -u $(CURRENT_UID):$(CURRENT_GID) node:16 /bin/bash -c "npm install && npm run build"
+
 nginx_frigate:
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.2 --file docker/Dockerfile.nginx .
 
-frigate: version
+local:
 	DOCKER_BUILDKIT=1 docker build -t frigate -f docker/Dockerfile .
 
-frigate_amd64: version
+amd64:
 	docker buildx build --platform linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
-frigate_arm64: version
+arm64:
 	docker buildx build --platform linux/arm64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
-frigate_armv7: version
+armv7:
 	docker buildx build --platform linux/arm/v7 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
-frigate_build: frigate_amd64 frigate_arm64 frigate_armv7
+build: version build_web amd64 arm64 armv7
 	docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
-frigate_push: frigate_build
+push: build
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
 run_tests: frigate

@@ -1,13 +1,5 @@
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
-FROM node:16 as web
-
-WORKDIR /opt/frigate
-
-COPY web/ .
-
-RUN npm install && npm run build
-
 FROM debian:11 as wheels
 ARG TARGETARCH
 
@@ -112,7 +104,7 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
 
-COPY --from=web /opt/frigate/dist web/
+COPY web/dist web/
 
 COPY docker/rootfs/ /
 
