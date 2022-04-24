@@ -26,7 +26,7 @@ arm64:
 armv7:
 	docker buildx build --platform linux/arm/v7 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
-build: version build_web amd64 arm64 armv7
+build: version amd64 arm64 armv7
 	docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
 push: build
