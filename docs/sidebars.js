@@ -22,7 +22,6 @@ module.exports = {
       "configuration/stationary_objects",
       "configuration/advanced",
       "configuration/hardware_acceleration",
-      "configuration/nvdec",
       "configuration/camera_specific",
     ],
     Integrations: [

@@ -20,20 +20,6 @@ jobs:
         run: npm run lint
         working-directory: ./web
 
-  web_build:
-    name: Web - Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@master
-        with:
-          node-version: 16.x
-      - run: npm install
-        working-directory: ./web
-      - name: Build
-        run: npm run build
-        working-directory: ./web
-
   web_test:
     name: Web - Test
     runs-on: ubuntu-latest
@@ -71,6 +57,14 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - run: npm install
+        working-directory: ./web
+      - name: Build web
+        run: npm run build
+        working-directory: ./web
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx

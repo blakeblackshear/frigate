@@ -1,13 +1,5 @@
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
-FROM node:16 as web
-
-WORKDIR /opt/frigate
-
-COPY web/ .
-
-RUN npm install && npm run build
-
 FROM debian:11 as wheels
 ARG TARGETARCH
 
@@ -54,7 +46,13 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ENV DEBIAN_FRONTEND=noninteractive
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND="noninteractive"
+# http://stackoverflow.com/questions/48162574/ddg#49462622
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+# https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
+ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
+
 ENV FLASK_ENV=development
 
 COPY --from=wheels /wheels /wheels
@@ -71,30 +69,29 @@ RUN apt-get -qq update \
     && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
     && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
     # add coral repo
-    && APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    # jellyfin-ffmpeg
+    && wget -O - https://repo.jellyfin.org/jellyfin_team.gpg.key | apt-key add - \
+    && echo "deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/$( awk -F'=' '/^ID=/{ print $NF }' /etc/os-release ) $( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release ) main" | tee /etc/apt/sources.list.d/jellyfin.list \
     && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
-    ffmpeg \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
+    jellyfin-ffmpeg \
     && pip3 install -U /wheels/*.whl \
-    && rm -rf /var/lib/apt/lists/* /wheels \
-    && (apt-get autoremove -y; apt-get autoclean -y)
-
-# AMD64 specific packages
-RUN if [ "${TARGETARCH}" = "amd64" ]; \
-    then \
-    wget -qO - https://repositories.intel.com/graphics/intel-graphics.key | apt-key add - \
-    && echo 'deb [arch=amd64] https://repositories.intel.com/graphics/ubuntu focal main' > /etc/apt/sources.list.d/intel-graphics.list \
-    && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
-    # VAAPI drivers for Intel hardware accel
-    libva-drm2 libva2 libmfx1 i965-va-driver vainfo intel-media-va-driver-non-free mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
-    && rm -rf /var/lib/apt/lists/* \
-    && (apt-get autoremove -y; apt-get autoclean -y) \
-    fi
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/bin/ffmpeg \
+    # amd64 specific packages
+    && if [ "${TARGETARCH}" = "amd64" ]; then \
+    apt-get -qq install --no-install-recommends -y \
+    mesa-va-drivers; \
+    fi \
+    && rm -rf /wheels \
+    && apt-get remove gnupg apt-transport-https -y \
+    && apt-get clean autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
@@ -107,7 +104,7 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
 
-COPY --from=web /opt/frigate/dist web/
+COPY web/dist web/
 
 COPY docker/rootfs/ /
 
