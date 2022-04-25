@@ -515,9 +515,8 @@ def process_frames(
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
-        if motion_enabled.value:
-            # look for motion
-            motion_boxes = motion_detector.detect(frame)
+        # look for motion if enabled
+        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
         regions = []
 
