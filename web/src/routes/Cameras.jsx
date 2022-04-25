@@ -22,12 +22,13 @@ export default function Cameras() {
 }
 
 function SortedCameras({ unsortedCameras }) {
-
-  const sortedCameras = useMemo(() =>
-    Object.entries(unsortedCameras)
-      .filter(([_, conf]) => conf.ui.dashboard)
-      .sort(([_, aConf], [__, bConf]) => aConf.ui.order - bConf.ui.order),
-  [unsortedCameras]);
+  const sortedCameras = useMemo(
+    () =>
+      Object.entries(unsortedCameras)
+        .filter(([_, conf]) => conf.ui.dashboard)
+        .sort(([_, aConf], [__, bConf]) => aConf.ui.order - bConf.ui.order),
+    [unsortedCameras]
+  );
 
   return (
     <Fragment>
@@ -56,7 +57,7 @@ function Camera({ name }) {
         icon: MotionIcon,
         color: detectValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendDetect(detectValue === 'ON' ? 'OFF' : 'ON');
+          sendDetect(detectValue === 'ON' ? 'OFF' : 'ON', true);
         },
       },
       {
@@ -64,7 +65,7 @@ function Camera({ name }) {
         icon: ClipIcon,
         color: recordValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON');
+          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON', true);
         },
       },
       {
@@ -72,7 +73,7 @@ function Camera({ name }) {
         icon: SnapshotIcon,
         color: snapshotValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
-          sendSnapshots(snapshotValue === 'ON' ? 'OFF' : 'ON');
+          sendSnapshots(snapshotValue === 'ON' ? 'OFF' : 'ON', true);
         },
       },
     ],

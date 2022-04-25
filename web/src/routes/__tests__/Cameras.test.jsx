@@ -54,14 +54,14 @@ describe('Cameras Route', () => {
     await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 
     fireEvent.click(screen.getAllByLabelText('Toggle detect off')[0]);
-    expect(sendDetect).toHaveBeenCalledWith('OFF');
+    expect(sendDetect).toHaveBeenCalledWith('OFF', true);
     expect(sendDetect).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getAllByLabelText('Toggle snapshots off')[0]);
-    expect(sendSnapshots).toHaveBeenCalledWith('OFF');
+    expect(sendSnapshots).toHaveBeenCalledWith('OFF', true);
 
     fireEvent.click(screen.getAllByLabelText('Toggle recordings on')[0]);
-    expect(sendRecordings).toHaveBeenCalledWith('ON');
+    expect(sendRecordings).toHaveBeenCalledWith('ON', true);
 
     expect(sendDetect).toHaveBeenCalledTimes(1);
     expect(sendSnapshots).toHaveBeenCalledTimes(1);
