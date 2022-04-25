@@ -105,7 +105,7 @@ describe('MqttProvider', () => {
     await screen.findByRole('button');
     fireEvent.click(screen.getByRole('button'));
     await expect(wsClient.send).toHaveBeenCalledWith(
-      JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }) })
+      JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }), retain: false })
     );
   });
 
@@ -124,22 +124,22 @@ describe('MqttProvider', () => {
     );
     await screen.findByTestId('data');
     expect(screen.getByTestId('front/detect/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"ON","retain":true}'
+      '{"lastUpdate":123456,"payload":"ON","retain":false}'
     );
     expect(screen.getByTestId('front/recordings/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"OFF","retain":true}'
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
     );
     expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"ON","retain":true}'
+      '{"lastUpdate":123456,"payload":"ON","retain":false}'
     );
     expect(screen.getByTestId('side/detect/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"OFF","retain":true}'
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
     );
     expect(screen.getByTestId('side/recordings/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"OFF","retain":true}'
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
     );
     expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent(
-      '{"lastUpdate":123456,"payload":"OFF","retain":true}'
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
     );
   });
 });
