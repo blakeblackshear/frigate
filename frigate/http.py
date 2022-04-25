@@ -318,6 +318,8 @@ def event_thumbnail(id):
     response.headers["Content-Type"] = "image/jpeg"
     if event_complete:
         response.headers["Cache-Control"] = "private, max-age=31536000"
+    else:
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
@@ -350,15 +352,18 @@ def label_thumbnail(camera_name, label):
 
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
+        response.headers["Cache-Control"] = "no-store"
         return response
 
 
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
     download = request.args.get("download", type=bool)
+    event_complete = False
     jpg_bytes = None
     try:
         event = Event.get(Event.id == id, Event.end_time != None)
+        event_complete = True
         if not event.has_snapshot:
             return "Snapshot not available", 404
         # read snapshot from disk
@@ -391,6 +396,10 @@ def event_snapshot(id):
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpeg"
+    if event_complete:
+        response.headers["Cache-Control"] = "private, max-age=31536000"
+    else:
+        response.headers["Cache-Control"] = "no-store"
     if download:
         response.headers[
             "Content-Disposition"
@@ -606,6 +615,7 @@ def latest_frame(camera_name):
         )
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
+        response.headers["Cache-Control"] = "no-store"
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
