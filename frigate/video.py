@@ -340,6 +340,8 @@ def capture_camera(name, config: CameraConfig, process_info):
 def track_camera(
     name,
     config: CameraConfig,
+    mqtt_client,
+    mqtt_prefix,
     model_shape,
     labelmap,
     detection_queue,
@@ -381,6 +383,8 @@ def track_camera(
 
     process_frames(
         name,
+        mqtt_client,
+        mqtt_prefix,
         frame_queue,
         frame_shape,
         model_shape,
@@ -468,6 +472,8 @@ def detect(
 
 def process_frames(
     camera_name: str,
+    mqtt_client,
+    mqtt_prefix,
     frame_queue: mp.Queue,
     frame_shape,
     model_shape,
@@ -517,6 +523,9 @@ def process_frames(
 
         # look for motion if enabled
         motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
+
+        if mqtt_client:
+            mqtt_client(f"{mqtt_prefix}/{camera_name}/motion/detected", True if motion_boxes else False, False)
 
         regions = []
 
