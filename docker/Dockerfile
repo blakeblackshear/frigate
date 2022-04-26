@@ -81,7 +81,6 @@ RUN apt-get -qq update \
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     jellyfin-ffmpeg \
     && pip3 install -U /wheels/*.whl \
-    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/bin/ffmpeg \
     # amd64 specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
     apt-get -qq install --no-install-recommends -y \
@@ -92,6 +91,8 @@ RUN apt-get -qq update \
     && apt-get clean autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PATH=$PATH:/usr/lib/jellyfin-ffmpeg
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
