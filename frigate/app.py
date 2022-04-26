@@ -91,6 +91,7 @@ class FrigateApp:
                 "detection_enabled": mp.Value(
                     "i", self.config.cameras[camera_name].detect.enabled
                 ),
+                "motion_enabled": mp.Value("i", True),
                 "improve_contrast_enabled": mp.Value(
                     "i", self.config.cameras[camera_name].motion.improve_contrast
                 ),

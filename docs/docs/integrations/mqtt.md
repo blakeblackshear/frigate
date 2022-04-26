@@ -118,6 +118,15 @@ Topic to turn snapshots for a camera on and off. Expected values are `ON` and `O
 
 Topic with current state of snapshots for a camera. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/motion/set`
+
+Topic to turn motion detection for a camera on and off. Expected values are `ON` and `OFF`.
+NOTE: Turning off motion detection will fail if detection is not disabled.
+
+### `frigate/<camera_name>/motion/state`
+
+Topic with current state of motion detection for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/improve_contrast/set`
 
 Topic to turn improve_contrast for a camera on and off. Expected values are `ON` and `OFF`.

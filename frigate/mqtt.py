@@ -78,11 +78,43 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
                 logger.info(f"Turning on detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = True
                 detect_settings.enabled = True
+
+                if not camera_metrics[camera_name]["motion_enabled"].value:
+                    logger.info(
+                        f"Turning on motion for {camera_name} due to detection being enabled."
+                    )
+                    camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
             if camera_metrics[camera_name]["detection_enabled"].value:
                 logger.info(f"Turning off detection for {camera_name} via mqtt")
                 camera_metrics[camera_name]["detection_enabled"].value = False
                 detect_settings.enabled = False
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+        state_topic = f"{message.topic[:-4]}/state"
+        client.publish(state_topic, payload, retain=True)
+
+    def on_motion_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_motion_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        if payload == "ON":
+            if not camera_metrics[camera_name]["motion_enabled"].value:
+                logger.info(f"Turning on motion for {camera_name} via mqtt")
+                camera_metrics[camera_name]["motion_enabled"].value = True
+        elif payload == "OFF":
+            if camera_metrics[camera_name]["detection_enabled"].value:
+                logger.error(
+                    f"Turning off motion is not allowed when detection is enabled."
+                )
+                return
+
+            if camera_metrics[camera_name]["motion_enabled"].value:
+                logger.info(f"Turning off motion for {camera_name} via mqtt")
+                camera_metrics[camera_name]["motion_enabled"].value = False
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
@@ -155,6 +187,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/detect/set", on_detect_command
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/motion/set", on_motion_command
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set",
