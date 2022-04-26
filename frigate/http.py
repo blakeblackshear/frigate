@@ -317,7 +317,7 @@ def event_thumbnail(id):
     response = make_response(thumbnail_bytes)
     response.headers["Content-Type"] = "image/jpeg"
     if event_complete:
-        response.headers["Cache-Control"] = "private, max-age=31536000"
+        response.headers["Cache-Control"] = "private, max-age=86400"
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
