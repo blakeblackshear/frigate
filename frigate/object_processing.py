@@ -652,6 +652,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
+        self.last_motion_updates: dict[str, int] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(("start", camera, obj.to_dict()))
@@ -844,6 +845,30 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def should_mqtt_motion(self, camera, motion_boxes):
+        # publish if motion is currently being detected
+        if motion_boxes:
+            self.client.publish(
+                f"{self.topic_prefix}/{camera}/motion/detected",
+                True,
+                retain=False,
+            )
+            self.last_motion_updates[camera] = int(time.time())
+        elif not motion_boxes and self.last_motion_updates.get(camera, 0) != 0:
+            mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
+            now = int(time.time())
+
+            # If no motion, make sure the off_delay has passed
+            if now - self.last_motion >= mqtt_delay:
+                self.client.publish(
+                    f"{self.topic_prefix}/{camera}/motion/detected",
+                    False,
+                    retain=False,
+                )
+                # reset the last_motion so redundant `off` commands aren't sent
+                self.last_motion_updates[camera] = 0
+
+
     def get_best(self, camera, label):
         # TODO: need a lock here
         camera_state = self.camera_states[camera]
@@ -879,12 +904,7 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
-            # publish if motion is currently being detected
-            self.client.publish(
-                f"{self.topic_prefix}/{camera}/motion/detected",
-                True if motion_boxes else False,
-                retain=False,
-            )
+            self.should_mqtt_motion(camera, motion_boxes)
 
             tracked_objects = [
                 o.to_dict() for o in camera_state.tracked_objects.values()
