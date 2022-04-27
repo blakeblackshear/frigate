@@ -255,8 +255,6 @@ class FrigateApp:
                 args=(
                     name,
                     config,
-                    self.mqtt_client,
-                    self.config.mqtt.topic_prefix,
                     model_shape,
                     self.config.model.merged_labelmap,
                     self.detection_queue,
