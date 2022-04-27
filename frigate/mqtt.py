@@ -145,6 +145,52 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
+    def on_motion_threshold_command(client, userdata, message):
+        try:
+            payload = int(message.payload.decode())
+        except ValueError:
+            logger.warning(
+                f"Received unsupported value at {message.topic}: {message.payload.decode()}"
+            )
+            return
+
+        logger.debug(f"on_motion_threshold_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        motion_settings = config.cameras[camera_name].motion
+
+        logger.info(f"Setting motion threshold for {camera_name} via mqtt: {payload}")
+        camera_metrics[camera_name]["motion_threshold"].value = payload
+        motion_settings.threshold = payload
+
+        state_topic = f"{message.topic[:-4]}/state"
+        client.publish(state_topic, payload, retain=True)
+
+    def on_motion_contour_area_command(client, userdata, message):
+        try:
+            payload = int(message.payload.decode())
+        except ValueError:
+            logger.warning(
+                f"Received unsupported value at {message.topic}: {message.payload.decode()}"
+            )
+            return
+
+        logger.debug(f"on_motion_contour_area_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        motion_settings = config.cameras[camera_name].motion
+
+        logger.info(
+            f"Setting motion contour area for {camera_name} via mqtt: {payload}"
+        )
+        camera_metrics[camera_name]["motion_contour_area"].value = payload
+        motion_settings.contour_area = payload
+
+        state_topic = f"{message.topic[:-4]}/state"
+        client.publish(state_topic, payload, retain=True)
+
     def on_restart_command(client, userdata, message):
         restart_frigate()
 
@@ -194,6 +240,14 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/set",
             on_improve_contrast_command,
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/motion_threshold/set",
+            on_motion_threshold_command,
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
+            on_motion_contour_area_command,
         )
 
     client.message_callback_add(
@@ -248,6 +302,16 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         client.publish(
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/state",
             "ON" if config.cameras[name].motion.improve_contrast else "OFF",
+            retain=True,
+        )
+        client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/motion_threshold/state",
+            config.cameras[name].motion.threshold,
+            retain=True,
+        )
+        client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/motion_contour_area/state",
+            config.cameras[name].motion.contour_area,
             retain=True,
         )
 
