@@ -882,7 +882,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.client.publish(
                 f"{self.topic_prefix}/{camera}/motion/detected",
                 True if motion_boxes else False,
-                retain=False
+                retain=False,
             )
 
             tracked_objects = [
