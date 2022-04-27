@@ -868,7 +868,6 @@ class TrackedObjectProcessor(threading.Thread):
                 # reset the last_motion so redundant `off` commands aren't sent
                 self.last_motion_updates[camera] = 0
 
-
     def get_best(self, camera, label):
         # TODO: need a lock here
         camera_state = self.camera_states[camera]
