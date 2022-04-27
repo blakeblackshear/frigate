@@ -241,6 +241,11 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             retain=True,
         )
         client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/motion/state",
+            "ON",
+            retain=True,
+        )
+        client.publish(
             f"{mqtt_config.topic_prefix}/{name}/improve_contrast/state",
             "ON" if config.cameras[name].motion.improve_contrast else "OFF",
             retain=True,
