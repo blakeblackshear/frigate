@@ -16,6 +16,8 @@ class CameraMetricsTypes(TypedDict):
     frame_queue: Queue
     motion_enabled: Synchronized
     improve_contrast_enabled: Synchronized
+    motion_threshold: Synchronized
+    motion_contour_area: Synchronized
     process: Optional[Process]
     process_fps: Synchronized
     read_start: Synchronized

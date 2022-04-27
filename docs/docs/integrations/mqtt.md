@@ -140,3 +140,19 @@ Topic to turn improve_contrast for a camera on and off. Expected values are `ON`
 ### `frigate/<camera_name>/improve_contrast/state`
 
 Topic with current state of improve_contrast for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/motion_threshold/set`
+
+Topic to adjust motion threshold for a camera. Expected value is an integer.
+
+### `frigate/<camera_name>/motion_threshold/state`
+
+Topic with current motion threshold for a camera. Published value is an integer.
+
+### `frigate/<camera_name>/motion_contour_area/set`
+
+Topic to adjust motion contour area for a camera. Expected value is an integer.
+
+### `frigate/<camera_name>/motion_contour_area/state`
+
+Topic with current motion contour area for a camera. Published value is an integer.
