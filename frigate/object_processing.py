@@ -879,6 +879,7 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
+            # publish if motion is currently being detected
             self.client.publish(
                 f"{self.topic_prefix}/{camera}/motion/detected",
                 True if motion_boxes else False,
