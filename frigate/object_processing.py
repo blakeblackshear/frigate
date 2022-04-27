@@ -879,6 +879,12 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
+            self.client.publish(
+                f"{self.topic_prefix}/{camera}/motion/detected",
+                True if motion_boxes else False,
+                retain=False
+            )
+
             tracked_objects = [
                 o.to_dict() for o in camera_state.tracked_objects.values()
             ]
