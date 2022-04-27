@@ -274,7 +274,7 @@ def delete_event(id):
 
 
 @bp.route("/events/<id>/thumbnail.jpg")
-def event_thumbnail(id):
+def event_thumbnail(id, max_cache_age=2592000):
     format = request.args.get("format", "ios")
     thumbnail_bytes = None
     event_complete = False
@@ -317,7 +317,7 @@ def event_thumbnail(id):
     response = make_response(thumbnail_bytes)
     response.headers["Content-Type"] = "image/jpeg"
     if event_complete:
-        response.headers["Cache-Control"] = "private, max-age=31536000"
+        response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
@@ -345,7 +345,7 @@ def label_thumbnail(camera_name, label):
     try:
         event = event_query.get()
 
-        return event_thumbnail(event.id)
+        return event_thumbnail(event.id, 60)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
