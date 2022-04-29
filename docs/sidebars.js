@@ -8,6 +8,7 @@ module.exports = {
     Guides: [
       'guides/camera_setup',
       'guides/getting_started',
+      'guides/events_setup',
       'guides/false_positives',
       'guides/ha_notifications',
       'guides/stationary_objects',
