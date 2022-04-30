@@ -487,6 +487,21 @@ def events():
     clauses = []
     excluded_fields = []
 
+    selected_columns = [
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.sub_label,
+        Event.top_score,
+    ]
+
     if camera != "all":
         clauses.append((Event.camera == camera))
 
@@ -510,12 +525,14 @@ def events():
 
     if not include_thumbnails:
         excluded_fields.append(Event.thumbnail)
+    else:
+        selected_columns.append(Event.thumbnail)
 
     if len(clauses) == 0:
         clauses.append((True))
 
     events = (
-        Event.select()
+        Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
         .order_by(Event.start_time.desc())
         .limit(limit)
