@@ -246,6 +246,8 @@ motion:
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
   improve_contrast: False
+  # Optional: Delay when updating camaera motion through MQTT from True -> False. (default: shown below)
+  mqtt_off_delay: 30
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
