@@ -859,7 +859,7 @@ class TrackedObjectProcessor(threading.Thread):
             now = int(time.time())
 
             # If no motion, make sure the off_delay has passed
-            if now - self.last_motion >= mqtt_delay:
+            if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion/detected",
                     False,
