@@ -89,7 +89,12 @@ This is accessible via "Media Browser" on the left menu panel in Home Assistant.
 
 The integration supports casting clips and camera streams to supported media devices.
 
-**NOTE: For clips to be castable to media devices, audio is required and may need to be [enabled for recordings](../faqs.md#audio-in-recordings).**
+:::tip
+For clips to be castable to media devices, audio is required and may need to be [enabled for recordings](../faqs.md#audio-in-recordings).
+
+**NOTE: Even if you camera does not support audio, audio will need to be enabled for Casting to be accepted.**
+
+:::
 
 <a name="api"></a>
 
