@@ -8,7 +8,7 @@ import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
 const defaultOptions = {
   controls: true,
-  playbackRates: [0.5, 1, 2, 4, 8],
+  playbackRates: [0.5, 1, 2, 4, 8, 16],
   fluid: true,
 };
 const defaultSeekOptions = {
