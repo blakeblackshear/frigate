@@ -5,6 +5,7 @@ import copy
 import json
 import glob
 import logging
+from operator import sub
 import os
 import re
 import subprocess as sp
@@ -496,6 +497,7 @@ def events():
     limit = request.args.get("limit", 100)
     camera = request.args.get("camera", "all")
     label = request.args.get("label", "all")
+    sub_label = request.args.get("sub_label", "all")
     zone = request.args.get("zone", "all")
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
@@ -511,6 +513,9 @@ def events():
 
     if label != "all":
         clauses.append((Event.label == label))
+
+    if sub_label != "all":
+        clauses.append((Event.sub_label == sub_label))
 
     if zone != "all":
         clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
