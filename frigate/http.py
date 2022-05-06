@@ -11,6 +11,7 @@ import subprocess as sp
 import time
 from functools import reduce
 from pathlib import Path
+from certifi import where
 
 import cv2
 from flask.helpers import send_file
@@ -584,6 +585,20 @@ def mjpeg_feed(camera_name):
         )
     else:
         return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/sub_labels")
+def get_sub_labels():
+    try:
+        sub_labels = Event.select(
+            Event.sub_label,
+        ).where(Event.sub_label != None)
+    except:
+        return jsonify(
+            {"success": False, "message": "Failed to get sub_labels"}, "404"
+        )
+
+    return jsonify(sub_labels)
 
 
 @bp.route("/<camera_name>/latest.jpg")
