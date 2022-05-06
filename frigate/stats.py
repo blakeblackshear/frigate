@@ -20,9 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 def get_latest_version() -> str:
-    request = requests.get(
-        "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
-    )
+    try:
+        request = requests.get(
+            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
+        )
+    except:
+        return "unknown"
+    
     response = request.json()
 
     if request.ok and response and "tag_name" in response:
