@@ -97,6 +97,7 @@ export default function Events({ path, ...props }) {
           return memo;
         }, config?.objects?.track || [])
         .filter((value, i, self) => self.indexOf(value) === i),
+      sub_labels: Object.values(),
     }),
     [config]
   );
@@ -235,7 +236,7 @@ export default function Events({ path, ...props }) {
           value={searchParams.camera}
           onChange={(e) => onFilter('camera', e.target.value)}
         >
-          <option value="all">all</option>
+          <option value="all">all cameras</option>
           {filterValues.cameras.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -247,7 +248,7 @@ export default function Events({ path, ...props }) {
           value={searchParams.label}
           onChange={(e) => onFilter('label', e.target.value)}
         >
-          <option value="all">all</option>
+          <option value="all">all labels</option>
           {filterValues.labels.map((item) => (
             <option key={item} value={item}>
               {item}
@@ -259,7 +260,7 @@ export default function Events({ path, ...props }) {
           value={searchParams.zone}
           onChange={(e) => onFilter('zone', e.target.value)}
         >
-          <option value="all">all</option>
+          <option value="all">all zones</option>
           {filterValues.zones.map((item) => (
             <option key={item} value={item}>
               {item}
