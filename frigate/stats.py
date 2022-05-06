@@ -26,7 +26,7 @@ def get_latest_version() -> str:
         )
     except:
         return "unknown"
-    
+
     response = request.json()
 
     if request.ok and response and "tag_name" in response:
