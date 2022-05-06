@@ -249,6 +249,24 @@ def set_sub_label(id):
     )
 
 
+@bp.route("/sub_labels")
+def get_sub_labels():
+    try:
+        events = (
+            Event.select(
+                Event.sub_label,
+            ).group_by(Event.sub_label)
+        ).dicts()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get sub_labels: {e}"}, "404"
+        )
+
+    sub_labels = [e["sub_label"] for e in events]
+    sub_labels.remove(None)
+    return jsonify(sub_labels)
+
+
 @bp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
     try:
@@ -585,20 +603,6 @@ def mjpeg_feed(camera_name):
         )
     else:
         return "Camera named {} not found".format(camera_name), 404
-
-
-@bp.route("/sub_labels")
-def get_sub_labels():
-    try:
-        sub_labels = Event.select(
-            Event.sub_label,
-        ).where(Event.sub_label != None)
-    except:
-        return jsonify(
-            {"success": False, "message": "Failed to get sub_labels"}, "404"
-        )
-
-    return jsonify(sub_labels)
 
 
 @bp.route("/<camera_name>/latest.jpg")
