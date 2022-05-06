@@ -44,6 +44,7 @@ export default function Events({ path, ...props }) {
     camera: props.camera ?? 'all',
     label: props.label ?? 'all',
     zone: props.zone ?? 'all',
+    sub_label: props.sub_label ?? 'all',
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -82,6 +83,8 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
+  const { data: allSubLabels } = useSWR('sub_labels')
+
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
@@ -97,9 +100,9 @@ export default function Events({ path, ...props }) {
           return memo;
         }, config?.objects?.track || [])
         .filter((value, i, self) => self.indexOf(value) === i),
-      sub_labels: Object.values(),
+      sub_labels: Object.values(allSubLabels || []),
     }),
-    [config]
+    [config, allSubLabels]
   );
 
   const onSave = async (e, eventId, save) => {
@@ -262,6 +265,18 @@ export default function Events({ path, ...props }) {
         >
           <option value="all">all zones</option>
           {filterValues.zones.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+        <select
+          className="basis-1/4 cursor-pointer rounded dark:bg-slate-800"
+          value={searchParams.sub_label}
+          onChange={(e) => onFilter('sub_label', e.target.value)}
+        >
+          <option value="all">all sub labels</option>
+          {filterValues.sub_labels.map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
