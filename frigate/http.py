@@ -2,20 +2,14 @@ import base64
 from collections import OrderedDict
 from datetime import datetime, timedelta
 import copy
-import json
-import glob
 import logging
-from operator import sub
 import os
-import re
 import subprocess as sp
 import time
 from functools import reduce
 from pathlib import Path
-from certifi import where
 
 import cv2
-from flask.helpers import send_file
 
 import numpy as np
 from flask import (
@@ -28,13 +22,12 @@ from flask import (
     request,
 )
 
-from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
+from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
-from frigate.util import calculate_region
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
