@@ -235,7 +235,7 @@ export default function Events({ path, ...props }) {
       <Heading>Events</Heading>
       <div className="flex flex-wrap gap-2 items-center">
         <select
-          className="basis-1/4 cursor-pointer rounded dark:bg-slate-800"
+          className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           value={searchParams.camera}
           onChange={(e) => onFilter('camera', e.target.value)}
         >
@@ -247,7 +247,7 @@ export default function Events({ path, ...props }) {
           ))}
         </select>
         <select
-          className="basis-1/4 cursor-pointer rounded dark:bg-slate-800"
+          className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           value={searchParams.label}
           onChange={(e) => onFilter('label', e.target.value)}
         >
@@ -259,7 +259,7 @@ export default function Events({ path, ...props }) {
           ))}
         </select>
         <select
-          className="basis-1/4 cursor-pointer rounded dark:bg-slate-800"
+          className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           value={searchParams.zone}
           onChange={(e) => onFilter('zone', e.target.value)}
         >
@@ -271,7 +271,7 @@ export default function Events({ path, ...props }) {
           ))}
         </select>
         <select
-          className="basis-1/4 cursor-pointer rounded dark:bg-slate-800"
+          className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           value={searchParams.sub_label}
           onChange={(e) => onFilter('sub_label', e.target.value)}
         >
