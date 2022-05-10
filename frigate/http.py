@@ -638,122 +638,100 @@ def latest_frame(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+# return hourly summary for recordings of camera
+@bp.route("/<camera_name>/recordings/summary")
+def recordings_summary(camera_name):
+    recording_groups = (
+        Recordings.select(
+            fn.strftime(
+                "%Y-%m-%d %H",
+                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+            ).alias("hour"),
+            fn.SUM(Recordings.duration).alias("duration"),
+            fn.SUM(Recordings.motion).alias("motion"),
+            fn.SUM(Recordings.objects).alias("objects"),
+        )
+        .where(Recordings.camera == camera_name)
+        .group_by(
+            fn.strftime(
+                "%Y-%m-%d %H",
+                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+            )
+        )
+        .order_by(
+            fn.strftime(
+                "%Y-%m-%d H",
+                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+            ).desc()
+        )
+    )
+
+    event_groups = (
+        Event.select(
+            fn.strftime(
+                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+            ).alias("hour"),
+            fn.COUNT(Event.id).alias("count"),
+        )
+        .where(Event.camera == camera_name, Event.has_clip)
+        .group_by(
+            fn.strftime(
+                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+            ),
+        )
+        .objects()
+    )
+
+    event_map = {g.hour: g.count for g in event_groups}
+
+    days = {}
+
+    for recording_group in recording_groups.objects():
+        parts = recording_group.hour.split()
+        hour = parts[1]
+        day = parts[0]
+        events_count = event_map.get(recording_group.hour, 0)
+        hour_data = {
+            "hour": hour,
+            "events": events_count,
+            "motion": recording_group.motion,
+            "objects": recording_group.objects,
+            "duration": round(recording_group.duration),
+        }
+        if day not in days:
+            days[day] = {"events": events_count, "hours": [hour_data], "day": day}
+        else:
+            days[day]["events"] += events_count
+            days[day]["hours"].append(hour_data)
+
+    return jsonify(list(days.values()))
+
+
+# return hour of recordings data for camera
 @bp.route("/<camera_name>/recordings")
 def recordings(camera_name):
-    dates = OrderedDict()
+    after = request.args.get(
+        "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
+    )
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
 
-    # Retrieve all recordings for this camera
     recordings = (
-        Recordings.select()
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
-    )
-
-    last_end = 0
-    recording: Recordings
-    for recording in recordings:
-        date = datetime.fromtimestamp(recording.start_time)
-        key = date.strftime("%Y-%m-%d")
-        hour = date.strftime("%H")
-
-        # Create Day Record
-        if key not in dates:
-            dates[key] = OrderedDict()
-
-        # Create Hour Record
-        if hour not in dates[key]:
-            dates[key][hour] = {"delay": {}, "events": []}
-
-        # Check for delay
-        the_hour = datetime.strptime(f"{key} {hour}", "%Y-%m-%d %H").timestamp()
-        # diff current recording start time and the greater of the previous end time or top of the hour
-        diff = recording.start_time - max(last_end, the_hour)
-        # Determine seconds into recording
-        seconds = 0
-        if datetime.fromtimestamp(last_end).strftime("%H") == hour:
-            seconds = int(last_end - the_hour)
-        # Determine the delay
-        delay = min(int(diff), 3600 - seconds)
-        if delay > 1:
-            # Add an offset for any delay greater than a second
-            dates[key][hour]["delay"][seconds] = delay
-
-        last_end = recording.end_time
-
-    # Packing intervals to return all events with same label and overlapping times as one row.
-    # See: https://blogs.solidq.com/en/sqlserver/packing-intervals/
-    events = Event.raw(
-        """WITH C1 AS
-        (
-        SELECT id, label, camera, top_score, start_time AS ts, +1 AS type, 1 AS sub
-        FROM event
-        WHERE camera = ?
-        UNION ALL
-        SELECT id, label, camera, top_score, end_time + 15 AS ts, -1 AS type, 0 AS sub
-        FROM event
-        WHERE camera = ?
-        ),
-        C2 AS
-        (
-        SELECT C1.*,
-        SUM(type) OVER(PARTITION BY label ORDER BY ts, type DESC
-        ROWS BETWEEN UNBOUNDED PRECEDING
-        AND CURRENT ROW) - sub AS cnt
-        FROM C1
-        ),
-        C3 AS
-        (
-        SELECT id, label, camera, top_score, ts,
-        (ROW_NUMBER() OVER(PARTITION BY label ORDER BY ts) - 1) / 2 + 1
-        AS grpnum
-        FROM C2
-        WHERE cnt = 0
+        Recordings.select(
+            Recordings.id,
+            Recordings.start_time,
+            Recordings.end_time,
+            Recordings.motion,
+            Recordings.objects,
         )
-        SELECT id, label, camera, top_score, start_time, end_time
-        FROM event
-        WHERE camera = ? AND end_time IS NULL
-        UNION ALL
-        SELECT MIN(id) as id, label, camera, MAX(top_score) as top_score, MIN(ts) AS start_time, max(ts) AS end_time
-        FROM C3
-        GROUP BY label, grpnum
-        ORDER BY start_time;""",
-        camera_name,
-        camera_name,
-        camera_name,
+        .where(
+            Recordings.camera == camera_name,
+            Recordings.end_time >= after,
+            Recordings.start_time <= before,
+        )
+        .order_by(Recordings.start_time)
     )
 
-    event: Event
-    for event in events:
-        date = datetime.fromtimestamp(event.start_time)
-        key = date.strftime("%Y-%m-%d")
-        hour = date.strftime("%H")
-        if key in dates and hour in dates[key]:
-            dates[key][hour]["events"].append(
-                model_to_dict(
-                    event,
-                    exclude=[
-                        Event.false_positive,
-                        Event.zones,
-                        Event.thumbnail,
-                        Event.has_clip,
-                        Event.has_snapshot,
-                    ],
-                )
-            )
-
-    return jsonify(
-        [
-            {
-                "date": date,
-                "events": sum([len(value["events"]) for value in hours.values()]),
-                "recordings": [
-                    {"hour": hour, "delay": value["delay"], "events": value["events"]}
-                    for hour, value in hours.items()
-                ],
-            }
-            for date, hours in dates.items()
-        ]
-    )
+    return jsonify([e for e in recordings.dicts()])
 
 
 @bp.route("/<camera>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
