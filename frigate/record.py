@@ -9,10 +9,8 @@ import shutil
 import string
 import subprocess as sp
 import threading
-import time
 from collections import defaultdict
 from pathlib import Path
-from numpy import delete
 
 import psutil
 from peewee import JOIN, DoesNotExist
