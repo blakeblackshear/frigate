@@ -141,12 +141,14 @@ def set_retain(id):
 
 @bp.route("/events/<id>/plus", methods=("POST",))
 def send_to_plus(id):
-    if current_app.plus_api.is_active():
+    if not current_app.plus_api.is_active():
+        message = "PLUS_API_KEY environment variable is not set"
+        logger.error(message)
         return make_response(
             jsonify(
                 {
                     "success": False,
-                    "message": "PLUS_API_KEY environment variable is not set",
+                    "message": message,
                 }
             ),
             400,
@@ -155,14 +157,14 @@ def send_to_plus(id):
     try:
         event = Event.get(Event.id == id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Event" + id + " not found"}), 404
-        )
+        message = f"Event {id} not found"
+        logger.error(message)
+        return make_response(jsonify({"success": False, "message": message}), 404)
 
     if event.plus_id:
-        return make_response(
-            jsonify({"success": False, "message": "Already submitted to plus"}), 400
-        )
+        message = "Already submitted to plus"
+        logger.error(message)
+        return make_response(jsonify({"success": False, "message": message}), 400)
 
     # load clean.png
     try:
@@ -180,6 +182,7 @@ def send_to_plus(id):
     try:
         plus_id = current_app.plus_api.upload_image(image, event.camera)
     except Exception as ex:
+        logger.exception(ex)
         return make_response(
             jsonify({"success": False, "message": str(ex)}),
             400,
