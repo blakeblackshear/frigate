@@ -10,13 +10,7 @@ export function ApiProvider({ children, options }) {
   return (
     <SWRConfig
       value={{
-        fetcher: (arg) => {
-          if (typeof arg === 'string') {
-            return axios.get(arg).then((res) => res.data);
-          }
-          const [path, params] = arg;
-          return axios.get(path, { params }).then((res) => res.data);
-        },
+        fetcher: (path, params) => axios.get(path, { params }).then((res) => res.data),
         ...options,
       }}
     >
