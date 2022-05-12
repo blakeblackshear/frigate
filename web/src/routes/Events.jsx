@@ -270,18 +270,21 @@ export default function Events({ path, ...props }) {
             </option>
           ))}
         </select>
-        <select
-          className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.sub_label}
-          onChange={(e) => onFilter('sub_label', e.target.value)}
-        >
-          <option value="all">all sub labels</option>
-          {filterValues.sub_labels.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+        {
+          filterValues.sub_labels.length > 0 && (
+            <select
+              className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
+              value={searchParams.sub_label}
+              onChange={(e) => onFilter('sub_label', e.target.value)}
+            >
+              <option value="all">all sub labels</option>
+              {filterValues.sub_labels.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          )}
         <div ref={datePicker} className="ml-auto">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
