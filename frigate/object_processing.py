@@ -848,11 +848,15 @@ class TrackedObjectProcessor(threading.Thread):
     def should_mqtt_motion(self, camera, motion_boxes):
         # publish if motion is currently being detected
         if motion_boxes:
-            self.client.publish(
-                f"{self.topic_prefix}/{camera}/motion/detected",
-                True,
-                retain=False,
-            )
+            # only send True if motion hasn't been detected recently
+            if self.last_motion_updates[camera] == 0:
+                self.client.publish(
+                    f"{self.topic_prefix}/{camera}/motion/detected",
+                    True,
+                    retain=False,
+                )
+
+            # always updated latest motion
             self.last_motion_updates[camera] = int(time.time())
         elif not motion_boxes and self.last_motion_updates.get(camera, 0) != 0:
             mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
