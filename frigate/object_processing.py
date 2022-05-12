@@ -849,7 +849,7 @@ class TrackedObjectProcessor(threading.Thread):
         # publish if motion is currently being detected
         if motion_boxes:
             # only send True if motion hasn't been detected recently
-            if self.last_motion_updates[camera] == 0:
+            if self.last_motion_updates.get(camera, 0) == 0:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion/detected",
                     True,
