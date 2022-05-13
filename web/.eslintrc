@@ -14,7 +14,10 @@
   },
   "rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
-    "comma-dangle": ["error", { "objects": "always-multiline", "arrays": "always-multiline" }],
+    "comma-dangle": [
+      "error",
+      { "objects": "always-multiline", "arrays": "always-multiline", "imports": "always-multiline" }
+    ],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "no-console": "error"
   },

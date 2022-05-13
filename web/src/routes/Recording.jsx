@@ -1,5 +1,6 @@
 import { h } from 'preact';
-import { closestTo, format, parseISO } from 'date-fns';
+import { parseISO, endOfHour, startOfHour, getUnixTime } from 'date-fns';
+import { useEffect, useMemo } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import RecordingPlaylist from '../components/RecordingPlaylist';
@@ -7,15 +8,106 @@ import VideoPlayer from '../components/VideoPlayer';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 
-export default function Recording({ camera, date, hour, seconds }) {
-  const apiHost = useApiHost();
-  const { data } = useSWR(`${camera}/recordings`);
+export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
+  const currentDate = useMemo(
+    () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
+    [date, hour, minute, second]
+  );
 
-  if (!data) {
+  const apiHost = useApiHost();
+  const { data: recordingsSummary } = useSWR(`${camera}/recordings/summary`);
+
+  const recordingParams = {
+    before: getUnixTime(endOfHour(currentDate)),
+    after: getUnixTime(startOfHour(currentDate)),
+  };
+  const { data: recordings } = useSWR([`${camera}/recordings`, recordingParams]);
+
+  // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
+  const seekSeconds = useMemo(() => {
+    if (!recordings) {
+      return 0;
+    }
+    const currentUnix = getUnixTime(currentDate);
+
+    const hourStart = getUnixTime(startOfHour(currentDate));
+    let seekSeconds = 0;
+    recordings.every((segment) => {
+      // if the next segment is past the desired time, stop calculating
+      if (segment.start_time > currentUnix) {
+        return false;
+      }
+      // if the segment starts before the hour, skip the seconds before the hour
+      const start = segment.start_time < hourStart ? hourStart : segment.start_time;
+      // if the segment ends after the selected time, use the selected time for end
+      const end = segment.end_time > currentUnix ? currentUnix : segment.end_time;
+      seekSeconds += end - start;
+      return true;
+    });
+    return seekSeconds;
+  }, [recordings, currentDate]);
+
+  const playlist = useMemo(() => {
+    if (!recordingsSummary) {
+      return [];
+    }
+
+    const selectedDayRecordingData = recordingsSummary.find((s) => !date || s.day === date);
+
+    const [year, month, day] = selectedDayRecordingData.day.split('-');
+    return selectedDayRecordingData.hours
+      .map((h) => {
+        return {
+          name: h.hour,
+          description: `${camera} recording @ ${h.hour}:00.`,
+          sources: [
+            {
+              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/index.m3u8`,
+              type: 'application/vnd.apple.mpegurl',
+            },
+          ],
+        };
+      })
+      .reverse();
+  }, [apiHost, date, recordingsSummary, camera]);
+
+  const playlistIndex = useMemo(() => {
+    const index = playlist.findIndex((item) => item.name === hour);
+    if (index === -1) {
+      return 0;
+    }
+    return index;
+  }, [playlist, hour]);
+
+  useEffect(() => {
+    if (this.player) {
+      this.player.playlist(playlist);
+    }
+  }, [playlist]);
+
+  useEffect(() => {
+    if (this.player) {
+      this.player.playlist.currentItem(playlistIndex);
+    }
+  }, [playlistIndex]);
+
+  useEffect(() => {
+    if (this.player) {
+      // if the playlist has moved on to the next item, then reset
+      if (this.player.playlist.currentItem() !== playlistIndex) {
+        this.player.playlist.currentItem(playlistIndex);
+      }
+      this.player.currentTime(seekSeconds);
+      // try and play since the user is likely to have interacted with the dom
+      this.player.play();
+    }
+  }, [seekSeconds, playlistIndex]);
+
+  if (!recordingsSummary) {
     return <ActivityIndicator />;
   }
 
-  if (data.length === 0) {
+  if (recordingsSummary.length === 0) {
     return (
       <div className="space-y-4">
         <Heading>{camera} Recordings</Heading>
@@ -27,66 +119,18 @@ export default function Recording({ camera, date, hour, seconds }) {
     );
   }
 
-  const recordingDates = data.map((item) => item.date);
-  const selectedDate = closestTo(
-    date ? parseISO(date) : new Date(),
-    recordingDates.map((i) => parseISO(i))
-  );
-  const selectedKey = format(selectedDate, 'yyyy-MM-dd');
-  const [year, month, day] = selectedKey.split('-');
-  const playlist = [];
-  const hours = [];
-
-  for (const item of data) {
-    if (item.date === selectedKey) {
-      for (const recording of item.recordings) {
-        playlist.push({
-          name: `${selectedKey} ${recording.hour}:00`,
-          description: `${camera} recording @ ${recording.hour}:00.`,
-          sources: [
-            {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${recording.hour}/${camera}/index.m3u8`,
-              type: 'application/vnd.apple.mpegurl',
-            },
-          ],
-        });
-        hours.push(recording.hour);
-      }
-    }
-  }
-
-  const selectedHour = hours.indexOf(hour);
-
-  if (this.player) {
-    this.player.playlist([]);
-    this.player.playlist(playlist);
-    this.player.playlist.autoadvance(0);
-    if (selectedHour !== -1) {
-      this.player.playlist.currentItem(selectedHour);
-      if (seconds !== undefined) {
-        this.player.currentTime(seconds);
-      }
-    }
-    // Force playback rate to be correct
-    const playbackRate = this.player.playbackRate();
-    this.player.defaultPlaybackRate(playbackRate);
-  }
-
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>{camera} Recordings</Heading>
 
       <VideoPlayer
         onReady={(player) => {
+          player.on('ratechange', () => player.defaultPlaybackRate(player.playbackRate()));
           if (player.playlist) {
             player.playlist(playlist);
             player.playlist.autoadvance(0);
-            if (selectedHour !== -1) {
-              player.playlist.currentItem(selectedHour);
-              if (seconds !== undefined) {
-                player.currentTime(seconds);
-              }
-            }
+            player.playlist.currentItem(playlistIndex);
+            player.currentTime(seekSeconds);
             this.player = player;
           }
         }}
@@ -94,7 +138,7 @@ export default function Recording({ camera, date, hour, seconds }) {
           this.player = null;
         }}
       >
-        <RecordingPlaylist camera={camera} recordings={data} selectedDate={selectedKey} selectedHour={hour} />
+        <RecordingPlaylist camera={camera} recordings={recordingsSummary} selectedDate={currentDate} />
       </VideoPlayer>
     </div>
   );
