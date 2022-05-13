@@ -247,3 +247,16 @@ HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed i
 ### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
+
+### `GET /api/<camera_name>/recordings/summary`
+
+Hourly summary of recordings data for a camera.
+
+### `GET /api/<camera_name>/recordings`
+
+Get recording segment details for the given timestamp range.
+
+| param    | Type | Description                           |
+| -------- | ---- | ------------------------------------- |
+| `after`  | int  | Unix timestamp for beginning of range |
+| `before` | int  | Unix timestamp for end of range       |
