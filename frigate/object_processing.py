@@ -852,7 +852,7 @@ class TrackedObjectProcessor(threading.Thread):
             if self.last_motion_updates.get(camera, 0) == 0:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion/detected",
-                    True,
+                    "ON",
                     retain=False,
                 )
 
@@ -866,7 +866,7 @@ class TrackedObjectProcessor(threading.Thread):
             if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion/detected",
-                    False,
+                    "OFF",
                     retain=False,
                 )
                 # reset the last_motion so redundant `off` commands aren't sent
