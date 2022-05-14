@@ -852,10 +852,10 @@ class TrackedObjectProcessor(threading.Thread):
                 )
 
             # always updated latest motion
-            self.last_motion_updates[camera] = datetime.datetime.now().timestamp
+            self.last_motion_updates[camera] = int(datetime.datetime.now().timestamp())
         elif not motion_boxes and self.last_motion_updates.get(camera, 0) != 0:
             mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
-            now = datetime.datetime.now().timestamp
+            now = int(datetime.datetime.now().timestamp())
 
             # If no motion, make sure the off_delay has passed
             if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
