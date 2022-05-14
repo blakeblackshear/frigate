@@ -79,12 +79,13 @@ RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
-    jellyfin-ffmpeg \
     && pip3 install -U /wheels/*.whl \
-    # amd64 specific packages
+    # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    apt-get -qq install --no-install-recommends -y \
-    mesa-va-drivers; \
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    mesa-va-drivers jellyfin-ffmpeg; else \
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    ffmpeg; \
     fi \
     && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
