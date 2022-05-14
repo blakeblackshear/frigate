@@ -851,7 +851,7 @@ class TrackedObjectProcessor(threading.Thread):
             # only send True if motion hasn't been detected recently
             if self.last_motion_updates.get(camera, 0) == 0:
                 self.client.publish(
-                    f"{self.topic_prefix}/{camera}/motion/detected",
+                    f"{self.topic_prefix}/{camera}/motion",
                     "ON",
                     retain=False,
                 )
@@ -865,7 +865,7 @@ class TrackedObjectProcessor(threading.Thread):
             # If no motion, make sure the off_delay has passed
             if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
                 self.client.publish(
-                    f"{self.topic_prefix}/{camera}/motion/detected",
+                    f"{self.topic_prefix}/{camera}/motion",
                     "OFF",
                     retain=False,
                 )
