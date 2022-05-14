@@ -125,8 +125,9 @@ NOTE: Turning off motion detection will fail if detection is not disabled.
 
 ### `frigate/<camera_name>/motion`
 
-Whether camera_name is currently detecting motion. Expected valeus are `ON` and `OFF`.
-NOTE: Will reset to `OFF` after configurable amount of time (30 seconds by default).
+Whether camera_name is currently detecting motion. Expected values are `ON` and `OFF`.
+NOTE: After motion is initially detected, `ON` will be set until no motion has
+been detected for `motion_off_delay` seconds (30 by default).
 
 ### `frigate/<camera_name>/motion/state`
 
