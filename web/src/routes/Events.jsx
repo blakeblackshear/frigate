@@ -388,7 +388,7 @@ export default function Events({ path, ...props }) {
                     onClick={() => (viewEvent === event.id ? setViewEvent(null) : setViewEvent(event.id))}
                   >
                     <div
-                      className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain"
+                      className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center"
                       style={{
                         'background-image': `url(${apiHost}/api/events/${event.id}/thumbnail.jpg)`,
                       }}
