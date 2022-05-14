@@ -18,7 +18,11 @@ const defaultSeekOptions = {
 
 export default function VideoPlayer({ children, options, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
   const playerRef = useRef();
-
+  
+  if (!videojs.browser.IS_FIREFOX) {
+    defaultOptions.playbackRates.push(16);
+  }
+  
   useEffect(() => {
     const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
       onReady(player);
