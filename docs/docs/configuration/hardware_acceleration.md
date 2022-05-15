@@ -5,20 +5,9 @@ title: Hardware Acceleration
 
 It is recommended to update your configuration to enable hardware accelerated decoding in ffmpeg. Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
-### Raspberry Pi 3/4 (32-bit OS)
+### Raspberry Pi 3/4
 
 Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config > Performance Options > GPU Memory).
-**NOTICE**: If you are using the addon, you may need to turn off `Protection mode` for hardware acceleration.
-
-```yaml
-ffmpeg:
-  hwaccel_args:
-    - -c:v
-    - h264_mmal
-```
-
-### Raspberry Pi 3/4 (64-bit OS)
-
 **NOTICE**: If you are using the addon, you may need to turn off `Protection mode` for hardware acceleration.
 
 ```yaml
