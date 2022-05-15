@@ -127,7 +127,7 @@ NOTE: Turning off motion detection will fail if detection is not disabled.
 
 Whether camera_name is currently detecting motion. Expected values are `ON` and `OFF`.
 NOTE: After motion is initially detected, `ON` will be set until no motion has
-been detected for `motion_off_delay` seconds (30 by default).
+been detected for `mqtt_off_delay` seconds (30 by default).
 
 ### `frigate/<camera_name>/motion/state`
 
