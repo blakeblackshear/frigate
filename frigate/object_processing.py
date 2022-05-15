@@ -647,7 +647,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
-        self.last_motion_updates: dict[str, int] = {}
+        self.last_motion_detected: dict[str, float] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(("start", camera, obj.to_dict()))
@@ -840,11 +840,11 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_mqtt_motion(self, camera, motion_boxes):
+    def update_mqtt_motion(self, camera, frame_time, motion_boxes):
         # publish if motion is currently being detected
         if motion_boxes:
-            # only send True if motion hasn't been detected recently
-            if self.last_motion_updates.get(camera, 0) == 0:
+            # only send ON if motion isn't already active
+            if self.last_motion_detected.get(camera, 0) == 0:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion",
                     "ON",
@@ -852,20 +852,19 @@ class TrackedObjectProcessor(threading.Thread):
                 )
 
             # always updated latest motion
-            self.last_motion_updates[camera] = int(datetime.datetime.now().timestamp())
-        elif not motion_boxes and self.last_motion_updates.get(camera, 0) != 0:
+            self.last_motion_detected[camera] = frame_time
+        elif self.last_motion_detected.get(camera, 0) > 0:
             mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
-            now = int(datetime.datetime.now().timestamp())
 
             # If no motion, make sure the off_delay has passed
-            if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
+            if frame_time - self.last_motion_detected.get(camera, 0) >= mqtt_delay:
                 self.client.publish(
                     f"{self.topic_prefix}/{camera}/motion",
                     "OFF",
                     retain=False,
                 )
                 # reset the last_motion so redundant `off` commands aren't sent
-                self.last_motion_updates[camera] = 0
+                self.last_motion_detected[camera] = 0
 
     def get_best(self, camera, label):
         # TODO: need a lock here
@@ -902,7 +901,7 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
 
-            self.should_mqtt_motion(camera, motion_boxes)
+            self.update_mqtt_motion(camera, frame_time, motion_boxes)
 
             tracked_objects = [
                 o.to_dict() for o in camera_state.tracked_objects.values()
