@@ -246,12 +246,14 @@ motion:
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
   improve_contrast: False
+  # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
+  mqtt_off_delay: 30
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
-  # WARNING: If recording is disabled in the config, turning it on via 
+  # WARNING: If recording is disabled in the config, turning it on via
   #          the UI or MQTT later will have no effect.
   # WARNING: Frigate does not currently support limiting recordings based
   #          on available disk space automatically. If using recordings,

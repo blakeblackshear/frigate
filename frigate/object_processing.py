@@ -1,29 +1,24 @@
 import base64
-import copy
 import datetime
-import hashlib
-import itertools
 import json
 import logging
 import os
 import queue
 import threading
-import time
 from collections import Counter, defaultdict
-from statistics import mean, median
+from statistics import median
 from typing import Callable
 
 import cv2
 import numpy as np
 
 from frigate.config import CameraConfig, SnapshotsConfig, RecordConfig, FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.const import CLIPS_DIR
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
     draw_box_with_label,
     draw_timestamp,
-    load_labels,
 )
 
 logger = logging.getLogger(__name__)
@@ -652,6 +647,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
+        self.last_motion_updates: dict[str, int] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(("start", camera, obj.to_dict()))
@@ -844,6 +840,33 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
+    def should_mqtt_motion(self, camera, motion_boxes):
+        # publish if motion is currently being detected
+        if motion_boxes:
+            # only send True if motion hasn't been detected recently
+            if self.last_motion_updates.get(camera, 0) == 0:
+                self.client.publish(
+                    f"{self.topic_prefix}/{camera}/motion",
+                    "ON",
+                    retain=False,
+                )
+
+            # always updated latest motion
+            self.last_motion_updates[camera] = int(datetime.datetime.now().timestamp())
+        elif not motion_boxes and self.last_motion_updates.get(camera, 0) != 0:
+            mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
+            now = int(datetime.datetime.now().timestamp())
+
+            # If no motion, make sure the off_delay has passed
+            if now - self.last_motion_updates.get(camera, 0) >= mqtt_delay:
+                self.client.publish(
+                    f"{self.topic_prefix}/{camera}/motion",
+                    "OFF",
+                    retain=False,
+                )
+                # reset the last_motion so redundant `off` commands aren't sent
+                self.last_motion_updates[camera] = 0
+
     def get_best(self, camera, label):
         # TODO: need a lock here
         camera_state = self.camera_states[camera]
@@ -878,6 +901,8 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state.update(
                 frame_time, current_tracked_objects, motion_boxes, regions
             )
+
+            self.should_mqtt_motion(camera, motion_boxes)
 
             tracked_objects = [
                 o.to_dict() for o in camera_state.tracked_objects.values()

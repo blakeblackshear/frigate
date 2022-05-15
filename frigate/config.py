@@ -134,6 +134,10 @@ class MotionConfig(FrigateBaseModel):
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
+    mqtt_off_delay: int = Field(
+        default=30,
+        title="Delay for updating MQTT with no motion detected.",
+    )
 
 
 class RuntimeMotionConfig(MotionConfig):
