@@ -6,24 +6,25 @@ import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
 import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
-const defaultOptions = {
-  controls: true,
-  playbackRates: [0.5, 1, 2, 4, 8],
-  fluid: true,
-};
-const defaultSeekOptions = {
-  forward: 30,
-  back: 10,
-};
-
 export default function VideoPlayer({ children, options, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
   const playerRef = useRef();
-  
-  if (!videojs.browser.IS_FIREFOX) {
-    defaultOptions.playbackRates.push(16);
-  }
-  
+
   useEffect(() => {
+    const defaultOptions = {
+      controls: true,
+      playbackRates: [0.5, 1, 2, 4, 8],
+      fluid: true,
+    };
+
+    const defaultSeekOptions = {
+      forward: 30,
+      back: 10,
+    };
+
+    if (!videojs.browser.IS_FIREFOX) {
+      defaultOptions.playbackRates.push(16);
+    }
+
     const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
       onReady(player);
     });

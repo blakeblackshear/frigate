@@ -123,6 +123,12 @@ Topic with current state of snapshots for a camera. Published values are `ON` an
 Topic to turn motion detection for a camera on and off. Expected values are `ON` and `OFF`.
 NOTE: Turning off motion detection will fail if detection is not disabled.
 
+### `frigate/<camera_name>/motion`
+
+Whether camera_name is currently detecting motion. Expected values are `ON` and `OFF`.
+NOTE: After motion is initially detected, `ON` will be set until no motion has
+been detected for `mqtt_off_delay` seconds (30 by default).
+
 ### `frigate/<camera_name>/motion/state`
 
 Topic with current state of motion detection for a camera. Published values are `ON` and `OFF`.
