@@ -59,7 +59,7 @@ export default function Events({ path, ...props }) {
     has_snapshot: false,
     plus_id: undefined,
   });
-  const [deleteState, setDeleteState] = useState({
+  const [deleteFavoriteState, setDeleteFavoriteState] = useState({
     deletingFavoriteEventId: null,
     showDeleteFavorite: false,
   });
@@ -122,7 +122,7 @@ export default function Events({ path, ...props }) {
     e.stopPropagation();
 
     if (saved) {
-      setDeleteState({ deletingFavoriteEventId: eventId, showDeleteFavorite: true });
+      setDeleteFavoriteState({ deletingFavoriteEventId: eventId, showDeleteFavorite: true });
     } else {
       const response = await axios.delete(`events/${eventId}`);
       if (response.status === 200) {
@@ -383,14 +383,14 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
-      {deleteState.showDeleteFavorite && (
+      {deleteFavoriteState.showDeleteFavorite && (
         <Dialog>
           <div className="p-4">
             <Heading size="lg">Delete Saved Event?</Heading>
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" onClick={(e) => { setDeleteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteState.deletingFavoriteEventId, false) }} type="text">
+            <Button className="ml-2" onClick={(e) => { setDeleteFavoriteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false) }} type="text">
               Delete
             </Button>
           </div>
