@@ -50,7 +50,6 @@ export default function Events({ path, ...props }) {
     showDatePicker: false,
     showCalendar: false,
     showPlusConfig: false,
-    showDeleteFavorite: false,
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
@@ -59,6 +58,10 @@ export default function Events({ path, ...props }) {
     has_clip: false,
     has_snapshot: false,
     plus_id: undefined,
+  });
+  const [deleteState, setDeleteState] = useState({
+    deletingFavoriteEventId: null,
+    showDeleteFavorite: false,
   });
 
   const eventsFetcher = useCallback((path, params) => {
@@ -115,11 +118,11 @@ export default function Events({ path, ...props }) {
     }
   };
 
-  const onDelete = async (e, eventId, favorited) => {
+  const onDelete = async (e, eventId, saved) => {
     e.stopPropagation();
 
-    if (favorited) {
-
+    if (saved) {
+      setDeleteState({ deletingFavoriteEventId: eventId, showDeleteFavorite: true });
     } else {
       const response = await axios.delete(`events/${eventId}`);
       if (response.status === 200) {
@@ -380,14 +383,14 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
-      {state.showDeleteFavorite && (
+      {deleteState.showDeleteFavorite && (
         <Dialog>
           <div className="p-4">
             <Heading size="lg">Delete Saved Event?</Heading>
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" onClick={() => setState({ ...state, showDeleteFavorite: false })} type="text">
+            <Button className="ml-2" onClick={(e) => { setDeleteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteState.deletingFavoriteEventId, false) }} type="text">
               Delete
             </Button>
           </div>
