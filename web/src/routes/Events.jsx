@@ -50,6 +50,7 @@ export default function Events({ path, ...props }) {
     showDatePicker: false,
     showCalendar: false,
     showPlusConfig: false,
+    showDeleteFavorite: false,
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
@@ -114,11 +115,16 @@ export default function Events({ path, ...props }) {
     }
   };
 
-  const onDelete = async (e, eventId) => {
+  const onDelete = async (e, eventId, favorited) => {
     e.stopPropagation();
-    const response = await axios.delete(`events/${eventId}`);
-    if (response.status === 200) {
-      mutate();
+
+    if (favorited) {
+
+    } else {
+      const response = await axios.delete(`events/${eventId}`);
+      if (response.status === 200) {
+        mutate();
+      }
     }
   };
 
@@ -374,6 +380,19 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
+      {state.showDeleteFavorite && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Delete Saved Event?</Heading>
+            <p className="mb-2">Confirm deletion of saved event.</p>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => setState({ ...state, showDeleteFavorite: false })} type="text">
+              Delete
+            </Button>
+          </div>
+        </Dialog>
+      )}
       <div className="space-y-2">
         {eventPages ? (
           eventPages.map((page, i) => {
@@ -441,7 +460,7 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id)} />
+                        <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
 
                         <Download
                           className="h-6 w-6 mt-auto"
