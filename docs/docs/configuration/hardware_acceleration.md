@@ -69,7 +69,9 @@ services:
     resources:
       reservations:
         devices:
-        - capabilities: [gpu]
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 ```
 
 The decoder you need to pass in the `hwaccel_args` will depend on the input video.
