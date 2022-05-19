@@ -4,7 +4,7 @@ import useSWR, { SWRConfig } from 'swr';
 import { MqttProvider } from './mqtt';
 import axios from 'axios';
 
-axios.defaults.baseURL = `${baseUrl}/api/`;
+axios.defaults.baseURL = `${baseUrl}api/`;
 
 export function ApiProvider({ children, options }) {
   return (

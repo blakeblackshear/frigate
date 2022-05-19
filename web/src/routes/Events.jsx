@@ -463,7 +463,7 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <Delete className="cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
+                        <Delete className="h-6 w-6 cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
 
                         <Download
                           className="h-6 w-6 mt-auto"
