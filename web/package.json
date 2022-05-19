@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "lint": "eslint ./ --ext .jsx,.js,.tsx,.ts",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base=/BASE_PATH/",
     "preview": "vite preview",
     "test": "jest"
   },
