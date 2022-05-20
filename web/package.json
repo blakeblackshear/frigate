@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "lint": "eslint ./ --ext .jsx,.js,.tsx,.ts",
     "build": "tsc && vite build --base=/BASE_PATH/",
     "preview": "vite preview",
