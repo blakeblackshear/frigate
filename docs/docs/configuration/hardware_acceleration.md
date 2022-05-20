@@ -43,6 +43,8 @@ ffmpeg:
 
 ### Intel-based CPUs (>=10th Generation) via Quicksync
 
+**Note:** You might also need to set `LIBVA_DRIVER_NAME=iHD` as an environment variable on the container. Check with `vainfo` inside the container to see if it works.
+
 ```yaml
 ffmpeg:
   hwaccel_args:
