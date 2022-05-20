@@ -2,7 +2,7 @@ import { rest } from 'msw';
 import { API_HOST } from '../src/env';
 
 export const handlers = [
-  rest.get(`${API_HOST}/api/config`, (req, res, ctx) => {
+  rest.get(`${API_HOST}api/config`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -35,7 +35,7 @@ export const handlers = [
       })
     );
   }),
-  rest.get(`${API_HOST}/api/stats`, (req, res, ctx) => {
+  rest.get(`${API_HOST}api/stats`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -54,7 +54,7 @@ export const handlers = [
       })
     );
   }),
-  rest.get(`${API_HOST}/api/events`, (req, res, ctx) => {
+  rest.get(`${API_HOST}api/events`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json(

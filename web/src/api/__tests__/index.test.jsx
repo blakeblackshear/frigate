@@ -18,6 +18,6 @@ describe('useApiHost', () => {
         <Test />
       </ApiProvider>
     );
-    expect(screen.queryByText('http://base-url.local:5000')).toBeInTheDocument();
+    expect(screen.queryByText('http://base-url.local:5000/')).toBeInTheDocument();
   });
 });
