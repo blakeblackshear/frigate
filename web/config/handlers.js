@@ -72,7 +72,7 @@ export const handlers = [
       )
     );
   }),
-  rest.get(`${API_HOST}/api/sub_labels`, (req, res, ctx) => {
+  rest.get(`${API_HOST}api/sub_labels`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json([
