@@ -1,23 +1,18 @@
-import json
+from ctypes import c_char
 import logging
 import multiprocessing as mp
 from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event
-from multiprocessing.context import Process
 import os
 import signal
 import sys
-import threading
-from logging.handlers import QueueHandler
 from typing import Optional
 from types import FrameType
 
 import traceback
-import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
-from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
@@ -108,6 +103,8 @@ class FrigateApp:
                 "frame_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
+                "birdseye_enabled": mp.Value("i", self.config.cameras[camera_name].birdseye.enabled),
+                "birdseye_mode": mp.Array(c_char, self.config.cameras[camera_name].birdseye.mode),
             }
 
     def set_log_levels(self) -> None:
