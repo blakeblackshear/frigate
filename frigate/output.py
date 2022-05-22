@@ -23,6 +23,7 @@ from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import BASE_DIR
+from frigate.types import CameraMetricsTypes
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -89,10 +90,16 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config, frame_manager: SharedMemoryFrameManager):
+    def __init__(
+        self,
+        config,
+        frame_manager: SharedMemoryFrameManager,
+        process_info: dict[str, CameraMetricsTypes],
+    ):
         self.config = config
         self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
+        self.process_info = process_info
         width = config.birdseye.width
         height = config.birdseye.height
         self.frame_shape = (height, width)
@@ -310,15 +317,15 @@ class BirdsEyeFrameManager:
 
         return True
 
-    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+    def update(self, camera, object_count, motion_count, frame_time) -> bool:
         # don't process if birdseye is disabled for this camera
-        camera_config = self.config.cameras[camera].birdseye
-        if not camera_config.enabled:
+        camera_info = self.process_info[camera]
+        if not camera_info["birdseye_enabled"].value:
             return False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(camera_config.mode, object_count, motion_count):
+        if self.camera_active(camera_info["birdseye_mode"].value, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -334,7 +341,11 @@ class BirdsEyeFrameManager:
         return False
 
 
-def output_frames(config: FrigateConfig, video_output_queue):
+def output_frames(
+    config: FrigateConfig,
+    video_output_queue,
+    process_info: dict[str, CameraMetricsTypes],
+):
     threading.current_thread().name = f"output"
     setproctitle(f"frigate.output")
 
@@ -397,7 +408,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(config, frame_manager)
+    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, process_info)
 
     while not stop_event.is_set():
         try:
@@ -432,7 +443,6 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 len([o for o in current_tracked_objects if not o["stationary"]]),
                 len(motion_boxes),
                 frame_time,
-                frame,
             ):
                 converters["birdseye"].write(birdseye_manager.frame.tobytes())
 

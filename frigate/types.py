@@ -22,6 +22,8 @@ class CameraMetricsTypes(TypedDict):
     process_fps: Synchronized
     read_start: Synchronized
     skipped_fps: Synchronized
+    birdseye_enabled: Synchronized
+    birdseye_mode: Synchronized
 
 
 class StatsTrackingTypes(TypedDict):
