@@ -156,3 +156,19 @@ Topic to adjust motion contour area for a camera. Expected value is an integer.
 ### `frigate/<camera_name>/motion_contour_area/state`
 
 Topic with current motion contour area for a camera. Published value is an integer.
+### `frigate/<camera_name>/birdseye/set`
+
+Topic to turn birdseye for a camera on and off. Expected valures are `ON` and `OFF`.
+
+### `frigate/camera_name>/birdseye/state`
+
+Topic with current state of birdseye for a camera. Published valeus are `ON` and `OFF`.
+
+### `frigate/camera_name>/birdseye/mode/set`
+
+Topic to set birdseye mode for a camera. Expected values are `continuous`, `objects`, and `motion`.
+
+### `frigate/<camera_name>/birdseye/mode`
+
+Topic with current birdseye mode for a camera. Published values are `continuous`, `objects`, and `motion`.
+>>>>>>> adb6126 (Add docs for mqtt)
