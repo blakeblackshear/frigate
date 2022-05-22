@@ -1,13 +1,7 @@
 import copy
 import datetime
-import hashlib
-import json
 import logging
-import math
 import signal
-import subprocess as sp
-import threading
-import time
 import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
@@ -15,7 +9,6 @@ from multiprocessing import shared_memory
 from typing import AnyStr
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import psutil
@@ -623,6 +616,30 @@ def load_labels(path, encoding="utf-8"):
             return {int(index): label.strip() for index, label in pairs}
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
+
+
+def birdseye_mode_from_int(mode: int) -> str:
+    """Returns a string name for a given int"""
+    if mode == 1:
+        return "continuous"
+    elif mode == 2:
+        return "motion"
+    elif mode == 3:
+        return "objects"
+    else:
+        logger.error(f"{mode} is not a valid int for birdseye mode.")
+
+
+def int_from_birdseye_mode(mode: str) -> int:
+    """Returns an int for a given birdseye mode string."""
+    if mode == "continuous":
+        return 1
+    elif mode == "motion":
+        return 2
+    elif mode == "objects":
+        return 3
+    else:
+        logger.error(f"{mode} is not a valid birdseye mode.")
 
 
 class FrameManager(ABC):

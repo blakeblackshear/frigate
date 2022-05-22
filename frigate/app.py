@@ -1,4 +1,3 @@
-from ctypes import c_char
 import logging
 import multiprocessing as mp
 from multiprocessing.queues import Queue
@@ -27,6 +26,7 @@ from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
+from frigate.util import int_from_birdseye_mode
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -104,7 +104,7 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
                 "birdseye_enabled": mp.Value("i", self.config.cameras[camera_name].birdseye.enabled),
-                "birdseye_mode": mp.Array(c_char, self.config.cameras[camera_name].birdseye.mode),
+                "birdseye_mode": mp.Value("i", int_from_birdseye_mode(self.config.cameras[camera_name].birdseye.mode)),
             }
 
     def set_log_levels(self) -> None:
