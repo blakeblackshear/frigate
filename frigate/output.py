@@ -325,7 +325,9 @@ class BirdsEyeFrameManager:
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(camera_info["birdseye_mode"].value, object_count, motion_count):
+        if self.camera_active(
+            camera_info["birdseye_mode"].value, object_count, motion_count
+        ):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()

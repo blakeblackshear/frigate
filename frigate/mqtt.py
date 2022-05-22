@@ -217,19 +217,46 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         birdseye_settings = config.cameras[camera_name].birdseye
 
         if payload == BirdseyeModeEnum.continuous:
-            if birdseye_mode_from_int(camera_metrics[camera_name]["birdseye_mode"].value) != BirdseyeModeEnum.continuous:
-                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
-                camera_metrics[camera_name]["birdseye_mode"].value = int_from_birdseye_mode(BirdseyeModeEnum.continuous)
+            if (
+                birdseye_mode_from_int(
+                    camera_metrics[camera_name]["birdseye_mode"].value
+                )
+                != BirdseyeModeEnum.continuous
+            ):
+                logger.info(
+                    f"Setting birdseye mode for {camera_name} to {payload} via mqtt"
+                )
+                camera_metrics[camera_name][
+                    "birdseye_mode"
+                ].value = int_from_birdseye_mode(BirdseyeModeEnum.continuous)
                 birdseye_settings.mode = BirdseyeModeEnum.continuous
         elif payload == BirdseyeModeEnum.motion:
-            if birdseye_mode_from_int(camera_metrics[camera_name]["birdseye_mode"].value) != BirdseyeModeEnum.motion:
-                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
-                camera_metrics[camera_name]["birdseye_mode"].value = int_from_birdseye_mode(BirdseyeModeEnum.motion)
+            if (
+                birdseye_mode_from_int(
+                    camera_metrics[camera_name]["birdseye_mode"].value
+                )
+                != BirdseyeModeEnum.motion
+            ):
+                logger.info(
+                    f"Setting birdseye mode for {camera_name} to {payload} via mqtt"
+                )
+                camera_metrics[camera_name][
+                    "birdseye_mode"
+                ].value = int_from_birdseye_mode(BirdseyeModeEnum.motion)
                 birdseye_settings.mode = BirdseyeModeEnum.motion
         elif payload == BirdseyeModeEnum.objects:
-            if birdseye_mode_from_int(camera_metrics[camera_name]["birdseye_mode"].value) != BirdseyeModeEnum.objects:
-                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
-                camera_metrics[camera_name]["birdseye_mode"].value = int_from_birdseye_mode(BirdseyeModeEnum.objects)
+            if (
+                birdseye_mode_from_int(
+                    camera_metrics[camera_name]["birdseye_mode"].value
+                )
+                != BirdseyeModeEnum.objects
+            ):
+                logger.info(
+                    f"Setting birdseye mode for {camera_name} to {payload} via mqtt"
+                )
+                camera_metrics[camera_name][
+                    "birdseye_mode"
+                ].value = int_from_birdseye_mode(BirdseyeModeEnum.objects)
                 birdseye_settings.mode = BirdseyeModeEnum.objects
         else:
             logger.warning(f"Received unsupported value at {message.topic}: {payload}")

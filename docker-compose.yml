@@ -13,9 +13,9 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+    #devices:
+    #  - /dev/bus/usb:/dev/bus/usb
+    #  - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - .:/lab/frigate:cached

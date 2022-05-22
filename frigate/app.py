@@ -103,8 +103,15 @@ class FrigateApp:
                 "frame_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
-                "birdseye_enabled": mp.Value("i", self.config.cameras[camera_name].birdseye.enabled),
-                "birdseye_mode": mp.Value("i", int_from_birdseye_mode(self.config.cameras[camera_name].birdseye.mode)),
+                "birdseye_enabled": mp.Value(
+                    "i", self.config.cameras[camera_name].birdseye.enabled
+                ),
+                "birdseye_mode": mp.Value(
+                    "i",
+                    int_from_birdseye_mode(
+                        self.config.cameras[camera_name].birdseye.mode
+                    ),
+                ),
             }
 
     def set_log_levels(self) -> None:
