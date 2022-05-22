@@ -12,7 +12,7 @@ from ws4py.server.wsgirefserver import (
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
-from frigate.config import FrigateConfig
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.util import restart_frigate
 
 logger = logging.getLogger(__name__)
@@ -163,7 +163,6 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         logger.info(f"Setting motion threshold for {camera_name} via mqtt: {payload}")
         camera_metrics[camera_name]["motion_threshold"].value = payload
         motion_settings.threshold = payload
-
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
@@ -187,6 +186,53 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         )
         camera_metrics[camera_name]["motion_contour_area"].value = payload
         motion_settings.contour_area = payload
+
+    def on_birdseye_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_birdseye_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        birdseye_settings = config.cameras[camera_name].birdseye
+
+        if payload == "ON":
+            if not camera_metrics[camera_name]["birdseye_enabled"].value:
+                logger.info(f"Turning on birdseye for {camera_name} via mqtt")
+                camera_metrics[camera_name]["birdseye_enabled"].value = True
+                birdseye_settings.enabled = True
+        elif payload == "OFF":
+            if camera_metrics[camera_name]["birdseye_enabled"].value:
+                logger.info(f"Turning off birdseye for {camera_name} via mqtt")
+                camera_metrics[camera_name]["birdseye_enabled"].value = False
+                birdseye_settings.enabled = False
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
+
+    def on_birdseye_mode_command(client, userdata, message):
+        payload = message.payload.decode()
+        logger.debug(f"on_birdseye_mode_toggle: {message.topic} {payload}")
+
+        camera_name = message.topic.split("/")[-3]
+
+        birdseye_settings = config.cameras[camera_name].birdseye
+
+        if payload == BirdseyeModeEnum.continuous:
+            if camera_metrics[camera_name]["birdseye_mode"].value != BirdseyeModeEnum.continuous:
+                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
+                camera_metrics[camera_name]["birdseye_mode"].value = BirdseyeModeEnum.continuous
+                birdseye_settings.mode = BirdseyeModeEnum.continuous
+        elif payload == BirdseyeModeEnum.motion:
+            if camera_metrics[camera_name]["birdseye_mode"].value != BirdseyeModeEnum.motion:
+                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
+                camera_metrics[camera_name]["birdseye_mode"].value = BirdseyeModeEnum.motion
+                birdseye_settings.mode = BirdseyeModeEnum.motion
+        elif payload == BirdseyeModeEnum.objects:
+            if camera_metrics[camera_name]["birdseye_mode"].value != BirdseyeModeEnum.objects:
+                logger.info(f"Setting birdseye mode for {camera_name} to {payload} via mqtt")
+                camera_metrics[camera_name]["birdseye_mode"].value = BirdseyeModeEnum.objects
+                birdseye_settings.mode = BirdseyeModeEnum.objects
+        else:
+            logger.warning(f"Received unsupported value at {message.topic}: {payload}")
 
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
@@ -242,12 +288,21 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             on_improve_contrast_command,
         )
         client.message_callback_add(
+<<<<<<< HEAD
             f"{mqtt_config.topic_prefix}/{name}/motion_threshold/set",
             on_motion_threshold_command,
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
             on_motion_contour_area_command,
+=======
+            f"{mqtt_config.topic_prefix}/{name}/birdseye/set",
+            on_birdseye_command,
+        )
+        client.message_callback_add(
+            f"{mqtt_config.topic_prefix}/{name}/birdseye/mode/set",
+            on_birdseye_mode_command,
+>>>>>>> f223cd0 (Add mqtt topics)
         )
 
     client.message_callback_add(
@@ -318,6 +373,15 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             f"{mqtt_config.topic_prefix}/{name}/motion",
             "OFF",
             retain=False,
+        )
+            f"{mqtt_config.topic_prefix}/{name}/birdseye/state",
+            "ON" if config.cameras[name].birdseye.enabled else "OFF",
+            retain=True,
+        )
+        client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/birdseye/mode",
+            config.cameras[name].birdseye.mode,
+            retain=True,
         )
 
     return client
