@@ -59,6 +59,10 @@ export default function Events({ path, ...props }) {
     has_snapshot: false,
     plus_id: undefined,
   });
+  const [deleteFavoriteState, setDeleteFavoriteState] = useState({
+    deletingFavoriteEventId: null,
+    showDeleteFavorite: false,
+  });
 
   const eventsFetcher = useCallback((path, params) => {
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
@@ -114,11 +118,16 @@ export default function Events({ path, ...props }) {
     }
   };
 
-  const onDelete = async (e, eventId) => {
+  const onDelete = async (e, eventId, saved) => {
     e.stopPropagation();
-    const response = await axios.delete(`events/${eventId}`);
-    if (response.status === 200) {
-      mutate();
+
+    if (saved) {
+      setDeleteFavoriteState({ deletingFavoriteEventId: eventId, showDeleteFavorite: true });
+    } else {
+      const response = await axios.delete(`events/${eventId}`);
+      if (response.status === 200) {
+        mutate();
+      }
     }
   };
 
@@ -374,6 +383,19 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
+      {deleteFavoriteState.showDeleteFavorite && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Delete Saved Event?</Heading>
+            <p className="mb-2">Confirm deletion of saved event.</p>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" color="red" onClick={(e) => { setDeleteFavoriteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false) }} type="text">
+              Delete
+            </Button>
+          </div>
+        </Dialog>
+      )}
       <div className="space-y-2">
         {eventPages ? (
           eventPages.map((page, i) => {
@@ -441,7 +463,7 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <Delete className="h-6 w-6 cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id)} />
+                        <Delete className="h-6 w-6 cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
 
                         <Download
                           className="h-6 w-6 mt-auto"
