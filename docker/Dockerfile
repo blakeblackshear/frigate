@@ -46,6 +46,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
+ARG JELLYFIN_FFMPEG_VERSION=4.3.2-1
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND="noninteractive"
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -72,9 +73,6 @@ RUN apt-get -qq update \
     && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
-    # jellyfin-ffmpeg
-    && wget -O - https://repo.jellyfin.org/jellyfin_team.gpg.key | apt-key add - \
-    && echo "deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/$( awk -F'=' '/^ID=/{ print $NF }' /etc/os-release ) $( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release ) main" | tee /etc/apt/sources.list.d/jellyfin.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     # coral drivers
@@ -82,8 +80,11 @@ RUN apt-get -qq update \
     && pip3 install -U /wheels/*.whl \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers jellyfin-ffmpeg; else \
+    # jellyfin-ffmpeg
+    wget -O /tmp/jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    mesa-va-drivers /tmp/jellyfin.deb \
+    && rm /tmp/jellyfin.deb; else \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
     ffmpeg; \
     fi \
