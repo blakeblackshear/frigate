@@ -250,9 +250,7 @@ def set_sub_label(id):
 def get_sub_labels():
     try:
         events = (
-            Event.select(
-                Event.sub_label,
-            ).group_by(Event.sub_label)
+            Event.select(Event.sub_label).distinct()
         ).dicts()
     except Exception as e:
         return jsonify(
