@@ -249,9 +249,7 @@ def set_sub_label(id):
 @bp.route("/sub_labels")
 def get_sub_labels():
     try:
-        events = (
-            Event.select(Event.sub_label).distinct()
-        ).dicts()
+        events = (Event.select(Event.sub_label).distinct()).dicts()
     except Exception as e:
         return jsonify(
             {"success": False, "message": f"Failed to get sub_labels: {e}"}, "404"
