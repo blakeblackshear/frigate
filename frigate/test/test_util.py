@@ -63,3 +63,22 @@ class TestConfig(unittest.TestCase):
         assert not BoundingBoxTriggerEnum.top_center.is_in_zone(
             centroid, box, zone.contour
         )
+
+    def test_bounding_box_trigger_points_half_in_zone(self):
+        frigate_config = FrigateConfig(**self.config)
+        centroid = (300, 300)
+        box = (200, 200, 500, 500)
+        zone = frigate_config.cameras["back"].zones["test"]
+
+        assert not BoundingBoxTriggerEnum.bottom_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert BoundingBoxTriggerEnum.left_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert not BoundingBoxTriggerEnum.right_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert BoundingBoxTriggerEnum.top_center.is_in_zone(
+            centroid, box, zone.contour
+        )
