@@ -79,6 +79,4 @@ class TestConfig(unittest.TestCase):
         assert not BoundingBoxTriggerEnum.right_center.is_in_zone(
             centroid, box, zone.contour
         )
-        assert BoundingBoxTriggerEnum.top_center.is_in_zone(
-            centroid, box, zone.contour
-        )
+        assert BoundingBoxTriggerEnum.top_center.is_in_zone(centroid, box, zone.contour)
