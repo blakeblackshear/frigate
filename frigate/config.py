@@ -277,6 +277,13 @@ class RuntimeFilterConfig(FilterConfig):
         extra = Extra.ignore
 
 
+class BoundingBoxTriggerEnum(str, Enum):
+    bottom_center = "bottom-center"
+    left_center = "left-center"
+    top_center = "top-center"
+    right_center = "right-center"
+
+
 # this uses the base model because the color is an extra attribute
 class ZoneConfig(BaseModel):
     filters: Dict[str, FilterConfig] = Field(
@@ -289,8 +296,8 @@ class ZoneConfig(BaseModel):
         default_factory=list,
         title="List of objects that can trigger the zone.",
     )
-    bounding_box_trigger: str = Field(
-        default="bottom-center",
+    bounding_box_trigger: BoundingBoxTriggerEnum = Field(
+        default=BoundingBoxTriggerEnum.bottom_center,
         title="Point of an objects bounding box that triggers this zone.",
     )
     _color: Optional[Tuple[int, int, int]] = PrivateAttr()
