@@ -984,13 +984,13 @@ class BoundingBoxTriggerEnum(str, Enum):
     def is_in_zone(self, centroid, box, contour) -> bool:
         """Tests a zone based on the bounding box
         trigger and the objects bounding box."""
-        if self.value is self.bottom_center:
+        if self is self.bottom_center:
             point = (centroid[0], box[3])
-        elif self.value is self.left_center:
+        elif self is self.left_center:
             point = (box[0], centroid[1])
-        elif self.value is self.right_center:
+        elif self is self.right_center:
             point = (box[2], centroid[1])
-        elif self.value is self.top_center:
+        elif self is self.top_center:
             point = (centroid[0], box[1])
 
         return cv2.pointPolygonTest(contour, point, False) >= 0
