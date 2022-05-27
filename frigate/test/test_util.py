@@ -23,14 +23,14 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
-                    "zones": {"test": {"coordinates": "100,100,400,400"}},
+                    "zones": {"test": {"coordinates": "0,0,0,400,400,400,400,0"}},
                 }
             },
         }
 
     def test_bounding_box_trigger_points_in_zone(self):
         frigate_config = FrigateConfig(**self.config)
-        centroid = (200, 200)
+        centroid = (250, 250)
         box = (150, 150, 350, 350)
         zone = frigate_config.cameras["back"].zones["test"]
 
@@ -47,8 +47,8 @@ class TestConfig(unittest.TestCase):
 
     def test_bounding_box_trigger_points_outside_zone(self):
         frigate_config = FrigateConfig(**self.config)
-        centroid = (200, 200)
-        box = (0, 0, 500, 500)
+        centroid = (500, 500)
+        box = (400, 400, 600, 600)
         zone = frigate_config.cameras["back"].zones["test"]
 
         assert not BoundingBoxTriggerEnum.bottom_center.is_in_zone(
