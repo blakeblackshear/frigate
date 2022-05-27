@@ -3,6 +3,7 @@ import unittest
 from frigate.config import FrigateConfig
 from frigate.util import BoundingBoxTriggerEnum
 
+
 class TestConfig(unittest.TestCase):
     def setUp(self):
         self.config = {
@@ -33,9 +34,15 @@ class TestConfig(unittest.TestCase):
         box = (150, 150, 350, 350)
         zone = frigate_config.cameras["back"].zones["test"]
 
-        assert BoundingBoxTriggerEnum.bottom_center.is_in_zone(centroid, box, zone.contour)
-        assert BoundingBoxTriggerEnum.left_center.is_in_zone(centroid, box, zone.contour)
-        assert BoundingBoxTriggerEnum.right_center.is_in_zone(centroid, box, zone.contour)
+        assert BoundingBoxTriggerEnum.bottom_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert BoundingBoxTriggerEnum.left_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert BoundingBoxTriggerEnum.right_center.is_in_zone(
+            centroid, box, zone.contour
+        )
         assert BoundingBoxTriggerEnum.top_center.is_in_zone(centroid, box, zone.contour)
 
     def test_bounding_box_trigger_points_outside_zone(self):
@@ -44,7 +51,15 @@ class TestConfig(unittest.TestCase):
         box = (0, 0, 500, 500)
         zone = frigate_config.cameras["back"].zones["test"]
 
-        assert not BoundingBoxTriggerEnum.bottom_center.is_in_zone(centroid, box, zone.contour)
-        assert not BoundingBoxTriggerEnum.left_center.is_in_zone(centroid, box, zone.contour)
-        assert not BoundingBoxTriggerEnum.right_center.is_in_zone(centroid, box, zone.contour)
-        assert not BoundingBoxTriggerEnum.top_center.is_in_zone(centroid, box, zone.contour)
+        assert not BoundingBoxTriggerEnum.bottom_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert not BoundingBoxTriggerEnum.left_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert not BoundingBoxTriggerEnum.right_center.is_in_zone(
+            centroid, box, zone.contour
+        )
+        assert not BoundingBoxTriggerEnum.top_center.is_in_zone(
+            centroid, box, zone.contour
+        )
