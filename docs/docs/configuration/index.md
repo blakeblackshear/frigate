@@ -438,8 +438,10 @@ cameras:
       #       camera.
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
-        # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
+        # NOTE: Presence in a zone is evaluated only based on a specific point of the objects bounding box.
         coordinates: 545,1077,747,939,788,805
+        # Optional: Point of the bounding box that needs to be within the zone to be considered active. (default: shown below)
+        bounding_box_trigger: bottom_center
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
           - person
