@@ -136,15 +136,19 @@ class TrackedObject:
 
         # check zones
         current_zones = []
-        bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
+
         # check each zone
         for name, zone in self.camera_config.zones.items():
             # if the zone is not for this object type, skip
             if len(zone.objects) > 0 and not obj_data["label"] in zone.objects:
                 continue
-            contour = zone.contour
+
             # check if the object is in the zone
-            if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
+            if zone.bounding_box_trigger.is_in_zone(
+                obj_data["centroid"],
+                obj_data["box"],
+                zone.contour,
+            ):
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
                     current_zones.append(name)

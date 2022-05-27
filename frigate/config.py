@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
 from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
 from pydantic.fields import PrivateAttr
 
@@ -19,12 +18,12 @@ from frigate.const import (
     YAML_EXT,
 )
 from frigate.util import (
+    BoundingBoxTriggerEnum,
     create_mask,
     deep_merge,
     get_ffmpeg_arg_list,
     escape_special_characters,
     load_config_with_no_duplicates,
-    load_labels,
 )
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration,
@@ -33,13 +32,10 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_rtmp,
 )
 from frigate.detectors import (
-    PixelFormatEnum,
-    InputTensorEnum,
     ModelConfig,
     DetectorConfig,
 )
 from frigate.version import VERSION
-
 
 logger = logging.getLogger(__name__)
 
@@ -275,13 +271,6 @@ class RuntimeFilterConfig(FilterConfig):
     class Config:
         arbitrary_types_allowed = True
         extra = Extra.ignore
-
-
-class BoundingBoxTriggerEnum(str, Enum):
-    bottom_center = "bottom-center"
-    left_center = "left-center"
-    top_center = "top-center"
-    right_center = "right-center"
 
 
 # this uses the base model because the color is an extra attribute

@@ -5,6 +5,7 @@ import shlex
 import subprocess as sp
 import json
 import re
+from enum import Enum
 import signal
 import traceback
 import urllib.parse
@@ -972,3 +973,24 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]
+
+
+class BoundingBoxTriggerEnum(str, Enum):
+    bottom_center = "bottom-center"
+    left_center = "left-center"
+    right_center = "right-center"
+    top_center = "top-center"
+
+    def is_in_zone(self, centroid, box, contour) -> bool:
+        """Tests a zone based on the bounding box
+        trigger and the objects bounding box."""
+        if self.value is self.bottom_center:
+            point = (centroid[0], box[3])
+        elif self.value is self.left_center:
+            point = (box[0], centroid[1])
+        elif self.value is self.right_center:
+            point = (box[2], centroid[1])
+        elif self.value is self.top_center:
+            point = (centroid[0], box[1])
+
+        return cv2.pointPolygonTest(contour, point, False) >= 0
