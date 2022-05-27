@@ -289,6 +289,10 @@ class ZoneConfig(BaseModel):
         default_factory=list,
         title="List of objects that can trigger the zone.",
     )
+    bounding_box_trigger: str = Field(
+        default="bottom-center",
+        title="Point of an objects bounding box that triggers this zone.",
+    )
     _color: Optional[Tuple[int, int, int]] = PrivateAttr()
     _contour: np.ndarray = PrivateAttr()
 
