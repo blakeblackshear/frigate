@@ -976,10 +976,10 @@ class SharedMemoryFrameManager(FrameManager):
 
 
 class BoundingBoxTriggerEnum(str, Enum):
-    bottom_center = "bottom-center"
-    left_center = "left-center"
-    right_center = "right-center"
-    top_center = "top-center"
+    bottom_center = "bottom_center"
+    left_center = "left_center"
+    right_center = "right_center"
+    top_center = "top_center"
 
     def is_in_zone(self, centroid, box, contour) -> bool:
         """Tests a zone based on the bounding box
