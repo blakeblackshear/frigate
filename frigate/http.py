@@ -2,18 +2,14 @@ import base64
 from collections import OrderedDict
 from datetime import datetime, timedelta
 import copy
-import json
-import glob
 import logging
 import os
-import re
 import subprocess as sp
 import time
 from functools import reduce
 from pathlib import Path
 
 import cv2
-from flask.helpers import send_file
 
 import numpy as np
 from flask import (
@@ -26,13 +22,12 @@ from flask import (
     request,
 )
 
-from peewee import SqliteDatabase, operator, fn, DoesNotExist, Value
+from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
-from frigate.util import calculate_region
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -249,6 +244,20 @@ def set_sub_label(id):
         ),
         200,
     )
+
+
+@bp.route("/sub_labels")
+def get_sub_labels():
+    try:
+        events = Event.select(Event.sub_label).distinct()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get sub_labels: {e}"}, "404"
+        )
+
+    sub_labels = [e.sub_label for e in events]
+    sub_labels.remove(None)
+    return jsonify(sub_labels)
 
 
 @bp.route("/events/<id>", methods=("DELETE",))
@@ -480,6 +489,7 @@ def events():
     limit = request.args.get("limit", 100)
     camera = request.args.get("camera", "all")
     label = request.args.get("label", "all")
+    sub_label = request.args.get("sub_label", "all")
     zone = request.args.get("zone", "all")
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
@@ -510,6 +520,9 @@ def events():
 
     if label != "all":
         clauses.append((Event.label == label))
+
+    if sub_label != "all":
+        clauses.append((Event.sub_label == sub_label))
 
     if zone != "all":
         clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
