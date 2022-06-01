@@ -83,7 +83,6 @@ class RetainConfig(FrigateBaseModel):
 
 
 class EventsConfig(FrigateBaseModel):
-    max_seconds: int = Field(default=300, title="Maximum event duration.")
     pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(

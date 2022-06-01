@@ -377,16 +377,11 @@ class RecordingCleanup(threading.Thread):
         logger.debug("Start all cameras.")
         for camera, config in self.config.cameras.items():
             logger.debug(f"Start camera: {camera}.")
-            # When deleting recordings without events, we have to keep at LEAST the configured max clip duration
-            min_end = (
-                datetime.datetime.now()
-                - datetime.timedelta(seconds=config.record.events.max_seconds)
-            ).timestamp()
+            # Get the timestamp for cutoff of retained days
             expire_days = config.record.retain.days
-            expire_before = (
+            expire_date = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
-            expire_date = min(min_end, expire_before)
 
             # Get recordings to check for expiration
             recordings: Recordings = (

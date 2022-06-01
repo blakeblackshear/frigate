@@ -278,10 +278,6 @@ record:
     mode: all
   # Optional: Event recording settings
   events:
-    # Optional: Maximum length of time to retain video during long events. (default: shown below)
-    # NOTE: If an object is being tracked for longer than this amount of time, the retained recordings
-    #       will be the last x seconds of the event unless retain->days under record is > 0.
-    max_seconds: 300
     # Optional: Number of seconds before the event to include (default: shown below)
     pre_capture: 5
     # Optional: Number of seconds after the event to include (default: shown below)
