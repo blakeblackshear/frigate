@@ -58,18 +58,17 @@ ffmpeg:
 
 ### Reolink 410/520 (possibly others)
 
-According to [this discussion](https://github.com/blakeblackshear/frigate/issues/1713#issuecomment-932976305), the http video streams seem to be the most reliable for Reolink.
+According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
 ```yaml
 cameras:
   reolink:
     ffmpeg:
-      hwaccel_args:
       input_args:
         - -avoid_negative_ts
         - make_zero
         - -fflags
-        - nobuffer+genpts+discardcorrupt
+        - +genpts+discardcorrupt
         - -flags
         - low_delay
         - -strict
