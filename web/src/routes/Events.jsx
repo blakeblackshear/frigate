@@ -494,7 +494,7 @@ export default function Events({ path, ...props }) {
                   </div>
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
-                      <div className="mx-auto">
+                      <div className="mx-auto max-w-7xl">
                         {event.has_clip ? (
                           <>
                             <Heading size="lg">Clip</Heading>
