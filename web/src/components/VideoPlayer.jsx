@@ -93,7 +93,8 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
 
   return (
     <div data-vjs-player>
-      <video ref={playerRef} className="small-player video-js vjs-default-skin" controls playsinline />
+      {/* Setting an empty data-setup is required to override the default values and allow video to be fit the size of its parent */}
+      <video ref={playerRef} className="small-player video-js vjs-default-skin" data-setup="{}" controls playsinline />
       {children}
     </div>
   );
