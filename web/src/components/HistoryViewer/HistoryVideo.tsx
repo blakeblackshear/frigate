@@ -3,6 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../../api';
 import { isNullOrUndefined } from '../../utils/objectUtils';
 
+import 'videojs-seek-buttons';
+import 'video.js/dist/video-js.css';
+import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
+
+import videojs from 'video.js';
+
 interface OnTimeUpdateEvent {
   timestamp: number;
   isPlaying: boolean;
@@ -31,75 +37,45 @@ export const HistoryVideo = ({
   onPlay,
 }: HistoryVideoProps) => {
   const apiHost = useApiHost();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const [posterLoaded, setPosterLoaded] = useState(false);
-  const [videoHeight, setVideoHeight] = useState<number | undefined>(undefined);
+  const videoRef = useRef<HTMLVideoElement>();
 
   const [videoProperties, setVideoProperties] = useState<VideoProperties>({
     posterUrl: '',
     videoUrl: '',
   });
 
-  const videoCallback = useCallback(
-    (domNode: any) => {
-      videoRef.current = domNode;
-
-      if (posterLoaded) {
-        setVideoHeight(videoRef.current?.offsetHeight);
-      }
-    },
-    [posterLoaded]
-  );
-
   useEffect(() => {
-    const idExists = !isNullOrUndefined(id);
-    if (idExists) {
-      if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current = null;
-      }
-
-      const posterUrl = `${apiHost}/api/events/${id}/snapshot.jpg`;
-      const poster = new Image();
-      poster.src = posterUrl;
-      poster.onload = () => {
-        setPosterLoaded(true);
-      };
-      setVideoProperties({
-        posterUrl,
-        videoUrl: `${apiHost}/vod/event/${id}/index.m3u8`,
-      });
-    } else {
-      setVideoProperties({
-        posterUrl: '',
-        videoUrl: '',
-      });
+    let video: any;
+    if (videoRef.current && id) {
+      video = videojs(videoRef.current, {});
     }
-  }, [id, videoHeight, videoRef, apiHost]);
+  }, [videoRef]);
 
   useEffect(() => {
-    const playVideo = (video: HTMLMediaElement) => video.play();
+    if (!id) {
+      return;
+    }
+    const video = videojs(videoRef.current);
+    video.src({
+      src: `${apiHost}/vod/event/${id}/index.m3u8`,
+      type: 'application/vnd.apple.mpegurl',
+    });
+    video.poster(`${apiHost}/api/events/${id}/snapshot.jpg`);
+    if (videoIsPlaying) {
+      video.play();
+    }
+  }, [id]);
 
-    const attemptPlayVideo = (video: HTMLMediaElement) => {
-      const videoHasNotLoaded = video.readyState <= 1;
-      if (videoHasNotLoaded) {
-        video.oncanplay = () => {
-          playVideo(video);
-        };
-        video.load();
-      } else {
-        playVideo(video);
-      }
-    };
+  useEffect(() => {
+    if (!videoRef) {
+      return;
+    }
 
-    const video = videoRef.current;
-    const videoExists = !isNullOrUndefined(video);
-    if (video && videoExists) {
-      if (videoIsPlaying) {
-        attemptPlayVideo(video);
-      } else {
-        video.pause();
-      }
+    const video = videojs(videoRef.current);
+    if (video.paused() && videoIsPlaying) {
+      video.play();
+    } else if (!video.paused() && !videoIsPlaying) {
+      video.pause();
     }
   }, [videoIsPlaying, videoRef]);
 
@@ -119,7 +95,6 @@ export const HistoryVideo = ({
         isPlaying: videoIsPlaying,
         timestamp: target.currentTime,
       };
-
       onTimeUpdate && onTimeUpdate(timeUpdateEvent);
     },
     [videoIsPlaying, onTimeUpdate]
@@ -127,19 +102,17 @@ export const HistoryVideo = ({
 
   const { posterUrl, videoUrl } = videoProperties;
   return (
-    <video
-      ref={videoCallback}
-      key={posterUrl}
-      onTimeUpdate={onTimeUpdateHandler}
-      onPause={onPause}
-      onPlay={onPlay}
-      poster={posterUrl}
-      preload="metadata"
-      controls
-      style={videoHeight ? { minHeight: `${videoHeight}px` } : {}}
-      playsInline
-    >
-      <source type="application/vnd.apple.mpegurl" src={videoUrl} />
-    </video>
+    <div data-vjs-player>
+      <video
+        ref={videoRef}
+        onTimeUpdate={onTimeUpdateHandler}
+        onPause={onPause}
+        onPlay={onPlay}
+        poster={posterUrl}
+        src={videoUrl}
+        className="video-js vjs-fluid"
+        data-setup="{}"
+      />
+    </div>
   );
 };
