@@ -41,11 +41,16 @@ export const HistoryVideo = ({
     videoUrl: '',
   });
 
-  useEffect(() => {
-    if (posterLoaded && videoRef.current) {
-      setVideoHeight(videoRef.current?.offsetHeight);
-    }
-  }, [posterLoaded, videoRef.current]);
+  const videoCallback = useCallback(
+    (domNode: any) => {
+      videoRef.current = domNode;
+
+      if (posterLoaded) {
+        setVideoHeight(videoRef.current?.offsetHeight);
+      }
+    },
+    [posterLoaded]
+  );
 
   useEffect(() => {
     const idExists = !isNullOrUndefined(id);
@@ -123,7 +128,7 @@ export const HistoryVideo = ({
   const { posterUrl, videoUrl } = videoProperties;
   return (
     <video
-      ref={videoRef}
+      ref={videoCallback}
       key={posterUrl}
       onTimeUpdate={onTimeUpdateHandler}
       onPause={onPause}
