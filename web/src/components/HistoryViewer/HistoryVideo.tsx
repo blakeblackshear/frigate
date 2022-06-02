@@ -11,7 +11,6 @@ interface OnTimeUpdateEvent {
 interface VideoProperties {
   posterUrl: string;
   videoUrl: string;
-  height: number;
 }
 
 interface HistoryVideoProps {
@@ -32,21 +31,21 @@ export const HistoryVideo = ({
   onPlay,
 }: HistoryVideoProps) => {
   const apiHost = useApiHost();
-  const videoRef = useRef<HTMLVideoElement|null>(null);
-  const [videoHeight, setVideoHeight] = useState<number>(0);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const [posterLoaded, setPosterLoaded] = useState(false);
+  const [videoHeight, setVideoHeight] = useState<number | undefined>(undefined);
+
   const [videoProperties, setVideoProperties] = useState<VideoProperties>({
     posterUrl: '',
     videoUrl: '',
-    height: 0,
   });
 
-  const currentVideo = videoRef.current;
-  if (currentVideo && !videoHeight) {
-    const currentVideoHeight = currentVideo.offsetHeight;
-    if (currentVideoHeight > 0) {
-      setVideoHeight(currentVideoHeight);
+  useEffect(() => {
+    if (posterLoaded && videoRef.current) {
+      setVideoHeight(videoRef.current?.offsetHeight);
     }
-  }
+  }, [posterLoaded, videoRef.current]);
 
   useEffect(() => {
     const idExists = !isNullOrUndefined(id);
@@ -55,16 +54,20 @@ export const HistoryVideo = ({
         videoRef.current = null;
       }
 
+      const posterUrl = `${apiHost}/api/events/${id}/snapshot.jpg`;
+      const poster = new Image();
+      poster.src = posterUrl;
+      poster.onload = () => {
+        setPosterLoaded(true);
+      };
       setVideoProperties({
-        posterUrl: `${apiHost}/api/events/${id}/snapshot.jpg`,
+        posterUrl,
         videoUrl: `${apiHost}/vod/event/${id}/index.m3u8`,
-        height: videoHeight,
       });
     } else {
       setVideoProperties({
         posterUrl: '',
         videoUrl: '',
-        height: 0,
       });
     }
   }, [id, videoHeight, videoRef, apiHost]);
@@ -117,12 +120,7 @@ export const HistoryVideo = ({
     [videoIsPlaying, onTimeUpdate]
   );
 
-  const videoPropertiesIsUndefined = isNullOrUndefined(videoProperties);
-  if (videoPropertiesIsUndefined) {
-    return <div style={{ height: `${videoHeight}px`, width: '100%' }} />;
-  }
-
-  const { posterUrl, videoUrl, height } = videoProperties;
+  const { posterUrl, videoUrl } = videoProperties;
   return (
     <video
       ref={videoRef}
@@ -131,12 +129,12 @@ export const HistoryVideo = ({
       onPause={onPause}
       onPlay={onPlay}
       poster={posterUrl}
-      preload='metadata'
+      preload="metadata"
       controls
-      style={height ? { minHeight: `${height}px` } : {}}
+      style={videoHeight ? { minHeight: `${videoHeight}px` } : {}}
       playsInline
     >
-      <source type='application/vnd.apple.mpegurl' src={videoUrl} />
+      <source type="application/vnd.apple.mpegurl" src={videoUrl} />
     </video>
   );
 };
