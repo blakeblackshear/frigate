@@ -20,11 +20,11 @@ export const TimelineBlocks = ({ timeline, firstBlockOffset, onEventClick }: Tim
       const timelineBlockOffset = (timelineContainerHeight - largestYOffsetInBlocks) / 2;
       return (
         <div
-          className='relative'
+          className="relative"
           style={{
             height: `${timelineContainerHeight}px`,
             width: `${timelineContainerWidth}px`,
-            background: "url('/marker.png')",
+            background: "url('/images/marker.png')",
             backgroundPosition: 'center',
             backgroundSize: '30px',
             backgroundRepeat: 'repeat',
@@ -41,7 +41,7 @@ export const TimelineBlocks = ({ timeline, firstBlockOffset, onEventClick }: Tim
         </div>
       );
     }
-    return <div />
+    return <div />;
   }, [timeline, onEventClick, firstBlockOffset]);
 
   return timelineEventBlocks;
