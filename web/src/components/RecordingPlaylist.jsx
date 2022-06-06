@@ -144,7 +144,11 @@ export function EventCard({ camera, event }) {
   const apiHost = useApiHost();
   const start = fromUnixTime(event.start_time);
   const end = fromUnixTime(event.end_time);
+
+  const { data: config } = useSWR('config');
+
   let duration = 'In Progress';
+
   if (event.end_time) {
     duration = formatDuration(intervalToDuration({ start, end }));
   }
@@ -160,7 +164,7 @@ export function EventCard({ camera, event }) {
             <div className="flex flex-row items-center">
               <div className="flex-1">
                 <div className="text-2xl text-white leading-tight capitalize">{event.label}</div>
-                <div className="text-xs md:text-normal text-gray-300">Start: {format(start, 'HH:mm:ss')}</div>
+                <div className="text-xs md:text-normal text-gray-300">Start: {format(start, `${config.ui.timestamp.hour_12 ? 'hh' : 'HH'}:mm:ss ${config.ui.timestamp.hour_12 ? 'a' : ''}`)}</div>
                 <div className="text-xs md:text-normal text-gray-300">Duration: {duration}</div>
               </div>
               <div className="text-lg text-white text-right leading-tight">{(event.top_score * 100).toFixed(1)}%</div>
