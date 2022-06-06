@@ -12,6 +12,9 @@ export const handlers = [
         service: {
           version: '0.8.3',
         },
+        ui: {
+          timestamp: { hour_12: true },
+        },
         cameras: {
           front: {
             name: 'front',
