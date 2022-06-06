@@ -502,7 +502,7 @@ export default function Events({ path, ...props }) {
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
-                          {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
+                          {new Date(event.start_time * 1000).toLocaleTimeString([], {hour12: config.ui.timestamp.hour_12})}{' '}
                           {new Date(event.start_time * 1000).toLocaleTimeString()} (
                           {clipDuration(event.start_time, event.end_time)})
                         </div>
