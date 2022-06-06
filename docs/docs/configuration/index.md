@@ -342,6 +342,15 @@ snapshots:
     objects:
       person: 15
 
+# Optional: Frontend UI Configuration
+ui:
+  # Optional: Enable experimental frontend ui features (default: shown below).
+  use_experimental: false
+  # Optional: Configuration for frontend timestamp
+  timestamp:
+    # Optional: Show hour as 12-hour format (default: shown below).
+    hour_12: true
+
 # Optional: RTMP configuration
 # NOTE: RTMP is deprecated in favor of restream
 # NOTE: Can be overridden at the camera level
