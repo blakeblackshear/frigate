@@ -61,12 +61,15 @@ class FrigateBaseModel(BaseModel):
 
 class UiTimestampConfig(FrigateBaseModel):
     """Configuration for the UI timestamps."""
+
     hour_12: bool = Field(default=True, title="Use 12 hour format in UI.")
 
 
 class UIConfig(FrigateBaseModel):
     use_experimental: bool = Field(default=False, title="Experimental UI")
-    timestamp: UiTimestampConfig = Field(default_factory=UiTimestampConfig, title="UI timestamp configuration.")
+    timestamp: UiTimestampConfig = Field(
+        default_factory=UiTimestampConfig, title="UI timestamp configuration."
+    )
 
 
 class MqttConfig(FrigateBaseModel):
