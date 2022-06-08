@@ -148,7 +148,6 @@ export function EventCard({ camera, event }) {
   const { data: config } = useSWR('config');
 
   let duration = 'In Progress';
-
   if (event.end_time) {
     duration = formatDuration(intervalToDuration({ start, end }));
   }
