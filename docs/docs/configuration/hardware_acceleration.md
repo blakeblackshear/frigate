@@ -12,33 +12,21 @@ Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config
 
 ```yaml
 ffmpeg:
-  hwaccel_args:
-    - -c:v
-    - h264_v4l2m2m
+  hwaccel_args: -c:v h264_v4l2m2m
 ```
 
 ### Intel-based CPUs (<10th Generation) via Quicksync
 
 ```yaml
 ffmpeg:
-  hwaccel_args:
-    - -hwaccel
-    - vaapi
-    - -hwaccel_device
-    - /dev/dri/renderD128
-    - -hwaccel_output_format
-    - yuv420p
+  hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
 ```
 
 ### Intel-based CPUs (>=10th Generation) via Quicksync
 
 ```yaml
 ffmpeg:
-  hwaccel_args:
-    - -hwaccel
-    - qsv
-    - -qsv_device
-    - /dev/dri/renderD128
+  hwaccel_args: -hwaccel qsv -qsv_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
 ```
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
@@ -47,11 +35,7 @@ ffmpeg:
 
 ```yaml
 ffmpeg:
-  hwaccel_args:
-    - -hwaccel
-    - vaapi
-    - -hwaccel_device
-    - /dev/dri/renderD128
+  hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
 ```
 
 ### NVIDIA GPU
@@ -91,13 +75,13 @@ A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the c
  V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
 ```
 
-For example, for H265 video (hevc), you'll select `hevc_cuvid`.
+For example, for H264 video, you'll select `h264_cuvid`.
 
 ```yaml
 ffmpeg:
   hwaccel_args:
     - -c:v
-    - hevc_cuvid
+    - h264_cuvid
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
