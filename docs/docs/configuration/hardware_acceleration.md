@@ -26,7 +26,7 @@ ffmpeg:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -hwaccel qsv -qsv_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
+  hwaccel_args: -c:v h264_qsv
 ```
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
@@ -79,9 +79,7 @@ For example, for H264 video, you'll select `h264_cuvid`.
 
 ```yaml
 ffmpeg:
-  hwaccel_args:
-    - -c:v
-    - h264_cuvid
+  hwaccel_args: -c:v h264_cuvid
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
