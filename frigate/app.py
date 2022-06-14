@@ -20,7 +20,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, PLUS_ENV_VAR, RECORD_DIR
 from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
@@ -54,6 +54,11 @@ class FrigateApp:
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
             os.environ[key] = value
+
+            # plus needs to be re-created if API KEY
+            # is included in config env vars
+            if key == PLUS_ENV_VAR:
+                self.plus_api = PlusApi()
 
     def ensure_dirs(self) -> None:
         for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
