@@ -48,17 +48,11 @@ class FrigateApp:
         self.detection_out_events: dict[str, Event] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
             os.environ[key] = value
-
-            # plus needs to be re-created if API KEY
-            # is included in config env vars
-            if key == PLUS_ENV_VAR:
-                self.plus_api = PlusApi()
 
     def ensure_dirs(self) -> None:
         for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
@@ -175,6 +169,9 @@ class FrigateApp:
             self.mqtt_client, self.config.mqtt.topic_prefix
         )
         self.mqtt_relay.start()
+
+    def init_plus(self) -> None:
+        self.plus_api = PlusApi()
 
     def start_detectors(self) -> None:
         model_path = self.config.model.path
@@ -352,6 +349,7 @@ class FrigateApp:
             self.init_queues()
             self.init_database()
             self.init_mqtt()
+            self.init_plus()
         except Exception as e:
             print(e)
             self.log_process.terminate()
