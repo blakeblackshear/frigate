@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import unittest
 from unittest.mock import patch, MagicMock
 
@@ -15,7 +16,31 @@ from frigate.test.const import TEST_DB
 
 
 class TestHttp(unittest.TestCase):
+
+    def setup_test_db(self) -> SqliteQueueDatabase:
+        """Setup a functional db"""
+
+        # close and delete db before each test
+        if self.db:
+            if not self.db.is_closed():
+                self.db.close()
+
+            os.remove("test.db")
+
+        migrate_db = SqliteExtDatabase("test.db")
+        del logging.getLogger("peewee_migrate").handlers[:]
+        router = Router(migrate_db)
+        router.run()
+
+        migrate_db.close()
+
+        self.db = SqliteQueueDatabase(TEST_DB)
+        models = [Event, Recordings]
+        self.db.bind(models)
+        return self.db
+
     def setUp(self):
+        self.db = None
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},
             "cameras": {
@@ -143,31 +168,16 @@ class TestHttp(unittest.TestCase):
         }
 
     def test_get_good_event(self):
-        db = _setup_test_db()
+        db = self.setup_test_db()
         app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
         id = "123456.someid"
-        _insert_mock_event(id)
 
         with app.test_client() as client:
+            _insert_mock_event(id)
             event = client.get(f"/events/{id}").json
 
         assert event
         assert event["id"] == id
-
-
-def _setup_test_db() -> SqliteQueueDatabase:
-    """Setup a functional db"""
-    migrate_db = SqliteExtDatabase("test.db")
-    del logging.getLogger("peewee_migrate").handlers[:]
-    router = Router(migrate_db)
-    router.run()
-
-    migrate_db.close()
-
-    db = SqliteQueueDatabase(TEST_DB)
-    models = [Event, Recordings]
-    db.bind(models)
-    return db
 
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
@@ -186,4 +196,4 @@ def _insert_mock_event(id: str) -> Event:
         area=0,
         has_clip=True,
         has_snapshot=True,
-    )
+    ).execute()
