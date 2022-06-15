@@ -7,6 +7,7 @@ from unittest.mock import patch, MagicMock
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.http import create_app
@@ -178,6 +179,7 @@ class TestHttp(unittest.TestCase):
 
         assert event
         assert event["id"] == id
+        assert event == model_to_dict(Event.get(Event.id == id))
 
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
