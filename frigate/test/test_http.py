@@ -1,8 +1,17 @@
+import datetime
+import logging
 import unittest
 from unittest.mock import patch, MagicMock
 
+from peewee_migrate import Router
+from playhouse.sqlite_ext import SqliteExtDatabase
+from playhouse.sqliteq import SqliteQueueDatabase
+
 from frigate.config import FrigateConfig
 from frigate.http import create_app
+from frigate.models import Event, Recordings
+
+from frigate.test.const import TEST_DB
 
 
 class TestHttp(unittest.TestCase):
@@ -132,3 +141,49 @@ class TestHttp(unittest.TestCase):
                 "latest_version": "0.11",
             },
         }
+
+    def test_get_good_event(self):
+        db = _setup_test_db()
+        app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
+        id = "123456.someid"
+        _insert_mock_event(id)
+
+        with app.test_client() as client:
+            event = client.get(f"/events/{id}").json
+
+        assert event
+        assert event["id"] == id
+
+
+def _setup_test_db() -> SqliteQueueDatabase:
+    """Setup a functional db"""
+    migrate_db = SqliteExtDatabase("test.db")
+    del logging.getLogger("peewee_migrate").handlers[:]
+    router = Router(migrate_db)
+    router.run()
+
+    migrate_db.close()
+
+    db = SqliteQueueDatabase(TEST_DB)
+    models = [Event, Recordings]
+    db.bind(models)
+    return db
+
+def _insert_mock_event(id: str) -> Event:
+    """Inserts a basic event model with a given id."""
+    return Event.insert(
+        id=id,
+        label="Mock",
+        camera="front_door",
+        start_time=datetime.datetime.now().timestamp(),
+        end_time=datetime.datetime.now().timestamp() + 20,
+        top_score=100,
+        false_positive=False,
+        zones=list(),
+        thumbnail="",
+        region=[],
+        box=[],
+        area=0,
+        has_clip=True,
+        has_snapshot=True,
+    )
