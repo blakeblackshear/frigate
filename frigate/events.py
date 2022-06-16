@@ -50,7 +50,6 @@ class EventProcessor(threading.Thread):
         self.name = "event_processor"
         self.config = config
         self.camera_processes = camera_processes
-        self.cached_clips = {}
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.events_in_process: Dict[str, Event] = {}
