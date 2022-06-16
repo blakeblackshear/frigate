@@ -313,6 +313,19 @@ class TestHttp(unittest.TestCase):
             assert config
             assert config["cameras"]["front_door"]
 
+    def test_recordings(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config).runtime_config, self.db, None, None, None
+        )
+        id = "123456.random"
+
+        with app.test_client() as client:
+            _insert_mock_recording(id)
+            recording = client.get("/front_door/recordings").json
+            assert recording
+            assert recording[0]["id"] == id
+
+
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
     return Event.insert(
@@ -330,4 +343,18 @@ def _insert_mock_event(id: str) -> Event:
         area=0,
         has_clip=True,
         has_snapshot=True,
+    ).execute()
+
+
+def _insert_mock_recording(id: str) -> Event:
+    """Inserts a basic recording model with a given id."""
+    return Recordings.insert(
+        id=id,
+        camera="front_door",
+        path=f"/recordings/{id}",
+        start_time=datetime.datetime.now().timestamp() - 50,
+        end_time=datetime.datetime.now().timestamp() - 60,
+        duration=10,
+        motion=True,
+        objects=True,
     ).execute()
