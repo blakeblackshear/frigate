@@ -194,6 +194,21 @@ class TestHttp(unittest.TestCase):
 
         assert not event
 
+    def test_delete_event(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+        id = "123456.random"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            event = client.get(f"/events/{id}").json
+            assert event
+            assert event["id"] == id
+            client.delete(f"/events/{id}")
+            event = client.get(f"/events/{id}").json
+            assert not event
+
     def test_event_retention(self):
         app = create_app(
             FrigateConfig(**self.minimal_config), self.db, None, None, None
