@@ -184,6 +184,17 @@ class TestHttp(unittest.TestCase):
             events = client.get(f"/events").json
             assert events
             assert len(events) == 2
+            events = client.get(
+                f"/events",
+                query_string={"limit": 1},
+            ).json
+            assert events
+            assert len(events) == 1
+            events = client.get(
+                f"/events",
+                query_string={"has_clip": 0},
+            ).json
+            assert not events
 
     def test_get_good_event(self):
         app = create_app(
