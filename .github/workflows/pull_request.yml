@@ -54,6 +54,7 @@ jobs:
 
   python_tests:
     runs-on: ubuntu-latest
+    name: Python Tests
     steps:
       - name: Check out code
         uses: actions/checkout@v2
