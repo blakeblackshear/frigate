@@ -14,7 +14,7 @@ from frigate.config import FrigateConfig
 from frigate.http import create_app
 from frigate.models import Event, Recordings
 
-from frigate.test.const import TEST_DB
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
 class TestHttp(unittest.TestCase):
@@ -106,9 +106,8 @@ class TestHttp(unittest.TestCase):
             self.db.close()
 
         try:
-            os.remove("test.db")
-            os.remove("test.db-shm")
-            os.remove("test.db-wal")
+            for file in TEST_DB_CLEANUPS:
+                os.remove(file)
         except OSError:
             pass
 
