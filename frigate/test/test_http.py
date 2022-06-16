@@ -241,6 +241,23 @@ class TestHttp(unittest.TestCase):
             assert event["id"] == id
             assert event["sub_label"] == ""
 
+    def test_sub_label_list(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+        id = "123456.random"
+        sub_label = "sub"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            client.post(
+                f"/events/{id}/sub_label",
+                data=json.dumps({"subLabel": sub_label}),
+                content_type="application/json",
+            )
+            sub_labels = client.get("/sub_labels").json
+            assert sub_labels
+            assert sub_labels == [sub_label]
 
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
