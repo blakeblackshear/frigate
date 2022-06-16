@@ -11,18 +11,22 @@ from peewee import fn
 from frigate.config import EventsConfig, FrigateConfig, RecordConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
+from frigate.types import CameraMetricsTypes
+
+from multiprocessing.queues import Queue
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
 
-def should_insert_db(prev_event, current_event):
+def should_insert_db(prev_event: Event, current_event: Event) -> bool:
     """If current event has new clip or snapshot."""
     return (not prev_event["has_clip"] and not prev_event["has_snapshot"]) and (
         current_event["has_clip"] or current_event["has_snapshot"]
     )
 
 
-def should_update_db(prev_event, current_event):
+def should_update_db(prev_event: Event, current_event: Event) -> bool:
     """If current_event has updated fields and (clip or snapshot)."""
     return (current_event["has_clip"] or current_event["has_snapshot"]) and (
         prev_event["top_score"] != current_event["top_score"]
@@ -35,7 +39,12 @@ def should_update_db(prev_event, current_event):
 
 class EventProcessor(threading.Thread):
     def __init__(
-        self, config, camera_processes, event_queue, event_processed_queue, stop_event
+        self,
+        config: FrigateConfig,
+        camera_processes: dict[str, CameraMetricsTypes],
+        event_queue: Queue,
+        event_processed_queue: Queue,
+        stop_event: Event,
     ):
         threading.Thread.__init__(self)
         self.name = "event_processor"
@@ -44,10 +53,10 @@ class EventProcessor(threading.Thread):
         self.cached_clips = {}
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
-        self.events_in_process = {}
+        self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
 
-    def run(self):
+    def run(self) -> None:
         # set an end_time on events without an end_time on startup
         Event.update(end_time=Event.start_time + 30).where(
             Event.end_time == None
@@ -147,14 +156,15 @@ class EventProcessor(threading.Thread):
 
 
 class EventCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event):
+    def __init__(self, config: FrigateConfig, stop_event: Event):
         threading.Thread.__init__(self)
         self.name = "event_cleanup"
         self.config = config
         self.stop_event = stop_event
         self.camera_keys = list(self.config.cameras.keys())
 
-    def expire(self, media_type):
+    def expire(self, media_type: str) -> None:
+        # TODO: Refactor media_type to enum
         ## Expire events from unlisted cameras based on the global config
         if media_type == "clips":
             retain_config = self.config.record.events.retain
@@ -253,7 +263,7 @@ class EventCleanup(threading.Thread):
                 )
                 update_query.execute()
 
-    def purge_duplicates(self):
+    def purge_duplicates(self) -> None:
         duplicate_query = """with grouped_events as (
           select id,
             label,
@@ -287,7 +297,7 @@ class EventCleanup(threading.Thread):
             .execute()
         )
 
-    def run(self):
+    def run(self) -> None:
         # only expire events every 5 minutes
         while not self.stop_event.wait(300):
             self.expire("clips")
