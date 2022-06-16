@@ -305,7 +305,11 @@ class TestHttp(unittest.TestCase):
 
     def test_config(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config).runtime_config, self.db, None, None, None
+            FrigateConfig(**self.minimal_config).runtime_config,
+            self.db,
+            None,
+            None,
+            None,
         )
 
         with app.test_client() as client:
@@ -315,7 +319,11 @@ class TestHttp(unittest.TestCase):
 
     def test_recordings(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config).runtime_config, self.db, None, None, None
+            FrigateConfig(**self.minimal_config).runtime_config,
+            self.db,
+            None,
+            None,
+            None,
         )
         id = "123456.random"
 
