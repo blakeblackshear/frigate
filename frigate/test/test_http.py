@@ -3,8 +3,6 @@ import json
 import logging
 import os
 import unittest
-from unittest.mock import patch, MagicMock
-from flask import jsonify
 
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
