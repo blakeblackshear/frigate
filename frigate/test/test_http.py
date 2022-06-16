@@ -18,15 +18,7 @@ from frigate.test.const import TEST_DB
 
 class TestHttp(unittest.TestCase):
 
-    def setup_test_db(self) -> SqliteQueueDatabase:
-        """Setup a functional db"""
-
-        # close and delete db before each test
-        if self.db and not self.db.is_closed():
-            self.db.close()
-
-        os.remove("test.db")
-
+    def setUp(self):
         migrate_db = SqliteExtDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
@@ -37,10 +29,6 @@ class TestHttp(unittest.TestCase):
         self.db = SqliteQueueDatabase(TEST_DB)
         models = [Event, Recordings]
         self.db.bind(models)
-        return self.db
-
-    def setUp(self):
-        self.db = None
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},
             "cameras": {
@@ -167,9 +155,19 @@ class TestHttp(unittest.TestCase):
             },
         }
 
+    def tearDown(self):
+        if not self.db.is_closed():
+            self.db.close()
+
+        try:
+            os.remove("test.db")
+            os.remove("test.db-shm")
+            os.remove("test.db-wal")
+        except OSError:
+            pass
+
     def test_get_good_event(self):
-        db = self.setup_test_db()
-        app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
+        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
         id = "123456.random"
 
         with app.test_client() as client:
@@ -181,8 +179,7 @@ class TestHttp(unittest.TestCase):
         assert event == model_to_dict(Event.get(Event.id == id))
 
     def test_get_bad_event(self):
-        db = self.setup_test_db()
-        app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
+        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
         id = "123456.random"
         bad_id = "654321.other"
 
