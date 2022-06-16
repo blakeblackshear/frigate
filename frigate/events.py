@@ -28,13 +28,16 @@ def should_insert_db(prev_event: Event, current_event: Event) -> bool:
 
 def should_update_db(prev_event: Event, current_event: Event) -> bool:
     """If current_event has updated fields and (clip or snapshot)."""
-    return (current_event["has_clip"] or current_event["has_snapshot"]) and (
-        prev_event["top_score"] != current_event["top_score"]
-        or prev_event["entered_zones"] != current_event["entered_zones"]
-        or prev_event["thumbnail"] != current_event["thumbnail"]
-        or prev_event["has_clip"] != current_event["has_clip"]
-        or prev_event["has_snapshot"] != current_event["has_snapshot"]
-    )
+    if current_event["has_clip"] or current_event["has_snapshot"]:
+        if (
+            prev_event["top_score"] != current_event["top_score"]
+            or prev_event["entered_zones"] != current_event["entered_zones"]
+            or prev_event["thumbnail"] != current_event["thumbnail"]
+            or prev_event["has_clip"] != current_event["has_clip"]
+            or prev_event["has_snapshot"] != current_event["has_snapshot"]
+        ):
+            return True
+    return False
 
 
 class EventProcessor(threading.Thread):
