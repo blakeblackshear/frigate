@@ -172,14 +172,18 @@ class TestHttp(unittest.TestCase):
             FrigateConfig(**self.minimal_config), self.db, None, None, None
         )
         id = "123456.random"
+        id2 = "7890.random"
 
         with app.test_client() as client:
             _insert_mock_event(id)
             events = client.get(f"/events").json
-
-        assert events
-        assert len(events) == 1
-        assert events[0]["id"] == id
+            assert events
+            assert len(events) == 1
+            assert events[0]["id"] == id
+            _insert_mock_event(id2)
+            events = client.get(f"/events").json
+            assert events
+            assert len(events) == 2
 
     def test_get_good_event(self):
         app = create_app(
