@@ -1,8 +1,10 @@
 import datetime
+import json
 import logging
 import os
 import unittest
 from unittest.mock import patch, MagicMock
+from flask import jsonify
 
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -17,7 +19,6 @@ from frigate.test.const import TEST_DB
 
 
 class TestHttp(unittest.TestCase):
-
     def setUp(self):
         migrate_db = SqliteExtDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
@@ -167,7 +168,9 @@ class TestHttp(unittest.TestCase):
             pass
 
     def test_get_good_event(self):
-        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
         id = "123456.random"
 
         with app.test_client() as client:
@@ -179,7 +182,9 @@ class TestHttp(unittest.TestCase):
         assert event == model_to_dict(Event.get(Event.id == id))
 
     def test_get_bad_event(self):
-        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
         id = "123456.random"
         bad_id = "654321.other"
 
@@ -190,7 +195,9 @@ class TestHttp(unittest.TestCase):
         assert not event
 
     def test_event_retention(self):
-        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
         id = "123456.random"
 
         with app.test_client() as client:
@@ -205,6 +212,35 @@ class TestHttp(unittest.TestCase):
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] == False
+
+    def test_set_delete_sub_label(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+        id = "123456.random"
+        sub_label = "sub"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            client.post(
+                f"/events/{id}/sub_label",
+                data=json.dumps({"subLabel": sub_label}),
+                content_type="application/json",
+            )
+            event = client.get(f"/events/{id}").json
+            assert event
+            assert event["id"] == id
+            assert event["sub_label"] == sub_label
+            client.post(
+                f"/events/{id}/sub_label",
+                data=json.dumps({"subLabel": ""}),
+                content_type="application/json",
+            )
+            event = client.get(f"/events/{id}").json
+            assert event
+            assert event["id"] == id
+            assert event["sub_label"] == ""
+
 
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
