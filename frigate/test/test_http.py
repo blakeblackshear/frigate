@@ -167,6 +167,20 @@ class TestHttp(unittest.TestCase):
         except OSError:
             pass
 
+    def test_get_event_list(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+        id = "123456.random"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            events = client.get(f"/events").json
+
+        assert events
+        assert len(events) == 1
+        assert events[0]["id"] == id
+
     def test_get_good_event(self):
         app = create_app(
             FrigateConfig(**self.minimal_config), self.db, None, None, None
