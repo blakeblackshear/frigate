@@ -303,6 +303,16 @@ class TestHttp(unittest.TestCase):
             assert sub_labels
             assert sub_labels == [sub_label]
 
+    def test_config(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config).runtime_config, self.db, None, None, None
+        )
+
+        with app.test_client() as client:
+            config = client.get("/config").json
+            assert config
+            assert config["cameras"]["front_door"]
+
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
     return Event.insert(
