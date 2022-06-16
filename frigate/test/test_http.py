@@ -189,6 +189,23 @@ class TestHttp(unittest.TestCase):
 
         assert not event
 
+    def test_event_retention(self):
+        app = create_app(FrigateConfig(**self.minimal_config), self.db, None, None, None)
+        id = "123456.random"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            client.post(f"/events/{id}/retain")
+            event = client.get(f"/events/{id}").json
+            assert event
+            assert event["id"] == id
+            assert event["retain_indefinitely"] == True
+            client.delete(f"/events/{id}/retain")
+            event = client.get(f"/events/{id}").json
+            assert event
+            assert event["id"] == id
+            assert event["retain_indefinitely"] == False
+
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
     return Event.insert(
