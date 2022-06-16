@@ -22,11 +22,10 @@ class TestHttp(unittest.TestCase):
         """Setup a functional db"""
 
         # close and delete db before each test
-        if self.db:
-            if not self.db.is_closed():
-                self.db.close()
+        if self.db and not self.db.is_closed():
+            self.db.close()
 
-            os.remove("test.db")
+        os.remove("test.db")
 
         migrate_db = SqliteExtDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
@@ -171,7 +170,7 @@ class TestHttp(unittest.TestCase):
     def test_get_good_event(self):
         db = self.setup_test_db()
         app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
-        id = "123456.someid"
+        id = "123456.random"
 
         with app.test_client() as client:
             _insert_mock_event(id)
@@ -180,6 +179,18 @@ class TestHttp(unittest.TestCase):
         assert event
         assert event["id"] == id
         assert event == model_to_dict(Event.get(Event.id == id))
+
+    def test_get_bad_event(self):
+        db = self.setup_test_db()
+        app = create_app(FrigateConfig(**self.minimal_config), db, None, None, None)
+        id = "123456.random"
+        bad_id = "654321.other"
+
+        with app.test_client() as client:
+            _insert_mock_event(id)
+            event = client.get(f"/events/{bad_id}").json
+
+        assert not event
 
 def _insert_mock_event(id: str) -> Event:
     """Inserts a basic event model with a given id."""
