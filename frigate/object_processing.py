@@ -399,7 +399,7 @@ class CameraState:
                     box[2],
                     box[3],
                     obj["label"],
-                    f"{obj['score']:.0%} {int(obj['area'])}",
+                    f"{'(Stat)' if obj['stationary'] else '(Actv)'} {obj['score']:.0%} {int(obj['area'])}",
                     thickness=thickness,
                     color=color,
                 )
