@@ -37,12 +37,7 @@ export const HistoryVideo = ({
   onPlay,
 }: HistoryVideoProps) => {
   const apiHost = useApiHost();
-  const videoRef = useRef<HTMLVideoElement>();
-
-  const [videoProperties, setVideoProperties] = useState<VideoProperties>({
-    posterUrl: '',
-    videoUrl: '',
-  });
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     let video: any;
@@ -100,7 +95,6 @@ export const HistoryVideo = ({
     [videoIsPlaying, onTimeUpdate]
   );
 
-  const { posterUrl, videoUrl } = videoProperties;
   return (
     <div data-vjs-player>
       <video
@@ -108,8 +102,6 @@ export const HistoryVideo = ({
         onTimeUpdate={onTimeUpdateHandler}
         onPause={onPause}
         onPlay={onPlay}
-        poster={posterUrl}
-        src={videoUrl}
         className="video-js vjs-fluid"
         data-setup="{}"
       />
