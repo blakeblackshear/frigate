@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useCallback, useEffect, useRef } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../../api';
 import { isNullOrUndefined } from '../../utils/objectUtils';
 
@@ -7,7 +7,7 @@ import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
 import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
-import videojs from 'video.js';
+import videojs, { VideoJsPlayer } from 'video.js';
 
 interface OnTimeUpdateEvent {
   timestamp: number;
@@ -34,18 +34,28 @@ export const HistoryVideo = ({
   const apiHost = useApiHost();
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const [video, setVideo] = useState<VideoJsPlayer>();
+
   useEffect(() => {
-    let video: any;
-    if (videoRef.current && id) {
-      video = videojs(videoRef.current, {});
+    let video: VideoJsPlayer
+    if (videoRef.current) {
+      video = videojs(videoRef.current, {})
+      setVideo(video)
     }
+    () => video?.dispose()
   }, [videoRef]);
 
   useEffect(() => {
-    if (!id) {
-      return;
+    if (!video) {
+      return
     }
-    const video = videojs(videoRef.current);
+
+
+    if (!id) {
+      video.pause()
+      return
+    }
+
     video.src({
       src: `${apiHost}/vod/event/${id}/index.m3u8`,
       type: 'application/vnd.apple.mpegurl',
@@ -54,20 +64,7 @@ export const HistoryVideo = ({
     if (videoIsPlaying) {
       video.play();
     }
-  }, [id]);
-
-  useEffect(() => {
-    if (!videoRef) {
-      return;
-    }
-
-    const video = videojs(videoRef.current);
-    if (video.paused() && videoIsPlaying) {
-      video.play();
-    } else if (!video.paused() && !videoIsPlaying) {
-      video.pause();
-    }
-  }, [videoIsPlaying, videoRef]);
+  }, [video, id]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -90,11 +87,28 @@ export const HistoryVideo = ({
     [videoIsPlaying, onTimeUpdate]
   );
 
+  useEffect(() => {
+    if (video && video.readyState() >= 1) {
+      if (videoIsPlaying) {
+        video.play()
+      } else {
+        video.pause()
+      }
+    }
+  }, [video, videoIsPlaying])
+
+  const onLoad = useCallback(() => {
+    if (video && video.readyState() >= 1 && videoIsPlaying) {
+      video.play()
+    }
+  }, [video, videoIsPlaying])
+  
   return (
     <div data-vjs-player>
       <video
         ref={videoRef}
         onTimeUpdate={onTimeUpdateHandler}
+        onLoadedMetadata={onLoad}
         onPause={onPause}
         onPlay={onPlay}
         className="video-js vjs-fluid"
