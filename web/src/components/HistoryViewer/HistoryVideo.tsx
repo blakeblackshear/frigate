@@ -14,11 +14,6 @@ interface OnTimeUpdateEvent {
   isPlaying: boolean;
 }
 
-interface VideoProperties {
-  posterUrl: string;
-  videoUrl: string;
-}
-
 interface HistoryVideoProps {
   id?: string;
   isPlaying: boolean;
