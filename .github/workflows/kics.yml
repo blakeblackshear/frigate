@@ -1,0 +1,33 @@
+name: "KICS"
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+  schedule:
+    - cron: '24 19 * * 3'
+jobs:
+  kics-scan:
+    name: KICS Scan
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run KICS
+        continue-on-error: true
+        run: |
+          docker pull checkmarx/kics:latest
+          docker run -v ${{ github.workspace }}:/path checkmarx/kics scan -p "/path" -o "/path/" --report-formats "sarif" --no-progress
+      - name: actions/upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: kics-analysis
+          path: results.sarif
+      - name: Upload KICS scan results to GitHub Security tab
+        if: ${{ env.CODEQL_ENABLED }}
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: results.sarif
