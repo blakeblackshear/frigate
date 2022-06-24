@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef } from 'preact/hooks';
 import { useApiHost } from '../../api';
 import { isNullOrUndefined } from '../../utils/objectUtils';
 
