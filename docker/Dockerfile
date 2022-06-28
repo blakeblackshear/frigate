@@ -46,7 +46,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ARG JELLYFIN_FFMPEG_VERSION=4.3.2-1
+ARG JELLYFIN_FFMPEG_VERSION=4.4.1-4
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND="noninteractive"
 # http://stackoverflow.com/questions/48162574/ddg#49462622
