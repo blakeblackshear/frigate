@@ -54,6 +54,7 @@ jobs:
 
   python_tests:
     runs-on: ubuntu-latest
+    name: Python Tests
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -69,6 +70,8 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Create Version Module
+        run: make version
       - name: Build
         run: make
       - name: Run mypy

@@ -256,7 +256,10 @@ def get_sub_labels():
         )
 
     sub_labels = [e.sub_label for e in events]
-    sub_labels.remove(None)
+
+    if None in sub_labels:
+        sub_labels.remove(None)
+
     return jsonify(sub_labels)
 
 
