@@ -278,6 +278,8 @@ def set_sub_label(id):
 
 @bp.route("/sub_labels")
 def get_sub_labels():
+    split_joined = request.args.get("split_joined", type=int)
+
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception as e:
@@ -289,6 +291,16 @@ def get_sub_labels():
 
     if None in sub_labels:
         sub_labels.remove(None)
+
+    if split_joined:
+        for label in sub_labels:
+            if "," in label:
+                sub_labels.remove(label)
+                parts = label.split(",")
+
+                for part in parts:
+                    if not (part.strip()) in sub_labels:
+                        sub_labels.append(part.strip())
 
     return jsonify(sub_labels)
 
@@ -519,11 +531,35 @@ def event_clip(id):
 
 @bp.route("/events")
 def events():
-    limit = request.args.get("limit", 100)
     camera = request.args.get("camera", "all")
+    cameras = request.args.get("cameras", "all")
+
+    # handle old camera arg
+    if cameras == "all" and camera != "all":
+        cameras = camera
+
     label = unquote(request.args.get("label", "all"))
+    labels = request.args.get("labels", "all")
+
+    # handle old label arg
+    if labels == "all" and label != "all":
+        labels = label
+
     sub_label = request.args.get("sub_label", "all")
+    sub_labels = request.args.get("sub_labels", "all")
+
+    # handle old sub_label arg
+    if sub_labels == "all" and sub_label != "all":
+        sub_labels = sub_label
+
     zone = request.args.get("zone", "all")
+    zones = request.args.get("zones", "all")
+
+    # handle old label arg
+    if zones == "all" and zone != "all":
+        zones = zone
+
+    limit = request.args.get("limit", 100)
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
     has_clip = request.args.get("has_clip", type=int)
@@ -551,14 +587,36 @@ def events():
     if camera != "all":
         clauses.append((Event.camera == camera))
 
-    if label != "all":
-        clauses.append((Event.label == label))
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Event.camera << camera_list))
 
-    if sub_label != "all":
-        clauses.append((Event.sub_label == sub_label))
+    if labels != "all":
+        label_list = labels.split(",")
+        clauses.append((Event.label << label_list))
 
-    if zone != "all":
-        clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+    if sub_labels != "all":
+        # use matching so joined sub labels are included
+        # for example a sub label 'bob' would get events
+        # with sub labels 'bob' and 'bob, john'
+        sub_label_clauses = []
+
+        for label in sub_labels.split(","):
+            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label}*"))
+
+        sub_label_clause = reduce(operator.or_, sub_label_clauses)
+        clauses.append((sub_label_clause))
+
+    if zones != "all":
+        # use matching so events with multiple zones
+        # still match on a search where any zone matches
+        zone_clauses = []
+
+        for zone in zones.split(","):
+            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+
+        zone_clause = reduce(operator.or_, zone_clauses)
+        clauses.append((zone_clause))
 
     if after:
         clauses.append((Event.start_time > after))

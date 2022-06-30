@@ -23,6 +23,7 @@ import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
+import MultiSelect from '../components/MultiSelect';
 
 const API_LIMIT = 25;
 
@@ -53,10 +54,10 @@ export default function Events({ path, ...props }) {
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
-    camera: props.camera ?? 'all',
-    label: props.label ?? 'all',
-    zone: props.zone ?? 'all',
-    sub_label: props.sub_label ?? 'all',
+    cameras: props.cameras ?? 'all',
+    labels: props.labels ?? 'all',
+    zones: props.zones ?? 'all',
+    sub_labels: props.sub_labels ?? 'all',
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -100,7 +101,7 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
-  const { data: allSubLabels } = useSWR('sub_labels');
+  const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
 
   const filterValues = useMemo(
     () => ({
@@ -146,6 +147,40 @@ export default function Events({ path, ...props }) {
         mutate();
       }
     }
+  };
+
+  const onToggleNamedFilter = (name, item) => {
+    let items;
+
+    if (searchParams[name] == 'all') {
+      const currentItems = Array.from(filterValues[name]);
+
+      // don't remove all if only one option
+      if (currentItems.length > 1) {
+        currentItems.splice(currentItems.indexOf(item), 1);
+        items = currentItems.join(",");
+      } else {
+        items = ["all"];
+      }
+    } else {
+      let currentItems = searchParams[name].length > 0 ? searchParams[name].split(",") : [];
+
+      if (currentItems.includes(item)) {
+        // don't remove the last item in the filter list
+        if (currentItems.length > 1) {
+          currentItems.splice(currentItems.indexOf(item), 1);
+        }
+
+        items = currentItems.join(",");
+      } else if ((currentItems.length + 1) == filterValues[name].length) {
+        items = ["all"];
+      } else {
+        currentItems.push(item);
+        items = currentItems.join(",");
+      }
+    }
+
+    onFilter(name, items);
   };
 
   const datePicker = useRef();
@@ -260,56 +295,37 @@ export default function Events({ path, ...props }) {
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
       <div className="flex flex-wrap gap-2 items-center">
-        <select
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.camera}
-          onChange={(e) => onFilter('camera', e.target.value)}
-        >
-          <option value="all">all cameras</option>
-          {filterValues.cameras.map((item) => (
-            <option key={item} value={item}>
-              {item.replaceAll('_', ' ')}
-            </option>
-          ))}
-        </select>
-        <select
+          title="Cameras"
+          options={filterValues.cameras}
+          selection={searchParams.cameras}
+          onToggle={(item) => onToggleNamedFilter("cameras", item)}
+        />
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.label}
-          onChange={(e) => onFilter('label', e.target.value)}
-        >
-          <option value="all">all labels</option>
-          {filterValues.labels.map((item) => (
-            <option key={item.replaceAll('_', ' ')} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-        <select
+          title="Labels"
+          options={filterValues.labels}
+          selection={searchParams.labels}
+          onToggle={(item) => onToggleNamedFilter("labels", item) }
+        />
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.zone}
-          onChange={(e) => onFilter('zone', e.target.value)}
-        >
-          <option value="all">all zones</option>
-          {filterValues.zones.map((item) => (
-            <option key={item} value={item}>
-              {item.replaceAll('_', ' ')}
-            </option>
-          ))}
-        </select>
-        {filterValues.sub_labels.length > 0 && (
-          <select
-            className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-            value={searchParams.sub_label}
-            onChange={(e) => onFilter('sub_label', e.target.value)}
-          >
-            <option value="all">all sub labels</option>
-            {filterValues.sub_labels.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        )}
+          title="Zones"
+          options={filterValues.zones}
+          selection={searchParams.zones}
+          onToggle={(item) => onToggleNamedFilter("zones", item) }
+        />
+        {
+          filterValues.sub_labels.length > 0 && (
+            <MultiSelect
+              className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
+              title="Sub Labels"
+              options={filterValues.sub_labels}
+              selection={searchParams.sub_labels}
+              onToggle={(item) => onToggleNamedFilter("sub_labels", item) }
+            />
+          )}
         <div ref={datePicker} className="ml-auto">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"

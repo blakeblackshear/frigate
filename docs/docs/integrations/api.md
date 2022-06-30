@@ -159,9 +159,9 @@ Events from the database. Accepts the following query string parameters:
 | -------------------- | ---- | --------------------------------------------- |
 | `before`             | int  | Epoch time                                    |
 | `after`              | int  | Epoch time                                    |
-| `camera`             | str  | Camera name                                   |
-| `label`              | str  | Label name                                    |
-| `zone`               | str  | Zone name                                     |
+| `cameras`            | str  | , separated list of cameras                   |
+| `labels`             | str  | , separated list of labels                    |
+| `zones`              | str  | , separated list of zones                     |
 | `limit`              | int  | Limit the number of events returned           |
 | `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1) |
 | `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
