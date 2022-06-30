@@ -5,6 +5,10 @@ CACHE_DIR = "/tmp/cache"
 YAML_EXT = (".yaml", ".yml")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
+
+### Default Args
+
+DEFAULT_TIME_RANGE = "00:00,24:00"
 MAX_SEGMENT_DURATION = 600
 
 # Regex Consts
