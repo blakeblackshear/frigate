@@ -1,4 +1,5 @@
 import { h, Fragment } from 'preact';
+import useSWR from 'swr';
 import BaseAppBar from './components/AppBar';
 import LinkedLogo from './components/LinkedLogo';
 import Menu, { MenuItem, MenuSeparator } from './components/Menu';
@@ -10,8 +11,10 @@ import Prompt from './components/Prompt';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { useRestart } from './api/mqtt';
+import NotificationMenu, { NotificationItem } from './components/NotificationMenu';
 
 export default function AppBar() {
+  const [showNotifications, setShowNotifications] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
@@ -25,6 +28,18 @@ export default function AppBar() {
     },
     [setDarkMode, setShowMoreMenu]
   );
+
+  const { data: notifications } = useSWR('notifications');
+
+  const notifRef = useRef(null);
+
+  const handleShowNotifications = useCallback(() => {
+    setShowNotifications(true);
+  }, [setShowNotifications]);
+
+  const handleDismissNotifications = useCallback(() => {
+    setShowNotifications(false);
+  }, [setShowNotifications]);
 
   const moreRef = useRef(null);
 
@@ -53,7 +68,14 @@ export default function AppBar() {
 
   return (
     <Fragment>
-      <BaseAppBar title={LinkedLogo} overflowRef={moreRef} onOverflowClick={handleShowMenu} />
+      <BaseAppBar title={LinkedLogo} notificationRef={(notifications && notifications.length > 0) ? notifRef : null} overflowRef={moreRef} onNotificationClick={handleShowNotifications} onOverflowClick={handleShowMenu} />
+      {showNotifications ? (
+        <NotificationMenu onDismiss={handleDismissNotifications} relativeTo={notifRef}>
+          {notifications.map((item) => (
+            <NotificationItem key={item.title} title={item.title} desc={item.desc} type={item.type} href={item.url} />
+          ))}
+        </NotificationMenu>
+      ) : null}
       {showMoreMenu ? (
         <Menu onDismiss={handleDismissMoreMenu} relativeTo={moreRef}>
           <MenuItem icon={AutoAwesomeIcon} label="Auto dark mode" value="media" onSelect={handleSelectDarkMode} />

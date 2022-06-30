@@ -54,6 +54,18 @@ export const handlers = [
       })
     );
   }),
+  rest.get(`${API_HOST}api/notifications`, (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json([
+        {
+          title: 'Notification Title',
+          desc: 'Notification Desc',
+          type: 'success',
+        },
+      ])
+    );
+  }),
   rest.get(`${API_HOST}api/events`, (req, res, ctx) => {
     return res(
       ctx.status(200),

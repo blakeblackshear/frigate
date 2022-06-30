@@ -6,6 +6,7 @@ import logging
 import os
 import subprocess as sp
 import time
+from typing import Any, Dict, List
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
@@ -26,7 +27,7 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.version import VERSION
@@ -595,6 +596,52 @@ def version():
 def stats():
     stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
+
+
+@bp.route("/notifications")
+def notifications():
+    notifications: List[Dict[str, Any]] = []
+    stats = stats_snapshot(current_app.stats_tracking)
+
+    # check if update is available
+    if stats["service"]["version"] < stats["service"]["latest_version"]:
+        notifications.append(
+            {
+                "title": "New Update Available",
+                "desc": f"An update to version {stats['service']['latest_version']} is available.",
+                "type": "success",
+                "url": "https://github.com/blakeblackshear/frigate/releases",
+            }
+        )
+
+    # check if the recording dir is almost full
+    recording_dir = stats["service"]["storage"][RECORD_DIR]
+
+    if (recording_dir["used"] / recording_dir["total"]) > 0.9:
+        notifications.append(
+            {
+                "title": "Recording Storage Almost Full",
+                "desc": "The storage for saving recordings is almost full, this may cause issues with cameras.",
+                "type": "warning",
+                "url": "/debug",
+            }
+        )
+
+    # check if cameras are not connected
+    for camera_name in current_app.frigate_config.cameras.keys():
+        camera = stats.get(camera_name)
+
+        if camera and camera["camera_fps"] == 0.0:
+            notifications.append(
+                {
+                    "title": f"{camera_name.replace('_', ' ').title()} is not connected.",
+                    "desc": "Check the logs for more info on the cameras connection.",
+                    "type": "error",
+                    "url": "/debug",
+                }
+            )
+
+    return jsonify(notifications)
 
 
 @bp.route("/<camera_name>")

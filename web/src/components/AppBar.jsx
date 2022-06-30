@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import Button from './Button';
+import NotificationIcon from '../icons/Notification';
 import MenuIcon from '../icons/Menu';
 import MoreIcon from '../icons/More';
 import { useDrawer } from '../context';
@@ -9,7 +10,7 @@ import { useLayoutEffect, useCallback, useState } from 'preact/hooks';
 // But need to avoid too many re-renders
 let lastScrollY = window.scrollY;
 
-export default function AppBar({ title: Title, overflowRef, onOverflowClick }) {
+export default function AppBar({ title: Title, notificationRef, overflowRef, onNotificationClick, onOverflowClick }) {
   const [show, setShow] = useState(true);
   const [atZero, setAtZero] = useState(window.scrollY === 0);
   const { setShowDrawer } = useDrawer();
@@ -50,6 +51,19 @@ export default function AppBar({ title: Title, overflowRef, onOverflowClick }) {
       </div>
       <Title />
       <div className="flex-grow-1 flex justify-end w-full">
+        {notificationRef && onNotificationClick ? (
+          <div className="w-auto" ref={notificationRef}>
+            <Button
+              aria-label="Notifications"
+              color="yellow"
+              className="rounded-full w-9 h-9"
+              onClick={onNotificationClick}
+              type="text"
+            >
+              <NotificationIcon className="w-10 h-10" />
+            </Button>
+          </div>
+        ) : null}
         {overflowRef && onOverflowClick ? (
           <div className="w-auto" ref={overflowRef}>
             <Button

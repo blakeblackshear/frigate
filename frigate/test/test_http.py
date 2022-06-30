@@ -29,7 +29,6 @@ class TestHttp(unittest.TestCase):
         self.db = SqliteQueueDatabase(TEST_DB)
         models = [Event, Recordings]
         self.db.bind(models)
-
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},
             "cameras": {
@@ -292,6 +291,51 @@ class TestHttp(unittest.TestCase):
         with app.test_client() as client:
             stats = client.get("/stats").json
             assert stats == self.test_stats
+
+    @patch("frigate.http.stats_snapshot")
+    def test_no_notifications(self, mock_stats):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+
+        mock_stats.return_value = self.test_stats
+
+        with app.test_client() as client:
+            notifications = client.get("/notifications").json
+
+        assert notifications == []
+
+    @patch("frigate.http.stats_snapshot")
+    def test_all_notifications(self, mock_stats):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+
+        mock_stats.return_value = self.test_stats
+
+        with app.test_client() as client:
+            notifications = client.get("/notifications").json
+
+        assert notifications == [
+            {
+                "title": "New Update Available",
+                "desc": "An update to version 0.11 is available.",
+                "type": "success",
+                "url": "https://github.com/blakeblackshear/frigate/releases",
+            },
+            {
+                "title": "Recording Storage Almost Full",
+                "desc": "The storage for saving recordings is almost full, this may cause issues with cameras.",
+                "type": "warning",
+                "url": "/debug",
+            },
+            {
+                "title": "Front Door is not connected.",
+                "desc": "Check the logs for more info on the cameras connection.",
+                "type": "error",
+                "url": "/debug",
+            },
+        ]
 
 
 def _insert_mock_event(id: str) -> Event:
