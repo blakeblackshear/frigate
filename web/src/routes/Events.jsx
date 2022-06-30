@@ -20,10 +20,12 @@ import { Download } from '../icons/Download';
 import Menu, { MenuItem } from '../components/Menu';
 import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
+import ClockIcon from '../icons/Clock';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
-import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 import MultiSelect from '../components/MultiSelect';
+import TimePicker from '../components/TimePicker';
+import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 
 const API_LIMIT = 25;
 
@@ -58,12 +60,14 @@ export default function Events({ path, ...props }) {
     labels: props.labels ?? 'all',
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
+    time_range: '00:00,24:00',
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
     showDatePicker: false,
     showCalendar: false,
     showPlusConfig: false,
+    showTimePicker: false,
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
@@ -185,6 +189,8 @@ export default function Events({ path, ...props }) {
 
   const datePicker = useRef();
 
+  const timePicker = useRef();
+
   const downloadButton = useRef();
 
   const onDownloadClick = (e, event) => {
@@ -205,6 +211,13 @@ export default function Events({ path, ...props }) {
       setState({ ...state, showDatePicker: false });
     },
     [searchParams, setSearchParams, state, setState]
+  );
+
+  const handleSelectTimeRange = useCallback(
+    (timeRange) => {
+      setSearchParams({ ...searchParams, time_range: timeRange})
+    },
+    [searchParams, setSearchParams]
   );
 
   const onFilter = useCallback(
@@ -340,6 +353,12 @@ export default function Events({ path, ...props }) {
             onClick={() => setState({ ...state, showDatePicker: true })}
           />
         </div>
+        <div ref={timePicker} className="">
+          <ClockIcon
+            className="h-8 w-8 cursor-pointer"
+            onClick={() => setState({ ...state, showTimePicker: true })}
+          />
+        </div>
       </div>
       {state.showDownloadMenu && (
         <Menu onDismiss={() => setState({ ...state, showDownloadMenu: false })} relativeTo={downloadButton}>
@@ -419,6 +438,19 @@ export default function Events({ path, ...props }) {
             dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
             close={() => setState({ ...state, showCalendar: false })}
           />
+        </Menu>
+      )}
+      {state.showTimePicker && (
+        <Menu
+          className="rounded-t-none"
+          onDismiss={() => setState({ ...state, showTimePicker: false })}
+          relativeTo={timePicker}>
+          <div>
+            <TimePicker
+              onChange={handleSelectTimeRange}
+              timeRange={{ after: searchParams.time_range.split(",")[0], before: searchParams.time_range.split(",")[1] }}
+            />
+          </div>
         </Menu>
       )}
       {state.showPlusConfig && (
