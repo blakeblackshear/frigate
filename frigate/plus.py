@@ -1,6 +1,8 @@
 import datetime
+import json
 import logging
 import os
+import re
 import requests
 from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
 from requests.models import Response
@@ -28,10 +30,23 @@ def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
 class PlusApi:
     def __init__(self) -> None:
         self.host = PLUS_API_HOST
+        self.key = None
         if PLUS_ENV_VAR in os.environ:
             self.key = os.environ.get(PLUS_ENV_VAR)
-        else:
+        # check for the addon options file
+        elif os.path.isfile("/data/options.json"):
+            with open("/data/options.json") as f:
+                raw_options = f.read()
+            options = json.loads(raw_options)
+            self.key = options.get("plus_api_key")
+
+        if self.key is not None and not re.match(
+            r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}:[a-z0-9]{40}",
+            self.key,
+        ):
+            logger.error("Plus API Key is not formatted correctly.")
             self.key = None
+
         self._is_active: bool = self.key is not None
         self._token_data: dict = {}
 
