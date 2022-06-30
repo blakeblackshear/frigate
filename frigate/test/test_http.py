@@ -224,7 +224,7 @@ class TestHttp(unittest.TestCase):
                 query_string={"time_range": "07:00,24:00"},
             ).json
             assert events
-            #assert len(events) == 1
+            # assert len(events) == 1
             # evening event is excluded
             events = client.get(
                 f"/events",
