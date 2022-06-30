@@ -32,7 +32,7 @@ from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import CLIPS_DIR, DEFAULT_TIME_RANGE, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
@@ -562,6 +562,7 @@ def events():
     limit = request.args.get("limit", 100)
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
+    time_range = request.args.get("time_range", DEFAULT_TIME_RANGE)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
@@ -626,6 +627,17 @@ def events():
 
     if not has_clip is None:
         clauses.append((Event.has_clip == has_clip))
+
+    if time_range != DEFAULT_TIME_RANGE:
+        times = time_range.split(",")
+        time_after = times[0]
+        time_before = times[1]
+
+        start_hour_fun = fn.strftime(
+            "%H:%M", fn.datetime(Event.start_time, "unixepoch", "localtime")
+        )
+        clauses.append((start_hour_fun > time_after))
+        clauses.append((start_hour_fun < time_before))
 
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
