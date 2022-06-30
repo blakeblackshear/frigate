@@ -202,6 +202,37 @@ class TestHttp(unittest.TestCase):
             assert event["id"] == id
             assert event["retain_indefinitely"] == False
 
+    def test_event_time_filtering(self):
+        app = create_app(
+            FrigateConfig(**self.minimal_config), self.db, None, None, None
+        )
+        morning_id = "123456.random"
+        evening_id = "654321.random"
+        morning = 1656590400  # 06/30/2022 6 am (GMT)
+        evening = 1656633600  # 06/30/2022 6 pm (GMT)
+
+        with app.test_client() as client:
+            _insert_mock_event(morning_id, morning)
+            _insert_mock_event(evening_id, evening)
+            # both events come back
+            events = client.get(f"/events").json
+            assert events
+            assert len(events) == 2
+            # morning event is excluded
+            events = client.get(
+                f"/events",
+                query_string={"time_range": "07:00,24:00"},
+            ).json
+            assert events
+            #assert len(events) == 1
+            # evening event is excluded
+            events = client.get(
+                f"/events",
+                query_string={"time_range": "00:00,18:00"},
+            ).json
+            assert events
+            assert len(events) == 1
+
     def test_set_delete_sub_label(self):
         app = create_app(
             FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
@@ -297,14 +328,17 @@ class TestHttp(unittest.TestCase):
             assert stats == self.test_stats
 
 
-def _insert_mock_event(id: str) -> Event:
+def _insert_mock_event(
+    id: str,
+    start_time: datetime.datetime = datetime.datetime.now().timestamp(),
+) -> Event:
     """Inserts a basic event model with a given id."""
     return Event.insert(
         id=id,
         label="Mock",
         camera="front_door",
-        start_time=datetime.datetime.now().timestamp(),
-        end_time=datetime.datetime.now().timestamp() + 20,
+        start_time=start_time,
+        end_time=start_time + 20,
         top_score=100,
         false_positive=False,
         zones=list(),
