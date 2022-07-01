@@ -183,6 +183,10 @@ Permanently deletes the event along with any clips/snapshots.
 
 Sets retain to true for the event id.
 
+### `POST /api/events/<id>/plus`
+
+Submits the snapshot of the event to Frigate+ for labeling.
+
 ### `DELETE /api/events/<id>/retain`
 
 Sets retain to false for the event id (event may be deleted quickly after removing).
