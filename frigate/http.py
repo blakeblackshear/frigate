@@ -690,32 +690,15 @@ def latest_frame(camera_name):
 
 
 @bp.route("/recordings/storage")
-def recordings_storage_usage():
-    total_bytes = 0
-    storage = {}
+def get_recordings_storage_usage():
+    recording_stats = stats_snapshot(current_app.stats_tracking)["service"]["storage"][
+        RECORD_DIR
+    ]
+    total_bytes = recording_stats["total"]
+    storage = {"cameras": {}, "total": total_bytes}
+    storage[camera_name] = camera_bytes
+    total_bytes += camera_bytes
 
-    for camera_name in current_app.frigate_config.cameras.keys():
-        camera_bytes = 0
-        du_cmd = [
-            "du",
-            "-h",
-            RECORD_DIR,
-        ]
-        p: sp.CompletedProcess = sp.run(
-            du_cmd,
-            encoding="ascii",
-            capture_output=True,
-        )
-        summary = sp.check_output(('grep', camera_name), stdin=p.stdout)
-
-        for line in summary.split("\n"):
-            logger.error(F"Found the line {line}")
-            camera_bytes += 1
-
-        storage[camera_name] = camera_bytes
-        total_bytes += camera_bytes
-
-    storage["total"] = total_bytes
     return jsonify(storage)
 
 
