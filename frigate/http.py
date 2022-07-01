@@ -27,8 +27,7 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
@@ -688,6 +687,36 @@ def latest_frame(camera_name):
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/recordings/storage")
+def recordings_storage_usage():
+    total_bytes = 0
+    storage = {}
+
+    for camera_name in current_app.frigate_config.cameras.keys():
+        camera_bytes = 0
+        du_cmd = [
+            "du",
+            "-h",
+            RECORD_DIR,
+        ]
+        p: sp.CompletedProcess = sp.run(
+            du_cmd,
+            encoding="ascii",
+            capture_output=True,
+        )
+        summary = sp.check_output(('grep', camera_name), stdin=p.stdout)
+
+        for line in summary.split("\n"):
+            logger.error(F"Found the line {line}")
+            camera_bytes += 1
+
+        storage[camera_name] = camera_bytes
+        total_bytes += camera_bytes
+
+    storage["total"] = total_bytes
+    return jsonify(storage)
 
 
 # return hourly summary for recordings of camera
