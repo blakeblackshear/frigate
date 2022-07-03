@@ -80,15 +80,14 @@ RUN apt-get -qq update \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     && pip3 install -U /wheels/*.whl \
+    # jellyfin-ffmpeg
+    && wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y ./jellyfin.deb \
+    && rm jellyfin.deb \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    # jellyfin-ffmpeg
-    wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
-    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers intel-media-va-driver-non-free ./jellyfin.deb \
-    && rm jellyfin.deb; else \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    ffmpeg; \
+    mesa-va-drivers intel-media-va-driver-non-free; \
     fi \
     && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
