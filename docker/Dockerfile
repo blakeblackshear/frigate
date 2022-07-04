@@ -46,7 +46,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ARG JELLYFIN_FFMPEG_VERSION=4.3.2-1
+ARG JELLYFIN_FFMPEG_VERSION=4.4.1-4
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND="noninteractive"
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -73,20 +73,21 @@ RUN apt-get -qq update \
     && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
     && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
+    # enable non-free repo
+    && sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     && pip3 install -U /wheels/*.whl \
+    # jellyfin-ffmpeg
+    && wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y ./jellyfin.deb \
+    && rm jellyfin.deb \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    # jellyfin-ffmpeg
-    wget -O /tmp/jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
-    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers /tmp/jellyfin.deb \
-    && rm /tmp/jellyfin.deb; else \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    ffmpeg; \
+    mesa-va-drivers intel-media-va-driver-non-free; \
     fi \
     && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
