@@ -3,7 +3,7 @@ Flask == 2.1.*
 imutils == 0.5.*
 matplotlib == 3.5.*
 mypy == 0.942
-numpy == 1.19.*
+numpy == 1.22.*
 opencv-python-headless == 4.5.5.*
 paho-mqtt == 1.6.*
 peewee == 3.14.*
