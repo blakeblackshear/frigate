@@ -11,8 +11,8 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
-    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
+    && echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3 \
@@ -67,8 +67,8 @@ RUN apt-get -qq update \
     unzip tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo
-    && wget -O - http://archive.raspberrypi.org/debian/raspberrypi.gpg.key | apt-key add - \
-    && echo "deb http://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
+    && echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list \
     # add coral repo
     && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
@@ -88,6 +88,16 @@ RUN apt-get -qq update \
     && if [ "${TARGETARCH}" = "amd64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
     mesa-va-drivers intel-media-va-driver-non-free; \
+    fi \
+    # not sure why 32bit arm requires all these
+    && if [ "${TARGETARCH}" = "arm" ]; then \
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    libgtk-3-dev \
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
+    libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
+    gfortran openexr libatlas-base-dev libssl-dev\
+    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev; \
     fi \
     && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
