@@ -46,7 +46,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ARG JELLYFIN_FFMPEG_VERSION=4.4.1-4
+ARG JELLYFIN_FFMPEG_VERSION=5.0.1-7
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND="noninteractive"
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -81,7 +81,7 @@ RUN apt-get -qq update \
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     && pip3 install -U /wheels/*.whl \
     # jellyfin-ffmpeg
-    && wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
+    && wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg5_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y ./jellyfin.deb \
     && rm jellyfin.deb \
     # arch specific packages
