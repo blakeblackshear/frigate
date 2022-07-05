@@ -346,7 +346,7 @@ FFMPEG_INPUT_ARGS_DEFAULT = [
     "+genpts+discardcorrupt",
     "-rtsp_transport",
     "tcp",
-    "-stimeout",
+    "-timeout",
     "5000000",
     "-use_wallclock_as_timestamps",
     "1",

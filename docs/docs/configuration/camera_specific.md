@@ -102,7 +102,7 @@ You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
 
 ### UDP Only Cameras
@@ -111,5 +111,5 @@ If your cameras do not support TCP connections for RTSP, you can use UDP.
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```

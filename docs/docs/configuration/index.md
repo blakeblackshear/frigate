@@ -135,7 +135,7 @@ ffmpeg:
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
   # Optional: global input args (default: shown below)
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
