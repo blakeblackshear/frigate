@@ -15,13 +15,13 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   );
 
   const apiHost = useApiHost();
-  const { data: recordingsSummary } = useSWR(`${camera}/recordings/summary`);
+  const { data: recordingsSummary } = useSWR(`${camera}/recordings/summary`, { revalidateOnFocus: false });
 
   const recordingParams = {
     before: getUnixTime(endOfHour(currentDate)),
     after: getUnixTime(startOfHour(currentDate)),
   };
-  const { data: recordings } = useSWR([`${camera}/recordings`, recordingParams]);
+  const { data: recordings } = useSWR([`${camera}/recordings`, recordingParams], { revalidateOnFocus: false });
 
   // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
   const seekSeconds = useMemo(() => {
