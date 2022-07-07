@@ -102,6 +102,7 @@ class RecordingMaintainer(threading.Thread):
             if len(grouped_recordings[camera]) > keep_count:
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
+                    logger.warning(f"Discarding a recording segment: {f}")
                     Path(f["cache_path"]).unlink(missing_ok=True)
                     self.end_time_cache.pop(f["cache_path"], None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
