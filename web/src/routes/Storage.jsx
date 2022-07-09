@@ -8,7 +8,7 @@ import useSWR from 'swr';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useCallback } from 'preact/hooks';
 
-export default function () {
+export default function Storage() {
   const { data: storage } = useSWR('recordings/storage');
 
   return (
