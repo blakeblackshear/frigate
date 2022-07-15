@@ -314,6 +314,11 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             config.cameras[name].motion.contour_area,
             retain=True,
         )
+        client.publish(
+            f"{mqtt_config.topic_prefix}/{name}/motion",
+            "OFF",
+            retain=False,
+        )
 
     return client
 
