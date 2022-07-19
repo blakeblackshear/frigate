@@ -208,3 +208,16 @@ npm run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Official builds
+
+Setup buildx for multiarch
+
+```
+docker buildx stop builder && docker buildx rm builder # <---- if existing
+docker run --privileged --rm tonistiigi/binfmt --install all
+docker buildx create --name builder --driver docker-container --driver-opt network=host --use
+docker buildx inspect builder --bootstrap
+make build_web
+make push
+```
