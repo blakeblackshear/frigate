@@ -79,6 +79,7 @@ RUN     buildDeps="autoconf \
         python \
         libssl-dev \
         yasm \
+        libva-dev \
         linux-headers-raspi2 \
         libomxil-bellagio-dev \
         zlib1g-dev" && \
@@ -444,6 +445,7 @@ RUN \
         --enable-libkvazaar \
         --enable-libaom \
         --extra-libs=-lpthread \
+        --enable-vaapi \
         --enable-rkmpp \
         --enable-libdrm \
         # --enable-omx \
@@ -482,5 +484,10 @@ CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
+
+RUN \
+        apt-get update -y && \
+        apt-get install -y --no-install-recommends libva-drm2 libva2 mesa-va-drivers && \
+        rm -rf /var/lib/apt/lists/*
 
 # Run ffmpeg with -c:v h264_v4l2m2m to enable HW accell for decoding on raspberry pi4 64-bit

@@ -5,6 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install packages for apt repo
 RUN apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
+    # VAAPI drivers for Intel hardware accel
+    libva-drm2 libva2 vainfo mesa-vdpau-drivers mesa-va-drivers mesa-vdpau-drivers libdrm-radeon1 \
     # ffmpeg runtime dependencies
     libgomp1 \
     # runtime dependencies
