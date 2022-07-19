@@ -394,15 +394,6 @@ RUN \
         rm -rf ${DIR}
 
 
-RUN \
-        DIR=/tmp/rkmpp && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        git clone https://github.com/rockchip-linux/libdrm-rockchip && git clone https://github.com/rockchip-linux/mpp && \
-        cd libdrm-rockchip && bash autogen.sh && ./configure && make && make install && \
-        cd ../mpp && cmake -DRKPLATFORM=ON -DHAVE_DRM=ON && make -j6 && make install && \
-        rm -rf ${DIR}
-
 ## ffmpeg https://ffmpeg.org/
 RUN  \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
@@ -446,8 +437,6 @@ RUN \
         --enable-libaom \
         --extra-libs=-lpthread \
         --enable-vaapi \
-        --enable-rkmpp \
-        --enable-libdrm \
         # --enable-omx \
         # --enable-omx-rpi \
         # --enable-mmal \
