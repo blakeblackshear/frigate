@@ -6,6 +6,7 @@ services:
     # add groups from host for render, plugdev, video
     group_add:
       - "109" # render
+      - "110" # render
       - "44"  # video
       - "46"  # plugdev
     shm_size: "256mb"
