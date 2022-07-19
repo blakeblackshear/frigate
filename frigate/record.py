@@ -101,7 +101,9 @@ class RecordingMaintainer(threading.Thread):
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
-                logger.warning(f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest...")
+                logger.warning(
+                    f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
+                )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
                     cache_path = f["cache_path"]
