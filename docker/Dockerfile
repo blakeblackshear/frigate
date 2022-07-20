@@ -89,6 +89,10 @@ RUN apt-get -qq update \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
     mesa-va-drivers intel-media-va-driver-non-free; \
     fi \
+    && if [ "${TARGETARCH}" = "arm64" ]; then \
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    libva-drm2 mesa-va-drivers; \
+    fi \
     # not sure why 32bit arm requires all these
     && if [ "${TARGETARCH}" = "arm" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
