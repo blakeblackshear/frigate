@@ -42,8 +42,8 @@ RUN pip3 install -r requirements.txt
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
-# Frigate Container
-FROM debian:11-slim
+# Frigate without web
+FROM debian:11-slim AS frigate-without-web
 ARG TARGETARCH
 
 ARG JELLYFIN_FFMPEG_VERSION=5.0.1-7
@@ -118,8 +118,6 @@ WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
 
-COPY web/dist web/
-
 COPY docker/rootfs/ /
 
 # s6-overlay
@@ -136,3 +134,56 @@ EXPOSE 1935
 ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]
+
+
+# Frigate with Node.js and NPM
+FROM frigate-without-web AS frigate-with-node
+
+# Install Node 16
+RUN apt-get update -y \
+    && apt-get install -y curl \
+    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs
+
+RUN npm install -g npm@latest
+
+
+# Build of the Frigate web
+FROM frigate-with-node AS web-build
+
+WORKDIR /work
+COPY web/package.json web/package-lock.json ./
+RUN npm install
+
+COPY web/ ./
+RUN npm run build
+
+
+# Frigate Container
+FROM frigate-without-web
+
+COPY --from=build-web /work/dist web/
+
+
+# Devcontainer
+FROM frigate-with-node AS dev
+
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash \
+    #
+    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+RUN apt-get update \
+    && apt-get install -y git curl vim htop
+
+COPY requirements-dev.txt /opt/frigate/requirements-dev.txt
+RUN pip3 install -r requirements-dev.txt

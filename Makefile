@@ -15,7 +15,7 @@ nginx_frigate:
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.2 --file docker/Dockerfile.nginx .
 
 local:
-	DOCKER_BUILDKIT=1 docker build -t frigate -f docker/Dockerfile .
+	DOCKER_BUILDKIT=1 docker build --tag frigate:latest --file docker/Dockerfile .
 
 amd64:
 	docker buildx build --platform linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .

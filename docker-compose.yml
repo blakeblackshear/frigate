@@ -12,10 +12,11 @@ services:
     shm_size: "256mb"
     build:
       context: .
-      dockerfile: docker/Dockerfile.dev
+      dockerfile: docker/Dockerfile
+      target: dev
     devices:
       - /dev/bus/usb:/dev/bus/usb
-      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+      # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - .:/lab/frigate:cached
