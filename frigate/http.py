@@ -25,7 +25,7 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
+from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
 from frigate.version import VERSION
@@ -571,7 +571,7 @@ def config():
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = " ".join(cmd["cmd"])
 
-    config["plus"] = {"enabled": PLUS_ENV_VAR in os.environ}
+    config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     return jsonify(config)
 
