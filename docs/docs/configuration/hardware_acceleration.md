@@ -15,7 +15,11 @@ ffmpeg:
   hwaccel_args: -c:v h264_v4l2m2m
 ```
 
-### Intel-based CPUs (<10th Generation) via Quicksync
+### Intel-based CPUs with QuickSync
+
+Intel CPUs with build in graphics (non-F variants) since 5th generation have at least h264 decoding support. Once you've configured it and restarted frigate, verify that it's working by running `intel_gpu_top` - if everything is set up correctly, you should see non-zero load on `Video` and/or `VideoEnhance`.
+
+#### <10th Generation via `vaapi`
 
 ```yaml
 ffmpeg:
@@ -23,12 +27,37 @@ ffmpeg:
 ```
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME_JELLYFIN=i965` to your docker-compose file.   
 
-### Intel-based CPUs (>=10th Generation) via Quicksync
+### >=10th Generation via Quicksync
 
 ```yaml
 ffmpeg:
   hwaccel_args: -c:v h264_qsv
 ```
+
+### >=12th Generation via Quicksync
+
+**Note:** You should use kernel 5.18 or newer for full support.
+
+```yaml
+ffmpeg:
+  input_args:
+    - -c:v
+    - h264_qsv # Or h265_qsv depending on your camera's format
+    - -gpu_copy
+    - "on"
+    ...
+  hwaccel_args:
+    - -hwaccel
+    - qsv
+    - -qsv_device
+    - /dev/dri/renderD128
+    - -hwaccel_output_format
+    - qsv 
+  output_args:
+    # Converts from the format used on the GPU to the format expected by frigate.
+    detect: -vf vpp_qsv=format=yuv420p -f rawvideo -pix_fmt yuv420p
+```
+Specifying `input_args` and `output_args` overrides frigate's defaults, so you may want to append whatever options your camera requires.
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
