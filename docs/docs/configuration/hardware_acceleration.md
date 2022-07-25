@@ -27,14 +27,14 @@ ffmpeg:
 ```
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME_JELLYFIN=i965` to your docker-compose file.   
 
-### >=10th Generation via Quicksync
+#### >=10th Generation via Quicksync
 
 ```yaml
 ffmpeg:
   hwaccel_args: -c:v h264_qsv
 ```
 
-### >=12th Generation via Quicksync
+#### >=12th Generation via Quicksync
 
 **Note:** You should use kernel 5.18 or newer for full support.
 
