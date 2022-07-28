@@ -67,4 +67,4 @@ ffmpeg:
 
 ### NVIDIA GPU
 
-NVIDIA GPU based decoding via NVDEC is supported, but requires special configuration. See the [NVIDIA NVDEC documentation](/configuration/nvdec) for more details.
+NVIDIA GPU based decoding via NVDEC is supported, but requires special configuration. See the [NVIDIA NVDEC documentation](/docs/docs/configuration/nvdec.md) for more details.
