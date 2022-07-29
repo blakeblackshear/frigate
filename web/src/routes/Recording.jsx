@@ -103,7 +103,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary || !recording) {
+  if (!recordingsSummary || !recordings) {
     return <ActivityIndicator />;
   }
 
