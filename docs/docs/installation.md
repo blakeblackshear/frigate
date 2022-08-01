@@ -102,14 +102,8 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 Running in Docker directly is the recommended install method.
 
-Make sure you choose the right image for your architecture:
-
-| Arch        | Image Name                                 |
-| ----------- | ------------------------------------------ |
-| amd64       | blakeblackshear/frigate:stable-amd64       |
-| amd64nvidia | blakeblackshear/frigate:stable-amd64nvidia |
-| armv7       | blakeblackshear/frigate:stable-armv7       |
-| aarch64     | blakeblackshear/frigate:stable-aarch64     |
+Frigate supports docker multiarch:
+`blakeblackshear/frigate:stable`
 
 It is recommended to run with docker-compose:
 
@@ -120,7 +114,7 @@ services:
     container_name: frigate
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
-    image: blakeblackshear/frigate:<specify_version_tag>
+    image: blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
@@ -157,7 +151,7 @@ docker run -d \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
   -p 1935:1935 \
-  blakeblackshear/frigate:<specify_version_tag>
+  blakeblackshear/frigate:stable
 ```
 
 ## Home Assistant Operating System (HassOS)
