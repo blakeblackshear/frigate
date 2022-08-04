@@ -162,6 +162,10 @@ export default function Event({ eventId, close, scrollRef }) {
                 <Td>Score</Td>
                 <Td>{(data.top_score * 100).toFixed(2)}%</Td>
               </Tr>
+              <Tr>
+               <Td>Area</Td>
+               <Td>{(data.area)}%</Td>
+             </Tr>
               <Tr index={1}>
                 <Td>Zones</Td>
                 <Td>{data.zones.join(', ')}</Td>
