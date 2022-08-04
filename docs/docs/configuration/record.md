@@ -42,3 +42,16 @@ The same options are available with events. Let's consider a scenario where you 
 - With the `all` option all segments for the duration of the event would be saved for the event. This event would have 4 hours of footage.
 - With the `motion` option all segments for the duration of the event with motion would be saved. This means any segment where a car drove by in the street, person walked by, lighting changed, etc. would be saved. 
 - With the `active_objects` it would only keep segments where the object was active. In this case the only segments that would be saved would be the ones where the car was driving up, you going inside, you coming outside, and the car driving away. Essentially reducing the 4 hours to a minute or two of event footage. 
+
+A configration example of the above retain modes where `motion` is stored for 7 days and `active objects` are store for 14 would be as follows:
+```yaml
+record:
+  enabled: True
+  retain:
+    days: 7
+    mode: motion
+  events:
+    retain:
+      default: 14
+      mode: active_objects
+```
