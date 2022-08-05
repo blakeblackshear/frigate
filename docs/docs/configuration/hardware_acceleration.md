@@ -41,6 +41,8 @@ ffmpeg:
 
 ### NVIDIA GPU
 
+[Supported Nvidia GPUs for Decoding](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new)
+
 These instructions are based on the [jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux)
 
 Add `--gpus all` to your docker run command or update your compose file.
