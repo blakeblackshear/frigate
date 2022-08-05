@@ -57,7 +57,9 @@ record:
 ```
 The above configuration example can be added globally or on a per camera basis.
 
-You can also set specific retention length for each object type. The below configuration example builds on from above but also specifies that recordings of dogs only need to be kept for 2 days and recordings of cars should be kept for 7 days.
+### Object Specific Retention
+
+You can also set specific retention length for an object type. The below configuration example builds on from above but also specifies that recordings of dogs only need to be kept for 2 days and recordings of cars should be kept for 7 days.
 ```yaml
 record:
   enabled: True
