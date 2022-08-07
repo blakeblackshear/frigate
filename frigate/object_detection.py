@@ -8,9 +8,10 @@ import threading
 from abc import ABC, abstractmethod
 
 import numpy as np
-import tflite_runtime.interpreter as tflite
 from setproctitle import setproctitle
-from tflite_runtime.interpreter import load_delegate
+from frigate.config import DetectorTypeEnum
+from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
+from frigate.detectors.cpu_tfl import CpuTfl
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
@@ -24,45 +25,29 @@ class ObjectDetector(ABC):
 
 
 class LocalObjectDetector(ObjectDetector):
-    def __init__(self, tf_device=None, model_path=None, num_threads=3, labels=None):
+    def __init__(
+        self,
+        det_type=DetectorTypeEnum.cpu,
+        det_device=None,
+        model_path=None,
+        num_threads=3,
+        labels=None,
+    ):
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
         else:
             self.labels = load_labels(labels)
 
-        device_config = {"device": "usb"}
-        if not tf_device is None:
-            device_config = {"device": tf_device}
-
-        edge_tpu_delegate = None
-
-        if tf_device != "cpu":
-            try:
-                logger.info(f"Attempting to load TPU as {device_config['device']}")
-                edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
-                logger.info("TPU found")
-                self.interpreter = tflite.Interpreter(
-                    model_path=model_path or "/edgetpu_model.tflite",
-                    experimental_delegates=[edge_tpu_delegate],
-                )
-            except ValueError:
-                logger.error(
-                    "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
-                )
-                raise
+        if det_type == DetectorTypeEnum.edgetpu:
+            self.detectApi = EdgeTpuTfl(tf_device=det_device, model_path=model_path)
         else:
             logger.warning(
                 "CPU detectors are not recommended and should only be used for testing or for trial purposes."
             )
-            self.interpreter = tflite.Interpreter(
-                model_path=model_path or "/cpu_model.tflite", num_threads=num_threads
+            self.detectApi = CpuTfl(
+                tf_device=det_device, model_path=model_path, num_threads=num_threads
             )
-
-        self.interpreter.allocate_tensors()
-
-        self.tensor_input_details = self.interpreter.get_input_details()
-        self.tensor_output_details = self.interpreter.get_output_details()
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -79,31 +64,7 @@ class LocalObjectDetector(ObjectDetector):
         return detections
 
     def detect_raw(self, tensor_input):
-        self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
-        self.interpreter.invoke()
-
-        boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
-        class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]
-        scores = self.interpreter.tensor(self.tensor_output_details[2]["index"])()[0]
-        count = int(
-            self.interpreter.tensor(self.tensor_output_details[3]["index"])()[0]
-        )
-
-        detections = np.zeros((20, 6), np.float32)
-
-        for i in range(count):
-            if scores[i] < 0.4 or i == 20:
-                break
-            detections[i] = [
-                class_ids[i],
-                float(scores[i]),
-                boxes[i][0],
-                boxes[i][1],
-                boxes[i][2],
-                boxes[i][3],
-            ]
-
-        return detections
+        return self.detectApi.detect_raw(tensor_input=tensor_input)
 
 
 def run_detector(
@@ -114,7 +75,7 @@ def run_detector(
     start,
     model_path,
     model_shape,
-    tf_device,
+    det_device,
     num_threads,
 ):
     threading.current_thread().name = f"detector:{name}"
@@ -133,7 +94,7 @@ def run_detector(
 
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(
-        tf_device=tf_device, model_path=model_path, num_threads=num_threads
+        det_device=det_device, model_path=model_path, num_threads=num_threads
     )
 
     outputs = {}
@@ -165,7 +126,7 @@ def run_detector(
         avg_speed.value = (avg_speed.value * 9 + duration) / 10
 
 
-class EdgeTPUProcess:
+class ObjectDetectProcess:
     def __init__(
         self,
         name,
