@@ -133,7 +133,13 @@ RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdli
 
 # setup rockchip support
 RUN mkdir rockchip
-RUN wget -q http://repo.rock-chips.com/python/rknn_toolkit-1.2.1-cp36-cp36m-linux_x86_64.whl -O /rockchip/wheels.whl
+
+RUN ROCK_ARCH="${TARGETARCH}" \
+    && if [ "${TARGETARCH}" = "amd64" ]; then ROCK_ARCH="x86_64"; fi \
+    && if [ "${TARGETARCH}" = "arm" ]; then ROCK_ARCH="aarch64"; fi \
+    && if [ "${TARGETARCH}" = "arm64" ]; then ROCK_ARCH="aarch64"; fi \
+    && wget -q "https://repo.rock-chips.com/pypi/simple/rknn-toolkit/rknn-toolkit-1.3.0-cp36-cp36m-linux_${ROCK_ARCH}.whl" -O rockchip/rknn-toolkit-1.3.0-cp39-cp39-linux_${ROCK_ARCH}.whl \
+    && python3 -m pip install rockchip/rknn-toolkit-1.3.0-cp39-cp39-linux_${ROCK_ARCH}.whl --no-deps
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
