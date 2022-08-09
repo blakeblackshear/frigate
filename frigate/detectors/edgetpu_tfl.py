@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class EdgeTpuTfl(DetectionApi):
-    def __init__(self, tf_device=None, model_path=None):
+    def __init__(self, det_device=None, model_path=None):
         device_config = {"device": "usb"}
-        if not tf_device is None:
-            device_config = {"device": tf_device}
+        if not det_device is None:
+            device_config = {"device": det_device}
 
         edge_tpu_delegate = None
 

@@ -3,6 +3,7 @@ from statistics import mean
 import multiprocessing as mp
 import numpy as np
 import datetime
+from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
     LocalObjectDetector,
     ObjectDetectProcess,
@@ -81,8 +82,12 @@ events = {}
 for x in range(0, 10):
     events[str(x)] = mp.Event()
 detection_queue = mp.Queue()
-edgetpu_process_1 = ObjectDetectProcess(detection_queue, events, "usb:0")
-edgetpu_process_2 = ObjectDetectProcess(detection_queue, events, "usb:1")
+edgetpu_process_1 = ObjectDetectProcess(
+    detection_queue, events, DetectorTypeEnum.edgetpu, "usb:0"
+)
+edgetpu_process_2 = ObjectDetectProcess(
+    detection_queue, events, DetectorTypeEnum.edgetpu, "usb:1"
+)
 
 for x in range(0, 10):
     camera_process = mp.Process(

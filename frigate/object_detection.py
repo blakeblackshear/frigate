@@ -40,14 +40,12 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if det_type == DetectorTypeEnum.edgetpu:
-            self.detectApi = EdgeTpuTfl(tf_device=det_device, model_path=model_path)
+            self.detectApi = EdgeTpuTfl(det_device=det_device, model_path=model_path)
         else:
             logger.warning(
                 "CPU detectors are not recommended and should only be used for testing or for trial purposes."
             )
-            self.detectApi = CpuTfl(
-                tf_device=det_device, model_path=model_path, num_threads=num_threads
-            )
+            self.detectApi = CpuTfl(model_path=model_path, num_threads=num_threads)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -75,6 +73,7 @@ def run_detector(
     start,
     model_path,
     model_shape,
+    det_type,
     det_device,
     num_threads,
 ):
@@ -94,7 +93,10 @@ def run_detector(
 
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(
-        det_device=det_device, model_path=model_path, num_threads=num_threads
+        det_type=det_type,
+        det_device=det_device,
+        model_path=model_path,
+        num_threads=num_threads,
     )
 
     outputs = {}
@@ -134,7 +136,8 @@ class ObjectDetectProcess:
         out_events,
         model_path,
         model_shape,
-        tf_device=None,
+        det_type=None,
+        det_device=None,
         num_threads=3,
     ):
         self.name = name
@@ -145,7 +148,8 @@ class ObjectDetectProcess:
         self.detect_process = None
         self.model_path = model_path
         self.model_shape = model_shape
-        self.tf_device = tf_device
+        self.det_type = det_type
+        self.det_device = det_device
         self.num_threads = num_threads
         self.start_or_restart()
 
@@ -173,7 +177,8 @@ class ObjectDetectProcess:
                 self.detection_start,
                 self.model_path,
                 self.model_shape,
-                self.tf_device,
+                self.det_type,
+                self.det_device,
                 self.num_threads,
             ),
         )
