@@ -18,3 +18,14 @@ scipy == 1.8.*
 setproctitle == 1.2.*
 ws4py == 0.5.*
 zeroconf == 0.38.4
+
+# rockchip specific
+dill
+flatbuffers
+h5py
+lmdb
+networkx
+onnx
+onnx-tf
+protobuf
+ruamel.yaml
