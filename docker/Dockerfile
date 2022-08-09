@@ -131,6 +131,10 @@ COPY labelmap.txt /labelmap.txt
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
+# setup rockchip support
+RUN mkdir rockchip
+RUN wget -q http://repo.rock-chips.com/python/rknn_toolkit-1.2.1-cp36-cp36m-linux_x86_64.whl -O /rockchip/wheels.whl
+
 WORKDIR /opt/frigate/
 ADD frigate frigate/
 ADD migrations migrations/
