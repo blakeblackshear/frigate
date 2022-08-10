@@ -138,8 +138,10 @@ RUN ROCK_ARCH="${TARGETARCH}" \
     && if [ "${TARGETARCH}" = "amd64" ]; then ROCK_ARCH="x86_64"; fi \
     && if [ "${TARGETARCH}" = "arm" ]; then ROCK_ARCH="aarch64"; fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then ROCK_ARCH="aarch64"; fi \
-    && wget -q "https://repo.rock-chips.com/pypi/simple/rknn-toolkit/rknn-toolkit-1.3.0-cp36-cp36m-linux_${ROCK_ARCH}.whl" -O rockchip/rknn-toolkit-1.3.0-cp39-cp39-linux_${ROCK_ARCH}.whl \
-    && python3 -m pip install rockchip/rknn-toolkit-1.3.0-cp39-cp39-linux_${ROCK_ARCH}.whl --no-deps
+    && wget -q "https://repo.rock-chips.com/edge/pypi/simple/rknn-toolkit-lite/rknn_toolkit_lite-1.7.2.dev12139523-cp39-cp39-linux_${ROCK_ARCH}.whl" -O rockchip/rknn_toolkit_lite-1.7.2.dev12139523-cp39-cp39-linux_${ROCK_ARCH}.whl \
+    && python3 -m pip install rockchip/rknn_toolkit_lite-1.7.2.dev12139523-cp39-cp39-linux_${ROCK_ARCH}.whl --no-deps
+
+COPY precompiled_models/ precompiled_models/
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
