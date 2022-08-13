@@ -25,6 +25,10 @@ cameras:
       height: 720
 ```
 
+### VSCode Configuration Schema
+
+VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema` to the top of the config file. `frigate_host` being the IP address of frigate or `ccab4aaf-frigate` if running in the addon.
+
 ### Full configuration reference:
 
 :::caution
@@ -311,6 +315,8 @@ snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
+  # Optional: save a clean PNG copy of the snapshot image (default: shown below)
+  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
