@@ -198,28 +198,16 @@ class FrigateApp:
             self.detection_shms.append(shm_out)
 
         for name, detector in self.config.detectors.items():
-            if detector.type == DetectorTypeEnum.cpu:
-                self.detectors[name] = ObjectDetectProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    detector.type,
-                    "cpu",
-                    detector.num_threads,
-                )
-            if detector.type == DetectorTypeEnum.edgetpu:
-                self.detectors[name] = ObjectDetectProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    detector.type,
-                    detector.device,
-                    detector.num_threads,
-                )
+            self.detectors[name] = ObjectDetectProcess(
+                name,
+                self.detection_queue,
+                self.detection_out_events,
+                model_path,
+                model_shape,
+                detector.type,
+                detector.device,
+                detector.num_threads,
+            )
 
     def start_detected_frames_processor(self) -> None:
         self.detected_frames_processor = TrackedObjectProcessor(
