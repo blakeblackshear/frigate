@@ -100,12 +100,7 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 ## Docker
 
-Running in Docker directly is the recommended install method.
-
-Frigate supports docker multiarch:
-`blakeblackshear/frigate:stable`
-
-It is recommended to run with docker-compose:
+Running in Docker with compose is the recommended install method:
 
 ```yaml
 version: "3.9"
