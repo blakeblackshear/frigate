@@ -644,12 +644,36 @@ class CameraConfig(FrigateBaseModel):
 
         return [part for part in cmd if part != ""]
 
+class DatabaseTypeEnum(str, Enum):
+    sqlite = "sqlite"
+    mysql = "mysql"
 
 class DatabaseConfig(FrigateBaseModel):
+    type: DatabaseTypeEnum = Field(
+        default=DatabaseTypeEnum.sqlite, title="Database connection method, sqlite, mysql"
+    )
+
+    # Only used for sqlite
     path: str = Field(
         default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
     )
 
+    # Only used for mysql
+    database: str = Field(
+        default="frigate", title="Database name."
+    )
+    host: str = Field(
+        default="localhost", title="Database host."
+    )
+    user: str = Field(
+        default="frigate", title="Database user."
+    )
+    password: str = Field(
+        default="frigate", title="Database password."
+    )
+    port: int = Field(
+        default=3306, title="Database password."
+    )
 
 class ModelConfig(FrigateBaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")

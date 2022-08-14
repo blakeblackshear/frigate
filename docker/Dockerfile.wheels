@@ -34,7 +34,8 @@ RUN pip3 wheel --wheel-dir=/wheels \
     matplotlib \
     click \
     setproctitle \
-    peewee
+    peewee \
+    pymysql
 
 FROM scratch
 

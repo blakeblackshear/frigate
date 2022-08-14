@@ -1,6 +1,7 @@
 from numpy import unique
 from peewee import *
 from playhouse.sqlite_ext import *
+from playhouse.mysql_ext import *
 
 
 class Event(Model):
@@ -8,7 +9,7 @@ class Event(Model):
     label = CharField(index=True, max_length=20)
     camera = CharField(index=True, max_length=20)
     start_time = DateTimeField()
-    end_time = DateTimeField()
+    end_time = DateTimeField(null=True)
     top_score = FloatField()
     false_positive = BooleanField()
     zones = JSONField()
