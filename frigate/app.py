@@ -10,11 +10,6 @@ from typing import Dict, List
 
 import traceback
 import yaml
-from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
-from playhouse.sqliteq import SqliteQueueDatabase
-from peewee import MySQLDatabase
-from playhouse.shortcuts import ReconnectMixin
 from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
@@ -23,7 +18,6 @@ from frigate.edgetpu import EdgeTPUProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings
 from frigate.mqtt import MqttSocketRelay, create_mqtt_client
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -32,11 +26,9 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
+from frigate.database import resolve_db_from_config
 
 logger = logging.getLogger(__name__)
-
-class ReconnectMySQLDatabase(ReconnectMixin, MySQLDatabase):
-    pass
 
 class FrigateApp:
     def __init__(self):
@@ -120,42 +112,7 @@ class FrigateApp:
         self.recordings_info_queue = mp.Queue()
 
     def init_database(self):
-        if self.config.database.type == "sqlite":
-            # Migrate DB location
-            old_db_path = os.path.join(CLIPS_DIR, "frigate.db")
-            if not os.path.isfile(self.config.database.path) and os.path.isfile(
-                old_db_path
-            ):
-                os.rename(old_db_path, self.config.database.path)
-
-            # Migrate DB schema
-            migrate_db = SqliteExtDatabase(self.config.database.path)
-
-            # Run migrations
-            del logging.getLogger("peewee_migrate").handlers[:]
-            router = Router(migrate_db)
-            router.run()
-
-            migrate_db.close()
-
-            self.db = SqliteQueueDatabase(self.config.database.path)
-            models = [Event, Recordings]
-            self.db.bind(models)
-        elif self.config.database.type == "mysql":
-            self.db = ReconnectMySQLDatabase(self.config.database.database, 
-                host=self.config.database.host, 
-                port=self.config.database.port, 
-                user=self.config.database.user, 
-                passwd=self.config.database.password
-            )
-            models = [Event, Recordings]
-            self.db.bind(models)
-            
-            Event.create_table()
-            Recordings.create_table()
-
-        models = [Event, Recordings]
-        self.db.bind(models)
+        self.db = resolve_db_from_config(self.config)
 
     def init_stats(self):
         self.stats_tracking = stats_init(self.camera_metrics, self.detectors)
