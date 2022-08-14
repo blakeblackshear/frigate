@@ -650,7 +650,7 @@ class DatabaseTypeEnum(str, Enum):
 
 class DatabaseConfig(FrigateBaseModel):
     type: DatabaseTypeEnum = Field(
-        default=DatabaseTypeEnum.sqlite, title="Database connection method, sqlite, mysql"
+        default=DatabaseTypeEnum.sqlite, title="Database connection method."
     )
 
     # Only used for sqlite
