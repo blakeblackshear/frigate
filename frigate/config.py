@@ -672,7 +672,7 @@ class DatabaseConfig(FrigateBaseModel):
         default="frigate", title="Database password."
     )
     port: int = Field(
-        default=3306, title="Database password."
+        default=3306, title="Database server port."
     )
 
 class ModelConfig(FrigateBaseModel):
