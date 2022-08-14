@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 from setproctitle import setproctitle
+
 from frigate.config import DetectorTypeEnum
 from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
 from frigate.detectors.cpu_tfl import CpuTfl

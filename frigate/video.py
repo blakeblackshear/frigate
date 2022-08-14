@@ -12,8 +12,6 @@ from collections import defaultdict
 
 import numpy as np
 import cv2
-
-# from cv2 import cv2, reduce
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig

@@ -14,7 +14,7 @@ from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
-from frigate.edgetpu import EdgeTPUProcess
+from frigate.object_detection import ObjectDetectProcess
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,8 @@ def get_latest_version() -> str:
 
 
 def stats_init(
-    camera_metrics: dict[str, CameraMetricsTypes], detectors: dict[str, EdgeTPUProcess]
+    camera_metrics: dict[str, CameraMetricsTypes],
+    detectors: dict[str, ObjectDetectProcess],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,

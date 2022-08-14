@@ -23,7 +23,7 @@ Examples of available modules are:
 
 - `frigate.app`
 - `frigate.mqtt`
-- `frigate.edgetpu`
+- `frigate.object_detection`
 - `frigate.zeroconf`
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
