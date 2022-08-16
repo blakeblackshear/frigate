@@ -41,12 +41,12 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if det_type == DetectorTypeEnum.edgetpu:
-            self.detectApi = EdgeTpuTfl(det_device=det_device, model_path=model_path)
+            self.detect_api = EdgeTpuTfl(det_device=det_device, model_path=model_path)
         else:
             logger.warning(
                 "CPU detectors are not recommended and should only be used for testing or for trial purposes."
             )
-            self.detectApi = CpuTfl(model_path=model_path, num_threads=num_threads)
+            self.detect_api = CpuTfl(model_path=model_path, num_threads=num_threads)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -63,7 +63,7 @@ class LocalObjectDetector(ObjectDetector):
         return detections
 
     def detect_raw(self, tensor_input):
-        return self.detectApi.detect_raw(tensor_input=tensor_input)
+        return self.detect_api.detect_raw(tensor_input=tensor_input)
 
 
 def run_detector(
