@@ -62,7 +62,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
           description: `${camera} recording @ ${h.hour}:00.`,
           sources: [
             {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/index.m3u8`,
+              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/master.m3u8`,
               type: 'application/vnd.apple.mpegurl',
             },
           ],

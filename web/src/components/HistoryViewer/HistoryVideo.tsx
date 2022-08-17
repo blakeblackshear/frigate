@@ -57,7 +57,7 @@ export const HistoryVideo = ({
     }
 
     video.src({
-      src: `${apiHost}/vod/event/${id}/index.m3u8`,
+      src: `${apiHost}/vod/event/${id}/master.m3u8`,
       type: 'application/vnd.apple.mpegurl',
     });
     video.poster(`${apiHost}/api/events/${id}/snapshot.jpg`);
