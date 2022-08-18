@@ -825,6 +825,38 @@ def recording_clip(camera, start_ts, end_ts):
     return response
 
 
+def get_keyframe_timestamps_and_adjusted_offset(
+    source: str, target_offset: int
+) -> tuple[list[int], int]:
+    """Get the keyframe timestamp locations for this source.
+
+    Also return the timestamp of the nearest keyframe before start_ts.
+    This is useful for codec variants with long or variable keyframe intervals."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-skip_frame",
+        "nokey",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "frame=pts_time",
+        "-v",
+        "quiet",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        source,
+    ]
+    p = sp.run(ffprobe_cmd, capture_output=True)
+    keyframe_timestamps = [int(1000 * float(pts)) for pts in p.stdout.split()]
+    if target_offset == 0:
+        return keyframe_timestamps, 0
+    for ts in reversed(keyframe_timestamps):
+        if ts <= target_offset:
+            return keyframe_timestamps, ts
+    logger.warning("Couldn't find starting keyframe for VOD clip")
+    return keyframe_timestamps, 0
+
+
 @bp.route("/vod/<camera>/start/<int:start_ts>/end/<int:end_ts>")
 @bp.route("/vod/<camera>/start/<float:start_ts>/end/<float:end_ts>")
 def vod_ts(camera, start_ts, end_ts):
@@ -847,10 +879,23 @@ def vod_ts(camera, start_ts, end_ts):
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
         # Determine if offset is needed for first clip
-        if recording.start_time < start_ts:
-            offset = int((start_ts - recording.start_time) * 1000)
-            clip["clipFrom"] = offset
-            duration -= offset
+        target_offset = (
+            int((start_ts - recording.start_time) * 1000)
+            if recording.start_time < start_ts
+            else 0
+        )
+        # If we are clipping, we need to find the keyframe before start_ts and start
+        # from there. Otherwise we may lose data and our durations will be incorrect.
+        # Also get the keyframe timestamps so we can use "keyFrameDurations" below.
+        keyframe_timestamps, offset = get_keyframe_timestamps_and_adjusted_offset(
+            recording.path, target_offset
+        )
+        if keyframe_timestamps:
+            clip["keyFrameDurations"] = [
+                j - i for i, j in zip(keyframe_timestamps[:-1], keyframe_timestamps[1:])
+            ] + [duration - keyframe_timestamps[-1]]
+        clip["clipFrom"] = offset
+        duration -= offset
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
@@ -869,6 +914,7 @@ def vod_ts(camera, start_ts, end_ts):
     return jsonify(
         {
             "cache": hour_ago.timestamp() > start_ts,
+            "clipTo": sum(durations),
             "discontinuity": False,
             "durations": durations,
             "sequences": [{"clips": clips}],
