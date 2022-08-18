@@ -690,3 +690,37 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]
+
+
+def get_keyframe_timestamps_and_adjusted_offset(
+    source: str, target_offset: int
+) -> tuple[list[int], int]:
+    """Get timestamp metadata from the source.
+
+    This is used to pass information to the VOD module and is useful for codec variants
+    with long or variable keyframe intervals.
+    Returns a tuple of: 1) the keyframe timestamp locations for this source
+                    and 2) the timestamp of the nearest keyframe before target_offset."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-skip_frame",
+        "nokey",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "frame=pts_time",
+        "-v",
+        "quiet",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        source,
+    ]
+    p = sp.run(ffprobe_cmd, capture_output=True)
+    keyframe_timestamps = [int(1000 * float(pts)) for pts in p.stdout.split()]
+    if target_offset == 0:
+        return keyframe_timestamps, 0
+    for ts in reversed(keyframe_timestamps):
+        if ts <= target_offset:
+            return keyframe_timestamps, ts
+    logger.warning("Couldn't find starting keyframe for VOD clip")
+    return keyframe_timestamps, 0

@@ -28,6 +28,7 @@ from playhouse.shortcuts import model_to_dict
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
+from frigate.util import get_keyframe_timestamps_and_adjusted_offset
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -823,38 +824,6 @@ def recording_clip(camera, start_ts, end_ts):
     ] = f"/cache/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
 
     return response
-
-
-def get_keyframe_timestamps_and_adjusted_offset(
-    source: str, target_offset: int
-) -> tuple[list[int], int]:
-    """Get the keyframe timestamp locations for this source.
-
-    Also return the timestamp of the nearest keyframe before start_ts.
-    This is useful for codec variants with long or variable keyframe intervals."""
-    ffprobe_cmd = [
-        "ffprobe",
-        "-skip_frame",
-        "nokey",
-        "-select_streams",
-        "v:0",
-        "-show_entries",
-        "frame=pts_time",
-        "-v",
-        "quiet",
-        "-of",
-        "default=noprint_wrappers=1:nokey=1",
-        source,
-    ]
-    p = sp.run(ffprobe_cmd, capture_output=True)
-    keyframe_timestamps = [int(1000 * float(pts)) for pts in p.stdout.split()]
-    if target_offset == 0:
-        return keyframe_timestamps, 0
-    for ts in reversed(keyframe_timestamps):
-        if ts <= target_offset:
-            return keyframe_timestamps, ts
-    logger.warning("Couldn't find starting keyframe for VOD clip")
-    return keyframe_timestamps, 0
 
 
 @bp.route("/vod/<camera>/start/<int:start_ts>/end/<int:end_ts>")
