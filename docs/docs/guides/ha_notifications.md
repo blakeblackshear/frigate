@@ -20,7 +20,7 @@ automation:
         data_template:
           message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
           data:
-            image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
+            image: 'https://your.public.hass.address.com/api/frigate/events/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
             tag: '{{trigger.payload_json["after"]["id"]}}'
             when: '{{trigger.payload_json["after"]["start_time"]|int}}'
 ```
@@ -42,7 +42,7 @@ automation:
           message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
           data:
             image: >-
-              https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
+              https://your.public.hass.address.com/api/frigate/events/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
             tag: '{{trigger.payload_json["after"]["id"]}}'
             when: '{{trigger.payload_json["after"]["start_time"]|int}}'
             entity_id: camera.{{trigger.payload_json["after"]["camera"]}}
