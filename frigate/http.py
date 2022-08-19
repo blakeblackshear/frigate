@@ -18,7 +18,6 @@ from flask import (
     Flask,
     Response,
     current_app,
-    g,
     jsonify,
     make_response,
     request,
@@ -35,11 +34,6 @@ from frigate.version import VERSION
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("frigate", __name__)
-
-
-@bp.url_value_preprocessor
-def unquote_label(endpoint, values):
-    g.label = unquote(values.pop("label", ""))
 
 
 def create_app(
@@ -347,8 +341,9 @@ def event_thumbnail(id, max_cache_age=2592000):
 
 @bp.route("/<camera_name>/<label>/best.jpg")
 @bp.route("/<camera_name>/<label>/thumbnail.jpg")
-def label_thumbnail(camera_name):
-    if g.label == "any":
+def label_thumbnail(camera_name, label):
+    label = unquote(label)
+    if label == "any":
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
@@ -359,7 +354,7 @@ def label_thumbnail(camera_name):
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.label == g.label)
+            .where(Event.label == label)
             .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
@@ -430,8 +425,9 @@ def event_snapshot(id):
 
 
 @bp.route("/<camera_name>/<label>/snapshot.jpg")
-def label_snapshot(camera_name):
-    if g.label == "any":
+def label_snapshot(camera_name, label):
+    label = unquote(label)
+    if label == "any":
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
@@ -442,7 +438,7 @@ def label_snapshot(camera_name):
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.label == g.label)
+            .where(Event.label == label)
             .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
