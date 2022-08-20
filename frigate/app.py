@@ -270,7 +270,7 @@ class FrigateApp:
                 ),
             )
             camera_process.daemon = True
-            self.camera_metrics[name]["process"] = camera_process
+            self.camera_metrics[name]["process_pid"] = camera_process.pid
             camera_process.start()
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
@@ -282,7 +282,7 @@ class FrigateApp:
                 args=(name, config, self.camera_metrics[name]),
             )
             capture_process.daemon = True
-            self.camera_metrics[name]["capture_process"] = capture_process
+            self.camera_metrics[name]["capture_process_pid"] = capture_process.pid
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 

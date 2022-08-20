@@ -8,7 +8,7 @@ from frigate.edgetpu import EdgeTPUProcess
 
 class CameraMetricsTypes(TypedDict):
     camera_fps: Synchronized
-    capture_process: Optional[Process]
+    capture_process_pid: Optional[int]
     detection_enabled: Synchronized
     detection_fps: Synchronized
     detection_frame: Synchronized
@@ -18,7 +18,7 @@ class CameraMetricsTypes(TypedDict):
     improve_contrast_enabled: Synchronized
     motion_threshold: Synchronized
     motion_contour_area: Synchronized
-    process: Optional[Process]
+    process_pid: Optional[int]
     process_fps: Synchronized
     read_start: Synchronized
     skipped_fps: Synchronized

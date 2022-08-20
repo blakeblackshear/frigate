@@ -4,13 +4,17 @@ import multiprocessing as mp
 import os
 import queue
 import signal
+import sys
 import threading
 from abc import ABC, abstractmethod
 
 import numpy as np
-import tflite_runtime.interpreter as tflite
+if (sys.platform == "darwin"):
+    import tensorflow.lite as tflite
+else:
+    import tflite_runtime.interpreter as tflite
+    from tflite_runtime.interpreter import load_delegate
 from setproctitle import setproctitle
-from tflite_runtime.interpreter import load_delegate
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 

@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 import threading
 import time
 import psutil
@@ -87,12 +88,9 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
 
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats["detection_fps"].value
-        pid = camera_stats["process"].pid if camera_stats["process"] else None
-        cpid = (
-            camera_stats["capture_process"].pid
-            if camera_stats["capture_process"]
-            else None
-        )
+        pid = camera_stats["process_pid"]
+        cpid = camera_stats["capture_process_pid"]
+
         stats[name] = {
             "camera_fps": round(camera_stats["camera_fps"].value, 2),
             "process_fps": round(camera_stats["process_fps"].value, 2),
@@ -121,6 +119,9 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
+        if sys.platform == "darwin" and path == "/dev/shm": #osx doesn't have /dev/shm
+            continue
+
         storage_stats = shutil.disk_usage(path)
         stats["service"]["storage"][path] = {
             "total": round(storage_stats.total / 1000000, 1),

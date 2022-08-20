@@ -11,7 +11,8 @@ import time
 from collections import defaultdict
 
 import numpy as np
-from cv2 import cv2, reduce
+import cv2
+from cv2 import reduce
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
@@ -165,7 +166,7 @@ def capture_frames(
         frame_name = f"{camera_name}{current_frame.value}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
-            frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+            frame_buffer[:frame_size] = ffmpeg_process.stdout.read(frame_size) #on osx frame_buffer isn't always the right size (ftruncate can make it larger)
         except Exception as e:
             logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
