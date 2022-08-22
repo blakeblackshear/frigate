@@ -46,7 +46,6 @@ RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 FROM debian:11-slim
 ARG TARGETARCH
 
-ARG JELLYFIN_FFMPEG_VERSION=5.0.1-7
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND="noninteractive"
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -80,14 +79,21 @@ RUN apt-get -qq update \
     # coral drivers
     libedgetpu1-max python3-tflite-runtime python3-pycoral \
     && pip3 install -U /wheels/*.whl \
-    # jellyfin-ffmpeg
-    && wget -O jellyfin.deb "https://repo.jellyfin.org/releases/server/debian/versions/jellyfin-ffmpeg/${JELLYFIN_FFMPEG_VERSION}/jellyfin-ffmpeg5_${JELLYFIN_FFMPEG_VERSION}-$( awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release )_$( dpkg --print-architecture ).deb" \
-    && apt-get -qq install --no-install-recommends --no-install-suggests -y ./jellyfin.deb \
-    && rm jellyfin.deb \
+    # btbn-ffmpeg -> amd64 / arm64
+    && if [ "${TARGETARCH}" = "amd64" ] || [ "${TARGETARCH}" = "arm64" ]; then \
+    mkdir -p /usr/lib/btbn-ffmpeg \
+    && wget -O btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux$( [ "$TARGETARCH" = "amd64" ] && echo "64" || echo "arm64" )-gpl-5.1.tar.xz" \
+    && tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1 \
+    && rm btbn-ffmpeg.tar.xz; \
+    fi \
+    # ffmpeg -> arm32
+    && if [ "${TARGETARCH}" = "arm" ]; then \
+    apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg; \
+    fi \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers intel-media-va-driver-non-free; \
+    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1; \
     fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
@@ -109,7 +115,7 @@ RUN apt-get -qq update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH=$PATH:/usr/lib/jellyfin-ffmpeg
+ENV PATH=$PATH:/usr/lib/btbn-ffmpeg/bin
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
