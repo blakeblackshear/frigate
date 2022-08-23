@@ -87,7 +87,7 @@ RUN apt-get -qq update \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free; \
+    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver; \
     fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
