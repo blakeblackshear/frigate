@@ -28,7 +28,7 @@ from playhouse.shortcuts import model_to_dict
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
-from frigate.util import get_keyframe_timestamps_and_adjusted_offset
+from frigate.util import get_adjusted_offset
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -847,24 +847,16 @@ def vod_ts(camera, start_ts, end_ts):
     for recording in recordings:
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
+        clip["keyFrameDurations"] = [duration]
+
         # Determine if offset is needed for first clip
-        target_offset = (
-            int((start_ts - recording.start_time) * 1000)
-            if recording.start_time < start_ts
-            else 0
-        )
-        # If we are clipping, we need to find the keyframe before start_ts and start
-        # from there. Otherwise we may lose data and our durations will be incorrect.
-        # Also get the keyframe timestamps so we can use "keyFrameDurations" below.
-        keyframe_timestamps, offset = get_keyframe_timestamps_and_adjusted_offset(
-            recording.path, target_offset
-        )
-        if keyframe_timestamps:
-            clip["keyFrameDurations"] = [
-                j - i for i, j in zip(keyframe_timestamps[:-1], keyframe_timestamps[1:])
-            ] + [duration - keyframe_timestamps[-1]]
-        clip["clipFrom"] = offset
-        duration -= offset
+        if (target_offset := int((start_ts - recording.start_time) * 1000)) > 0:
+            # If we are clipping, we need to find the keyframe before start_ts and start
+            # from there. Otherwise we may lose data and our durations will be incorrect.
+            offset = get_adjusted_offset(recording.path, target_offset)
+            clip["clipFrom"] = offset
+            duration -= offset
+
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
