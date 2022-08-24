@@ -652,8 +652,8 @@ def process_frames(
                         (
                             max(o[2][0], 0),
                             max(o[2][1], 0),
-                            min(o[2][2] - o[2][0], detect_config.width),
-                            min(o[2][3] - o[2][1], detect_config.height),
+                            min(o[2][2] - o[2][0], detect_config.width - 1),
+                            min(o[2][3] - o[2][1], detect_config.height - 1),
                         )
                         for o in group
                     ]
