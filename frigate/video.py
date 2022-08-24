@@ -647,12 +647,13 @@ def process_frames(
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                     # o[2] is the box of the object: xmin, ymin, xmax, ymax
+                    # apply max/min to ensure values do not exceed the known frame size
                     boxes = [
                         (
-                            o[2][0],
-                            o[2][1],
-                            o[2][2] - o[2][0],
-                            o[2][3] - o[2][1],
+                            max(o[2][0], 0),
+                            max(o[2][1], 0),
+                            min(o[2][2] - o[2][0], detect_config.width - 1),
+                            min(o[2][3] - o[2][1], detect_config.height - 1),
                         )
                         for o in group
                     ]
