@@ -697,8 +697,6 @@ def get_adjusted_offset(source: str, target_offset: int) -> int:
 
     This is used to pass information to the VOD module and is useful for codec variants
     with long or variable keyframe intervals."""
-    if target_offset == 0:
-        return 0
     ffprobe_cmd = [
         "ffprobe",
         "-skip_frame",
