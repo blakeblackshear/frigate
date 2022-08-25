@@ -171,4 +171,3 @@ Topic to set birdseye mode for a camera. Expected values are `continuous`, `obje
 ### `frigate/<camera_name>/birdseye/mode`
 
 Topic with current birdseye mode for a camera. Published values are `continuous`, `objects`, and `motion`.
->>>>>>> adb6126 (Add docs for mqtt)
