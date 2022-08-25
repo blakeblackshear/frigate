@@ -68,6 +68,7 @@ export const handlers = [
           top_score: Math.random(),
           zones: ['front_patio'],
           thumbnail: '/9j/4aa...',
+          camera: 'camera_name',
         }))
       )
     );

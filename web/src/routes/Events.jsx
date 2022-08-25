@@ -461,7 +461,7 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="capitalize  text-sm flex align-center">
                           <Zone className="w-5 h-5 mr-2 inline" />
-                          {event.zones.join(',').replaceAll('_', ' ')}
+                          {event.zones.join(', ').replaceAll('_', ' ')}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
