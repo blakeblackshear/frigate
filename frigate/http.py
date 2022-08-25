@@ -28,7 +28,6 @@ from playhouse.shortcuts import model_to_dict
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.stats import stats_snapshot
-from frigate.util import get_adjusted_offset
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -847,21 +846,13 @@ def vod_ts(camera, start_ts, end_ts):
     for recording in recordings:
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
-        clip["keyFrameDurations"] = [duration]
-
-        # Determine if offset is needed for first clip
-        if (target_offset := int((start_ts - recording.start_time) * 1000)) > 0:
-            # If we are clipping, we need to find the keyframe before start_ts and start
-            # from there. Otherwise we may lose data and our durations will be incorrect.
-            offset = get_adjusted_offset(recording.path, target_offset)
-            clip["clipFrom"] = offset
-            duration -= offset
 
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
         if duration > 0:
+            clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
         else:
@@ -875,7 +866,6 @@ def vod_ts(camera, start_ts, end_ts):
     return jsonify(
         {
             "cache": hour_ago.timestamp() > start_ts,
-            "clipTo": sum(durations),
             "discontinuity": False,
             "durations": durations,
             "sequences": [{"clips": clips}],
