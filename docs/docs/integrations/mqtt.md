@@ -156,6 +156,7 @@ Topic to adjust motion contour area for a camera. Expected value is an integer.
 ### `frigate/<camera_name>/motion_contour_area/state`
 
 Topic with current motion contour area for a camera. Published value is an integer.
+
 ### `frigate/<camera_name>/birdseye/set`
 
 Topic to turn birdseye for a camera on and off. Expected valures are `ON` and `OFF`.

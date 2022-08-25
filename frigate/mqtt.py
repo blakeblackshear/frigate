@@ -163,6 +163,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         logger.info(f"Setting motion threshold for {camera_name} via mqtt: {payload}")
         camera_metrics[camera_name]["motion_threshold"].value = payload
         motion_settings.threshold = payload
+
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
@@ -186,6 +187,9 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         )
         camera_metrics[camera_name]["motion_contour_area"].value = payload
         motion_settings.contour_area = payload
+        
+        state_topic = f"{message.topic[:-4]}/state"
+        client.publish(state_topic, payload, retain=True)
 
     def on_birdseye_command(client, userdata, message):
         payload = message.payload.decode()
@@ -315,21 +319,18 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             on_improve_contrast_command,
         )
         client.message_callback_add(
-<<<<<<< HEAD
             f"{mqtt_config.topic_prefix}/{name}/motion_threshold/set",
             on_motion_threshold_command,
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
             on_motion_contour_area_command,
-=======
             f"{mqtt_config.topic_prefix}/{name}/birdseye/set",
             on_birdseye_command,
         )
         client.message_callback_add(
             f"{mqtt_config.topic_prefix}/{name}/birdseye/mode/set",
             on_birdseye_mode_command,
->>>>>>> f223cd0 (Add mqtt topics)
         )
 
     client.message_callback_add(
