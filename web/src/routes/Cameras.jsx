@@ -50,6 +50,10 @@ function Camera({ name }) {
       { name: 'Recordings', href: `/recording/${name}` },
     ];
   }, [name]);
+  const cleanName = useMemo(
+    () => { return `${name.replaceAll('_', ' ')}` },
+    [name]
+  );
   const icons = useMemo(
     () => [
       {
@@ -81,6 +85,6 @@ function Camera({ name }) {
   );
 
   return (
-    <Card buttons={buttons} href={href} header={name} icons={icons} media={<CameraImage camera={name} stretch />} />
+    <Card buttons={buttons} href={href} header={cleanName} icons={icons} media={<CameraImage camera={name} stretch />} />
   );
 }
