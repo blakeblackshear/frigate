@@ -251,7 +251,7 @@ export default function Events({ path, ...props }) {
           <option value="all">all cameras</option>
           {filterValues.cameras.map((item) => (
             <option key={item} value={item}>
-              {item}
+              {item.replaceAll('_', ' ')}
             </option>
           ))}
         </select>
@@ -262,7 +262,7 @@ export default function Events({ path, ...props }) {
         >
           <option value="all">all labels</option>
           {filterValues.labels.map((item) => (
-            <option key={item} value={item}>
+            <option key={item.replaceAll('_', ' ')} value={item}>
               {item}
             </option>
           ))}
@@ -275,7 +275,7 @@ export default function Events({ path, ...props }) {
           <option value="all">all zones</option>
           {filterValues.zones.map((item) => (
             <option key={item} value={item}>
-              {item}
+              {item.replaceAll('_', ' ')}
             </option>
           ))}
         </select>
@@ -457,11 +457,11 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
-                          {event.camera}
+                          {event.camera.replaceAll('_', ' ')}
                         </div>
                         <div className="capitalize  text-sm flex align-center">
                           <Zone className="w-5 h-5 mr-2 inline" />
-                          {event.zones.join(',')}
+                          {event.zones.join(',').replaceAll('_', ' ')}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">

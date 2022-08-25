@@ -81,7 +81,7 @@ export default function Debug() {
                 {cameraNames.map((camera, i) => (
                   <Tr key={i} index={i}>
                     <Td>
-                      <Link href={`/cameras/${camera}`}>{camera}</Link>
+                      <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                     </Td>
                     {cameraDataKeys.map((name) => (
                       <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
