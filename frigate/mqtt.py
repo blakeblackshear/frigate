@@ -187,7 +187,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
         )
         camera_metrics[camera_name]["motion_contour_area"].value = payload
         motion_settings.contour_area = payload
-        
+
         state_topic = f"{message.topic[:-4]}/state"
         client.publish(state_topic, payload, retain=True)
 
@@ -402,6 +402,7 @@ def create_mqtt_client(config: FrigateConfig, camera_metrics):
             "OFF",
             retain=False,
         )
+        client.publish(
             f"{mqtt_config.topic_prefix}/{name}/birdseye/state",
             "ON" if config.cameras[name].birdseye.enabled else "OFF",
             retain=True,
