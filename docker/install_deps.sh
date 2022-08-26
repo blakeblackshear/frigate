@@ -53,6 +53,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     echo 'deb http://deb.debian.org/debian testing main non-free' >/etc/apt/sources.list.d/debian-testing.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
+        intel-opencl-icd \
         mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 radeontop intel-gpu-tools
     rm -f /etc/apt/sources.list.d/debian-testing.list
 fi
