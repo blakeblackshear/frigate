@@ -849,16 +849,13 @@ def vod_ts(camera_name, start_ts, end_ts):
     for recording in recordings:
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
-        # Determine if offset is needed for first clip
-        if recording.start_time < start_ts:
-            offset = int((start_ts - recording.start_time) * 1000)
-            clip["clipFrom"] = offset
-            duration -= offset
+
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
         if duration > 0:
+            clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
         else:
