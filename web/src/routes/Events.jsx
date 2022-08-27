@@ -21,6 +21,7 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
+import { useTranslation } from 'react-i18next';
 
 const API_LIMIT = 25;
 
@@ -37,6 +38,7 @@ const monthsAgo = (num) => {
 };
 
 export default function Events({ path, ...props }) {
+  const { t } = useTranslation();
   const apiHost = useApiHost();
   const [searchParams, setSearchParams] = useState({
     before: null,
@@ -241,14 +243,14 @@ export default function Events({ path, ...props }) {
 
   return (
     <div className="space-y-4 p-2 px-4 w-full">
-      <Heading>Events</Heading>
+      <Heading>{t('events')}</Heading>
       <div className="flex flex-wrap gap-2 items-center">
         <select
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           value={searchParams.camera}
           onChange={(e) => onFilter('camera', e.target.value)}
         >
-          <option value="all">all cameras</option>
+          <option value="all">{t('all_cameras')}</option>
           {filterValues.cameras.map((item) => (
             <option key={item} value={item}>
               {item.replaceAll('_', ' ')}
@@ -260,7 +262,7 @@ export default function Events({ path, ...props }) {
           value={searchParams.label}
           onChange={(e) => onFilter('label', e.target.value)}
         >
-          <option value="all">all labels</option>
+          <option value="all">{t('all_labels')}</option>
           {filterValues.labels.map((item) => (
             <option key={item.replaceAll('_', ' ')} value={item}>
               {item}
@@ -272,7 +274,7 @@ export default function Events({ path, ...props }) {
           value={searchParams.zone}
           onChange={(e) => onFilter('zone', e.target.value)}
         >
-          <option value="all">all zones</option>
+          <option value="all">{t('all_zones')}</option>
           {filterValues.zones.map((item) => (
             <option key={item} value={item}>
               {item.replaceAll('_', ' ')}
@@ -286,7 +288,7 @@ export default function Events({ path, ...props }) {
               value={searchParams.sub_label}
               onChange={(e) => onFilter('sub_label', e.target.value)}
             >
-              <option value="all">all sub labels</option>
+              <option value="all">{t('all_sub_labels')}</option>
               {filterValues.sub_labels.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -306,7 +308,7 @@ export default function Events({ path, ...props }) {
           {downloadEvent.has_snapshot && (
             <MenuItem
               icon={Snapshot}
-              label="Download Snapshot"
+              label={t('download_snapshot')}
               value="snapshot"
               href={`${apiHost}/api/events/${downloadEvent.id}/snapshot.jpg?download=true`}
               download
@@ -315,7 +317,7 @@ export default function Events({ path, ...props }) {
           {downloadEvent.has_clip && (
             <MenuItem
               icon={Clip}
-              label="Download Clip"
+              label={t('download_clip')}
               value="clip"
               href={`${apiHost}/api/events/${downloadEvent.id}/clip.mp4?download=true`}
               download
@@ -324,7 +326,7 @@ export default function Events({ path, ...props }) {
           {downloadEvent.has_snapshot && !downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
-              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
+              label={uploading.includes(downloadEvent.id) ? t('uploading') : t('send_to_frigate_plus')}
               value="plus"
               onSelect={() => onSendToPlus(downloadEvent.id)}
             />
@@ -332,7 +334,7 @@ export default function Events({ path, ...props }) {
           {downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
-              label={'Sent to Frigate+'}
+              label={t('send_to_frigate_plus')}
               value="plus"
               onSelect={() => setState({ ...state, showDownloadMenu: false })}
             />
@@ -345,22 +347,22 @@ export default function Events({ path, ...props }) {
           onDismiss={() => setState({ ...state, setShowDatePicker: false })}
           relativeTo={datePicker}
         >
-          <MenuItem label="All" value={{ before: null, after: null }} onSelect={handleSelectDateRange} />
-          <MenuItem label="Today" value={{ before: null, after: daysAgo(0) }} onSelect={handleSelectDateRange} />
+          <MenuItem label={t('all')} value={{ before: null, after: null }} onSelect={handleSelectDateRange} />
+          <MenuItem label={t('today')} value={{ before: null, after: daysAgo(0) }} onSelect={handleSelectDateRange} />
           <MenuItem
-            label="Yesterday"
+            label={t('yesterday')}
             value={{ before: daysAgo(0), after: daysAgo(1) }}
             onSelect={handleSelectDateRange}
           />
-          <MenuItem label="Last 7 Days" value={{ before: null, after: daysAgo(7) }} onSelect={handleSelectDateRange} />
-          <MenuItem label="This Month" value={{ before: null, after: monthsAgo(0) }} onSelect={handleSelectDateRange} />
+          <MenuItem label={t('last_seven_days')} value={{ before: null, after: daysAgo(7) }} onSelect={handleSelectDateRange} />
+          <MenuItem label={t('this_month')} value={{ before: null, after: monthsAgo(0) }} onSelect={handleSelectDateRange} />
           <MenuItem
-            label="Last Month"
+            label={t('last_month')}
             value={{ before: monthsAgo(0), after: monthsAgo(1) }}
             onSelect={handleSelectDateRange}
           />
           <MenuItem
-            label="Custom Range"
+            label={t('custom_range')}
             value="custom"
             onSelect={() => {
               setState({ ...state, showCalendar: true, showDatePicker: false });
@@ -397,7 +399,7 @@ export default function Events({ path, ...props }) {
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button className="ml-2" onClick={() => setState({ ...state, showPlusConfig: false })} type="text">
-              Close
+              {t('close')}
             </Button>
           </div>
         </Dialog>
@@ -405,12 +407,12 @@ export default function Events({ path, ...props }) {
       {deleteFavoriteState.showDeleteFavorite && (
         <Dialog>
           <div className="p-4">
-            <Heading size="lg">Delete Saved Event?</Heading>
-            <p className="mb-2">Confirm deletion of saved event.</p>
+            <Heading size="lg">{t('title_delete_saved_event')}</Heading>
+            <p className="mb-2">{t('desc_delete_saved_event')}</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button className="ml-2" color="red" onClick={(e) => { setDeleteFavoriteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false) }} type="text">
-              Delete
+              {t('delete')}
             </Button>
           </div>
         </Dialog>
@@ -441,7 +443,7 @@ export default function Events({ path, ...props }) {
                       />
                       {event.end_time ? null : (
                         <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
-                          In progress
+                          {t('in_progress')}
                         </div>
                       )}
                     </div>
@@ -468,14 +470,14 @@ export default function Events({ path, ...props }) {
                         {event.has_snapshot && (
                           <Fragment>
                             {event.plus_id ? (
-                              <div className="uppercase text-xs">Sent to Frigate+</div>
+                              <div className="uppercase text-xs">{t('sent_to_frigate_plus')}</div>
                             ) : (
                               <Button
                                 color="gray"
                                 disabled={uploading.includes(event.id)}
                                 onClick={(e) => onSendToPlus(event.id, e)}
                               >
-                                {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                                {uploading.includes(event.id) ? t('uploading') : t('send_to_frigate_plus')}
                               </Button>
                             )}
                           </Fragment>
@@ -497,7 +499,7 @@ export default function Events({ path, ...props }) {
                       <div className="mx-auto max-w-7xl">
                         {event.has_clip ? (
                           <>
-                            <Heading size="lg">Clip</Heading>
+                            <Heading size="lg">{t('clip')}</Heading>
                             <VideoPlayer
                               options={{
                                 preload: 'auto',
@@ -516,7 +518,7 @@ export default function Events({ path, ...props }) {
                         ) : (
                           <div className="flex justify-center">
                             <div>
-                              <Heading size="sm">{event.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+                              <Heading size="sm">{event.has_snapshot ? t('best_image') : t('thumbnail')}</Heading>
                               <img
                                 className="flex-grow-0"
                                 src={
@@ -524,7 +526,7 @@ export default function Events({ path, ...props }) {
                                     ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
                                     : `data:image/jpeg;base64,${event.thumbnail}`
                                 }
-                                alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
+                                alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% ${t('_confidence')}`}
                               />
                             </div>
                           </div>
