@@ -1,9 +1,18 @@
 {
+    "are_you_sure": "Are you sure?",
+    "auto_dark_mode": "Auto Dark Mode",
     "birdseye": "Birdseye",
     "cameras": "Cameras",
+    "cancel": "Cancel",
+    "dark": "Dark",
     "debug": "Debug",
     "documentation": "Documentation",
     "events": "Events",
     "github": "GitHub",
-    "style_guide": "Style Guide"
+    "light": "Light",
+    "restart_frigate": "Restart Frigate",
+    "restart_in_progress": "Restart in progress",
+    "style_guide": "Style Guide",
+    "wait_for_restart": "Please wait a few seconds for the restart to complete before reloading the page.",
+    "yes": "Yes"
 }
