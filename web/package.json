@@ -21,7 +21,11 @@
     "swr": "^1.2.2",
     "video.js": "^7.20.2",
     "videojs-playlist": "^5.0.0",
-    "videojs-seek-buttons": "^2.2.1"
+    "videojs-seek-buttons": "^2.2.1",
+    "react-i18next": "^11.18.5",
+    "i18next": "^21.9.1",
+    "i18next-http-backend": "^1.4.1",
+    "i18next-browser-languagedetector": "^6.1.5"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",

@@ -6,8 +6,10 @@ import { ENV } from './env';
 import { useMemo } from 'preact/hooks'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
+import { useTranslation } from 'react-i18next';
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const { data: config } = useSWR('config');
 
   const sortedCameras = useMemo(() => {
@@ -27,7 +29,7 @@ export default function Sidebar() {
 
   return (
     <NavigationDrawer header={<Header />}>
-      <Destination href="/" text="Cameras" />
+      <Destination href="/" text={t('cameras')} />
       <Match path="/cameras/:camera/:other?">
         {({ matches }) =>
           matches ? (
