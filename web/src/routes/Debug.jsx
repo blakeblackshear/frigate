@@ -7,10 +7,12 @@ import { useMqtt } from '../api/mqtt';
 import useSWR from 'swr';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useCallback } from 'preact/hooks';
+import { useTranslation } from 'react-i18next';
 
 const emptyObject = Object.freeze({});
 
 export default function Debug() {
+  const { t } = useTranslation();
   const { data: config } = useSWR('config');
 
   const {
@@ -35,7 +37,7 @@ export default function Debug() {
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>
-        Debug <span className="text-sm">{service.version}</span>
+        {t('debug')} <span className="text-sm">{service.version}</span>
       </Heading>
 
       {!detectors ? (
@@ -48,7 +50,7 @@ export default function Debug() {
             <Table className="w-full">
               <Thead>
                 <Tr>
-                  <Th>detector</Th>
+                  <Th>{t('_detector')}</Th>
                   {detectorDataKeys.map((name) => (
                     <Th key={name}>{name.replace('_', ' ')}</Th>
                   ))}
@@ -71,7 +73,7 @@ export default function Debug() {
             <Table className="w-full">
               <Thead>
                 <Tr>
-                  <Th>camera</Th>
+                  <Th>{t('_camera')}</Th>
                   {cameraDataKeys.map((name) => (
                     <Th key={name}>{name.replace('_', ' ')}</Th>
                   ))}
@@ -92,14 +94,14 @@ export default function Debug() {
             </Table>
           </div>
 
-          <p>Debug stats update automatically every {config.mqtt.stats_interval} seconds.</p>
+          <p>{t('debug_update_interval').replace("{interval}", config.mqtt.stats_interval)}</p>
         </Fragment>
       )}
 
       <div className="relative">
-        <Heading size="sm">Config</Heading>
+        <Heading size="sm">{t('config')}</Heading>
         <Button className="absolute top-8 right-4" onClick={handleCopyConfig}>
-          Copy to Clipboard
+          {t('copy_clipboard')}
         </Button>
         <pre className="overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 max-h-96">
           {JSON.stringify(config, null, 2)}
