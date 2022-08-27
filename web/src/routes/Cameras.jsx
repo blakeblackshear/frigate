@@ -8,6 +8,7 @@ import SnapshotIcon from '../icons/Snapshot';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
 import { useMemo } from 'preact/hooks';
 import useSWR from 'swr';
+import { useTranslation } from 'react-i18next';
 
 export default function Cameras() {
   const { data: config } = useSWR('config');
@@ -40,16 +41,17 @@ function SortedCameras({ unsortedCameras }) {
 }
 
 function Camera({ name }) {
+  const { t } = useTranslation();
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
     return [
-      { name: 'Events', href: `/events?camera=${name}` },
-      { name: 'Recordings', href: `/recording/${name}` },
+      { name: `${t('events')}`, href: `/events?camera=${name}` },
+      { name: `${t('recordings')}`, href: `/recording/${name}` },
     ];
-  }, [name]);
+  }, [name, t]);
   const cleanName = useMemo(
     () => { return `${name.replaceAll('_', ' ')}` },
     [name]
@@ -57,7 +59,7 @@ function Camera({ name }) {
   const icons = useMemo(
     () => [
       {
-        name: `Toggle detect ${detectValue === 'ON' ? 'off' : 'on'}`,
+        name: `${t('toggle_detect')} ${detectValue === 'ON' ? 'Off' : 'On'}`,
         icon: MotionIcon,
         color: detectValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
@@ -65,7 +67,7 @@ function Camera({ name }) {
         },
       },
       {
-        name: `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}`,
+        name: `${t('toggle_recordings')} ${recordValue === 'ON' ? 'Off' : 'On'}`,
         icon: ClipIcon,
         color: recordValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
@@ -73,7 +75,7 @@ function Camera({ name }) {
         },
       },
       {
-        name: `Toggle snapshots ${snapshotValue === 'ON' ? 'off' : 'on'}`,
+        name: `${t('toggle_snapshots')} ${snapshotValue === 'ON' ? 'Off' : 'On'}`,
         icon: SnapshotIcon,
         color: snapshotValue === 'ON' ? 'blue' : 'gray',
         onClick: () => {
@@ -81,7 +83,7 @@ function Camera({ name }) {
         },
       },
     ],
-    [detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
+    [detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots, t]
   );
 
   return (
