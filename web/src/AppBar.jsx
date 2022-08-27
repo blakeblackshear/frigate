@@ -10,10 +10,8 @@ import Prompt from './components/Prompt';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { useRestart } from './api/mqtt';
-import { useTranslation } from 'react-i18next';
 
 export default function AppBar() {
-  const { t } = useTranslation();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
@@ -58,29 +56,29 @@ export default function AppBar() {
       <BaseAppBar title={LinkedLogo} overflowRef={moreRef} onOverflowClick={handleShowMenu} />
       {showMoreMenu ? (
         <Menu onDismiss={handleDismissMoreMenu} relativeTo={moreRef}>
-          <MenuItem icon={AutoAwesomeIcon} label={t('auto_dark_mode')} value="media" onSelect={handleSelectDarkMode} />
+          <MenuItem icon={AutoAwesomeIcon} label="Auto dark mode" value="media" onSelect={handleSelectDarkMode} />
           <MenuSeparator />
-          <MenuItem icon={LightModeIcon} label={t('light')} value="light" onSelect={handleSelectDarkMode} />
-          <MenuItem icon={DarkModeIcon} label={t('dark')} value="dark" onSelect={handleSelectDarkMode} />
+          <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
+          <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
           <MenuSeparator />
-          <MenuItem icon={FrigateRestartIcon} label={t('restart_frigate')} onSelect={handleRestart} />
+          <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>
       ) : null}
       {showDialog ? (
         <Prompt
           onDismiss={handleDismissRestartDialog}
-          title={t('restart_frigate')}
-          text={t('are_you_sure')}
+          title="Restart Frigate"
+          text="Are you sure?"
           actions={[
-            { text: `${t('yes')}`, color: 'red', onClick: handleClickRestartDialog },
-            { text: `${t('cancel')}`, onClick: handleDismissRestartDialog },
+            { text: 'Yes', color: 'red', onClick: handleClickRestartDialog },
+            { text: 'Cancel', onClick: handleDismissRestartDialog },
           ]}
         />
       ) : null}
       {showDialogWait ? (
         <Prompt
-          title={t('restart_in_progress')}
-          text={t('wait_for_restart')}
+          title="Restart in progress"
+          text="Please wait a few seconds for the restart to complete before reloading the page."
         />
       ) : null}
     </Fragment>

@@ -7,8 +7,10 @@ import RecordingPlaylist from '../components/RecordingPlaylist';
 import VideoPlayer from '../components/VideoPlayer';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import { useTranslation } from 'react-i18next';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
+  const { t } = useTranslation();
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
