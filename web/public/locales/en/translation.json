@@ -1,6 +1,9 @@
 {
     "birdseye": "Birdseye",
     "cameras": "Cameras",
-    "text": "Thank you for visiting our website.",
-    "language": "Language"
+    "debug": "Debug",
+    "documentation": "Documentation",
+    "events": "Events",
+    "github": "GitHub",
+    "style_guide": "Style Guide"
 }

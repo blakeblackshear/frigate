@@ -44,19 +44,19 @@ export default function Sidebar() {
           ) : null
         }
       </Match>
-      {birdseye?.enabled ? <Destination href="/birdseye" text="Birdseye" /> : null}
-      <Destination href="/events" text="Events" />
-      <Destination href="/debug" text="Debug" />
+      {birdseye?.enabled ? <Destination href="/birdseye" text={t('birdseye')} /> : null}
+      <Destination href="/events" text={t('events')} />
+      <Destination href="/debug" text={t('debug')} />
       <Separator />
       <div className="flex flex-grow" />
       {ENV !== 'production' ? (
         <Fragment>
-          <Destination href="/styleguide" text="Style Guide" />
+          <Destination href="/styleguide" text={t('style_guide')} />
           <Separator />
         </Fragment>
       ) : null}
-      <Destination className="self-end" href="https://docs.frigate.video" text="Documentation" />
-      <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
+      <Destination className="self-end" href="https://docs.frigate.video" text={t('documentation')} />
+      <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text={t('github')} />
     </NavigationDrawer>
   );
 }
