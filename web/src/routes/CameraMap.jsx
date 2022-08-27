@@ -7,8 +7,10 @@ import { useResizeObserver } from '../hooks';
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import { useTranslation } from 'react-i18next';
 
 export default function CameraMasks({ camera }) {
+  const { t } = useTranslation();
   const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const imageRef = useRef(null);
@@ -198,17 +200,20 @@ ${Object.keys(objectMaskPoints)
 
   return (
     <div className="flex-col space-y-4 p-2 px-4">
-      <Heading size="2xl">{camera} mask & zone creator</Heading>
+      <Heading size="2xl">{t('title_mask_creation')
+        .replace("{camera}", camera.replace("_", " "))
+      }
+      </Heading>
 
       <Card
         content={
           <p>
-            This tool can help you create masks & zones for your {camera} camera. When done, copy each mask
-            configuration into your <code className="font-mono">config.yml</code> file restart your Frigate instance to
-            save your changes.
+            {t('desc_mask_creation')
+              .replace("{camera}", camera.replace("_", " "))
+            }
           </p>
         }
-        header="Warning"
+        header={t('warning')}
       />
 
       <div className="space-y-4">
@@ -231,7 +236,7 @@ ${Object.keys(objectMaskPoints)
       <div className="flex-col space-y-4">
         <MaskValues
           editing={editing}
-          title="Motion masks"
+          title={t('motion_masks')}
           onCopy={handleCopyMotionMasks}
           onCreate={handleAddMask}
           onEdit={handleEditMask}
@@ -243,7 +248,7 @@ ${Object.keys(objectMaskPoints)
 
         <MaskValues
           editing={editing}
-          title="Zones"
+          title={t('zones')}
           onCopy={handleCopyZones}
           onCreate={handleAddZone}
           onEdit={handleEditZone}
@@ -256,7 +261,7 @@ ${Object.keys(objectMaskPoints)
         <MaskValues
           isMulti
           editing={editing}
-          title="Object masks"
+          title={t('object_masks')}
           onAdd={handleAddToObjectMask}
           onCopy={handleCopyObjectMasks}
           onCreate={handleAddObjectMask}
@@ -499,6 +504,8 @@ function MaskValues({
 }
 
 function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, _handleAdd, handleRemove, yamlKeyPrefix }) {
+  const { t } = useTranslation();
+
   return (
     <span
       data-key={mainkey}
@@ -507,7 +514,7 @@ function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, _hand
         editing.key === mainkey && editing.subkey === subkey ? 'text-blue-800 dark:text-blue-600' : ''
       }`}
       onClick={handleEdit}
-      title="Click to edit"
+      title={t('click_to_edit')}
     >
       {`${yamlKeyPrefix(points, mainkey, subkey)}${polylinePointsToPolyline(points)}`}
       {showButtons ? (
@@ -518,7 +525,7 @@ function Item({ mainkey, subkey, editing, handleEdit, points, showButtons, _hand
           data-subkey={subkey}
           onClick={handleRemove}
         >
-          Remove
+          {t('remove')}
         </Button>
       ) : null}
     </span>
