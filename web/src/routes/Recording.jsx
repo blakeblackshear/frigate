@@ -112,10 +112,10 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   if (recordingsSummary.length === 0) {
     return (
       <div className="space-y-4">
-        <Heading>{camera} Recordings</Heading>
+        <Heading>{camera} {t('recordings')}</Heading>
         <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
-          <p class="font-bold">No Recordings Found</p>
-          <p>Make sure you have enabled the record role in your configuration for the {camera} camera.</p>
+          <p class="font-bold">{t('title_no_recordings')}</p>
+          <p>{t('desc_no_recordings').replace('{camera}', camera)}</p>
         </div>
       </div>
     );
@@ -123,7 +123,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading>{camera.replaceAll('_', ' ')} Recordings</Heading>
+      <Heading>{camera.replaceAll('_', ' ')} {t('recordings')}</Heading>
 
       <VideoPlayer
         onReady={(player) => {
