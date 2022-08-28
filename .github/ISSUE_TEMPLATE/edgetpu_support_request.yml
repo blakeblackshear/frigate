@@ -26,7 +26,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: docker config
+    id: docker
     attributes:
       label: docker-compose file or Docker CLI command
       description: This will be automatically formatted into code, so no need for backticks.
