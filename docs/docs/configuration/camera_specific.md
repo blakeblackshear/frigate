@@ -112,3 +112,14 @@ If your cameras do not support TCP connections for RTSP, you can use UDP.
 ffmpeg:
   input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
+
+### Unifi Protect Cameras
+
+In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp.
+
+```yaml
+ffmpeg:
+  output_args:
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
+    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
+```
