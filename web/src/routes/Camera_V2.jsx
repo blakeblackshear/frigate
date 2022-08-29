@@ -7,8 +7,10 @@ import { Tabs, TextTab } from '../components/Tabs';
 import { LiveChip } from '../components/LiveChip';
 import { DebugCamera } from '../components/DebugCamera';
 import HistoryViewer from '../components/HistoryViewer/HistoryViewer.tsx';
+import { useTranslation } from 'react-i18next';
 
 export default function Camera({ camera }) {
+  const { t } = useTranslation();
   const { data: config } = useSWR('config');
 
   const [playerType, setPlayerType] = useState('live');
@@ -47,9 +49,9 @@ export default function Camera({ camera }) {
 
         <div className='absolute flex justify-center bottom-8 w-full'>
           <Tabs selectedIndex={1} onChange={handleTabChange} className='justify'>
-            <TextTab text='History' />
-            <TextTab text='Live' />
-            <TextTab text='Debug' />
+            <TextTab text={t('history')} />
+            <TextTab text={t('live')} />
+            <TextTab text={t('debug')} />
           </Tabs>
         </div>
       </div>
