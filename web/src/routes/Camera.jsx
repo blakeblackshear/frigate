@@ -13,10 +13,12 @@ import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import { useTranslation } from 'react-i18next';
 
 const emptyObject = Object.freeze({});
 
 export default function Camera({ camera }) {
+  const { t } = useTranslation();
   const { data: config } = useSWR('config');
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
@@ -61,33 +63,33 @@ export default function Camera({ camera }) {
         checked={options['bbox']}
         id="bbox"
         onChange={handleSetOption}
-        label="Bounding box"
+        label={t('bounding_box')}
         labelPosition="after"
       />
       <Switch
         checked={options['timestamp']}
         id="timestamp"
         onChange={handleSetOption}
-        label="Timestamp"
+        label={t('timestamp')}
         labelPosition="after"
       />
-      <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label={t('zones')} labelPosition="after" />
+      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label={t('masks')} labelPosition="after" />
       <Switch
         checked={options['motion']}
         id="motion"
         onChange={handleSetOption}
-        label="Motion boxes"
+        label={t('motion_boxes')}
         labelPosition="after"
       />
       <Switch
         checked={options['regions']}
         id="regions"
         onChange={handleSetOption}
-        label="Regions"
+        label={t('regions')}
         labelPosition="after"
       />
-      <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
+      <Link href={`/cameras/${camera}/editor`}>{t('title_mask_creation')}</Link>
     </div>
   ) : null;
 
@@ -111,9 +113,9 @@ export default function Camera({ camera }) {
           <span className="w-5 h-5">
             <SettingsIcon />
           </span>{' '}
-          <span>{showSettings ? 'Hide' : 'Show'} Options</span>
+          <span>{showSettings ? t('hide') : t('show')} {t('options')}</span>
         </Button>
-        {showSettings ? <Card header="Options" elevated={false} content={optionContent} /> : null}
+        {showSettings ? <Card header={t('options')} elevated={false} content={optionContent} /> : null}
       </Fragment>
     );
   }
@@ -126,7 +128,7 @@ export default function Camera({ camera }) {
       {player}
 
       <div className="space-y-4">
-        <Heading size="sm">Tracked objects</Heading>
+        <Heading size="sm">{t('tracked_objects')}</Heading>
         <div className="flex flex-wrap justify-start">
           {cameraConfig.objects.track.map((objectType) => (
             <Card

@@ -200,7 +200,7 @@ ${Object.keys(objectMaskPoints)
 
   return (
     <div className="flex-col space-y-4 p-2 px-4">
-      <Heading size="2xl">{t('title_mask_creation')
+      <Heading size="2xl">{t('title_mask_creation_camera')
         .replace("{camera}", camera.replace("_", " "))
       }
       </Heading>
