@@ -12,9 +12,6 @@ export default function ButtonsTabbed({
 }) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState(0);
-  const captitalize = (str) => {
-    return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
-  };
 
   const getHeader = useCallback(
     (i) => {
@@ -38,7 +35,7 @@ export default function ButtonsTabbed({
       {viewModes.map((item, i) => {
         return (
           <button key={i} onClick={() => handleClick(i)} className={i === selected ? selectedClassName : className}>
-            {captitalize(item)}
+            {t(item)}
           </button>
         );
       })}
