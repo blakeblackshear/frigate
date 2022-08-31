@@ -687,6 +687,12 @@ class DatabaseConfig(FrigateBaseModel):
     )
 
 
+class PixelFormatEnum(str, Enum):
+    rgb = "rgb"
+    bgr = "bgr"
+    yuv = "yuv"
+
+
 class ModelConfig(FrigateBaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")
     labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
@@ -694,6 +700,12 @@ class ModelConfig(FrigateBaseModel):
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
         default_factory=dict, title="Labelmap customization."
+    )
+    input_tensor: List[str] = Field(
+        default=["B", "H", "W", "C"], title="Model Input Tensor Shape"
+    )
+    input_pixel_format: PixelFormatEnum = Field(
+        default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-from frigate.config import DetectorTypeEnum
+from frigate.config import DetectorTypeEnum, ModelConfig
 import frigate.object_detection
 
 
@@ -12,30 +12,33 @@ class TestLocalObjectDetector(unittest.TestCase):
     def test_localdetectorprocess_given_type_cpu_should_call_cputfl_init(
         self, mock_cputfl, mock_edgetputfl
     ):
+        test_cfg = ModelConfig()
+        test_cfg.path = "/test/modelpath"
         test_obj = frigate.object_detection.LocalObjectDetector(
-            det_type=DetectorTypeEnum.cpu, model_path="/test/modelpath", num_threads=6
+            det_type=DetectorTypeEnum.cpu, model_config=test_cfg, num_threads=6
         )
 
         assert test_obj is not None
         mock_edgetputfl.assert_not_called()
-        mock_cputfl.assert_called_once_with(model_path="/test/modelpath", num_threads=6)
+        mock_cputfl.assert_called_once_with(model_config=test_cfg, num_threads=6)
 
     @patch("frigate.object_detection.EdgeTpuTfl")
     @patch("frigate.object_detection.CpuTfl")
     def test_localdetectorprocess_given_type_edgtpu_should_call_edgtpu_init(
         self, mock_cputfl, mock_edgetputfl
     ):
+        test_cfg = ModelConfig()
+        test_cfg.path = "/test/modelpath"
+
         test_obj = frigate.object_detection.LocalObjectDetector(
             det_type=DetectorTypeEnum.edgetpu,
             det_device="usb",
-            model_path="/test/modelpath",
+            model_config=test_cfg,
         )
 
         assert test_obj is not None
         mock_cputfl.assert_not_called()
-        mock_edgetputfl.assert_called_once_with(
-            det_device="usb", model_path="/test/modelpath"
-        )
+        mock_edgetputfl.assert_called_once_with(det_device="usb", model_config=test_cfg)
 
     @patch("frigate.object_detection.CpuTfl")
     def test_detect_raw_given_tensor_input_should_return_api_detect_raw_result(

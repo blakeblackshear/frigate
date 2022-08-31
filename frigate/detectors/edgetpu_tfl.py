@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class EdgeTpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_path=None):
+    def __init__(self, det_device=None, model_config=None):
         device_config = {"device": "usb"}
         if not det_device is None:
             device_config = {"device": det_device}
@@ -21,7 +21,7 @@ class EdgeTpuTfl(DetectionApi):
             edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
             logger.info("TPU found")
             self.interpreter = tflite.Interpreter(
-                model_path=model_path or "/edgetpu_model.tflite",
+                model_path=model_config.path or "/edgetpu_model.tflite",
                 experimental_delegates=[edge_tpu_delegate],
             )
         except ValueError:

@@ -30,7 +30,7 @@ class LocalObjectDetector(ObjectDetector):
         self,
         det_type=DetectorTypeEnum.cpu,
         det_device=None,
-        model_path=None,
+        model_config=None,
         num_threads=3,
         labels=None,
     ):
@@ -41,12 +41,14 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if det_type == DetectorTypeEnum.edgetpu:
-            self.detect_api = EdgeTpuTfl(det_device=det_device, model_path=model_path)
+            self.detect_api = EdgeTpuTfl(
+                det_device=det_device, model_config=model_config
+            )
         else:
             logger.warning(
                 "CPU detectors are not recommended and should only be used for testing or for trial purposes."
             )
-            self.detect_api = CpuTfl(model_path=model_path, num_threads=num_threads)
+            self.detect_api = CpuTfl(model_config=model_config, num_threads=num_threads)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -72,8 +74,7 @@ def run_detector(
     out_events: dict[str, mp.Event],
     avg_speed,
     start,
-    model_path,
-    model_shape,
+    model_config,
     det_type,
     det_device,
     num_threads,
@@ -96,7 +97,7 @@ def run_detector(
     object_detector = LocalObjectDetector(
         det_type=det_type,
         det_device=det_device,
-        model_path=model_path,
+        model_config=model_config,
         num_threads=num_threads,
     )
 
@@ -112,7 +113,7 @@ def run_detector(
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
-            connection_id, (1, model_shape[0], model_shape[1], 3)
+            connection_id, (1, model_config.height, model_config.width, 3)
         )
 
         if input_frame is None:
@@ -135,8 +136,7 @@ class ObjectDetectProcess:
         name,
         detection_queue,
         out_events,
-        model_path,
-        model_shape,
+        model_config,
         det_type=None,
         det_device=None,
         num_threads=3,
@@ -147,8 +147,7 @@ class ObjectDetectProcess:
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
         self.detect_process = None
-        self.model_path = model_path
-        self.model_shape = model_shape
+        self.model_config = model_config
         self.det_type = det_type
         self.det_device = det_device
         self.num_threads = num_threads
@@ -176,8 +175,7 @@ class ObjectDetectProcess:
                 self.out_events,
                 self.avg_inference_speed,
                 self.detection_start,
-                self.model_path,
-                self.model_shape,
+                self.model_config,
                 self.det_type,
                 self.det_device,
                 self.num_threads,
@@ -188,7 +186,7 @@ class ObjectDetectProcess:
 
 
 class RemoteObjectDetector:
-    def __init__(self, name, labels, detection_queue, event, model_shape):
+    def __init__(self, name, labels, detection_queue, event, model_config):
         self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
@@ -196,7 +194,9 @@ class RemoteObjectDetector:
         self.event = event
         self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
         self.np_shm = np.ndarray(
-            (1, model_shape[0], model_shape[1], 3), dtype=np.uint8, buffer=self.shm.buf
+            (1, model_config.height, model_config.width, 3),
+            dtype=np.uint8,
+            buffer=self.shm.buf,
         )
         self.out_shm = mp.shared_memory.SharedMemory(
             name=f"out-{self.name}", create=False

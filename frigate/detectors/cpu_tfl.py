@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class CpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_path=None, num_threads=3):
+    def __init__(self, det_device=None, model_config=None, num_threads=3):
         self.interpreter = tflite.Interpreter(
-            model_path=model_path or "/cpu_model.tflite", num_threads=num_threads
+            model_path=model_config.path or "/cpu_model.tflite", num_threads=num_threads
         )
 
         self.interpreter.allocate_tensors()
