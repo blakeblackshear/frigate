@@ -25,6 +25,18 @@ class ObjectDetector(ABC):
         pass
 
 
+def tensor_transform(desired_shape):
+    # Currently this function only supports BHWC permutations
+    if desired_shape == ["B", "H", "W", "C"]:
+        return None
+    else:
+        transform = [0] * 4
+        transform[desired_shape.index("H")] = 1
+        transform[desired_shape.index("W")] = 2
+        transform[desired_shape.index("C")] = 3
+        return tuple(transform)
+
+
 class LocalObjectDetector(ObjectDetector):
     def __init__(
         self,
@@ -39,6 +51,11 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = {}
         else:
             self.labels = load_labels(labels)
+
+        if model_config:
+            self.input_transform = tensor_transform(model_config.input_tensor)
+        else:
+            self.input_transform = None
 
         if det_type == DetectorTypeEnum.edgetpu:
             self.detect_api = EdgeTpuTfl(
@@ -65,6 +82,8 @@ class LocalObjectDetector(ObjectDetector):
         return detections
 
     def detect_raw(self, tensor_input):
+        if self.input_transform:
+            tensor_input = np.transpose(tensor_input, self.input_transform)
         return self.detect_api.detect_raw(tensor_input=tensor_input)
 
 
