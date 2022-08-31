@@ -50,6 +50,20 @@ database:
 
 If using a custom model, the width and height will need to be specified.
 
+Custom models may also require different input tensor formats. The colorspace conversion supports RGB, BGR, or YUV frames to be sent to the object detector. The input tensor shape parameter is a list of axis to let the detector reorder (transpose) the standard layout [BHWC] to match what specified by the model.
+
+| Tensor Dimension | Description    |
+| :--------------: | -------------- |
+|        B         | Batch Size     |
+|        H         | Model Height   |
+|        W         | Model Width    |
+|        C         | Color Channels |
+
+```yaml
+model:
+  input_tensor: ["B", "H", "W", "C"]
+```
+
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
 
 ```yaml
