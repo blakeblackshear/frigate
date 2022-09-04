@@ -2,6 +2,7 @@ import { h, Fragment } from 'preact';
 import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
+import { Tabs, TextTab } from '../components/Tabs';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
@@ -54,6 +55,7 @@ export default function Events({ path, ...props }) {
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
+  const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
     id: null,
     has_clip: false,
@@ -233,6 +235,10 @@ export default function Events({ path, ...props }) {
     if (state.showDownloadMenu && downloadEvent.id === id) {
       setState({ ...state, showDownloadMenu: false });
     }
+  };
+
+  const handleEventDetailTabChange = (index) => {
+    setEventDetailType(index == 0 ? 'clip' : 'image');
   };
 
   if (!config) {
@@ -495,9 +501,15 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
-                        {event.has_clip ? (
-                          <>
-                            <Heading size="lg">Clip</Heading>
+                        <div className='flex justify-center w-full py-2'>
+                          <Tabs selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1} onChange={handleEventDetailTabChange} className='justify'>
+                            <TextTab text='Clip' disabled={!event.has_clip} />
+                            <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
+                          </Tabs>
+                        </div>
+
+                        <div>
+                          {((eventDetailType == 'clip') && event.has_clip) ? (
                             <VideoPlayer
                               options={{
                                 preload: 'auto',
@@ -512,23 +524,22 @@ export default function Events({ path, ...props }) {
                               seekOptions={{ forward: 10, back: 5 }}
                               onReady={() => {}}
                             />
-                          </>
-                        ) : (
-                          <div className="flex justify-center">
-                            <div>
-                              <Heading size="sm">{event.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+                          ) : null }
+
+                          {((eventDetailType == 'image') || !event.has_clip) ? (
+                            <div className="flex justify-center">
                               <img
                                 className="flex-grow-0"
                                 src={
                                   event.has_snapshot
                                     ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
-                                    : `data:image/jpeg;base64,${event.thumbnail}`
+                                    : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
                                 alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
                               />
                             </div>
-                          </div>
-                        )}
+                          ) : null }
+                        </div>
                       </div>
                     </div>
                   )}
