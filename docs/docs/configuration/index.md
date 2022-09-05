@@ -76,9 +76,9 @@ detectors:
   # Required: name of the detector
   coral:
     # Required: type of the detector
-    # Valid values are 'edgetpu' (requires device property below) and 'cpu'.
+    # Valid values are 'edgetpu' (requires device property below)  `openvino` (see Detectors documentation), and 'cpu'.
     type: edgetpu
-    # Optional: device name as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
+    # Optional: Edgetpu or OpenVino device name
     device: usb
     # Optional: num_threads value passed to the tflite.Interpreter (default: shown below)
     # This value is only used for CPU types
