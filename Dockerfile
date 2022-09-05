@@ -5,6 +5,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 FROM debian:11 AS base
 
+FROM --platform=linux/amd64 debian:11 AS base_amd64
+
 FROM debian:11-slim AS slim-base
 
 FROM blakeblackshear/frigate-nginx:1.0.2 AS nginx
@@ -24,6 +26,21 @@ WORKDIR /rootfs/usr/local/go2rtc/bin
 RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.3/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
+# Download and Convert OpenVino model
+FROM base_amd64 AS ov-converter
+ARG DEBIAN_FRONTEND
+RUN apt-get -qq update \
+    && apt-get -qq install -y wget python3 python3-distutils
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip"
+
+COPY requirements-ov.txt /requirements-ov.txt
+RUN pip install -r /requirements-ov.txt
+
+RUN mkdir /models
+RUN cd /models && omz_downloader --name ssdlite_mobilenet_v2
+RUN cd /models && omz_converter --name ssdlite_mobilenet_v2 --precision FP16
+
 
 FROM wget AS models
 
@@ -31,6 +48,10 @@ FROM wget AS models
 RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
 RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
 COPY labelmap.txt .
+# Copy OpenVino model
+COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
+RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt
+
 
 
 FROM wget AS s6-overlay
