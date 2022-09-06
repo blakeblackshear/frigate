@@ -23,6 +23,7 @@ import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 
 const API_LIMIT = 25;
+const HAPTIC_FEEDBACK_DURATION = 100;
 
 const daysAgo = (num) => {
   let date = new Date();
@@ -110,7 +111,14 @@ export default function Events({ path, ...props }) {
   );
 
   const onSave = async (e, eventId, save) => {
-    e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+
+      if ("vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
+      }
+    }
+
     let response;
     if (save) {
       response = await axios.post(`events/${eventId}/retain`);
@@ -123,7 +131,13 @@ export default function Events({ path, ...props }) {
   };
 
   const onDelete = async (e, eventId, saved) => {
-    e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+
+      if ("vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
+      }
+    }
 
     if (saved) {
       setDeleteFavoriteState({ deletingFavoriteEventId: eventId, showDeleteFavorite: true });
@@ -140,7 +154,14 @@ export default function Events({ path, ...props }) {
   const downloadButton = useRef();
 
   const onDownloadClick = (e, event) => {
-    e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+
+      if ("vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
+      }
+    }
+
     setDownloadEvent((_prev) => ({
       id: event.id,
       has_clip: event.has_clip,
@@ -197,6 +218,10 @@ export default function Events({ path, ...props }) {
 
   const onSendToPlus = async (id, e) => {
     if (e) {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
+      }
+
       e.stopPropagation();
     }
 
