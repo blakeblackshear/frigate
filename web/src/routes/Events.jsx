@@ -23,7 +23,7 @@ import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 
 const API_LIMIT = 25;
-const HAPTIC_FEEDBACK_DURATION = 100;
+const HAPTIC_FEEDBACK_DURATION = 50;
 
 const daysAgo = (num) => {
   let date = new Date();
