@@ -1,0 +1,25 @@
+# Close Stale Issues
+# Warns and then closes issues and PRs that have had no activity for a specified amount of time.
+# https://github.com/actions/stale
+
+name: "Stalebot"
+on:
+  schedule:
+    - cron: "0 0 * * *" # run stalebot once a day
+    
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@main
+        id: stale
+        with:
+          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+          close-issue-message: ''
+          days-before-stale: 30
+          days-before-close: 3
+          exempt-draft-pr: true
+          exempt-issue-labels: 'pinned,security'
+          exempt-pr-labels: 'pinned,security'
+      - name: Print outputs
+        run: echo ${{ join(steps.stale.outputs.*, ',') }}
