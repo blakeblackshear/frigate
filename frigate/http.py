@@ -786,33 +786,38 @@ def recording_clip(camera_name, start_ts, end_ts):
     file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
     path = f"/tmp/cache/{file_name}"
 
-    ffmpeg_cmd = [
-        "ffmpeg",
-        "-y",
-        "-protocol_whitelist",
-        "pipe,file",
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        "/dev/stdin",
-        "-c",
-        "copy",
-        "-movflags",
-        "+faststart",
-        path,
-    ]
+    if not os.path.exists(path):
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-c",
+            "copy",
+            "-movflags",
+            "+faststart",
+            path,
+        ]
+        p = sp.run(
+            ffmpeg_cmd,
+            input="\n".join(playlist_lines),
+            encoding="ascii",
+            capture_output=True,
+        )
 
-    p = sp.run(
-        ffmpeg_cmd,
-        input="\n".join(playlist_lines),
-        encoding="ascii",
-        capture_output=True,
-    )
-    if p.returncode != 0:
-        logger.error(p.stderr)
-        return f"Could not create clip from recordings for {camera_name}.", 500
+        if p.returncode != 0:
+            logger.error(p.stderr)
+            return f"Could not create clip from recordings for {camera_name}.", 500
+    else:
+        logger.debug(
+            f"Ignoring subsequent request for {path} as it already exists in the cache."
+        )
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
