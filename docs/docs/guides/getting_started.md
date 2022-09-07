@@ -45,6 +45,12 @@ More details on available detectors can be found [here](/configuration/detectors
 
 Now let's add the first camera:
 
+:::caution
+
+Note that passwords that contain special characters often cause issues with ffmpeg connecting to the cameara. If recieving `end-of-file` or `unauthorized` errors with a verified correct password, try changing the password to something simple to rule out the possibility that the password is the issue.
+
+:::
+
 ```yaml
 mqtt:
   host: <ip of your mqtt server>
