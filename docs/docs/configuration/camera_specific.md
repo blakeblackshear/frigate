@@ -8,15 +8,15 @@ title: Camera Specific Configurations
 The input and output parameters need to be adjusted for MJPEG cameras
 
 ```yaml
-input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -use_wallclock_as_timestamps 1 -c:v mjpeg
+input_args: preset-http-mjpeg-generic
 ```
 
 Note that mjpeg cameras require encoding the video into h264 for recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
 
 ```yaml
 output_args:
-  record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
-  rtmp: -c:v libx264 -an -f flv
+  record: preset-record-mjpeg
+  rtmp: preset-rtmp-mjpeg
 ```
 
 ## JPEG Stream Cameras
@@ -24,25 +24,7 @@ output_args:
 Cameras using a live changing jpeg image will need input parameters as below
 
 ```yaml
-input_args:
-- -r
-- 5 # << enter FPS here
-- -stream_loop
-- -1
-- -f
-- image2
-- -avoid_negative_ts
-- make_zero
-- -fflags
-- nobuffer
-- -flags
-- low_delay
-- -strict
-- experimental
-- -fflags
-- +genpts+discardcorrupt
-- -use_wallclock_as_timestamps
-- 1
+input_args: preset-http-jpeg-generic
 ```
 
 Outputting the stream will have the same args and caveats as per [MJPEG Cameras](#mjpeg-cameras)
@@ -53,7 +35,7 @@ The input parameters need to be adjusted for RTMP cameras
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rw_timeout 5000000 -use_wallclock_as_timestamps 1 -f live_flv
+  input_args: preset-rtmp-generic
 ```
 
 ## UDP Only Cameras
@@ -62,7 +44,7 @@ If your cameras do not support TCP connections for RTSP, you can use UDP.
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: preset-rtsp-udp
 ```
 
 ## Model/vendor specific setup
@@ -77,7 +59,7 @@ cameras:
       output_args:
         record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
         rtmp: -c:v copy -c:a aac -f flv
-        
+
       inputs:
         - path: rtsp://user:password@camera-ip:554/H264/ch1/main/av_stream # <----- Update for your camera
           roles:
@@ -99,7 +81,7 @@ You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: preset-rtsp-blue-iris
 ```
 
 ### Reolink 410/520 (possibly others)
@@ -112,21 +94,7 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 cameras:
   reolink:
     ffmpeg:
-      input_args:
-        - -avoid_negative_ts
-        - make_zero
-        - -fflags
-        - +genpts+discardcorrupt
-        - -flags
-        - low_delay
-        - -strict
-        - experimental
-        - -analyzeduration
-        - 1000M
-        - -probesize
-        - 1000M
-        - -rw_timeout
-        - "5000000"
+      input_args: preset-http-reolink
       inputs:
         - path: http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password
           roles:
@@ -148,6 +116,6 @@ In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate 
 ```yaml
 ffmpeg:
   output_args:
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
-    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
+    record: preset-record-ubiquiti
+    rtmp: preset-rtmp-ubiquiti
 ```
