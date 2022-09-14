@@ -25,7 +25,7 @@ from frigate.util import (
     load_config_with_no_duplicates,
     load_labels,
 )
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration
+from frigate.ffmpeg_presets import parse_preset_hardware_acceleration, parse_preset_input
 
 logger = logging.getLogger(__name__)
 
@@ -691,7 +691,7 @@ class CameraConfig(FrigateBaseModel):
 
         global_args = ffmpeg_input.global_args or self.ffmpeg.global_args
         hwaccel_args = ffmpeg_input.hwaccel_args or parse_preset_hardware_acceleration(self.ffmpeg.hwaccel_args) or self.ffmpeg.hwaccel_args
-        input_args = ffmpeg_input.input_args or self.ffmpeg.input_args
+        input_args = ffmpeg_input.input_args or parse_preset_input(self.ffmpeg.input_args, self.detect.fps) or self.ffmpeg.input_args
 
         global_args = (
             global_args if isinstance(global_args, list) else global_args.split(" ")
