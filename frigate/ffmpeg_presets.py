@@ -23,7 +23,7 @@ def parse_preset_hardware_acceleration(arg: Any) -> str:
     return PRESETS_HW_ACCEL.get(arg, None)
 
 
-PRESETS_INPUT_ARGS = {
+PRESETS_INPUT = {
     "preset-http-jpeg-generic": "-r {} -stream_loop -1 -f image2 -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -use_wallclock_as_timestamps 1",
     "preset-http-mjpeg-generic": "-avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -use_wallclock_as_timestamps 1",
     "preset-http-reolink": "-avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -flags low_delay -strict experimental -analyzeduration 1000M -probesize 1000M -rw_timeout 5000000",
@@ -40,6 +40,39 @@ def parse_preset_input(arg: Any, detect_fps: int) -> str:
         return None
 
     if arg is "preset-jpeg-generic":
-        return PRESETS_INPUT_ARGS[arg].format(f'{detect_fps}')
+        return PRESETS_INPUT[arg].format(f'{detect_fps}')
 
-    return PRESETS_INPUT_ARGS.get(arg, None)
+    return PRESETS_INPUT.get(arg, None)
+
+
+PRESETS_RECORD_OUTPUT = {
+    "preset-record-generic": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an",
+    "preset-record-generic-audio": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -c:a aac",
+    "preset-record-mjpeg": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an",
+    "preset-record-jpeg": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an",
+    "preset-record-ubiquiti": "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac",
+}
+
+
+def parse_preset_output_record(arg: Any) -> str:
+    """Return the correct preset if in preset format otherwise return raw input."""
+    if not isinstance(arg, str):
+        return None
+
+    return PRESETS_RECORD_OUTPUT.get(arg, None)
+
+
+PRESETS_RTMP_OUTPUT = {
+    "preset-rtmp-generic": "-c copy -f flv",
+    "preset-rtmp-mjpeg": "-c:v libx264 -an -f flv",
+    "preset-rtmp-jpeg": "-c:v libx264 -an -f flv",
+    "preset-rtmp-ubiquiti": "-c:v copy -f flv -ar 44100 -c:a aac",
+}
+
+
+def parse_preset_output_rtmp(arg: Any, detect_fps: int) -> str:
+    """Return the correct preset if in preset format otherwise return raw input."""
+    if not isinstance(arg, str):
+        return None
+
+    return PRESETS_RTMP_OUTPUT.get(arg, None)
