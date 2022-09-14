@@ -21,11 +21,15 @@ from frigate.const import (
 from frigate.util import (
     create_mask,
     deep_merge,
+    get_ffmpeg_arg_list,
     escape_special_characters,
     load_config_with_no_duplicates,
     load_labels,
 )
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration, parse_preset_input
+from frigate.ffmpeg_presets import (
+    parse_preset_hardware_acceleration,
+    parse_preset_input,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -647,11 +651,8 @@ class CameraConfig(FrigateBaseModel):
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
-            detect_args = (
-                self.ffmpeg.output_args.detect
-                if isinstance(self.ffmpeg.output_args.detect, list)
-                else self.ffmpeg.output_args.detect.split(" ")
-            )
+            detect_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.detect)
+
             ffmpeg_output_args = (
                 [
                     "-r",
@@ -664,20 +665,13 @@ class CameraConfig(FrigateBaseModel):
                 + ["pipe:"]
             )
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
-            rtmp_args = (
-                self.ffmpeg.output_args.rtmp
-                if isinstance(self.ffmpeg.output_args.rtmp, list)
-                else self.ffmpeg.output_args.rtmp.split(" ")
-            )
+            rtmp_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.rtmp)
+
             ffmpeg_output_args = (
                 rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
-            record_args = (
-                self.ffmpeg.output_args.record
-                if isinstance(self.ffmpeg.output_args.record, list)
-                else self.ffmpeg.output_args.record.split(" ")
-            )
+            record_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.record)
 
             ffmpeg_output_args = (
                 record_args
@@ -689,18 +683,18 @@ class CameraConfig(FrigateBaseModel):
         if len(ffmpeg_output_args) == 0:
             return None
 
-        global_args = ffmpeg_input.global_args or self.ffmpeg.global_args
-        hwaccel_args = ffmpeg_input.hwaccel_args or parse_preset_hardware_acceleration(self.ffmpeg.hwaccel_args) or self.ffmpeg.hwaccel_args
-        input_args = ffmpeg_input.input_args or parse_preset_input(self.ffmpeg.input_args, self.detect.fps) or self.ffmpeg.input_args
-
-        global_args = (
-            global_args if isinstance(global_args, list) else global_args.split(" ")
+        global_args = get_ffmpeg_arg_list(
+            ffmpeg_input.global_args or self.ffmpeg.global_args
         )
-        hwaccel_args = (
-            hwaccel_args if isinstance(hwaccel_args, list) else hwaccel_args.split(" ")
+        hwaccel_args = get_ffmpeg_arg_list(
+            ffmpeg_input.hwaccel_args
+            or parse_preset_hardware_acceleration(self.ffmpeg.hwaccel_args)
+            or self.ffmpeg.hwaccel_args
         )
-        input_args = (
-            input_args if isinstance(input_args, list) else input_args.split(" ")
+        input_args = get_ffmpeg_arg_list(
+            ffmpeg_input.input_args
+            or parse_preset_input(self.ffmpeg.input_args, self.detect.fps)
+            or self.ffmpeg.input_args
         )
 
         cmd = (
