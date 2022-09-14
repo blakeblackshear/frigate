@@ -888,7 +888,7 @@ def vainfo_hwaccel() -> sp.CompletedProcess:
 
 def get_ffmpeg_arg_list(arg: Any) -> list:
     """Use arg if list or convert to list format."""
-    return (arg if isinstance(arg, list) else arg.split(" "))
+    return arg if isinstance(arg, list) else arg.split(" ")
 
 
 class FrameManager(ABC):

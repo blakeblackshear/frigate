@@ -40,7 +40,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> str:
         return None
 
     if arg is "preset-jpeg-generic":
-        return PRESETS_INPUT[arg].format(f'{detect_fps}')
+        return PRESETS_INPUT[arg].format(f"{detect_fps}")
 
     return PRESETS_INPUT.get(arg, None)
 
@@ -70,7 +70,7 @@ PRESETS_RTMP_OUTPUT = {
 }
 
 
-def parse_preset_output_rtmp(arg: Any, detect_fps: int) -> str:
+def parse_preset_output_rtmp(arg: Any) -> str:
     """Return the correct preset if in preset format otherwise return raw input."""
     if not isinstance(arg, str):
         return None

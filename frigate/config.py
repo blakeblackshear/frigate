@@ -667,13 +667,19 @@ class CameraConfig(FrigateBaseModel):
                 + ["pipe:"]
             )
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
-            rtmp_args = get_ffmpeg_arg_list(parse_preset_output_rtmp(self.ffmpeg.output_args.args.rtmp) or self.ffmpeg.output_args.rtmp)
+            rtmp_args = get_ffmpeg_arg_list(
+                parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)
+                or self.ffmpeg.output_args.rtmp
+            )
 
             ffmpeg_output_args = (
                 rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
-            record_args = get_ffmpeg_arg_list(parse_preset_output_record(self.ffmpeg.output_args.record) or self.ffmpeg.output_args.record)
+            record_args = get_ffmpeg_arg_list(
+                parse_preset_output_record(self.ffmpeg.output_args.record)
+                or self.ffmpeg.output_args.record
+            )
 
             ffmpeg_output_args = (
                 record_args
