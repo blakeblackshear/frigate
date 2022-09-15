@@ -89,7 +89,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-rtmp-generic" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert parse_preset_input("preset-rtmp-generic", 5) in (
+        assert (" ".join(parse_preset_input("preset-rtmp-generic", 5))) in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
