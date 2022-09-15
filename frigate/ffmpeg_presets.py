@@ -26,6 +26,7 @@ PRESETS_HW_ACCEL = {
     ],
     "preset-nvidia-h264": ["-c:v", "h264_cuvid"],
     "preset-nvidia-h265": ["-c:v", "hevc_cuvid"],
+    "preset-nvidia-mjpeg": ["-c:v", "mjpeg_cuvid"],
 }
 
 
