@@ -39,7 +39,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> str:
     if not isinstance(arg, str):
         return None
 
-    if arg is "preset-jpeg-generic":
+    if arg == "preset-jpeg-generic":
         return PRESETS_INPUT[arg].format(f"{detect_fps}")
 
     return PRESETS_INPUT.get(arg, None)
