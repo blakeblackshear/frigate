@@ -41,15 +41,15 @@ export default function RecordingPlaylist({ camera, recordings, selectedDate }) 
   const openClass = active ? '-left-6' : 'right-0';
 
   return (
-    <div className="flex absolute z-10 inset-y-0 right-0 w-9/12 md:w-1/2 lg:w-3/5 max-w-md text-base text-white font-sans">
+    <div className="flex absolute inset-y-0 right-0 w-9/12 md:w-1/2 lg:w-3/5 max-w-md text-base text-white font-sans">
       <div
         onClick={toggle}
-        className={`absolute ${openClass} cursor-pointer items-center self-center rounded-tl-lg rounded-bl-lg border border-r-0 w-6 h-20 py-7 bg-gray-800 bg-opacity-70`}
+        className={`absolute ${openClass} cursor-pointer items-center self-center rounded-tl-lg rounded-bl-lg border border-r-0 w-6 h-20 py-7 bg-gray-800 bg-opacity-70 z-10`}
       >
         {active ? <Menu /> : <MenuOpen />}
       </div>
       <div
-        className={`w-full h-full bg-gray-800 bg-opacity-70 border-l overflow-x-hidden overflow-y-auto${
+        className={`w-full h-full bg-gray-800 bg-opacity-70 border-l overflow-x-hidden overflow-y-auto z-10${
           active ? '' : ' hidden'
         }`}
       >
