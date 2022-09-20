@@ -457,8 +457,8 @@ def detect(
         size = region[2] - region[0]
         x_min = int(max(0, (box[1] * size) + region[0]))
         y_min = int(max(0, (box[0] * size) + region[1]))
-        x_max = int(min(detect_config.width, (box[3] * size) + region[0]))
-        y_max = int(min(detect_config.height, (box[2] * size) + region[1]))
+        x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
+        y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
