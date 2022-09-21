@@ -462,6 +462,11 @@ def detect(
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
+
+        # ignore objects that were detected outside the frame
+        if height == 0:
+            continue
+
         ratio = width / height
         det = (
             d[0],
