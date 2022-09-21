@@ -459,11 +459,11 @@ def detect(
         y_min = int(max(0, (box[0] * size) + region[1]))
         x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
         y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
-        
+
         # ignore objects that were detected outside the frame
         if y_min >= detect_config.height - 1:
             continue
-        
+
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
