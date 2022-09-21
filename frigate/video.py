@@ -464,7 +464,7 @@ def detect(
         area = width * height
 
         # ignore objects that were detected outside the frame
-        if height == 0:
+        if height <= 0:
             continue
 
         ratio = width / height
