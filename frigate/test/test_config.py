@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from pydantic import ValidationError
 from frigate.config import (
+    BirdseyeModeEnum,
     FrigateConfig,
     DetectorTypeEnum,
 )
@@ -79,6 +80,86 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config
         assert "dog" in runtime_config.cameras["back"].objects.track
+
+    def test_override_birdseye(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": "continuous"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "birdseye": {"enabled": False, "mode": "motion"},
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert not runtime_config.cameras["back"].birdseye.enabled
+        assert runtime_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.motion
+
+    def test_override_birdseye_non_inheritable(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": "continuous", "height": 1920},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].birdseye.enabled
+
+    def test_inherit_birdseye(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "birdseye": {"enabled": True, "mode": "continuous"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].birdseye.enabled
+        assert (
+            runtime_config.cameras["back"].birdseye.mode is BirdseyeModeEnum.continuous
+        )
 
     def test_override_tracked_objects(self):
         config = {
@@ -1267,6 +1348,36 @@ class TestConfig(unittest.TestCase):
         self.assertRaises(
             ValidationError, lambda: frigate_config.runtime_config.cameras
         )
+
+    def test_object_filter_ratios_work(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {
+                "track": ["person", "dog"],
+                "filters": {"dog": {"min_ratio": 0.2, "max_ratio": 10.1}},
+            },
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert "dog" in runtime_config.cameras["back"].objects.filters
+        assert runtime_config.cameras["back"].objects.filters["dog"].min_ratio == 0.2
+        assert runtime_config.cameras["back"].objects.filters["dog"].max_ratio == 10.1
 
 
 if __name__ == "__main__":

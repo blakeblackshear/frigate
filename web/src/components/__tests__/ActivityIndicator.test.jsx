@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import ActivityIndicator from '../ActivityIndicator';
-import { render, screen } from '@testing-library/preact';
+import { render, screen } from 'testing-library';
 
 describe('ActivityIndicator', () => {
   test('renders an ActivityIndicator with default size md', async () => {

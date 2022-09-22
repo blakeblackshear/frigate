@@ -22,6 +22,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.const import BASE_DIR
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -104,12 +105,21 @@ class BirdsEyeFrameManager:
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
 
         # find and copy the logo on the blank frame
-        logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
-        frigate_logo = None
-        if len(logo_files) > 0:
-            frigate_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
-        if not frigate_logo is None:
-            transparent_layer = frigate_logo[:, :, 3]
+        birdseye_logo = None
+
+        custom_logo_files = glob.glob(f"{BASE_DIR}/custom.png")
+
+        if len(custom_logo_files) > 0:
+            birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
+
+        if birdseye_logo is None:
+            logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
+
+            if len(logo_files) > 0:
+                birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
+
+        if not birdseye_logo is None:
+            transparent_layer = birdseye_logo[:, :, 3]
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
             self.blank_frame[
@@ -180,14 +190,14 @@ class BirdsEyeFrameManager:
             channel_dims,
         )
 
-    def camera_active(self, object_box_count, motion_box_count):
-        if self.mode == BirdseyeModeEnum.continuous:
+    def camera_active(self, mode, object_box_count, motion_box_count):
+        if mode == BirdseyeModeEnum.continuous:
             return True
 
-        if self.mode == BirdseyeModeEnum.motion and motion_box_count > 0:
+        if mode == BirdseyeModeEnum.motion and motion_box_count > 0:
             return True
 
-        if self.mode == BirdseyeModeEnum.objects and object_box_count > 0:
+        if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
     def update_frame(self):
@@ -301,10 +311,14 @@ class BirdsEyeFrameManager:
         return True
 
     def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+        # don't process if birdseye is disabled for this camera
+        camera_config = self.config.cameras[camera].birdseye
+        if not camera_config.enabled:
+            return False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(object_count, motion_count):
+        if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()

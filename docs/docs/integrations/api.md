@@ -24,16 +24,6 @@ Accepts the following query string parameters:
 
 You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
 
-### `GET /api/<camera_name>/<object_name>/best.jpg[?h=300&crop=1&quality=70]`
-
-The best snapshot for any object type. It is a full resolution image by default.
-
-Example parameters:
-
-- `h=300`: resizes the image to 300 pixes tall
-- `crop=1`: crops the image to the region of the detection rather than returning the entire image
-- `quality=70`: sets the jpeg encoding quality (0-100)
-
 ### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
 The most recent frame that frigate has finished processing. It is a full resolution image by default.
@@ -120,7 +110,8 @@ Sample response:
   "service": {
     /* Uptime in seconds */
     "uptime": 10,
-    "version": "0.8.0-8883709",
+    "version": "0.10.1-8883709",
+    "latest_version": "0.10.1",
     /* Storage data in MB for important locations */
     "storage": {
       "/media/frigate/clips": {
@@ -188,9 +179,36 @@ Returns data for a single event.
 
 Permanently deletes the event along with any clips/snapshots.
 
+### `POST /api/events/<id>/retain`
+
+Sets retain to true for the event id.
+
+### `POST /api/events/<id>/plus`
+
+Submits the snapshot of the event to Frigate+ for labeling.
+
+### `DELETE /api/events/<id>/retain`
+
+Sets retain to false for the event id (event may be deleted quickly after removing).
+
+### `POST /api/events/<id>/sub_label`
+
+Set a sub label for an event. For example to update `person` -> `person's name` if they were recognized with facial recognition.
+Sub labels must be 20 characters or shorter.
+
+```json
+{
+  "subLabel": "some_string"
+}
+```
+
 ### `GET /api/events/<id>/thumbnail.jpg`
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
+
+### `GET /api/<camera_name>/<label>/thumbnail.jpg`
+
+Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /api/events/<id>/clip.mp4`
 
@@ -209,6 +227,10 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
+
+### `GET /api/<camera_name>/<label>/snapshot.jpg`
+
+Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /clips/<camera>-<id>.jpg`
 
@@ -229,3 +251,16 @@ HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed i
 ### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
+
+### `GET /api/<camera_name>/recordings/summary`
+
+Hourly summary of recordings data for a camera.
+
+### `GET /api/<camera_name>/recordings`
+
+Get recording segment details for the given timestamp range.
+
+| param    | Type | Description                           |
+| -------- | ---- | ------------------------------------- |
+| `after`  | int  | Unix timestamp for beginning of range |
+| `before` | int  | Unix timestamp for end of range       |

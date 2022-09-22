@@ -5,24 +5,49 @@ import time
 import psutil
 import shutil
 import os
+import requests
+from typing import Optional, Any
+from paho.mqtt.client import Client
+from multiprocessing.synchronize import Event
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
+from frigate.edgetpu import EdgeTPUProcess
 
 logger = logging.getLogger(__name__)
 
 
-def stats_init(camera_metrics, detectors):
-    stats_tracking = {
+def get_latest_version() -> str:
+    try:
+        request = requests.get(
+            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
+        )
+    except:
+        return "unknown"
+
+    response = request.json()
+
+    if request.ok and response and "tag_name" in response:
+        return str(response.get("tag_name").replace("v", ""))
+    else:
+        return "unknown"
+
+
+def stats_init(
+    camera_metrics: dict[str, CameraMetricsTypes], detectors: dict[str, EdgeTPUProcess]
+) -> StatsTrackingTypes:
+    stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
         "detectors": detectors,
         "started": int(time.time()),
+        "latest_frigate_version": get_latest_version(),
     }
     return stats_tracking
 
 
-def get_fs_type(path):
+def get_fs_type(path: str) -> str:
     bestMatch = ""
     fsType = ""
     for part in psutil.disk_partitions(all=True):
@@ -32,7 +57,7 @@ def get_fs_type(path):
     return fsType
 
 
-def read_temperature(path):
+def read_temperature(path: str) -> Optional[float]:
     if os.path.isfile(path):
         with open(path) as f:
             line = f.readline().strip()
@@ -40,7 +65,7 @@ def read_temperature(path):
     return None
 
 
-def get_temperatures():
+def get_temperatures() -> dict[str, float]:
     temps = {}
 
     # Get temperatures for all attached Corals
@@ -54,35 +79,43 @@ def get_temperatures():
     return temps
 
 
-def stats_snapshot(stats_tracking):
+def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
     camera_metrics = stats_tracking["camera_metrics"]
-    stats = {}
+    stats: dict[str, Any] = {}
 
     total_detection_fps = 0
 
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats["detection_fps"].value
+        pid = camera_stats["process"].pid if camera_stats["process"] else None
+        cpid = (
+            camera_stats["capture_process"].pid
+            if camera_stats["capture_process"]
+            else None
+        )
         stats[name] = {
             "camera_fps": round(camera_stats["camera_fps"].value, 2),
             "process_fps": round(camera_stats["process_fps"].value, 2),
             "skipped_fps": round(camera_stats["skipped_fps"].value, 2),
             "detection_fps": round(camera_stats["detection_fps"].value, 2),
-            "pid": camera_stats["process"].pid,
-            "capture_pid": camera_stats["capture_process"].pid,
+            "pid": pid,
+            "capture_pid": cpid,
         }
 
     stats["detectors"] = {}
     for name, detector in stats_tracking["detectors"].items():
+        pid = detector.detect_process.pid if detector.detect_process else None
         stats["detectors"][name] = {
             "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),
             "detection_start": detector.detection_start.value,
-            "pid": detector.detect_process.pid,
+            "pid": pid,
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
         "version": VERSION,
+        "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
         "temperatures": get_temperatures(),
     }
@@ -103,10 +136,10 @@ class StatsEmitter(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        stats_tracking,
-        mqtt_client,
-        topic_prefix,
-        stop_event,
+        stats_tracking: StatsTrackingTypes,
+        mqtt_client: Client,
+        topic_prefix: str,
+        stop_event: Event,
     ):
         threading.Thread.__init__(self)
         self.name = "frigate_stats_emitter"
@@ -116,7 +149,7 @@ class StatsEmitter(threading.Thread):
         self.topic_prefix = topic_prefix
         self.stop_event = stop_event
 
-    def run(self):
+    def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
             stats = stats_snapshot(self.stats_tracking)

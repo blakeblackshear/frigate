@@ -34,7 +34,7 @@ export function MqttProvider({
   config,
   children,
   createWebsocket = defaultCreateWebsocket,
-  mqttUrl = `${baseUrl.replace(/^http/, 'ws')}/ws`,
+  mqttUrl = `${baseUrl.replace(/^http/, 'ws')}ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const wsRef = useRef();
@@ -42,9 +42,9 @@ export function MqttProvider({
   useEffect(() => {
     Object.keys(config.cameras).forEach((camera) => {
       const { name, record, detect, snapshots } = config.cameras[camera];
-      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: true });
-      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: true });
-      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: true });
+      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
+      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
+      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: false });
     });
   }, [config]);
 
@@ -78,11 +78,12 @@ export function useMqtt(watchTopic, publishTopic) {
   const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
-    (payload) => {
+    (payload, retain = false) => {
       ws.send(
         JSON.stringify({
           topic: publishTopic || watchTopic,
           payload: typeof payload !== 'string' ? JSON.stringify(payload) : payload,
+          retain,
         })
       );
     },

@@ -6,7 +6,7 @@ ARG USER_GID=$USER_UID
 
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash \
     #
     # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
     && apt-get update \
@@ -17,10 +17,11 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN apt-get update \
     && apt-get install -y git curl vim htop
 
-RUN pip3 install pylint black
+COPY requirements-dev.txt /opt/frigate/requirements-dev.txt
+RUN pip3 install -r requirements-dev.txt
 
-# Install Node 14
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+# Install Node 16
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs
 
 RUN npm install -g npm@latest

@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import TextField from '../TextField';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { render, screen, fireEvent } from 'testing-library';
 
 describe('TextField', () => {
   test('can render a leading icon', async () => {
@@ -18,20 +18,6 @@ describe('TextField', () => {
     const icons = screen.queryAllByTestId(/icon-.+/);
     expect(icons[0]).toHaveAttribute('data-testid', 'icon-leading');
     expect(icons[1]).toHaveAttribute('data-testid', 'icon-trailing');
-  });
-
-  test('focuses and blurs', async () => {
-    const handleFocus = jest.fn();
-    const handleBlur = jest.fn();
-    render(<TextField label="Tacos" onFocus={handleFocus} onBlur={handleBlur} />);
-
-    fireEvent.focus(screen.getByRole('textbox'));
-    expect(handleFocus).toHaveBeenCalled();
-    expect(screen.getByText('Tacos').classList.contains('-translate-y-2')).toBe(true);
-
-    fireEvent.blur(screen.getByRole('textbox'));
-    expect(handleBlur).toHaveBeenCalled();
-    expect(screen.getByText('Tacos').classList.contains('-translate-y-2')).toBe(false);
   });
 
   test('onChange updates the value', async () => {

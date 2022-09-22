@@ -6,7 +6,6 @@ import queue
 import signal
 import threading
 from abc import ABC, abstractmethod
-from typing import Dict
 
 import numpy as np
 import tflite_runtime.interpreter as tflite
@@ -110,7 +109,7 @@ class LocalObjectDetector(ObjectDetector):
 def run_detector(
     name: str,
     detection_queue: mp.Queue,
-    out_events: Dict[str, mp.Event],
+    out_events: dict[str, mp.Event],
     avg_speed,
     start,
     model_path,

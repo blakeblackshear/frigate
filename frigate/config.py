@@ -44,6 +44,10 @@ class DetectorConfig(FrigateBaseModel):
     num_threads: int = Field(default=3, title="Number of detection threads")
 
 
+class UIConfig(FrigateBaseModel):
+    use_experimental: bool = Field(default=False, title="Experimental UI")
+
+
 class MqttConfig(FrigateBaseModel):
     host: str = Field(title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
@@ -79,7 +83,6 @@ class RetainConfig(FrigateBaseModel):
 
 
 class EventsConfig(FrigateBaseModel):
-    max_seconds: int = Field(default=300, title="Maximum event duration.")
     pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
@@ -129,6 +132,10 @@ class MotionConfig(FrigateBaseModel):
     frame_height: Optional[int] = Field(default=50, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
+    )
+    mqtt_off_delay: int = Field(
+        default=30,
+        title="Delay for updating MQTT with no motion detected.",
     )
 
 
@@ -208,6 +215,14 @@ class FilterConfig(FrigateBaseModel):
     )
     max_area: int = Field(
         default=24000000, title="Maximum area of bounding box for object to be counted."
+    )
+    min_ratio: float = Field(
+        default=0,
+        title="Minimum ratio of bounding box's width/height for object to be counted.",
+    )
+    max_ratio: float = Field(
+        default=24000000,
+        title="Maximum ratio of bounding box's width/height for object to be counted.",
     )
     threshold: float = Field(
         default=0.7,
@@ -315,6 +330,14 @@ class BirdseyeConfig(FrigateBaseModel):
     )
 
 
+# uses BaseModel because some global attributes are not available at the camera level
+class BirdseyeCameraConfig(BaseModel):
+    enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
+    mode: BirdseyeModeEnum = Field(
+        default=BirdseyeModeEnum.objects, title="Tracking mode for camera."
+    )
+
+
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
 FFMPEG_INPUT_ARGS_DEFAULT = [
     "-avoid_negative_ts",
@@ -323,7 +346,7 @@ FFMPEG_INPUT_ARGS_DEFAULT = [
     "+genpts+discardcorrupt",
     "-rtsp_transport",
     "tcp",
-    "-stimeout",
+    "-timeout",
     "5000000",
     "-use_wallclock_as_timestamps",
     "1",
@@ -498,6 +521,13 @@ class CameraLiveConfig(FrigateBaseModel):
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
 
+class CameraUiConfig(FrigateBaseModel):
+    order: int = Field(default=0, title="Order of camera in UI.")
+    dashboard: bool = Field(
+        default=True, title="Show this camera in Frigate dashboard UI."
+    )
+
+
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
@@ -529,6 +559,12 @@ class CameraConfig(FrigateBaseModel):
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
+    )
+    ui: CameraUiConfig = Field(
+        default_factory=CameraUiConfig, title="Camera UI Modifications."
+    )
+    birdseye: BirdseyeCameraConfig = Field(
+        default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig, title="Timestamp style configuration."
@@ -710,6 +746,7 @@ class FrigateConfig(FrigateBaseModel):
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."
     )
+    ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )
@@ -765,6 +802,7 @@ class FrigateConfig(FrigateBaseModel):
         # Global config to propegate down to camera level
         global_config = config.dict(
             include={
+                "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
                 "live": ...,

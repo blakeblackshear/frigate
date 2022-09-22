@@ -114,6 +114,7 @@ environment_vars:
   EXAMPLE_VAR: value
 
 # Optional: birdseye configuration
+# NOTE: Can (enabled, mode) be overridden at the camera level
 birdseye:
   # Optional: Enable birdseye view (default: shown below)
   enabled: True
@@ -138,7 +139,7 @@ ffmpeg:
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
   # Optional: global input args (default: shown below)
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
@@ -202,6 +203,10 @@ objects:
       min_area: 5000
       # Optional: maximum width*height of the bounding box for the detected object (default: 24000000)
       max_area: 100000
+      # Optional: minimum width/height of the bounding box for the detected object (default: 0)
+      min_ratio: 0.5
+      # Optional: maximum width/height of the bounding box for the detected object (default: 24000000)
+      max_ratio: 2.0
       # Optional: minimum score for the object to initiate tracking (default: shown below)
       min_score: 0.5
       # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive (default: shown below)
@@ -245,12 +250,14 @@ motion:
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
   improve_contrast: False
+  # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
+  mqtt_off_delay: 30
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
 record:
   # Optional: Enable recording (default: shown below)
-  # WARNING: If recording is disabled in the config, turning it on via 
+  # WARNING: If recording is disabled in the config, turning it on via
   #          the UI or MQTT later will have no effect.
   # WARNING: Frigate does not currently support limiting recordings based
   #          on available disk space automatically. If using recordings,
@@ -275,10 +282,6 @@ record:
     mode: all
   # Optional: Event recording settings
   events:
-    # Optional: Maximum length of time to retain video during long events. (default: shown below)
-    # NOTE: If an object is being tracked for longer than this amount of time, the retained recordings
-    #       will be the last x seconds of the event unless retain->days under record is > 0.
-    max_seconds: 300
     # Optional: Number of seconds before the event to include (default: shown below)
     pre_capture: 5
     # Optional: Number of seconds after the event to include (default: shown below)
@@ -447,4 +450,12 @@ cameras:
       quality: 70
       # Optional: Restrict mqtt messages to objects that entered any of the listed zones (default: no required zones)
       required_zones: []
+
+    # Optional: Configuration for how camera is handled in the GUI.
+    ui:
+      # Optional: Adjust sort order of cameras in the UI. Larger numbers come later (default: shown below)
+      # By default the cameras are sorted alphabetically.
+      order: 0
+      # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
+      dashboard: True
 ```

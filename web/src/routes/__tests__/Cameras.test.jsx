@@ -1,30 +1,16 @@
 import { h } from 'preact';
-import * as Api from '../../api';
 import * as CameraImage from '../../components/CameraImage';
 import * as Mqtt from '../../api/mqtt';
 import Cameras from '../Cameras';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-library';
 
 describe('Cameras Route', () => {
-  let useConfigMock;
-
   beforeEach(() => {
-    useConfigMock = jest.spyOn(Api, 'useConfig').mockImplementation(() => ({
-      data: {
-        cameras: {
-          front: { name: 'front', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: true } },
-          side: { name: 'side', objects: { track: ['taco', 'cat', 'dog'] }, record: { enabled: false } },
-        },
-      },
-      status: 'loaded',
-    }));
-    jest.spyOn(Api, 'useApiHost').mockImplementation(() => 'http://base-url.local:5000');
     jest.spyOn(CameraImage, 'default').mockImplementation(() => <div data-testid="camera-image" />);
     jest.spyOn(Mqtt, 'useMqtt').mockImplementation(() => ({ value: { payload: 'OFF' }, send: jest.fn() }));
   });
 
   test('shows an ActivityIndicator if not yet loaded', async () => {
-    useConfigMock.mockReturnValueOnce(() => ({ status: 'loading' }));
     render(<Cameras />);
     expect(screen.queryByLabelText('Loading…')).toBeInTheDocument();
   });
@@ -32,7 +18,7 @@ describe('Cameras Route', () => {
   test('shows cameras', async () => {
     render(<Cameras />);
 
-    expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 
     expect(screen.queryByText('front')).toBeInTheDocument();
     expect(screen.queryByText('front').closest('a')).toHaveAttribute('href', '/cameras/front');
@@ -44,7 +30,7 @@ describe('Cameras Route', () => {
   test('shows recordings link', async () => {
     render(<Cameras />);
 
-    expect(screen.queryByLabelText('Loading…')).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 
     expect(screen.queryAllByText('Recordings')).toHaveLength(2);
   });
@@ -65,15 +51,17 @@ describe('Cameras Route', () => {
 
     render(<Cameras />);
 
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
+
     fireEvent.click(screen.getAllByLabelText('Toggle detect off')[0]);
-    expect(sendDetect).toHaveBeenCalledWith('OFF');
+    expect(sendDetect).toHaveBeenCalledWith('OFF', true);
     expect(sendDetect).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getAllByLabelText('Toggle snapshots off')[0]);
-    expect(sendSnapshots).toHaveBeenCalledWith('OFF');
+    expect(sendSnapshots).toHaveBeenCalledWith('OFF', true);
 
     fireEvent.click(screen.getAllByLabelText('Toggle recordings on')[0]);
-    expect(sendRecordings).toHaveBeenCalledWith('ON');
+    expect(sendRecordings).toHaveBeenCalledWith('ON', true);
 
     expect(sendDetect).toHaveBeenCalledTimes(1);
     expect(sendSnapshots).toHaveBeenCalledTimes(1);

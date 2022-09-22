@@ -9,7 +9,6 @@ import subprocess as sp
 import threading
 import time
 from collections import defaultdict
-from typing import Dict, List
 
 import numpy as np
 from cv2 import cv2, reduce
@@ -38,6 +37,10 @@ logger = logging.getLogger(__name__)
 
 def filtered(obj, objects_to_track, object_filters):
     object_name = obj[0]
+    object_score = obj[1]
+    object_box = obj[2]
+    object_area = obj[3]
+    object_ratio = obj[4]
 
     if not object_name in objects_to_track:
         return True
@@ -47,24 +50,35 @@ def filtered(obj, objects_to_track, object_filters):
 
         # if the min area is larger than the
         # detected object, don't add it to detected objects
-        if obj_settings.min_area > obj[3]:
+        if obj_settings.min_area > object_area:
             return True
 
         # if the detected object is larger than the
         # max area, don't add it to detected objects
-        if obj_settings.max_area < obj[3]:
+        if obj_settings.max_area < object_area:
             return True
 
         # if the score is lower than the min_score, skip
-        if obj_settings.min_score > obj[1]:
+        if obj_settings.min_score > object_score:
+            return True
+
+        # if the object is not proportionally wide enough
+        if obj_settings.min_ratio > object_ratio:
+            return True
+
+        # if the object is proportionally too wide
+        if obj_settings.max_ratio < object_ratio:
             return True
 
         if not obj_settings.mask is None:
             # compute the coordinates of the object and make sure
-            # the location isnt outside the bounds of the image (can happen from rounding)
-            y_location = min(int(obj[2][3]), len(obj_settings.mask) - 1)
+            # the location isn't outside the bounds of the image (can happen from rounding)
+            object_xmin = object_box[0]
+            object_xmax = object_box[2]
+            object_ymax = object_box[3]
+            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
             x_location = min(
-                int((obj[2][2] - obj[2][0]) / 2.0) + obj[2][0],
+                int((object_xmax + object_xmin) / 2.0),
                 len(obj_settings.mask[0]) - 1,
             )
 
@@ -188,7 +202,7 @@ class CameraWatchdog(threading.Thread):
         self.config = config
         self.capture_thread = None
         self.ffmpeg_detect_process = None
-        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect", logging.ERROR)
+        self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
         self.ffmpeg_other_processes = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
@@ -204,8 +218,7 @@ class CameraWatchdog(threading.Thread):
             if "detect" in c["roles"]:
                 continue
             logpipe = LogPipe(
-                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}",
-                logging.ERROR,
+                f"ffmpeg.{self.camera_name}.{'_'.join(sorted(c['roles']))}"
             )
             self.ffmpeg_other_processes.append(
                 {
@@ -348,12 +361,22 @@ def track_camera(
 
     frame_queue = process_info["frame_queue"]
     detection_enabled = process_info["detection_enabled"]
+    motion_enabled = process_info["motion_enabled"]
+    improve_contrast_enabled = process_info["improve_contrast_enabled"]
+    motion_threshold = process_info["motion_threshold"]
+    motion_contour_area = process_info["motion_contour_area"]
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
 
-    motion_detector = MotionDetector(frame_shape, config.motion)
+    motion_detector = MotionDetector(
+        frame_shape,
+        config.motion,
+        improve_contrast_enabled,
+        motion_threshold,
+        motion_contour_area,
+    )
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_shape
     )
@@ -377,6 +400,7 @@ def track_camera(
         objects_to_track,
         object_filters,
         detection_enabled,
+        motion_enabled,
         stop_event,
     )
 
@@ -416,7 +440,13 @@ def intersects_any(box_a, boxes):
 
 
 def detect(
-    object_detector, frame, model_shape, region, objects_to_track, object_filters
+    detect_config: DetectConfig,
+    object_detector,
+    frame,
+    model_shape,
+    region,
+    objects_to_track,
+    object_filters,
 ):
     tensor_input = create_tensor_input(frame, model_shape, region)
 
@@ -425,15 +455,25 @@ def detect(
     for d in region_detections:
         box = d[2]
         size = region[2] - region[0]
-        x_min = int((box[1] * size) + region[0])
-        y_min = int((box[0] * size) + region[1])
-        x_max = int((box[3] * size) + region[0])
-        y_max = int((box[2] * size) + region[1])
+        x_min = int(max(0, (box[1] * size) + region[0]))
+        y_min = int(max(0, (box[0] * size) + region[1]))
+        x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
+        y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
+
+        # ignore objects that were detected outside the frame
+        if (x_min >= detect_config.width - 1) or (y_min >= detect_config.height - 1):
+            continue
+
+        width = x_max - x_min
+        height = y_max - y_min
+        area = width * height
+        ratio = width / height
         det = (
             d[0],
             d[1],
             (x_min, y_min, x_max, y_max),
-            (x_max - x_min) * (y_max - y_min),
+            area,
+            ratio,
             region,
         )
         # apply object filters
@@ -454,10 +494,11 @@ def process_frames(
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue,
-    process_info: Dict,
-    objects_to_track: List[str],
+    process_info: dict,
+    objects_to_track: list[str],
     object_filters,
     detection_enabled: mp.Value,
+    motion_enabled: mp.Value,
     stop_event,
     exit_on_empty: bool = False,
 ):
@@ -491,8 +532,8 @@ def process_frames(
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
-        # look for motion
-        motion_boxes = motion_detector.detect(frame)
+        # look for motion if enabled
+        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
         regions = []
 
@@ -580,6 +621,7 @@ def process_frames(
                     obj["score"],
                     obj["box"],
                     obj["area"],
+                    obj["ratio"],
                     obj["region"],
                 )
                 for obj in object_tracker.tracked_objects.values()
@@ -589,6 +631,7 @@ def process_frames(
             for region in regions:
                 detections.extend(
                     detect(
+                        detect_config,
                         object_detector,
                         frame,
                         model_shape,
@@ -615,15 +658,23 @@ def process_frames(
                 for group in detected_object_groups.values():
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                    # o[2] is the box of the object: xmin, ymin, xmax, ymax
+                    # apply max/min to ensure values do not exceed the known frame size
                     boxes = [
-                        (o[2][0], o[2][1], o[2][2] - o[2][0], o[2][3] - o[2][1])
+                        (
+                            o[2][0],
+                            o[2][1],
+                            o[2][2] - o[2][0],
+                            o[2][3] - o[2][1],
+                        )
                         for o in group
                     ]
                     confidences = [o[1] for o in group]
                     idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
                     for index in idxs:
-                        obj = group[index[0]]
+                        index = index if isinstance(index, np.int32) else index[0]
+                        obj = group[index]
                         if clipped(obj, frame_shape):
                             box = obj[2]
                             # calculate a new region that will hopefully get the entire object
@@ -640,6 +691,7 @@ def process_frames(
 
                             selected_objects.extend(
                                 detect(
+                                    detect_config,
                                     object_detector,
                                     frame,
                                     model_shape,

@@ -1,2 +1,2 @@
 export const ENV = import.meta.env.MODE;
-export const API_HOST = import.meta.env.SNOWPACK_PUBLIC_API_HOST;
+export const API_HOST = ENV === 'production' ? '' : 'http://localhost:5000/';

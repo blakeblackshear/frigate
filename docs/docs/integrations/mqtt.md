@@ -18,10 +18,12 @@ Causes frigate to exit. Docker should be configured to automatically restart the
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
+`all` can be used as the object_name for the count of all objects for the camera.
 
 ### `frigate/<zone_name>/<object_name>`
 
 Publishes the count of objects for the zone for use as a sensor in Home Assistant.
+`all` can be used as the object_name for the count of all objects for the zone.
 
 ### `frigate/<camera_name>/<object_name>/snapshot`
 
@@ -50,6 +52,7 @@ Message published for each changed event. The first message is published when th
     "score": 0.7890625,
     "box": [424, 500, 536, 712],
     "area": 23744,
+    "ratio": 2.113207,
     "region": [264, 450, 667, 853],
     "current_zones": ["driveway"],
     "entered_zones": ["yard", "driveway"],
@@ -73,6 +76,7 @@ Message published for each changed event. The first message is published when th
     "score": 0.87890625,
     "box": [432, 496, 544, 854],
     "area": 40096,
+    "ratio": 1.251397,
     "region": [218, 440, 693, 915],
     "current_zones": ["yard", "driveway"],
     "entered_zones": ["yard", "driveway"],
@@ -113,3 +117,42 @@ Topic to turn snapshots for a camera on and off. Expected values are `ON` and `O
 ### `frigate/<camera_name>/snapshots/state`
 
 Topic with current state of snapshots for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/motion/set`
+
+Topic to turn motion detection for a camera on and off. Expected values are `ON` and `OFF`.
+NOTE: Turning off motion detection will fail if detection is not disabled.
+
+### `frigate/<camera_name>/motion`
+
+Whether camera_name is currently detecting motion. Expected values are `ON` and `OFF`.
+NOTE: After motion is initially detected, `ON` will be set until no motion has
+been detected for `mqtt_off_delay` seconds (30 by default).
+
+### `frigate/<camera_name>/motion/state`
+
+Topic with current state of motion detection for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/improve_contrast/set`
+
+Topic to turn improve_contrast for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/improve_contrast/state`
+
+Topic with current state of improve_contrast for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/motion_threshold/set`
+
+Topic to adjust motion threshold for a camera. Expected value is an integer.
+
+### `frigate/<camera_name>/motion_threshold/state`
+
+Topic with current motion threshold for a camera. Published value is an integer.
+
+### `frigate/<camera_name>/motion_contour_area/set`
+
+Topic to adjust motion contour area for a camera. Expected value is an integer.
+
+### `frigate/<camera_name>/motion_contour_area/state`
+
+Topic with current motion contour area for a camera. Published value is an integer.

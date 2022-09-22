@@ -1,7 +1,7 @@
 import { h, createRef } from 'preact';
 import RelativeModal from '../RelativeModal';
 import userEvent from '@testing-library/user-event';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 describe('RelativeModal', () => {
   test('keeps tab focus', async () => {

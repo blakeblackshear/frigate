@@ -15,8 +15,16 @@ from frigate.models import Event
 logger = logging.getLogger(__name__)
 
 
+def should_insert_db(prev_event, current_event):
+    """If current event has new clip or snapshot."""
+    return (not prev_event["has_clip"] and not prev_event["has_snapshot"]) and (
+        current_event["has_clip"] or current_event["has_snapshot"]
+    )
+
+
 def should_update_db(prev_event, current_event):
-    return (
+    """If current_event has updated fields and (clip or snapshot)."""
+    return (current_event["has_clip"] or current_event["has_snapshot"]) and (
         prev_event["top_score"] != current_event["top_score"]
         or prev_event["entered_zones"] != current_event["entered_zones"]
         or prev_event["thumbnail"] != current_event["thumbnail"]
@@ -58,33 +66,54 @@ class EventProcessor(threading.Thread):
             if event_type == "start":
                 self.events_in_process[event_data["id"]] = event_data
 
+            elif event_type == "update" and should_insert_db(
+                self.events_in_process[event_data["id"]], event_data
+            ):
+                self.events_in_process[event_data["id"]] = event_data
+                # TODO: this will generate a lot of db activity possibly
+                Event.insert(
+                    id=event_data["id"],
+                    label=event_data["label"],
+                    camera=camera,
+                    start_time=event_data["start_time"] - event_config.pre_capture,
+                    end_time=None,
+                    top_score=event_data["top_score"],
+                    false_positive=event_data["false_positive"],
+                    zones=list(event_data["entered_zones"]),
+                    thumbnail=event_data["thumbnail"],
+                    region=event_data["region"],
+                    box=event_data["box"],
+                    area=event_data["area"],
+                    has_clip=event_data["has_clip"],
+                    has_snapshot=event_data["has_snapshot"],
+                ).execute()
+
             elif event_type == "update" and should_update_db(
                 self.events_in_process[event_data["id"]], event_data
             ):
                 self.events_in_process[event_data["id"]] = event_data
                 # TODO: this will generate a lot of db activity possibly
-                if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.replace(
-                        id=event_data["id"],
-                        label=event_data["label"],
-                        camera=camera,
-                        start_time=event_data["start_time"] - event_config.pre_capture,
-                        end_time=None,
-                        top_score=event_data["top_score"],
-                        false_positive=event_data["false_positive"],
-                        zones=list(event_data["entered_zones"]),
-                        thumbnail=event_data["thumbnail"],
-                        region=event_data["region"],
-                        box=event_data["box"],
-                        area=event_data["area"],
-                        has_clip=event_data["has_clip"],
-                        has_snapshot=event_data["has_snapshot"],
-                    ).execute()
+                Event.update(
+                    label=event_data["label"],
+                    camera=camera,
+                    start_time=event_data["start_time"] - event_config.pre_capture,
+                    end_time=None,
+                    top_score=event_data["top_score"],
+                    false_positive=event_data["false_positive"],
+                    zones=list(event_data["entered_zones"]),
+                    thumbnail=event_data["thumbnail"],
+                    region=event_data["region"],
+                    box=event_data["box"],
+                    area=event_data["area"],
+                    ratio=event_data["ratio"],
+                    has_clip=event_data["has_clip"],
+                    has_snapshot=event_data["has_snapshot"],
+                ).where(Event.id == event_data["id"]).execute()
 
             elif event_type == "end":
                 if event_data["has_clip"] or event_data["has_snapshot"]:
-                    Event.replace(
-                        id=event_data["id"],
+                    # Full update for valid end of event
+                    Event.update(
                         label=event_data["label"],
                         camera=camera,
                         start_time=event_data["start_time"] - event_config.pre_capture,
@@ -96,9 +125,16 @@ class EventProcessor(threading.Thread):
                         region=event_data["region"],
                         box=event_data["box"],
                         area=event_data["area"],
+                        ratio=event_data["ratio"],
                         has_clip=event_data["has_clip"],
                         has_snapshot=event_data["has_snapshot"],
-                    ).execute()
+                    ).where(Event.id == event_data["id"]).execute()
+                else:
+                    # Event ended after clip & snapshot disabled,
+                    # only end time should be updated.
+                    Event.update(
+                        end_time=event_data["end_time"] + event_config.post_capture
+                    ).where(Event.id == event_data["id"]).execute()
 
                 del self.events_in_process[event_data["id"]]
                 self.event_processed_queue.put((event_data["id"], camera))
@@ -147,6 +183,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == l.label,
+                Event.retain_indefinitely == False,
             )
             # delete the media from disk
             for event in expired_events:
@@ -166,6 +203,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == l.label,
+                Event.retain_indefinitely == False,
             )
             update_query.execute()
 
@@ -192,6 +230,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == l.label,
+                    Event.retain_indefinitely == False,
                 )
                 # delete the grabbed clips from disk
                 for event in expired_events:
@@ -210,6 +249,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == l.label,
+                    Event.retain_indefinitely == False,
                 )
                 update_query.execute()
 

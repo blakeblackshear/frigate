@@ -110,7 +110,7 @@ export default function RelativeModal({
 
   const menu = (
     <Fragment>
-      <div data-testid="scrim" key="scrim" className="absolute inset-0 z-10" onClick={handleDismiss} />
+      <div data-testid="scrim" key="scrim" className="fixed inset-0 z-10" onClick={handleDismiss} />
       <div
         key="menu"
         className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto h-auto transition-transform transition-opacity duration-75 transform scale-90 opacity-0 overflow-x-hidden overflow-y-auto ${

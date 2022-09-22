@@ -1,4 +1,3 @@
-import collections
 import copy
 import datetime
 import hashlib
@@ -11,6 +10,7 @@ import threading
 import time
 import traceback
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import AnyStr
 
@@ -34,7 +34,7 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     for k, v2 in dct2.items():
         if k in merged:
             v1 = merged[k]
-            if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
+            if isinstance(v1, dict) and isinstance(v2, Mapping):
                 merged[k] = deep_merge(v1, v2, override)
             elif isinstance(v1, list) and isinstance(v2, list):
                 if merge_lists:
@@ -522,7 +522,7 @@ def clipped(obj, frame_shape):
     # if the object is within 5 pixels of the region border, and the region is not on the edge
     # consider the object to be clipped
     box = obj[2]
-    region = obj[4]
+    region = obj[5]
     if (
         (region[0] > 5 and box[0] - region[0] <= 5)
         or (region[1] > 5 and box[1] - region[1] <= 5)

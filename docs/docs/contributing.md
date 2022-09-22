@@ -40,9 +40,7 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 
 ### Setup
 
-#### 1. Build the docker container locally with the appropriate make command
-
-For x86 machines, use `make amd64_frigate`
+#### 1. Build the version information and docker container locally by running `make`
 
 #### 2. Create a local config file for testing
 
@@ -90,6 +88,38 @@ VSCode will start the docker compose file for you and open a terminal window con
 
 After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
+### Testing
+
+#### FFMPEG Hardware Acceleration
+
+The following commands are used inside the container to ensure hardware acceleration is working properly.
+
+**Raspberry Pi (64bit)**
+
+This should show <50% CPU in top, and ~80% CPU without `-c:v h264_v4l2m2m`.
+
+```shell
+ffmpeg -c:v h264_v4l2m2m -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+**NVIDIA**
+
+```shell
+ffmpeg -c:v h264_cuvid -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+**VAAPI**
+
+```shell
+ffmpeg -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+**QSV**
+
+```shell
+ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
 ## Web Interface
 
 ### Prerequisites
@@ -117,20 +147,16 @@ cd web && npm install
 #### 3. Run the development server
 
 ```console
-cd web && npm run start
+cd web && npm run dev
 ```
 
 #### 3a. Run the development server against a non-local instance
 
-To run the development server against a non-local instance, you will need to provide an environment variable, `SNOWPACK_PUBLIC_API_HOST` that tells the web application how to connect to the Frigate API:
-
-```console
-cd web && SNOWPACK_PUBLIC_API_HOST=http://<ip-address-to-your-frigate-instance>:5000 npm run start
-```
+To run the development server against a non-local instance, you will need to modify the API_HOST default return in `web/src/env.js`.
 
 #### 4. Making changes
 
-The Web UI is built using [Snowpack](https://www.snowpack.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).
+The Web UI is built using [Vite](https://vitejs.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).
 
 Light guidelines and advice:
 
@@ -182,3 +208,16 @@ npm run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+## Official builds
+
+Setup buildx for multiarch
+
+```
+docker buildx stop builder && docker buildx rm builder # <---- if existing
+docker run --privileged --rm tonistiigi/binfmt --install all
+docker buildx create --name builder --driver docker-container --driver-opt network=host --use
+docker buildx inspect builder --bootstrap
+make build_web
+make push
+```

@@ -9,7 +9,6 @@ import shutil
 import string
 import subprocess as sp
 import threading
-import time
 from collections import defaultdict
 from pathlib import Path
 
@@ -100,11 +99,23 @@ class RecordingMaintainer(threading.Thread):
         # delete all cached files past the most recent 5
         keep_count = 5
         for camera in grouped_recordings.keys():
-            if len(grouped_recordings[camera]) > keep_count:
+            segment_count = len(grouped_recordings[camera])
+            if segment_count > keep_count:
+                ####
+                # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
+                ####
+                # logger.warning(
+                #     f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
+                # )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
-                    Path(f["cache_path"]).unlink(missing_ok=True)
-                    self.end_time_cache.pop(f["cache_path"], None)
+                    cache_path = f["cache_path"]
+                    ####
+                    # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
+                    ####
+                    # logger.warning(f"Discarding a recording segment: {cache_path}")
+                    Path(cache_path).unlink(missing_ok=True)
+                    self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
         for camera, recordings in grouped_recordings.items():
@@ -378,16 +389,11 @@ class RecordingCleanup(threading.Thread):
         logger.debug("Start all cameras.")
         for camera, config in self.config.cameras.items():
             logger.debug(f"Start camera: {camera}.")
-            # When deleting recordings without events, we have to keep at LEAST the configured max clip duration
-            min_end = (
-                datetime.datetime.now()
-                - datetime.timedelta(seconds=config.record.events.max_seconds)
-            ).timestamp()
+            # Get the timestamp for cutoff of retained days
             expire_days = config.record.retain.days
-            expire_before = (
+            expire_date = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
-            expire_date = min(min_end, expire_before)
 
             # Get recordings to check for expiration
             recordings: Recordings = (
@@ -459,7 +465,13 @@ class RecordingCleanup(threading.Thread):
                     deleted_recordings.add(recording.id)
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-            Recordings.delete().where(Recordings.id << deleted_recordings).execute()
+            # delete up to 100,000 at a time
+            max_deletes = 100000
+            deleted_recordings_list = list(deleted_recordings)
+            for i in range(0, len(deleted_recordings_list), max_deletes):
+                Recordings.delete().where(
+                    Recordings.id << deleted_recordings_list[i : i + max_deletes]
+                ).execute()
 
             logger.debug(f"End camera: {camera}.")
 
@@ -534,7 +546,12 @@ class RecordingCleanup(threading.Thread):
         logger.debug(
             f"Deleting {len(recordings_to_delete)} recordings with missing files"
         )
-        Recordings.delete().where(Recordings.id << recordings_to_delete).execute()
+        # delete up to 100,000 at a time
+        max_deletes = 100000
+        for i in range(0, len(recordings_to_delete), max_deletes):
+            Recordings.delete().where(
+                Recordings.id << recordings_to_delete[i : i + max_deletes]
+            ).execute()
 
         logger.debug("End sync recordings.")
 

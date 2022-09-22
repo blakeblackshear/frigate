@@ -4,14 +4,11 @@ import { useCallback, useState } from 'preact/hooks';
 export default function Switch({ checked, id, onChange, label, labelPosition = 'before' }) {
   const [isFocused, setFocused] = useState(false);
 
-  const handleChange = useCallback(
-    (event) => {
-      if (onChange) {
-        onChange(id, !checked);
-      }
-    },
-    [id, onChange, checked]
-  );
+  const handleChange = useCallback(() => {
+    if (onChange) {
+      onChange(id, !checked);
+    }
+  }, [id, onChange, checked]);
 
   const handleFocus = useCallback(() => {
     onChange && setFocused(true);

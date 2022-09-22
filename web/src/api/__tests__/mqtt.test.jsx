@@ -1,14 +1,16 @@
 import { h } from 'preact';
 import { Mqtt, MqttProvider, useMqtt } from '../mqtt';
 import { useCallback, useContext } from 'preact/hooks';
-import { fireEvent, render, screen } from '@testing-library/preact';
+import { fireEvent, render, screen } from 'testing-library';
 
 function Test() {
   const { state } = useContext(Mqtt);
   return state.__connected ? (
     <div data-testid="data">
       {Object.keys(state).map((key) => (
-        <div data-testid={key}>{JSON.stringify(state[key])}</div>
+        <div key={key} data-testid={key}>
+          {JSON.stringify(state[key])}
+        </div>
       ))}
     </div>
   ) : null;
@@ -28,10 +30,10 @@ describe('MqttProvider', () => {
       return new Proxy(
         {},
         {
-          get(target, prop, receiver) {
+          get(_target, prop, _receiver) {
             return wsClient[prop];
           },
-          set(target, prop, value) {
+          set(_target, prop, value) {
             wsClient[prop] = typeof value === 'function' ? jest.fn(value) : value;
             if (prop === 'onopen') {
               wsClient[prop]();
@@ -103,7 +105,7 @@ describe('MqttProvider', () => {
     await screen.findByRole('button');
     fireEvent.click(screen.getByRole('button'));
     await expect(wsClient.send).toHaveBeenCalledWith(
-      JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }) })
+      JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }), retain: false })
     );
   });
 
@@ -121,12 +123,24 @@ describe('MqttProvider', () => {
       </MqttProvider>
     );
     await screen.findByTestId('data');
-    expect(screen.getByTestId('front/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON","retain":true}');
-    expect(screen.getByTestId('front/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
-    expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"ON","retain":true}');
-    expect(screen.getByTestId('side/detect/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
-    expect(screen.getByTestId('side/recordings/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
-    expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent('{"lastUpdate":123456,"payload":"OFF","retain":true}');
+    expect(screen.getByTestId('front/detect/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"ON","retain":false}'
+    );
+    expect(screen.getByTestId('front/recordings/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
+    );
+    expect(screen.getByTestId('front/snapshots/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"ON","retain":false}'
+    );
+    expect(screen.getByTestId('side/detect/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
+    );
+    expect(screen.getByTestId('side/recordings/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
+    );
+    expect(screen.getByTestId('side/snapshots/state')).toHaveTextContent(
+      '{"lastUpdate":123456,"payload":"OFF","retain":false}'
+    );
   });
 });
 

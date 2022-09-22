@@ -58,18 +58,17 @@ ffmpeg:
 
 ### Reolink 410/520 (possibly others)
 
-According to [this discussion](https://github.com/blakeblackshear/frigate/issues/1713#issuecomment-932976305), the http video streams seem to be the most reliable for Reolink.
+According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
 ```yaml
 cameras:
   reolink:
     ffmpeg:
-      hwaccel_args:
       input_args:
         - -avoid_negative_ts
         - make_zero
         - -fflags
-        - nobuffer+genpts+discardcorrupt
+        - +genpts+discardcorrupt
         - -flags
         - low_delay
         - -strict
@@ -102,7 +101,7 @@ You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
 
 ### UDP Only Cameras
@@ -111,5 +110,16 @@ If your cameras do not support TCP connections for RTSP, you can use UDP.
 
 ```yaml
 ffmpeg:
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -stimeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
+```
+
+### Unifi Protect Cameras
+
+In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp.
+
+```yaml
+ffmpeg:
+  output_args:
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
+    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
 ```
