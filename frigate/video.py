@@ -457,8 +457,13 @@ def detect(
         size = region[2] - region[0]
         x_min = int(max(0, (box[1] * size) + region[0]))
         y_min = int(max(0, (box[0] * size) + region[1]))
-        x_max = int(min(detect_config.width, (box[3] * size) + region[0]))
-        y_max = int(min(detect_config.height, (box[2] * size) + region[1]))
+        x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
+        y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
+
+        # ignore objects that were detected outside the frame
+        if (x_min >= detect_config.width - 1) or (y_min >= detect_config.height - 1):
+            continue
+
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
@@ -657,10 +662,10 @@ def process_frames(
                     # apply max/min to ensure values do not exceed the known frame size
                     boxes = [
                         (
-                            max(o[2][0], 0),
-                            max(o[2][1], 0),
-                            min(o[2][2] - o[2][0], detect_config.width - 1),
-                            min(o[2][3] - o[2][1], detect_config.height - 1),
+                            o[2][0],
+                            o[2][1],
+                            o[2][2] - o[2][0],
+                            o[2][3] - o[2][1],
                         )
                         for o in group
                     ]
