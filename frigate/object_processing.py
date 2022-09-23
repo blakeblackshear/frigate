@@ -80,6 +80,9 @@ class TrackedObject:
         # start the score history
         self.score_history = [self.obj_data["score"]]
 
+        # set blank sub label
+        self.obj_data["sub_label"] = None
+
     def _is_false_positive(self):
         # once a true positive, always a true positive
         if not self.false_positive:
@@ -180,6 +183,7 @@ class TrackedObject:
             "frame_time": self.obj_data["frame_time"],
             "snapshot_time": snapshot_time,
             "label": self.obj_data["label"],
+            "sub_label": self.obj_data["sub_label"],
             "top_score": self.top_score,
             "false_positive": self.false_positive,
             "start_time": self.obj_data["start_time"],
