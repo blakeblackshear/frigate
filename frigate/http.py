@@ -236,7 +236,9 @@ def set_sub_label(id):
         )
 
     if not event.end_time:
-        current_app.detected_frames_processor.camera_states[event.camera].tracked_objects[event.id].obj_data["sub_label"] = new_sub_label
+        current_app.detected_frames_processor.camera_states[
+            event.camera
+        ].tracked_objects[event.id].obj_data["sub_label"] = new_sub_label
 
     event.sub_label = new_sub_label
     event.save()
