@@ -28,6 +28,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
+from frigate.object_processing import TrackedObjectProcessor
 from frigate.stats import stats_snapshot
 from frigate.version import VERSION
 
@@ -211,7 +212,7 @@ def delete_retain(id):
 @bp.route("/events/<id>/sub_label", methods=("POST",))
 def set_sub_label(id):
     try:
-        event = Event.get(Event.id == id)
+        event: Event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
@@ -233,6 +234,9 @@ def set_sub_label(id):
             ),
             400,
         )
+
+    if not event.end_time:
+        current_app.detected_frames_processor.camera_states[event.camera].tracked_objects[event.id].obj_data["sub_label"] = new_sub_label
 
     event.sub_label = new_sub_label
     event.save()
