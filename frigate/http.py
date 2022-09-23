@@ -28,7 +28,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
-from frigate.object_processing import TrackedObjectProcessor
+from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.stats import stats_snapshot
 from frigate.version import VERSION
 
@@ -236,9 +236,14 @@ def set_sub_label(id):
         )
 
     if not event.end_time:
-        current_app.detected_frames_processor.camera_states[
-            event.camera
-        ].tracked_objects[event.id].obj_data["sub_label"] = new_sub_label
+        tracked_obj: TrackedObject = (
+            current_app.detected_frames_processor.camera_states[event.camera].get(
+                event.id
+            )
+        )
+
+        if tracked_obj:
+            tracked_obj.obj_data["sub_label"] = new_sub_label
 
     event.sub_label = new_sub_label
     event.save()
