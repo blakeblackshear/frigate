@@ -111,6 +111,12 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
                 gpu["name"] = "intel-vaapi"
                 gpu["usage"] = "100"
                 gpu["memory"] = "200"
+        elif "v4l2m2m" in args:
+            gpu["name"] = "RPi"
+
+        stats["name"] = "name"
+
+    return stats
 
 
 def stats_snapshot(
