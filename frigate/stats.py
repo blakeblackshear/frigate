@@ -11,7 +11,7 @@ from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
@@ -82,7 +82,41 @@ def get_temperatures() -> dict[str, float]:
     return temps
 
 
-def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
+def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
+    """Parse GPUs from hwaccel args and use for stats."""
+    hwaccel_args = set(map(lambda camera: camera.ffmpeg.hwaccel_args, config.cameras))
+    stats: dict[str, dict] = {}
+
+    for args in hwaccel_args:
+        gpu: dict[str, str] = {}
+
+        if "cuvid" in args:
+            # nvidia GPU
+            gpu["name"] = "nvidia"
+            gpu["usage"] = "100"
+            gpu["memory"] = "200"
+        elif "qsv" in args:
+            # intel QSV GPU
+            gpu["name"] = "intel-qsv"
+            gpu["usage"] = "100"
+            gpu["memory"] = "200"
+        elif "vaapi" in args:
+            driver = os.environ.get(DRIVER_ENV_VAR)
+
+            if driver == DRIVER_AMD:
+                gpu["name"] = "amd-vaapi"
+                gpu["usage"] = "100"
+                gpu["memory"] = "200"
+            else:
+                gpu["name"] = "intel-vaapi"
+                gpu["usage"] = "100"
+                gpu["memory"] = "200"
+
+
+def stats_snapshot(
+    config: FrigateConfig, stats_tracking: StatsTrackingTypes
+) -> dict[str, Any]:
+    """Get a snapshot of the current stats that are being tracked."""
     camera_metrics = stats_tracking["camera_metrics"]
     stats: dict[str, Any] = {}
 
@@ -120,6 +154,7 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["cpu_usages"] = get_cpu_stats()
+    stats["gpu_usages"] = get_gpu_stats()
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
@@ -159,6 +194,6 @@ class StatsEmitter(threading.Thread):
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
-            stats = stats_snapshot(self.stats_tracking)
+            stats = stats_snapshot(self.config, self.stats_tracking)
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
         logger.info(f"Exiting watchdog...")
