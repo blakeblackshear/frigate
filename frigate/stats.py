@@ -13,6 +13,7 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
+from frigate.util import get_amd_gpu_stats
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
 from frigate.object_detection import ObjectDetectProcess
@@ -98,23 +99,22 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
         elif "qsv" in args:
             # intel QSV GPU
             gpu["name"] = "intel-qsv"
-            gpu["usage"] = "100"
-            gpu["memory"] = "200"
+            gpu["gpu_usage"] = "100"
+            gpu["memory_usage"] = "200"
         elif "vaapi" in args:
             driver = os.environ.get(DRIVER_ENV_VAR)
 
             if driver == DRIVER_AMD:
-                gpu["name"] = "amd-vaapi"
-                gpu["usage"] = "100"
-                gpu["memory"] = "200"
+                amd_usage = get_amd_gpu_stats()
+
+                if amd_usage:
+                    stats["amd-vaapi"] = amd_usage
             else:
                 gpu["name"] = "intel-vaapi"
                 gpu["usage"] = "100"
                 gpu["memory"] = "200"
         elif "v4l2m2m" in args:
             gpu["name"] = "RPi"
-
-        stats["name"] = "name"
 
     return stats
 
