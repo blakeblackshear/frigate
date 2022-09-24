@@ -57,7 +57,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0']
+              device_ids: ['0'] # this is only needed when using multiple GPUs
               capabilities: [gpu]
 ```
 
