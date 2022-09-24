@@ -11,3 +11,9 @@ PLUS_API_HOST = "https://api.frigate.video"
 REGEX_CAMERA_NAME = "^[a-zA-Z0-9_-]+$"
 REGEX_RTSP_CAMERA_USER_PASS = ":\/\/[a-zA-Z0-9_-]+:[\S]+@"
 REGEX_HTTP_CAMERA_USER_PASS = "user=[a-zA-Z0-9_-]+&password=[\S]+"
+
+# Known Driver Names
+
+DRIVER_AMD = "radeonsi"
+DRIVER_INTEL_i965 = "i965"
+DRIVER_INTEL_iHD = "iHD"
