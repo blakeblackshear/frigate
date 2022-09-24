@@ -14,6 +14,7 @@ REGEX_HTTP_CAMERA_USER_PASS = "user=[a-zA-Z0-9_-]+&password=[\S]+"
 
 # Known Driver Names
 
+DRIVER_ENV_VAR = "LIBVA_DRIVER_NAME"
 DRIVER_AMD = "radeonsi"
 DRIVER_INTEL_i965 = "i965"
 DRIVER_INTEL_iHD = "iHD"
