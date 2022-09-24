@@ -734,6 +734,37 @@ def escape_special_characters(path: str) -> str:
         # path does not have user:pass
         return path
 
+def get_amd_gpu_stats() -> dict[str, str]:
+    """Get stats using radeontop."""
+    radeontop_command = [
+        "radeontop",
+        "-d",
+        "-",
+        "-l",
+        "1"
+    ]
+
+    p = sp.run(
+        radeontop_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split(",")
+        results: dict[str, str] = {}
+
+        for hw in usages:
+            if "gpu" in hw:
+                results["gpu_usage"] = hw.strip().split(" ")[1]
+            elif "vram" in hw:
+                results["gpu_usage"] = hw.strip().split(" ")[1]
+
+        return results
+
 
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
