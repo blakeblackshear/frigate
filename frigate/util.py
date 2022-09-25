@@ -817,7 +817,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
     """Get stats using nvidia-smi."""
     nvidia_smi_command = [
         "nvidia-smi",
-        "--query-gpu=gpu_name,utilization.gpu,utilization.memory",
+        "--query-gpu=gpu_name,utilization.gpu,memory.used,memory.total",
         "--format=csv"
     ]
 
@@ -832,10 +832,11 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         return None
     else:
         usages = p.stdout.split("\n")[1].strip()
+        memory_percent = f"{round(float(usages[2].replace(' MiB', '')) / float(usages[3].replace(' MiB', '')) * 100, 1)}" %"
         results: dict[str, str] = {
             "name": usages[0],
             "gpu_usage": usages[1],
-            "memory_usage": usages[2]
+            "memory_usage": memory_percent
         }
 
         return results
