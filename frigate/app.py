@@ -306,9 +306,7 @@ class FrigateApp:
         self.recording_cleanup.start()
 
     def start_storage_maintainer(self) -> None:
-        self.storage_maintainer = StorageMaintainer(
-            self.config, self.stop_event
-        )
+        self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
 
     def start_stats_emitter(self) -> None:

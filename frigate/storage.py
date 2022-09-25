@@ -34,10 +34,14 @@ class StorageMaintainer(threading.Thread):
                 .scalar(),
                 2,
             )
-            segment_duration = int(Recordings.select(Recordings.duration).where(Recordings.camera == camera).scalar())
+            segment_duration = int(
+                Recordings.select(Recordings.duration)
+                .where(Recordings.camera == camera)
+                .scalar()
+            )
             self.avg_segment_sizes[camera] = {
                 "segment": avg_segment_size,
-                "hour": (3600 / segment_duration) * avg_segment_size
+                "hour": (3600 / segment_duration) * avg_segment_size,
             }
 
     def run(self):
