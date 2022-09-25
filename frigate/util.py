@@ -761,7 +761,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
             if "gpu" in hw:
                 results["gpu_usage"] = hw.strip().split(" ")[1]
             elif "vram" in hw:
-                results["gpu_usage"] = hw.strip().split(" ")[1]
+                results["memory_usage"] = hw.strip().split(" ")[1]
 
         return results
 
