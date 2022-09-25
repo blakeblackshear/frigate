@@ -93,7 +93,7 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
 
         if "cuvid" in args:
             # nvidia GPU
-            gpu["name"] = "nvidia"
+            gpu["name"] = "nvidia-cuvid"
             gpu["usage"] = "100"
             gpu["memory"] = "200"
         elif "qsv" in args:
