@@ -21,9 +21,17 @@ export default function System() {
   } = useWs('stats');
   const { data: initialStats } = useSWR('stats');
 
-  const { cpu_usages, detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
+  const {
+    cpu_usages,
+    gpu_usages,
+    detectors,
+    service = {},
+    detection_fps: _,
+    ...cameras
+  } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
+  const gpuNames = Object.keys(gpu_usages || emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
 
   const handleCopyConfig = useCallback(() => {
@@ -121,6 +129,31 @@ export default function System() {
                     </Tbody>
                   </Table>
                 </div>
+              </div>
+            ))}
+          </div>
+
+          <Heading size="lg">GPUs</Heading>
+          <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
+            {gpuNames.map((gpu) => (
+              <div
+                key={gpu}
+                className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2"
+              >
+                <Table className="w-full">
+                  <Thead>
+                    <Tr>
+                      <Th>Gpu %</Th>
+                      <Th>Memory %</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>{gpu_usages[gpu]['gpu']}</Td>
+                      <Td>{gpu_usages[gpu]['memory']}</Td>
+                    </Tr>
+                  </Tbody>
+                </Table>
               </div>
             ))}
           </div>
