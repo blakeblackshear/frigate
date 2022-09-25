@@ -64,6 +64,7 @@ class StorageMaintainer(threading.Thread):
         """Return if storage needs cleanup."""
         # currently runs cleanup if less than 1 hour of space is left
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
+        logger.debug(f"Storage cleanup check: {self.avg_segment_sizes['total']['hour']} hourly with remaining storage: {remaining_storage}")
         return remaining_storage < self.avg_segment_sizes["total"]["hour"]
 
     def delete_recording_segments(
@@ -193,7 +194,6 @@ class StorageMaintainer(threading.Thread):
 
             needs_cleanup = self.check_storage_needs_cleanup()
 
-            logger.debug(f"needs cleanup: {needs_cleanup}")
             if needs_cleanup:
                 self.reduce_storage_consumption()
 
