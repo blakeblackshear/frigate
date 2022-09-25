@@ -13,7 +13,7 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
-from frigate.util import get_amd_gpu_stats, get_nvidia_gpu_stats
+from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_stats
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
 from frigate.object_detection import ObjectDetectProcess
@@ -85,12 +85,12 @@ def get_temperatures() -> dict[str, float]:
 
 def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
     """Parse GPUs from hwaccel args and use for stats."""
-    hwaccel_args = set(map(lambda camera: camera.ffmpeg.hwaccel_args, config.cameras.values()))
+    hwaccel_args = set(
+        map(lambda camera: camera.ffmpeg.hwaccel_args, config.cameras.values())
+    )
     stats: dict[str, dict] = {}
 
     for args in hwaccel_args:
-        gpu: dict[str, str] = {}
-
         if "cuvid" in args:
             # nvidia GPU
             nvidia_usage = get_nvidia_gpu_stats()
@@ -99,23 +99,28 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
                 stats[nvidia_usage["name"]] = nvidia_usage
         elif "qsv" in args:
             # intel QSV GPU
-            gpu["name"] = "intel-qsv"
-            gpu["gpu_usage"] = "100"
-            gpu["memory_usage"] = "200"
+            intel_usage = get_intel_gpu_stats()
+
+            if intel_usage:
+                stats["intel-qsv"] = intel_usage
         elif "vaapi" in args:
             driver = os.environ.get(DRIVER_ENV_VAR)
 
             if driver == DRIVER_AMD:
+                # AMD VAAPI GPU
                 amd_usage = get_amd_gpu_stats()
 
                 if amd_usage:
                     stats["amd-vaapi"] = amd_usage
             else:
-                gpu["name"] = "intel-vaapi"
-                gpu["usage"] = "100"
-                gpu["memory"] = "200"
+                # intel VAAPI GPU
+                intel_usage = get_intel_gpu_stats()
+
+                if intel_usage:
+                    stats["intel-qsv"] = intel_usage
         elif "v4l2m2m" in args:
-            gpu["name"] = "RPi"
+            # RPi v4l2m2m
+            stats["rpi-v4l2m2m"] = {}
 
     return stats
 

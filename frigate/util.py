@@ -812,6 +812,40 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
         return results
 
+def get_intel_gpu_stats() -> dict[str, str]:
+    """Get stats using intel_gpu_top."""
+    radeontop_command = [
+        "timeout",
+        "1s",
+        "intel_gpu_top",
+        "-J",
+        "-o",
+        "-",
+        "-s",
+        "1"
+    ]
+
+    p = sp.run(
+        radeontop_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split(",")
+        results: dict[str, str] = {}
+
+        for hw in usages:
+            if "gpu" in hw:
+                results["gpu_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
+            elif "vram" in hw:
+                results["memory_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
+
+        return results
+
 
 def get_nvidia_gpu_stats() -> dict[str, str]:
     """Get stats using nvidia-smi."""
