@@ -134,29 +134,37 @@ export default function System() {
           </div>
 
           <Heading size="lg">GPUs</Heading>
-          <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
-            {gpuNames.map((gpu) => (
-              <div
-                key={gpu}
-                className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2"
-              >
-                <Table className="w-full">
-                  <Thead>
-                    <Tr>
-                      <Th>Gpu %</Th>
-                      <Th>Memory %</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    <Tr>
-                      <Td>{gpu_usages[gpu]['gpu']}</Td>
-                      <Td>{gpu_usages[gpu]['memory']}</Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
-              </div>
-            ))}
-          </div>
+          {!gpu_usages ? (
+            <div className="p-4">
+              <Link href={'https://docs.frigate.video/configuration/hardware_acceleration'}>
+                Hardware acceleration has not been setup, see the docs to setup hardware acceleration.
+              </Link>
+            </div>
+          ) : (
+            <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
+              {gpuNames.map((gpu) => (
+                <div
+                  key={gpu}
+                  className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2"
+                >
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
+                        <Th>Gpu %</Th>
+                        <Th>Memory %</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>{gpu_usages[gpu]['gpu']}</Td>
+                        <Td>{gpu_usages[gpu]['memory']}</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Heading size="lg">Cameras</Heading>
           <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
