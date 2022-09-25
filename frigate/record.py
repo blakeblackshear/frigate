@@ -283,13 +283,9 @@ class RecordingMaintainer(threading.Thread):
                 logger.debug(
                     f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
                 )
-                try:
-                    segment_size = float(os.stat(file_path)) / 1000
-                except OSError:
-                    segment_size = -1
 
                 try:
-                    segment_size = float(os.path.getsize(file_path)) / 1000
+                    segment_size = float(os.path.getsize(file_path)) / 1000000
                 except OSError:
                     segment_size = -1
 
