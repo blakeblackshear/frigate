@@ -13,7 +13,7 @@ from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
-from frigate.util import get_amd_gpu_stats
+from frigate.util import get_amd_gpu_stats, get_nvidia_gpu_stats
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
 from frigate.object_detection import ObjectDetectProcess
@@ -93,9 +93,10 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
 
         if "cuvid" in args:
             # nvidia GPU
-            gpu["name"] = "nvidia-cuvid"
-            gpu["usage"] = "100"
-            gpu["memory"] = "200"
+            nvidia_usage = get_nvidia_gpu_stats()
+
+            if nvidia_usage:
+                stats[nvidia_usage["name"]] = nvidia_usage
         elif "qsv" in args:
             # intel QSV GPU
             gpu["name"] = "intel-qsv"
