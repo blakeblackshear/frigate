@@ -71,7 +71,7 @@ class StorageMaintainer(threading.Thread):
         logger.debug("Start all cameras.")
         for camera in self.config.cameras.keys():
             logger.debug(f"Start camera: {camera}.")
-            # Get last 24 hours of recordings seconds
+            # Get last 24 hours of recordings segments
             segment_count = int(
                 7200 / self.avg_segment_sizes[camera]["segment_duration"]
             )
@@ -94,16 +94,17 @@ class StorageMaintainer(threading.Thread):
                 .objects()
             )
 
-            # loop over recordings and see if they overlap with any non-expired events
+            # loop over recordings and see if they overlap with any retained events
             # TODO: expire segments based on segment stats according to config
             event_start = 0
             deleted_recordings = set()
             for recording in recordings.objects().iterator():
-                # 2 hours of recordings have been deleted, no need to delete any more
+                # check if 2 hours of recordings have been deleted
                 if len(deleted_recordings) >= segment_count:
                     break
 
                 keep = False
+
                 # Now look for a reason to keep this recording segment
                 for idx in range(event_start, len(retained_events)):
                     event = retained_events[idx]
@@ -127,7 +128,7 @@ class StorageMaintainer(threading.Thread):
                     if event.end_time < recording.start_time:
                         event_start = idx
 
-                # Delete recordings outside of the retention window or based on the retention mode
+                # Delete recordings not retained indefinitely
                 if not keep:
                     Path(recording.path).unlink(missing_ok=True)
                     deleted_recordings.add(recording.id)
