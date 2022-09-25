@@ -734,37 +734,6 @@ def escape_special_characters(path: str) -> str:
         # path does not have user:pass
         return path
 
-def get_amd_gpu_stats() -> dict[str, str]:
-    """Get stats using radeontop."""
-    radeontop_command = [
-        "radeontop",
-        "-d",
-        "-",
-        "-l",
-        "1"
-    ]
-
-    p = sp.run(
-        radeontop_command,
-        encoding="ascii",
-        capture_output=True,
-    )
-
-    if p.returncode != 0:
-        logger.error(p.stderr)
-        return None
-    else:
-        usages = p.stdout.split(",")
-        results: dict[str, str] = {}
-
-        for hw in usages:
-            if "gpu" in hw:
-                results["gpu_usage"] = hw.strip().split(" ")[1]
-            elif "vram" in hw:
-                results["memory_usage"] = hw.strip().split(" ")[1]
-
-        return results
-
 
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
@@ -810,6 +779,66 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
         path,
     ]
     return sp.run(ffprobe_cmd, capture_output=True)
+
+
+def get_amd_gpu_stats() -> dict[str, str]:
+    """Get stats using radeontop."""
+    radeontop_command = [
+        "radeontop",
+        "-d",
+        "-",
+        "-l",
+        "1"
+    ]
+
+    p = sp.run(
+        radeontop_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split(",")
+        results: dict[str, str] = {}
+
+        for hw in usages:
+            if "gpu" in hw:
+                results["gpu_usage"] = hw.strip().split(" ")[1]
+            elif "vram" in hw:
+                results["memory_usage"] = hw.strip().split(" ")[1]
+
+        return results
+
+
+def get_nvidia_gpu_stats() -> dict[str, str]:
+    """Get stats using nvidia-smi."""
+    nvidia_smi_command = [
+        "nvidia-smi",
+        "--query-gpu=gpu_name,utilization.gpu,utilization.memory",
+        "--format=csv"
+    ]
+
+    p = sp.run(
+        nvidia_smi_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split("\n")[1].split(",")
+        results: dict[str, str] = {
+            "name": usages[0],
+            "gpu_usage": usages[1],
+            "memory_usage": usages[2]
+        }
+
+        return results
 
 
 class FrameManager(ABC):
