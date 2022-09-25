@@ -851,7 +851,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         logger.error(p.stderr)
         return None
     else:
-        usages = p.stdout.split("\n")[1].strip()
+        usages = p.stdout.split("\n")[1].strip().split(",")
         memory_percent = f"{round(float(usages[2].replace(' MiB', '').strip()) / float(usages[3].replace(' MiB', '').strip()) * 100, 1)} %"
         results: dict[str, str] = {
             "name": usages[0],
