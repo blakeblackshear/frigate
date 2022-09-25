@@ -30,9 +30,6 @@ class StorageMaintainer(threading.Thread):
         total_avg_hour = 0.0
 
         for camera in self.config.cameras.keys():
-            if not self.config.cameras[camera].record.enabled:
-                continue
-
             # get average of non-zero segment sizes to ignore segment with no value
             avg_segment_size = round(
                 Recordings.select(fn.AVG(Recordings.segment_size))
@@ -54,12 +51,12 @@ class StorageMaintainer(threading.Thread):
             total_avg_hour += avg_hour_size
             self.avg_segment_sizes[camera] = {
                 "segment": avg_segment_size,
+                "segment_duration": segment_duration,
                 "hour": avg_hour_size,
             }
 
         self.avg_segment_sizes["total"] = {
             "segment": total_avg_segment,
-            "segment_duration": segment_duration,
             "hour": total_avg_hour,
         }
 
@@ -103,7 +100,7 @@ class StorageMaintainer(threading.Thread):
             deleted_recordings = set()
             for recording in recordings.objects().iterator():
                 # 2 hours of recordings have been deleted, no need to delete any more
-                if deleted_recordings >= segment_count:
+                if len(deleted_recordings) >= segment_count:
                     break
 
                 keep = False
@@ -151,15 +148,15 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         # Check storage consumption every 5 minutes
-        while not self.stop_event.wait(300):
+        while not self.stop_event.wait(20):
 
             if not self.avg_segment_sizes:
                 self.calculate_camera_segment_sizes()
-                logger.error(f"Default camera segment sizes: {self.avg_segment_sizes}")
+                logger.debug(f"Default camera segment sizes: {self.avg_segment_sizes}")
 
             needs_cleanup = self.check_storage_needs_cleanup()
 
-            logger.error(f"needs cleanup: {needs_cleanup}")
+            logger.debug(f"needs cleanup: {needs_cleanup}")
             if needs_cleanup:
                 self.reduce_storage_consumption()
 
