@@ -38,7 +38,7 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         Recordings,
-        segment_size=pw.FloatField(),
+        segment_size=pw.FloatField(default=0),
     )
 
 
