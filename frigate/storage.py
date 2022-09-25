@@ -22,7 +22,7 @@ class StorageMaintainer(threading.Thread):
         self.avg_segment_sizes = {}
 
     def calculate_camera_segment_sizes(self):
-        """Calculate the size of each cameras recording segments over the last hour."""
+        """Calculate the size of each cameras recording segments."""
         for camera in self.config.cameras.keys():
             if not self.config.cameras[camera].record.enabled:
                 continue
