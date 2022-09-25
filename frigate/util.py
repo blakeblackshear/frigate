@@ -811,10 +811,10 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
 def get_intel_gpu_stats() -> dict[str, str]:
     """Get stats using intel_gpu_top."""
-    radeontop_command = ["timeout", "1s", "intel_gpu_top", "-J", "-o", "-", "-s", "1"]
+    intel_gpu_top_command = ["timeout", "0.1s", "intel_gpu_top", "-J", "-o", "-", "-s", "1"]
 
     p = sp.run(
-        radeontop_command,
+        intel_gpu_top_command,
         encoding="ascii",
         capture_output=True,
     )
@@ -823,15 +823,24 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(p.stderr)
         return None
     else:
-        usages = p.stdout.split(",")
+        readings = json.loads(f'[{p.stdout}]')
         results: dict[str, str] = {}
 
-        for hw in usages:
-            if "gpu" in hw:
-                results["gpu_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
-            elif "vram" in hw:
-                results["memory_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
+        for reading in readings:
+            if reading.get("engines", {}).get("Video/0", {}).get(
+                "busy", 0
+            ) or reading.get("engines", {}).get("Video/1", {}).get("busy", 0):
+                gpu_usage = round(
+                    float(reading.get("engines", {}).get("Video/0", {}).get("busy", 0))
+                    + float(
+                        reading.get("engines", {}).get("Video/1", {}).get("busy", 0)
+                    ),
+                    2,
+                )
+                results["gpu_usage"] = f"{gpu_usage} %"
+                break
 
+        results["memory_usage"] = "- %"
         return results
 
 
