@@ -826,9 +826,9 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
         for hw in usages:
             if "gpu" in hw:
-                results["gpu_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
+                results["gpu_usage"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
             elif "vram" in hw:
-                results["memory_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
+                results["memory_usage"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
 
         return results
 
