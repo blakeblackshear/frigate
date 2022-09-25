@@ -1,12 +1,15 @@
 """Handle storage retention and usage."""
 
 import logging
+from pathlib import Path
+import shutil
 import threading
 
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 
 from frigate.config import FrigateConfig
-from frigate.models import Recordings
+from frigate.const import RECORD_DIR
+from frigate.models import Event, Recordings
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +36,7 @@ class StorageMaintainer(threading.Thread):
             # get average of non-zero segment sizes to ignore segment with no value
             avg_segment_size = round(
                 Recordings.select(fn.AVG(Recordings.segment_size))
-                .where(Recordings.camera == camera)
-                .where(Recordings.segment_size != 0)
+                .where(Recordings.camera == camera, Recordings.segment_size != 0)
                 .scalar(),
                 2,
             )
@@ -43,6 +45,7 @@ class StorageMaintainer(threading.Thread):
             segment_duration = int(
                 Recordings.select(Recordings.duration)
                 .where(Recordings.camera == camera)
+                .limit(1)
                 .scalar()
             )
             avg_hour_size = round((3600 / segment_duration) * avg_segment_size, 2)
@@ -56,15 +59,106 @@ class StorageMaintainer(threading.Thread):
 
         self.avg_segment_sizes["total"] = {
             "segment": total_avg_segment,
+            "segment_duration": segment_duration,
             "hour": total_avg_hour,
         }
 
+    def check_storage_needs_cleanup(self) -> bool:
+        """Return if storage needs cleanup."""
+        # currently runs cleanup if less than 1 hour of space is left
+        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
+        return remaining_storage < self.avg_segment_sizes["total"]["hour"]
+
+    def reduce_storage_consumption(self) -> None:
+        """Cleanup the last 2 hours of recordings."""
+        logger.debug("Start all cameras.")
+        for camera in self.config.cameras.keys():
+            logger.debug(f"Start camera: {camera}.")
+            # Get last 24 hours of recordings seconds
+            segment_count = int(7200 / self.avg_segment_sizes[camera]["segment_duration"])
+            recordings: Recordings = (
+                Recordings.select()
+                .where(Recordings.camera == camera)
+                .order_by(Recordings.start_time.asc())
+                .limit(segment_count * 12)
+            )
+
+            # Get retained events to check against
+            retained_events: Event = (
+                Event.select()
+                .where(
+                    Event.camera == camera,
+                    Event.retain_indefinitely == True,
+                    Event.has_clip,
+                )
+                .order_by(Event.start_time)
+                .objects()
+            )
+
+            # loop over recordings and see if they overlap with any non-expired events
+            # TODO: expire segments based on segment stats according to config
+            event_start = 0
+            deleted_recordings = set()
+            for recording in recordings.objects().iterator():
+                # 2 hours of recordings have been deleted, no need to delete any more
+                if deleted_recordings >= segment_count:
+                    break
+
+                keep = False
+                # Now look for a reason to keep this recording segment
+                for idx in range(event_start, len(retained_events)):
+                    event = retained_events[idx]
+
+                    # if the event starts in the future, stop checking events
+                    # and let this recording segment expire
+                    if event.start_time > recording.end_time:
+                        keep = False
+                        break
+
+                    # if the event is in progress or ends after the recording starts, keep it
+                    # and stop looking at events
+                    if event.end_time is None or event.end_time >= recording.start_time:
+                        keep = True
+                        break
+
+                    # if the event ends before this recording segment starts, skip
+                    # this event and check the next event for an overlap.
+                    # since the events and recordings are sorted, we can skip events
+                    # that end before the previous recording segment started on future segments
+                    if event.end_time < recording.start_time:
+                        event_start = idx
+
+                # Delete recordings outside of the retention window or based on the retention mode
+                if not keep:
+                    Path(recording.path).unlink(missing_ok=True)
+                    deleted_recordings.add(recording.id)
+
+            logger.debug(f"Expiring {len(deleted_recordings)} recordings")
+            # delete up to 100,000 at a time
+            max_deletes = 100000
+            deleted_recordings_list = list(deleted_recordings)
+            for i in range(0, len(deleted_recordings_list), max_deletes):
+                Recordings.delete().where(
+                    Recordings.id << deleted_recordings_list[i : i + max_deletes]
+                ).execute()
+
+            logger.debug(f"End camera: {camera}.")
+
+        logger.debug("End all cameras.")
+        logger.debug("End expire recordings (new).")
+
     def run(self):
         # Check storage consumption every 5 minutes
-        while not self.stop_event.wait(20):
+        while not self.stop_event.wait(300):
 
             if not self.avg_segment_sizes:
                 self.calculate_camera_segment_sizes()
-                logger.debug(f"Default camera segment sizes: {self.avg_segment_sizes}")
+                logger.error(f"Default camera segment sizes: {self.avg_segment_sizes}")
+
+            needs_cleanup = self.check_storage_needs_cleanup()
+
+            logger.error(f"needs cleanup: {needs_cleanup}")
+            if needs_cleanup:
+                self.reduce_storage_consumption()
 
         logger.info(f"Exiting storage maintainer...")
