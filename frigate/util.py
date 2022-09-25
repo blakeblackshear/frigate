@@ -811,7 +811,16 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
 def get_intel_gpu_stats() -> dict[str, str]:
     """Get stats using intel_gpu_top."""
-    intel_gpu_top_command = ["timeout", "0.1s", "intel_gpu_top", "-J", "-o", "-", "-s", "1"]
+    intel_gpu_top_command = [
+        "timeout",
+        "0.1s",
+        "intel_gpu_top",
+        "-J",
+        "-o",
+        "-",
+        "-s",
+        "1",
+    ]
 
     p = sp.run(
         intel_gpu_top_command,
@@ -823,7 +832,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(p.stderr)
         return None
     else:
-        readings = json.loads(f'[{p.stdout}]')
+        readings = json.loads(f"[{p.stdout}]")
         results: dict[str, str] = {}
 
         for reading in readings:
