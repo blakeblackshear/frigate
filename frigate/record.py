@@ -285,7 +285,7 @@ class RecordingMaintainer(threading.Thread):
                 )
 
                 try:
-                    segment_size = float(os.path.getsize(file_path)) / 1000000
+                    segment_size = round(float(os.path.getsize(file_path)) / 1000000, 1)
                 except OSError:
                     segment_size = 0
 

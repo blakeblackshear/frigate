@@ -148,7 +148,7 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         # Check storage consumption every 5 minutes
-        while not self.stop_event.wait(20):
+        while not self.stop_event.wait(300):
 
             if not self.avg_segment_sizes:
                 self.calculate_camera_segment_sizes()
