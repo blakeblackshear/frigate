@@ -96,7 +96,9 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, dict]:
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
-                stats[nvidia_usage["name"]] = nvidia_usage
+                name = nvidia_usage["name"]
+                del nvidia_usage["name"]
+                stats[name] = nvidia_usage
         elif "qsv" in args:
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
