@@ -75,7 +75,9 @@ class StorageMaintainer(threading.Thread):
         for camera in self.config.cameras.keys():
             logger.debug(f"Start camera: {camera}.")
             # Get last 24 hours of recordings seconds
-            segment_count = int(7200 / self.avg_segment_sizes[camera]["segment_duration"])
+            segment_count = int(
+                7200 / self.avg_segment_sizes[camera]["segment_duration"]
+            )
             recordings: Recordings = (
                 Recordings.select()
                 .where(Recordings.camera == camera)
