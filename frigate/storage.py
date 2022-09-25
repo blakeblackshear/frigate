@@ -66,6 +66,51 @@ class StorageMaintainer(threading.Thread):
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
         return remaining_storage < self.avg_segment_sizes["total"]["hour"]
 
+    def delete_recording_segments(
+        self, recordings, retained_events, segment_count: int
+    ) -> set[str]:
+        """Delete Recording Segments"""
+        # loop over recordings and see if they overlap with any retained events
+        # TODO: expire segments based on segment stats according to config
+        event_start = 0
+        deleted_recordings = set()
+        for recording in recordings.objects().iterator():
+            # check if 2 hours of recordings have been deleted
+            if len(deleted_recordings) >= segment_count:
+                break
+
+            keep = False
+
+            # Now look for a reason to keep this recording segment
+            for idx in range(event_start, len(retained_events)):
+                event = retained_events[idx]
+
+                # if the event starts in the future, stop checking events
+                # and let this recording segment expire
+                if event.start_time > recording.end_time:
+                    keep = False
+                    break
+
+                # if the event is in progress or ends after the recording starts, keep it
+                # and stop looking at events
+                if event.end_time is None or event.end_time >= recording.start_time:
+                    keep = True
+                    break
+
+                # if the event ends before this recording segment starts, skip
+                # this event and check the next event for an overlap.
+                # since the events and recordings are sorted, we can skip events
+                # that end before the previous recording segment started on future segments
+                if event.end_time < recording.start_time:
+                    event_start = idx
+
+            # Delete recordings not retained indefinitely
+            if not keep:
+                Path(recording.path).unlink(missing_ok=True)
+                deleted_recordings.add(recording.id)
+
+        return deleted_recordings
+
     def reduce_storage_consumption(self) -> None:
         """Cleanup the last 2 hours of recordings."""
         logger.debug("Start all cameras.")
@@ -94,44 +139,35 @@ class StorageMaintainer(threading.Thread):
                 .objects()
             )
 
-            # loop over recordings and see if they overlap with any retained events
-            # TODO: expire segments based on segment stats according to config
-            event_start = 0
-            deleted_recordings = set()
-            for recording in recordings.objects().iterator():
-                # check if 2 hours of recordings have been deleted
-                if len(deleted_recordings) >= segment_count:
-                    break
+            deleted_recordings: set[str] = self.deleted_recordings(
+                recordings, retained_events, segment_count
+            )
 
-                keep = False
+            # check if 2 hours of segments were deleted from the 24 retrieved
+            if len(deleted_recordings) < segment_count:
+                # get the rest of the recording segments to look through
+                recordings: Recordings = (
+                    Recordings.select()
+                    .where(Recordings.camera == camera)
+                    .order_by(Recordings.start_time.asc())
+                )
+                second_run: set[str] = self.delete_recording_segments(
+                    recordings, retained_events, segment_count
+                )
+                deleted_recordings = deleted_recordings.union(second_run)
 
-                # Now look for a reason to keep this recording segment
-                for idx in range(event_start, len(retained_events)):
-                    event = retained_events[idx]
-
-                    # if the event starts in the future, stop checking events
-                    # and let this recording segment expire
-                    if event.start_time > recording.end_time:
-                        keep = False
-                        break
-
-                    # if the event is in progress or ends after the recording starts, keep it
-                    # and stop looking at events
-                    if event.end_time is None or event.end_time >= recording.start_time:
-                        keep = True
-                        break
-
-                    # if the event ends before this recording segment starts, skip
-                    # this event and check the next event for an overlap.
-                    # since the events and recordings are sorted, we can skip events
-                    # that end before the previous recording segment started on future segments
-                    if event.end_time < recording.start_time:
-                        event_start = idx
-
-                # Delete recordings not retained indefinitely
-                if not keep:
-                    Path(recording.path).unlink(missing_ok=True)
-                    deleted_recordings.add(recording.id)
+                # check if still 2 hour quota still not meant
+                if len(deleted_recordings) < segment_count:
+                    recordings: Recordings = (
+                        Recordings.select()
+                        .where(Recordings.camera == camera)
+                        .order_by(Recordings.start_time.asc())
+                    )
+                    # delete segments including retained events
+                    last_run: set[str] = self.delete_recording_segments(
+                        recordings, [], segment_count
+                    )
+                    deleted_recordings = deleted_recordings.union(last_run)
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
             # delete up to 100,000 at a time
