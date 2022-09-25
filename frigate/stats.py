@@ -92,11 +92,14 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, dict]:
             else None,
             config.cameras.values(),
         )
-    ).remove(None)
+    )
     stats: dict[str, dict] = {}
 
-    if not hwaccel_args:
-        return None
+    if None in hwaccel_args:
+        hwaccel_args.remove(None)
+
+        if not hwaccel_args:
+            return None
 
     for args in hwaccel_args:
         if "cuvid" in args:
