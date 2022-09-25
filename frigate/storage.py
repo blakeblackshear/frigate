@@ -19,7 +19,7 @@ class StorageMaintainer(threading.Thread):
         self.name = "recording_cleanup"
         self.config = config
         self.stop_event = stop_event
-        self.avg_segment_sizes = {}
+        self.avg_segment_sizes: dict[str, dict] = {}
 
     def calculate_camera_segment_sizes(self):
         """Calculate the size of each cameras recording segments."""
@@ -27,12 +27,18 @@ class StorageMaintainer(threading.Thread):
             if not self.config.cameras[camera].record.enabled:
                 continue
 
-            self.avg_segment_sizes[camera] = (
+            avg_segment_size = round(
                 Recordings.select(fn.AVG(Recordings.segment_size))
                 .where(Recordings.camera == camera)
                 .where(Recordings.segment_size != 0)
-                .scalar()
+                .scalar(),
+                2,
             )
+            segment_duration = int(Recordings.select(Recordings.duration).where(Recordings.camera == camera).scalar())
+            self.avg_segment_sizes[camera] = {
+                "segment": avg_segment_size,
+                "hour": (3600 / segment_duration) * avg_segment_size
+            }
 
     def run(self):
         # Check storage consumption every 5 minutes
