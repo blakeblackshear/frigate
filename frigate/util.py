@@ -806,9 +806,9 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
         for hw in usages:
             if "gpu" in hw:
-                results["gpu_usage"] = hw.strip().split(" ")[1]
+                results["gpu_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
             elif "vram" in hw:
-                results["memory_usage"] = hw.strip().split(" ")[1]
+                results["memory_usage"] = f"{hw.strip().split(' ')[1].split(' ')[0]} %"
 
         return results
 
@@ -831,7 +831,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         logger.error(p.stderr)
         return None
     else:
-        usages = p.stdout.split("\n")[1].split(",")
+        usages = p.stdout.split("\n")[1].strip()
         results: dict[str, str] = {
             "name": usages[0],
             "gpu_usage": usages[1],
