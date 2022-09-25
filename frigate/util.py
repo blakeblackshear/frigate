@@ -802,7 +802,9 @@ def get_amd_gpu_stats() -> dict[str, str]:
             if "gpu" in hw:
                 results["gpu_usage"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
             elif "vram" in hw:
-                results["memory_usage"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+                results[
+                    "memory_usage"
+                ] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
 
         return results
 
@@ -855,7 +857,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         memory_percent = f"{round(float(usages[2].replace(' MiB', '').strip()) / float(usages[3].replace(' MiB', '').strip()) * 100, 1)} %"
         results: dict[str, str] = {
             "name": usages[0],
-            "gpu_usage": usages[1],
+            "gpu_usage": usages[1].strip(),
             "memory_usage": memory_percent,
         }
 
