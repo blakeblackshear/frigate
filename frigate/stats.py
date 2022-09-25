@@ -119,8 +119,8 @@ def get_gpu_stats(config: FrigateConfig) -> dict[str, str]:
                 if intel_usage:
                     stats["intel-qsv"] = intel_usage
         elif "v4l2m2m" in args:
-            # RPi v4l2m2m
-            stats["rpi-v4l2m2m"] = {}
+            # RPi v4l2m2m is currently not able to get usage stats
+            pass
 
     return stats
 
