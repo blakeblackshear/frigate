@@ -160,7 +160,7 @@ def stats_snapshot(
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["cpu_usages"] = get_cpu_stats()
-    stats["gpu_usages"] = get_gpu_stats()
+    stats["gpu_usages"] = get_gpu_stats(config)
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
