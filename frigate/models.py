@@ -41,4 +41,4 @@ class Recordings(Model):  # type: ignore[misc]
     duration = FloatField()
     motion = IntegerField(null=True)
     objects = IntegerField(null=True)
-    segment_size = FloatField()
+    segment_size = FloatField() # this should be stored as MB
