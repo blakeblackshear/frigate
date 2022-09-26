@@ -126,7 +126,7 @@ class TestHttp(unittest.TestCase):
             "total": {
                 "segment": 12.0,
                 "hour": 2880.0,
-            }
+            },
         }
 
     def test_storage_cleanup(self):
