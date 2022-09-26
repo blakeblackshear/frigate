@@ -36,7 +36,17 @@ class StorageMaintainer(threading.Thread):
                 .where(Recordings.camera == camera, Recordings.segment_size != 0)
                 .scalar()
             )
-            avg_segment_size = round(segment_query, 2) if segment_query else 0
+
+            # camera has no recordings
+            if not segment_query:
+                self.avg_segment_sizes[camera] = {
+                    "segment": 0,
+                    "segment_duration": 0,
+                    "hour": 0,
+                }
+                continue
+
+            avg_segment_size = round(segment_query, 2)
 
             # get average of an hour using the average segment size
             segment_duration = int(
@@ -138,7 +148,7 @@ class StorageMaintainer(threading.Thread):
                     Event.retain_indefinitely == True,
                     Event.has_clip,
                 )
-                .order_by(Event.start_time)
+                .order_by(Event.start_time.asc())
                 .objects()
             )
 
