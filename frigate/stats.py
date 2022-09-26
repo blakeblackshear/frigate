@@ -85,21 +85,16 @@ def get_temperatures() -> dict[str, float]:
 
 def get_gpu_stats(config: FrigateConfig) -> dict[str, dict]:
     """Parse GPUs from hwaccel args and use for stats."""
-    hwaccel_args = set(
-        map(
-            lambda camera: camera.ffmpeg.hwaccel_args
-            if camera.ffmpeg.hwaccel_args
-            else None,
-            config.cameras.values(),
-        )
-    )
+    hwaccel_args = []
+
+    for camera in config.cameras.values():
+        if hwaccel_args and camera.ffmpeg.hwaccel_args not in hwaccel_args:
+            hwaccel_args.append(camera.ffmpeg.hwaccel_args)
+
     stats: dict[str, dict] = {}
 
-    if None in hwaccel_args:
-        hwaccel_args.remove(None)
-
-        if not hwaccel_args:
-            return None
+    if not hwaccel_args:
+        return None
 
     for args in hwaccel_args:
         if "cuvid" in args:
