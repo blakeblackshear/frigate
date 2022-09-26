@@ -285,9 +285,11 @@ class RecordingMaintainer(threading.Thread):
                 )
 
                 try:
-                    segment_size = round(float(os.path.getsize(file_path)) / 1000000, 1)
+                    segment_size = round(float(os.path.getsize(cache_path)) / 1000000, 1)
                 except OSError:
                     segment_size = 0
+
+                os.remove(cache_path)
 
                 rand_id = "".join(
                     random.choices(string.ascii_lowercase + string.digits, k=6)
