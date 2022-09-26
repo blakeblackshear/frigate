@@ -143,7 +143,9 @@ class StorageMaintainer(threading.Thread):
             # cameras that are only recording part time
             # should not be forced to have 2 hours of
             # recordings disabled
-            limited_recorder = len(recordings) < segment_count
+            # NOTE: A camera is considered a part time recorder
+            # if it has less than 12 hours of recordings saved
+            limited_recorder = len(recordings) < (segment_count * 6)
 
             # Get retained events to check against
             retained_events: Event = (
@@ -173,7 +175,6 @@ class StorageMaintainer(threading.Thread):
                     .where(Recordings.camera == camera)
                     .order_by(Recordings.start_time.asc())
                 )
-                limited_recorder = len(recordings) < segment_count
                 second_run: set[str] = self.delete_recording_segments(
                     recordings, retained_events, segment_count
                 )
