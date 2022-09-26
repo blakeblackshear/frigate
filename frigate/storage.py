@@ -142,12 +142,13 @@ class StorageMaintainer(threading.Thread):
                 .objects()
             )
 
-            deleted_recordings: set[str] = self.deleted_recordings(
+            deleted_recordings: set[str] = self.delete_recording_segments(
                 recordings, retained_events, segment_count
             )
 
             # check if 2 hours of segments were deleted from the 24 retrieved
             if len(deleted_recordings) < segment_count:
+                logger.debug(f"segment target of {segment_count} > {len(deleted_recordings)}, pulling all non-retained recordings")
                 # get the rest of the recording segments to look through
                 recordings: Recordings = (
                     Recordings.select()
@@ -161,6 +162,7 @@ class StorageMaintainer(threading.Thread):
 
                 # check if still 2 hour quota still not meant
                 if len(deleted_recordings) < segment_count:
+                    logger.debug(f"segment target of {segment_count} > {len(deleted_recordings)}, pulling all recordings")
                     recordings: Recordings = (
                         Recordings.select()
                         .where(Recordings.camera == camera)
@@ -184,7 +186,7 @@ class StorageMaintainer(threading.Thread):
             logger.debug(f"End camera: {camera}.")
 
         logger.debug("End all cameras.")
-        logger.debug("End expire recordings (new).")
+        logger.debug("End storage cleanup.")
 
     def run(self):
         # Check storage consumption every 5 minutes
