@@ -14,6 +14,11 @@ from frigate.models import Event, Recordings
 logger = logging.getLogger(__name__)
 
 
+bandwidth_equation = Recordings.segment_size / (
+    Recordings.end_time - Recordings.start_time
+)
+
+
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
@@ -22,7 +27,45 @@ class StorageMaintainer(threading.Thread):
         self.name = "recording_cleanup"
         self.config = config
         self.stop_event = stop_event
+        self.camera_storage_stats: dict[str, dict] = {"total": {}}
         self.avg_segment_sizes: dict[str, dict] = {}
+
+    def calculate_camera_bandwidth(self):
+        """Calculate an average MB/s for each camera."""
+        self.camera_storage_stats["total"]["bandwidth"] = 0
+        self.camera_storage_stats["total"]["needs_refresh"] = False
+
+        for camera in self.config.cameras.keys():
+            # cameras with < 50 segments should be refreshed to keep size accurate
+            if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
+                self.camera_storage_stats[camera] = {
+                    "needs_refresh": (
+                        Recordings.select(fn.COUNT(Recordings.id))
+                        .where(Recordings.camera == camera)
+                        .scalar()
+                        < 50
+                    )
+                }
+
+                if self.camera_storage_stats[camera]["needs_refresh"]:
+                    self.camera_storage_stats["total"]["needs_refresh"] = True
+
+            # calculate MB/hr
+            bandwidth = round(
+                Recordings.select(fn.AVG(bandwidth_equation))
+                .where(Recordings.camera == camera)
+                .limit(100)
+                .scalar()
+                * 3600,
+                2,
+            )
+            self.camera_storage_stats[camera]["bandwidth"] = bandwidth
+            self.camera_storage_stats["total"]["bandwidth"] += bandwidth
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr")
+
+        logger.debug(
+            f"Total MB/hr is {self.camera_storage_stats['total']['bandwidth']}"
+        )
 
     def calculate_camera_segment_sizes(self):
         """Calculate the size of each cameras recording segments."""
@@ -73,6 +116,7 @@ class StorageMaintainer(threading.Thread):
     def check_storage_needs_cleanup(self) -> bool:
         """Return if storage needs cleanup."""
         # currently runs cleanup if less than 1 hour of space is left
+        return False
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
         logger.debug(
             f"Storage cleanup check: {self.avg_segment_sizes['total']['hour']} hourly with remaining storage: {remaining_storage}"
@@ -216,13 +260,11 @@ class StorageMaintainer(threading.Thread):
         # Check storage consumption every 5 minutes
         while not self.stop_event.wait(300):
 
-            if not self.avg_segment_sizes:
-                self.calculate_camera_segment_sizes()
-                logger.debug(f"Default camera segment sizes: {self.avg_segment_sizes}")
+            if self.camera_storage_stats["total"].get("needs_refresh", True):
+                self.calculate_camera_bandwidth()
+                logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}")
 
-            needs_cleanup = self.check_storage_needs_cleanup()
-
-            if needs_cleanup:
+            if self.check_storage_needs_cleanup():
                 self.reduce_storage_consumption()
 
         logger.info(f"Exiting storage maintainer...")
