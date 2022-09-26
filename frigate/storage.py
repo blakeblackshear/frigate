@@ -140,6 +140,11 @@ class StorageMaintainer(threading.Thread):
                 .limit(segment_count * 12)
             )
 
+            # cameras that are only recording part time
+            # should not be forced to have 2 hours of
+            # recordings disabled
+            limited_recorder = len(recordings) < segment_count
+
             # Get retained events to check against
             retained_events: Event = (
                 Event.select()
@@ -156,8 +161,9 @@ class StorageMaintainer(threading.Thread):
                 recordings, retained_events, segment_count
             )
 
-            # check if 2 hours of segments were deleted from the 24 retrieved
-            if len(deleted_recordings) < segment_count:
+            # check if 2 hours of segments were deleted from the 24 hours retrieved
+            # if camera is a limited recorder then do not force removal
+            if not limited_recorder and len(deleted_recordings) < segment_count:
                 logger.debug(
                     f"segment target of {segment_count} > {len(deleted_recordings)}, pulling all non-retained recordings"
                 )
@@ -167,13 +173,14 @@ class StorageMaintainer(threading.Thread):
                     .where(Recordings.camera == camera)
                     .order_by(Recordings.start_time.asc())
                 )
+                limited_recorder = len(recordings) < segment_count
                 second_run: set[str] = self.delete_recording_segments(
                     recordings, retained_events, segment_count
                 )
                 deleted_recordings = deleted_recordings.union(second_run)
 
                 # check if still 2 hour quota still not meant
-                if len(deleted_recordings) < segment_count:
+                if not limited_recorder and len(deleted_recordings) < segment_count:
                     logger.debug(
                         f"segment target of {segment_count} > {len(deleted_recordings)}, pulling all recordings"
                     )
