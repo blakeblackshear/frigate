@@ -21,12 +21,6 @@ Windows is not officially supported, but some users have had success getting it 
 
 Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
 
-:::caution
-
-Note that Frigate does not currently support limiting recordings based on available disk space automatically. If using recordings, you must specify retention settings for a number of days that will fit within the available disk space of your drive or Frigate will crash.
-
-:::
-
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
