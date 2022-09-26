@@ -84,7 +84,6 @@ class StorageMaintainer(threading.Thread):
     ) -> set[str]:
         """Delete Recording Segments"""
         # loop over recordings and see if they overlap with any retained events
-        # TODO: expire segments based on segment stats according to config
         event_start = 0
         deleted_recordings = set()
         for recording in recordings.objects().iterator():
@@ -139,6 +138,9 @@ class StorageMaintainer(threading.Thread):
                 .order_by(Recordings.start_time.asc())
                 .limit(segment_count * 12)
             )
+
+            if len(recordings) == 0:
+                continue
 
             # cameras that are only recording part time
             # should not be forced to have 2 hours of
