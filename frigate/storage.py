@@ -36,7 +36,9 @@ class StorageMaintainer(threading.Thread):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
                         Recordings.select(fn.COUNT(Recordings.id))
-                        .where(Recordings.camera == camera)
+                        .where(
+                            Recordings.camera == camera, Recordings.segment_size != 0
+                        )
                         .scalar()
                         < 50
                     )
@@ -45,7 +47,7 @@ class StorageMaintainer(threading.Thread):
             # calculate MB/hr
             bandwidth = round(
                 Recordings.select(fn.AVG(bandwidth_equation))
-                .where(Recordings.camera == camera)
+                .where(Recordings.camera == camera, Recordings.segment_size != 0)
                 .limit(100)
                 .scalar()
                 * 3600,
