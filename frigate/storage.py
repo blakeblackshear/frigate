@@ -88,6 +88,7 @@ class StorageMaintainer(threading.Thread):
             .objects()
         )
 
+        event_start = 0
         deleted_recordings = set()
         for recording in recordings.objects().iterator():
             # check if 1 hour of storage has been reclaimed
@@ -126,8 +127,10 @@ class StorageMaintainer(threading.Thread):
                 deleted_recordings.add(recording.id)
 
         # need to delete retained segments
-        if deleted_recordings < hourly_bandwidth:
-            logger.error("Could not clear enough storage, retained recordings must be deleted.")
+        if deleted_segments_size < hourly_bandwidth:
+            logger.error(
+                "Could not clear enough storage, retained recordings must be deleted."
+            )
             for recording in recordings.objects().iterator():
                 if deleted_segments_size > hourly_bandwidth:
                     break
