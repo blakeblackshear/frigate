@@ -130,8 +130,8 @@ class TestHttp(unittest.TestCase):
             time_keep,
             time_keep + 10,
             camera="front_door",
-            seg_size=4,
-            seg_dur=0,
+            seg_size=0,
+            seg_dur=10,
         )
         storage.calculate_camera_bandwidth()
         assert storage.camera_storage_stats == {
