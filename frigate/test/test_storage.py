@@ -111,26 +111,15 @@ class TestHttp(unittest.TestCase):
             seg_size=8,
             seg_dur=20,
         )
-        storage.calculate_camera_segment_sizes()
-        assert storage.avg_segment_sizes == {
-            "front_door": {
-                "segment": 4.0,
-                "segment_duration": 10,
-                "hour": 1440,
-            },
-            "back_door": {
-                "segment": 8.0,
-                "segment_duration": 20,
-                "hour": 1440,
-            },
-            "total": {
-                "segment": 12.0,
-                "hour": 2880.0,
-            },
+        storage.calculate_camera_bandwidth()
+        print(storage.camera_storage_stats)
+        assert storage.camera_storage_stats == {
+            "front_door": {"bandwidth": 1440, "needs_refresh": True},
+            "back_door": {"bandwidth": 2880, "needs_refresh": True},
         }
 
     def test_storage_cleanup(self):
-        """Ensure that retained recordings are kept and unretained recordings are cleaned up."""
+        """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)
         storage = StorageMaintainer(config, MagicMock())
 
@@ -154,13 +143,12 @@ class TestHttp(unittest.TestCase):
         _insert_mock_recording(rec_d2_id, time_delete + 10, time_delete + 20)
         _insert_mock_recording(rec_d3_id, time_delete + 20, time_delete + 30)
 
-        storage.calculate_camera_segment_sizes()
+        storage.calculate_camera_bandwidth()
         storage.reduce_storage_consumption()
-        assert Recordings.get(Recordings.id == rec_k_id)
-        assert Recordings.get(Recordings.id == rec_k2_id)
-        assert Recordings.get(Recordings.id == rec_k3_id)
-
         with self.assertRaises(DoesNotExist):
+            assert Recordings.get(Recordings.id == rec_k_id)
+            assert Recordings.get(Recordings.id == rec_k2_id)
+            assert Recordings.get(Recordings.id == rec_k3_id)
             Recordings.get(Recordings.id == rec_d_id)
             Recordings.get(Recordings.id == rec_d2_id)
             Recordings.get(Recordings.id == rec_d3_id)
