@@ -89,6 +89,7 @@ class TestHttp(unittest.TestCase):
             pass
 
     def test_segment_calculations(self):
+        """Test that the segment calculations are correct."""
         config = FrigateConfig(**self.double_cam_config)
         storage = StorageMaintainer(config, MagicMock())
 
@@ -115,6 +116,26 @@ class TestHttp(unittest.TestCase):
         assert storage.camera_storage_stats == {
             "front_door": {"bandwidth": 1440, "needs_refresh": True},
             "back_door": {"bandwidth": 2880, "needs_refresh": True},
+        }
+
+    def test_segment_calculations_with_zero_segments(self):
+        """Ensure segment calculation does not fail when migrating from previous version."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        rec_fd_id = "1234567.frontdoor"
+        _insert_mock_recording(
+            rec_fd_id,
+            time_keep,
+            time_keep + 10,
+            camera="front_door",
+            seg_size=4,
+            seg_dur=0,
+        )
+        storage.calculate_camera_bandwidth()
+        assert storage.camera_storage_stats == {
+            "front_door": {"bandwidth": 0, "needs_refresh": True},
         }
 
     def test_storage_cleanup(self):
