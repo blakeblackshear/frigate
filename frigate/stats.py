@@ -91,7 +91,7 @@ def get_gpu_stats(config: FrigateConfig) -> Optional[dict[str, dict]]:
         args = (
             " ".join(camera.ffmpeg.hwaccel_args)
             if camera.ffmpeg.hwaccel_args is list
-            else camera.ffmpeg.hwaccel_args
+            else str(camera.ffmpeg.hwaccel_args)
         )
 
         if args and args not in hwaccel_args:
