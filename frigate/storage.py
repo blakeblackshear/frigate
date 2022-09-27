@@ -126,7 +126,7 @@ class StorageMaintainer(threading.Thread):
                 Path(recording.path).unlink(missing_ok=True)
                 deleted_recordings.add(recording.id)
 
-        # need to delete retained segments
+        # check if need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
             logger.error(
                 f"Could not clear {hourly_bandwidth} currently {deleted_segments_size}, retained recordings must be deleted."
