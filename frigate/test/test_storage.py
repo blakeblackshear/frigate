@@ -169,7 +169,9 @@ class TestHttp(unittest.TestCase):
 
         time_delete = datetime.datetime.now().timestamp() - 7200
         for i in range(0, 59):
-            _insert_mock_recording(f"{123456 + i}.delete", time_delete, time_delete + 600)
+            _insert_mock_recording(
+                f"{123456 + i}.delete", time_delete, time_delete + 600
+            )
 
         storage.calculate_camera_bandwidth()
         storage.reduce_storage_consumption()
