@@ -129,7 +129,7 @@ class StorageMaintainer(threading.Thread):
         # need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
             logger.error(
-                "Could not clear enough storage, retained recordings must be deleted."
+                f"Could not clear {hourly_bandwidth} currently {deleted_segments_size}, retained recordings must be deleted."
             )
             for recording in recordings.objects().iterator():
                 if deleted_segments_size > hourly_bandwidth:
