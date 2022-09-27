@@ -150,7 +150,7 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
-        while not self.stop_event.wait(20):
+        while not self.stop_event.wait(300):
 
             if not self.camera_storage_stats or False in [
                 r["needs_refresh"] for r in self.camera_storage_stats.values()

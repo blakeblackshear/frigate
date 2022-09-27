@@ -13,16 +13,15 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
-    #devices:
-    #  - /dev/bus/usb:/dev/bus/usb
-    #  - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - .:/lab/frigate:cached
-      - ./config/:/config/:rw
-      #- ./debug:/media/frigate
-      - /Volumes/small:/media/frigate:rw
-     # - /dev/bus/usb:/dev/bus/usb
+      - ./config/config.yml:/config/config.yml:ro
+      - ./debug:/media/frigate
+      - /dev/bus/usb:/dev/bus/usb
     ports:
       - "1935:1935"
       - "3000:3000"
