@@ -45,14 +45,18 @@ class StorageMaintainer(threading.Thread):
                 }
 
             # calculate MB/hr
-            bandwidth = round(
-                Recordings.select(fn.AVG(bandwidth_equation))
-                .where(Recordings.camera == camera, Recordings.segment_size != 0)
-                .limit(100)
-                .scalar()
-                * 3600,
-                2,
-            )
+            try:
+                bandwidth = round(
+                    Recordings.select(fn.AVG(bandwidth_equation))
+                    .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                    .limit(100)
+                    .scalar()
+                    * 3600,
+                    2,
+                )
+            except TypeError:
+                bandwidth = 0
+
             self.camera_storage_stats[camera]["bandwidth"] = bandwidth
             logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr.")
 
