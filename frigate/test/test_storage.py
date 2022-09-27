@@ -112,7 +112,6 @@ class TestHttp(unittest.TestCase):
             seg_dur=20,
         )
         storage.calculate_camera_bandwidth()
-        print(storage.camera_storage_stats)
         assert storage.camera_storage_stats == {
             "front_door": {"bandwidth": 1440, "needs_refresh": True},
             "back_door": {"bandwidth": 2880, "needs_refresh": True},
@@ -152,6 +151,31 @@ class TestHttp(unittest.TestCase):
             Recordings.get(Recordings.id == rec_d_id)
             Recordings.get(Recordings.id == rec_d2_id)
             Recordings.get(Recordings.id == rec_d3_id)
+
+    def test_storage_cleanup_keeps_retained(self):
+        """Ensure that all recordings are cleaned up when necessary."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        id = "123456.keep"
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_event(id, time_keep, time_keep + 30, True)
+        rec_k_id = "1234567.keep"
+        rec_k2_id = "1234568.keep"
+        rec_k3_id = "1234569.keep"
+        _insert_mock_recording(rec_k_id, time_keep, time_keep + 10)
+        _insert_mock_recording(rec_k2_id, time_keep + 10, time_keep + 20)
+        _insert_mock_recording(rec_k3_id, time_keep + 20, time_keep + 30)
+
+        time_delete = datetime.datetime.now().timestamp() - 7200
+        for i in range(0, 59):
+            _insert_mock_recording(f"{123456 + i}.delete", time_delete, time_delete + 600)
+
+        storage.calculate_camera_bandwidth()
+        storage.reduce_storage_consumption()
+        assert Recordings.get(Recordings.id == rec_k_id)
+        assert Recordings.get(Recordings.id == rec_k2_id)
+        assert Recordings.get(Recordings.id == rec_k3_id)
 
 
 def _insert_mock_event(id: str, start: int, end: int, retain: bool) -> Event:
