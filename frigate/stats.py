@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 def get_latest_version() -> str:
     try:
         request = requests.get(
-            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
+            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
+            timeout=10
         )
     except:
         return "unknown"
