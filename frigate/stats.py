@@ -23,7 +23,7 @@ def get_latest_version() -> str:
     try:
         request = requests.get(
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
-            timeout=10
+            timeout=10,
         )
     except:
         return "unknown"
