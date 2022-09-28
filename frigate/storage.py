@@ -158,7 +158,7 @@ class StorageMaintainer(threading.Thread):
         """Check every 5 minutes if storage needs to be cleaned up."""
         while not self.stop_event.wait(300):
 
-            if not self.camera_storage_stats or False in [
+            if not self.camera_storage_stats or True in [
                 r["needs_refresh"] for r in self.camera_storage_stats.values()
             ]:
                 self.calculate_camera_bandwidth()
