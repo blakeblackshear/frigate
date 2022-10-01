@@ -180,6 +180,7 @@ class TrackedObject:
             "frame_time": self.obj_data["frame_time"],
             "snapshot_time": snapshot_time,
             "label": self.obj_data["label"],
+            "sub_label": self.obj_data.get("sub_label"),
             "top_score": self.top_score,
             "false_positive": self.false_positive,
             "start_time": self.obj_data["start_time"],
