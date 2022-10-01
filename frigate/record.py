@@ -276,28 +276,31 @@ class RecordingMaintainer(threading.Thread):
         file_path = os.path.join(directory, file_name)
 
         try:
-            start_frame = datetime.datetime.now().timestamp()
-            # copy then delete is required when recordings are stored on some network drives
-            shutil.copyfile(cache_path, file_path)
-            logger.debug(
-                f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
-            )
-            os.remove(cache_path)
+            if not os.path.exists(file_path):
+                start_frame = datetime.datetime.now().timestamp()
+                # copy then delete is required when recordings are stored on some network drives
+                shutil.copyfile(cache_path, file_path)
+                logger.debug(
+                    f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                )
 
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
-            Recordings.create(
-                id=f"{start_time.timestamp()}-{rand_id}",
-                camera=camera,
-                path=file_path,
-                start_time=start_time.timestamp(),
-                end_time=end_time.timestamp(),
-                duration=duration,
-                motion=motion_count,
-                # TODO: update this to store list of active objects at some point
-                objects=active_count,
-            )
+                rand_id = "".join(
+                    random.choices(string.ascii_lowercase + string.digits, k=6)
+                )
+                Recordings.create(
+                    id=f"{start_time.timestamp()}-{rand_id}",
+                    camera=camera,
+                    path=file_path,
+                    start_time=start_time.timestamp(),
+                    end_time=end_time.timestamp(),
+                    duration=duration,
+                    motion=motion_count,
+                    # TODO: update this to store list of active objects at some point
+                    objects=active_count,
+                )
+            else:
+                logger.warning(f"Ignoring segment because {file_path} already exists.")
+            os.remove(cache_path)
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
