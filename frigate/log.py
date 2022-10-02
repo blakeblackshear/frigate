@@ -58,7 +58,7 @@ class FrigateLogFormatter(logging.Formatter):
         logging.CRITICAL: bold_red + message_format + reset,
     }
 
-    def format(self, record):
+    def format(self, record) -> str:
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, self.time_format)
         return formatter.format(record)
