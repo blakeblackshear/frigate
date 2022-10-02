@@ -14,9 +14,7 @@ from collections import deque
 def listener_configurer() -> None:
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
-    )
+    formatter = FrigateLogFormatter()
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
@@ -40,6 +38,33 @@ def log_process(log_queue: Queue) -> None:
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
+
+
+class FrigateLogFormatter(logging.Formatter):
+
+    grey = "\x1b[38;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = (
+        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s",
+        "%Y-%m-%d %H:%M:%S",
+    )
+
+    def __iniit__(self) -> None:
+        self.FORMATS = {
+            logging.DEBUG: self.grey + format + self.reset,
+            logging.INFO: self.grey + format + self.reset,
+            logging.WARNING: self.yellow + format + self.reset,
+            logging.ERROR: self.red + format + self.reset,
+            logging.CRITICAL: self.bold_red + format + self.reset,
+        }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
 
 
 # based on https://codereview.stackexchange.com/a/17959
