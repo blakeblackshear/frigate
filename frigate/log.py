@@ -15,7 +15,6 @@ def listener_configurer() -> None:
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
     formatter = FrigateLogFormatter()
-    #formatter = logging.Formatter(format)
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
@@ -56,7 +55,7 @@ class FrigateLogFormatter(logging.Formatter):
         logging.INFO: grey + message_format + reset,
         logging.WARNING: yellow + message_format + reset,
         logging.ERROR: red + message_format + reset,
-        logging.CRITICAL: bold_red + message_format + reset
+        logging.CRITICAL: bold_red + message_format + reset,
     }
 
     def format(self, record):
