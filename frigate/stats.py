@@ -135,7 +135,10 @@ def get_gpu_stats(config: FrigateConfig) -> Optional[dict[str, dict]]:
             # RPi v4l2m2m is currently not able to get usage stats
             pass
 
-    return stats
+    if stats:
+        return stats
+
+    return None
 
 
 def stats_snapshot(
