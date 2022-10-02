@@ -5,7 +5,7 @@ import os
 import signal
 import queue
 from multiprocessing.queues import Queue
-from logging import handlers
+from logging import LogRecord, handlers
 from setproctitle import setproctitle
 from typing import Deque
 from collections import deque
@@ -58,7 +58,7 @@ class FrigateLogFormatter(logging.Formatter):
         logging.CRITICAL: bold_red + message_format + reset,
     }
 
-    def format(self, record) -> str:
+    def format(self, record: LogRecord) -> str:
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, self.time_format)
         return formatter.format(record)
