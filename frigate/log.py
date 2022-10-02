@@ -15,6 +15,7 @@ def listener_configurer() -> None:
     root = logging.getLogger()
     console_handler = logging.StreamHandler()
     formatter = FrigateLogFormatter()
+    #formatter = logging.Formatter(format)
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
     root.setLevel(logging.INFO)
@@ -47,23 +48,20 @@ class FrigateLogFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = (
-        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s",
-        "%Y-%m-%d %H:%M:%S",
-    )
+    message_format = "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s"
+    time_format = "%Y-%m-%d %H:%M:%S"
 
-    def __iniit__(self) -> None:
-        self.FORMATS = {
-            logging.DEBUG: self.grey + format + self.reset,
-            logging.INFO: self.grey + format + self.reset,
-            logging.WARNING: self.yellow + format + self.reset,
-            logging.ERROR: self.red + format + self.reset,
-            logging.CRITICAL: self.bold_red + format + self.reset,
-        }
+    FORMATS = {
+        logging.DEBUG: grey + message_format + reset,
+        logging.INFO: grey + message_format + reset,
+        logging.WARNING: yellow + message_format + reset,
+        logging.ERROR: red + message_format + reset,
+        logging.CRITICAL: bold_red + message_format + reset
+    }
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
+        formatter = logging.Formatter(log_fmt, self.time_format)
         return formatter.format(record)
 
 
