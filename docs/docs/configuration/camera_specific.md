@@ -56,7 +56,70 @@ ffmpeg:
   input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rw_timeout 5000000 -use_wallclock_as_timestamps 1 -f live_flv
 ```
 
-### Reolink 410/520 (possibly others)
+### Blue Iris RTSP Cameras
+
+You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
+
+```yaml
+ffmpeg:
+  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
+```
+
+### UDP Only Cameras
+
+If your cameras do not support TCP connections for RTSP, you can use UDP.
+
+```yaml
+ffmpeg:
+  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
+```
+
+### Unifi Protect Cameras
+
+In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp.
+
+```yaml
+ffmpeg:
+  output_args:
+    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
+    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
+```
+
+### Model/vendor specific setup
+
+#### Annke C800
+This camera is H.265 only. To be able to play clips on a Mac the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
+
+```yaml
+cameras:
+  annkec800: # <------ Name the camera
+    ffmpeg:
+      hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
+      output_args:
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
+        rtmp: -c:v copy -c:a aac -f flv
+        
+      inputs:
+        - path: rtsp://user:password@camera-ip:554/H264/ch1/main/av_stream # <----- Update for your camera
+          roles:
+            - detect
+            - record
+            - rtmp
+    rtmp:
+      enabled: False # <-- RTMP should be disabled if your stream is not H264
+    detect:
+      width: 3840 # <---- update for your camera's resolution
+      height: 2160 # <---- update for your camera's resolution
+
+    objects:
+      track:
+        - person
+
+```
+
+#### Reolink 410/520 (possibly others)
+
+![Resolutions](/img/reolink-settings.png)
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
@@ -93,33 +156,3 @@ cameras:
       fps: 7
 ```
 
-![Resolutions](/img/reolink-settings.png)
-
-### Blue Iris RTSP Cameras
-
-You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
-
-```yaml
-ffmpeg:
-  input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
-```
-
-### UDP Only Cameras
-
-If your cameras do not support TCP connections for RTSP, you can use UDP.
-
-```yaml
-ffmpeg:
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
-```
-
-### Unifi Protect Cameras
-
-In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp.
-
-```yaml
-ffmpeg:
-  output_args:
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -ar 44100 -c:a aac
-    rtmp: -c:v copy -f flv -ar 44100 -c:a aac
-```
