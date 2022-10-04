@@ -237,9 +237,9 @@ def set_sub_label(id):
 
     if not event.end_time:
         tracked_obj: TrackedObject = (
-            current_app.detected_frames_processor.camera_states[event.camera].tracked_objects.get(
-                event.id
-            )
+            current_app.detected_frames_processor.camera_states[
+                event.camera
+            ].tracked_objects.get(event.id)
         )
 
         if tracked_obj:
