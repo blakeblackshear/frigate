@@ -178,7 +178,7 @@ for how to set these.
 
 When multiple Frigate instances are configured, [API](#api) URLs should include an
 identifier to tell Home Assistant which Frigate instance to refer to. The
-identifier used is the MQTT `client_id` paremeter included in the configuration,
+identifier used is the MQTT `client_id` parameter included in the configuration,
 and is used like so:
 
 ```
