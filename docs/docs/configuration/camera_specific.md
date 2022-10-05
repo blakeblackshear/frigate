@@ -68,7 +68,7 @@ ffmpeg:
 ## Model/vendor specific setup
 
 ### Annke C800
-This camera is H.265 only. To be able to play clips on a Mac the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
+This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
 
 ```yaml
 cameras:
