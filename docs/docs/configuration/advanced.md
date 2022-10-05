@@ -4,8 +4,6 @@ title: Advanced Options
 sidebar_label: Advanced Options
 ---
 
-## Advanced configuration
-
 ### `logger`
 
 Change the default log level for troubleshooting purposes.

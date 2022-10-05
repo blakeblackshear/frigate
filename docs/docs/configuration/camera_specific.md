@@ -74,7 +74,6 @@ This camera is H.265 only. To be able to play clips on a Mac the H.265 stream ha
 cameras:
   annkec800: # <------ Name the camera
     ffmpeg:
-      hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
       output_args:
         record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
         rtmp: -c:v copy -c:a aac -f flv
@@ -88,8 +87,8 @@ cameras:
     rtmp:
       enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
-      width: 3840 # <---- update for your camera's resolution
-      height: 2160 # <---- update for your camera's resolution
+      width:  # <---- update for your camera's resolution
+      height:  # <---- update for your camera's resolution
 
 
 ```
