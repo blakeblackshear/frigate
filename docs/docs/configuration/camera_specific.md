@@ -111,9 +111,6 @@ cameras:
       width: 3840 # <---- update for your camera's resolution
       height: 2160 # <---- update for your camera's resolution
 
-    objects:
-      track:
-        - person
 
 ```
 
