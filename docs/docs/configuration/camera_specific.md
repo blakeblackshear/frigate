@@ -3,7 +3,7 @@ id: camera_specific
 title: Camera Specific Configurations
 ---
 
-### MJPEG Cameras
+## MJPEG Cameras
 
 The input and output parameters need to be adjusted for MJPEG cameras
 
@@ -19,7 +19,7 @@ output_args:
   rtmp: -c:v libx264 -an -f flv
 ```
 
-### JPEG Stream Cameras
+## JPEG Stream Cameras
 
 Cameras using a live changing jpeg image will need input parameters as below
 
@@ -47,7 +47,7 @@ input_args:
 
 Outputting the stream will have the same args and caveats as per [MJPEG Cameras](#mjpeg-cameras)
 
-### RTMP Cameras
+## RTMP Cameras
 
 The input parameters need to be adjusted for RTMP cameras
 
@@ -56,7 +56,7 @@ ffmpeg:
   input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rw_timeout 5000000 -use_wallclock_as_timestamps 1 -f live_flv
 ```
 
-### UDP Only Cameras
+## UDP Only Cameras
 
 If your cameras do not support TCP connections for RTSP, you can use UDP.
 
@@ -65,9 +65,9 @@ ffmpeg:
   input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport udp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
 
-### Model/vendor specific setup
+## Model/vendor specific setup
 
-#### Annke C800
+### Annke C800
 This camera is H.265 only. To be able to play clips on a Mac the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
 
 ```yaml
@@ -94,7 +94,7 @@ cameras:
 
 ```
 
-#### Blue Iris RTSP Cameras
+### Blue Iris RTSP Cameras
 
 You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
 
@@ -103,7 +103,7 @@ ffmpeg:
   input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
 
-#### Reolink 410/520 (possibly others)
+### Reolink 410/520 (possibly others)
 
 ![Resolutions](/img/reolink-settings.png)
 
@@ -142,7 +142,7 @@ cameras:
       fps: 7
 ```
 
-#### Unifi Protect Cameras
+### Unifi Protect Cameras
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp.
 
