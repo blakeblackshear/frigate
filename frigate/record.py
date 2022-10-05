@@ -167,7 +167,7 @@ class RecordingMaintainer(threading.Thread):
                         f"{cache_path}",
                     ]
                     p = sp.run(ffprobe_cmd, capture_output=True)
-                    if p.returncode == 0:
+                    if p.returncode == 0 and p.stdout.decode():
                         duration = float(p.stdout.decode().strip())
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
