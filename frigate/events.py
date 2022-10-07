@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import logging
 import os
 import queue
@@ -289,15 +290,18 @@ class EventCleanup(threading.Thread):
 
     def run(self):
         # only expire events every 5 minutes
-        while not self.stop_event.wait(300):
-            self.expire("clips")
-            self.expire("snapshots")
-            self.purge_duplicates()
+        for counter in itertools.cycle(range(self.config.snapshots.expire_interval)):
+            if self.stop_event.wait(60):
+                logger.info(f"Exiting event cleanup...")
+                break
 
-            # drop events from db where has_clip and has_snapshot are false
-            delete_query = Event.delete().where(
-                Event.has_clip == False, Event.has_snapshot == False
-            )
-            delete_query.execute()
+            if counter == 0:
+                self.expire("clips")
+                self.expire("snapshots")
+                self.purge_duplicates()
 
-        logger.info(f"Exiting event cleanup...")
+                # drop events from db where has_clip and has_snapshot are false
+                delete_query = Event.delete().where(
+                    Event.has_clip == False, Event.has_snapshot == False
+                )
+                delete_query.execute()

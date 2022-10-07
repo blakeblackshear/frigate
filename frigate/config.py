@@ -440,6 +440,10 @@ class CameraFfmpegConfig(FfmpegConfig):
 
 class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
+    expire_interval: int = Field(
+        default=5,
+        title="Number of minutes to wait between cleanup runs.",
+    )
     clean_copy: bool = Field(
         default=True, title="Create a clean copy of the snapshot image."
     )
