@@ -358,7 +358,6 @@ def label_thumbnail(camera_name, label):
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
     else:
@@ -366,7 +365,6 @@ def label_thumbnail(camera_name, label):
             Event.select()
             .where(Event.camera == camera_name)
             .where(Event.label == label)
-            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
 
