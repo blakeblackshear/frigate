@@ -14,7 +14,7 @@ class TestUserPassCleanup(unittest.TestCase):
         """Test that user / pass are cleaned up."""
         clean = clean_camera_user_pass(self.rtsp_with_pass)
         assert clean != self.rtsp_with_pass
-        assert "user:password" not in self.rtsp_with_pass
+        assert "user:password" not in clean
 
     def test_no_cleanup(self):
         """Test that nothing changes when no user / pass are defined."""
