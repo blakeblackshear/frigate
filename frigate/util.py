@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import math
+import re
 import signal
 import subprocess as sp
 import threading
@@ -19,6 +20,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import psutil
+
+from frigate.const import REGEX_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
 
@@ -623,6 +626,10 @@ def load_labels(path, encoding="utf-8"):
             return {int(index): label.strip() for index, label in pairs}
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
+
+def clean_camera_user_pass(line: str) -> str:
+    """Removes user and password from line."""
+    return re.sub(REGEX_CAMERA_USER_PASS, "*:*@", line)
 
 
 class FrameManager(ABC):

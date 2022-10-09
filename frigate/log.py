@@ -12,6 +12,7 @@ from typing import Deque
 from collections import deque
 
 from frigate.const import REGEX_CAMERA_USER_PASS
+from frigate.util import clean_camera_user_pass
 
 
 def listener_configurer() -> None:
@@ -60,7 +61,7 @@ class LogPipe(threading.Thread):
 
     def cleanup_log(self, log: str) -> str:
         """Cleanup the log line to remove sensitive info and string tokens."""
-        log = re.sub(REGEX_CAMERA_USER_PASS, "*:*@", log).strip("\n")
+        log = clean_camera_user_pass(log).strip("\n")
         return log
 
     def fileno(self) -> int:
