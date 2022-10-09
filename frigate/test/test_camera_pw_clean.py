@@ -8,7 +8,7 @@ from frigate.util import clean_camera_user_pass
 class TestUserPassCleanup(unittest.TestCase):
     def setUp(self) -> None:
         self.rtsp_with_pass = "rtsp://user:password@192.168.0.2:554/live"
-        self.rtsp_no_pass = "rtsp://192.168.0.3/live"
+        self.rtsp_no_pass = "rtsp://192.168.0.3:554/live"
 
     def test_cleanup(self):
         """Test that user / pass are cleaned up."""
