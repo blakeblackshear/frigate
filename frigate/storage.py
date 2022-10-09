@@ -60,6 +60,23 @@ class StorageMaintainer(threading.Thread):
             self.camera_storage_stats[camera]["bandwidth"] = bandwidth
             logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr.")
 
+    def calculate_camera_usages(self) -> dict[str, dict]:
+        """Calculate the storage usage of each camera."""
+        usages: dict[str, dict] = {}
+        total_storage = 0
+
+        for camera in self.config.cameras.keys():
+            camera_storage = (
+                Recordings.select(fn.SUM(Recordings.segment_size))
+                .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                .scalar()
+            )
+            total_storage += camera_storage
+            usages[camera] = {"usage": camera_storage}
+
+        usages["total"] = {"usage": total_storage}
+        return usages
+
     def check_storage_needs_cleanup(self) -> bool:
         """Return if storage needs cleanup."""
         # currently runs cleanup if less than 1 hour of space is left

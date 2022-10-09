@@ -694,12 +694,19 @@ def get_recordings_storage_usage():
     recording_stats = stats_snapshot(current_app.stats_tracking)["service"]["storage"][
         RECORD_DIR
     ]
-    total_bytes = recording_stats["total"]
-    storage = {"cameras": {}, "total": total_bytes}
-    storage[camera_name] = camera_bytes
-    total_bytes += camera_bytes
+    total_mb = recording_stats["total"]
 
-    return jsonify(storage)
+    camera_usages: dict[
+        str, dict
+    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages["max"] = total_mb
+
+    for camera_name in camera_usages.keys():
+        camera_usages[camera_name]["usage_percent"] = (
+            camera_usages[camera_name]["usage"] / total_mb
+        )
+
+    return jsonify(camera_usages)
 
 
 # return hourly summary for recordings of camera
