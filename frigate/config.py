@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from enum import Enum
+import re
 from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, REGEX_CAMERA_NAME, YAML_EXT
+from frigate.const import BASE_DIR, CACHE_DIR, REGEX_CAMERA_NAME, REGEX_CAMERA_USER_PASS, YAML_EXT
 from frigate.util import create_mask, deep_merge, load_labels
 
 logger = logging.getLogger(__name__)
@@ -689,13 +690,14 @@ class CameraConfig(FrigateBaseModel):
         input_args = (
             input_args if isinstance(input_args, list) else input_args.split(" ")
         )
+        cleaned_input = re.sub(REGEX_CAMERA_USER_PASS, "*:*@", ffmpeg_input.path)
 
         cmd = (
             ["ffmpeg"]
             + global_args
             + hwaccel_args
             + input_args
-            + ["-i", ffmpeg_input.path]
+            + ["-i", cleaned_input]
             + ffmpeg_output_args
         )
 
