@@ -694,6 +694,7 @@ def latest_frame(camera_name):
 
 @bp.route("/recordings/storage")
 def get_recordings_storage_usage():
+    include_total = request.args.get("include_total", True)
     recording_stats = stats_snapshot(current_app.stats_tracking)["service"]["storage"][
         RECORD_DIR
     ]
@@ -702,7 +703,9 @@ def get_recordings_storage_usage():
     camera_usages: dict[
         str, dict
     ] = current_app.storage_maintainer.calculate_camera_usages()
-    del camera_usages["total"]
+
+    if not include_total:
+        del camera_usages["total"]
 
     for camera_name in camera_usages.keys():
         camera_usages[camera_name]["usage_percent"] = (
