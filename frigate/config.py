@@ -18,7 +18,12 @@ from frigate.const import (
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
-from frigate.util import clean_camera_user_pass, create_mask, deep_merge, load_labels
+from frigate.util import (
+    create_mask,
+    deep_merge,
+    escape_special_characters,
+    load_labels,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -694,14 +699,13 @@ class CameraConfig(FrigateBaseModel):
         input_args = (
             input_args if isinstance(input_args, list) else input_args.split(" ")
         )
-        cleaned_input = clean_camera_user_pass(ffmpeg_input.path)
 
         cmd = (
             ["ffmpeg"]
             + global_args
             + hwaccel_args
             + input_args
-            + ["-i", cleaned_input]
+            + ["-i", escape_special_characters(ffmpeg_input.path)]
             + ffmpeg_output_args
         )
 
