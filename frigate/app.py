@@ -163,6 +163,7 @@ class FrigateApp:
             self.db,
             self.stats_tracking,
             self.detected_frames_processor,
+            self.storage_maintainer,
             self.plus_api,
         )
 
@@ -362,13 +363,13 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_storage_maintainer()
         self.init_stats()
         self.init_web_server()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
         self.start_recording_cleanup()
-        self.start_storage_maintainer()
         self.start_stats_emitter()
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)

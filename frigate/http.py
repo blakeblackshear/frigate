@@ -32,6 +32,7 @@ from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
 from frigate.util import clean_camera_user_pass, ffprobe_stream, vainfo_hwaccel
+from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
+    storage_maintainer: StorageMaintainer,
     plus_api,
 ):
     app = Flask(__name__)
@@ -61,6 +63,7 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+    app.storage_maintainer = storage_maintainer
     app.plus_api = plus_api
     app.camera_error_image = None
 
@@ -699,7 +702,7 @@ def get_recordings_storage_usage():
     camera_usages: dict[
         str, dict
     ] = current_app.storage_maintainer.calculate_camera_usages()
-    camera_usages["max"] = total_mb
+    del camera_usages["total"]
 
     for camera_name in camera_usages.keys():
         camera_usages[camera_name]["usage_percent"] = (
