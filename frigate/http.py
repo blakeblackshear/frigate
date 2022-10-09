@@ -751,6 +751,7 @@ def recordings(camera_name):
             Recordings.id,
             Recordings.start_time,
             Recordings.end_time,
+            Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
         )

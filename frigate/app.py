@@ -1,23 +1,17 @@
-import json
 import logging
 import multiprocessing as mp
 from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event
-from multiprocessing.context import Process
 import os
 import signal
 import sys
-import threading
-from logging.handlers import QueueHandler
 from typing import Optional
 from types import FrameType
 
 import traceback
-import yaml
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
-from pydantic import ValidationError
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
@@ -32,6 +26,7 @@ from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
+from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -310,6 +305,10 @@ class FrigateApp:
         self.recording_cleanup = RecordingCleanup(self.config, self.stop_event)
         self.recording_cleanup.start()
 
+    def start_storage_maintainer(self) -> None:
+        self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
+        self.storage_maintainer.start()
+
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
             self.config,
@@ -369,6 +368,7 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_recording_maintainer()
         self.start_recording_cleanup()
+        self.start_storage_maintainer()
         self.start_stats_emitter()
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)

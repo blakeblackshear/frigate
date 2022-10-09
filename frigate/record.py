@@ -284,6 +284,15 @@ class RecordingMaintainer(threading.Thread):
                     f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
                 )
 
+                try:
+                    segment_size = round(
+                        float(os.path.getsize(cache_path)) / 1000000, 1
+                    )
+                except OSError:
+                    segment_size = 0
+
+                os.remove(cache_path)
+
                 rand_id = "".join(
                     random.choices(string.ascii_lowercase + string.digits, k=6)
                 )
@@ -297,10 +306,8 @@ class RecordingMaintainer(threading.Thread):
                     motion=motion_count,
                     # TODO: update this to store list of active objects at some point
                     objects=active_count,
+                    segment_size=segment_size,
                 )
-            else:
-                logger.warning(f"Ignoring segment because {file_path} already exists.")
-            os.remove(cache_path)
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)
