@@ -137,6 +137,8 @@ class StorageMaintainer(threading.Thread):
             logger.error(
                 f"Could not clear {hourly_bandwidth} currently {deleted_segments_size}, retained recordings must be deleted."
             )
+            recordings = Recordings.select().order_by(Recordings.start_time.asc())
+
             for recording in recordings.objects().iterator():
                 if deleted_segments_size > hourly_bandwidth:
                     break
