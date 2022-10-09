@@ -633,7 +633,6 @@ def escape_special_characters(path: str) -> str:
     try:
         found = re.search(REGEX_CAMERA_USER_PASS, path).group(0)[:-1]
         pw = found[(found.index(":") + 1) :]
-        logger.error(f"Found {found} and pw {pw}")
         return path.replace(pw, urllib.parse.quote_plus(pw))
     except AttributeError:
         # path does not have user:pass
