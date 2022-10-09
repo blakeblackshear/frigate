@@ -63,7 +63,6 @@ class StorageMaintainer(threading.Thread):
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
         usages: dict[str, dict] = {}
-        total_storage = 0
 
         for camera in self.config.cameras.keys():
             camera_storage = (
@@ -71,10 +70,9 @@ class StorageMaintainer(threading.Thread):
                 .where(Recordings.camera == camera, Recordings.segment_size != 0)
                 .scalar()
             )
-            total_storage += camera_storage
+
             usages[camera] = {"usage": camera_storage}
 
-        usages["total"] = {"usage": total_storage}
         return usages
 
     def check_storage_needs_cleanup(self) -> bool:
