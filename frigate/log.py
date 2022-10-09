@@ -1,5 +1,6 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
+import re
 import threading
 import os
 import signal
@@ -9,6 +10,8 @@ from logging import handlers
 from setproctitle import setproctitle
 from typing import Deque
 from collections import deque
+
+from frigate.const import REGEX_CAMERA_USER_PASS
 
 
 def listener_configurer() -> None:
@@ -55,6 +58,11 @@ class LogPipe(threading.Thread):
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
 
+    def cleanup_log(self, log: str) -> str:
+        """Cleanup the log line to remove sensitive info and string tokens."""
+        log = re.sub(REGEX_CAMERA_USER_PASS, "*:*@", log).strip("\n")
+        return log
+
     def fileno(self) -> int:
         """Return the write file descriptor of the pipe"""
         return self.fdWrite
@@ -62,7 +70,7 @@ class LogPipe(threading.Thread):
     def run(self) -> None:
         """Run the thread, logging everything."""
         for line in iter(self.pipeReader.readline, ""):
-            self.deque.append(line.strip("\n"))
+            self.deque.append(self.cleanup_log(line))
 
         self.pipeReader.close()
 
