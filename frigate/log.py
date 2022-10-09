@@ -1,9 +1,7 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
-import re
 import threading
 import os
-import signal
 import queue
 from multiprocessing.queues import Queue
 from logging import handlers
@@ -11,7 +9,6 @@ from setproctitle import setproctitle
 from typing import Deque
 from collections import deque
 
-from frigate.const import REGEX_CAMERA_USER_PASS
 from frigate.util import clean_camera_user_pass
 
 
