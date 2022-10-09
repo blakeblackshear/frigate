@@ -627,6 +627,7 @@ def load_labels(path, encoding="utf-8"):
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
 
+
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
     return re.sub(REGEX_CAMERA_USER_PASS, "*:*@", line)
