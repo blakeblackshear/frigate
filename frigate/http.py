@@ -705,7 +705,7 @@ def get_recordings_storage_usage():
 
     for camera_name in camera_usages.keys():
         camera_usages[camera_name]["usage_percent"] = (
-            camera_usages[camera_name]["usage"] / total_mb
+            camera_usages[camera_name]["usage"] / total_mb * 100
         )
 
     return jsonify(camera_usages)
