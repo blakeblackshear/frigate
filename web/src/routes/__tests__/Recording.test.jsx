@@ -2,7 +2,7 @@ import { h } from 'preact';
 import * as CameraImage from '../../components/CameraImage';
 import * as Mqtt from '../../api/mqtt';
 import Cameras from '../Cameras';
-import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-library';
+import { render, screen, waitForElementToBeRemoved } from 'testing-library';
 
 describe('Recording Route', () => {
   beforeEach(() => {
@@ -22,6 +22,6 @@ describe('Recording Route', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 
-    expect(screen.queryAllByText('No Recordings Found')).toBeInTheDocument();
+    expect(screen.queryAllByText('No Recordings Found')).toHaveLength(0);
   });
 });
