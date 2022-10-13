@@ -13,6 +13,7 @@ import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import VideoPlayer from '../components/VideoPlayer';
 
 const emptyObject = Object.freeze({});
 
@@ -93,13 +94,29 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    player = (
-      <Fragment>
-        <div>
-          <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
-        </div>
-      </Fragment>
-    );
+    if (cameraConfig.restream.enabled) {
+      <VideoPlayer
+        options={{
+          preload: 'auto',
+          autoplay: true,
+          sources: [
+            {
+              src: `${apiHost}/restream/${camera}`,
+              type: 'video/mp4',
+            },
+          ],
+        }}
+        onReady={() => {}}
+      />
+    } else {
+      player = (
+        <Fragment>
+          <div>
+            <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
+          </div>
+        </Fragment>
+      );
+    }
   } else if (viewMode === 'debug') {
     player = (
       <Fragment>
