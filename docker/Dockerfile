@@ -121,7 +121,7 @@ ENV PATH=$PATH:/usr/lib/btbn-ffmpeg/bin
 RUN wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-beta.8/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc \
     && mkdir -p /usr/local/go2rtc/sbin/ \
-    && mv go2rtc /usr/local/sbin/go2rtc
+    && mv go2rtc /usr/local/go2rtc/sbin/go2rtc
 
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
