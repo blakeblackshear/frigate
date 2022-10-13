@@ -518,7 +518,7 @@ class RtmpConfig(FrigateBaseModel):
 
 
 class RestreamConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="go2rtc restreaming enabled.")
+    enabled: bool = Field(default=True, title="Restreaming enabled.")
 
 
 class CameraLiveSourceEnum(str, Enum):
@@ -554,6 +554,9 @@ class CameraConfig(FrigateBaseModel):
     )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="RTMP restreaming configuration."
+    )
+    restream: RestreamConfig = Field(
+        default_factory=RestreamConfig, title="Restreaming configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
@@ -593,7 +596,7 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
-            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect"]
+            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect", "restream"]
 
         super().__init__(**config)
 
@@ -780,6 +783,9 @@ class FrigateConfig(FrigateBaseModel):
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
     )
+    restream: RestreamConfig = Field(
+        default_factory=RestreamConfig, title="Global restream configuration."
+    )
     birdseye: BirdseyeConfig = Field(
         default_factory=BirdseyeConfig, title="Birdseye configuration."
     )
@@ -903,6 +909,11 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
                 raise ValueError(
                     f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                )
+
+            if camera_config.restream.enabled and not "restream" in assigned_roles:
+                raise ValueError(
+                    f"Camera {name} has restream enabled, but restream is not assigned to an input."
                 )
 
             # backwards compatibility for retain_days

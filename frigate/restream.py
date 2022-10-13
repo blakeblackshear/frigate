@@ -1,10 +1,13 @@
 """Controls go2rtc restream."""
 
 
+import logging
 import requests
 import urllib.parse
 
 from frigate.config import FrigateConfig
+
+logger = logging.getLogger(__name__)
 
 
 class RestreamApi:
@@ -18,10 +21,13 @@ class RestreamApi:
         self.relays: dict[str, str] = {}
 
         for cam_name, camera in self.config.cameras.items():
+            if not camera.restream.enabled:
+                continue
+
             for input in camera.ffmpeg.inputs:
                 if "restream" in input.roles:
                     self.relays[cam_name] = input.path
 
         for name, path in self.relays.items():
-            params = {"src": urllib.parse.quote_plus(path), "name": name}
-            requests.put("http://localhost:1984/api/streams", params=params)
+            params = {"src": path, "name": name}
+            requests.put("http://127.0.0.1:1984/api/streams", params=params)
