@@ -514,7 +514,7 @@ class CameraMqttConfig(FrigateBaseModel):
 
 
 class RtmpConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
+    enabled: bool = Field(default=False, title="RTMP restreaming enabled.")
 
 
 class RestreamConfig(FrigateBaseModel):
