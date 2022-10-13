@@ -818,6 +818,7 @@ class FrigateConfig(FrigateBaseModel):
                 "snapshots": ...,
                 "live": ...,
                 "rtmp": ...,
+                "restream": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
