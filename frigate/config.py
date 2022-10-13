@@ -521,9 +521,15 @@ class RestreamConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="go2rtc restreaming enabled.")
 
 
+class CameraLiveSourceEnum(str, Enum):
+    jsmpeg = "jsmpeg"
+    restream = "restream"
+
+
 class CameraLiveConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
+    source: CameraLiveSourceEnum = Field(default=CameraLiveSourceEnum.restream)
 
 
 class CameraUiConfig(FrigateBaseModel):
