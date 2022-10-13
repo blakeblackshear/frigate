@@ -403,6 +403,7 @@ class FfmpegConfig(FrigateBaseModel):
 
 class CameraRoleEnum(str, Enum):
     record = "record"
+    restream = "restream"
     rtmp = "rtmp"
     detect = "detect"
 
@@ -514,6 +515,10 @@ class CameraMqttConfig(FrigateBaseModel):
 
 class RtmpConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
+
+
+class RestreamConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="go2rtc restreaming enabled.")
 
 
 class CameraLiveConfig(FrigateBaseModel):
