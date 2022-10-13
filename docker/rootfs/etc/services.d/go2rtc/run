@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+/usr/local/go2rtc/sbin/go2rtc
