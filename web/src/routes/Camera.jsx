@@ -94,20 +94,26 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (cameraConfig.restream.enabled) {
-      <VideoPlayer
-        options={{
-          preload: 'auto',
-          autoplay: true,
-          sources: [
-            {
-              src: `${apiHost}/restream/${camera}`,
-              type: 'video/mp4',
-            },
-          ],
-        }}
-        onReady={() => {}}
-      />
+    if (cameraConfig.live.source == 'restream') {
+      player = (
+        <Fragment>
+          <div>
+            <VideoPlayer
+              options={{
+                preload: 'auto',
+                autoplay: true,
+                sources: [
+                  {
+                    src: `${apiHost}/restream/${camera}`,
+                    type: 'video/mp4',
+                  },
+                ],
+              }}
+              onReady={() => {}}
+            />
+          </div>
+        </Fragment>
+      );
     } else {
       player = (
         <Fragment>
