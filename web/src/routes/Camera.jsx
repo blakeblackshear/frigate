@@ -108,7 +108,7 @@ export default function Camera({ camera }) {
                 playbackRates: [1],
                 sources: [
                   {
-                    src: `${apiHost}/restream/${camera}`,
+                    src: `${apiHost}/restream/mp4/${camera}`,
                     type: 'video/mp4',
                   },
                 ],
