@@ -119,6 +119,14 @@ export default function Camera({ camera }) {
           </div>
         </Fragment>
       );
+    } else if (cameraConfig.live.source == 'webrtc') {
+      player = (
+        <Fragment>
+          <div>
+            Not implemented
+          </div>
+        </Fragment>
+      )
     } else {
       player = (
         <Fragment>
