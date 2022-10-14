@@ -94,11 +94,13 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (cameraConfig.live.source == 'restream') {
+    if (cameraConfig.live.source == 'mp4') {
       player = (
         <Fragment>
           <div style={`max-height: ${cameraConfig.live.height}px; max-width: ${liveWidth}px`}>
             <VideoPlayer
+              audio={false}
+              live={true}
               options={{
                 autoplay: true,
                 preload: 'metadata',
@@ -111,6 +113,7 @@ export default function Camera({ camera }) {
                   },
                 ],
               }}
+              seekOptions={{ forward: false, back: false }}
               onReady={() => {}}
             />
           </div>

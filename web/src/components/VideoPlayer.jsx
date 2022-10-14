@@ -6,7 +6,7 @@ import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
 import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
-export default function VideoPlayer({ children, options, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
+export default function VideoPlayer({ children, options, audio=true, live=false, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
   const playerRef = useRef();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
       defaultOptions.playbackRates.push(16);
     }
 
-    const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
+    const player = videojs(playerRef.current, { ...defaultOptions, ...options, controlBar: { volumePanel: audio, playToggle: !live, progressControl: !live, remainingTimeDisplay: !live, playbackRateMenuButton: !live } }, () => {
       onReady(player);
     });
     player.seekButtons({
