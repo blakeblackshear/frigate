@@ -336,6 +336,7 @@ snapshots:
       person: 15
 
 # Optional: RTMP configuration
+# NOTE: RTMP is deprecated in favor of restream
 # NOTE: Can be overridden at the camera level
 rtmp:
   # Optional: Enable the RTMP stream (default: False)
@@ -343,7 +344,7 @@ rtmp:
 
 # Optional: Restream configuration
 # NOTE: Can be overridden at the camera level
-rtmp:
+restream:
   # Optional: Enable the restream (default: True)
   enabled: True
 
