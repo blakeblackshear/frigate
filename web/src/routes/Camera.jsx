@@ -97,10 +97,9 @@ export default function Camera({ camera }) {
     if (cameraConfig.live.source == 'restream') {
       player = (
         <Fragment>
-          <div>
+          <div style={`max-height: ${cameraConfig.live.height}px; max-width: ${liveWidth}px`}>
             <VideoPlayer
               options={{
-                preload: 'auto',
                 autoplay: true,
                 sources: [
                   {
