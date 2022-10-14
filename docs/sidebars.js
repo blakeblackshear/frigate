@@ -17,7 +17,7 @@ module.exports = {
       "configuration/record",
       "configuration/snapshots",
       "configuration/objects",
-      "configuration/rtmp",
+      "configuration/restream",
       "configuration/zones",
       "configuration/birdseye",
       "configuration/stationary_objects",
