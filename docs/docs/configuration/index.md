@@ -19,7 +19,7 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp
+            - restream
     detect:
       width: 1280
       height: 720
@@ -338,7 +338,13 @@ snapshots:
 # Optional: RTMP configuration
 # NOTE: Can be overridden at the camera level
 rtmp:
-  # Optional: Enable the RTMP stream (default: True)
+  # Optional: Enable the RTMP stream (default: False)
+  enabled: False
+
+# Optional: Restream configuration
+# NOTE: Can be overridden at the camera level
+rtmp:
+  # Optional: Enable the restream (default: True)
   enabled: True
 
 # Optional: Live stream configuration for WebUI
@@ -351,6 +357,10 @@ live:
   # Optional: Set the encode quality of the live stream (default: shown below)
   # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
   quality: 8
+  # Optional: Set the source of the live stream (default: shown below)
+  # mp4 is full res stream that does not support audio
+  # jsmpeg is the detect stream, capped at 10 fps
+  source: mp4
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
@@ -387,11 +397,12 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,rtmp
-          # NOTICE: In addition to assigning the record, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,restream,rtmp
+          # NOTICE: In addition to assigning the record, restream, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
+            - restream
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
