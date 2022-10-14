@@ -101,6 +101,9 @@ export default function Camera({ camera }) {
             <VideoPlayer
               options={{
                 autoplay: true,
+                preload: 'metadata',
+                poster: `${apiHost}/api/${camera}/latest.jpg`,
+                playbackRates: [1],
                 sources: [
                   {
                     src: `${apiHost}/restream/${camera}`,
