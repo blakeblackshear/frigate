@@ -99,7 +99,6 @@ export default function Camera({ camera }) {
         <Fragment>
           <div style={`max-height: ${cameraConfig.live.height}px; max-width: ${liveWidth}px`}>
             <VideoPlayer
-              audio={false}
               live={true}
               options={{
                 autoplay: true,
@@ -123,7 +122,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            Not implemented
+            webRTC not implemented
           </div>
         </Fragment>
       )
