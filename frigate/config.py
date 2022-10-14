@@ -523,7 +523,8 @@ class RestreamConfig(FrigateBaseModel):
 
 class CameraLiveSourceEnum(str, Enum):
     jsmpeg = "jsmpeg"
-    restream = "restream"
+    mp4 = "mp4"
+    webrtc = "webrtc"
 
 
 class CameraLiveConfig(FrigateBaseModel):
