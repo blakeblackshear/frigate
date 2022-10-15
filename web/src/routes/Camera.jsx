@@ -14,6 +14,7 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import VideoPlayer from '../components/VideoPlayer';
+import WebRtcPlayer from '../components/WebRtcPlayer';
 
 const emptyObject = Object.freeze({});
 
@@ -122,7 +123,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            webRTC not implemented
+            <WebRtcPlayer />
           </div>
         </Fragment>
       )

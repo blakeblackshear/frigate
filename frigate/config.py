@@ -524,12 +524,13 @@ class RestreamConfig(FrigateBaseModel):
 class CameraLiveSourceEnum(str, Enum):
     jsmpeg = "jsmpeg"
     mp4 = "mp4"
+    webrtc = "webrtc"
 
 
 class CameraLiveConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
-    source: CameraLiveSourceEnum = Field(default=CameraLiveSourceEnum.mp4)
+    source: CameraLiveSourceEnum = Field(default=CameraLiveSourceEnum.webrtc)
 
 
 class CameraUiConfig(FrigateBaseModel):
