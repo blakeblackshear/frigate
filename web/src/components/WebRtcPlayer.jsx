@@ -3,11 +3,11 @@ import { useRef, useEffect } from 'preact/hooks';
 
 let ws;
 
-function initStream() {
-  console.log('Doing a thing');
-  ws = new WebSocket('ws://127.0.0.1:1984/api/ws?src=garage_cam');
+function initStream(camera) {
+  //ws = new WebSocket('ws://127.0.0.1:1984/api/ws?src=garage_cam');
+  ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/restream-ws/api/ws?src=${camera}`);
   ws.onopen = () => {
-    console.log('ws.onopen');
+    console.debug('ws.onopen');
     pc.createOffer().then(offer => {
       pc.setLocalDescription(offer).then(() => {
         console.log(offer.sdp);
@@ -16,12 +16,9 @@ function initStream() {
       });
     });
   }
-  ws.onerror = e => {
-    console.log("There was a ws error " + e.type);
-  }
   ws.onmessage = ev => {
     const msg = JSON.parse(ev.data);
-    console.log('ws.onmessage', msg);
+    console.debug('ws.onmessage', msg);
 
     if (msg.type === 'webrtc/candidate') {
       pc.addIceCandidate({candidate: msg.value, sdpMid: ''});
@@ -65,7 +62,7 @@ function initStream() {
 }
 
 export default function WebRtcPlayer({ camera, width, height }) {
-  initStream();
+  initStream(camera);
   return (
     <div>
       <video id='video' autoplay playsinline controls muted width={width} height={height} />

@@ -123,7 +123,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <WebRtcPlayer width={liveWidth} height={cameraConfig.live.height} />
+            <WebRtcPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
           </div>
         </Fragment>
       )
