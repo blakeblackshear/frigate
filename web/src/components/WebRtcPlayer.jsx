@@ -1,16 +1,12 @@
 import { h } from 'preact';
-import { useRef, useEffect } from 'preact/hooks';
 
 let ws;
 
 function initStream(camera) {
-  //ws = new WebSocket('ws://127.0.0.1:1984/api/ws?src=garage_cam');
-  ws = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/restream-ws/api/ws?src=${camera}`);
+  ws = new WebSocket(`ws://${window.location.host}/go2rtc/api/ws?src=${camera}`);
   ws.onopen = () => {
-    console.debug('ws.onopen');
     pc.createOffer().then(offer => {
       pc.setLocalDescription(offer).then(() => {
-        console.log(offer.sdp);
         const msg = {type: 'webrtc/offer', value: pc.localDescription.sdp};
         ws.send(JSON.stringify(msg));
       });
@@ -18,7 +14,6 @@ function initStream(camera) {
   }
   ws.onmessage = ev => {
     const msg = JSON.parse(ev.data);
-    console.debug('ws.onmessage', msg);
 
     if (msg.type === 'webrtc/candidate') {
       pc.addIceCandidate({candidate: msg.value, sdpMid: ''});
