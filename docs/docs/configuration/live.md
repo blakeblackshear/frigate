@@ -12,5 +12,5 @@ Live view options can be specified globally and per-camera using `live -> source
 | Source | Latency | Frame Rate                             | Resolution     | Audio                       | Requires Restream |
 | ------ | ------- | -------------------------------------- | -------------- | --------------------------- | ----------------- |
 | jsmpeg | low     | same as `detect -> fps`, capped at 10  | same as detect | no                          | no                |
-| mp4    | high    | native                                 | native         | no                          | yes               |
+| mp4    | high    | native                                 | native         | not yet                     | yes               |
 | webrtc | low     | native                                 | native         | yes (depends on browser)    | yes               |
