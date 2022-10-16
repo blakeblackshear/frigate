@@ -1143,6 +1143,33 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert runtime_config.cameras["back"].restream.enabled
 
+    def test_global_restream_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "restream": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "restream": {
+                        "enabled": True,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].restream.enabled
+
     def test_global_rtmp_merge(self):
 
         config = {
