@@ -1050,11 +1050,11 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
 
-    def test_global_rtmp(self):
+    def test_global_restream(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": True},
+            "restream": {"enabled": True},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1072,7 +1072,30 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].rtmp.enabled
+        assert runtime_config.cameras["back"].restream.enabled
+
+    def test_global_rtmp_disabled(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert not runtime_config.cameras["back"].rtmp.enabled
 
     def test_default_rtmp(self):
 
