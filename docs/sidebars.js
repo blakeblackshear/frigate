@@ -18,6 +18,7 @@ module.exports = {
       "configuration/snapshots",
       "configuration/objects",
       "configuration/restream",
+      "configuration/live",
       "configuration/zones",
       "configuration/birdseye",
       "configuration/stationary_objects",
