@@ -52,9 +52,9 @@ mqtt:
   # Optional: user
   user: mqtt_user
   # Optional: password
-  # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
+  # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_' with quote
   #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'
-  password: password
+  password: 'password'
   # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
   tls_ca_certs: /path/to/ca.crt
   # Optional: tls_client_cert and tls_client key in order to use self-signed client
