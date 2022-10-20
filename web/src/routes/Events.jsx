@@ -455,11 +455,12 @@ export default function Events({ path, ...props }) {
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
                           {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} (
-                          {(event.top_score * 100).toFixed(0)}%)
+                          {(event.top_score * 100).toFixed(0)}%) <span className="text-red-300">{(event.end_time - event.start_time).toFixed(0)}s</span>
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()}
+                          {new Date(event.start_time * 1000).toLocaleTimeString()}{' - '}
+                          {new Date(event.end_time * 1000).toLocaleTimeString()}
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
