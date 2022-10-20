@@ -37,6 +37,21 @@ const monthsAgo = (num) => {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000;
 };
 
+const clipLength = (num) => {
+  let totalSeconds = num;
+  let hours = Math.floor(totalSeconds / 3600);
+  totalSeconds %= 3600;
+  let minutes = Math.floor(totalSeconds / 60);
+  let seconds = (totalSeconds % 60).toFixed(0);
+  let length=`${hours} Hours ${minutes} Minutes ${seconds} Seconds`
+  if (hours == 0 && minutes == 0) {
+    length=`${seconds} Seconds`
+  } else {
+    length=`${minutes} Minutes ${seconds} Seconds`
+  }
+  return length;
+}
+
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
   const [searchParams, setSearchParams] = useState({
@@ -455,12 +470,11 @@ export default function Events({ path, ...props }) {
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
                           {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} (
-                          {(event.top_score * 100).toFixed(0)}%) <span className="text-red-300">{(event.end_time - event.start_time).toFixed(0)}s</span>
+                          {(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()}{' - '}
-                          {new Date(event.end_time * 1000).toLocaleTimeString()}
+                          {new Date(event.start_time * 1000).toLocaleTimeString()} <span className="text-red-300">({clipLength(event.end_time - event.start_time)})</span>
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
