@@ -22,6 +22,11 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
+import {
+  fromUnixTime,
+  intervalToDuration,
+  formatDuration,
+} from 'date-fns';
 
 const API_LIMIT = 25;
 
@@ -37,19 +42,14 @@ const monthsAgo = (num) => {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000;
 };
 
-const clipLength = (num) => {
-  let totalSeconds = num;
-  let hours = Math.floor(totalSeconds / 3600);
-  totalSeconds %= 3600;
-  let minutes = Math.floor(totalSeconds / 60);
-  let seconds = (totalSeconds % 60).toFixed(0);
-  let length=`${hours} Hours ${minutes} Minutes ${seconds} Seconds`
-  if (hours == 0 && minutes == 0) {
-    length=`${seconds} Seconds`
-  } else {
-    length=`${minutes} Minutes ${seconds} Seconds`
+const clipLength = (start_time, end_time) => {
+  const start = fromUnixTime(start_time);
+  const end = fromUnixTime(end_time);
+  let duration = 'In Progress';
+  if (end_time) {
+    duration = formatDuration(intervalToDuration({ start, end }));
   }
-  return length;
+  return duration;
 }
 
 export default function Events({ path, ...props }) {
@@ -474,7 +474,7 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()} <span className="text-red-300">({clipLength(event.end_time - event.start_time)})</span>
+                          {new Date(event.start_time * 1000).toLocaleTimeString()} ({clipLength(event.end_time, event.start_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
