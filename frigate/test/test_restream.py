@@ -38,7 +38,7 @@ class TestRestream(TestCase):
                     "restream": {
                         "enabled": True,
                     },
-                }
+                },
             },
         }
 
