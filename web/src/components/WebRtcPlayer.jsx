@@ -1,11 +1,11 @@
 import { h } from 'preact';
 import { baseUrl } from '../api/baseUrl';
-import { useMemo } from 'preact/hooks';
+import { useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}go2rtc/api/ws?src=${camera}`;
 
-  useMemo(() => {
+  useEffect(() => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       pc.createOffer().then(offer => {
@@ -56,7 +56,11 @@ export default function WebRtcPlayer({ camera, width, height }) {
     // Safari don't support "offerToReceiveVideo"
     // so need to create transeivers manually
     pc.addTransceiver('video', {direction: 'recvonly'});
-    pc.addTransceiver('audio', {direction: 'recvonly'});
+    pc.addTransceiver('audio', { direction: 'recvonly' });
+
+    return () => {
+      ws.close();
+    };
   }, [url]);
 
   return (
