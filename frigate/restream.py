@@ -29,7 +29,7 @@ class RestreamApi:
                         self.relays[cam_name] = input.path
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
-                        self.relays[cam_name] = f"exec: /usr/lib/btbn-ffmpeg/bin/ffmpeg -i {input.path} -c copy -rtsp_transport tcp -f rtsp {{output}}"
+                        self.relays[cam_name] = f"exec: /usr/lib/btbn-ffmpeg/bin/ffmpeg -i {input.path} -c:v copy -c:a libopus -rtsp_transport tcp -f rtsp {{output}}"
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
