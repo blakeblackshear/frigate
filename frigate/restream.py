@@ -26,7 +26,11 @@ class RestreamApi:
 
             for input in camera.ffmpeg.inputs:
                 if "restream" in input.roles:
-                    self.relays[cam_name] = input.path
+                    if input.path.startswith('rtsp'):
+                        self.relays[cam_name] = input.path
+                    else:
+                        # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
+                        self.relays[cam_name] = f"ffmpeg:{input.path}"
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
