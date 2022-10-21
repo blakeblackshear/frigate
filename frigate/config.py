@@ -530,7 +530,7 @@ class CameraLiveSourceEnum(str, Enum):
 class CameraLiveConfig(FrigateBaseModel):
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
-    source: CameraLiveSourceEnum = Field(default=CameraLiveSourceEnum.webrtc)
+    source: CameraLiveSourceEnum = Field(default=CameraLiveSourceEnum.jsmpeg)
 
 
 class CameraUiConfig(FrigateBaseModel):
