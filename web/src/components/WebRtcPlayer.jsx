@@ -3,7 +3,7 @@ import { h } from 'preact';
 let ws;
 
 function initStream(camera) {
-  if (location.protocol == 'https') {
+  if (location.protocol == 'https:') {
     ws = new WebSocket(`wss://${window.location.host}/go2rtc/api/ws?src=${camera}`);
   } else {
     ws = new WebSocket(`ws://${window.location.host}/go2rtc/api/ws?src=${camera}`);
