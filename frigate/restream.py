@@ -9,6 +9,11 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
+def get_manual_go2rtc_stream(camera_url: str) -> str:
+    """Get a manual stream for go2rtc."""
+    return f"exec: /usr/lib/btbn-ffmpeg/bin/ffmpeg -i {camera_url} -c:v copy -c:a libopus -rtsp_transport tcp -f rtsp {{output}}"
+
+
 class RestreamApi:
     """Control go2rtc relay API."""
 
@@ -29,7 +34,7 @@ class RestreamApi:
                         self.relays[cam_name] = input.path
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
-                        self.relays[cam_name] = f"exec: /usr/lib/btbn-ffmpeg/bin/ffmpeg -i {input.path} -c:v copy -c:a libopus -rtsp_transport tcp -f rtsp {{output}}"
+                        self.relays[cam_name] = get_manual_go2rtc_stream(input.path)
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
