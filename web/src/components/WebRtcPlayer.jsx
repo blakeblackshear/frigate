@@ -55,7 +55,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
 
     // Safari don't support "offerToReceiveVideo"
     // so need to create transeivers manually
-    pc.addTransceiver('video', {direction: 'recvonly'});
+    pc.addTransceiver('video', { direction: 'recvonly' });
     pc.addTransceiver('audio', { direction: 'recvonly' });
 
     return () => {
