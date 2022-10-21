@@ -57,7 +57,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
     // so need to create transeivers manually
     pc.addTransceiver('video', {direction: 'recvonly'});
     pc.addTransceiver('audio', {direction: 'recvonly'});
-  }, [camera]);
+  }, [url]);
 
   return (
     <div>
