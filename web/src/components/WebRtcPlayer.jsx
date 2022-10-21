@@ -59,6 +59,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
     pc.addTransceiver('audio', { direction: 'recvonly' });
 
     return () => {
+      pc.close();
       ws.close();
     };
   }, [url]);
