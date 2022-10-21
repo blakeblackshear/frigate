@@ -1,17 +1,12 @@
 import { h } from 'preact';
+import { baseUrl } from '../api/baseUrl';
 import { useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
+  const url = `${baseUrl.replace(/^http/, 'ws')}go2rtc/api/ws?src=${camera}`;
 
   useEffect(() => {
-    let ws;
-
-    if (location.protocol == 'https:') {
-      ws = new WebSocket(`wss://${window.location.host}/go2rtc/api/ws?src=${camera}`);
-    } else {
-      ws = new WebSocket(`ws://${window.location.host}/go2rtc/api/ws?src=${camera}`);
-    }
-
+    const ws = new WebSocket(url);
     ws.onopen = () => {
       pc.createOffer().then(offer => {
         pc.setLocalDescription(offer).then(() => {
