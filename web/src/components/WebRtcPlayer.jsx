@@ -1,11 +1,11 @@
 import { h } from 'preact';
 import { baseUrl } from '../api/baseUrl';
-import { useEffect } from 'preact/hooks';
+import { useMemo } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}go2rtc/api/ws?src=${camera}`;
 
-  useEffect(() => {
+  useMemo(() => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       pc.createOffer().then(offer => {
