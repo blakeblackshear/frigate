@@ -23,12 +23,12 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
-  const [viewSource, setViewSource] = useState('webrtc');
 
   const cameraConfig = config?.cameras[camera];
   const liveWidth = cameraConfig
     ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
+  const [viewSource, setViewSource] = usePersistence(`${camera}-source`, 'webrtc');
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
