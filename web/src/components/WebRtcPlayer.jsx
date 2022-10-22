@@ -3,7 +3,7 @@ import { baseUrl } from '../api/baseUrl';
 import { useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
-  const url = `${baseUrl.replace(/^http/, 'ws')}go2rtc/api/ws?src=${camera}`;
+  const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
 
   useEffect(() => {
     const ws = new WebSocket(url);
