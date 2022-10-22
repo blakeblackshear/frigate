@@ -23,6 +23,7 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
+  const [viewSource, setViewSource] = useState('webrtc');
 
   const cameraConfig = config?.cameras[camera];
   const liveWidth = cameraConfig
@@ -95,7 +96,7 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (cameraConfig.live.source == 'mp4') {
+    if (viewSource == 'mp4') {
       player = (
         <Fragment>
           <div style={`max-height: ${cameraConfig.live.height}px; max-width: ${liveWidth}px`}>
@@ -119,7 +120,7 @@ export default function Camera({ camera }) {
           </div>
         </Fragment>
       );
-    } else if (cameraConfig.live.source == 'webrtc') {
+    } else if (viewSource == 'webrtc') {
       player = (
         <Fragment>
           <div>

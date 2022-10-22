@@ -522,20 +522,10 @@ class JsmpegStreamConfig(FrigateBaseModel):
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality.")
 
 
-class BaseStreamConfig(FrigateBaseModel):
-    height: int = Field(default=720, title="Live camera view height.")
-
-
 class RestreamConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Restreaming enabled.")
     jsmpeg: JsmpegStreamConfig = Field(
         default_factory=JsmpegStreamConfig, title="Jsmpeg Stream Configuration."
-    )
-    mp4: BaseStreamConfig = Field(
-        default_factory=BaseStreamConfig, title="MP4 Stream Configuration."
-    )
-    webrtc: BaseStreamConfig = Field(
-        default_factory=BaseStreamConfig, title="Webrtc Stream Configuration."
     )
 
 
