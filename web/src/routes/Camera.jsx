@@ -25,8 +25,8 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = cameraConfig
-    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+  const jsmpegWidth = cameraConfig
+    ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource] = usePersistence(`${camera}-source`, 'webrtc');
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
@@ -124,7 +124,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <WebRtcPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
+            <WebRtcPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
           </div>
         </Fragment>
       )
@@ -132,7 +132,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
           </div>
         </Fragment>
       );
