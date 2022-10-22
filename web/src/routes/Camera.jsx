@@ -99,7 +99,7 @@ export default function Camera({ camera }) {
     if (viewSource == 'mp4') {
       player = (
         <Fragment>
-          <div>
+          <div className='max-w-7xl'>
             <VideoPlayer
               live={true}
               options={{
@@ -123,7 +123,7 @@ export default function Camera({ camera }) {
     } else if (viewSource == 'webrtc') {
       player = (
         <Fragment>
-          <div>
+          <div className='max-w-5xl'>
             <WebRtcPlayer camera={camera} />
           </div>
         </Fragment>
