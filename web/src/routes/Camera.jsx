@@ -99,7 +99,7 @@ export default function Camera({ camera }) {
     if (viewSource == 'mp4') {
       player = (
         <Fragment>
-          <div style={`max-height: ${cameraConfig.live.height}px; max-width: ${liveWidth}px`}>
+          <div>
             <VideoPlayer
               live={true}
               options={{
@@ -124,7 +124,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <WebRtcPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
+            <WebRtcPlayer camera={camera} />
           </div>
         </Fragment>
       )
