@@ -592,7 +592,6 @@ class CameraConfig(FrigateBaseModel):
         if len(config["ffmpeg"]["inputs"]) == 1:
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
-                "rtmp",
                 "detect",
                 "restream",
             ]
