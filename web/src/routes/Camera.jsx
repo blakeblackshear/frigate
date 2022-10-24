@@ -28,7 +28,8 @@ export default function Camera({ camera }) {
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
-  const [viewSource, setViewSource] = usePersistence(`${camera}-source`, 'webrtc');
+  const [viewSource, setViewSource] = usePersistence(`${camera}-source`, 'jsmpeg');
+  const sourceValues = cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -99,7 +100,7 @@ export default function Camera({ camera }) {
     if (viewSource == 'mp4') {
       player = (
         <Fragment>
-          <div className='max-w-7xl'>
+          <div className="max-w-7xl">
             <VideoPlayer
               live={true}
               options={{
@@ -109,7 +110,7 @@ export default function Camera({ camera }) {
                 playbackRates: [1],
                 sources: [
                   {
-                    src: `${apiHost}/restream/mp4/${camera}`,
+                    src: `${apiHost}/live/mp4/${camera}`,
                     type: 'video/mp4',
                   },
                 ],
@@ -123,11 +124,11 @@ export default function Camera({ camera }) {
     } else if (viewSource == 'webrtc') {
       player = (
         <Fragment>
-          <div className='max-w-5xl'>
+          <div className="max-w-5xl">
             <WebRtcPlayer camera={camera} />
           </div>
         </Fragment>
-      )
+      );
     } else {
       player = (
         <Fragment>
@@ -157,7 +158,21 @@ export default function Camera({ camera }) {
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading size="2xl">{camera.replaceAll('_', ' ')}</Heading>
+      <div className='flex justify-between'>
+        <Heading className='p-2' size="2xl">{camera.replaceAll('_', ' ')}</Heading>
+        <select
+          className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
+          value={viewSource}
+          onChange={(e) => setViewSource(e.target.value)}
+        >
+          {sourceValues.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
 
       {player}
