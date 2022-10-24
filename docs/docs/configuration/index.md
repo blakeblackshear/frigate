@@ -347,21 +347,15 @@ rtmp:
 restream:
   # Optional: Enable the restream (default: True)
   enabled: True
-
-# Optional: Live stream configuration for WebUI
-# NOTE: Can be overridden at the camera level
-live:
-  # Optional: Set the height of the live stream. (default: 720)
-  # This must be less than or equal to the height of the detect stream. Lower resolutions
-  # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
-  height: 720
-  # Optional: Set the encode quality of the live stream (default: shown below)
-  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
-  quality: 8
-  # Optional: Set the source of the live stream (default: shown below)
-  # mp4 is full res stream that does not support audio
-  # jsmpeg is the detect stream, capped at 10 fps
-  source: mp4
+  # Optional: jsmpeg stream configuration for WebUI
+  jsmpeg:
+    # Optional: Set the height of the jsmpeg stream. (default: 720)
+    # This must be less than or equal to the height of the detect stream. Lower resolutions
+    # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+    height: 720
+    # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+    # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+    quality: 8
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
