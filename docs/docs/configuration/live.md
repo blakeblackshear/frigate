@@ -7,7 +7,7 @@ Frigate has different live view options, some of which require [restream](restre
 
 ## Live View Options
 
-Live view options can be specified globally and per-camera using `live -> source`. The options are:
+Live view options can be selected while viewing the live stream. The options are:
 
 | Source | Latency | Frame Rate                             | Resolution     | Audio                       | Requires Restream | Other Limitations  |
 | ------ | ------- | -------------------------------------- | -------------- | --------------------------- | ----------------- | ------------------ |
