@@ -1181,7 +1181,7 @@ class TestConfig(unittest.TestCase):
                         "inputs": [
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
-                                "roles": ["detect"],
+                                "roles": ["detect", "rtmp"],
                             },
                         ]
                     },
@@ -1225,11 +1225,11 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert not runtime_config.cameras["back"].rtmp.enabled
 
-    def test_global_live(self):
+    def test_global_jsmpeg(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "live": {"quality": 4},
+            "restream": {"jsmpeg": {"quality": 4}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1247,7 +1247,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 4
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 4
 
     def test_default_live(self):
 
@@ -1270,13 +1270,13 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 8
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 8
 
     def test_global_live_merge(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "live": {"quality": 4, "height": 480},
+            "restream": {"jsmpeg": {"quality": 4, "height": 480}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1287,8 +1287,10 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "live": {
-                        "quality": 7,
+                    "restream": {
+                        "jsmpeg": {
+                            "quality": 7,
+                        }
                     },
                 }
             },
@@ -1297,8 +1299,8 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 7
-        assert runtime_config.cameras["back"].live.height == 480
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 7
+        assert runtime_config.cameras["back"].restream.jsmpeg.height == 480
 
     def test_global_timestamp_style(self):
 

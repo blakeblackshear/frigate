@@ -29,7 +29,7 @@ export default function Camera({ camera }) {
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource] = usePersistence(`${camera}-source`, 'jsmpeg');
-  const sourceValues = cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
+  const sourceValues = (cameraConfig && cameraConfig.restream.enabled) ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -100,7 +100,7 @@ export default function Camera({ camera }) {
     if (viewSource == 'mp4') {
       player = (
         <Fragment>
-          <div className="max-w-7xl">
+          <div className="max-w-5xl">
             <VideoPlayer
               live={true}
               options={{

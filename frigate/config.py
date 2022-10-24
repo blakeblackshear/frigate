@@ -590,11 +590,16 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
+            has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0]["roles"]
+
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
                 "restream",
             ]
+
+            if has_rtmp:
+                config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
         super().__init__(**config)
 

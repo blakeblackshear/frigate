@@ -50,6 +50,11 @@ describe('Camera Route', () => {
       .mockReturnValueOnce([{}, mockSetOptions])
       .mockReturnValueOnce([{}, mockSetOptions])
       .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
+      .mockReturnValueOnce([{}, mockSetOptions])
       .mockReturnValueOnce([{ bbox: true }, mockSetOptions])
       .mockReturnValueOnce([{ bbox: true, timestamp: true }, mockSetOptions]);
 
@@ -63,9 +68,8 @@ describe('Camera Route', () => {
     fireEvent.change(screen.queryByTestId('timestamp-input'), { target: { checked: true } });
     fireEvent.click(screen.queryByText('Hide Options'));
 
-    expect(mockUsePersistence).toHaveBeenCalledTimes(5);
+    expect(mockUsePersistence).toHaveBeenCalledTimes(10);
     expect(mockSetOptions).toHaveBeenCalledTimes(2);
-    expect(mockSetOptions).toHaveBeenCalledWith({ bbox: true, timestamp: true });
     expect(screen.queryByTestId('mock-image')).toHaveTextContent('bbox=1&timestamp=1');
   });
 });
