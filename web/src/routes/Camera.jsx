@@ -28,8 +28,8 @@ export default function Camera({ camera }) {
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
-  const [viewSource, setViewSource] = usePersistence(`${camera}-source`, undefined);
-  const sourceValues = (cameraConfig && cameraConfig.restream.enabled) ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'jsmpeg');
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -55,7 +55,7 @@ export default function Camera({ camera }) {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
 
-  if (!cameraConfig) {
+  if (!cameraConfig || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
@@ -158,8 +158,10 @@ export default function Camera({ camera }) {
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <div className='flex justify-between'>
-        <Heading className='p-2' size="2xl">{camera.replaceAll('_', ' ')}</Heading>
+      <div className="flex justify-between">
+        <Heading className="p-2" size="2xl">
+          {camera.replaceAll('_', ' ')}
+        </Heading>
         <select
           className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
           value={viewSource}
