@@ -380,7 +380,7 @@ timestamp_style:
 cameras:
   # Required: name of the camera
   back:
-    # Optional: Enable/Disable the camera (default: camera is enabled automatically)
+    # Optional: Enable/Disable the camera (default: shown below)
     enabled: True
     # Required: ffmpeg settings for the camera
     ffmpeg:
