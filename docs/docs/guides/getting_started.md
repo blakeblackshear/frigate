@@ -62,6 +62,7 @@ detectors:
 
 cameras:
   camera_1: # <------ Name the camera
+    enabled: True # <----- Enable/disable camera
     ffmpeg:
       inputs:
         - path: rtsp://10.0.10.10:554/rtsp # <----- Update for your camera
