@@ -530,6 +530,7 @@ class CameraUiConfig(FrigateBaseModel):
 
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
+    enabled: Optional[bool] = Field(default=True, title="Enable camera.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -799,7 +800,7 @@ class FrigateConfig(FrigateBaseModel):
         if config.mqtt.password:
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
-        # Global config to propegate down to camera level
+        # Global config to propagate down to camera level
         global_config = config.dict(
             include={
                 "birdseye": ...,
@@ -816,109 +817,113 @@ class FrigateConfig(FrigateBaseModel):
             exclude_unset=True,
         )
 
-        for name, camera in config.cameras.items():
+        for name, camera in config.cameras.copy().items():
             merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
             )
 
-            # Default max_disappeared configuration
-            max_disappeared = camera_config.detect.fps * 5
-            if camera_config.detect.max_disappeared is None:
-                camera_config.detect.max_disappeared = max_disappeared
+            if camera_config.enabled:
+                # Default max_disappeared configuration
+                max_disappeared = camera_config.detect.fps * 5
+                if camera_config.detect.max_disappeared is None:
+                    camera_config.detect.max_disappeared = max_disappeared
 
-            # Default stationary_threshold configuration
-            stationary_threshold = camera_config.detect.fps * 10
-            if camera_config.detect.stationary.threshold is None:
-                camera_config.detect.stationary.threshold = stationary_threshold
+                # Default stationary_threshold configuration
+                stationary_threshold = camera_config.detect.fps * 10
+                if camera_config.detect.stationary.threshold is None:
+                    camera_config.detect.stationary.threshold = stationary_threshold
 
-            # FFMPEG input substitution
-            for input in camera_config.ffmpeg.inputs:
-                input.path = input.path.format(**FRIGATE_ENV_VARS)
+                # FFMPEG input substitution
+                for input in camera_config.ffmpeg.inputs:
+                    input.path = input.path.format(**FRIGATE_ENV_VARS)
 
-            # Add default filters
-            object_keys = camera_config.objects.track
-            if camera_config.objects.filters is None:
-                camera_config.objects.filters = {}
-            object_keys = object_keys - camera_config.objects.filters.keys()
-            for key in object_keys:
-                camera_config.objects.filters[key] = FilterConfig()
+                # Add default filters
+                object_keys = camera_config.objects.track
+                if camera_config.objects.filters is None:
+                    camera_config.objects.filters = {}
+                object_keys = object_keys - camera_config.objects.filters.keys()
+                for key in object_keys:
+                    camera_config.objects.filters[key] = FilterConfig()
 
-            # Apply global object masks and convert masks to numpy array
-            for object, filter in camera_config.objects.filters.items():
-                if camera_config.objects.mask:
-                    filter_mask = []
-                    if filter.mask is not None:
-                        filter_mask = (
-                            filter.mask
-                            if isinstance(filter.mask, list)
-                            else [filter.mask]
+                # Apply global object masks and convert masks to numpy array
+                for object, filter in camera_config.objects.filters.items():
+                    if camera_config.objects.mask:
+                        filter_mask = []
+                        if filter.mask is not None:
+                            filter_mask = (
+                                filter.mask
+                                if isinstance(filter.mask, list)
+                                else [filter.mask]
+                            )
+                        object_mask = (
+                            camera_config.objects.mask
+                            if isinstance(camera_config.objects.mask, list)
+                            else [camera_config.objects.mask]
                         )
-                    object_mask = (
-                        camera_config.objects.mask
-                        if isinstance(camera_config.objects.mask, list)
-                        else [camera_config.objects.mask]
+                        filter.mask = filter_mask + object_mask
+
+                    # Set runtime filter to create masks
+                    camera_config.objects.filters[object] = RuntimeFilterConfig(
+                        frame_shape=camera_config.frame_shape,
+                        **filter.dict(exclude_unset=True),
                     )
-                    filter.mask = filter_mask + object_mask
 
-                # Set runtime filter to create masks
-                camera_config.objects.filters[object] = RuntimeFilterConfig(
-                    frame_shape=camera_config.frame_shape,
-                    **filter.dict(exclude_unset=True),
-                )
+                # Convert motion configuration
+                if camera_config.motion is None:
+                    camera_config.motion = RuntimeMotionConfig(
+                        frame_shape=camera_config.frame_shape
+                    )
+                else:
+                    camera_config.motion = RuntimeMotionConfig(
+                        frame_shape=camera_config.frame_shape,
+                        raw_mask=camera_config.motion.mask,
+                        **camera_config.motion.dict(exclude_unset=True),
+                    )
 
-            # Convert motion configuration
-            if camera_config.motion is None:
-                camera_config.motion = RuntimeMotionConfig(
-                    frame_shape=camera_config.frame_shape
+                # check runtime config
+                assigned_roles = list(
+                    set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
                 )
+                if camera_config.record.enabled and not "record" in assigned_roles:
+                    raise ValueError(
+                        f"Camera {name} has record enabled, but record is not assigned to an input."
+                    )
+
+                if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+                    raise ValueError(
+                        f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
+                    )
+
+                # backwards compatibility for retain_days
+                if not camera_config.record.retain_days is None:
+                    logger.warning(
+                        "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+                    )
+                    if camera_config.record.retain.days == 0:
+                        camera_config.record.retain.days = (
+                            camera_config.record.retain_days
+                        )
+
+                # warning if the higher level record mode is potentially more restrictive than the events
+                rank_map = {
+                    RetainModeEnum.all: 0,
+                    RetainModeEnum.motion: 1,
+                    RetainModeEnum.active_objects: 2,
+                }
+                if (
+                    camera_config.record.retain.days != 0
+                    and rank_map[camera_config.record.retain.mode]
+                    > rank_map[camera_config.record.events.retain.mode]
+                ):
+                    logger.warning(
+                        f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+                    )
+                # generate the ffmpeg commands
+                camera_config.create_ffmpeg_cmds()
+                config.cameras[name] = camera_config
             else:
-                camera_config.motion = RuntimeMotionConfig(
-                    frame_shape=camera_config.frame_shape,
-                    raw_mask=camera_config.motion.mask,
-                    **camera_config.motion.dict(exclude_unset=True),
-                )
-
-            # check runtime config
-            assigned_roles = list(
-                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
-            )
-            if camera_config.record.enabled and not "record" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
-
-            if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
-
-            # backwards compatibility for retain_days
-            if not camera_config.record.retain_days is None:
-                logger.warning(
-                    "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
-                )
-                if camera_config.record.retain.days == 0:
-                    camera_config.record.retain.days = camera_config.record.retain_days
-
-            # warning if the higher level record mode is potentially more restrictive than the events
-            rank_map = {
-                RetainModeEnum.all: 0,
-                RetainModeEnum.motion: 1,
-                RetainModeEnum.active_objects: 2,
-            }
-            if (
-                camera_config.record.retain.days != 0
-                and rank_map[camera_config.record.retain.mode]
-                > rank_map[camera_config.record.events.retain.mode]
-            ):
-                logger.warning(
-                    f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
-                )
-            # generage the ffmpeg commands
-            camera_config.create_ffmpeg_cmds()
-            config.cameras[name] = camera_config
-
+                config.cameras.pop(name)
         return config
 
     @validator("cameras")
