@@ -100,7 +100,8 @@ model:
   # Optional: Object detection model input colorspace
   # Valid values are rgb, bgr, or yuv. (default: shown below)
   input_pixel_format: rgb
-  # Optional: Object detection model input tensor format (default: shown below)
+  # Optional: Object detection model input tensor format
+  # Valid values are nhwc or nchw (default: shown below)
   input_tensor: "nhwc"
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
