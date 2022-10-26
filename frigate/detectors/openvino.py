@@ -17,7 +17,15 @@ class OvDetector(DetectionApi):
             model=self.ov_model, device_name=det_device
         )
         logger.info(f"Model Input Shape: {self.interpreter.input(0).shape}")
-        logger.info(f"Model Output Shape: {self.interpreter.output(0).shape}")
+        self.output_indexes = 0
+        while True:
+            try:
+                tensor_shape = self.interpreter.output(self.output_indexes).shape
+                logger.info(f"Model Output-{self.output_indexes} Shape: {tensor_shape}")
+                self.output_indexes += 1
+            except:
+                logger.info(f"Model has {self.output_indexes} Output Tensors")
+                break
 
     def detect_raw(self, tensor_input):
 
