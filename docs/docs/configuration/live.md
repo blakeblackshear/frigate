@@ -33,6 +33,8 @@ webrtc:
 
 and pass that config to frigate via docker or `frigate-go2rtc.yaml` for addon users:
 
+See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
+
 ```yaml
 volumes:
   - /path/to/your/go2rtc.yml:/config/frigate-go2rtc.yml:ro
