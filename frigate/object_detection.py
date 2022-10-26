@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import DetectorTypeEnum
+from frigate.config import DetectorTypeEnum, InputTensorEnum
 from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
 from frigate.detectors.cpu_tfl import CpuTfl
 
@@ -27,14 +27,10 @@ class ObjectDetector(ABC):
 
 def tensor_transform(desired_shape):
     # Currently this function only supports BHWC permutations
-    if desired_shape == ["B", "H", "W", "C"]:
+    if desired_shape == InputTensorEnum.nhwc:
         return None
-    else:
-        transform = [0] * 4
-        transform[desired_shape.index("H")] = 1
-        transform[desired_shape.index("W")] = 2
-        transform[desired_shape.index("C")] = 3
-        return tuple(transform)
+    elif desired_shape == InputTensorEnum.nchw:
+        return (0, 3, 1, 2)
 
 
 class LocalObjectDetector(ObjectDetector):

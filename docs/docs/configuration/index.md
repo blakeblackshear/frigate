@@ -101,7 +101,7 @@ model:
   # Valid values are rgb, bgr, or yuv. (default: shown below)
   input_pixel_format: rgb
   # Optional: Object detection model input tensor format (default: shown below)
-  input_tensor: ["B", "H", "W", "C"]
+  input_tensor: "nhwc"
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle

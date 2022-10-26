@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-from frigate.config import DetectorTypeEnum, ModelConfig
+from frigate.config import DetectorTypeEnum, InputTensorEnum, ModelConfig
 import frigate.object_detection
 
 
@@ -66,7 +66,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
 
         test_cfg = ModelConfig()
-        test_cfg.input_tensor = ["B", "C", "H", "W"]
+        test_cfg.input_tensor = InputTensorEnum.nchw
 
         test_obj_detect = frigate.object_detection.LocalObjectDetector(
             det_device=DetectorTypeEnum.cpu, model_config=test_cfg
