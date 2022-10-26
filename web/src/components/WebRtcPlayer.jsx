@@ -17,7 +17,6 @@ export default function WebRtcPlayer({ camera, width, height }) {
     }
     ws.onmessage = ev => {
       const msg = JSON.parse(ev.data);
-      console.log("For fun " + msg.type + " and a message " + msg.value);
 
       if (msg.type === 'webrtc/candidate') {
         pc.addIceCandidate({candidate: msg.value, sdpMid: ''});
