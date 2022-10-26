@@ -1,2 +1,2 @@
 #!/usr/bin/execlineb -P
-/usr/local/go2rtc/sbin/go2rtc
+/usr/local/go2rtc/sbin/go2rtc -config=/usr/local/go2rtc/go2rtc.yaml
