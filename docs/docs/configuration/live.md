@@ -13,11 +13,11 @@ Live view options can be selected while viewing the live stream. The options are
 | ------ | ------- | -------------------------------------- | -------------- | --------------------------- | ----------------- | --------------------- |
 | jsmpeg | low     | same as `detect -> fps`, capped at 10  | same as detect | no                          | no                | none                  |
 | mp4    | high    | native                                 | native         | not yet                     | yes               | none                  |
-| webrtc | low     | native                                 | native         | yes (depends on browser)    | yes               | requires extra config |
+| webrtc | lowest  | native                                 | native         | yes (depends on browser)    | yes               | requires extra config |
 
-### webRTC extra configuration:
+### WebRTC extra configuration:
 
-webRTC works by creating a websocket connection on extra ports. One of the following is requried for webRTC to work:
+webRTC works by creating a websocket connection on extra ports. One of the following is required for webRTC to work:
 * Frigate is run with `network_mode: host` to support automatic UDP port pass through locally and remotely. See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
 * Frigate is run with `network_mode: bridge` and has:
     * Router setup to forward port `8555` to port `8555` on the frigate device.
