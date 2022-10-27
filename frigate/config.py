@@ -524,7 +524,9 @@ class JsmpegStreamConfig(FrigateBaseModel):
 
 class RestreamConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Restreaming enabled.")
-    force_audio: bool = Field(default=False, title="Force audio compatibility with the browser.")
+    force_audio: bool = Field(
+        default=False, title="Force audio compatibility with the browser."
+    )
     jsmpeg: JsmpegStreamConfig = Field(
         default_factory=JsmpegStreamConfig, title="Jsmpeg Stream Configuration."
     )
