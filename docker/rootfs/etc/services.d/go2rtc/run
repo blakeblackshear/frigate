@@ -1,6 +1,12 @@
 #!/bin/bash
+
+# https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425?permalink_comment_id=3945021
+set -euo pipefail
+
 if [[ -f "/config/frigate-go2rtc.yaml" ]]; then
-    /usr/local/go2rtc/sbin/go2rtc -config=/config/frigate-go2rtc.yaml
+    CONFIG_PATH=/config/frigate-go2rtc.yaml
 else
-    /usr/local/go2rtc/sbin/go2rtc -config=/usr/local/go2rtc/sbin/go2rtc.yaml
+    CONFIG_PATH=/usr/local/go2rtc/sbin/go2rtc.yaml
 fi
+
+exec /usr/local/go2rtc/sbin/go2rtc -config="$CONFIG_PATH"
