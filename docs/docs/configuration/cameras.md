@@ -7,7 +7,7 @@ title: Cameras
 
 Several inputs can be configured for each camera and the role of each input can be mixed and matched based on your needs. This allows you to use a lower resolution stream for object detection, but create recordings from a higher resolution stream, or vice versa.
 
-A camera is enabled by default but can be temporarily disabled by using `enabled: False`.
+A camera is enabled by default but can be temporarily disabled by using `enabled: False`. Existing events and recordings can still be accessed. Live streams, recording and detecting are not working. Camera specific configurations will be used.
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
