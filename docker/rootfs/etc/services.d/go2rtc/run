@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -f "/config/frigate-go2rtc.yaml" ]; then
+if [[ -f "/config/frigate-go2rtc.yaml" ]]; then
     /usr/local/go2rtc/sbin/go2rtc -config=/config/frigate-go2rtc.yaml
 else
     /usr/local/go2rtc/sbin/go2rtc -config=/usr/local/go2rtc/sbin/go2rtc.yaml
