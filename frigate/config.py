@@ -823,10 +823,6 @@ class FrigateConfig(FrigateBaseModel):
                 {"name": name, **merged_config}
             )
 
-            if not camera_config.enabled:
-                config.cameras.pop(name)
-                continue
-
             # Default max_disappeared configuration
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
