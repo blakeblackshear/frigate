@@ -49,7 +49,7 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
       {
         (enabled) ?
           <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} />
-          : <div class="text-center text-green-500">Camera is disabled in config, no stream or snapshot available!</div>
+          : <div class="text-center pt-6">Camera is disabled in config, no stream or snapshot available!</div>
       }
       {
         (!hasLoaded && enabled) ? (
