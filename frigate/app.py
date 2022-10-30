@@ -250,42 +250,44 @@ class FrigateApp:
     def start_camera_processors(self) -> None:
         model_shape = (self.config.model.height, self.config.model.width)
         for name, config in self.config.cameras.items():
-            if self.config.cameras[name].enabled:
-                camera_process = mp.Process(
-                    target=track_camera,
-                    name=f"camera_processor:{name}",
-                    args=(
-                        name,
-                        config,
-                        model_shape,
-                        self.config.model.merged_labelmap,
-                        self.detection_queue,
-                        self.detection_out_events[name],
-                        self.detected_frames_queue,
-                        self.camera_metrics[name],
-                    ),
-                )
-                camera_process.daemon = True
-                self.camera_metrics[name]["process"] = camera_process
-                camera_process.start()
-                logger.info(f"Camera processor started for {name}: {camera_process.pid}")
-            else:
+            if not self.config.cameras[name].enabled:
                 logger.info(f"Camera processor not started for disabled camera {name}")
+                continue
+
+            camera_process = mp.Process(
+                target=track_camera,
+                name=f"camera_processor:{name}",
+                args=(
+                    name,
+                    config,
+                    model_shape,
+                    self.config.model.merged_labelmap,
+                    self.detection_queue,
+                    self.detection_out_events[name],
+                    self.detected_frames_queue,
+                    self.camera_metrics[name],
+                ),
+            )
+            camera_process.daemon = True
+            self.camera_metrics[name]["process"] = camera_process
+            camera_process.start()
+            logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self) -> None:
         for name, config in self.config.cameras.items():
-            if self.config.cameras[name].enabled:
-                capture_process = mp.Process(
-                    target=capture_camera,
-                    name=f"camera_capture:{name}",
-                    args=(name, config, self.camera_metrics[name]),
-                )
-                capture_process.daemon = True
-                self.camera_metrics[name]["capture_process"] = capture_process
-                capture_process.start()
-                logger.info(f"Capture process started for {name}: {capture_process.pid}")
-            else:
+            if not self.config.cameras[name].enabled:
                 logger.info(f"Capture process not started for disabled camera {name}")
+                continue
+
+            capture_process = mp.Process(
+                target=capture_camera,
+                name=f"camera_capture:{name}",
+                args=(name, config, self.camera_metrics[name]),
+            )
+            capture_process.daemon = True
+            self.camera_metrics[name]["capture_process"] = capture_process
+            capture_process.start()
+            logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(

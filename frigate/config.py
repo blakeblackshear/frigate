@@ -817,7 +817,7 @@ class FrigateConfig(FrigateBaseModel):
             exclude_unset=True,
         )
 
-        for name, camera in config.cameras.copy().items():
+        for name, camera in config.cameras.items():
             merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
