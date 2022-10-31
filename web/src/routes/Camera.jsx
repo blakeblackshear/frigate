@@ -99,8 +99,10 @@ export default function Camera({ camera }) {
   if (viewMode === 'live') {
     if (viewSource == 'mse') {
       player = (
-        <Fragment className="max-w-5xl">
-          <MsePlayer camera={camera} />
+        <Fragment>
+          <div className="max-w-5xl">
+            <MsePlayer camera={camera} />
+          </div>
         </Fragment>
       );
     } else if (viewSource == 'webrtc') {
