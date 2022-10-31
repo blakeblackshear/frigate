@@ -28,8 +28,8 @@ export default function Camera({ camera }) {
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'jsmpeg');
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mse', 'webrtc'] : ['jsmpeg'];
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'mse');
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['mse'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
