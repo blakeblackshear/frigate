@@ -3,7 +3,7 @@ import { baseUrl } from '../api/baseUrl';
 import { useEffect } from 'preact/hooks';
 
 export default function MsePlayer({ camera, width, height }) {
-  const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
+  const url = `${baseUrl.replace(/^http/, 'ws')}live/mse/api/ws?src=${camera}`;
 
   useEffect(() => {
     const video = document.querySelector('#video');
