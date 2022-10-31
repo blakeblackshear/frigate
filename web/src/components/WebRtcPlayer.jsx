@@ -8,39 +8,37 @@ export default function WebRtcPlayer({ camera, width, height }) {
   useEffect(() => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
-      pc.createOffer().then(offer => {
+      pc.createOffer().then((offer) => {
         pc.setLocalDescription(offer).then(() => {
-          const msg = {type: 'webrtc/offer', value: pc.localDescription.sdp};
+          const msg = { type: 'webrtc/offer', value: pc.localDescription.sdp };
           ws.send(JSON.stringify(msg));
         });
       });
-    }
-    ws.onmessage = ev => {
+    };
+    ws.onmessage = (ev) => {
       const msg = JSON.parse(ev.data);
 
       if (msg.type === 'webrtc/candidate') {
-        pc.addIceCandidate({candidate: msg.value, sdpMid: ''});
+        pc.addIceCandidate({ candidate: msg.value, sdpMid: '' });
       } else if (msg.type === 'webrtc/answer') {
-        pc.setRemoteDescription({type: 'answer', sdp: msg.value});
-        pc.getTransceivers().forEach(t => {
-          if (t.receiver.track.kind === 'audio') {
-            t.currentDirection
-          }
-        })
+        pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
-    }
+    };
 
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
-    pc.onicecandidate = ev => {
+    pc.onicecandidate = (ev) => {
       if (ev.candidate !== null) {
-        ws.send(JSON.stringify({
-          type: 'webrtc/candidate', value: ev.candidate.toJSON().candidate,
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'webrtc/candidate',
+            value: ev.candidate.toJSON().candidate,
+          })
+        );
       }
-    }
-    pc.ontrack = ev => {
+    };
+    pc.ontrack = (ev) => {
       const video = document.getElementById('video');
 
       // when audio track not exist in Chrome
@@ -51,7 +49,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
       if (video.srcObject !== null) return;
 
       video.srcObject = ev.streams[0];
-    }
+    };
 
     // Safari don't support "offerToReceiveVideo"
     // so need to create transeivers manually
@@ -68,7 +66,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
 
   return (
     <div>
-      <video id='video' autoplay playsinline controls muted width={width} height={height} />
+      <video id="video" autoplay playsinline controls muted width={width} height={height} />
     </div>
   );
 }
