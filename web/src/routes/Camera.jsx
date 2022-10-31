@@ -15,6 +15,7 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 import VideoPlayer from '../components/VideoPlayer';
 import WebRtcPlayer from '../components/WebRtcPlayer';
+import MsePlayer from '../components/MsePlayer';
 
 const emptyObject = Object.freeze({});
 
@@ -29,7 +30,7 @@ export default function Camera({ camera }) {
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'jsmpeg');
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'webrtc'] : ['jsmpeg'];
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'mse', 'webrtc'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -116,9 +117,15 @@ export default function Camera({ camera }) {
                 ],
               }}
               seekOptions={{ forward: false, back: false }}
-              onReady={() => {}}
+              onReady={() => { }}
             />
           </div>
+        </Fragment>
+      );
+    } else if (viewSource == 'mse') {
+      player = (
+        <Fragment>
+          <MsePlayer camera={camera} />
         </Fragment>
       );
     } else if (viewSource == 'webrtc') {
