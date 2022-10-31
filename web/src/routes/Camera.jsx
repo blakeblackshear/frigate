@@ -30,7 +30,7 @@ export default function Camera({ camera }) {
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'jsmpeg');
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mp4', 'mse', 'webrtc'] : ['jsmpeg'];
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['jsmpeg', 'mse', 'webrtc'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -98,33 +98,9 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (viewSource == 'mp4') {
+    if (viewSource == 'mse') {
       player = (
-        <Fragment>
-          <div className="max-w-5xl">
-            <VideoPlayer
-              live={true}
-              options={{
-                autoplay: true,
-                preload: 'metadata',
-                poster: `${apiHost}/api/${camera}/latest.jpg`,
-                playbackRates: [1],
-                sources: [
-                  {
-                    src: `${apiHost}/live/mp4/${camera}`,
-                    type: 'video/mp4',
-                  },
-                ],
-              }}
-              seekOptions={{ forward: false, back: false }}
-              onReady={() => { }}
-            />
-          </div>
-        </Fragment>
-      );
-    } else if (viewSource == 'mse') {
-      player = (
-        <Fragment>
+        <Fragment className="max-w-5xl">
           <MsePlayer camera={camera} />
         </Fragment>
       );
