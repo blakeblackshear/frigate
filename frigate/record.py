@@ -177,6 +177,11 @@ class RecordingMaintainer(threading.Thread):
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
                     else:
+                        if duration == -1:
+                            logger.warning(
+                                f"Failed to probe corrupt segment {f}: {p.returncode} - {p.stderr}"
+                            )
+
                         logger.warning(f"Discarding a corrupt recording segment: {f}")
                         Path(cache_path).unlink(missing_ok=True)
                         continue
