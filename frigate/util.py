@@ -1,24 +1,21 @@
 import copy
 import datetime
-import hashlib
-import json
 import logging
-import math
+import re
 import signal
-import subprocess as sp
-import threading
-import time
 import traceback
+import urllib.parse
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import AnyStr
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import psutil
+
+from frigate.const import REGEX_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
 
@@ -623,6 +620,23 @@ def load_labels(path, encoding="utf-8"):
             return {int(index): label.strip() for index, label in pairs}
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
+
+
+def clean_camera_user_pass(line: str) -> str:
+    """Removes user and password from line."""
+    # todo also remove http password like reolink
+    return re.sub(REGEX_CAMERA_USER_PASS, "*:*@", line)
+
+
+def escape_special_characters(path: str) -> str:
+    """Cleans reserved characters to encodings for ffmpeg."""
+    try:
+        found = re.search(REGEX_CAMERA_USER_PASS, path).group(0)[:-1]
+        pw = found[(found.index(":") + 1) :]
+        return path.replace(pw, urllib.parse.quote_plus(pw))
+    except AttributeError:
+        # path does not have user:pass
+        return path
 
 
 class FrameManager(ABC):

@@ -2,13 +2,14 @@
 import logging
 import threading
 import os
-import signal
 import queue
 from multiprocessing.queues import Queue
 from logging import handlers
 from setproctitle import setproctitle
 from typing import Deque
 from collections import deque
+
+from frigate.util import clean_camera_user_pass
 
 
 def listener_configurer() -> None:
@@ -55,6 +56,11 @@ class LogPipe(threading.Thread):
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
 
+    def cleanup_log(self, log: str) -> str:
+        """Cleanup the log line to remove sensitive info and string tokens."""
+        log = clean_camera_user_pass(log).strip("\n")
+        return log
+
     def fileno(self) -> int:
         """Return the write file descriptor of the pipe"""
         return self.fdWrite
@@ -62,7 +68,7 @@ class LogPipe(threading.Thread):
     def run(self) -> None:
         """Run the thread, logging everything."""
         for line in iter(self.pipeReader.readline, ""):
-            self.deque.append(line.strip("\n"))
+            self.deque.append(self.cleanup_log(line))
 
         self.pipeReader.close()
 

@@ -30,6 +30,7 @@ from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.stats import stats_snapshot
+from frigate.util import clean_camera_user_pass
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -581,7 +582,7 @@ def config():
         camera_dict = config["cameras"][camera_name]
         camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
-            cmd["cmd"] = " ".join(cmd["cmd"])
+            cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 

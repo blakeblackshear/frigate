@@ -12,8 +12,18 @@ import yaml
 from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT
-from frigate.util import create_mask, deep_merge, load_labels
+from frigate.const import (
+    BASE_DIR,
+    CACHE_DIR,
+    REGEX_CAMERA_NAME,
+    YAML_EXT,
+)
+from frigate.util import (
+    create_mask,
+    deep_merge,
+    escape_special_characters,
+    load_labels,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -540,7 +550,7 @@ class CameraUiConfig(FrigateBaseModel):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
+    name: Optional[str] = Field(title="Camera name.", regex=REGEX_CAMERA_NAME)
     enabled: bool = Field(default=True, title="Enable camera.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
@@ -695,7 +705,7 @@ class CameraConfig(FrigateBaseModel):
             + global_args
             + hwaccel_args
             + input_args
-            + ["-i", ffmpeg_input.path]
+            + ["-i", escape_special_characters(ffmpeg_input.path)]
             + ffmpeg_output_args
         )
 
