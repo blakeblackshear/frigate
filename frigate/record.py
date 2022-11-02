@@ -169,9 +169,19 @@ class RecordingMaintainer(threading.Thread):
                     p = sp.run(ffprobe_cmd, capture_output=True)
                     if p.returncode == 0 and p.stdout.decode():
                         duration = float(p.stdout.decode().strip())
+                    else:
+                        duration = -1
+
+                    # ensure duration is within expected length
+                    if 0 < duration < 600:
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
                     else:
+                        if duration == -1:
+                            logger.warning(
+                                f"Failed to probe corrupt segment {f}: {p.returncode} - {p.stderr}"
+                            )
+
                         logger.warning(f"Discarding a corrupt recording segment: {f}")
                         Path(cache_path).unlink(missing_ok=True)
                         continue
