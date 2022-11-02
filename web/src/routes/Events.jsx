@@ -22,6 +22,7 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
+import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 
 const API_LIMIT = 25;
 
@@ -36,6 +37,16 @@ const monthsAgo = (num) => {
   date.setMonth(date.getMonth() - num);
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000;
 };
+
+const clipDuration = (start_time, end_time) => {
+  const start = fromUnixTime(start_time);
+  const end = fromUnixTime(end_time);
+  let duration = 'In Progress';
+  if (end_time) {
+    duration = formatDuration(intervalToDuration({ start, end }));
+  }
+  return duration;
+}
 
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
@@ -459,7 +470,7 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()}
+                          {new Date(event.start_time * 1000).toLocaleTimeString()} ({clipDuration(event.start_time, event.end_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
@@ -522,9 +533,9 @@ export default function Events({ path, ...props }) {
                                 ],
                               }}
                               seekOptions={{ forward: 10, back: 5 }}
-                              onReady={() => {}}
+                              onReady={() => { }}
                             />
-                          ) : null }
+                          ) : null}
 
                           {((eventDetailType == 'image') || !event.has_clip) ? (
                             <div className="flex justify-center">
@@ -538,7 +549,7 @@ export default function Events({ path, ...props }) {
                                 alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
                               />
                             </div>
-                          ) : null }
+                          ) : null}
                         </div>
                       </div>
                     </div>
