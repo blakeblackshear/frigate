@@ -1,11 +1,5 @@
 import unittest
-import numpy as np
-from pydantic import ValidationError
-from frigate.config import (
-    BirdseyeModeEnum,
-    FrigateConfig,
-    DetectorTypeEnum,
-)
+from frigate.config import FrigateConfig
 from frigate.ffmpeg_presets import parse_preset_input
 
 
@@ -17,7 +11,10 @@ class TestFfmpegPresets(unittest.TestCase):
                 "back": {
                     "ffmpeg": {
                         "inputs": [
-                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect", "rtmp"],
+                            }
                         ],
                         "output_args": {
                             "detect": "-f rawvideo -pix_fmt yuv420p",
@@ -31,6 +28,9 @@ class TestFfmpegPresets(unittest.TestCase):
                         "fps": 5,
                     },
                     "record": {
+                        "enabled": True,
+                    },
+                    "rtmp": {
                         "enabled": True,
                     },
                     "name": "back",
