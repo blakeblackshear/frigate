@@ -117,6 +117,12 @@ RUN apt-get -qq update \
 
 ENV PATH=$PATH:/usr/lib/btbn-ffmpeg/bin
 
+# install go2rtc
+RUN wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-beta.10/go2rtc_linux_${TARGETARCH}" \
+    && chmod +x go2rtc \
+    && mkdir -p /usr/local/go2rtc/sbin/ \
+    && mv go2rtc /usr/local/go2rtc/sbin/go2rtc
+
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
 # get model and labels
@@ -142,6 +148,8 @@ RUN S6_ARCH="${TARGETARCH}" \
 
 EXPOSE 5000
 EXPOSE 1935
+EXPOSE 8554
+EXPOSE 8555
 
 ENTRYPOINT ["/init"]
 

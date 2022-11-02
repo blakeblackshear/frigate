@@ -19,7 +19,7 @@ export const handlers = [
             record: { enabled: true },
             detect: { width: 1280, height: 720 },
             snapshots: {},
-            live: { height: 720 },
+            restream: { enabled: true, jsmpeg: { height: 720 } },
             ui: { dashboard: true, order: 0 },
           },
           side: {
@@ -28,7 +28,7 @@ export const handlers = [
             record: { enabled: false },
             detect: { width: 1280, height: 720 },
             snapshots: {},
-            live: { height: 720 },
+            restream: { enabled: true, jsmpeg: { height: 720 } },
             ui: { dashboard: true, order: 1 },
           },
         },

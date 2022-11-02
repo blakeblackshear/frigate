@@ -13,6 +13,8 @@ import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import WebRtcPlayer from '../components/WebRtcPlayer';
+import MsePlayer from '../components/MsePlayer';
 
 const emptyObject = Object.freeze({});
 
@@ -23,9 +25,11 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = cameraConfig
-    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+  const jsmpegWidth = cameraConfig
+    ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'mse');
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['mse'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -51,7 +55,7 @@ export default function Camera({ camera }) {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
 
-  if (!cameraConfig) {
+  if (!cameraConfig || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
@@ -93,13 +97,31 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    player = (
-      <Fragment>
-        <div>
-          <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
-        </div>
-      </Fragment>
-    );
+    if (viewSource == 'mse') {
+      player = (
+        <Fragment>
+          <div className="max-w-5xl">
+            <MsePlayer camera={camera} />
+          </div>
+        </Fragment>
+      );
+    } else if (viewSource == 'webrtc') {
+      player = (
+        <Fragment>
+          <div className="max-w-5xl">
+            <WebRtcPlayer camera={camera} />
+          </div>
+        </Fragment>
+      );
+    } else {
+      player = (
+        <Fragment>
+          <div>
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
+          </div>
+        </Fragment>
+      );
+    }
   } else if (viewMode === 'debug') {
     player = (
       <Fragment>
@@ -120,7 +142,23 @@ export default function Camera({ camera }) {
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading size="2xl">{camera.replaceAll('_', ' ')}</Heading>
+      <div className="flex justify-between">
+        <Heading className="p-2" size="2xl">
+          {camera.replaceAll('_', ' ')}
+        </Heading>
+        <select
+          className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
+          value={viewSource}
+          onChange={(e) => setViewSource(e.target.value)}
+        >
+          {sourceValues.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
 
       {player}

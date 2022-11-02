@@ -19,7 +19,7 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp
+            - restream
     detect:
       width: 1280
       height: 720
@@ -336,21 +336,28 @@ snapshots:
       person: 15
 
 # Optional: RTMP configuration
+# NOTE: RTMP is deprecated in favor of restream
 # NOTE: Can be overridden at the camera level
 rtmp:
-  # Optional: Enable the RTMP stream (default: True)
-  enabled: True
+  # Optional: Enable the RTMP stream (default: False)
+  enabled: False
 
-# Optional: Live stream configuration for WebUI
+# Optional: Restream configuration
 # NOTE: Can be overridden at the camera level
-live:
-  # Optional: Set the height of the live stream. (default: 720)
-  # This must be less than or equal to the height of the detect stream. Lower resolutions
-  # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
-  height: 720
-  # Optional: Set the encode quality of the live stream (default: shown below)
-  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
-  quality: 8
+restream:
+  # Optional: Enable the restream (default: True)
+  enabled: True
+  # Optional: Force audio compatibility with browsers (default: shown below)
+  force_audio: False
+  # Optional: jsmpeg stream configuration for WebUI
+  jsmpeg:
+    # Optional: Set the height of the jsmpeg stream. (default: 720)
+    # This must be less than or equal to the height of the detect stream. Lower resolutions
+    # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+    height: 720
+    # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+    # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+    quality: 8
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
@@ -387,11 +394,12 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,rtmp
-          # NOTICE: In addition to assigning the record, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,restream,rtmp
+          # NOTICE: In addition to assigning the record, restream, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
+            - restream
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:

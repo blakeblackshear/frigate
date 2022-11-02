@@ -25,6 +25,7 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
+from frigate.restream import RestreamApi
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -162,6 +163,10 @@ class FrigateApp:
             self.detected_frames_processor,
             self.plus_api,
         )
+
+    def init_restream(self) -> None:
+        self.restream = RestreamApi(self.config)
+        self.restream.add_cameras()
 
     def init_mqtt(self) -> None:
         self.mqtt_client = create_mqtt_client(self.config, self.camera_metrics)
@@ -363,6 +368,7 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.init_stats()
         self.init_web_server()
+        self.init_restream()
         self.start_mqtt_relay()
         self.start_event_processor()
         self.start_event_cleanup()

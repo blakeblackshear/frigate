@@ -5,7 +5,7 @@ import JSMpeg from '@cycjimmy/jsmpeg-player';
 
 export default function JSMpegPlayer({ camera, width, height }) {
   const playerRef = useRef();
-  const url = `${baseUrl.replace(/^http/, 'ws')}live/${camera}`;
+  const url = `${baseUrl.replace(/^http/, 'ws')}live/jsmpeg/${camera}`;
 
   useEffect(() => {
     const video = new JSMpeg.VideoElement(
