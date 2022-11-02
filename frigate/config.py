@@ -541,6 +541,7 @@ class CameraUiConfig(FrigateBaseModel):
 
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
+    enabled: bool = Field(default=True, title="Enable camera.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -819,7 +820,7 @@ class FrigateConfig(FrigateBaseModel):
         if config.mqtt.password:
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
-        # Global config to propegate down to camera level
+        # Global config to propagate down to camera level
         global_config = config.dict(
             include={
                 "birdseye": ...,
@@ -940,10 +941,9 @@ class FrigateConfig(FrigateBaseModel):
                 logger.warning(
                     f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
                 )
-            # generage the ffmpeg commands
+            # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
-
         return config
 
     @validator("cameras")
