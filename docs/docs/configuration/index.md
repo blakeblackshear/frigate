@@ -97,6 +97,12 @@ model:
   width: 320
   # Required: Object detection model input height (default: shown below)
   height: 320
+  # Optional: Object detection model input colorspace
+  # Valid values are rgb, bgr, or yuv. (default: shown below)
+  input_pixel_format: rgb
+  # Optional: Object detection model input tensor format
+  # Valid values are nhwc or nchw (default: shown below)
+  input_tensor: "nhwc"
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle

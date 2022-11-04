@@ -476,6 +476,16 @@ def yuv_region_2_rgb(frame, region):
         raise
 
 
+def yuv_region_2_bgr(frame, region):
+    try:
+        yuv_cropped_frame = yuv_crop_and_resize(frame, region)
+        return cv2.cvtColor(yuv_cropped_frame, cv2.COLOR_YUV2BGR_I420)
+    except:
+        print(f"frame.shape: {frame.shape}")
+        print(f"region: {region}")
+        raise
+
+
 def intersection(box_a, box_b):
     return (
         max(box_a[0], box_b[0]),

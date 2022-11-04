@@ -15,7 +15,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import DetectorTypeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.edgetpu import EdgeTPUProcess
+from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
@@ -40,7 +40,7 @@ class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: Event = mp.Event()
         self.detection_queue: Queue = mp.Queue()
-        self.detectors: dict[str, EdgeTPUProcess] = {}
+        self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, Event] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
@@ -178,8 +178,6 @@ class FrigateApp:
         self.mqtt_relay.start()
 
     def start_detectors(self) -> None:
-        model_path = self.config.model.path
-        model_shape = (self.config.model.height, self.config.model.width)
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
 
@@ -203,26 +201,15 @@ class FrigateApp:
             self.detection_shms.append(shm_out)
 
         for name, detector in self.config.detectors.items():
-            if detector.type == DetectorTypeEnum.cpu:
-                self.detectors[name] = EdgeTPUProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    "cpu",
-                    detector.num_threads,
-                )
-            if detector.type == DetectorTypeEnum.edgetpu:
-                self.detectors[name] = EdgeTPUProcess(
-                    name,
-                    self.detection_queue,
-                    self.detection_out_events,
-                    model_path,
-                    model_shape,
-                    detector.device,
-                    detector.num_threads,
-                )
+            self.detectors[name] = ObjectDetectProcess(
+                name,
+                self.detection_queue,
+                self.detection_out_events,
+                self.config.model,
+                detector.type,
+                detector.device,
+                detector.num_threads,
+            )
 
     def start_detected_frames_processor(self) -> None:
         self.detected_frames_processor = TrackedObjectProcessor(
@@ -253,7 +240,6 @@ class FrigateApp:
         logger.info(f"Output process started: {output_processor.pid}")
 
     def start_camera_processors(self) -> None:
-        model_shape = (self.config.model.height, self.config.model.width)
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
                 logger.info(f"Camera processor not started for disabled camera {name}")
@@ -265,7 +251,7 @@ class FrigateApp:
                 args=(
                     name,
                     config,
-                    model_shape,
+                    self.config.model,
                     self.config.model.merged_labelmap,
                     self.detection_queue,
                     self.detection_out_events[name],
