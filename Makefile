@@ -9,7 +9,7 @@ version:
 	echo "VERSION=\"$(VERSION)-$(COMMIT_HASH)\"" > frigate/version.py
 
 build_web:
-	docker run --volume ${PWD}/web:/web -w /web --group-add $(CURRENT_GID) -u $(CURRENT_UID):$(CURRENT_GID) node:16 /bin/bash -c "sudo chown -R $(CURRENT_UID):$(CURRENT_GID) /.npm && npm install && npm run build"
+	docker run --volume ${PWD}/web:/web --volume ${PWD}/.npm:/.npm -w /web --group-add $(CURRENT_GID) -u $(CURRENT_UID):$(CURRENT_GID) node:16 /bin/bash -c "npm install && npm run build"
 
 nginx_frigate:
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate-nginx:1.0.2 --file docker/Dockerfile.nginx .
