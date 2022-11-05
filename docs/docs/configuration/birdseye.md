@@ -11,7 +11,7 @@ Birdseye offers different modes to customize which cameras show under which circ
 
 ### Custom Birdseye Icon
 
-A custom icon can be added to the birdseye background by provided a file `custom.png` inside of the Frigate `media` folder. The file must be a png with the icon as transparent, any non-transparent pixels will be white when displayed in the birdseye view. 
+A custom icon can be added to the birdseye background by providing a 180x180 image named `custom.png` inside of the Frigate `media` folder. The file must be a png with the icon as transparent, any non-transparent pixels will be white when displayed in the birdseye view.
 
 ### Birdseye view override at camera level
 

@@ -35,7 +35,7 @@ module.exports = {
           position: 'right',
         },
         {
-          href: 'https://demo.frigate.video',
+          href: 'http://demo.frigate.video',
           label: 'Demo',
           position: 'right',
         },
