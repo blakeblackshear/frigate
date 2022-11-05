@@ -13,7 +13,7 @@ env:
 jobs:
   multi_arch_build:
     runs-on: ubuntu-latest
-    name: Python Tests
+    name: Image Build
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -21,5 +21,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Build
+      - name: Build web
+        run: make build_web
+      - name: Build image
         run: make build
