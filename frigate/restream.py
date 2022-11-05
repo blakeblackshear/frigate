@@ -3,6 +3,7 @@
 
 import logging
 import requests
+from frigate.util import escape_special_characters
 
 from frigate.config import FrigateConfig
 
@@ -34,10 +35,10 @@ class RestreamApi:
                         input.path.startswith("rtsp")
                         and not camera.restream.force_audio
                     ):
-                        self.relays[cam_name] = input.path
+                        self.relays[cam_name] = escape_special_characters(input.path)
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
-                        self.relays[cam_name] = get_manual_go2rtc_stream(input.path)
+                        self.relays[cam_name] = get_manual_go2rtc_stream(escape_special_characters(input.path))
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
