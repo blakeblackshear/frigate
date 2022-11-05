@@ -38,7 +38,9 @@ class RestreamApi:
                         self.relays[cam_name] = escape_special_characters(input.path)
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
-                        self.relays[cam_name] = get_manual_go2rtc_stream(escape_special_characters(input.path))
+                        self.relays[cam_name] = get_manual_go2rtc_stream(
+                            escape_special_characters(input.path)
+                        )
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
