@@ -635,13 +635,13 @@ def load_labels(path, encoding="utf-8"):
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
     # todo also remove http password like reolink
-    return re.sub(REGEX_CAMERA_USER_PASS, "*:*@", line)
+    return re.sub(REGEX_CAMERA_USER_PASS, "://*:*@", line)
 
 
 def escape_special_characters(path: str) -> str:
     """Cleans reserved characters to encodings for ffmpeg."""
     try:
-        found = re.search(REGEX_CAMERA_USER_PASS, path).group(0)[:-1]
+        found = re.search(REGEX_CAMERA_USER_PASS, path).group(0)[3:-1]
         pw = found[(found.index(":") + 1) :]
         return path.replace(pw, urllib.parse.quote_plus(pw))
     except AttributeError:
