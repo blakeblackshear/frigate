@@ -122,7 +122,7 @@ device_cgroup_rules:
   - 'c 189:* rmw'
 volumes:
   - /dev/bus/usb:/dev/bus/usb
-``` 
+```
 
 ### OpenVINO Models
 
@@ -133,8 +133,8 @@ model:
   path: /openvino-model/ssdlite_mobilenet_v2.xml
   width: 300
   height: 300
-  input_tensor: [B, H, W, C]
-  input_pixel_format: "bgr"
+  input_tensor: nhwc
+  input_pixel_format: bgr
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
 ```
