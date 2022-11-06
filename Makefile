@@ -30,7 +30,7 @@ build: version amd64 arm64 armv7
 	docker buildx build --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
 
 push: build
-	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag blakeblackshear/frigate:$(VERSION)-$(COMMIT_HASH) --file docker/Dockerfile .
+	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag ghcr.io/blakeblackshear/frigate:${GITHUB_REF_NAME}-$(COMMIT_HASH) --file docker/Dockerfile .
 
 run_tests: frigate
 	docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
