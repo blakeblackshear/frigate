@@ -1424,6 +1424,36 @@ class TestConfig(unittest.TestCase):
             ValidationError, lambda: frigate_config.runtime_config.cameras
         )
 
+    def test_fails_zone_defines_untracked_object(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {"track": ["person"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "zones": {
+                        "steps": {
+                            "coordinates": "0,0,0,0",
+                            "objects": ["car", "person"],
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(
+            ValueError, lambda: frigate_config.runtime_config.cameras
+        )
+
     def test_object_filter_ratios_work(self):
         config = {
             "mqtt": {"host": "mqtt"},
