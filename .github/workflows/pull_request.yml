@@ -10,7 +10,7 @@ jobs:
     name: Web - Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -24,7 +24,7 @@ jobs:
     name: Web - Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -39,7 +39,7 @@ jobs:
     name: Python checks
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v2.2.2
         with:
@@ -57,7 +57,7 @@ jobs:
     name: Python Tests
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
