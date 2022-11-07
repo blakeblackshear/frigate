@@ -21,7 +21,7 @@
     "swr": "^1.2.2",
     "video.js": "^7.20.2",
     "videojs-playlist": "^5.0.0",
-    "videojs-seek-buttons": "^2.2.1"
+    "videojs-seek-buttons": "^3.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",
