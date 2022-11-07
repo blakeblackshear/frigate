@@ -1450,9 +1450,7 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
 
-        self.assertRaises(
-            ValueError, lambda: frigate_config.runtime_config.cameras
-        )
+        self.assertRaises(ValueError, lambda: frigate_config.runtime_config.cameras)
 
     def test_object_filter_ratios_work(self):
         config = {

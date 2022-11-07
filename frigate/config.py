@@ -789,7 +789,7 @@ class LoggerConfig(FrigateBaseModel):
 def verify_config_roles(camera_config: CameraConfig) -> None:
     """Verify that roles are setup in the config correctly."""
     assigned_roles = list(
-    set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+        set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
     )
 
     if camera_config.record.enabled and not "record" in assigned_roles:
