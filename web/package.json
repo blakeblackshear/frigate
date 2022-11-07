@@ -24,7 +24,7 @@
     "videojs-seek-buttons": "^2.2.1"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.16.7",
     "@preact/preset-vite": "^2.1.5",
     "@tailwindcss/forms": "^0.5.0",
