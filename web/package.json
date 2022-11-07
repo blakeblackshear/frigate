@@ -19,7 +19,7 @@
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.0.1",
     "swr": "^1.2.2",
-    "video.js": "^7.20.2",
+    "video.js": "^7.20.3",
     "videojs-playlist": "^5.0.0",
     "videojs-seek-buttons": "^2.2.1"
   },
@@ -32,7 +32,7 @@
     "@testing-library/preact": "^2.0.1",
     "@testing-library/preact-hooks": "^1.1.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/video.js": "^7.3.44",
+    "@types/video.js": "^7.3.49",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
     "autoprefixer": "^10.4.2",
