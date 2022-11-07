@@ -15,7 +15,7 @@
     "@docusaurus/core": "^2.0.0-beta.20",
     "@docusaurus/preset-classic": "^2.0.0-beta.20",
     "@mdx-js/react": "^1.6.22",
-    "clsx": "^1.1.1",
+    "clsx": "^1.2.1",
     "raw-loader": "^4.0.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0"
