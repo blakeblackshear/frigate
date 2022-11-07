@@ -836,6 +836,16 @@ def verify_recording_retention(camera_config: CameraConfig) -> None:
         )
 
 
+def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
+    """Verify that user has not entered zone objects that are not in the tracking config."""
+    for zone_name, zone in camera_config.zones.items():
+        for obj in zone.objects:
+            if obj not in camera_config.objects.track:
+                raise ValueError(
+                    f"Zone {zone_name} is configured to track {obj} but that object type is not added to objects -> track."
+                )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -980,6 +990,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_config_roles(camera_config)
             verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
+            verify_zone_objects_are_tracked(camera_config)
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
