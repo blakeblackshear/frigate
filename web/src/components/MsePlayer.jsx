@@ -10,8 +10,10 @@ export default function MsePlayer({ camera, width, height }) {
 
     // support api_path
     const ws = new WebSocket(url);
-    ws.binaryType = "arraybuffer";
-    let mediaSource, sourceBuffer, queueBuffer = [];
+    ws.binaryType = 'arraybuffer';
+    let mediaSource,
+      sourceBuffer,
+      queueBuffer = [];
 
     ws.onopen = () => {
       mediaSource = new MediaSource();
@@ -19,18 +21,17 @@ export default function MsePlayer({ camera, width, height }) {
       mediaSource.onsourceopen = () => {
         mediaSource.onsourceopen = null;
         URL.revokeObjectURL(video.src);
-        ws.send(JSON.stringify({"type": "mse"}));
+        ws.send(JSON.stringify({ type: 'mse' }));
       };
     };
 
-    ws.onmessage = ev => {
+    ws.onmessage = (ev) => {
       if (typeof ev.data === 'string') {
         const data = JSON.parse(ev.data);
 
-
-        if (data.type === "mse") {
+        if (data.type === 'mse') {
           sourceBuffer = mediaSource.addSourceBuffer(data.value);
-          sourceBuffer.mode = "segments"; // segments or sequence
+          sourceBuffer.mode = 'segments'; // segments or sequence
           sourceBuffer.onupdateend = () => {
             if (!sourceBuffer.updating && queueBuffer.length > 0) {
               try {
@@ -39,7 +40,7 @@ export default function MsePlayer({ camera, width, height }) {
                 // console.warn(e);
               }
             }
-          }
+          };
         }
       } else if (sourceBuffer.updating || queueBuffer.length > 0) {
         queueBuffer.push(ev.data);
@@ -61,11 +62,7 @@ export default function MsePlayer({ camera, width, height }) {
           video.playbackRate = Math.floor(delay);
         }
       }
-    }
-
-    video.onpause = () => {
-      //ws.close();
-    }
+    };
   }, [url]);
 
   return (
