@@ -14,7 +14,7 @@
     "axios": "^0.26.0",
     "date-fns": "^2.28.0",
     "idb-keyval": "^6.1.0",
-    "immer": "^9.0.12",
+    "immer": "^9.0.16",
     "preact": "^10.6.6",
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.0.1",
