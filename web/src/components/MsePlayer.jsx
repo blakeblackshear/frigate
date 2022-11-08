@@ -64,7 +64,7 @@ export default function MsePlayer({ camera, width, height }) {
     }
 
     video.onpause = () => {
-      ws.close();
+      //ws.close();
     }
   }, [url]);
 
