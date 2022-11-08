@@ -22,6 +22,7 @@ from frigate.util import (
     create_mask,
     deep_merge,
     escape_special_characters,
+    load_config_with_no_duplicates,
     load_labels,
 )
 
@@ -1011,7 +1012,7 @@ class FrigateConfig(FrigateBaseModel):
             raw_config = f.read()
 
         if config_file.endswith(YAML_EXT):
-            config = yaml.safe_load(raw_config)
+            config = load_config_with_no_duplicates(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 

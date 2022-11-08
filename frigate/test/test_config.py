@@ -1,11 +1,13 @@
 import unittest
 import numpy as np
 from pydantic import ValidationError
+
 from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
     DetectorTypeEnum,
 )
+from frigate.util import load_config_with_no_duplicates
 
 
 class TestConfig(unittest.TestCase):
@@ -1451,6 +1453,23 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
 
         self.assertRaises(ValueError, lambda: frigate_config.runtime_config.cameras)
+
+    def test_fails_duplicate_keys(self):
+        raw_config = """
+        cameras:
+          test:
+            ffmpeg:
+              inputs:
+                - one
+                - two
+              inputs:
+                - three
+                - four
+        """
+
+        self.assertRaises(
+            ValueError, lambda: load_config_with_no_duplicates(raw_config)
+        )
 
     def test_object_filter_ratios_work(self):
         config = {
