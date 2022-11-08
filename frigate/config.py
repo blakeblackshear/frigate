@@ -993,6 +993,11 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_retention(camera_config)
             verify_zone_objects_are_tracked(camera_config)
 
+            if camera_config.rtmp.enabled:
+                logger.warning(
+                    "RTMP restream is deprecated in favor of the restream role, recommend disabling RTMP."
+                )
+
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
