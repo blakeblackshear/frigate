@@ -63,6 +63,11 @@ export default function MsePlayer({ camera, width, height }) {
         }
       }
     };
+
+    video.onpause = () => {
+      ws.close();
+      video.src = null;
+    }
   }, [url]);
 
   return (
