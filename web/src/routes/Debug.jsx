@@ -24,7 +24,6 @@ export default function Debug() {
   const detectorNames = Object.keys(detectors || emptyObject);
   const detectorDataKeys = Object.keys(detectors ? detectors[detectorNames[0]] : emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
-  const cameraDataKeys = Object.keys(cameras[cameraNames[0]] || emptyObject);
 
   const handleCopyConfig = useCallback(() => {
     async function copy() {
@@ -59,9 +58,9 @@ export default function Debug() {
         <Fragment>
           <Heading>Detectors</Heading>
           <div data-testid="detectors" className="min-w-0 overflow-auto">
-            {detectorNames.map((name) => (
-              <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
-                <div className="text-lg flex justify-between">{name}</div>
+            {detectorNames.map((detector) => (
+              <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
+                <div className="text-lg flex justify-between">{detector}</div>
                 <Table className="w-full">
                   <Thead>
                     <Tr>
@@ -86,8 +85,8 @@ export default function Debug() {
 
           <Heading>Cameras</Heading>
           <div data-testid="cameras" className="min-w-0 overflow-auto">
-            {cameraNames.map((camera, i) => (
-              <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
+            {cameraNames.map((camera) => (
+              <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
                 <div className="text-lg flex justify-between">
                   <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                   <Button onClick={(e) => onCopyFfprobe(camera, e)}>copy ffprobe</Button>
