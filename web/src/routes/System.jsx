@@ -141,7 +141,7 @@ export default function System() {
               </Link>
             </div>
           ) : (
-            <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
+            <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
               {gpuNames.map((gpu) => (
                 <div
                   key={gpu}
