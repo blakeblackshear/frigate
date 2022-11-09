@@ -1,6 +1,8 @@
 import copy
 import datetime
 import logging
+import subprocess as sp
+import json
 import re
 import signal
 import traceback
@@ -677,6 +679,36 @@ def escape_special_characters(path: str) -> str:
     except AttributeError:
         # path does not have user:pass
         return path
+
+
+def get_cpu_stats() -> dict[str, dict]:
+    """Get cpu usages for each process id"""
+    usages = {}
+    top_command = ["top", "-b", "-n", "1"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split(" ")))
+            try:
+                usages[stats[0]] = {
+                    "cpu": stats[8],
+                    "mem": stats[9],
+                }
+            except:
+                continue
+
+        return usages
 
 
 class FrameManager(ABC):

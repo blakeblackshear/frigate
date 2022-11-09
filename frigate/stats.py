@@ -14,6 +14,7 @@ from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
+from frigate.util import get_cpu_stats
 from frigate.object_detection import ObjectDetectProcess
 
 logger = logging.getLogger(__name__)
@@ -115,6 +116,8 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
             "pid": pid,
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
+
+    stats["cpu_usages"] = get_cpu_stats()
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
