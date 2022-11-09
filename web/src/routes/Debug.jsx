@@ -71,13 +71,11 @@ export default function Debug() {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {detectorNames.map((detector, i) => (
-                        <Tr key={i} index={i}>
-                          {detectorDataKeys.map((name) => (
-                            <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
-                          ))}
-                        </Tr>
-                      ))}
+                      <Tr>
+                        {detectorDataKeys.map((name) => (
+                          <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                        ))}
+                      </Tr>
                     </Tbody>
                   </Table>
                 </div>
