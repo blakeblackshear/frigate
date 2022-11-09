@@ -684,7 +684,8 @@ def escape_special_characters(path: str) -> str:
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
     usages = {}
-    top_command = ["top", "-b", "-n", "1"]
+    # -n=2 runs to ensure extraneous values are not included
+    top_command = ["top", "-b", "-n", "2"]
 
     p = sp.run(
         top_command,
