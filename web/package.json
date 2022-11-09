@@ -17,7 +17,7 @@
     "immer": "^9.0.16",
     "preact": "^10.6.6",
     "preact-async-route": "^2.2.1",
-    "preact-router": "^4.0.1",
+    "preact-router": "^4.1.0",
     "swr": "^1.2.2",
     "video.js": "^7.20.3",
     "videojs-playlist": "^5.0.0",
