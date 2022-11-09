@@ -712,6 +712,27 @@ def get_cpu_stats() -> dict[str, dict]:
         return usages
 
 
+def ffprobe_stream(path: str) -> str:
+    """Run ffprobe on stream."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-rtsp_transport",
+        "tcp",
+        "-show_entries",
+        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
+        "-loglevel",
+        "quiet",
+        path,
+    ]
+    p = sp.run(ffprobe_cmd, capture_output=True)
+
+    if p.returncode != 0:
+        logger.error(f"ffprobe unable to get result for stream: {p.stderr}")
+        return None
+    else:
+        return p.stdout.decode().strip()
+
+
 class FrameManager(ABC):
     @abstractmethod
     def create(self, name, size) -> AnyStr:

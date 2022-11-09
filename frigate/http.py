@@ -26,11 +26,12 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
+from frigate.config import CameraConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject, TrackedObjectProcessor
 from frigate.stats import stats_snapshot
-from frigate.util import clean_camera_user_pass
+from frigate.util import clean_camera_user_pass, ffprobe_stream
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -605,6 +606,40 @@ def version():
 def stats():
     stats = stats_snapshot(current_app.stats_tracking)
     return jsonify(stats)
+
+
+@bp.route("/<camera_name>/ffprobe")
+def ffprobe(camera_name):
+    if camera_name not in current_app.frigate_config.cameras:
+        return jsonify(
+            {"success": False, "message": f"Camera name {camera_name} not found"}, "404"
+        )
+
+    config: CameraConfig = current_app.frigate_config.cameras[camera_name]
+
+    if len(config.ffmpeg.inputs) > 1:
+        # user has multiple streams
+        ffprobe_cmd = [
+            "ffprobe",
+            "-rtsp_transport",
+            "tcp",
+            config.ffmpeg.inputs[0].path,
+        ]
+    else:
+        # user has single stream
+        ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
+        if not ffprobe:
+            return jsonify(
+                {
+                    "success": False,
+                    "message": f"ffprobe unable to get info for {camera_name}",
+                },
+                "500",
+            )
+        else:
+            return jsonify(
+                {"success": True, "message": ffprobe}, "200"
+            )
 
 
 @bp.route("/<camera_name>")
