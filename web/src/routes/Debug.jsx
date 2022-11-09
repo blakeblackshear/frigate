@@ -57,78 +57,81 @@ export default function Debug() {
         </div>
       ) : (
         <Fragment>
+          <Heading>Detectors</Heading>
           <div data-testid="detectors" className="min-w-0 overflow-auto">
-            <Table className="w-full">
-              <Thead>
-                <Tr>
-                  <Th>detector</Th>
-                  {detectorDataKeys.map((name) => (
-                    <Th key={name}>{name.replace('_', ' ')}</Th>
-                  ))}
-                </Tr>
-              </Thead>
-              <Tbody>
-                {detectorNames.map((detector, i) => (
-                  <Tr key={i} index={i}>
-                    <Td>{detector}</Td>
-                    {detectorDataKeys.map((name) => (
-                      <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+            {detectorNames.map((name) => (
+              <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
+                <div className="text-lg flex justify-between">{name}</div>
+                <Table className="w-full">
+                  <Thead>
+                    <Tr>
+                      {detectorDataKeys.map((name) => (
+                        <Th key={name}>{name.replace('_', ' ')}</Th>
+                      ))}
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {detectorNames.map((detector, i) => (
+                      <Tr key={i} index={i}>
+                        {detectorDataKeys.map((name) => (
+                          <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                        ))}
+                      </Tr>
                     ))}
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                  </Tbody>
+                </Table>
+              </div>
+            ))}
           </div>
 
-            <Heading>
-              Cameras
-            </Heading>
-            <div data-testid="cameras" className="min-w-0 overflow-auto">
-
-              {cameraNames.map((camera, i) => (
-                <div className='dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2'>
-                  <div className='text-lg flex justify-between'>
-                    <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                    <Button onClick={(e) => onCopyFfprobe(camera, e)}>
-                      copy ffprobe
-                    </Button>
-                  </div>
-                  <div className='p-4'>
-                    <Table className='w-full'>
-                      <Thead>
-                        <Tr>
-                          <Th>Processes</Th>
-                          <Th>Process ID</Th>
-                          <Th>Cpu %</Th>
-                          <Th>Memory %</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        <Tr key='capture' index='0'>
-                          <Td>Capture</Td>
-                          <Td>{cameras[camera]['capture_pid']}</Td>
-                          <Td>{cpu_usages[cameras[camera]['capture_pid']]['cpu']}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['capture_pid']]['mem']}%</Td>
-                        </Tr>
-                        <Tr key='detect' index='1'>
-                          <Td>Detect</Td>
-                          <Td>{cameras[camera]['pid']}</Td>
-                          <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
-                        </Tr>
-                        <Tr key='ffmpeg' index='2'>
-                          <Td>ffmpeg</Td>
-                          <Td>{cameras[camera]['ffmpeg_pid']}</Td>
-                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
-                        </Tr>
-                      </Tbody>
-                    </Table>
-
-                  </div>
+          <Heading>Cameras</Heading>
+          <div data-testid="cameras" className="min-w-0 overflow-auto">
+            {cameraNames.map((camera, i) => (
+              <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
+                <div className="text-lg flex justify-between">
+                  <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
+                  <Button onClick={(e) => onCopyFfprobe(camera, e)}>copy ffprobe</Button>
                 </div>
-              ))}
-
+                <div className="p-4">
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
+                        <Th>Processes</Th>
+                        <Th>Process ID</Th>
+                        <Th>fps</Th>
+                        <Th>Cpu %</Th>
+                        <Th>Memory %</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr key="capture" index="0">
+                        <Td>Capture</Td>
+                        <Td>{cameras[camera]['capture_pid']}</Td>
+                        <Td>{cameras[camera]['process_fps']}</Td>
+                        <Td>{cpu_usages[cameras[camera]['capture_pid']]['cpu']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['capture_pid']]['mem']}%</Td>
+                      </Tr>
+                      <Tr key="detect" index="1">
+                        <Td>Detect</Td>
+                        <Td>{cameras[camera]['pid']}</Td>
+                        <Td>
+                          {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                        </Td>
+                        <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
+                      </Tr>
+                      <Tr key="ffmpeg" index="2">
+                        <Td>ffmpeg</Td>
+                        <Td>{cameras[camera]['ffmpeg_pid']}</Td>
+                        <Td>{cameras[camera]['camera_fps']}</Td>
+                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              </div>
+            ))}
           </div>
 
           <p>Debug stats update automatically every {config.mqtt.stats_interval} seconds.</p>
