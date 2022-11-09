@@ -57,7 +57,7 @@ export default function Debug() {
       ) : (
         <Fragment>
           <Heading>Detectors</Heading>
-          <div data-testid="detectors" className="min-w-0 overflow-auto">
+          <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
             {detectorNames.map((detector) => (
               <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
                 <div className="text-lg flex justify-between">{detector}</div>
@@ -84,7 +84,7 @@ export default function Debug() {
           </div>
 
           <Heading>Cameras</Heading>
-          <div data-testid="cameras" className="min-w-0 overflow-auto">
+          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
             {cameraNames.map((camera) => (
               <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
                 <div className="text-lg flex justify-between">
