@@ -624,12 +624,18 @@ def ffprobe(camera_name):
 
     if len(config.ffmpeg.inputs) > 1:
         # user has multiple streams
-        ffprobe_cmd = [
-            "ffprobe",
-            "-rtsp_transport",
-            "tcp",
-            config.ffmpeg.inputs[0].path,
-        ]
+        output = ""
+
+        for input in config.ffmpeg.inputs:
+            output += f"{input.roles}\n"
+            ffprobe = ffprobe_stream(input.path)
+
+            if output:
+                output += f"{ffprobe}\n"
+            else:
+                output += "error getting stream\n"
+
+        return output
     else:
         # user has single stream
         ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
