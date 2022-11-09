@@ -18,7 +18,7 @@ export default function Debug() {
   } = useMqtt('stats');
   const { data: initialStats } = useSWR('stats');
 
-  const { detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
+  const { cpu_usages, detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
   const detectorDataKeys = Object.keys(detectors ? detectors[detectorNames[0]] : emptyObject);
@@ -86,19 +86,28 @@ export default function Debug() {
                         <Tr>
                           <Th>Processes</Th>
                           <Th>Process ID</Th>
-                          <Th>Cpu Usage</Th>
+                          <Th>Cpu %</Th>
+                          <Th>Memory %</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         <Tr key='capture' index='0'>
                           <Td>Capture</Td>
                           <Td>{cameras[camera]['capture_pid']}</Td>
-                          <Td>25%</Td>
+                          <Td>{cpu_usages[cameras[camera]['capture_pid']]['cpu']}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['capture_pid']]['mem']}%</Td>
                         </Tr>
-                        <Tr key='detect' index='0'>
+                        <Tr key='detect' index='1'>
                           <Td>Detect</Td>
                           <Td>{cameras[camera]['pid']}</Td>
-                          <Td>2%</Td>
+                          <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
+                        </Tr>
+                        <Tr key='ffmpeg' index='2'>
+                          <Td>ffmpeg</Td>
+                          <Td>{cameras[camera]['ffmpeg_pid']}</Td>
+                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
                         </Tr>
                       </Tbody>
                     </Table>
