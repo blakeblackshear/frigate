@@ -67,29 +67,46 @@ export default function Debug() {
             </Table>
           </div>
 
-          <div data-testid="cameras" className="min-w-0 overflow-auto">
-            <Table className="w-full">
-              <Thead>
-                <Tr>
-                  <Th>camera</Th>
-                  {cameraDataKeys.map((name) => (
-                    <Th key={name}>{name.replace('_', ' ')}</Th>
-                  ))}
-                </Tr>
-              </Thead>
-              <Tbody>
-                {cameraNames.map((camera, i) => (
-                  <Tr key={i} index={i}>
-                    <Td>
-                      <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                    </Td>
-                    {cameraDataKeys.map((name) => (
-                      <Td key={`${name}-${camera}`}>{cameras[camera][name]}</Td>
-                    ))}
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+            <Heading>
+              Cameras
+            </Heading>
+            <div data-testid="cameras" className="min-w-0 overflow-auto">
+
+              {cameraNames.map((camera, i) => (
+                <div className='dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2'>
+                  <div className='text-lg flex justify-between'>
+                    <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
+                    <div className='text-sm'>
+                      ffprobe
+                    </div>
+                  </div>
+                  <div className='p-4'>
+                    <Table className='w-full'>
+                      <Thead>
+                        <Tr>
+                          <Th>Processes</Th>
+                          <Th>Process ID</Th>
+                          <Th>Cpu Usage</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr key='capture' index='0'>
+                          <Td>Capture</Td>
+                          <Td>{cameras[camera]['capture_pid']}</Td>
+                          <Td>25%</Td>
+                        </Tr>
+                        <Tr key='detect' index='0'>
+                          <Td>Detect</Td>
+                          <Td>{cameras[camera]['pid']}</Td>
+                          <Td>2%</Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+
+                  </div>
+                </div>
+              ))}
+
           </div>
 
           <p>Debug stats update automatically every {config.mqtt.stats_interval} seconds.</p>
