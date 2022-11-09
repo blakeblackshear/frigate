@@ -57,45 +57,47 @@ export default function Debug() {
       ) : (
         <Fragment>
           <Heading>Detectors</Heading>
-          <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
+          <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {detectorNames.map((detector) => (
-              <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
-                <div className="text-lg flex justify-between">{detector}</div>
-                <Table className="w-full">
-                  <Thead>
-                    <Tr>
-                      {detectorDataKeys.map((name) => (
-                        <Th key={name}>{name.replace('_', ' ')}</Th>
-                      ))}
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {detectorNames.map((detector, i) => (
-                      <Tr key={i} index={i}>
+              <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                <div className="text-lg flex justify-between p-4">{detector}</div>
+                <div className="p-2">
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
                         {detectorDataKeys.map((name) => (
-                          <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                          <Th key={name}>{name.replace('_', ' ')}</Th>
                         ))}
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
+                    </Thead>
+                    <Tbody>
+                      {detectorNames.map((detector, i) => (
+                        <Tr key={i} index={i}>
+                          {detectorDataKeys.map((name) => (
+                            <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
+                          ))}
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </div>
               </div>
             ))}
           </div>
 
           <Heading>Cameras</Heading>
-          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
+          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {cameraNames.map((camera) => (
-              <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2">
-                <div className="text-lg flex justify-between">
+              <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                <div className="text-lg flex justify-between p-4">
                   <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                   <Button onClick={(e) => onCopyFfprobe(camera, e)}>copy ffprobe</Button>
                 </div>
-                <div className="p-4">
+                <div className="p-2">
                   <Table className="w-full">
                     <Thead>
                       <Tr>
-                        <Th>Processes</Th>
+                        <Th>Process</Th>
                         <Th>Process ID</Th>
                         <Th>fps</Th>
                         <Th>Cpu %</Th>
