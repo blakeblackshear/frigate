@@ -630,7 +630,7 @@ def ffprobe(camera_name):
             else:
                 output += "error getting stream\n"
 
-        return output
+        return jsonify(output, "200")
     else:
         # user has single stream
         ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
@@ -643,9 +643,7 @@ def ffprobe(camera_name):
                 "500",
             )
         else:
-            return jsonify(
-                {"success": True, "message": ffprobe}, "200"
-            )
+            return jsonify(ffprobe, "200")
 
 
 @bp.route("/<camera_name>")

@@ -5,6 +5,7 @@ import Heading from '../components/Heading';
 import Link from '../components/Link';
 import { useMqtt } from '../api/mqtt';
 import useSWR from 'swr';
+import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useCallback } from 'preact/hooks';
 
@@ -31,6 +32,18 @@ export default function Debug() {
     }
     copy();
   }, [config]);
+
+  const onCopyFfprobe = async (camera, e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    const response = await axios.get(`${camera}/ffprobe`);
+
+    if (response.status === 200) {
+      await window.navigator.clipboard.writeText(JSON.stringify(response.data, null, 2));
+    }
+  };
 
   return (
     <div className="space-y-4 p-2 px-4">
@@ -76,9 +89,9 @@ export default function Debug() {
                 <div className='dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2'>
                   <div className='text-lg flex justify-between'>
                     <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                    <div className='text-sm'>
-                      ffprobe
-                    </div>
+                    <Button onClick={(e) => onCopyFfprobe(camera, e)}>
+                      copy ffprobe
+                    </Button>
                   </div>
                   <div className='p-4'>
                     <Table className='w-full'>
