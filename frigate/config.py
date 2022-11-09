@@ -22,6 +22,7 @@ from frigate.util import (
     create_mask,
     deep_merge,
     escape_special_characters,
+    load_config_with_no_duplicates,
     load_labels,
 )
 
@@ -786,6 +787,66 @@ class LoggerConfig(FrigateBaseModel):
     )
 
 
+def verify_config_roles(camera_config: CameraConfig) -> None:
+    """Verify that roles are setup in the config correctly."""
+    assigned_roles = list(
+        set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+    )
+
+    if camera_config.record.enabled and not "record" in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
+        )
+
+    if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
+        )
+
+    if camera_config.restream.enabled and not "restream" in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has restream enabled, but restream is not assigned to an input."
+        )
+
+
+def verify_old_retain_config(camera_config: CameraConfig) -> None:
+    """Leave log if old retain_days is used."""
+    if not camera_config.record.retain_days is None:
+        logger.warning(
+            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+        )
+        if camera_config.record.retain.days == 0:
+            camera_config.record.retain.days = camera_config.record.retain_days
+
+
+def verify_recording_retention(camera_config: CameraConfig) -> None:
+    """Verify that recording retention modes are ranked correctly."""
+    rank_map = {
+        RetainModeEnum.all: 0,
+        RetainModeEnum.motion: 1,
+        RetainModeEnum.active_objects: 2,
+    }
+
+    if (
+        camera_config.record.retain.days != 0
+        and rank_map[camera_config.record.retain.mode]
+        > rank_map[camera_config.record.events.retain.mode]
+    ):
+        logger.warning(
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+        )
+
+
+def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
+    """Verify that user has not entered zone objects that are not in the tracking config."""
+    for zone_name, zone in camera_config.zones.items():
+        for obj in zone.objects:
+            if obj not in camera_config.objects.track:
+                raise ValueError(
+                    f"Zone {zone_name} is configured to track {obj} but that object type is not added to objects -> track."
+                )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -927,47 +988,16 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.dict(exclude_unset=True),
                 )
 
-            # check runtime config
-            assigned_roles = list(
-                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
-            )
-            if camera_config.record.enabled and not "record" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
+            verify_config_roles(camera_config)
+            verify_old_retain_config(camera_config)
+            verify_recording_retention(camera_config)
+            verify_zone_objects_are_tracked(camera_config)
 
-            if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
-
-            if camera_config.restream.enabled and not "restream" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has restream enabled, but restream is not assigned to an input."
-                )
-
-            # backwards compatibility for retain_days
-            if not camera_config.record.retain_days is None:
+            if camera_config.rtmp.enabled:
                 logger.warning(
-                    "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+                    "RTMP restream is deprecated in favor of the restream role, recommend disabling RTMP."
                 )
-                if camera_config.record.retain.days == 0:
-                    camera_config.record.retain.days = camera_config.record.retain_days
 
-            # warning if the higher level record mode is potentially more restrictive than the events
-            rank_map = {
-                RetainModeEnum.all: 0,
-                RetainModeEnum.motion: 1,
-                RetainModeEnum.active_objects: 2,
-            }
-            if (
-                camera_config.record.retain.days != 0
-                and rank_map[camera_config.record.retain.mode]
-                > rank_map[camera_config.record.events.retain.mode]
-            ):
-                logger.warning(
-                    f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
-                )
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
@@ -987,7 +1017,7 @@ class FrigateConfig(FrigateBaseModel):
             raw_config = f.read()
 
         if config_file.endswith(YAML_EXT):
-            config = yaml.safe_load(raw_config)
+            config = load_config_with_no_duplicates(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 

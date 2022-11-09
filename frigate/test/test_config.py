@@ -1,11 +1,13 @@
 import unittest
 import numpy as np
 from pydantic import ValidationError
+
 from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
     DetectorTypeEnum,
 )
+from frigate.util import load_config_with_no_duplicates
 
 
 class TestConfig(unittest.TestCase):
@@ -1422,6 +1424,51 @@ class TestConfig(unittest.TestCase):
 
         self.assertRaises(
             ValidationError, lambda: frigate_config.runtime_config.cameras
+        )
+
+    def test_fails_zone_defines_untracked_object(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {"track": ["person"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "zones": {
+                        "steps": {
+                            "coordinates": "0,0,0,0",
+                            "objects": ["car", "person"],
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(ValueError, lambda: frigate_config.runtime_config.cameras)
+
+    def test_fails_duplicate_keys(self):
+        raw_config = """
+        cameras:
+          test:
+            ffmpeg:
+              inputs:
+                - one
+                - two
+              inputs:
+                - three
+                - four
+        """
+
+        self.assertRaises(
+            ValueError, lambda: load_config_with_no_duplicates(raw_config)
         )
 
     def test_object_filter_ratios_work(self):
