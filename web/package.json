@@ -31,7 +31,7 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/preact": "^2.0.1",
     "@testing-library/preact-hooks": "^1.1.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/video.js": "^7.3.49",
     "@typescript-eslint/parser": "^5.42.1",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
