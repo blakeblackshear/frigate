@@ -632,21 +632,21 @@ def ffprobe(camera_name):
                 {
                     "input_roles": input.roles,
                     "return_code": ffprobe.returncode,
-                    "stderr": ffprobe.stderr,
-                    "stdout": ffprobe.stdout,
+                    "stderr": ffprobe.stderr.decode().strip(),
+                    "stdout": ffprobe.stdout.decode().strip(),
                 }
             )
 
         return jsonify(output)
     else:
         # user has single stream
-        ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
+        ffprobe: sp.CompletedProcess = ffprobe_stream(config.ffmpeg.inputs[0].path)
         return jsonify(
             {
                 "input_roles": config.ffmpeg.inputs[0].roles,
                 "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr,
-                "stdout": ffprobe.stdout,
+                "stderr": ffprobe.stderr.decode().strip(),
+                "stdout": ffprobe.stdout.decode().strip(),
             }
         )
 
