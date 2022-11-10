@@ -157,7 +157,7 @@ export default function System() {
                     <Tbody>
                       <Tr>
                         <Td>{gpu_usages[gpu]['gpu']}</Td>
-                        <Td>{gpu_usages[gpu]['memory']}</Td>
+                        <Td>{gpu_usages[gpu]['mem']}</Td>
                       </Tr>
                     </Tbody>
                   </Table>
