@@ -630,7 +630,7 @@ def ffprobe(camera_name):
             output += f"{input.roles}\n"
             ffprobe = ffprobe_stream(input.path)
 
-            if output:
+            if ffprobe:
                 output += f"{ffprobe}\n"
             else:
                 output += "error getting stream\n"
