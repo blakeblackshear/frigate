@@ -716,8 +716,6 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     ffprobe_cmd = [
         "ffprobe",
-        "-rtsp_transport",
-        "tcp",
         "-show_entries",
         "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
         "-loglevel",
