@@ -619,31 +619,31 @@ def ffprobe(camera_name):
 
     if len(config.ffmpeg.inputs) > 1:
         # user has multiple streams
-        output = ""
+        output = []
 
         for input in config.ffmpeg.inputs:
-            output += f"{input.roles}\n"
             ffprobe = ffprobe_stream(input.path)
-
-            if ffprobe:
-                output += f"{ffprobe}\n"
-            else:
-                output += "error getting stream\n"
+            output.append(
+                {
+                    "input_roles": input.roles,
+                    "return_code": ffprobe.returncode,
+                    "stderr": ffprobe.stderr,
+                    "stdout": ffprobe.stdout,
+                }
+            )
 
         return jsonify(output, "200")
     else:
         # user has single stream
         ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
-        if not ffprobe:
-            return jsonify(
-                {
-                    "success": False,
-                    "message": f"ffprobe unable to get info for {camera_name}",
-                },
-                "500",
-            )
-        else:
-            return jsonify(ffprobe, "200")
+        return jsonify(
+            {
+                "input_roles": config.ffmpeg.inputs[0].roles,
+                "return_code": ffprobe.returncode,
+                "stderr": ffprobe.stderr,
+                "stdout": ffprobe.stdout,
+            }
+        )
 
 
 @bp.route("/<camera_name>")

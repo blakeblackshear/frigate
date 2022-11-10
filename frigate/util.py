@@ -712,7 +712,7 @@ def get_cpu_stats() -> dict[str, dict]:
         return usages
 
 
-def ffprobe_stream(path: str) -> str:
+def ffprobe_stream(path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     ffprobe_cmd = [
         "ffprobe",
@@ -724,13 +724,7 @@ def ffprobe_stream(path: str) -> str:
         "quiet",
         path,
     ]
-    p = sp.run(ffprobe_cmd, capture_output=True)
-
-    if p.returncode != 0:
-        logger.error(f"ffprobe unable to get result for stream: {p.stderr}")
-        return None
-    else:
-        return p.stdout.decode().strip()
+    return sp.run(ffprobe_cmd, capture_output=True)
 
 
 class FrameManager(ABC):
