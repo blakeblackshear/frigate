@@ -7,11 +7,13 @@ import { useMqtt } from '../api/mqtt';
 import useSWR from 'swr';
 import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
-import { useCallback } from 'preact/hooks';
+import { useCallback, useState } from 'preact/hooks';
+import Dialog from '../components/Dialog';
 
 const emptyObject = Object.freeze({});
 
 export default function Debug() {
+  const [state, setState] = useState({ showFfprobe: false, ffprobe: '' });
   const { data: config } = useSWR('config');
 
   const {
@@ -22,7 +24,6 @@ export default function Debug() {
   const { cpu_usages, detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
-  const detectorDataKeys = Object.keys(detectors ? detectors[detectorNames[0]] : emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
 
   const handleCopyConfig = useCallback(() => {
@@ -32,16 +33,24 @@ export default function Debug() {
     copy();
   }, [config]);
 
-  const onCopyFfprobe = async (camera, e) => {
+  const onHandleFfprobe = async (camera, e) => {
     if (e) {
       e.stopPropagation();
     }
 
+    setState({ ...state, showFfprobe: true });
     const response = await axios.get(`${camera}/ffprobe`);
 
     if (response.status === 200) {
-      await window.navigator.clipboard.writeText(JSON.stringify(response.data, null, 2));
+      setState({ showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
+    } else {
+      setState({ ...state, ffprobe: 'There was an error getting the ffprobe output.' });
     }
+  };
+
+  const onCopyFfprobe = async () => {
+    await window.navigator.clipboard.writeText(JSON.stringify(state.ffprobe, null, 2));
+    setState({ ...state, ffprobe: '', showFfprobe: false });
   };
 
   return (
@@ -49,6 +58,26 @@ export default function Debug() {
       <Heading>
         Debug <span className="text-sm">{service.version}</span>
       </Heading>
+      {state.showFfprobe && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Ffprobe Output</Heading>
+            {state.ffprobe != '' ? <p className="mb-2">{state.ffprobe}</p> : <ActivityIndicator />}
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => onCopyFfprobe()} type="text">
+              Copy
+            </Button>
+            <Button
+              className="ml-2"
+              onClick={() => setState({ ...state, ffprobe: '', showFfprobe: false })}
+              type="text"
+            >
+              Close
+            </Button>
+          </div>
+        </Dialog>
+      )}
 
       {!detectors ? (
         <div>
@@ -56,7 +85,7 @@ export default function Debug() {
         </div>
       ) : (
         <Fragment>
-          <Heading>Detectors</Heading>
+          <Heading size="lg">Detectors</Heading>
           <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {detectorNames.map((detector) => (
               <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
@@ -65,16 +94,16 @@ export default function Debug() {
                   <Table className="w-full">
                     <Thead>
                       <Tr>
-                        {detectorDataKeys.map((name) => (
-                          <Th key={name}>{name.replace('_', ' ')}</Th>
-                        ))}
+                        <Th>P-ID</Th>
+                        <Th>Detection Start</Th>
+                        <Th>Inference Speed</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       <Tr>
-                        {detectorDataKeys.map((name) => (
-                          <Td key={`${name}-${detector}`}>{detectors[detector][name]}</Td>
-                        ))}
+                        <Td>{detectors[detector]['pid']}</Td>
+                        <Td>{detectors[detector]['detection_start']}</Td>
+                        <Td>{detectors[detector]['inference_speed']}</Td>
                       </Tr>
                     </Tbody>
                   </Table>
@@ -83,20 +112,20 @@ export default function Debug() {
             ))}
           </div>
 
-          <Heading>Cameras</Heading>
+          <Heading size="lg">Cameras</Heading>
           <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {cameraNames.map((camera) => (
               <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
                 <div className="text-lg flex justify-between p-4">
                   <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                  <Button onClick={(e) => onCopyFfprobe(camera, e)}>copy ffprobe</Button>
+                  <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
                 </div>
                 <div className="p-2">
                   <Table className="w-full">
                     <Thead>
                       <Tr>
                         <Th>Process</Th>
-                        <Th>Process ID</Th>
+                        <Th>P-ID</Th>
                         <Th>fps</Th>
                         <Th>Cpu %</Th>
                         <Th>Memory %</Th>
