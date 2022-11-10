@@ -632,7 +632,7 @@ def ffprobe(camera_name):
                 }
             )
 
-        return jsonify(output, "200")
+        return jsonify(output)
     else:
         # user has single stream
         ffprobe = ffprobe_stream(config.ffmpeg.inputs[0].path)
