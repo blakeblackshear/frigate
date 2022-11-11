@@ -1,8 +1,8 @@
 import base64
-from collections import OrderedDict
 from datetime import datetime, timedelta
 import copy
 import logging
+import json
 import os
 import subprocess as sp
 import time
@@ -26,10 +26,9 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
-from frigate.object_processing import TrackedObject, TrackedObjectProcessor
+from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
 from frigate.util import clean_camera_user_pass, ffprobe_stream
 from frigate.version import VERSION
@@ -608,44 +607,6 @@ def stats():
     return jsonify(stats)
 
 
-@bp.route("/<camera_name>/ffprobe")
-def ffprobe(camera_name):
-    if camera_name not in current_app.frigate_config.cameras:
-        return jsonify(
-            {"success": False, "message": f"Camera name {camera_name} not found"}, "404"
-        )
-
-    config: CameraConfig = current_app.frigate_config.cameras[camera_name]
-
-    if len(config.ffmpeg.inputs) > 1:
-        # user has multiple streams
-        output = []
-
-        for input in config.ffmpeg.inputs:
-            ffprobe = ffprobe_stream(input.path)
-            output.append(
-                {
-                    "input_roles": input.roles,
-                    "return_code": ffprobe.returncode,
-                    "stderr": ffprobe.stderr.decode().strip(),
-                    "stdout": ffprobe.stdout.decode().strip(),
-                }
-            )
-
-        return jsonify(output)
-    else:
-        # user has single stream
-        ffprobe: sp.CompletedProcess = ffprobe_stream(config.ffmpeg.inputs[0].path)
-        return jsonify(
-            {
-                "input_roles": config.ffmpeg.inputs[0].roles,
-                "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr.decode().strip(),
-                "stdout": ffprobe.stdout.decode().strip(),
-            }
-        )
-
-
 @bp.route("/<camera_name>")
 def mjpeg_feed(camera_name):
     fps = int(request.args.get("fps", "3"))
@@ -996,3 +957,37 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + jpg.tobytes() + b"\r\n\r\n"
         )
+
+
+@bp.route("/ffprobe", methods=["GET"])
+def ffprobe():
+    path_param = request.args.get("paths", "")
+
+    if not path_param:
+        return jsonify(
+            {"success": False, "message": f"Path needs to be provided."}, "404"
+        )
+
+    if "," in clean_camera_user_pass(path_param):
+        paths = path_param.split(",")
+    else:
+        paths = [path_param]
+
+    # user has multiple streams
+    output = []
+
+    for path in paths:
+        ffprobe = ffprobe_stream(path)
+        output.append(
+            {
+                "return_code": ffprobe.returncode,
+                "stderr": json.loads(ffprobe.stderr.decode("unicode_escape").strip())
+                if ffprobe.stderr.decode()
+                else {},
+                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                if ffprobe.stdout.decode()
+                else {},
+            }
+        )
+
+    return jsonify(output)

@@ -39,7 +39,20 @@ export default function Debug() {
     }
 
     setState({ ...state, showFfprobe: true });
-    const response = await axios.get(`${camera}/ffprobe`);
+    let paths = '';
+    config.cameras[camera].ffmpeg.inputs.forEach((input) => {
+      if (paths) {
+        paths += ',';
+        paths += input.path;
+      } else {
+        paths = input.path;
+      }
+    });
+    const response = await axios.get('ffprobe', {
+      params: {
+        paths,
+      },
+    });
 
     if (response.status === 200) {
       setState({ showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
