@@ -179,7 +179,7 @@ module.exports = {
   // transform: undefined,
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  // transformIgnorePatterns: [
+  transformIgnorePatterns: ["node_modules/(?!axios)"],
   //   "/node_modules/",
   //   "\\.pnp\\.[^\\/]+$"
   // ],
