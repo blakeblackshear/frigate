@@ -202,12 +202,12 @@ ${Object.keys(objectMaskPoints)
 
       <Card
         content={
-          <p>
-            This tool can help you create masks & zones for your {camera} camera.<br />
-            • Click to add a point.<br />
-            • Click and hold on an existing point to move it.<br />
-            • Right-Click on an existing point to delete it.<br />
-          </p>
+          <p>This tool can help you create masks & zones for your {camera} camera.</p>
+          <ul>
+            <li>Click to add a point.</li>
+            <li>Click and hold on an existing point to move it.</li>
+            <li>Right-Click on an existing point to delete it.</li>
+          </ul>
         }
         header="Instructions"
       />
