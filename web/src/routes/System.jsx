@@ -84,7 +84,7 @@ export default function System() {
     if (response.status === 200) {
       setState({ ...state, showVainfo: true, vainfo: JSON.stringify(resonse.data, null, 2)})
     } else {
-      setState({ ...state, showVainfo: true, 'There was an error getting the vainfo output.'})
+      setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.'})
     }
   };
 
