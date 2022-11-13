@@ -84,6 +84,20 @@ def get_temperatures() -> dict[str, float]:
     return temps
 
 
+def get_processing_stats(config: FrigateConfig, stats: dict[str, str]) -> None:
+    """Get stats for cpu / gpu."""
+
+    async def run_tasks():
+        await asyncio.wait(
+            asyncio.create_task(set_gpu_stats(config, stats)),
+            asyncio.create_task(set_cpu_stats(stats)),
+        )
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run_tasks())
+    loop.close()
+
+
 def set_cpu_stats(all_stats: dict[str, str]) -> None:
     """Set cpu usage from top."""
     cpu_stats = get_cpu_stats()
@@ -188,10 +202,7 @@ def stats_snapshot(
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
-    asyncio.gather(
-        asyncio.create_task(set_gpu_stats(config, stats)),
-        asyncio.create_task(set_cpu_stats(stats)),
-    )
+    get_processing_stats(config, stats)
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
