@@ -82,9 +82,9 @@ export default function System() {
     const response = axios.get('vainfo');
 
     if (response.status === 200) {
-      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(resonse.data, null, 2)})
+      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(resonse.data, null, 2) });
     } else {
-      setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.'})
+      setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.' });
     }
   };
 
@@ -125,11 +125,7 @@ export default function System() {
             <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
               Copy
             </Button>
-            <Button
-              className="ml-2"
-              onClick={() => setState({ ...state, vainfo: '', showFfprobe: false })}
-              type="text"
-            >
+            <Button className="ml-2" onClick={() => setState({ ...state, vainfo: '', showFfprobe: false })} type="text">
               Close
             </Button>
           </div>

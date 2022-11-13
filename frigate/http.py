@@ -613,44 +613,6 @@ def stats():
     return jsonify(stats)
 
 
-@bp.route("/<camera_name>/ffprobe")
-def ffprobe(camera_name):
-    if camera_name not in current_app.frigate_config.cameras:
-        return jsonify(
-            {"success": False, "message": f"Camera name {camera_name} not found"}, "404"
-        )
-
-    config: CameraConfig = current_app.frigate_config.cameras[camera_name]
-
-    if len(config.ffmpeg.inputs) > 1:
-        # user has multiple streams
-        output = []
-
-        for input in config.ffmpeg.inputs:
-            ffprobe = ffprobe_stream(input.path)
-            output.append(
-                {
-                    "input_roles": input.roles,
-                    "return_code": ffprobe.returncode,
-                    "stderr": ffprobe.stderr.decode().strip(),
-                    "stdout": ffprobe.stdout.decode().strip(),
-                }
-            )
-
-        return jsonify(output)
-    else:
-        # user has single stream
-        ffprobe: sp.CompletedProcess = ffprobe_stream(config.ffmpeg.inputs[0].path)
-        return jsonify(
-            {
-                "input_roles": config.ffmpeg.inputs[0].roles,
-                "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr.decode().strip(),
-                "stdout": ffprobe.stdout.decode().strip(),
-            }
-        )
-
-
 @bp.route("/<camera_name>")
 def mjpeg_feed(camera_name):
     fps = int(request.args.get("fps", "3"))
