@@ -82,10 +82,15 @@ export default function System() {
     const response = axios.get('vainfo');
 
     if (response.status === 200) {
-      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(resonse.data, null, 2) });
+      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(response.data, null, 2) });
     } else {
       setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.' });
     }
+  };
+
+  const onCopyVainfo = async () => {
+    await window.navigator.clipboard.writeText(JSON.stringify(state.vaifp, null, 2));
+    setState({ ...state, vainfo: '', showVainfo: false });
   };
 
   return (
@@ -179,8 +184,8 @@ export default function System() {
           ) : (
             <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
               {gpuNames.map((gpu) => (
-                <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-                  <div className="text-lg flex justify-between p-4">{detector}</div>
+                <div key={gpu} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                  <div className="text-lg flex justify-between p-4">{gpu}</div>
                   <div className="p-2">
                     <Table className="w-full">
                       <Thead>
