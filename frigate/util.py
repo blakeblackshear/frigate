@@ -766,21 +766,6 @@ def get_cpu_stats() -> dict[str, dict]:
         return usages
 
 
-def ffprobe_stream(path: str) -> sp.CompletedProcess:
-    """Run ffprobe on stream."""
-    ffprobe_cmd = [
-        "ffprobe",
-        "-print_format",
-        "json",
-        "-show_entries",
-        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
-        "-loglevel",
-        "quiet",
-        path,
-    ]
-    return sp.run(ffprobe_cmd, capture_output=True)
-
-
 def get_amd_gpu_stats() -> dict[str, str]:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
@@ -878,6 +863,27 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         }
 
         return results
+
+
+def ffprobe_stream(path: str) -> sp.CompletedProcess:
+    """Run ffprobe on stream."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-print_format",
+        "json",
+        "-show_entries",
+        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
+        "-loglevel",
+        "quiet",
+        path,
+    ]
+    return sp.run(ffprobe_cmd, capture_output=True)
+
+
+def vainfo() -> sp.CompletedProcess:
+    """Run vainfo."""
+    ffprobe_cmd = ["vainfo"]
+    return sp.run(ffprobe_cmd, capture_output=True)
 
 
 class FrameManager(ABC):

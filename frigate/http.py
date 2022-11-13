@@ -31,7 +31,7 @@ from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
-from frigate.util import clean_camera_user_pass, ffprobe_stream
+from frigate.util import clean_camera_user_pass, ffprobe_stream, vainfo
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -1035,3 +1035,19 @@ def ffprobe():
         )
 
     return jsonify(output)
+
+
+@bp.route("/vainfo", methods=["GET"])
+def vainfo():
+    vainfo_output = vainfo()
+    return jsonify(
+        {
+            "return_code": vainfo_output.returncode,
+            "stderr": json.loads(vainfo_output.stderr.decode("unicode_escape").strip())
+            if vainfo_output.stderr.decode()
+            else {},
+            "stdout": json.loads(vainfo_output.stdout.decode("unicode_escape").strip())
+            if vainfo_output.stdout.decode()
+            else {},
+        }
+    )
