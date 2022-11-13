@@ -64,7 +64,7 @@ export const HistoryVideo = ({
     if (videoIsPlaying) {
       video.play();
     }
-  }, [video, id]);
+  }, [video, id, apiHost, videoIsPlaying]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -102,7 +102,7 @@ export const HistoryVideo = ({
       video.play()
     }
   }, [video, videoIsPlaying])
-  
+
   return (
     <div data-vjs-player>
       <video

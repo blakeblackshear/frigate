@@ -1,22 +1,33 @@
 {
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "vitest-globals/env": true
   },
-  "extends": ["eslint:recommended", "preact", "prettier"],
+  "extends": ["eslint:recommended", "plugin:vitest-globals/recommended", "preact", "prettier"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
     },
-    "ecmaVersion": 12,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
+  "settings": {
+    "jest": {
+      "version": 27
+    }
+  },
+  "ignorePatterns": ["*.d.ts"],
   "rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "comma-dangle": [
       "error",
-      { "objects": "always-multiline", "arrays": "always-multiline", "imports": "always-multiline" }
+      {
+        "objects": "always-multiline",
+        "arrays": "always-multiline",
+        "imports": "always-multiline"
+      }
     ],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "no-console": "error"
