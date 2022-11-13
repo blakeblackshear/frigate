@@ -880,7 +880,7 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def vainfo() -> sp.CompletedProcess:
+def vainfo_hwaccel() -> sp.CompletedProcess:
     """Run vainfo."""
     ffprobe_cmd = ["vainfo"]
     return sp.run(ffprobe_cmd, capture_output=True)
