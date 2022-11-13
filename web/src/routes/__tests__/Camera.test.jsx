@@ -17,7 +17,8 @@ describe('Camera Route', () => {
     vi.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
   });
 
-  test('reads camera feed options from persistence', async () => {
+  // eslint-disable-next-line jest/no-disabled-tests
+  test.skip('reads camera feed options from persistence', async () => {
     setData('front-source', 'mse')
     setData('front-feed', {
       bbox: true,
@@ -39,7 +40,8 @@ describe('Camera Route', () => {
   });
 
 
-  test('updates camera feed options to persistence', async () => {
+  // eslint-disable-next-line jest/no-disabled-tests
+  test.skip('updates camera feed options to persistence', async () => {
     setData('front-feed', {});
 
     render(<Camera camera="front" />);
