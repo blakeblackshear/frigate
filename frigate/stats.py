@@ -87,13 +87,14 @@ def get_temperatures() -> dict[str, float]:
 def get_processing_stats(config: FrigateConfig, stats: dict[str, str]) -> None:
     """Get stats for cpu / gpu."""
 
-    async def run_tasks():
+    async def run_tasks() -> None:
         await asyncio.wait(
             asyncio.create_task(set_gpu_stats(config, stats)),
             asyncio.create_task(set_cpu_stats(stats)),
         )
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     loop.run_until_complete(run_tasks())
     loop.close()
 
@@ -120,9 +121,6 @@ def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, str]) -> None:
             hwaccel_args.append(args)
 
     stats: dict[str, dict] = {}
-
-    if not hwaccel_args:
-        return None
 
     for args in hwaccel_args:
         if "cuvid" in args:
