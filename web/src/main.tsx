@@ -1,12 +1,8 @@
-import App from './App';
+import { render } from 'preact'
+import App from './app'
 import { ApiProvider } from './api';
-import { render } from 'preact';
-import 'preact/devtools';
-import './index.css';
+import './index.css'
 
-render(
-  <ApiProvider>
+render(<ApiProvider>
     <App />
-  </ApiProvider>,
-  document.getElementById('app') as HTMLElement
-);
+  </ApiProvider>, document.getElementById('app') as HTMLElement)

@@ -126,7 +126,7 @@ ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/
 
 - [Frigate source code](#frigate-core-web-and-docs)
 - All [core](#core) prerequisites _or_ another running Frigate instance locally available
-- Node.js 14
+- Node.js 16
 
 ### Making changes
 
@@ -169,6 +169,7 @@ npm run lint
 ```
 
 - Add to unit tests and ensure they pass. As much as possible, you should strive to _increase_ test coverage whenever making changes. This will help ensure features do not accidentally become broken in the future.
+- If you run into error messages like "TypeError: Cannot read properties of undefined (reading 'context')" when running tests, this may be due to these issues (https://github.com/vitest-dev/vitest/issues/1910, https://github.com/vitest-dev/vitest/issues/1652) in vitest, but I haven't been able to resolve them.
 
 ```console
 npm run test
@@ -181,7 +182,7 @@ npm run test
 ### Prerequisites
 
 - [Frigate source code](#frigate-core-web-and-docs)
-- Node.js 14
+- Node.js 16
 
 ### Making changes
 

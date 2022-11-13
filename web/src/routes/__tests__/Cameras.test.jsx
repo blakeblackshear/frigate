@@ -6,8 +6,8 @@ import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-li
 
 describe('Cameras Route', () => {
   beforeEach(() => {
-    jest.spyOn(CameraImage, 'default').mockImplementation(() => <div data-testid="camera-image" />);
-    jest.spyOn(Mqtt, 'useMqtt').mockImplementation(() => ({ value: { payload: 'OFF' }, send: jest.fn() }));
+    vi.spyOn(CameraImage, 'default').mockImplementation(() => <div data-testid="camera-image" />);
+    vi.spyOn(Mqtt, 'useMqtt').mockImplementation(() => ({ value: { payload: 'OFF' }, send: vi.fn() }));
   });
 
   test('shows an ActivityIndicator if not yet loaded', async () => {
@@ -36,16 +36,16 @@ describe('Cameras Route', () => {
   });
 
   test('buttons toggle detect, clips, and snapshots', async () => {
-    const sendDetect = jest.fn();
-    const sendRecordings = jest.fn();
-    const sendSnapshots = jest.fn();
-    jest.spyOn(Mqtt, 'useDetectState').mockImplementation(() => {
+    const sendDetect = vi.fn();
+    const sendRecordings = vi.fn();
+    const sendSnapshots = vi.fn();
+    vi.spyOn(Mqtt, 'useDetectState').mockImplementation(() => {
       return { payload: 'ON', send: sendDetect };
     });
-    jest.spyOn(Mqtt, 'useRecordingsState').mockImplementation(() => {
+    vi.spyOn(Mqtt, 'useRecordingsState').mockImplementation(() => {
       return { payload: 'OFF', send: sendRecordings };
     });
-    jest.spyOn(Mqtt, 'useSnapshotsState').mockImplementation(() => {
+    vi.spyOn(Mqtt, 'useSnapshotsState').mockImplementation(() => {
       return { payload: 'ON', send: sendSnapshots };
     });
 

@@ -1,9 +1,9 @@
 import { h } from 'preact';
 import AutoUpdatingCameraImage from '../AutoUpdatingCameraImage';
-import { screen, render } from 'testing-library';
+import { screen, render } from '@testing-library/preact';
 
 let mockOnload;
-jest.mock('../CameraImage', () => {
+vi.mock('../CameraImage', () => {
   function CameraImage({ onload, searchParams }) {
     mockOnload = () => {
       onload();
@@ -19,7 +19,7 @@ jest.mock('../CameraImage', () => {
 describe('AutoUpdatingCameraImage', () => {
   let dateNowSpy;
   beforeEach(() => {
-    dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
+    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(0);
   });
 
   test('shows FPS by default', async () => {
