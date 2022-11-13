@@ -63,7 +63,7 @@ export default function System() {
     });
 
     if (response.status === 200) {
-      setState({ showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
+      setState({ ...state, showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
     } else {
       setState({ ...state, ffprobe: 'There was an error getting the ffprobe output.' });
     }
@@ -74,11 +74,26 @@ export default function System() {
     setState({ ...state, ffprobe: '', showFfprobe: false });
   };
 
+  const onHandleVainfo = async (e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    const response = axios.get('vainfo');
+
+    if (response.status === 200) {
+      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(resonse.data, null, 2)})
+    } else {
+      setState({ ...state, showVainfo: true, 'There was an error getting the vainfo output.'})
+    }
+  };
+
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>
         System <span className="text-sm">{service.version}</span>
       </Heading>
+
       {state.showFfprobe && (
         <Dialog>
           <div className="p-4">
@@ -92,6 +107,27 @@ export default function System() {
             <Button
               className="ml-2"
               onClick={() => setState({ ...state, ffprobe: '', showFfprobe: false })}
+              type="text"
+            >
+              Close
+            </Button>
+          </div>
+        </Dialog>
+      )}
+
+      {state.showVainfo && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Vainfo Output</Heading>
+            {state.ffprobe != '' ? <p className="mb-2">{state.vainfo}</p> : <ActivityIndicator />}
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
+              Copy
+            </Button>
+            <Button
+              className="ml-2"
+              onClick={() => setState({ ...state, vainfo: '', showFfprobe: false })}
               type="text"
             >
               Close
@@ -133,7 +169,11 @@ export default function System() {
             ))}
           </div>
 
-          <Heading size="lg">GPUs</Heading>
+          <div className="text-lg flex justify-between p-4">
+            <Heading size="lg">GPUs</Heading>
+            <Button onClick={(e) => onHandleVainfo(e)}>vainfo</Button>
+          </div>
+
           {!gpu_usages ? (
             <div className="p-4">
               <Link href={'https://docs.frigate.video/configuration/hardware_acceleration'}>
