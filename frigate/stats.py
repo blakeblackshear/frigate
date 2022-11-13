@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import threading
@@ -83,7 +84,15 @@ def get_temperatures() -> dict[str, float]:
     return temps
 
 
-def get_gpu_stats(config: FrigateConfig) -> Optional[dict[str, dict]]:
+def set_cpu_stats(all_stats: dict[str, str]) -> None:
+    """Set cpu usage from top."""
+    cpu_stats = get_cpu_stats()
+
+    if cpu_stats:
+        all_stats["cpu_usages"] = cpu_stats
+
+
+def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, str]) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
 
@@ -136,9 +145,7 @@ def get_gpu_stats(config: FrigateConfig) -> Optional[dict[str, dict]]:
             pass
 
     if stats:
-        return stats
-
-    return None
+        all_stats["gpu_usages"] = stats
 
 
 def stats_snapshot(
@@ -181,8 +188,10 @@ def stats_snapshot(
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
-    stats["cpu_usages"] = get_cpu_stats()
-    stats["gpu_usages"] = get_gpu_stats(config)
+    asyncio.gather(
+        asyncio.create_task(set_gpu_stats(config, stats)),
+        asyncio.create_task(set_cpu_stats(stats)),
+    )
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
