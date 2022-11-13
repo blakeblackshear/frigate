@@ -63,6 +63,7 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
+    procps \
     unzip tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo

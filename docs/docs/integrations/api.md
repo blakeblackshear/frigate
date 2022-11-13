@@ -264,3 +264,11 @@ Get recording segment details for the given timestamp range.
 | -------- | ---- | ------------------------------------- |
 | `after`  | int  | Unix timestamp for beginning of range |
 | `before` | int  | Unix timestamp for end of range       |
+
+### `GET /api/ffprobe`
+
+Get ffprobe output for camera feed paths.
+
+| param   | Type   | Description                        |
+| ------- | ------ | ---------------------------------- |
+| `paths` | string | `,` separated list of camera paths |

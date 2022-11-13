@@ -1,6 +1,8 @@
 import copy
 import datetime
 import logging
+import subprocess as sp
+import json
 import re
 import signal
 import traceback
@@ -677,6 +679,52 @@ def escape_special_characters(path: str) -> str:
     except AttributeError:
         # path does not have user:pass
         return path
+
+
+def get_cpu_stats() -> dict[str, dict]:
+    """Get cpu usages for each process id"""
+    usages = {}
+    # -n=2 runs to ensure extraneous values are not included
+    top_command = ["top", "-b", "-n", "2"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split(" ")))
+            try:
+                usages[stats[0]] = {
+                    "cpu": stats[8],
+                    "mem": stats[9],
+                }
+            except:
+                continue
+
+        return usages
+
+
+def ffprobe_stream(path: str) -> sp.CompletedProcess:
+    """Run ffprobe on stream."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-print_format",
+        "json",
+        "-show_entries",
+        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
+        "-loglevel",
+        "quiet",
+        path,
+    ]
+    return sp.run(ffprobe_cmd, capture_output=True)
 
 
 class FrameManager(ABC):
