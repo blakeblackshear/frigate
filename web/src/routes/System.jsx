@@ -143,24 +143,24 @@ export default function System() {
           ) : (
             <div data-testid="gpus" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
               {gpuNames.map((gpu) => (
-                <div
-                  key={gpu}
-                  className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 m-2"
-                >
-                  <Table className="w-full">
-                    <Thead>
-                      <Tr>
-                        <Th>Gpu %</Th>
-                        <Th>Memory %</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>{gpu_usages[gpu]['gpu']}</Td>
-                        <Td>{gpu_usages[gpu]['mem']}</Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
+                <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                  <div className="text-lg flex justify-between p-4">{detector}</div>
+                  <div className="p-2">
+                    <Table className="w-full">
+                      <Thead>
+                        <Tr>
+                          <Th>Gpu %</Th>
+                          <Th>Memory %</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr>
+                          <Td>{gpu_usages[gpu]['gpu']}</Td>
+                          <Td>{gpu_usages[gpu]['mem']}</Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </div>
                 </div>
               ))}
             </div>
