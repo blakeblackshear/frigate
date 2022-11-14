@@ -3,7 +3,7 @@ id: stationary_objects
 title: Avoiding stationary objects
 ---
 
-Many people use Frigate to detect cars entering their driveway, and they often run into an issue with repeated events of a parked car being repeatedly detected. This is because object tracking stops when motion ends and the event ends. Motion detection works by determining if a sufficient number of pixels have changed between frames. Shadows or other lighting changes will be detected as motion. This will often cause a new event for a parked car.
+Many people use Frigate to detect cars entering their driveway, and they often run into an issue with repeated events of a parked car being repeatedly detected over the course of multiple days (for example if the car is lost at night and detected again the following morning.
 
 You can use zones to restrict events and notifications to objects that have entered specific areas.
 

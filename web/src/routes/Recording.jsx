@@ -62,7 +62,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
           description: `${camera} recording @ ${h.hour}:00.`,
           sources: [
             {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/index.m3u8`,
+              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/master.m3u8`,
               type: 'application/vnd.apple.mpegurl',
             },
           ],
@@ -103,7 +103,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary) {
+  if (!recordingsSummary || !recordings) {
     return <ActivityIndicator />;
   }
 
@@ -121,7 +121,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading>{camera} Recordings</Heading>
+      <Heading>{camera.replaceAll('_', ' ')} Recordings</Heading>
 
       <VideoPlayer
         onReady={(player) => {

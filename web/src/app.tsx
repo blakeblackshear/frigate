@@ -11,7 +11,7 @@ import useSWR from 'swr';
 
 export default function App() {
   const { data: config } = useSWR('config');
-  const cameraComponent = config && config.ui.use_experimental ? Routes.getCameraV2 : Routes.getCamera;
+  const cameraComponent = config && config.ui?.use_experimental ? Routes.getCameraV2 : Routes.getCamera;
 
   return (
     <DarkModeProvider>

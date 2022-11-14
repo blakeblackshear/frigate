@@ -65,7 +65,7 @@ function CameraSection({ sortedCameras }) {
     <Fragment>
       <Separator />
       {sortedCameras.map(([camera]) => (
-        <Destination key={camera} href={`/cameras/${camera}`} text={camera} />
+        <Destination key={camera} href={`/cameras/${camera}`} text={camera.replaceAll('_', ' ')} />
       ))}
       <Separator />
     </Fragment>
@@ -83,7 +83,7 @@ function RecordingSection({ sortedCameras }) {
             key={camera}
             path={`/recording/${camera}/:date?/:hour?/:seconds?`}
             href={`/recording/${camera}`}
-            text={camera}
+            text={camera.replaceAll('_', ' ')}
           />
         );
       })}

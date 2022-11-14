@@ -27,12 +27,14 @@ export function Tabs({ children, selectedIndex: selectedIndexProp, onChange, cla
   );
 }
 
-export function TextTab({ selected, text, onClick }) {
-  const selectedStyle = selected
-    ? 'text-white bg-blue-500 dark:text-black dark:bg-white'
-    : 'text-black dark:text-white bg-transparent';
+export function TextTab({ selected, text, onClick, disabled }) {
+  const selectedStyle = disabled
+    ? 'text-gray-400 dark:text-gray-600 bg-transparent'
+    : selected
+      ? 'text-white bg-blue-500 dark:text-black dark:bg-white'
+      : 'text-black dark:text-white bg-transparent';
   return (
-    <button onClick={onClick} className={`rounded-full px-4 py-2 ${selectedStyle}`}>
+    <button onClick={onClick} disabled={disabled} className={`rounded-full px-4 py-2 ${selectedStyle}`}>
       <span>{text}</span>
     </button>
   );

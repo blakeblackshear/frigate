@@ -29,6 +29,7 @@ services:
       - "5000:5000"
       - "5001:5001"
       - "8080:8080"
+      - "8554:8554"
     entrypoint: ["sudo", "/init"]
     command: /bin/sh -c "while sleep 1000; do :; done"
   mqtt:

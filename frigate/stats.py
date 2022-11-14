@@ -14,7 +14,8 @@ from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
-from frigate.edgetpu import EdgeTPUProcess
+from frigate.util import get_cpu_stats
+from frigate.object_detection import ObjectDetectProcess
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ logger = logging.getLogger(__name__)
 def get_latest_version() -> str:
     try:
         request = requests.get(
-            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest"
+            "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
+            timeout=10,
         )
     except:
         return "unknown"
@@ -36,7 +38,8 @@ def get_latest_version() -> str:
 
 
 def stats_init(
-    camera_metrics: dict[str, CameraMetricsTypes], detectors: dict[str, EdgeTPUProcess]
+    camera_metrics: dict[str, CameraMetricsTypes],
+    detectors: dict[str, ObjectDetectProcess],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
@@ -88,6 +91,9 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats["detection_fps"].value
         pid = camera_stats["process"].pid if camera_stats["process"] else None
+        ffmpeg_pid = (
+            camera_stats["ffmpeg_pid"].value if camera_stats["ffmpeg_pid"] else None
+        )
         cpid = (
             camera_stats["capture_process"].pid
             if camera_stats["capture_process"]
@@ -100,6 +106,7 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
             "detection_fps": round(camera_stats["detection_fps"].value, 2),
             "pid": pid,
             "capture_pid": cpid,
+            "ffmpeg_pid": ffmpeg_pid,
         }
 
     stats["detectors"] = {}
@@ -111,6 +118,8 @@ def stats_snapshot(stats_tracking: StatsTrackingTypes) -> dict[str, Any]:
             "pid": pid,
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
+
+    stats["cpu_usages"] = get_cpu_stats()
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),

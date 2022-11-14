@@ -19,7 +19,7 @@ export const handlers = [
             record: { enabled: true },
             detect: { width: 1280, height: 720 },
             snapshots: {},
-            live: { height: 720 },
+            restream: { enabled: true, jsmpeg: { height: 720 } },
             ui: { dashboard: true, order: 0 },
           },
           side: {
@@ -28,7 +28,7 @@ export const handlers = [
             record: { enabled: false },
             detect: { width: 1280, height: 720 },
             snapshots: {},
-            live: { height: 720 },
+            restream: { enabled: true, jsmpeg: { height: 720 } },
             ui: { dashboard: true, order: 1 },
           },
         },
@@ -39,9 +39,10 @@ export const handlers = [
     return res(
       ctx.status(200),
       ctx.json({
+        cpu_usages: { 74: {cpu: 6, mem: 6}, 64: { cpu: 5, mem: 5 }, 54: { cpu: 4, mem: 4 }, 71: { cpu: 3, mem: 3}, 60: {cpu: 2, mem: 2}, 72: {cpu: 1, mem: 1} },
         detection_fps: 0.0,
         detectors: { coral: { detection_start: 0.0, inference_speed: 8.94, pid: 52 } },
-        front: { camera_fps: 5.0, capture_pid: 64, detection_fps: 0.0, pid: 54, process_fps: 0.0, skipped_fps: 0.0 },
+        front: { camera_fps: 5.0, capture_pid: 64, detection_fps: 0.0, pid: 54, process_fps: 0.0, skipped_fps: 0.0, ffmpeg_pid: 72 },
         side: {
           camera_fps: 6.9,
           capture_pid: 71,
@@ -49,6 +50,7 @@ export const handlers = [
           pid: 60,
           process_fps: 0.0,
           skipped_fps: 0.0,
+          ffmpeg_pid: 74,
         },
         service: { uptime: 34812, version: '0.8.1-d376f6b' },
       })
@@ -68,6 +70,7 @@ export const handlers = [
           top_score: Math.random(),
           zones: ['front_patio'],
           thumbnail: '/9j/4aa...',
+          camera: 'camera_name',
         }))
       )
     );

@@ -21,7 +21,7 @@ ffmpeg:
 ffmpeg:
   hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
 ```
-**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME_JELLYFIN=i965` to your docker-compose file.   
+**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).   
 
 ### Intel-based CPUs (>=10th Generation) via Quicksync
 
@@ -41,22 +41,24 @@ ffmpeg:
 
 ### NVIDIA GPU
 
+[Supported Nvidia GPUs for Decoding](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new)
+
 These instructions are based on the [jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux)
 
 Add `--gpus all` to your docker run command or update your compose file.
-
+If you have multiple Nvidia graphic card, you can add them with their ids obtained via `nvidia-smi` command
 ```yaml
 services:
   frigate:
     ...
     image: blakeblackshear/frigate:stable
-  deploy:    # <------------- Add this section
-    resources:
-      reservations:
-        devices:
-          - driver: nvidia
-            count: 1
-            capabilities: [gpu]
+    deploy:    # <------------- Add this section
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0'] # this is only needed when using multiple GPUs
+              capabilities: [gpu]
 ```
 
 The decoder you need to pass in the `hwaccel_args` will depend on the input video.
@@ -84,7 +86,7 @@ ffmpeg:
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
-Verify that hardware decoding is working by running `nvidia-smi`, which should show the ffmpeg
+Verify that hardware decoding is working by running `docker exec -it frigate nvidia-smi`, which should show the ffmpeg
 processes:
 
 ```

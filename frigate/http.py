@@ -1,13 +1,14 @@
 import base64
-from collections import OrderedDict
 from datetime import datetime, timedelta
 import copy
 import logging
+import json
 import os
 import subprocess as sp
 import time
 from functools import reduce
 from pathlib import Path
+from urllib.parse import unquote
 
 import cv2
 
@@ -25,9 +26,11 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR, PLUS_ENV_VAR
+from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
+from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
+from frigate.util import clean_camera_user_pass, ffprobe_stream
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -210,7 +213,7 @@ def delete_retain(id):
 @bp.route("/events/<id>/sub_label", methods=("POST",))
 def set_sub_label(id):
     try:
-        event = Event.get(Event.id == id)
+        event: Event = Event.get(Event.id == id)
     except DoesNotExist:
         return make_response(
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
@@ -232,6 +235,16 @@ def set_sub_label(id):
             ),
             400,
         )
+
+    if not event.end_time:
+        tracked_obj: TrackedObject = (
+            current_app.detected_frames_processor.camera_states[
+                event.camera
+            ].tracked_objects.get(event.id)
+        )
+
+        if tracked_obj:
+            tracked_obj.obj_data["sub_label"] = new_sub_label
 
     event.sub_label = new_sub_label
     event.save()
@@ -341,11 +354,11 @@ def event_thumbnail(id, max_cache_age=2592000):
 @bp.route("/<camera_name>/<label>/best.jpg")
 @bp.route("/<camera_name>/<label>/thumbnail.jpg")
 def label_thumbnail(camera_name, label):
+    label = unquote(label)
     if label == "any":
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
     else:
@@ -353,7 +366,6 @@ def label_thumbnail(camera_name, label):
             Event.select()
             .where(Event.camera == camera_name)
             .where(Event.label == label)
-            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
 
@@ -424,6 +436,7 @@ def event_snapshot(id):
 
 @bp.route("/<camera_name>/<label>/snapshot.jpg")
 def label_snapshot(camera_name, label):
+    label = unquote(label)
     if label == "any":
         event_query = (
             Event.select()
@@ -491,7 +504,7 @@ def event_clip(id):
 def events():
     limit = request.args.get("limit", 100)
     camera = request.args.get("camera", "all")
-    label = request.args.get("label", "all")
+    label = unquote(request.args.get("label", "all"))
     sub_label = request.args.get("sub_label", "all")
     zone = request.args.get("zone", "all")
     after = request.args.get("after", type=float)
@@ -569,9 +582,9 @@ def config():
         camera_dict = config["cameras"][camera_name]
         camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
-            cmd["cmd"] = " ".join(cmd["cmd"])
+            cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
-    config["plus"] = {"enabled": PLUS_ENV_VAR in os.environ}
+    config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     return jsonify(config)
 
@@ -739,6 +752,7 @@ def recordings(camera_name):
             Recordings.id,
             Recordings.start_time,
             Recordings.end_time,
+            Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
         )
@@ -753,9 +767,9 @@ def recordings(camera_name):
     return jsonify([e for e in recordings.dicts()])
 
 
-@bp.route("/<camera>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
-@bp.route("/<camera>/start/<float:start_ts>/end/<float:end_ts>/clip.mp4")
-def recording_clip(camera, start_ts, end_ts):
+@bp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
+@bp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/clip.mp4")
+def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
     recordings = (
@@ -765,7 +779,7 @@ def recording_clip(camera, start_ts, end_ts):
             | (Recordings.end_time.between(start_ts, end_ts))
             | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
-        .where(Recordings.camera == camera)
+        .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
     )
 
@@ -780,36 +794,41 @@ def recording_clip(camera, start_ts, end_ts):
         if clip.end_time > end_ts:
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
-    file_name = f"clip_{camera}_{start_ts}-{end_ts}.mp4"
+    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
     path = f"/tmp/cache/{file_name}"
 
-    ffmpeg_cmd = [
-        "ffmpeg",
-        "-y",
-        "-protocol_whitelist",
-        "pipe,file",
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        "/dev/stdin",
-        "-c",
-        "copy",
-        "-movflags",
-        "+faststart",
-        path,
-    ]
+    if not os.path.exists(path):
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-c",
+            "copy",
+            "-movflags",
+            "+faststart",
+            path,
+        ]
+        p = sp.run(
+            ffmpeg_cmd,
+            input="\n".join(playlist_lines),
+            encoding="ascii",
+            capture_output=True,
+        )
 
-    p = sp.run(
-        ffmpeg_cmd,
-        input="\n".join(playlist_lines),
-        encoding="ascii",
-        capture_output=True,
-    )
-    if p.returncode != 0:
-        logger.error(p.stderr)
-        return f"Could not create clip from recordings for {camera}.", 500
+        if p.returncode != 0:
+            logger.error(p.stderr)
+            return f"Could not create clip from recordings for {camera_name}.", 500
+    else:
+        logger.debug(
+            f"Ignoring subsequent request for {path} as it already exists in the cache."
+        )
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
@@ -825,9 +844,9 @@ def recording_clip(camera, start_ts, end_ts):
     return response
 
 
-@bp.route("/vod/<camera>/start/<int:start_ts>/end/<int:end_ts>")
-@bp.route("/vod/<camera>/start/<float:start_ts>/end/<float:end_ts>")
-def vod_ts(camera, start_ts, end_ts):
+@bp.route("/vod/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
+@bp.route("/vod/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
+def vod_ts(camera_name, start_ts, end_ts):
     recordings = (
         Recordings.select()
         .where(
@@ -835,7 +854,7 @@ def vod_ts(camera, start_ts, end_ts):
             | Recordings.end_time.between(start_ts, end_ts)
             | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
         )
-        .where(Recordings.camera == camera)
+        .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
     )
 
@@ -846,16 +865,13 @@ def vod_ts(camera, start_ts, end_ts):
     for recording in recordings:
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
-        # Determine if offset is needed for first clip
-        if recording.start_time < start_ts:
-            offset = int((start_ts - recording.start_time) * 1000)
-            clip["clipFrom"] = offset
-            duration -= offset
+
         # Determine if we need to end the last clip early
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
         if duration > 0:
+            clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
         else:
@@ -876,14 +892,14 @@ def vod_ts(camera, start_ts, end_ts):
     )
 
 
-@bp.route("/vod/<year_month>/<day>/<hour>/<camera>")
-def vod_hour(year_month, day, hour, camera):
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
+def vod_hour(year_month, day, hour, camera_name):
     start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
-    return vod_ts(camera, start_ts, end_ts)
+    return vod_ts(camera_name, start_ts, end_ts)
 
 
 @bp.route("/vod/event/<id>")
@@ -941,3 +957,37 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + jpg.tobytes() + b"\r\n\r\n"
         )
+
+
+@bp.route("/ffprobe", methods=["GET"])
+def ffprobe():
+    path_param = request.args.get("paths", "")
+
+    if not path_param:
+        return jsonify(
+            {"success": False, "message": f"Path needs to be provided."}, "404"
+        )
+
+    if "," in clean_camera_user_pass(path_param):
+        paths = path_param.split(",")
+    else:
+        paths = [path_param]
+
+    # user has multiple streams
+    output = []
+
+    for path in paths:
+        ffprobe = ffprobe_stream(path)
+        output.append(
+            {
+                "return_code": ffprobe.returncode,
+                "stderr": json.loads(ffprobe.stderr.decode("unicode_escape").strip())
+                if ffprobe.stderr.decode()
+                else {},
+                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                if ffprobe.stdout.decode()
+                else {},
+            }
+        )
+
+    return jsonify(output)

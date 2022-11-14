@@ -5,7 +5,7 @@ import { render, screen } from 'testing-library';
 
 describe('useApiHost', () => {
   beforeEach(() => {
-    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+    vi.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
   });
 
   test('is set from the baseUrl', async () => {

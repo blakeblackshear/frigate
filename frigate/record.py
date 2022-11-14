@@ -101,13 +101,19 @@ class RecordingMaintainer(threading.Thread):
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
-                logger.warning(
-                    f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
-                )
+                ####
+                # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
+                ####
+                # logger.warning(
+                #     f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
+                # )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
                     cache_path = f["cache_path"]
-                    logger.warning(f"Discarding a recording segment: {cache_path}")
+                    ####
+                    # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
+                    ####
+                    # logger.warning(f"Discarding a recording segment: {cache_path}")
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
@@ -161,11 +167,21 @@ class RecordingMaintainer(threading.Thread):
                         f"{cache_path}",
                     ]
                     p = sp.run(ffprobe_cmd, capture_output=True)
-                    if p.returncode == 0:
+                    if p.returncode == 0 and p.stdout.decode():
                         duration = float(p.stdout.decode().strip())
+                    else:
+                        duration = -1
+
+                    # ensure duration is within expected length
+                    if 0 < duration < 600:
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
                     else:
+                        if duration == -1:
+                            logger.warning(
+                                f"Failed to probe corrupt segment {f}: {p.returncode} - {p.stderr}"
+                            )
+
                         logger.warning(f"Discarding a corrupt recording segment: {f}")
                         Path(cache_path).unlink(missing_ok=True)
                         continue
@@ -270,28 +286,38 @@ class RecordingMaintainer(threading.Thread):
         file_path = os.path.join(directory, file_name)
 
         try:
-            start_frame = datetime.datetime.now().timestamp()
-            # copy then delete is required when recordings are stored on some network drives
-            shutil.copyfile(cache_path, file_path)
-            logger.debug(
-                f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
-            )
-            os.remove(cache_path)
+            if not os.path.exists(file_path):
+                start_frame = datetime.datetime.now().timestamp()
+                # copy then delete is required when recordings are stored on some network drives
+                shutil.copyfile(cache_path, file_path)
+                logger.debug(
+                    f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                )
 
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
-            Recordings.create(
-                id=f"{start_time.timestamp()}-{rand_id}",
-                camera=camera,
-                path=file_path,
-                start_time=start_time.timestamp(),
-                end_time=end_time.timestamp(),
-                duration=duration,
-                motion=motion_count,
-                # TODO: update this to store list of active objects at some point
-                objects=active_count,
-            )
+                try:
+                    segment_size = round(
+                        float(os.path.getsize(cache_path)) / 1000000, 1
+                    )
+                except OSError:
+                    segment_size = 0
+
+                os.remove(cache_path)
+
+                rand_id = "".join(
+                    random.choices(string.ascii_lowercase + string.digits, k=6)
+                )
+                Recordings.create(
+                    id=f"{start_time.timestamp()}-{rand_id}",
+                    camera=camera,
+                    path=file_path,
+                    start_time=start_time.timestamp(),
+                    end_time=end_time.timestamp(),
+                    duration=duration,
+                    motion=motion_count,
+                    # TODO: update this to store list of active objects at some point
+                    objects=active_count,
+                    segment_size=segment_size,
+                )
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")
             Path(cache_path).unlink(missing_ok=True)

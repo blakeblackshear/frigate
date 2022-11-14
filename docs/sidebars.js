@@ -4,6 +4,7 @@ module.exports = {
     Guides: [
       "guides/camera_setup",
       "guides/getting_started",
+      "guides/events_setup",
       "guides/false_positives",
       "guides/ha_notifications",
       "guides/stationary_objects",
@@ -16,7 +17,8 @@ module.exports = {
       "configuration/record",
       "configuration/snapshots",
       "configuration/objects",
-      "configuration/rtmp",
+      "configuration/restream",
+      "configuration/live",
       "configuration/zones",
       "configuration/birdseye",
       "configuration/stationary_objects",

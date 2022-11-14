@@ -11,11 +11,11 @@ import time
 from collections import defaultdict
 
 import numpy as np
-from cv2 import cv2, reduce
+import cv2
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig
-from frigate.edgetpu import RemoteObjectDetector
+from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.objects import ObjectTracker
@@ -29,7 +29,9 @@ from frigate.util import (
     intersection,
     intersection_over_union,
     listen,
+    yuv_crop_and_resize,
     yuv_region_2_rgb,
+    yuv_region_2_bgr,
 )
 
 logger = logging.getLogger(__name__)
@@ -89,13 +91,20 @@ def filtered(obj, objects_to_track, object_filters):
     return False
 
 
-def create_tensor_input(frame, model_shape, region):
-    cropped_frame = yuv_region_2_rgb(frame, region)
+def create_tensor_input(frame, model_config, region):
+    if model_config.input_pixel_format == PixelFormatEnum.rgb:
+        cropped_frame = yuv_region_2_rgb(frame, region)
+    elif model_config.input_pixel_format == PixelFormatEnum.bgr:
+        cropped_frame = yuv_region_2_bgr(frame, region)
+    else:
+        cropped_frame = yuv_crop_and_resize(frame, region)
 
-    # Resize to 300x300 if needed
-    if cropped_frame.shape != (model_shape[0], model_shape[1], 3):
+    # Resize if needed
+    if cropped_frame.shape != (model_config.height, model_config.width, 3):
         cropped_frame = cv2.resize(
-            cropped_frame, dsize=model_shape, interpolation=cv2.INTER_LINEAR
+            cropped_frame,
+            dsize=(model_config.height, model_config.width),
+            interpolation=cv2.INTER_LINEAR,
         )
 
     # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
@@ -340,7 +349,7 @@ def capture_camera(name, config: CameraConfig, process_info):
 def track_camera(
     name,
     config: CameraConfig,
-    model_shape,
+    model_config,
     labelmap,
     detection_queue,
     result_connection,
@@ -378,7 +387,7 @@ def track_camera(
         motion_contour_area,
     )
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_shape
+        name, labelmap, detection_queue, result_connection, model_config
     )
 
     object_tracker = ObjectTracker(config.detect)
@@ -389,7 +398,7 @@ def track_camera(
         name,
         frame_queue,
         frame_shape,
-        model_shape,
+        model_config,
         config.detect,
         frame_manager,
         motion_detector,
@@ -440,19 +449,30 @@ def intersects_any(box_a, boxes):
 
 
 def detect(
-    object_detector, frame, model_shape, region, objects_to_track, object_filters
+    detect_config: DetectConfig,
+    object_detector,
+    frame,
+    model_config,
+    region,
+    objects_to_track,
+    object_filters,
 ):
-    tensor_input = create_tensor_input(frame, model_shape, region)
+    tensor_input = create_tensor_input(frame, model_config, region)
 
     detections = []
     region_detections = object_detector.detect(tensor_input)
     for d in region_detections:
         box = d[2]
         size = region[2] - region[0]
-        x_min = int((box[1] * size) + region[0])
-        y_min = int((box[0] * size) + region[1])
-        x_max = int((box[3] * size) + region[0])
-        y_max = int((box[2] * size) + region[1])
+        x_min = int(max(0, (box[1] * size) + region[0]))
+        y_min = int(max(0, (box[0] * size) + region[1]))
+        x_max = int(min(detect_config.width - 1, (box[3] * size) + region[0]))
+        y_max = int(min(detect_config.height - 1, (box[2] * size) + region[1]))
+
+        # ignore objects that were detected outside the frame
+        if (x_min >= detect_config.width - 1) or (y_min >= detect_config.height - 1):
+            continue
+
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
@@ -476,7 +496,7 @@ def process_frames(
     camera_name: str,
     frame_queue: mp.Queue,
     frame_shape,
-    model_shape,
+    model_config,
     detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
@@ -560,7 +580,7 @@ def process_frames(
             # combine motion boxes with known locations of existing objects
             combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
 
-            region_min_size = max(model_shape[0], model_shape[1])
+            region_min_size = max(model_config.height, model_config.width)
             # compute regions
             regions = [
                 calculate_region(
@@ -620,9 +640,10 @@ def process_frames(
             for region in regions:
                 detections.extend(
                     detect(
+                        detect_config,
                         object_detector,
                         frame,
-                        model_shape,
+                        model_config,
                         region,
                         objects_to_track,
                         object_filters,
@@ -647,6 +668,7 @@ def process_frames(
 
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                     # o[2] is the box of the object: xmin, ymin, xmax, ymax
+                    # apply max/min to ensure values do not exceed the known frame size
                     boxes = [
                         (
                             o[2][0],
@@ -678,9 +700,10 @@ def process_frames(
 
                             selected_objects.extend(
                                 detect(
+                                    detect_config,
                                     object_detector,
                                     frame,
-                                    model_shape,
+                                    model_config,
                                     region,
                                     objects_to_track,
                                     object_filters,

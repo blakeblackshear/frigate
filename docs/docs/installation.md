@@ -21,12 +21,6 @@ Windows is not officially supported, but some users have had success getting it 
 
 Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
 
-:::caution
-
-Note that Frigate does not currently support limiting recordings based on available disk space automatically. If using recordings, you must specify retention settings for a number of days that will fit within the available disk space of your drive or Frigate will crash.
-
-:::
-
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
@@ -100,18 +94,7 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 ## Docker
 
-Running in Docker directly is the recommended install method.
-
-Make sure you choose the right image for your architecture:
-
-| Arch        | Image Name                                 |
-| ----------- | ------------------------------------------ |
-| amd64       | blakeblackshear/frigate:stable-amd64       |
-| amd64nvidia | blakeblackshear/frigate:stable-amd64nvidia |
-| armv7       | blakeblackshear/frigate:stable-armv7       |
-| aarch64     | blakeblackshear/frigate:stable-aarch64     |
-
-It is recommended to run with docker-compose:
+Running in Docker with compose is the recommended install method:
 
 ```yaml
 version: "3.9"
@@ -120,7 +103,7 @@ services:
     container_name: frigate
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
-    image: blakeblackshear/frigate:<specify_version_tag>
+    image: blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
@@ -157,7 +140,7 @@ docker run -d \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
   -p 1935:1935 \
-  blakeblackshear/frigate:<specify_version_tag>
+  blakeblackshear/frigate:stable
 ```
 
 ## Home Assistant Operating System (HassOS)

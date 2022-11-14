@@ -1,24 +1,26 @@
 import copy
 import datetime
-import hashlib
-import json
 import logging
-import math
-import signal
 import subprocess as sp
-import threading
-import time
+import json
+import re
+import signal
 import traceback
+import urllib.parse
+import yaml
+
 from abc import ABC, abstractmethod
+from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import AnyStr
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import psutil
+
+from frigate.const import REGEX_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +47,33 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
         else:
             merged[k] = copy.deepcopy(v2)
     return merged
+
+
+def load_config_with_no_duplicates(raw_config) -> dict:
+    """Get config ensuring duplicate keys are not allowed."""
+
+    # https://stackoverflow.com/a/71751051
+    class PreserveDuplicatesLoader(yaml.loader.Loader):
+        pass
+
+    def map_constructor(loader, node, deep=False):
+        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                raise ValueError(
+                    f"Config input {key} is defined multiple times for the same field, this is not allowed."
+                )
+            else:
+                data[key] = val
+        return data
+
+    PreserveDuplicatesLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
+    )
+    return yaml.load(raw_config, PreserveDuplicatesLoader)
 
 
 def draw_timestamp(
@@ -479,6 +508,16 @@ def yuv_region_2_rgb(frame, region):
         raise
 
 
+def yuv_region_2_bgr(frame, region):
+    try:
+        yuv_cropped_frame = yuv_crop_and_resize(frame, region)
+        return cv2.cvtColor(yuv_cropped_frame, cv2.COLOR_YUV2BGR_I420)
+    except:
+        print(f"frame.shape: {frame.shape}")
+        print(f"region: {region}")
+        raise
+
+
 def intersection(box_a, box_b):
     return (
         max(box_a[0], box_b[0]),
@@ -623,6 +662,69 @@ def load_labels(path, encoding="utf-8"):
             return {int(index): label.strip() for index, label in pairs}
         else:
             return {index: line.strip() for index, line in enumerate(lines)}
+
+
+def clean_camera_user_pass(line: str) -> str:
+    """Removes user and password from line."""
+    # todo also remove http password like reolink
+    return re.sub(REGEX_CAMERA_USER_PASS, "://*:*@", line)
+
+
+def escape_special_characters(path: str) -> str:
+    """Cleans reserved characters to encodings for ffmpeg."""
+    try:
+        found = re.search(REGEX_CAMERA_USER_PASS, path).group(0)[3:-1]
+        pw = found[(found.index(":") + 1) :]
+        return path.replace(pw, urllib.parse.quote_plus(pw))
+    except AttributeError:
+        # path does not have user:pass
+        return path
+
+
+def get_cpu_stats() -> dict[str, dict]:
+    """Get cpu usages for each process id"""
+    usages = {}
+    # -n=2 runs to ensure extraneous values are not included
+    top_command = ["top", "-b", "-n", "2"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split(" ")))
+            try:
+                usages[stats[0]] = {
+                    "cpu": stats[8],
+                    "mem": stats[9],
+                }
+            except:
+                continue
+
+        return usages
+
+
+def ffprobe_stream(path: str) -> sp.CompletedProcess:
+    """Run ffprobe on stream."""
+    ffprobe_cmd = [
+        "ffprobe",
+        "-print_format",
+        "json",
+        "-show_entries",
+        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
+        "-loglevel",
+        "quiet",
+        path,
+    ]
+    return sp.run(ffprobe_cmd, capture_output=True)
 
 
 class FrameManager(ABC):

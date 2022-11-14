@@ -1,11 +1,13 @@
 import unittest
 import numpy as np
 from pydantic import ValidationError
+
 from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
     DetectorTypeEnum,
 )
+from frigate.util import load_config_with_no_duplicates
 
 
 class TestConfig(unittest.TestCase):
@@ -575,7 +577,7 @@ class TestConfig(unittest.TestCase):
                         "inputs": [
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
-                                "roles": ["detect", "rtmp"],
+                                "roles": ["detect", "rtmp", "restream"],
                             },
                             {"path": "rtsp://10.0.0.1:554/record", "roles": ["record"]},
                         ]
@@ -837,7 +839,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": False},
+            "restream": {"enabled": False},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1050,11 +1052,11 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
 
-    def test_global_rtmp(self):
+    def test_global_restream(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": True},
+            "restream": {"enabled": True},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1072,9 +1074,32 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].rtmp.enabled
+        assert runtime_config.cameras["back"].restream.enabled
 
-    def test_default_rtmp(self):
+    def test_global_rtmp_disabled(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert not runtime_config.cameras["back"].rtmp.enabled
+
+    def test_default_not_rtmp(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
@@ -1095,7 +1120,57 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].rtmp.enabled
+        assert not runtime_config.cameras["back"].rtmp.enabled
+
+    def test_default_restream(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    }
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].restream.enabled
+
+    def test_global_restream_merge(self):
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "restream": {"enabled": False},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "restream": {
+                        "enabled": True,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config
+        assert runtime_config.cameras["back"].restream.enabled
 
     def test_global_rtmp_merge(self):
 
@@ -1108,7 +1183,7 @@ class TestConfig(unittest.TestCase):
                         "inputs": [
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
-                                "roles": ["detect"],
+                                "roles": ["detect", "rtmp"],
                             },
                         ]
                     },
@@ -1128,7 +1203,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": False},
+            "restream": {"enabled": False},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1152,11 +1227,11 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert not runtime_config.cameras["back"].rtmp.enabled
 
-    def test_global_live(self):
+    def test_global_jsmpeg(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "live": {"quality": 4},
+            "restream": {"jsmpeg": {"quality": 4}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1174,7 +1249,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 4
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 4
 
     def test_default_live(self):
 
@@ -1197,13 +1272,13 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 8
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 8
 
     def test_global_live_merge(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "live": {"quality": 4, "height": 480},
+            "restream": {"jsmpeg": {"quality": 4, "height": 480}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1214,8 +1289,10 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
-                    "live": {
-                        "quality": 7,
+                    "restream": {
+                        "jsmpeg": {
+                            "quality": 7,
+                        }
                     },
                 }
             },
@@ -1224,8 +1301,8 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].live.quality == 7
-        assert runtime_config.cameras["back"].live.height == 480
+        assert runtime_config.cameras["back"].restream.jsmpeg.quality == 7
+        assert runtime_config.cameras["back"].restream.jsmpeg.height == 480
 
     def test_global_timestamp_style(self):
 
@@ -1347,6 +1424,51 @@ class TestConfig(unittest.TestCase):
 
         self.assertRaises(
             ValidationError, lambda: frigate_config.runtime_config.cameras
+        )
+
+    def test_fails_zone_defines_untracked_object(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {"track": ["person"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "zones": {
+                        "steps": {
+                            "coordinates": "0,0,0,0",
+                            "objects": ["car", "person"],
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(ValueError, lambda: frigate_config.runtime_config.cameras)
+
+    def test_fails_duplicate_keys(self):
+        raw_config = """
+        cameras:
+          test:
+            ffmpeg:
+              inputs:
+                - one
+                - two
+              inputs:
+                - three
+                - four
+        """
+
+        self.assertRaises(
+            ValueError, lambda: load_config_with_no_duplicates(raw_config)
         )
 
     def test_object_filter_ratios_work(self):

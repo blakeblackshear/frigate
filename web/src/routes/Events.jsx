@@ -2,6 +2,7 @@ import { h, Fragment } from 'preact';
 import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
+import { Tabs, TextTab } from '../components/Tabs';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
@@ -21,6 +22,7 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
+import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 
 const API_LIMIT = 25;
 
@@ -35,6 +37,16 @@ const monthsAgo = (num) => {
   date.setMonth(date.getMonth() - num);
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000;
 };
+
+const clipDuration = (start_time, end_time) => {
+  const start = fromUnixTime(start_time);
+  const end = fromUnixTime(end_time);
+  let duration = 'In Progress';
+  if (end_time) {
+    duration = formatDuration(intervalToDuration({ start, end }));
+  }
+  return duration;
+}
 
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
@@ -54,6 +66,7 @@ export default function Events({ path, ...props }) {
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
+  const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
     id: null,
     has_clip: false,
@@ -235,6 +248,10 @@ export default function Events({ path, ...props }) {
     }
   };
 
+  const handleEventDetailTabChange = (index) => {
+    setEventDetailType(index == 0 ? 'clip' : 'image');
+  };
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -251,7 +268,7 @@ export default function Events({ path, ...props }) {
           <option value="all">all cameras</option>
           {filterValues.cameras.map((item) => (
             <option key={item} value={item}>
-              {item}
+              {item.replaceAll('_', ' ')}
             </option>
           ))}
         </select>
@@ -262,7 +279,7 @@ export default function Events({ path, ...props }) {
         >
           <option value="all">all labels</option>
           {filterValues.labels.map((item) => (
-            <option key={item} value={item}>
+            <option key={item.replaceAll('_', ' ')} value={item}>
               {item}
             </option>
           ))}
@@ -275,7 +292,7 @@ export default function Events({ path, ...props }) {
           <option value="all">all zones</option>
           {filterValues.zones.map((item) => (
             <option key={item} value={item}>
-              {item}
+              {item.replaceAll('_', ' ')}
             </option>
           ))}
         </select>
@@ -453,15 +470,15 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()}
+                          {new Date(event.start_time * 1000).toLocaleTimeString()} ({clipDuration(event.start_time, event.end_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
-                          {event.camera}
+                          {event.camera.replaceAll('_', ' ')}
                         </div>
                         <div className="capitalize  text-sm flex align-center">
                           <Zone className="w-5 h-5 mr-2 inline" />
-                          {event.zones.join(',')}
+                          {event.zones.join(', ').replaceAll('_', ' ')}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
@@ -495,40 +512,45 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
-                        {event.has_clip ? (
-                          <>
-                            <Heading size="lg">Clip</Heading>
+                        <div className='flex justify-center w-full py-2'>
+                          <Tabs selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1} onChange={handleEventDetailTabChange} className='justify'>
+                            <TextTab text='Clip' disabled={!event.has_clip} />
+                            <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
+                          </Tabs>
+                        </div>
+
+                        <div>
+                          {((eventDetailType == 'clip') && event.has_clip) ? (
                             <VideoPlayer
                               options={{
                                 preload: 'auto',
                                 autoplay: true,
                                 sources: [
                                   {
-                                    src: `${apiHost}/vod/event/${event.id}/index.m3u8`,
+                                    src: `${apiHost}/vod/event/${event.id}/master.m3u8`,
                                     type: 'application/vnd.apple.mpegurl',
                                   },
                                 ],
                               }}
                               seekOptions={{ forward: 10, back: 5 }}
-                              onReady={() => {}}
+                              onReady={() => { }}
                             />
-                          </>
-                        ) : (
-                          <div className="flex justify-center">
-                            <div>
-                              <Heading size="sm">{event.has_snapshot ? 'Best Image' : 'Thumbnail'}</Heading>
+                          ) : null}
+
+                          {((eventDetailType == 'image') || !event.has_clip) ? (
+                            <div className="flex justify-center">
                               <img
                                 className="flex-grow-0"
                                 src={
                                   event.has_snapshot
                                     ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
-                                    : `data:image/jpeg;base64,${event.thumbnail}`
+                                    : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
                                 alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
                               />
                             </div>
-                          </div>
-                        )}
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   )}

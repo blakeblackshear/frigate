@@ -22,10 +22,10 @@ describe('MqttProvider', () => {
   let createWebsocket, wsClient;
   beforeEach(() => {
     wsClient = {
-      close: jest.fn(),
-      send: jest.fn(),
+      close: vi.fn(),
+      send: vi.fn(),
     };
-    createWebsocket = jest.fn((url) => {
+    createWebsocket = vi.fn((url) => {
       wsClient.args = [url];
       return new Proxy(
         {},
@@ -34,7 +34,7 @@ describe('MqttProvider', () => {
             return wsClient[prop];
           },
           set(_target, prop, value) {
-            wsClient[prop] = typeof value === 'function' ? jest.fn(value) : value;
+            wsClient[prop] = typeof value === 'function' ? vi.fn(value) : value;
             if (prop === 'onopen') {
               wsClient[prop]();
             }
@@ -110,7 +110,7 @@ describe('MqttProvider', () => {
   });
 
   test('prefills the recordings/detect/snapshots state from config', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(123456);
+    vi.spyOn(Date, 'now').mockReturnValue(123456);
     const config = {
       cameras: {
         front: { name: 'front', detect: { enabled: true }, record: { enabled: false }, snapshots: { enabled: true } },

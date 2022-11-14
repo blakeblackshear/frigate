@@ -19,11 +19,15 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp
+            - restream
     detect:
       width: 1280
       height: 720
 ```
+
+### VSCode Configuration Schema
+
+VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema` to the top of the config file. `frigate_host` being the IP address of frigate or `ccab4aaf-frigate` if running in the addon.
 
 ### Full configuration reference:
 
@@ -93,6 +97,12 @@ model:
   width: 320
   # Required: Object detection model input height (default: shown below)
   height: 320
+  # Optional: Object detection model input colorspace
+  # Valid values are rgb, bgr, or yuv. (default: shown below)
+  input_pixel_format: rgb
+  # Optional: Object detection model input tensor format
+  # Valid values are nhwc or nchw (default: shown below)
+  input_tensor: "nhwc"
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
@@ -311,6 +321,8 @@ snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
+  # Optional: save a clean PNG copy of the snapshot image (default: shown below)
+  clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
@@ -330,21 +342,28 @@ snapshots:
       person: 15
 
 # Optional: RTMP configuration
+# NOTE: RTMP is deprecated in favor of restream
 # NOTE: Can be overridden at the camera level
 rtmp:
-  # Optional: Enable the RTMP stream (default: True)
-  enabled: True
+  # Optional: Enable the RTMP stream (default: False)
+  enabled: False
 
-# Optional: Live stream configuration for WebUI
+# Optional: Restream configuration
 # NOTE: Can be overridden at the camera level
-live:
-  # Optional: Set the height of the live stream. (default: 720)
-  # This must be less than or equal to the height of the detect stream. Lower resolutions
-  # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
-  height: 720
-  # Optional: Set the encode quality of the live stream (default: shown below)
-  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
-  quality: 8
+restream:
+  # Optional: Enable the restream (default: True)
+  enabled: True
+  # Optional: Force audio compatibility with browsers (default: shown below)
+  force_audio: False
+  # Optional: jsmpeg stream configuration for WebUI
+  jsmpeg:
+    # Optional: Set the height of the jsmpeg stream. (default: 720)
+    # This must be less than or equal to the height of the detect stream. Lower resolutions
+    # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+    height: 720
+    # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+    # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+    quality: 8
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
@@ -374,6 +393,10 @@ timestamp_style:
 cameras:
   # Required: name of the camera
   back:
+    # Optional: Enable/Disable the camera (default: shown below).
+    # If disabled: config is used but no live stream and no capture etc.
+    # Events/Recordings are still viewable.
+    enabled: True
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.
@@ -381,11 +404,12 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,rtmp
-          # NOTICE: In addition to assigning the record, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,restream,rtmp
+          # NOTICE: In addition to assigning the record, restream, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
+            - restream
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
