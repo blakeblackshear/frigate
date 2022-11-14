@@ -62,7 +62,8 @@ ENV FLASK_ENV=development
 ENV S6_SERVICES_READYTIME=50
 
 # https://github.com/hassio-addons/addon-debian-base/pull/126
-RUN rm -f /etc/cont-init.d/00-banner.sh /etc/cont-init.d/01-log-level.sh
+# https://github.com/hassio-addons/addon-debian-base/pull/127
+RUN rm -f /etc/cont-init.d/*
 
 COPY --from=wheels /wheels /wheels
 
@@ -156,3 +157,5 @@ EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555
+
+CMD ["python3", "-u", "-m", "frigate"]

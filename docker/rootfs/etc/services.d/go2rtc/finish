@@ -7,6 +7,6 @@
 if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
     bashio::log.warning "go2rtc crashed, halting container..."
     /run/s6/basedir/bin/halt
+else
+    bashio::log.info "go2rtc stopped, restarting..."
 fi
-
-bashio::log.info "go2rtc stopped, restarting..."

@@ -1,9 +1,0 @@
-#!/command/with-contenv bashio
-# ==============================================================================
-# Runs Frigate
-# ==============================================================================
-# shellcheck shell=bash
-
-bashio::log.info 'Starting Frigate...'
-
-exec python3 -u -m frigate
