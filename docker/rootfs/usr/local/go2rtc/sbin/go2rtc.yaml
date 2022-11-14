@@ -1,5 +1,3 @@
-ffmpeg:
-  bin: /usr/lib/btbn-ffmpeg/bin/ffmpeg
 webrtc:
   listen: ":8555"
   candidates:
