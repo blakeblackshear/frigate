@@ -44,7 +44,7 @@ RUN pip3 install -r requirements.txt
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
-# Frigate without web
+# Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
 FROM debian:11-slim AS deps
 ARG TARGETARCH
 
@@ -142,7 +142,7 @@ RUN S6_ARCH="${TARGETARCH}" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
 
 
-# Frigate with Node.js and NPM
+# Frigate deps with Node.js and NPM
 FROM deps AS deps-node
 
 # Install Node 16
@@ -162,7 +162,7 @@ RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/re
 CMD ["sleep", "infinity"]
 
 
-# Build of the Frigate web
+# Frigate web build
 FROM deps-node AS web-build
 
 WORKDIR /work
@@ -172,13 +172,13 @@ RUN npm install
 COPY web/ ./
 RUN npm run build
 
-# Web dist files
+# Frigate web dist files
 FROM scratch AS web-dist
 
 COPY --from=web-build /work/dist/ /
 
 
-# Frigate container
+# Frigate final container
 FROM deps
 
 WORKDIR /opt/frigate/
