@@ -1,8 +1,8 @@
-# # syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.2
 
-FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
+FROM blakeblackshear/frigate-nginx:1.0.2 AS nginx
 
-FROM debian:11 as wheels
+FROM debian:11 AS wheels
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -146,11 +146,21 @@ RUN S6_ARCH="${TARGETARCH}" \
 FROM deps AS deps-node
 
 # Install Node 16
-RUN apt-get update -y \
-    && apt-get install -y curl \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g npm@latest
+    && npm install -g npm@9
+
+
+# Devcontainer
+FROM deps-node AS devcontainer
+
+WORKDIR /workspace/frigate
+
+RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
+    pip3 install -r requirements-dev.txt
+
+CMD ["sleep", "infinity"]
+
 
 # Build of the Frigate web
 FROM deps-node AS web-build
@@ -184,13 +194,3 @@ EXPOSE 8555
 ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]
-
-# Devcontainer
-FROM deps-node AS devcontainer
-
-WORKDIR /workspace/frigate
-
-RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
-    pip3 install -r requirements-dev.txt
-
-CMD ["sleep", "infinity"]
