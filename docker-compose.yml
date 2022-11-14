@@ -1,8 +1,7 @@
 version: "3"
 services:
-  dev:
-    container_name: frigate-dev
-    user: vscode
+  devcontainer:
+    container_name: frigate-devcontainer
     # add groups from host for render, plugdev, video
     group_add:
       - "109" # render
@@ -12,14 +11,13 @@ services:
     shm_size: "256mb"
     build:
       context: .
-      dockerfile: docker/Dockerfile
-      target: dev
+      target: devcontainer
     devices:
       - /dev/bus/usb:/dev/bus/usb
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
+      - .:/workspace/frigate:cached
       - /etc/localtime:/etc/localtime:ro
-      - .:/lab/frigate:cached
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
       - /dev/bus/usb:/dev/bus/usb
@@ -30,8 +28,6 @@ services:
       - "5001:5001"
       - "8080:8080"
       - "8554:8554"
-    entrypoint: ["sudo", "/init"]
-    command: /bin/sh -c "while sleep 1000; do :; done"
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6

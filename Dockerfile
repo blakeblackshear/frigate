@@ -1,3 +1,5 @@
+# # syntax=docker/dockerfile:1.2
+
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
 FROM debian:11 as wheels
@@ -43,7 +45,7 @@ COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
 # Frigate without web
-FROM debian:11-slim AS frigate-without-web
+FROM debian:11-slim AS deps
 ARG TARGETARCH
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
@@ -55,10 +57,9 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV FLASK_ENV=development
 
-COPY --from=wheels /wheels /wheels
-
 # Install ffmpeg
-RUN apt-get -qq update \
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
@@ -110,7 +111,6 @@ RUN apt-get -qq update \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev; \
     fi \
-    && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
     && apt-get clean autoclean -y \
     && apt-get autoremove -y \
@@ -131,10 +131,6 @@ COPY labelmap.txt /labelmap.txt
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
-WORKDIR /opt/frigate/
-ADD frigate frigate/
-ADD migrations migrations/
-
 COPY docker/rootfs/ /
 
 # s6-overlay
@@ -145,6 +141,41 @@ RUN S6_ARCH="${TARGETARCH}" \
     && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
 
+
+# Frigate with Node.js and NPM
+FROM deps AS deps-node
+
+# Install Node 16
+RUN apt-get update -y \
+    && apt-get install -y curl \
+    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
+
+# Build of the Frigate web
+FROM deps-node AS web-build
+
+WORKDIR /work
+COPY web/package.json web/package-lock.json ./
+RUN npm install
+
+COPY web/ ./
+RUN npm run build
+
+# Web dist files
+FROM scratch AS web-dist
+
+COPY --from=web-build /work/dist/ /
+
+
+# Frigate container
+FROM deps
+
+WORKDIR /opt/frigate/
+COPY frigate frigate/
+COPY migrations migrations/
+COPY --from=web-dist / web/
+
 EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
@@ -154,55 +185,12 @@ ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]
 
-
-# Frigate with Node.js and NPM
-FROM frigate-without-web AS frigate-with-node
-
-# Install Node 16
-RUN apt-get update -y \
-    && apt-get install -y curl \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs
-
-RUN npm install -g npm@latest
-
-
-# Build of the Frigate web
-FROM frigate-with-node AS web-build
-
-WORKDIR /work
-COPY web/package.json web/package-lock.json ./
-RUN npm install
-
-COPY web/ ./
-RUN npm run build
-
-
-# Frigate Container
-FROM frigate-without-web
-
-COPY --from=build-web /work/dist web/
-
-
 # Devcontainer
-FROM frigate-with-node AS dev
+FROM deps-node AS devcontainer
 
-ARG USERNAME=vscode
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
+WORKDIR /workspace/frigate
 
-# Create the user
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash \
-    #
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-    && apt-get update \
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
+RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
+    pip3 install -r requirements-dev.txt
 
-RUN apt-get update \
-    && apt-get install -y git curl vim htop
-
-COPY requirements-dev.txt /opt/frigate/requirements-dev.txt
-RUN pip3 install -r requirements-dev.txt
+CMD ["sleep", "infinity"]

@@ -1,9 +1,14 @@
 {
-  "name": "Frigate Dev",
+  "name": "Frigate Devcontainer",
   "dockerComposeFile": "../docker-compose.yml",
-  "service": "dev",
-  "workspaceFolder": "/lab/frigate",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace/frigate",
   "initializeCommand": ".devcontainer/initialize.sh",
+  "overrideCommand": false,
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:1": {}
+  },
   "extensions": [
     "ms-python.vscode-pylance",
     "ms-python.python",
@@ -19,6 +24,7 @@
     "bradlc.vscode-tailwindcss"
   ],
   "settings": {
+    "remote.autoForwardPorts": false,
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
