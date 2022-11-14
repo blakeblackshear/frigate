@@ -1,9 +1,9 @@
 #!/command/with-contenv bashio
 # ==============================================================================
-# Runs NGINX
+# Runs Frigate
 # ==============================================================================
 # shellcheck shell=bash
 
-bashio::log.info 'Starting NGINX...'
+bashio::log.info 'Starting Frigate...'
 
-exec nginx -g "daemon off;"
+exec python3 -u -m frigate

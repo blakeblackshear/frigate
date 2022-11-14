@@ -1,12 +1,12 @@
 #!/command/with-contenv bashio
 # ==============================================================================
-# Take down the S6 supervision tree when go2rtc fails
+# Take down the S6 supervision tree when Frigate fails
 # ==============================================================================
 # shellcheck shell=bash
 
 if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
-    bashio::log.warning "go2rtc crashed, halting container..."
+    bashio::log.warning "Frigate crashed, halting container..."
     /run/s6/basedir/bin/halt
 fi
 
-bashio::log.info "go2rtc stopped, restarting..."
+bashio::log.info "Frigate stopped, restarting..."

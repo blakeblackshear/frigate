@@ -43,7 +43,8 @@ COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
 # Frigate Container
-FROM debian:11-slim
+# https://github.com/hassio-addons/addon-debian-base/releases
+FROM ghcr.io/hassio-addons/debian-base:6.1.3
 ARG TARGETARCH
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
@@ -54,6 +55,9 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV FLASK_ENV=development
+
+# https://github.com/home-assistant/core/issues/79976
+ENV S6_SERVICES_READYTIME=50
 
 COPY --from=wheels /wheels /wheels
 
@@ -116,7 +120,7 @@ RUN apt-get -qq update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH=$PATH:/usr/lib/btbn-ffmpeg/bin
+ENV PATH="/usr/lib/btbn-ffmpeg/bin:$PATH"
 
 # install go2rtc
 RUN wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.2/go2rtc_linux_${TARGETARCH}" \
@@ -124,7 +128,11 @@ RUN wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.
     && mkdir -p /usr/local/go2rtc/sbin/ \
     && mv go2rtc /usr/local/go2rtc/sbin/go2rtc
 
+ENV PATH="/usr/local/go2rtc/sbin:$PATH"
+
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+
+ENV PATH="/usr/local/nginx/sbin:$PATH"
 
 # get model and labels
 COPY labelmap.txt /labelmap.txt
@@ -139,19 +147,7 @@ COPY web/dist web/
 
 COPY docker/rootfs/ /
 
-# s6-overlay
-RUN S6_ARCH="${TARGETARCH}" \
-    && if [ "${TARGETARCH}" = "amd64" ]; then S6_ARCH="amd64"; fi \
-    && if [ "${TARGETARCH}" = "arm" ]; then S6_ARCH="armhf"; fi \
-    && if [ "${TARGETARCH}" = "arm64" ]; then S6_ARCH="aarch64"; fi \
-    && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
-    && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
-
 EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555
-
-ENTRYPOINT ["/init"]
-
-CMD ["python3", "-u", "-m", "frigate"]
