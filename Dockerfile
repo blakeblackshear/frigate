@@ -141,6 +141,12 @@ RUN S6_ARCH="${TARGETARCH}" \
     && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
     && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
 
+EXPOSE 5000
+EXPOSE 1935
+EXPOSE 8554
+EXPOSE 8555
+
+ENTRYPOINT ["/init"]
 
 # Frigate deps with Node.js and NPM
 FROM deps AS deps-node
@@ -155,6 +161,10 @@ RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
 FROM deps-node AS devcontainer
 
 WORKDIR /workspace/frigate
+
+RUN apt-get update \
+    && apt-get install make -y \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
@@ -185,12 +195,5 @@ WORKDIR /opt/frigate/
 COPY frigate frigate/
 COPY migrations migrations/
 COPY --from=web-dist / web/
-
-EXPOSE 5000
-EXPOSE 1935
-EXPOSE 8554
-EXPOSE 8555
-
-ENTRYPOINT ["/init"]
 
 CMD ["python3", "-u", "-m", "frigate"]

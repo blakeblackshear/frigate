@@ -17,17 +17,11 @@ services:
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - .:/workspace/frigate:cached
+      - ./web/dist:/opt/frigate/web:cached
       - /etc/localtime:/etc/localtime:ro
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
       - /dev/bus/usb:/dev/bus/usb
-    ports:
-      - "1935:1935"
-      - "3000:3000"
-      - "5000:5000"
-      - "5001:5001"
-      - "8080:8080"
-      - "8554:8554"
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6
