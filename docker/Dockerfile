@@ -59,6 +59,9 @@ ENV FLASK_ENV=development
 # https://github.com/home-assistant/core/issues/79976
 ENV S6_SERVICES_READYTIME=50
 
+# https://github.com/hassio-addons/addon-debian-base/pull/126
+RUN rm -f /etc/cont-init.d/00-banner.sh /etc/cont-init.d/01-log-level.sh
+
 COPY --from=wheels /wheels /wheels
 
 # Install ffmpeg
