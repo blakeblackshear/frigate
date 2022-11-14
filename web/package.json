@@ -17,7 +17,7 @@
     "date-fns": "^2.29.3",
     "idb-keyval": "^6.2.0",
     "immer": "^9.0.16",
-    "preact": "^10.11.2",
+    "preact": "^10.11.3",
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.1.0",
     "react": "npm:@preact/compat@^17.1.2",
