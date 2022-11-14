@@ -24,6 +24,8 @@ webRTC works by creating a websocket connection on extra ports. One of the follo
     * For local webRTC, you will need to create your own go2rtc config:
 
 ```yaml
+ffmpeg:
+  bin: /usr/lib/btbn-ffmpeg/bin/ffmpeg # <--- this is required
 webrtc:
   listen: ":8555"
   candidates:
