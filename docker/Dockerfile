@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.2
+
 FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
 
 FROM debian:11 as wheels
@@ -55,10 +57,9 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV FLASK_ENV=development
 
-COPY --from=wheels /wheels /wheels
-
 # Install ffmpeg
-RUN apt-get -qq update \
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    apt-get -qq update \
     && apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
@@ -110,7 +111,6 @@ RUN apt-get -qq update \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev; \
     fi \
-    && rm -rf /wheels \
     && apt-get remove gnupg apt-transport-https -y \
     && apt-get clean autoclean -y \
     && apt-get autoremove -y \
