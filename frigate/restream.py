@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def get_manual_go2rtc_stream(camera_url: str) -> str:
     """Get a manual stream for go2rtc."""
-    return f"exec: /usr/lib/btbn-ffmpeg/bin/ffmpeg -i {camera_url} -c:v copy -c:a libopus -rtsp_transport tcp -f rtsp {{output}}"
+    return f"ffmpeg:{camera_url}#audio=aac#audio=opus"
 
 
 class RestreamApi:
