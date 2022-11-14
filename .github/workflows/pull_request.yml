@@ -70,8 +70,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Create Version Module
-        run: make version
       - name: Build
         run: make
       - name: Run mypy
