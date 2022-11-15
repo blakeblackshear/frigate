@@ -187,20 +187,27 @@ export default function System() {
                 <div key={gpu} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
                   <div className="text-lg flex justify-between p-4">{gpu}</div>
                   <div className="p-2">
-                    <Table className="w-full">
-                      <Thead>
-                        <Tr>
-                          <Th>Gpu %</Th>
-                          <Th>Memory %</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        <Tr>
-                          <Td>{gpu_usages[gpu]['gpu']}</Td>
-                          <Td>{gpu_usages[gpu]['mem']}</Td>
-                        </Tr>
-                      </Tbody>
-                    </Table>
+                    {gpu_usages[gpu]['gpu'] == -1 ? (
+                      <div className="p-4">
+                        There was an error getting usage stats. Either your GPU does not support this or frigate does
+                        not have proper access.
+                      </div>
+                    ) : (
+                      <Table className="w-full">
+                        <Thead>
+                          <Tr>
+                            <Th>Gpu %</Th>
+                            <Th>Memory %</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          <Tr>
+                            <Td>{gpu_usages[gpu]['gpu']}</Td>
+                            <Td>{gpu_usages[gpu]['mem']}</Td>
+                          </Tr>
+                        </Tbody>
+                      </Table>
+                    )}
                   </div>
                 </div>
               ))}
