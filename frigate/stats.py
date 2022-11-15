@@ -101,7 +101,7 @@ def get_processing_stats(config: FrigateConfig, stats: dict[str, str]) -> None:
     loop.close()
 
 
-async def set_cpu_stats(all_stats: dict[str, str]) -> None:
+async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
     """Set cpu usage from top."""
     cpu_stats = get_cpu_stats()
 
@@ -109,7 +109,7 @@ async def set_cpu_stats(all_stats: dict[str, str]) -> None:
         all_stats["cpu_usages"] = cpu_stats
 
 
-async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, str]) -> None:
+async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
 
