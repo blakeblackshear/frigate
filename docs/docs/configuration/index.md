@@ -354,7 +354,7 @@ restream:
   # Optional: Enable the restream (default: True)
   enabled: True
   # Optional: Force audio compatibility with browsers (default: shown below)
-  force_audio: False
+  force_audio: True
   # Optional: jsmpeg stream configuration for WebUI
   jsmpeg:
     # Optional: Set the height of the jsmpeg stream. (default: 720)
