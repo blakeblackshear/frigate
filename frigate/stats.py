@@ -133,12 +133,16 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, str]) -> Non
                 name = nvidia_usage["name"]
                 del nvidia_usage["name"]
                 stats[name] = nvidia_usage
+            else:
+                stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
         elif "qsv" in args:
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
 
             if intel_usage:
                 stats["intel-qsv"] = intel_usage
+            else:
+                stats["intel-qsv"] = {"gpu": -1, "mem": -1}
         elif "vaapi" in args:
             driver = os.environ.get(DRIVER_ENV_VAR)
 
@@ -148,15 +152,19 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, str]) -> Non
 
                 if amd_usage:
                     stats["amd-vaapi"] = amd_usage
+                else:
+                    stats["amd-vaapi"] = {"gpu": -1, "mem": -1}
             else:
                 # intel VAAPI GPU
                 intel_usage = get_intel_gpu_stats()
 
                 if intel_usage:
-                    stats["intel-qsv"] = intel_usage
+                    stats["intel-vaapi"] = intel_usage
+                else:
+                    stats["intel-vaapi"] = {"gpu": -1, "mem": -1}
         elif "v4l2m2m" in args:
             # RPi v4l2m2m is currently not able to get usage stats
-            pass
+            stats["rpi-v4l2m2m"] = {"gpu": -1, "mem": -1}
 
     if stats:
         all_stats["gpu_usages"] = stats
