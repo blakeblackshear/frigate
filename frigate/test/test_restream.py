@@ -25,6 +25,7 @@ class TestRestream(TestCase):
                     },
                     "restream": {
                         "enabled": True,
+                        "force_audio": False,
                     },
                 },
                 "front": {
