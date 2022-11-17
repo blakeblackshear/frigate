@@ -28,3 +28,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build image
         run: make push
+        env:
+          IMAGE_OWNER: ${{ github.actor }}
