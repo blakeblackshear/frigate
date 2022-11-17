@@ -13,6 +13,7 @@ from setproctitle import setproctitle
 from frigate.config import DetectorTypeEnum, InputTensorEnum
 from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
 from frigate.detectors.cpu_tfl import CpuTfl
+from frigate.detectors.rockchip import RockchipDetector
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
@@ -55,6 +56,10 @@ class LocalObjectDetector(ObjectDetector):
 
         if det_type == DetectorTypeEnum.edgetpu:
             self.detect_api = EdgeTpuTfl(
+                det_device=det_device, model_config=model_config
+            )
+        elif det_type == DetectorTypeEnum.rk1808:
+            self.detect_api = RockchipDetector(
                 det_device=det_device, model_config=model_config
             )
         else:
