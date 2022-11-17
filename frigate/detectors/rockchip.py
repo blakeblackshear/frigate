@@ -12,7 +12,7 @@ from frigate.detectors.detection_api import DetectionApi
 logger = logging.getLogger(__name__)
 
 
-class RockchiopDetector(DetectionApi):
+class RockchipDetector(DetectionApi):
     def __init__(
         self, det_device=None, model_config: ModelConfig = None, num_threads=1
     ):
