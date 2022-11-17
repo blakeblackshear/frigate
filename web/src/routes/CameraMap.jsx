@@ -202,10 +202,23 @@ ${Object.keys(objectMaskPoints)
 
       <Card
         content={
+          <div>
+            <p>This tool can help you create masks & zones for your {camera} camera.</p>
+            <ul>
+              <li>Click to add a point.</li>
+              <li>Click and hold on an existing point to move it.</li>
+              <li>Right-Click on an existing point to delete it.</li>
+            </ul>
+          </div>
+        }
+        header="Instructions"
+      />
+
+      <Card
+        content={
           <p>
-            This tool can help you create masks & zones for your {camera} camera. When done, copy each mask
-            configuration into your <code className="font-mono">config.yml</code> file restart your Frigate instance to
-            save your changes.
+            When done, copy each mask configuration into your <code className="font-mono">config.yml</code> file
+            restart your Frigate instance to save your changes.
           </p>
         }
         header="Warning"

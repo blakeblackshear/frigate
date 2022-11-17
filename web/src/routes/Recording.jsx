@@ -54,6 +54,10 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
 
     const selectedDayRecordingData = recordingsSummary.find((s) => !date || s.day === date);
 
+    if (!selectedDayRecordingData) {
+      return [];
+    }
+
     const [year, month, day] = selectedDayRecordingData.day.split('-');
     return selectedDayRecordingData.hours
       .map((h) => {
