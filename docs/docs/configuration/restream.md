@@ -10,3 +10,45 @@ Frigate can restream your video feed as an RTSP feed for other applications such
 ### RTMP (Deprecated)
 
 In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvantages however including being incompatible with H.265, high bitrates, and certain audio codecs. RTMP is deprecated and it is recommended to move to the new restream role.
+
+## Reduce Connections To Camera
+
+Some cameras only support 1 active connection or you may just want to have a single connection open to the camera. The RTSP restream allows this to be possible.
+
+### Single Stream
+
+One connection is made to the camera. One for the restream, `detect` and `record` connect to the restream.
+
+```yaml
+cameras:
+  test_cam:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/test_cam # <--- the name here must match the name of the camera
+          roles:
+            - record
+            - detect
+        - path: rtsp://192.168.1.5:554/live0 # <--- 1 connection to camera stream
+          roles:
+            - restream
+```
+
+### With Sub Stream
+
+Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
+
+```yaml
+cameras:
+  test_cam:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/test_cam # <--- the name here must match the name of the camera
+          roles:
+            - record
+        - path: rtsp://192.168.1.5:554/stream # <--- camera high res stream
+          roles:
+            - restream
+        - path: rtsp://192.168.1.5:554/substream # <--- camera sub stream
+          roles:
+            - detect
+```
