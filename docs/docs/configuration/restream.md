@@ -13,9 +13,9 @@ In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvanta
 
 ## Reduce Connections To Camera
 
-Some cameras only support 1 active connection or you may just want to have a single connection open to the camera. The RTSP restream allows this to be possible.
+Some cameras only support one active connection or you may just want to have a single connection open to the camera. The RTSP restream allows this to be possible.
 
-### Single Stream
+### With Single Stream
 
 One connection is made to the camera. One for the restream, `detect` and `record` connect to the restream.
 
