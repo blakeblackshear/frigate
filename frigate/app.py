@@ -1,7 +1,7 @@
 import logging
 import multiprocessing as mp
 from multiprocessing.queues import Queue
-from multiprocessing.synchronize import Event
+from multiprocessing.synchronize import Event as MpEvent
 import os
 import signal
 import sys
@@ -38,10 +38,10 @@ logger = logging.getLogger(__name__)
 
 class FrigateApp:
     def __init__(self) -> None:
-        self.stop_event: Event = mp.Event()
+        self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
-        self.detection_out_events: dict[str, Event] = {}
+        self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()

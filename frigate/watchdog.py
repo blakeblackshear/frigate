@@ -7,13 +7,13 @@ import signal
 
 from frigate.object_detection import ObjectDetectProcess
 from frigate.util import restart_frigate
-from multiprocessing.synchronize import Event
+from multiprocessing.synchronize import Event as MpEvent
 
 logger = logging.getLogger(__name__)
 
 
 class FrigateWatchdog(threading.Thread):
-    def __init__(self, detectors: dict[str, ObjectDetectProcess], stop_event: Event):
+    def __init__(self, detectors: dict[str, ObjectDetectProcess], stop_event: MpEvent):
         threading.Thread.__init__(self)
         self.name = "frigate_watchdog"
         self.detectors = detectors

@@ -14,6 +14,7 @@ from frigate.models import Event
 from frigate.types import CameraMetricsTypes
 
 from multiprocessing.queues import Queue
+from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class EventProcessor(threading.Thread):
         camera_processes: dict[str, CameraMetricsTypes],
         event_queue: Queue,
         event_processed_queue: Queue,
-        stop_event: Event,
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "event_processor"
@@ -158,7 +159,7 @@ class EventProcessor(threading.Thread):
 
 
 class EventCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event: Event):
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent):
         threading.Thread.__init__(self)
         self.name = "event_cleanup"
         self.config = config
