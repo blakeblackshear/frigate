@@ -19,6 +19,10 @@ jobs:
       - name: Lint
         run: npm run lint
         working-directory: ./web
+      - name: Install devcontainer cli
+        run: npm install --global @devcontainer/cli
+      - name: Ensure devcontainer builds
+        run: devcontainer build --workspace-folder .
 
   web_test:
     name: Web - Test
