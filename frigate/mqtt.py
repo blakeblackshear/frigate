@@ -372,17 +372,25 @@ class FrigateMqttClient:
             self.client.connect(self.mqtt_config.host, self.mqtt_config.port, 60)
         except Exception as e:
             logger.error(f"Unable to connect to MQTT server: {e}")
-            raise
+            self.client = None
+            return
 
         self.client.loop_start()
         self.set_initial_topics()
 
     def publish(self, topic: str, payload, retain: bool = False) -> None:
+        """Wrapper for publishing when client is in valid state."""
         if not self.client:
             logger.error(f"Unable to publish to {topic}: client is not connected")
             return
 
         self.client.publish(topic, payload, retain=retain)
+
+    def add_topic_callback(self, topic: str, callback) -> None:
+        if not self.client:
+            return
+
+        self.client.message_callback_add(topic, callback)
 
 
 class MqttSocketRelay:
@@ -449,7 +457,7 @@ class MqttSocketRelay:
 
             self.websocket_server.manager.broadcast(ws_message)
 
-        self.mqtt_client.client.message_callback_add(f"{self.topic_prefix}/#", send)
+        self.mqtt_client.add_topic_callback(f"{self.topic_prefix}/#", send)
 
         self.websocket_thread.start()
 
