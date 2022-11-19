@@ -94,7 +94,7 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     fi \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    echo 'deb http://deb.debian.org/debian testing main non-free' >> /etc/apt/sources.list.d/deb.list \
+    echo 'deb http://deb.debian.org/debian testing main non-free' > /etc/apt/sources.list.d/debian-testing.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1; \
@@ -154,10 +154,14 @@ ENTRYPOINT ["/init"]
 FROM deps AS deps-node
 
 # Install Node 16
-RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
+RUN \
+    # debian testing repo provides its own nodejs package, so we remove it first \
+    mv -f /etc/apt/sources.list.d/debian-testing.list /tmp/debian-testing.list\
+    && wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g npm@9
-
+    && npm install -g npm@9 \
+    # then we restore the debian testing repo \
+    && mv -f /tmp/debian-testing.list /etc/apt/sources.list.d/debian-testing.list
 
 # Devcontainer
 FROM deps-node AS devcontainer
