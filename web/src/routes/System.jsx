@@ -65,7 +65,7 @@ export default function System() {
     if (response.status === 200) {
       setState({ ...state, showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
     } else {
-      setState({ ...state, ffprobe: 'There was an error getting the ffprobe output.' });
+      setState({ ...state, showFfprobe: true, ffprobe: 'There was an error getting the ffprobe output.' });
     }
   };
 
@@ -124,13 +124,13 @@ export default function System() {
         <Dialog>
           <div className="p-4">
             <Heading size="lg">Vainfo Output</Heading>
-            {state.ffprobe != '' ? <p className="mb-2">{state.vainfo}</p> : <ActivityIndicator />}
+            {state.vainfo != '' ? <p className="mb-2">{state.vainfo}</p> : <ActivityIndicator />}
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
               Copy
             </Button>
-            <Button className="ml-2" onClick={() => setState({ ...state, vainfo: '', showFfprobe: false })} type="text">
+            <Button className="ml-2" onClick={() => setState({ ...state, vainfo: '', showVainfo: false })} type="text">
               Close
             </Button>
           </div>
