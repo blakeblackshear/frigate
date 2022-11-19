@@ -285,7 +285,6 @@ class FrigateMqttClient:
 
     def _on_connect(self, client: mqtt.Client, userdata, flags, rc) -> None:
         """Mqtt connection callback."""
-        self.connected = True
         threading.current_thread().name = "mqtt"
         if rc != 0:
             if rc == 3:
@@ -304,6 +303,7 @@ class FrigateMqttClient:
                     + str(rc)
                 )
 
+        self.connected = True
         logger.debug("MQTT connected")
         client.subscribe(f"{self.mqtt_config.topic_prefix}/#")
         self._set_initial_topics()
