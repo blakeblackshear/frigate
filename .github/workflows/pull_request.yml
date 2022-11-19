@@ -13,16 +13,18 @@ jobs:
       DOCKER_BUILDKIT: "1"
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Docker Compose
+        uses: ndeloof/install-docker-compose@v0.0.1
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
       - name: Install devcontainer cli
         run: npm install --global @devcontainers/cli
-      - name: Ensure devcontainer builds
+      - name: Build devcontainer
         run: devcontainer build --workspace-folder .
       - name: Start devcontainer
         run: devcontainer up --workspace-folder .
-      - name: Run devcontainer commands
+      - name: Run devcontainer scripts
         run: devcontainer run-user-commands --workspace-folder .
 
   web_lint:
