@@ -1005,10 +1005,10 @@ def vainfo():
     return jsonify(
         {
             "return_code": vainfo.returncode,
-            "stderr": vainfo.stderr.decode().strip()
+            "stderr": vainfo.stderr.decode("unicode_escape").strip()
             if vainfo.stderr.decode()
             else {},
-            "stdout": vainfo.stdout.decode().strip()
+            "stdout": vainfo.stdout.decode("unicode_escape").strip()
             if vainfo.stdout.decode()
             else {},
         }
