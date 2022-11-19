@@ -29,4 +29,4 @@ jobs:
       - name: Build image
         run: make push
         env:
-          IMAGE_OWNER: ${{ github.actor }}
+          IMAGE_REPO: ghcr.io/${{ github.actor }}/frigate
