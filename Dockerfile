@@ -65,7 +65,7 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     gnupg \
     wget \
     procps \
-    unzip tzdata libxml2 xz-utils \
+    unzip locales tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
@@ -94,10 +94,12 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     fi \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
+    # Use debian testing repo only for hwaccel packages
     echo 'deb http://deb.debian.org/debian testing main non-free' > /etc/apt/sources.list.d/debian-testing.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1; \
+    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 \
+    && rm -f /etc/apt/sources.list.d/debian-testing.list; \
     fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
@@ -154,14 +156,9 @@ ENTRYPOINT ["/init"]
 FROM deps AS deps-node
 
 # Install Node 16
-RUN \
-    # debian testing repo provides its own nodejs package, so we remove it first \
-    mv -f /etc/apt/sources.list.d/debian-testing.list /tmp/debian-testing.list\
-    && wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
+RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g npm@9 \
-    # then we restore the debian testing repo \
-    && mv -f /tmp/debian-testing.list /etc/apt/sources.list.d/debian-testing.list
+    && npm install -g npm@9
 
 # Devcontainer
 FROM deps-node AS devcontainer

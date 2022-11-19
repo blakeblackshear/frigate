@@ -8,6 +8,7 @@ env:
 jobs:
   build_devcontainer:
     runs-on: ubuntu-latest
+    name: Build Devcontainer
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@master
@@ -48,7 +49,7 @@ jobs:
 
   python_checks:
     runs-on: ubuntu-latest
-    name: Python checks
+    name: Python Checks
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
