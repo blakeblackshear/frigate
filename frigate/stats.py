@@ -7,11 +7,11 @@ import shutil
 import os
 import requests
 from typing import Optional, Any
-from paho.mqtt.client import Client
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
+from frigate.mqtt import FrigateMqttClient
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
@@ -146,7 +146,7 @@ class StatsEmitter(threading.Thread):
         self,
         config: FrigateConfig,
         stats_tracking: StatsTrackingTypes,
-        mqtt_client: Client,
+        mqtt_client: FrigateMqttClient,
         topic_prefix: str,
         stop_event: MpEvent,
     ):

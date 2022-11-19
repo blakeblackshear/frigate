@@ -26,10 +26,9 @@ class FrigateMqttClient:
     def __init__(
         self, config: FrigateConfig, camera_metrics: dict[str, CameraMetricsTypes]
     ) -> None:
-        self.config: FrigateConfig = config
+        self.config = config
         self.mqtt_config = config.mqtt
-        self.camera_metrics: dict[str, CameraMetricsTypes] = camera_metrics
-        self.client: mqtt.Client = None
+        self.camera_metrics = camera_metrics
         self.connected: bool = False
         self._start()
 
