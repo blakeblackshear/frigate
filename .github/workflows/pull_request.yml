@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Docker Compose
-        uses: ndeloof/install-docker-compose@v0.0.1
+        uses: ndeloof/install-compose-action@v0.0.1
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
