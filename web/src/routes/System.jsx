@@ -79,7 +79,7 @@ export default function System() {
       e.stopPropagation();
     }
 
-    const response = axios.get('vainfo');
+    const response = await axios.get('vainfo');
 
     if (response.status === 200) {
       setState({ ...state, showVainfo: true, vainfo: JSON.stringify(response.data, null, 2) });
