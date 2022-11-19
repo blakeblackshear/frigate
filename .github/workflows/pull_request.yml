@@ -6,6 +6,18 @@ env:
   DEFAULT_PYTHON: 3.9
 
 jobs:
+  build_devcontainer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Install devcontainer cli
+        run: npm install --global @devcontainer/cli
+      - name: Ensure devcontainer builds
+        run: devcontainer build --workspace-folder .
+
   web_lint:
     name: Web - Lint
     runs-on: ubuntu-latest
@@ -19,10 +31,6 @@ jobs:
       - name: Lint
         run: npm run lint
         working-directory: ./web
-      - name: Install devcontainer cli
-        run: npm install --global @devcontainer/cli
-      - name: Ensure devcontainer builds
-        run: devcontainer build --workspace-folder .
 
   web_test:
     name: Web - Test
