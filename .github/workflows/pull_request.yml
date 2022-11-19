@@ -9,6 +9,8 @@ jobs:
   build_devcontainer:
     runs-on: ubuntu-latest
     name: Build Devcontainer
+    env:
+      DOCKER_BUILDKIT: "1"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@master
@@ -18,8 +20,6 @@ jobs:
         run: npm install --global @devcontainers/cli
       - name: Ensure devcontainer builds
         run: devcontainer build --workspace-folder .
-        env:
-          DOCKER_BUILDKIT: "1"
       - name: Start devcontainer
         run: devcontainer up --workspace-folder .
       - name: Run devcontainer commands
