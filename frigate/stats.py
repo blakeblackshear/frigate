@@ -8,7 +8,7 @@ import os
 import requests
 from typing import Optional, Any
 from paho.mqtt.client import Client
-from multiprocessing.synchronize import Event
+from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
@@ -148,7 +148,7 @@ class StatsEmitter(threading.Thread):
         stats_tracking: StatsTrackingTypes,
         mqtt_client: Client,
         topic_prefix: str,
-        stop_event: Event,
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "frigate_stats_emitter"

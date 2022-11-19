@@ -159,14 +159,14 @@ export default function Debug() {
                           {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
                         </Td>
                         <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['pid']]['mem']}%</Td>
                       </Tr>
                       <Tr key="ffmpeg" index="2">
                         <Td>ffmpeg</Td>
                         <Td>{cameras[camera]['ffmpeg_pid']}</Td>
                         <Td>{cameras[camera]['camera_fps']}</Td>
                         <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['mem']}%</Td>
                       </Tr>
                     </Tbody>
                   </Table>
