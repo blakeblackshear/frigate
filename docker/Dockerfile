@@ -94,7 +94,9 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     fi \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    echo 'deb http://deb.debian.org/debian testing main non-free' >> /etc/apt/sources.list.d/deb.list \
+    && apt-get -qq update \
+    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
     mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1; \
     fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then \
