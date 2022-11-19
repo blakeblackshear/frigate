@@ -20,6 +20,10 @@ jobs:
         run: devcontainer build --workspace-folder .
         env:
           DOCKER_BUILDKIT: "1"
+      - name: Start devcontainer
+        run: devcontainer up --workspace-folder .
+      - name: Run devcontainer commands
+        run: devcontainer run-user-commands --workspace-folder .
 
   web_lint:
     name: Web - Lint
