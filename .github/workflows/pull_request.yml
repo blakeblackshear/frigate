@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 16.x
       - name: Install devcontainer cli
-        run: npm install --global @devcontainer/cli
+        run: npm install --global @devcontainers/cli
       - name: Ensure devcontainer builds
         run: devcontainer build --workspace-folder .
 
