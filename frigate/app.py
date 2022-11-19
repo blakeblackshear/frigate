@@ -20,7 +20,7 @@ from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
-from frigate.mqtt import MqttSocketRelay, create_mqtt_client
+from frigate.mqtt import FrigateMqttClient, MqttSocketRelay
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
@@ -169,7 +169,7 @@ class FrigateApp:
         self.restream.add_cameras()
 
     def init_mqtt(self) -> None:
-        self.mqtt_client = create_mqtt_client(self.config, self.camera_metrics)
+        self.mqtt_client = FrigateMqttClient(self.config, self.camera_metrics)
 
     def start_mqtt_relay(self) -> None:
         self.mqtt_relay = MqttSocketRelay(
