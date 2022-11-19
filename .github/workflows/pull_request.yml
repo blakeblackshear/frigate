@@ -11,8 +11,6 @@ jobs:
     name: Build Devcontainer
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -20,6 +18,8 @@ jobs:
         run: npm install --global @devcontainers/cli
       - name: Ensure devcontainer builds
         run: devcontainer build --workspace-folder .
+        env:
+          DOCKER_BUILDKIT: "1"
 
   web_lint:
     name: Web - Lint
