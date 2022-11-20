@@ -12,8 +12,15 @@ from typing import Callable
 import cv2
 import numpy as np
 
-from frigate.config import CameraConfig, SnapshotsConfig, RecordConfig, FrigateConfig
+from frigate.config import (
+    CameraConfig,
+    MqttConfig,
+    SnapshotsConfig,
+    RecordConfig,
+    FrigateConfig,
+)
 from frigate.const import CLIPS_DIR
+from frigate.mqtt import FrigateMqttClient
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
@@ -626,7 +633,7 @@ class TrackedObjectProcessor(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        client,
+        client: FrigateMqttClient,
         topic_prefix,
         tracked_objects_queue,
         event_queue,
@@ -724,7 +731,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
-            mqtt_config = self.config.cameras[camera].mqtt
+            mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
             if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=mqtt_config.timestamp,
