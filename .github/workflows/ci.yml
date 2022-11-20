@@ -26,7 +26,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build web
-        run: make build_web
       - name: Build image
         run: make push
+        env:
+          IMAGE_REPO: ghcr.io/${{ github.actor }}/frigate

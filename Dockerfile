@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.2
 
-FROM blakeblackshear/frigate-nginx:1.0.2 as nginx
+FROM blakeblackshear/frigate-nginx:1.0.2 AS nginx
 
-FROM debian:11 as wheels
+FROM debian:11 AS wheels
 ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -44,8 +44,8 @@ RUN pip3 install -r requirements.txt
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
-# Frigate Container
-FROM debian:11-slim
+# Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
+FROM debian:11-slim AS deps
 ARG TARGETARCH
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
@@ -65,7 +65,7 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     gnupg \
     wget \
     procps \
-    unzip tzdata libxml2 xz-utils \
+    unzip locales tzdata libxml2 xz-utils \
     python3-pip \
     # add raspberry pi repo
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
@@ -94,10 +94,12 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
     fi \
     # arch specific packages
     && if [ "${TARGETARCH}" = "amd64" ]; then \
-    echo 'deb http://deb.debian.org/debian testing main non-free' >> /etc/apt/sources.list.d/deb.list \
+    # Use debian testing repo only for hwaccel packages
+    echo 'deb http://deb.debian.org/debian testing main non-free' > /etc/apt/sources.list.d/debian-testing.list \
     && apt-get -qq update \
     && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1; \
+    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 \
+    && rm -f /etc/apt/sources.list.d/debian-testing.list; \
     fi \
     && if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
@@ -133,12 +135,6 @@ COPY labelmap.txt /labelmap.txt
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
 RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
-WORKDIR /opt/frigate/
-ADD frigate frigate/
-ADD migrations migrations/
-
-COPY web/dist web/
-
 COPY docker/rootfs/ /
 
 # s6-overlay
@@ -155,5 +151,52 @@ EXPOSE 8554
 EXPOSE 8555
 
 ENTRYPOINT ["/init"]
+
+# Frigate deps with Node.js and NPM
+FROM deps AS deps-node
+
+# Install Node 16
+RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@9
+
+# Devcontainer
+FROM deps-node AS devcontainer
+
+WORKDIR /workspace/frigate
+
+RUN apt-get update \
+    && apt-get install make -y \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
+    pip3 install -r requirements-dev.txt
+
+CMD ["sleep", "infinity"]
+
+
+# Frigate web build
+FROM deps-node AS web-build
+
+WORKDIR /work
+COPY web/package.json web/package-lock.json ./
+RUN npm install
+
+COPY web/ ./
+RUN npm run build
+
+# Frigate web dist files
+FROM scratch AS web-dist
+
+COPY --from=web-build /work/dist/ /
+
+
+# Frigate final container
+FROM deps
+
+WORKDIR /opt/frigate/
+COPY frigate frigate/
+COPY migrations migrations/
+COPY --from=web-dist / web/
 
 CMD ["python3", "-u", "-m", "frigate"]

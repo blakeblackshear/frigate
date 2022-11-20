@@ -1,0 +1,16 @@
+mqtt:
+  host: mqtt
+
+cameras:
+  test:
+    ffmpeg:
+      inputs:
+        - path: /media/frigate/car-stopping.mp4
+          input_args: -re -stream_loop -1 -fflags +genpts
+          roles:
+            - detect
+            - rtmp
+    detect:
+      height: 1080
+      width: 1920
+      fps: 5

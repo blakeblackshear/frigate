@@ -6,6 +6,30 @@ env:
   DEFAULT_PYTHON: 3.9
 
 jobs:
+  build_devcontainer:
+    runs-on: ubuntu-latest
+    name: Build Devcontainer
+    # The Dockerfile contains features that requires buildkit, and since the
+    # devcontainer cli uses docker-compose to build the image, the only way to
+    # ensure docker-compose uses buildkit is to explicitly enable it.
+    env:
+      DOCKER_BUILDKIT: "1"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Install devcontainer cli
+        run: npm install --global @devcontainers/cli
+      - name: Build devcontainer
+        run: devcontainer build --workspace-folder .
+      # It would be nice to also test the following commands, but for some
+      # reason they don't work even though in VS Code devcontainer works.
+      # - name: Start devcontainer
+      #   run: devcontainer up --workspace-folder .
+      # - name: Run devcontainer scripts
+      #   run: devcontainer run-user-commands --workspace-folder .
+
   web_lint:
     name: Web - Lint
     runs-on: ubuntu-latest
@@ -36,7 +60,7 @@ jobs:
 
   python_checks:
     runs-on: ubuntu-latest
-    name: Python checks
+    name: Python Checks
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -70,8 +94,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Create Version Module
-        run: make version
       - name: Build
         run: make
       - name: Run mypy
