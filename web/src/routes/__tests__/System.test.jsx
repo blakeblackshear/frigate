@@ -1,18 +1,18 @@
 import { h } from 'preact';
-import Debug from '../Debug';
+import System from '../System';
 import { render, screen, waitForElementToBeRemoved } from 'testing-library';
 
-describe('Debug Route', () => {
+describe('System Route', () => {
   beforeEach(() => {});
 
   test('shows an ActivityIndicator if stats are null', async () => {
-    render(<Debug />);
+    render(<System />);
     expect(screen.queryByLabelText('Loading…')).toBeInTheDocument();
   });
 
   // eslint-disable-next-line jest/no-disabled-tests
   test.skip('shows stats and config', async () => {
-    render(<Debug />);
+    render(<System />);
 
     await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading…'));
 

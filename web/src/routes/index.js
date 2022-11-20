@@ -28,8 +28,8 @@ export async function getRecording(_url, _cb, _props) {
   return module.default;
 }
 
-export async function getDebug(_url, _cb, _props) {
-  const module = await import('./Debug.jsx');
+export async function getSystem(_url, _cb, _props) {
+  const module = await import('./System.jsx');
   return module.default;
 }
 
