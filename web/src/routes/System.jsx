@@ -12,7 +12,7 @@ import Dialog from '../components/Dialog';
 
 const emptyObject = Object.freeze({});
 
-export default function Debug() {
+export default function System() {
   const [state, setState] = useState({ showFfprobe: false, ffprobe: '' });
   const { data: config } = useSWR('config');
 
@@ -69,7 +69,7 @@ export default function Debug() {
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>
-        Debug <span className="text-sm">{service.version}</span>
+        System <span className="text-sm">{service.version}</span>
       </Heading>
       {state.showFfprobe && (
         <Dialog>
@@ -175,7 +175,7 @@ export default function Debug() {
             ))}
           </div>
 
-          <p>Debug stats update automatically every {config.mqtt.stats_interval} seconds.</p>
+          <p>System stats update automatically every {config.mqtt.stats_interval} seconds.</p>
         </Fragment>
       )}
 
