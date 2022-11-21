@@ -44,7 +44,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-vitest-globals": "^1.2.0",
     "fake-indexeddb": "^4.0.0",
-    "jsdom": "^20.0.2",
+    "jsdom": "^20.0.3",
     "msw": "^0.48.3",
     "postcss": "^8.4.19",
     "prettier": "^2.7.1",
