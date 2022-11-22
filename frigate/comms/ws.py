@@ -16,6 +16,7 @@ from ws4py.websocket import WebSocket
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
 
+
 logger = logging.getLogger(__name__)
 
 
