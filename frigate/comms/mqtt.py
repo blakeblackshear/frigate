@@ -1,6 +1,8 @@
 import logging
 import threading
 
+from typing import Any, Callable
+
 import paho.mqtt.client as mqtt
 
 from frigate.comms.dispatcher import Communicator
@@ -10,7 +12,7 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
-class MqttClient(Communicator):
+class MqttClient(Communicator):  # type: ignore[misc]
     """Frigate wrapper for mqtt client."""
 
     def __init__(self, config: FrigateConfig) -> None:
@@ -18,12 +20,12 @@ class MqttClient(Communicator):
         self.mqtt_config = config.mqtt
         self.connected: bool = False
 
-    def subscribe(self, receiver) -> None:
+    def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
         self._dispatcher = receiver
         self._start()
 
-    def publish(self, topic: str, payload, retain: bool = False) -> None:
+    def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         if not self.connected:
             logger.error(f"Unable to publish to {topic}: client is not connected")
@@ -58,17 +60,17 @@ class MqttClient(Communicator):
             )
             self.publish(
                 f"{camera_name}/improve_contrast/state",
-                "ON" if camera.motion.improve_contrast else "OFF",
+                "ON" if camera.motion.improve_contrast else "OFF",  # type: ignore[union-attr]
                 retain=True,
             )
             self.publish(
                 f"{camera_name}/motion_threshold/state",
-                camera.motion.threshold,
+                camera.motion.threshold,  # type: ignore[union-attr]
                 retain=True,
             )
             self.publish(
                 f"{camera_name}/motion_contour_area/state",
-                camera.motion.contour_area,
+                camera.motion.contour_area,  # type: ignore[union-attr]
                 retain=True,
             )
             self.publish(
@@ -80,14 +82,20 @@ class MqttClient(Communicator):
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
-        self, client: mqtt.Client, userdata, message: mqtt.MQTTMessage
+        self, client: mqtt.Client, userdata: mqtt._UserData, message: mqtt.MQTTMessage
     ) -> None:
         self._dispatcher(
             message.topic.replace(f"{self.mqtt_config.topic_prefix}/", ""),
             message.payload.decode(),
         )
 
-    def _on_connect(self, client: mqtt.Client, userdata, flags, rc) -> None:
+    def _on_connect(
+        self,
+        client: mqtt.Client,
+        userdata: mqtt._UserData,
+        flags: Any,
+        rc: mqtt.ReasonCodes,
+    ) -> None:
         """Mqtt connection callback."""
         threading.current_thread().name = "mqtt"
         if rc != 0:
@@ -112,7 +120,7 @@ class MqttClient(Communicator):
         client.subscribe(f"{self.mqtt_config.topic_prefix}/#")
         self._set_initial_topics()
 
-    def _on_disconnect(self, client: mqtt.Client, userdata, flags, rc) -> None:
+    def _on_disconnect(self, client: mqtt.Client, userdata: mqtt._UserData, flags: Any, rc: mqtt) -> None:
         """Mqtt disconnection callback."""
         self.connected = False
         logger.error("MQTT disconnected")

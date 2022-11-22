@@ -2,6 +2,8 @@
 
 import logging
 
+from typing import Any, Callable
+
 from abc import ABC, abstractmethod
 
 from frigate.config import FrigateConfig
@@ -16,12 +18,13 @@ class Communicator(ABC):
     """pub/sub model via specific protocol."""
 
     @abstractmethod
-    def publish(self, topic: str, payload, retain: bool = False):
+    def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Send data via specific protocol."""
         pass
 
     @abstractmethod
-    def subscribe(self, receiver):
+    def subscribe(self, receiver: Callable) -> None:
+        """Pass receiver so communicators can pass commands."""
         pass
 
 
@@ -81,7 +84,7 @@ class Dispatcher:
         elif topic == "restart":
             restart_frigate()
 
-    def publish(self, topic: str, payload, retain: bool = False) -> None:
+    def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Handle publishing to communicators."""
         for comm in self.comms:
             comm.publish(topic, payload, retain)
@@ -141,14 +144,14 @@ class Dispatcher:
                 self.camera_metrics[camera_name][
                     "improve_contrast_enabled"
                 ].value = True
-                motion_settings.improve_contrast = True
+                motion_settings.improve_contrast = True  # type: ignore[union-attr]
         elif payload == "OFF":
             if self.camera_metrics[camera_name]["improve_contrast_enabled"].value:
                 logger.info(f"Turning off improve contrast for {camera_name}")
                 self.camera_metrics[camera_name][
                     "improve_contrast_enabled"
                 ].value = False
-                motion_settings.improve_contrast = False
+                motion_settings.improve_contrast = False  # type: ignore[union-attr]
 
         self.publish(f"{camera_name}/improve_contrast/state", payload, retain=True)
 
@@ -157,7 +160,7 @@ class Dispatcher:
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion contour area for {camera_name}: {payload}")
         self.camera_metrics[camera_name]["motion_contour_area"].value = payload
-        motion_settings.contour_area = payload
+        motion_settings.contour_area = payload  # type: ignore[union-attr]
         self.publish(f"{camera_name}/motion_contour_area/state", payload, retain=True)
 
     def _on_motion_threshold_command(self, camera_name: str, payload: int) -> None:
@@ -165,7 +168,7 @@ class Dispatcher:
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion threshold for {camera_name}: {payload}")
         self.camera_metrics[camera_name]["motion_threshold"].value = payload
-        motion_settings.threshold = payload
+        motion_settings.threshold = payload  # type: ignore[union-attr]
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
