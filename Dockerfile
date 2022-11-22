@@ -1,11 +1,46 @@
 # syntax=docker/dockerfile:1.2
 
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND=noninteractive
+
+FROM debian:11 AS base
+
+FROM debian:11-slim AS slim-base
+
 FROM blakeblackshear/frigate-nginx:1.0.2 AS nginx
 
-FROM debian:11 AS wheels
-ARG TARGETARCH
 
-ENV DEBIAN_FRONTEND=noninteractive
+FROM slim-base AS wget
+ARG DEBIAN_FRONTEND
+RUN apt-get update \
+    && apt-get install -y wget \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /rootfs
+
+
+FROM wget AS go2rtc
+ARG TARGETARCH
+WORKDIR /rootfs/usr/local/go2rtc/bin
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.3/go2rtc_linux_${TARGETARCH}" \
+    && chmod +x go2rtc
+
+
+FROM wget AS models
+
+# Get model and labels
+RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
+RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
+COPY labelmap.txt .
+
+
+FROM wget AS s6-overlay
+ARG TARGETARCH
+RUN --mount=type=bind,source=docker/install_s6_overlay.sh,target=/deps/install_s6_overlay.sh \
+    /deps/install_s6_overlay.sh
+
+
+FROM base AS wheels
+ARG DEBIAN_FRONTEND
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -44,106 +79,37 @@ RUN pip3 install -r requirements.txt
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
+
+# Collect deps in a single layer
+FROM scratch AS deps-rootfs
+COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY --from=go2rtc /rootfs/ /
+COPY --from=s6-overlay /rootfs/ /
+COPY --from=models /rootfs/ /
+COPY docker/rootfs/ /
+
+
 # Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
-FROM debian:11-slim AS deps
+FROM slim-base AS deps
 ARG TARGETARCH
 
-# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
-ARG DEBIAN_FRONTEND="noninteractive"
+ARG DEBIAN_FRONTEND
 # http://stackoverflow.com/questions/48162574/ddg#49462622
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+
 # https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-ENV FLASK_ENV=development
+ENV FLASK_ENV="development"
 
-# Install ffmpeg
-RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
-    apt-get -qq update \
-    && apt-get -qq install --no-install-recommends -y \
-    apt-transport-https \
-    gnupg \
-    wget \
-    procps \
-    unzip locales tzdata libxml2 xz-utils \
-    python3-pip \
-    # add raspberry pi repo
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
-    && echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list \
-    # add coral repo
-    && apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-    && echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" > /etc/apt/sources.list.d/coral-edgetpu.list \
-    && echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections \
-    # enable non-free repo
-    && sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list \
-    && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    # coral drivers
-    libedgetpu1-max python3-tflite-runtime python3-pycoral \
-    && pip3 install -U /wheels/*.whl \
-    # btbn-ffmpeg -> amd64 / arm64
-    && if [ "${TARGETARCH}" = "amd64" ] || [ "${TARGETARCH}" = "arm64" ]; then \
-    mkdir -p /usr/lib/btbn-ffmpeg \
-    && wget -O btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux$( [ "$TARGETARCH" = "amd64" ] && echo "64" || echo "arm64" )-gpl-5.1.tar.xz" \
-    && tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1 \
-    && rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay ; \
-    fi \
-    # ffmpeg -> arm32
-    && if [ "${TARGETARCH}" = "arm" ]; then \
-    apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg; \
-    fi \
-    # arch specific packages
-    && if [ "${TARGETARCH}" = "amd64" ]; then \
-    # Use debian testing repo only for hwaccel packages
-    echo 'deb http://deb.debian.org/debian testing main non-free' > /etc/apt/sources.list.d/debian-testing.list \
-    && apt-get -qq update \
-    && apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 \
-    && rm -f /etc/apt/sources.list.d/debian-testing.list; \
-    fi \
-    && if [ "${TARGETARCH}" = "arm64" ]; then \
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libva-drm2 mesa-va-drivers; \
-    fi \
-    # not sure why 32bit arm requires all these
-    && if [ "${TARGETARCH}" = "arm" ]; then \
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libgtk-3-dev \
-    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-    libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
-    gfortran openexr libatlas-base-dev libssl-dev\
-    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
-    libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev; \
-    fi \
-    && apt-get remove gnupg apt-transport-https -y \
-    && apt-get clean autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
-ENV PATH=$PATH:/usr/lib/btbn-ffmpeg/bin
+# Install dependencies
+RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
+    --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
+    /deps/install_deps.sh
 
-# install go2rtc
-RUN wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.3/go2rtc_linux_${TARGETARCH}" \
-    && chmod +x go2rtc \
-    && mkdir -p /usr/local/go2rtc/sbin/ \
-    && mv go2rtc /usr/local/go2rtc/sbin/go2rtc
-
-COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
-
-# get model and labels
-COPY labelmap.txt /labelmap.txt
-RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
-RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
-
-COPY docker/rootfs/ /
-
-# s6-overlay
-RUN S6_ARCH="${TARGETARCH}" \
-    && if [ "${TARGETARCH}" = "amd64" ]; then S6_ARCH="amd64"; fi \
-    && if [ "${TARGETARCH}" = "arm" ]; then S6_ARCH="armhf"; fi \
-    && if [ "${TARGETARCH}" = "arm64" ]; then S6_ARCH="aarch64"; fi \
-    && wget -O /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${S6_ARCH}-installer" \
-    && chmod +x /tmp/s6-overlay-installer && /tmp/s6-overlay-installer /
+COPY --from=deps-rootfs / /
 
 EXPOSE 5000
 EXPOSE 1935
@@ -156,8 +122,11 @@ ENTRYPOINT ["/init"]
 FROM deps AS deps-node
 
 # Install Node 16
-RUN wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
+RUN apt-get update \
+    && apt-get install wget -y \
+    && wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/* \
     && npm install -g npm@9
 
 # Devcontainer
@@ -190,13 +159,19 @@ FROM scratch AS web-dist
 
 COPY --from=web-build /work/dist/ /
 
-
-# Frigate final container
-FROM deps
+# Collect final files in a single layer
+FROM scratch AS rootfs
 
 WORKDIR /opt/frigate/
 COPY frigate frigate/
 COPY migrations migrations/
 COPY --from=web-dist / web/
+
+
+# Frigate final container
+FROM deps
+
+WORKDIR /opt/frigate/
+COPY --from=rootfs / /
 
 CMD ["python3", "-u", "-m", "frigate"]

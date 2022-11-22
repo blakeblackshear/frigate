@@ -1,2 +1,4 @@
-#!/usr/bin/execlineb -P
-/usr/local/nginx/sbin/nginx
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+exec nginx
