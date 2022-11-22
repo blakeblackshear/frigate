@@ -9,7 +9,7 @@ paho-mqtt == 1.6.*
 peewee == 3.14.*
 peewee_migrate == 1.4.*
 psutil == 5.9.*
-pydantic == 1.9.*
+pydantic == 1.10.*
 PyYAML == 6.0
 types-PyYAML == 6.0.*
 requests == 2.27.*
