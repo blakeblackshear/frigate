@@ -18,46 +18,11 @@ class MqttClient(Communicator):
         self.config = config
         self.mqtt_config = config.mqtt
         self.connected: bool = False
-        self._start()
 
     def subscribe(self, receiver) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
         self._dispatcher = receiver
-
-        # register callbacks
-        for name in self.config.cameras.keys():
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/recordings/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/snapshots/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/detect/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/improve_contrast/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_threshold/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
-                self.on_mqtt_command,
-            )
-
-        self.client.message_callback_add(
-            f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
-        )
+        self._start()
 
     def publish(self, topic: str, payload, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
@@ -164,6 +129,41 @@ class MqttClient(Communicator):
             payload="offline",
             qos=1,
             retain=True,
+        )
+
+        # register callbacks
+        for name in self.config.cameras.keys():
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/recordings/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/snapshots/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/detect/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/motion/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/improve_contrast/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/motion_threshold/set",
+                self.on_mqtt_command,
+            )
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
+                self.on_mqtt_command,
+            )
+
+        self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
         if not self.mqtt_config.tls_ca_certs is None:
