@@ -65,7 +65,9 @@ class MqttClient(Communicator):
             logger.error(f"Unable to publish to {topic}: client is not connected")
             return
 
-        self.client.publish(topic, payload, retain=retain)
+        self.client.publish(
+            f"{self.mqtt_config.topic_prefix}/topic", payload, retain=retain
+        )
 
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
