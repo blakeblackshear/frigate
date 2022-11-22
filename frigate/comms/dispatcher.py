@@ -44,43 +44,22 @@ class Dispatcher:
         for comm in self.comms:
             comm.subscribe(self._receive)
 
+        self._camera_settings_handlers: dict[str, Callable] = {
+            "detect": self._on_detect_command,
+            "improve_contrast": self._on_motion_improve_contrast_command,
+            "motion": self._on_motion_command,
+            "motion_contour_area": self._on_motion_contour_area_command,
+            "motion_threshold": self._on_motion_threshold_command,
+            "recording": self._on_recordings_command,
+            "snapshots": self._on_snapshots_command,
+        }
+
     def _receive(self, topic: str, payload: str) -> None:
         """Handle receiving of payload from communicators."""
-        if "detect/set" in topic:
+        if topic.endswith("set"):
             camera_name = topic.split("/")[-3]
-            self._on_detect_command(camera_name, payload)
-        elif "improve_contrast/set" in topic:
-            camera_name = topic.split("/")[-3]
-            self._on_motion_improve_contrast_command(camera_name, payload)
-        elif "motion/set" in topic:
-            camera_name = topic.split("/")[-3]
-            self._on_motion_command(camera_name, payload)
-        elif "motion_contour_area/set":
-            camera_name = topic.split("/")[-3]
-
-            try:
-                value = int(payload)
-            except ValueError:
-                f"Received unsupported value at {topic}: {payload}"
-                return
-
-            self._on_motion_contour_area_command(camera_name, value)
-        elif "motion_threshold/set":
-            camera_name = topic.split("/")[-3]
-
-            try:
-                value = int(payload)
-            except ValueError:
-                f"Received unsupported value at {topic}: {payload}"
-                return
-
-            self._on_motion_threshold_command(camera_name, value)
-        elif "recordings/set" in topic:
-            camera_name = topic.split("/")[-3]
-            self._on_recordings_command(camera_name, payload)
-        elif "snapshots/set" in topic:
-            camera_name = topic.split("/")[-3]
-            self._on_snapshots_command(camera_name, payload)
+            command = topic.split("/")[-2]
+            self._camera_settings_handlers[command](camera_name, payload)
         elif topic == "restart":
             restart_frigate()
 
@@ -157,6 +136,12 @@ class Dispatcher:
 
     def _on_motion_contour_area_command(self, camera_name: str, payload: int) -> None:
         """Callback for motion contour topic."""
+        try:
+            payload = int(payload)
+        except ValueError:
+            f"Received unsupported value for motion contour area: {payload}"
+            return
+
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion contour area for {camera_name}: {payload}")
         self.camera_metrics[camera_name]["motion_contour_area"].value = payload
@@ -165,6 +150,12 @@ class Dispatcher:
 
     def _on_motion_threshold_command(self, camera_name: str, payload: int) -> None:
         """Callback for motion threshold topic."""
+        try:
+            payload = int(payload)
+        except ValueError:
+            f"Received unsupported value for motion threshold: {payload}"
+            return
+
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion threshold for {camera_name}: {payload}")
         self.camera_metrics[camera_name]["motion_threshold"].value = payload

@@ -82,7 +82,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
-        self, client: mqtt.Client, userdata: mqtt._UserData, message: mqtt.MQTTMessage
+        self, client: mqtt.Client, userdata: Any, message: mqtt.MQTTMessage
     ) -> None:
         self._dispatcher(
             message.topic.replace(f"{self.mqtt_config.topic_prefix}/", ""),
@@ -92,7 +92,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def _on_connect(
         self,
         client: mqtt.Client,
-        userdata: mqtt._UserData,
+        userdata: Any,
         flags: Any,
         rc: mqtt.ReasonCodes,
     ) -> None:
@@ -121,7 +121,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self._set_initial_topics()
 
     def _on_disconnect(
-        self, client: mqtt.Client, userdata: mqtt._UserData, flags: Any, rc: mqtt
+        self, client: mqtt.Client, userdata: Any, flags: Any, rc: mqtt
     ) -> None:
         """Mqtt disconnection callback."""
         self.connected = False
