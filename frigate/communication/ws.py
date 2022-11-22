@@ -19,36 +19,42 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
-class _WebSocketHandler(WebSocket):
-    def received_message(self, message):
-        try:
-            json_message = json.loads(message.data.decode("utf-8"))
-            json_message = {
-                "topic": f"{self.topic_prefix}/{json_message['topic']}",
-                "payload": json_message.get("payload"),
-                "retain": json_message.get("retain", False),
-            }
-        except Exception as e:
-            logger.warning("Unable to parse websocket message as valid json.")
-            return
-
-        logger.debug(
-            f"Publishing mqtt message from websockets at {json_message['topic']}."
-        )
-        self.publish(
-            json_message["topic"],
-            json_message["payload"],
-            retain=json_message["retain"],
-        )
-
-
 class WebSocketClient(Communicator):
     """Frigate wrapper for ws client."""
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
 
+    def subscribe(self, receiver) -> None:
+        self._dispatcher = receiver
+        self.start()
+
     def start(self):
+        """Start the websocket client."""
+
+        class _WebSocketHandler(WebSocket):
+            receiver = self._dispatcher
+
+            def received_message(self, message):
+                try:
+                    json_message = json.loads(message.data.decode("utf-8"))
+                    json_message = {
+                        "topic": f"{self.topic_prefix}/{json_message['topic']}",
+                        "payload": json_message.get("payload"),
+                        "retain": json_message.get("retain", False),
+                    }
+                except Exception as e:
+                    logger.warning("Unable to parse websocket message as valid json.")
+                    return
+
+                logger.debug(
+                    f"Publishing mqtt message from websockets at {json_message['topic']}."
+                )
+                self.receiver(
+                    json_message["topic"],
+                    json_message["payload"],
+                    retain=json_message["retain"],
+                )
 
         # start a websocket server on 5002
         WebSocketWSGIHandler.http_version = "1.1"
@@ -65,7 +71,7 @@ class WebSocketClient(Communicator):
         )
         self.websocket_thread.start()
 
-    def publish(self, topic: str, payload: str) -> None:
+    def publish(self, topic: str, payload: str, _) -> None:
         try:
             ws_message = json.dumps(
                 {

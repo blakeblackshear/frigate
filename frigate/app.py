@@ -177,7 +177,6 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         self.ws_client = WebSocketClient(self.config)
-        self.ws_client.start()
         comms.append(self.ws_client)
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
@@ -354,7 +353,7 @@ class FrigateApp:
             self.set_log_levels()
             self.init_queues()
             self.init_database()
-            self.init_dispatcher
+            self.init_dispatcher()
         except Exception as e:
             print(e)
             self.log_process.terminate()

@@ -56,7 +56,7 @@ class MqttClient(Communicator):
             )
 
         self.client.message_callback_add(
-            f"{self.mqtt_config.topic_prefix}/restart", self.on_restart_command
+            f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
     def publish(self, topic: str, payload, retain: bool = False) -> None:
