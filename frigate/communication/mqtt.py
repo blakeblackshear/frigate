@@ -1,16 +1,12 @@
-import datetime
-import json
 import logging
 import threading
-from wsgiref.simple_server import make_server
 
 import paho.mqtt.client as mqtt
-from ws4py.server.wsgiutils import WebSocketWSGIApplication
-from ws4py.websocket import WebSocket
 
 from frigate.communication.dispatcher import Communicator
 from frigate.config import FrigateConfig
 from frigate.types import CameraMetricsTypes
+
 
 logger = logging.getLogger(__name__)
 
