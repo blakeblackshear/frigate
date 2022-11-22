@@ -189,6 +189,3 @@ class MqttClient(Communicator):
         except Exception as e:
             logger.error(f"Unable to connect to MQTT server: {e}")
             return
-
-    def add_topic_callback(self, topic: str, callback) -> None:
-        self.client.message_callback_add(topic, callback)
