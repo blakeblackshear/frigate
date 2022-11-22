@@ -5,13 +5,20 @@ title: Creating a config file
 
 This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](/installation). You should also configure your cameras according to the [camera setup guide](/guides/camera_setup)
 
-### Step 1: Configure the MQTT server
+### Step 1: Configure the MQTT server (Optional)
 
-Frigate requires a functioning MQTT server. Start by adding the mqtt section at the top level in your config:
+Use of a functioning MQTT server is optional for frigate, but required for the home assistant integration. Start by adding the mqtt section at the top level in your config:
 
+If using mqtt:
 ```yaml
 mqtt:
   host: <ip of your mqtt server>
+```
+
+If not using mqtt:
+```yaml
+mqtt:
+  enabled: False
 ```
 
 If using the Mosquitto Addon in Home Assistant, a username and password is required. For example:
