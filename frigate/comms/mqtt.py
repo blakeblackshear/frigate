@@ -77,9 +77,7 @@ class MqttClient(Communicator):
                 retain=False,
             )
 
-        self.publish(
-            "available", "online", retain=True
-        )
+        self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
         self, client: mqtt.Client, userdata, message: mqtt.MQTTMessage
