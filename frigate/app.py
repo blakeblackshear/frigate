@@ -13,9 +13,9 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.communication.dispatcher import Communicator, Dispatcher
-from frigate.communication.mqtt import MqttClient
-from frigate.communication.ws import WebSocketClient
+from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.mqtt import MqttClient
+from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess

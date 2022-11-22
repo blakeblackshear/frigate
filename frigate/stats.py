@@ -9,7 +9,7 @@ import requests
 from typing import Optional, Any
 from multiprocessing.synchronize import Event as MpEvent
 
-from frigate.communication.dispatcher import Dispatcher
+from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes

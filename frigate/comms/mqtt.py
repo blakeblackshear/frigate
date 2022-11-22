@@ -3,7 +3,7 @@ import threading
 
 import paho.mqtt.client as mqtt
 
-from frigate.communication.dispatcher import Communicator
+from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
 
 

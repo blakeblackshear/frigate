@@ -12,7 +12,7 @@ from typing import Callable
 import cv2
 import numpy as np
 
-from frigate.communication.dispatcher import Dispatcher
+from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
     CameraConfig,
     MqttConfig,
