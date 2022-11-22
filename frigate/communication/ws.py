@@ -39,12 +39,13 @@ class WebSocketClient(Communicator):
                 try:
                     json_message = json.loads(message.data.decode("utf-8"))
                     json_message = {
-                        "topic": f"{self.topic_prefix}/{json_message['topic']}",
+                        "topic": json_message.get("topic"),
                         "payload": json_message.get("payload"),
-                        "retain": json_message.get("retain", False),
                     }
                 except Exception as e:
-                    logger.warning("Unable to parse websocket message as valid json.")
+                    logger.warning(
+                        f"Unable to parse websocket message as valid json: {message.data.decode('utf-8')}"
+                    )
                     return
 
                 logger.debug(
@@ -53,7 +54,6 @@ class WebSocketClient(Communicator):
                 self.receiver(
                     json_message["topic"],
                     json_message["payload"],
-                    retain=json_message["retain"],
                 )
 
         # start a websocket server on 5002

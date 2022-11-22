@@ -5,7 +5,6 @@ import paho.mqtt.client as mqtt
 
 from frigate.communication.dispatcher import Communicator
 from frigate.config import FrigateConfig
-from frigate.types import CameraMetricsTypes
 
 
 logger = logging.getLogger(__name__)
@@ -38,48 +37,48 @@ class MqttClient(Communicator):
         """Set initial state topics."""
         for camera_name, camera in self.config.cameras.items():
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/recordings/state",
+                f"{camera_name}/recordings/state",
                 "ON" if camera.record.enabled else "OFF",
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/snapshots/state",
+                f"{camera_name}/snapshots/state",
                 "ON" if camera.snapshots.enabled else "OFF",
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/detect/state",
+                f"{camera_name}/detect/state",
                 "ON" if camera.detect.enabled else "OFF",
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/motion/state",
+                f"{camera_name}/motion/state",
                 "ON",
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/improve_contrast/state",
+                f"{camera_name}/improve_contrast/state",
                 "ON" if camera.motion.improve_contrast else "OFF",
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/motion_threshold/state",
+                f"{camera_name}/motion_threshold/state",
                 camera.motion.threshold,
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/motion_contour_area/state",
+                f"{camera_name}/motion_contour_area/state",
                 camera.motion.contour_area,
                 retain=True,
             )
             self.publish(
-                f"{self.mqtt_config.topic_prefix}/{camera_name}/motion",
+                f"{camera_name}/motion",
                 "OFF",
                 retain=False,
             )
 
         self.publish(
-            self.mqtt_config.topic_prefix + "/available", "online", retain=True
+            "available", "online", retain=True
         )
 
     def on_mqtt_command(
