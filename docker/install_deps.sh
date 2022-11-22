@@ -8,7 +8,7 @@ apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
     wget \
-    procps \
+    procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
     python3-pip
 
