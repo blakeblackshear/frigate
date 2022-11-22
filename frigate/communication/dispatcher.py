@@ -104,7 +104,7 @@ class Dispatcher:
                     self.publish(f"{camera_name}/motion/state", payload, retain=True)
         elif payload == "OFF":
             if self.camera_metrics[camera_name]["detection_enabled"].value:
-                logger.info(f"Turning off detection for {camera_name} via mqtt")
+                logger.info(f"Turning off detection for {camera_name}")
                 self.camera_metrics[camera_name]["detection_enabled"].value = False
                 detect_settings.enabled = False
 
@@ -114,7 +114,7 @@ class Dispatcher:
         """Callback for motion topic."""
         if payload == "ON":
             if not self.camera_metrics[camera_name]["motion_enabled"].value:
-                logger.info(f"Turning on motion for {camera_name} via mqtt")
+                logger.info(f"Turning on motion for {camera_name}")
                 self.camera_metrics[camera_name]["motion_enabled"].value = True
         elif payload == "OFF":
             if self.camera_metrics[camera_name]["detection_enabled"].value:
@@ -124,7 +124,7 @@ class Dispatcher:
                 return
 
             if self.camera_metrics[camera_name]["motion_enabled"].value:
-                logger.info(f"Turning off motion for {camera_name} via mqtt")
+                logger.info(f"Turning off motion for {camera_name}")
                 self.camera_metrics[camera_name]["motion_enabled"].value = False
 
         self.publish(f"{camera_name}/motion/state", payload, retain=True)

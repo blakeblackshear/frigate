@@ -66,7 +66,7 @@ class MqttClient(Communicator):
             return
 
         self.client.publish(
-            f"{self.mqtt_config.topic_prefix}/topic", payload, retain=retain
+            f"{self.mqtt_config.topic_prefix}/{topic}", payload, retain=retain
         )
 
     def _set_initial_topics(self) -> None:
