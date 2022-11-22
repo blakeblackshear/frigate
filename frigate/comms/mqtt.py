@@ -120,7 +120,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client.subscribe(f"{self.mqtt_config.topic_prefix}/#")
         self._set_initial_topics()
 
-    def _on_disconnect(self, client: mqtt.Client, userdata: mqtt._UserData, flags: Any, rc: mqtt) -> None:
+    def _on_disconnect(
+        self, client: mqtt.Client, userdata: mqtt._UserData, flags: Any, rc: mqtt
+    ) -> None:
         """Mqtt disconnection callback."""
         self.connected = False
         logger.error("MQTT disconnected")
