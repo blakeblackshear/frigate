@@ -5,7 +5,7 @@ import CameraImage from '../components/CameraImage';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
-import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
+import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
 import { useMemo } from 'preact/hooks';
 import useSWR from 'swr';
 

@@ -1,10 +1,10 @@
 import { h } from 'preact';
-import { Mqtt, MqttProvider, useMqtt } from '../mqtt';
+import { WS, WsProvider, useWs } from '../ws';
 import { useCallback, useContext } from 'preact/hooks';
 import { fireEvent, render, screen } from 'testing-library';
 
 function Test() {
-  const { state } = useContext(Mqtt);
+  const { state } = useContext(WS);
   return state.__connected ? (
     <div data-testid="data">
       {Object.keys(state).map((key) => (
@@ -18,7 +18,7 @@ function Test() {
 
 const TEST_URL = 'ws://test-foo:1234/ws';
 
-describe('MqttProvider', () => {
+describe('WsProvider', () => {
   let createWebsocket, wsClient;
   beforeEach(() => {
     wsClient = {
@@ -45,23 +45,23 @@ describe('MqttProvider', () => {
     });
   });
 
-  test('connects to the mqtt server', async () => {
+  test('connects to the ws server', async () => {
     render(
-      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <WsProvider config={mockConfig} createWebsocket={createWebsocket} wsUrl={TEST_URL}>
         <Test />
-      </MqttProvider>
+      </WsProvider>
     );
     await screen.findByTestId('data');
     expect(wsClient.args).toEqual([TEST_URL]);
     expect(screen.getByTestId('__connected')).toHaveTextContent('true');
   });
 
-  test('receives data through useMqtt', async () => {
+  test('receives data through useWs', async () => {
     function Test() {
       const {
         value: { payload, retain },
         connected,
-      } = useMqtt('tacos');
+      } = useWs('tacos');
       return connected ? (
         <div>
           <div data-testid="payload">{JSON.stringify(payload)}</div>
@@ -71,26 +71,26 @@ describe('MqttProvider', () => {
     }
 
     const { rerender } = render(
-      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <WsProvider config={mockConfig} createWebsocket={createWebsocket} wsUrl={TEST_URL}>
         <Test />
-      </MqttProvider>
+      </WsProvider>
     );
     await screen.findByTestId('payload');
     wsClient.onmessage({
       data: JSON.stringify({ topic: 'tacos', payload: JSON.stringify({ yes: true }), retain: false }),
     });
     rerender(
-      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <WsProvider config={mockConfig} createWebsocket={createWebsocket} wsUrl={TEST_URL}>
         <Test />
-      </MqttProvider>
+      </WsProvider>
     );
     expect(screen.getByTestId('payload')).toHaveTextContent('{"yes":true}');
     expect(screen.getByTestId('retain')).toHaveTextContent('false');
   });
 
-  test('can send values through useMqtt', async () => {
+  test('can send values through useWs', async () => {
     function Test() {
-      const { send, connected } = useMqtt('tacos');
+      const { send, connected } = useWs('tacos');
       const handleClick = useCallback(() => {
         send({ yes: true });
       }, [send]);
@@ -98,9 +98,9 @@ describe('MqttProvider', () => {
     }
 
     render(
-      <MqttProvider config={mockConfig} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <WsProvider config={mockConfig} createWebsocket={createWebsocket} wsUrl={TEST_URL}>
         <Test />
-      </MqttProvider>
+      </WsProvider>
     );
     await screen.findByRole('button');
     fireEvent.click(screen.getByRole('button'));
@@ -118,9 +118,9 @@ describe('MqttProvider', () => {
       },
     };
     render(
-      <MqttProvider config={config} createWebsocket={createWebsocket} mqttUrl={TEST_URL}>
+      <WsProvider config={config} createWebsocket={createWebsocket} wsUrl={TEST_URL}>
         <Test />
-      </MqttProvider>
+      </WsProvider>
     );
     await screen.findByTestId('data');
     expect(screen.getByTestId('front/detect/state')).toHaveTextContent(

@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import * as AutoUpdatingCameraImage from '../../components/AutoUpdatingCameraImage';
-import * as Mqtt from '../../api/mqtt';
+import * as WS from '../../api/ws';
 import Camera from '../Camera';
 import { set as setData } from 'idb-keyval';
 import * as JSMpegPlayer from '../../components/JSMpegPlayer';
@@ -14,7 +14,7 @@ describe('Camera Route', () => {
     vi.spyOn(JSMpegPlayer, 'default').mockImplementation(() => {
       return <div data-testid="mock-jsmpeg" />;
     });
-    vi.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+    vi.spyOn(WS, 'WsProvider').mockImplementation(({ children }) => children);
   });
 
   // eslint-disable-next-line jest/no-disabled-tests

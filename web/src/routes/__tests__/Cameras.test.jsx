@@ -1,13 +1,13 @@
 import { h } from 'preact';
 import * as CameraImage from '../../components/CameraImage';
-import * as Mqtt from '../../api/mqtt';
+import * as WS from '../../api/ws';
 import Cameras from '../Cameras';
 import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-library';
 
 describe('Cameras Route', () => {
   beforeEach(() => {
     vi.spyOn(CameraImage, 'default').mockImplementation(() => <div data-testid="camera-image" />);
-    vi.spyOn(Mqtt, 'useMqtt').mockImplementation(() => ({ value: { payload: 'OFF' }, send: vi.fn() }));
+    vi.spyOn(WS, 'useWs').mockImplementation(() => ({ value: { payload: 'OFF' }, send: vi.fn() }));
   });
 
   test('shows an ActivityIndicator if not yet loaded', async () => {
@@ -39,13 +39,13 @@ describe('Cameras Route', () => {
     const sendDetect = vi.fn();
     const sendRecordings = vi.fn();
     const sendSnapshots = vi.fn();
-    vi.spyOn(Mqtt, 'useDetectState').mockImplementation(() => {
+    vi.spyOn(WS, 'useDetectState').mockImplementation(() => {
       return { payload: 'ON', send: sendDetect };
     });
-    vi.spyOn(Mqtt, 'useRecordingsState').mockImplementation(() => {
+    vi.spyOn(WS, 'useRecordingsState').mockImplementation(() => {
       return { payload: 'OFF', send: sendRecordings };
     });
-    vi.spyOn(Mqtt, 'useSnapshotsState').mockImplementation(() => {
+    vi.spyOn(WS, 'useSnapshotsState').mockImplementation(() => {
       return { payload: 'ON', send: sendSnapshots };
     });
 
