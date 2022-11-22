@@ -12,7 +12,7 @@ psutil == 5.9.*
 pydantic == 1.9.*
 PyYAML == 6.0
 types-PyYAML == 6.0.*
-requests == 2.27.*
+requests == 2.28.*
 types-requests == 2.28.*
 scipy == 1.8.*
 setproctitle == 1.2.*
