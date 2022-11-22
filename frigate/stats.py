@@ -9,9 +9,9 @@ import requests
 from typing import Optional, Any
 from multiprocessing.synchronize import Event as MpEvent
 
+from frigate.communication.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR, CLIPS_DIR, CACHE_DIR
-from frigate.mqtt import FrigateMqttClient
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
@@ -146,7 +146,7 @@ class StatsEmitter(threading.Thread):
         self,
         config: FrigateConfig,
         stats_tracking: StatsTrackingTypes,
-        mqtt_client: FrigateMqttClient,
+        dispatcher: Dispatcher,
         topic_prefix: str,
         stop_event: MpEvent,
     ):
@@ -154,7 +154,7 @@ class StatsEmitter(threading.Thread):
         self.name = "frigate_stats_emitter"
         self.config = config
         self.stats_tracking = stats_tracking
-        self.mqtt_client = mqtt_client
+        self.dispatcher = dispatcher
         self.topic_prefix = topic_prefix
         self.stop_event = stop_event
 
@@ -162,7 +162,7 @@ class StatsEmitter(threading.Thread):
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
             stats = stats_snapshot(self.stats_tracking)
-            self.mqtt_client.publish(
+            self.dispatcher.publish(
                 f"{self.topic_prefix}/stats", json.dumps(stats), retain=False
             )
         logger.info(f"Exiting watchdog...")

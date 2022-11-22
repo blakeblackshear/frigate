@@ -11,15 +11,12 @@ from frigate.types import CameraMetricsTypes
 logger = logging.getLogger(__name__)
 
 
-class FrigateMqttClient(Communicator):
+class MqttClient(Communicator):
     """Frigate wrapper for mqtt client."""
 
-    def __init__(
-        self, config: FrigateConfig, camera_metrics: dict[str, CameraMetricsTypes]
-    ) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         self.mqtt_config = config.mqtt
-        self.camera_metrics = camera_metrics
         self.connected: bool = False
         self._start()
 

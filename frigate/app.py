@@ -13,14 +13,16 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.config import DetectorTypeEnum, FrigateConfig
+from frigate.communication.dispatcher import Communicator, Dispatcher
+from frigate.communication.mqtt import MqttClient
+from frigate.communication.ws import WebSocketClient
+from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings
-from frigate.mqtt import FrigateMqttClient, MqttSocketRelay
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
@@ -168,14 +170,16 @@ class FrigateApp:
         self.restream = RestreamApi(self.config)
         self.restream.add_cameras()
 
-    def init_mqtt(self) -> None:
-        self.mqtt_client = FrigateMqttClient(self.config, self.camera_metrics)
+    def init_dispatcher(self) -> None:
+        comms: list[Communicator] = []
 
-    def start_mqtt_relay(self) -> None:
-        self.mqtt_relay = MqttSocketRelay(
-            self.mqtt_client, self.config.mqtt.topic_prefix
-        )
-        self.mqtt_relay.start()
+        if self.config.mqtt.enabled:
+            comms.append(MqttClient(self.config))
+
+        self.ws_client = WebSocketClient(self.config)
+        self.ws_client.start()
+        comms.append(self.ws_client)
+        self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -214,7 +218,7 @@ class FrigateApp:
     def start_detected_frames_processor(self) -> None:
         self.detected_frames_processor = TrackedObjectProcessor(
             self.config,
-            self.mqtt_client,
+            self.dispatcher,
             self.config.mqtt.topic_prefix,
             self.detected_frames_queue,
             self.event_queue,
@@ -312,7 +316,7 @@ class FrigateApp:
         self.stats_emitter = StatsEmitter(
             self.config,
             self.stats_tracking,
-            self.mqtt_client,
+            self.dispatcher,
             self.config.mqtt.topic_prefix,
             self.stop_event,
         )
@@ -350,7 +354,7 @@ class FrigateApp:
             self.set_log_levels()
             self.init_queues()
             self.init_database()
-            self.init_mqtt()
+            self.init_dispatcher
         except Exception as e:
             print(e)
             self.log_process.terminate()
@@ -363,7 +367,6 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.init_stats()
         self.init_web_server()
-        self.start_mqtt_relay()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
@@ -390,7 +393,7 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
-        self.mqtt_relay.stop()
+        self.ws_client.stop()
         self.detected_frames_processor.join()
         self.event_processor.join()
         self.event_cleanup.join()

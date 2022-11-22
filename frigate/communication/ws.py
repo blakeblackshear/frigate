@@ -14,11 +14,12 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.communication.dispatcher import Communicator
+from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
 
 
-class WebSocketHandler(WebSocket):
+class _WebSocketHandler(WebSocket):
     def received_message(self, message):
         try:
             json_message = json.loads(message.data.decode("utf-8"))
@@ -44,8 +45,8 @@ class WebSocketHandler(WebSocket):
 class WebSocketClient(Communicator):
     """Frigate wrapper for ws client."""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, config: FrigateConfig) -> None:
+        self.config = config
 
     def start(self):
 
@@ -56,7 +57,7 @@ class WebSocketClient(Communicator):
             5002,
             server_class=WSGIServer,
             handler_class=WebSocketWSGIRequestHandler,
-            app=WebSocketWSGIApplication(handler_cls=WebSocketHandler),
+            app=WebSocketWSGIApplication(handler_cls=_WebSocketHandler),
         )
         self.websocket_server.initialize_websockets_manager()
         self.websocket_thread = threading.Thread(
