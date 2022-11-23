@@ -57,9 +57,13 @@ class Dispatcher:
     def _receive(self, topic: str, payload: str) -> None:
         """Handle receiving of payload from communicators."""
         if topic.endswith("set"):
-            camera_name = topic.split("/")[-3]
-            command = topic.split("/")[-2]
-            self._camera_settings_handlers[command](camera_name, payload)
+            try:
+                camera_name = topic.split("/")[-3]
+                command = topic.split("/")[-2]
+                self._camera_settings_handlers[command](camera_name, payload)
+            except Exception as e:
+                logger.error(f"Received invalid set command: {topic}")
+                return
         elif topic == "restart":
             restart_frigate()
 
