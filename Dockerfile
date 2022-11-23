@@ -119,8 +119,8 @@ EXPOSE 8555
 
 ENTRYPOINT ["/init"]
 
-# Frigate deps with Node.js and NPM
-FROM deps AS deps-node
+# Frigate deps with Node.js and NPM for devcontainer
+FROM deps AS devcontainer
 
 # Install Node 16
 RUN apt-get update \
@@ -129,9 +129,6 @@ RUN apt-get update \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/* \
     && npm install -g npm@9
-
-# Devcontainer
-FROM deps-node AS devcontainer
 
 WORKDIR /workspace/frigate
 
@@ -146,7 +143,8 @@ CMD ["sleep", "infinity"]
 
 
 # Frigate web build
-FROM --platform=linux/amd64 deps-node AS web-build
+# force this to run on amd64 because QEMU is painfully slow
+FROM --platform=linux/amd64 node:16 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
@@ -155,19 +153,13 @@ RUN npm install
 COPY web/ ./
 RUN npm run build
 
-# Frigate web dist files
-FROM scratch AS web-dist
-
-COPY --from=web-build /work/dist/ /
-
 # Collect final files in a single layer
 FROM scratch AS rootfs
 
 WORKDIR /opt/frigate/
 COPY frigate frigate/
 COPY migrations migrations/
-COPY --from=web-dist / web/
-
+COPY --from=web-build /work/dist/ web/
 
 # Frigate final container
 FROM deps
