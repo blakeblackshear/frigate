@@ -27,7 +27,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build image
-        run: make push
-        env:
-          IMAGE_REPO: ghcr.io/${{ github.actor }}/frigate
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          tags: "ghcr.io/blakeblackshear/frigate:${GITHUB_REF_NAME}-${GITHUB_SHA::7}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
