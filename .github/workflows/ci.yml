@@ -33,6 +33,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          tags: "ghcr.io/blakeblackshear/frigate:${GITHUB_REF_NAME}-${GITHUB_SHA::7}"
+          tags: |
+            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
