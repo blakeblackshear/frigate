@@ -28,7 +28,6 @@ sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
 apt-get -qq update
 apt-get -qq install --no-install-recommends --no-install-suggests -y \
     libedgetpu1-max python3-tflite-runtime python3-pycoral
-pip3 install -U /deps/wheels/*.whl
 
 # btbn-ffmpeg -> amd64 / arm64
 if [[ "${TARGETARCH}" == "amd64" || "${TARGETARCH}" == "arm64" ]]; then

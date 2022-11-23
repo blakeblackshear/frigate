@@ -107,8 +107,10 @@ ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:$
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
-    --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     /deps/install_deps.sh
+
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
+    pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
 
