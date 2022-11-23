@@ -41,6 +41,7 @@ RUN --mount=type=bind,source=docker/install_s6_overlay.sh,target=/deps/install_s
 
 FROM base AS wheels
 ARG DEBIAN_FRONTEND
+ARG TARGETARCH
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -145,7 +146,7 @@ CMD ["sleep", "infinity"]
 
 
 # Frigate web build
-FROM deps-node AS web-build
+FROM --platform=linux/amd64 deps-node AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
