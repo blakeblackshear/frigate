@@ -29,6 +29,7 @@ module.exports = {
       "integrations/home-assistant",
       "integrations/api",
       "integrations/mqtt",
+      "integrations/third_party_extensions",
     ],
     Troubleshooting: ["faqs"],
     Development: ["contributing"],
