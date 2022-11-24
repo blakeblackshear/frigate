@@ -8,6 +8,7 @@ module.exports = {
       "guides/false_positives",
       "guides/ha_notifications",
       "guides/stationary_objects",
+      "guides/reverse_proxy",
     ],
     Configuration: [
       "configuration/index",
