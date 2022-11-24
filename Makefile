@@ -2,7 +2,7 @@ default_target: local
 
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
 VERSION = 0.12.0
-IMAGE_OWNER ?= ghcr.io/blakeblackshear/frigate
+IMAGE_REPO ?= ghcr.io/blakeblackshear/frigate
 CURRENT_UID := $(shell id -u)
 CURRENT_GID := $(shell id -g)
 

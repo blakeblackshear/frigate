@@ -28,7 +28,6 @@ sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list
 apt-get -qq update
 apt-get -qq install --no-install-recommends --no-install-suggests -y \
     libedgetpu1-max python3-tflite-runtime python3-pycoral
-pip3 install -U /deps/wheels/*.whl
 
 # btbn-ffmpeg -> amd64 / arm64
 if [[ "${TARGETARCH}" == "amd64" || "${TARGETARCH}" == "arm64" ]]; then
@@ -69,7 +68,7 @@ if [[ "${TARGETARCH}" == "arm" ]]; then
         libgtk-3-dev \
         libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
         libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
-        gfortran openexr libatlas-base-dev libssl-devlibtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+        gfortran openexr libatlas-base-dev libtbb-dev libdc1394-22-dev libopenexr-dev \
         libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
 fi
 
