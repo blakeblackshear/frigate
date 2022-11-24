@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { baseUrl } from './baseUrl';
 import useSWR, { SWRConfig } from 'swr';
-import { MqttProvider } from './mqtt';
+import { WsProvider } from './ws';
 import axios from 'axios';
 
 axios.defaults.baseURL = `${baseUrl}api/`;
@@ -14,14 +14,14 @@ export function ApiProvider({ children, options }) {
         ...options,
       }}
     >
-      <MqttWithConfig>{children}</MqttWithConfig>
+      <WsWithConfig>{children}</WsWithConfig>
     </SWRConfig>
   );
 }
 
-function MqttWithConfig({ children }) {
+function WsWithConfig({ children }) {
   const { data } = useSWR('config');
-  return data ? <MqttProvider config={data}>{children}</MqttProvider> : children;
+  return data ? <WsProvider config={data}>{children}</WsProvider> : children;
 }
 
 export function useApiHost() {

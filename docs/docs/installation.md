@@ -7,7 +7,7 @@ Frigate is a Docker container that can be run on any Docker host including as a 
 
 ## Dependencies
 
-**MQTT broker** - Frigate requires an MQTT broker. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
+**MQTT broker (optional)** - An MQTT broker is optional with Frigate, but is required for the Home Assistant integration. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
 
 ## Preparing your hardware
 

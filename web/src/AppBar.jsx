@@ -9,7 +9,7 @@ import FrigateRestartIcon from './icons/FrigateRestart';
 import Prompt from './components/Prompt';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
-import { useRestart } from './api/mqtt';
+import { useRestart } from './api/ws';
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);

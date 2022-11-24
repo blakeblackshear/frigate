@@ -4,7 +4,7 @@ import produce from 'immer';
 import { useCallback, useContext, useEffect, useRef, useReducer } from 'preact/hooks';
 
 const initialState = Object.freeze({ __connected: false });
-export const Mqtt = createContext({ state: initialState, connection: null });
+export const WS = createContext({ state: initialState, connection: null });
 
 const defaultCreateWebsocket = (url) => new WebSocket(url);
 
@@ -30,11 +30,11 @@ function reducer(state, { topic, payload, retain }) {
   }
 }
 
-export function MqttProvider({
+export function WsProvider({
   config,
   children,
   createWebsocket = defaultCreateWebsocket,
-  mqttUrl = `${baseUrl.replace(/^http/, 'ws')}ws`,
+  wsUrl = `${baseUrl.replace(/^http/, 'ws')}ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const wsRef = useRef();
@@ -50,7 +50,7 @@ export function MqttProvider({
 
   useEffect(
     () => {
-      const ws = createWebsocket(mqttUrl);
+      const ws = createWebsocket(wsUrl);
       ws.onopen = () => {
         dispatch({ topic: '__CLIENT_CONNECTED' });
       };
@@ -66,14 +66,14 @@ export function MqttProvider({
       };
     },
     // Forces reconnecting
-    [state.__reconnectAttempts, mqttUrl] // eslint-disable-line react-hooks/exhaustive-deps
+    [state.__reconnectAttempts, wsUrl] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  return <Mqtt.Provider value={{ state, ws: wsRef.current }}>{children}</Mqtt.Provider>;
+  return <WS.Provider value={{ state, ws: wsRef.current }}>{children}</WS.Provider>;
 }
 
-export function useMqtt(watchTopic, publishTopic) {
-  const { state, ws } = useContext(Mqtt);
+export function useWs(watchTopic, publishTopic) {
+  const { state, ws } = useContext(WS);
 
   const value = state[watchTopic] || { payload: null };
 
@@ -98,7 +98,7 @@ export function useDetectState(camera) {
     value: { payload },
     send,
     connected,
-  } = useMqtt(`${camera}/detect/state`, `${camera}/detect/set`);
+  } = useWs(`${camera}/detect/state`, `${camera}/detect/set`);
   return { payload, send, connected };
 }
 
@@ -107,7 +107,7 @@ export function useRecordingsState(camera) {
     value: { payload },
     send,
     connected,
-  } = useMqtt(`${camera}/recordings/state`, `${camera}/recordings/set`);
+  } = useWs(`${camera}/recordings/state`, `${camera}/recordings/set`);
   return { payload, send, connected };
 }
 
@@ -116,7 +116,7 @@ export function useSnapshotsState(camera) {
     value: { payload },
     send,
     connected,
-  } = useMqtt(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
+  } = useWs(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
   return { payload, send, connected };
 }
 
@@ -125,6 +125,6 @@ export function useRestart() {
     value: { payload },
     send,
     connected,
-  } = useMqtt('restart', 'restart');
+  } = useWs('restart', 'restart');
   return { payload, send, connected };
 }

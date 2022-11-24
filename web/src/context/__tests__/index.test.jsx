@@ -3,7 +3,7 @@ import { set as setData } from 'idb-keyval';
 import { DarkModeProvider, useDarkMode, usePersistence } from '..';
 import { fireEvent, render, screen } from 'testing-library';
 import { useCallback } from 'preact/hooks';
-import * as Mqtt from '../../api/mqtt';
+import * as WS from '../../api/ws';
 
 function DarkModeChecker() {
   const { currentMode } = useDarkMode();
@@ -12,7 +12,7 @@ function DarkModeChecker() {
 
 describe('DarkMode', () => {
   beforeEach(() => {
-    vi.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+    vi.spyOn(WS, 'WsProvider').mockImplementation(({ children }) => children);
   });
 
   test('uses media by default', async () => {

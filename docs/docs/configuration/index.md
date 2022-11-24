@@ -39,6 +39,8 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 ```yaml
 mqtt:
+  # Optional: Enable mqtt server (default: shown below)
+  enabled: True
   # Required: host name
   host: mqtt.server.com
   # Optional: port (default: shown below)

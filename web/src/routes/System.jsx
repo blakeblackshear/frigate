@@ -3,7 +3,7 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import Button from '../components/Button';
 import Heading from '../components/Heading';
 import Link from '../components/Link';
-import { useMqtt } from '../api/mqtt';
+import { useWs } from '../api/ws';
 import useSWR from 'swr';
 import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
@@ -18,7 +18,7 @@ export default function System() {
 
   const {
     value: { payload: stats },
-  } = useMqtt('stats');
+  } = useWs('stats');
   const { data: initialStats } = useSWR('stats');
 
   const { cpu_usages, detectors, service = {}, detection_fps: _, ...cameras } = stats || initialStats || emptyObject;
