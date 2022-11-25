@@ -147,7 +147,6 @@ class StatsEmitter(threading.Thread):
         config: FrigateConfig,
         stats_tracking: StatsTrackingTypes,
         dispatcher: Dispatcher,
-        topic_prefix: str,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -155,14 +154,11 @@ class StatsEmitter(threading.Thread):
         self.config = config
         self.stats_tracking = stats_tracking
         self.dispatcher = dispatcher
-        self.topic_prefix = topic_prefix
         self.stop_event = stop_event
 
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
             stats = stats_snapshot(self.stats_tracking)
-            self.dispatcher.publish(
-                f"{self.topic_prefix}/stats", json.dumps(stats), retain=False
-            )
+            self.dispatcher.publish("stats", json.dumps(stats), retain=False)
         logger.info(f"Exiting watchdog...")
