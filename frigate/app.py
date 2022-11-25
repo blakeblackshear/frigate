@@ -316,7 +316,6 @@ class FrigateApp:
             self.config,
             self.stats_tracking,
             self.dispatcher,
-            self.config.mqtt.topic_prefix,
             self.stop_event,
         )
         self.stats_emitter.start()
