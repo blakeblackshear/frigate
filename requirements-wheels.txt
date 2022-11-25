@@ -7,7 +7,7 @@ numpy == 1.22.*
 opencv-python-headless == 4.5.5.*
 paho-mqtt == 1.6.*
 peewee == 3.15.*
-peewee_migrate == 1.4.*
+peewee_migrate == 1.6.*
 psutil == 5.9.*
 pydantic == 1.10.*
 PyYAML == 6.0
