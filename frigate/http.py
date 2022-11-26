@@ -577,9 +577,14 @@ def events():
 def config():
     config = current_app.frigate_config.dict()
 
-    # add in the ffmpeg_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
+
+        # clean paths
+        for input in camera_dict["ffmepg"]["inputs"]:
+            input["path"] = clean_camera_user_pass(input["path"])
+
+        # add clean ffmpeg_cmds
         camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
