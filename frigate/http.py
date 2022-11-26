@@ -581,7 +581,7 @@ def config():
         camera_dict = config["cameras"][camera_name]
 
         # clean paths
-        for input in camera_dict["ffmepg"]["inputs"]:
+        for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
             input["path"] = clean_camera_user_pass(input["path"])
 
         # add clean ffmpeg_cmds
