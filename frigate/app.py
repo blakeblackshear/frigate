@@ -218,7 +218,6 @@ class FrigateApp:
         self.detected_frames_processor = TrackedObjectProcessor(
             self.config,
             self.dispatcher,
-            self.config.mqtt.topic_prefix,
             self.detected_frames_queue,
             self.event_queue,
             self.event_processed_queue,
