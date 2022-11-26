@@ -9,4 +9,5 @@ PLUS_API_HOST = "https://api.frigate.video"
 # Regex Consts
 
 REGEX_CAMERA_NAME = "^[a-zA-Z0-9_-]+$"
-REGEX_CAMERA_USER_PASS = ":\/\/[a-zA-Z0-9_-]+:[\S]+@"
+REGEX_RTSP_CAMERA_USER_PASS = ":\/\/[a-zA-Z0-9_-]+:[\S]+@"
+REGEX_HTTP_CAMERA_USER_PASS = "user=[a-zA-Z0-9_-]+&password=[\S]+"
