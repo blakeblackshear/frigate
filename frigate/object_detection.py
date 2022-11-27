@@ -45,11 +45,8 @@ class LocalObjectDetector(ObjectDetector):
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
-        # else:
-        #     self.labels = load_labels(labels)
-
-        if model_config.labelmap_path:
-            self.labels = load_labels(model_config.labelmap_path)
+        else:
+            self.labels = load_labels(labels)
 
         if model_config:
             self.input_transform = tensor_transform(model_config.input_tensor)
@@ -232,18 +229,23 @@ class RemoteObjectDetector:
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
-        result = self.event.wait(timeout=10.0)
+        result = self.event.wait(timeout=100.0)
 
         # if it timed out
         if result is None:
             return detections
+        # file_object = open("/tmp/detections.yolov5.txt", "a")
 
         for d in self.out_np_shm:
-            if d[1] < threshold:
+            # if d[1] < threshold:
+            if d[1] < 0.25:
                 break
             detections.append(
                 (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
             )
+            # file_object.write(f"{self.labels[int(d[0])]},{float(d[1])}\n")
+        # file_object.close()
+        logger.info(f"end detections")
         self.fps.update()
         return detections
 

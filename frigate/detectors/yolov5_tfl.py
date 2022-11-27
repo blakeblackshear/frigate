@@ -28,11 +28,14 @@ logger = logging.getLogger("EdgeTPUModel")
 
 class YOLOv5Tfl(DetectionApi):
     def __init__(self, det_device=None, model_config=None):
+        self.labels = load_labels(
+            model_config.labelmap_path
+        )  # Just to be able to print human readable labels
+
         """
         Creates an object for running a Yolov5 model on an EdgeTPU or a Desktop
         Inputs:
           - model_file: path to edgetpu-compiled tflite file
-          - names_file: yaml names file (yolov5 format)
           - conf_thresh: detection threshold
           - iou_thresh: NMS threshold
           - desktop: option to run model on a desktop
@@ -42,11 +45,11 @@ class YOLOv5Tfl(DetectionApi):
         """
 
         self.model_file = model_config.path
-        self.labels = load_labels(model_config.labelmap_path)
         self.desktop = True  # Should be cpu?
         self.conf_thresh = 0.25
         self.iou_thresh = 0.45
         self.filter_classes = None
+        # self.filter_classes = [15, 16] # cat, dog
         self.agnostic_nms = False
         self.max_det = 1000
 
@@ -121,10 +124,9 @@ class YOLOv5Tfl(DetectionApi):
         tensor_input = np.squeeze(tensor_input, axis=0)
         results = self.forward(tensor_input)
         det = results[0]
-        # logger.info(f"detections {len(det)}")
         detections = np.zeros((20, 6), np.float32)
         i = 0
-        for *xyxy, conf, cls in reversed(det):
+        for *xyxy, conf, cls in det:
             detections[i] = [
                 int(cls),
                 float(conf),
@@ -134,8 +136,6 @@ class YOLOv5Tfl(DetectionApi):
                 xyxy[2],
             ]
             i += 1
-
-            logger.info(f"{self.labels[int(cls)], int(cls), float(conf)}")
 
         return detections
 
@@ -235,79 +235,6 @@ class Colors:
     @staticmethod
     def hex2rgb(h):  # rgb order (PIL)
         return tuple(int(h[1 + i : 1 + i + 2], 16) for i in (0, 2, 4))
-
-
-def plot_one_box(
-    box, im, color=(128, 128, 128), txt_color=(255, 255, 255), label=None, line_width=3
-):
-    # Plots one xyxy box on image im with label
-    assert (
-        im.data.contiguous
-    ), "Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input image."
-    lw = line_width or max(int(min(im.size) / 200), 2)  # line width
-
-    c1, c2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
-
-    cv2.rectangle(im, c1, c2, color, thickness=lw, lineType=cv2.LINE_AA)
-    if label:
-        tf = max(lw - 1, 1)  # font thickness
-        txt_width, txt_height = cv2.getTextSize(
-            label, 0, fontScale=lw / 3, thickness=tf
-        )[0]
-        c2 = c1[0] + txt_width, c1[1] - txt_height - 3
-        cv2.rectangle(im, c1, c2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(
-            im,
-            label,
-            (c1[0], c1[1] - 2),
-            0,
-            lw / 3,
-            txt_color,
-            thickness=tf,
-            lineType=cv2.LINE_AA,
-        )
-    return im
-
-
-def resize_and_pad(image, desired_size):
-    old_size = image.shape[:2]
-    ratio = float(desired_size / max(old_size))
-    new_size = tuple([int(x * ratio) for x in old_size])
-
-    # new_size should be in (width, height) format
-
-    image = cv2.resize(image, (new_size[1], new_size[0]))
-
-    delta_w = desired_size - new_size[1]
-    delta_h = desired_size - new_size[0]
-
-    pad = (delta_w, delta_h)
-
-    color = [100, 100, 100]
-    new_im = cv2.copyMakeBorder(
-        image, 0, delta_h, 0, delta_w, cv2.BORDER_CONSTANT, value=color
-    )
-
-    return new_im, pad
-
-
-def get_image_tensor(img, max_size, debug=False):
-    """
-    Reshapes an input image into a square with sides max_size
-    """
-    if type(img) is str:
-        img = cv2.imread(img)
-
-    resized, pad = resize_and_pad(img, max_size)
-    resized = resized.astype(np.float32)
-
-    if debug:
-        cv2.imwrite("intermediate.png", resized)
-
-    # Normalise!
-    resized /= 255.0
-
-    return img, resized, pad
 
 
 def xyxy2xywh(x):

@@ -638,15 +638,15 @@ def mjpeg_feed(camera_name):
 @bp.route("/<camera_name>/latest.jpg")
 def latest_frame(camera_name):
     draw_options = {
-        "bounding_boxes": request.args.get("bbox", type=int),
+        "bounding_boxes": request.args.get("bbox", default=1, type=int),
         "timestamp": request.args.get("timestamp", type=int),
         "zones": request.args.get("zones", type=int),
         "mask": request.args.get("mask", type=int),
-        "motion_boxes": request.args.get("motion", type=int),
+        "motion_boxes": request.args.get("motion", default=1, type=int),
         "regions": request.args.get("regions", type=int),
     }
     resize_quality = request.args.get("quality", default=70, type=int)
-    save_output = request.args.get("save_output", default=0, type=int)
+    save_output = request.args.get("save_output", default=1, type=int)
 
     if camera_name in current_app.frigate_config.cameras:
         frame = current_app.detected_frames_processor.get_current_frame(
@@ -660,7 +660,10 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
         if save_output == 1:
-            cv2.imwrite(f'/tmp/{camera_name}.{time.time_ns() // 1000000}.jpeg', frame)
+            cv2.imwrite(
+                f"/tmp/debug/{camera_name}.yolov5.cat.t25.{time.time_ns() // 1000000}.jpeg",
+                frame,
+            )
 
         ret, jpg = cv2.imencode(
             ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
