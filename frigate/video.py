@@ -29,9 +29,9 @@ from frigate.util import (
     intersection,
     intersection_over_union,
     listen,
-    yuv_crop_and_resize,
     yuv_region_2_rgb,
     yuv_region_2_bgr,
+    yuv_region_2_yuv,
 )
 
 logger = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ def create_tensor_input(frame, model_config, region):
     elif model_config.input_pixel_format == PixelFormatEnum.bgr:
         cropped_frame = yuv_region_2_bgr(frame, region)
     else:
-        cropped_frame = yuv_crop_and_resize(frame, region)
+        cropped_frame = yuv_region_2_yuv(frame, region)
 
     # Resize if needed
     if cropped_frame.shape != (model_config.height, model_config.width, 3):

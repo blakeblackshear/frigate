@@ -379,6 +379,47 @@ def yuv_crop_and_resize(frame, region, height=None):
     return yuv_cropped_frame
 
 
+def yuv_to_3_channel_yuv(yuv_frame):
+    height = yuv_frame.shape[0] // 3 * 2
+    width = yuv_frame.shape[1]
+
+    # flatten the image into array
+    yuv_data = yuv_frame.ravel()
+
+    # create a numpy array to hold all the 3 chanel yuv data
+    all_yuv_data = np.empty((height, width, 3), dtype=np.uint8)
+
+    y_count = height * width
+    uv_count = y_count // 4
+
+    # copy the y_channel
+    all_yuv_data[:, :, 0] = yuv_data[0:y_count].reshape((height, width))
+    # copy the u channel doubling each dimension
+    all_yuv_data[:, :, 1] = np.repeat(
+        np.reshape(
+            np.repeat(yuv_data[y_count : y_count + uv_count], repeats=2, axis=0),
+            (height // 2, width),
+        ),
+        repeats=2,
+        axis=0,
+    )
+    # copy the v channel doubling each dimension
+    all_yuv_data[:, :, 2] = np.repeat(
+        np.reshape(
+            np.repeat(
+                yuv_data[y_count + uv_count : y_count + uv_count + uv_count],
+                repeats=2,
+                axis=0,
+            ),
+            (height // 2, width),
+        ),
+        repeats=2,
+        axis=0,
+    )
+
+    return all_yuv_data
+
+
 def copy_yuv_to_position(
     destination_frame,
     destination_offset,
@@ -495,6 +536,17 @@ def copy_yuv_to_position(
             dsize=(uv_resize_width, uv_resize_height),
             interpolation=interpolation,
         )
+
+
+def yuv_region_2_yuv(frame, region):
+    try:
+        # TODO: does this copy the numpy array?
+        yuv_cropped_frame = yuv_crop_and_resize(frame, region)
+        return yuv_to_3_channel_yuv(yuv_cropped_frame)
+    except:
+        print(f"frame.shape: {frame.shape}")
+        print(f"region: {region}")
+        raise
 
 
 def yuv_region_2_rgb(frame, region):
