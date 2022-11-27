@@ -46,6 +46,7 @@ class FrigateBaseModel(BaseModel):
 
 class DetectorTypeEnum(str, Enum):
     edgetpu = "edgetpu"
+    yolov5 = "yolov5"
     cpu = "cpu"
 
 

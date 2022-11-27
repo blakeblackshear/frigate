@@ -646,6 +646,7 @@ def latest_frame(camera_name):
         "regions": request.args.get("regions", type=int),
     }
     resize_quality = request.args.get("quality", default=70, type=int)
+    save_output = request.args.get("save_output", default=0, type=int)
 
     if camera_name in current_app.frigate_config.cameras:
         frame = current_app.detected_frames_processor.get_current_frame(
@@ -658,6 +659,8 @@ def latest_frame(camera_name):
         width = int(height * frame.shape[1] / frame.shape[0])
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+        if save_output == 1:
+            cv2.imwrite(f'/tmp/{camera_name}.{time.time_ns() // 1000000}.jpeg', frame)
 
         ret, jpg = cv2.imencode(
             ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]

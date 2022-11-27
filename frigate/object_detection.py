@@ -13,7 +13,7 @@ from setproctitle import setproctitle
 from frigate.config import DetectorTypeEnum, InputTensorEnum
 from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
 from frigate.detectors.cpu_tfl import CpuTfl
-
+from frigate.detectors.yolov5_tfl import YOLOv5Tfl
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
 logger = logging.getLogger(__name__)
@@ -45,8 +45,11 @@ class LocalObjectDetector(ObjectDetector):
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
-        else:
-            self.labels = load_labels(labels)
+        # else:
+        #     self.labels = load_labels(labels)
+
+        if model_config.labelmap_path:
+            self.labels = load_labels(model_config.labelmap_path)
 
         if model_config:
             self.input_transform = tensor_transform(model_config.input_tensor)
@@ -55,6 +58,10 @@ class LocalObjectDetector(ObjectDetector):
 
         if det_type == DetectorTypeEnum.edgetpu:
             self.detect_api = EdgeTpuTfl(
+                det_device=det_device, model_config=model_config
+            )
+        elif det_type == DetectorTypeEnum.yolov5:
+            self.detect_api = YOLOv5Tfl(
                 det_device=det_device, model_config=model_config
             )
         else:
