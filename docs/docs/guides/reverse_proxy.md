@@ -2,14 +2,24 @@
 id: reverse_proxy
 title: Setting up a Reverse Proxy
 ---
-This guide outlines the configuration steps needed to expose your Frigate UI to the internet in a secure manner.
+This guide outlines the basic configuration steps needed to expose your Frigate UI to the internet.
 A common way of accomplishing this is to use a reverse proxy webserver between your router and your Frigate instance.
-
 A reverse proxy accepts HTTP requests the public internet and redirects them transparently to an internal webserver on your network.
+
 The suggested steps are:
 - **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/)) and only expose ports 80/443 from this webserver to the internet
-- **Secure** the proxy by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not necessary on your Frigate webserver as the proxy wraps all requests for you
+- **Encrypt** the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
+
+:::caution
+A reverse proxy can be used to secure access to an internal webserver but the user will be entirely reliant
+on the steps they have taken. You must ensure you are following security best practice.
+This page does not attempt outline the specific steps needed to secure your internal website.
+Please use your own knowledge to assess and vet them before you install anything on your system.
+:::
+
+There are several technologies available to implement reverse proxies. This document currently suggests one, using Apache2,
+and the community is invited to document others through a contribution to this page.
 ## Apache2 Reverse Proxy
 
 In the configuration examples below, only the directives relevant to the reverse proxy approach above are included.
@@ -39,7 +49,7 @@ Here we access Frigate via https://cctv.mydomain.co.uk
 </VirtualHost>
 ```
 ### Step 2: Use SSL to encrypt access to your Frigate instance
-Whilst this won't, on its own, stop access to your Frigate webserver it will encrypt all content (such a login credentials).
+Whilst this won't, on its own, stop access to your Frigate webserver it will encrypt all content (such as login credentials).
 Installing SSL is beyond the scope of this document but [Let's Encrypt](https://letsencrypt.org/) is a widely used approach.
 
 This Apache2 configuration snippet then results in unencrypted requests being redirected to webserver SSL port
