@@ -8,7 +8,7 @@ A reverse proxy accepts HTTP requests the public internet and redirects them tra
 
 The suggested steps are:
 - **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/)) and only expose ports 80/443 from this webserver to the internet
-- **Encrypt** the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
+- **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
 
 :::caution
