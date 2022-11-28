@@ -7,7 +7,6 @@ import queue
 import signal
 import subprocess as sp
 import threading
-from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 
 import cv2

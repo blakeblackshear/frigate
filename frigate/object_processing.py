@@ -882,6 +882,10 @@ class TrackedObjectProcessor(threading.Thread):
     def get_current_frame(self, camera, draw_options={}):
         return self.camera_states[camera].get_current_frame(draw_options)
 
+    def get_current_frame_time(self, camera) -> int:
+        """Returns the latest frame time for a given camera."""
+        return self.camera_states[camera].current_frame_time
+
     def run(self):
         while not self.stop_event.is_set():
             try:
