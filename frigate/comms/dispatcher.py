@@ -50,7 +50,7 @@ class Dispatcher:
             "motion": self._on_motion_command,
             "motion_contour_area": self._on_motion_contour_area_command,
             "motion_threshold": self._on_motion_threshold_command,
-            "recording": self._on_recordings_command,
+            "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
         }
 
