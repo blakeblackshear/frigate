@@ -176,6 +176,7 @@ def capture_frames(
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except Exception as e:
+            fps.value = 0
             logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() != None:
