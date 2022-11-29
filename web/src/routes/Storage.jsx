@@ -17,20 +17,18 @@ export default function Storage() {
 
   const { service } = stats || initialStats || emptyObject;
 
-  console.log("Service is " + service);
-
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>Storage</Heading>
 
-      {!service ? (
+      {(!service || !storage) ? (
         <div>
           <ActivityIndicator />
         </div>
       ) : (
         <Fragment>
           <Heading size="lg">Overview</Heading>
-          <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+          <div data-testid="detectors" className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
               <div className="text-lg flex justify-between p-4">Data</div>
               <div className="p-2">
@@ -78,6 +76,31 @@ export default function Storage() {
                 </Table>
               </div>
             </div>
+          </div>
+
+          <Heading size="lg">Cameras</Heading>
+          <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+            {Object.entries(storage).map(([name, camera]) => (
+              <div key={name} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                <div className="text-lg flex justify-between p-4">{name}</div>
+                <div className="p-2">
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
+                        <Th>Usage</Th>
+                        <Th>Stream Bandwidth</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>{Math.round(camera['usage_percent'] ?? 0)}%</Td>
+                        <Td>{camera['bandwidth']} MB/hr</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              </div>
+            ))}
           </div>
         </Fragment>
       )}
