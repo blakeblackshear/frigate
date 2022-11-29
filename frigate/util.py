@@ -766,6 +766,105 @@ def get_cpu_stats() -> dict[str, dict]:
         return usages
 
 
+def get_amd_gpu_stats() -> dict[str, str]:
+    """Get stats using radeontop."""
+    radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
+
+    p = sp.run(
+        radeontop_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split(",")
+        results: dict[str, str] = {}
+
+        for hw in usages:
+            if "gpu" in hw:
+                results["gpu"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+            elif "vram" in hw:
+                results["mem"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+
+        return results
+
+
+def get_intel_gpu_stats() -> dict[str, str]:
+    """Get stats using intel_gpu_top."""
+    intel_gpu_top_command = [
+        "timeout",
+        "0.1s",
+        "intel_gpu_top",
+        "-J",
+        "-o",
+        "-",
+        "-s",
+        "1",
+    ]
+
+    p = sp.run(
+        intel_gpu_top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        readings = json.loads(f"[{p.stdout}]")
+        results: dict[str, str] = {}
+
+        for reading in readings:
+            if reading.get("engines", {}).get("Video/0", {}).get(
+                "busy", 0
+            ) or reading.get("engines", {}).get("Video/1", {}).get("busy", 0):
+                gpu_usage = round(
+                    float(reading.get("engines", {}).get("Video/0", {}).get("busy", 0))
+                    + float(
+                        reading.get("engines", {}).get("Video/1", {}).get("busy", 0)
+                    ),
+                    2,
+                )
+                results["gpu"] = f"{gpu_usage} %"
+                break
+
+        results["mem"] = "- %"
+        return results
+
+
+def get_nvidia_gpu_stats() -> dict[str, str]:
+    """Get stats using nvidia-smi."""
+    nvidia_smi_command = [
+        "nvidia-smi",
+        "--query-gpu=gpu_name,utilization.gpu,memory.used,memory.total",
+        "--format=csv",
+    ]
+
+    p = sp.run(
+        nvidia_smi_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        logger.error(p.stderr)
+        return None
+    else:
+        usages = p.stdout.split("\n")[1].strip().split(",")
+        memory_percent = f"{round(float(usages[2].replace(' MiB', '').strip()) / float(usages[3].replace(' MiB', '').strip()) * 100, 1)} %"
+        results: dict[str, str] = {
+            "name": usages[0],
+            "gpu": usages[1].strip(),
+            "mem": memory_percent,
+        }
+
+        return results
+
+
 def ffprobe_stream(path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     ffprobe_cmd = [
@@ -778,6 +877,12 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
         "quiet",
         path,
     ]
+    return sp.run(ffprobe_cmd, capture_output=True)
+
+
+def vainfo_hwaccel() -> sp.CompletedProcess:
+    """Run vainfo."""
+    ffprobe_cmd = ["vainfo"]
     return sp.run(ffprobe_cmd, capture_output=True)
 
 

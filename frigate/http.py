@@ -26,11 +26,12 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
+from frigate.config import CameraConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
-from frigate.util import clean_camera_user_pass, ffprobe_stream
+from frigate.util import clean_camera_user_pass, ffprobe_stream, vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -608,7 +609,7 @@ def version():
 
 @bp.route("/stats")
 def stats():
-    stats = stats_snapshot(current_app.stats_tracking)
+    stats = stats_snapshot(current_app.frigate_config, current_app.stats_tracking)
     return jsonify(stats)
 
 
@@ -996,3 +997,19 @@ def ffprobe():
         )
 
     return jsonify(output)
+
+
+@bp.route("/vainfo", methods=["GET"])
+def vainfo():
+    vainfo = vainfo_hwaccel()
+    return jsonify(
+        {
+            "return_code": vainfo.returncode,
+            "stderr": vainfo.stderr.decode("unicode_escape").strip()
+            if vainfo.stderr.decode()
+            else "",
+            "stdout": vainfo.stdout.decode("unicode_escape").strip()
+            if vainfo.stdout.decode()
+            else "",
+        }
+    )
