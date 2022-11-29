@@ -12,22 +12,22 @@ Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -c:v h264_v4l2m2m
+  hwaccel_args: preset-rpi-64-h264
 ```
 
 ### Intel-based CPUs (<10th Generation) via Quicksync
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
+  hwaccel_args: preset-intel-vaapi
 ```
-**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).   
+**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
 
 ### Intel-based CPUs (>=10th Generation) via Quicksync
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -c:v h264_qsv
+  hwaccel_args: preset-intel-qsv-h264
 ```
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
@@ -36,7 +36,7 @@ ffmpeg:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format yuv420p
+  hwaccel_args: preset-amd-vaapi
 ```
 
 ### NVIDIA GPU
@@ -79,11 +79,11 @@ A list of supported codecs (you can use `ffmpeg -decoders | grep cuvid` in the c
  V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
 ```
 
-For example, for H264 video, you'll select `h264_cuvid`.
+For example, for H264 video, you'll select `preset-nvidia-h264`.
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -c:v h264_cuvid
+  hwaccel_args: preset-nvidia-h264
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.

@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
-from typing import AnyStr
+from typing import Any, AnyStr
 
 import cv2
 import numpy as np
@@ -884,6 +884,11 @@ def vainfo_hwaccel() -> sp.CompletedProcess:
     """Run vainfo."""
     ffprobe_cmd = ["vainfo"]
     return sp.run(ffprobe_cmd, capture_output=True)
+
+
+def get_ffmpeg_arg_list(arg: Any) -> list:
+    """Use arg if list or convert to list format."""
+    return arg if isinstance(arg, list) else arg.split(" ")
 
 
 class FrameManager(ABC):
