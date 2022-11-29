@@ -71,7 +71,10 @@ class StorageMaintainer(threading.Thread):
                 .scalar()
             )
 
-            usages[camera] = {"usage": camera_storage}
+            usages[camera] = {
+                "usage": camera_storage,
+                "bandwidth": self.camera_storage_stats[camera]["bandwidth"],
+            }
 
         return usages
 
