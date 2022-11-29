@@ -31,7 +31,7 @@ PRESETS_HW_ACCEL = {
 
 
 def parse_preset_hardware_acceleration(arg: Any) -> list[str]:
-    """Return the correct preset if in preset format otherwise return raw input."""
+    """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
@@ -151,7 +151,7 @@ PRESETS_INPUT = {
 
 
 def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
-    """Return the correct preset if in preset format otherwise return raw input."""
+    """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
@@ -245,7 +245,7 @@ PRESETS_RECORD_OUTPUT = {
 
 
 def parse_preset_output_record(arg: Any) -> list[str]:
-    """Return the correct preset if in preset format otherwise return raw input."""
+    """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
@@ -270,7 +270,7 @@ PRESETS_RTMP_OUTPUT = {
 
 
 def parse_preset_output_rtmp(arg: Any) -> list[str]:
-    """Return the correct preset if in preset format otherwise return raw input."""
+    """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
