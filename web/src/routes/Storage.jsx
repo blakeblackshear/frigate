@@ -15,7 +15,9 @@ export default function Storage() {
   } = useWs('stats');
   const { data: initialStats } = useSWR('stats');
 
-  const { service = {} } = stats || initialStats || emptyObject;
+  const { service } = stats || initialStats || emptyObject;
+
+  console.log("Service is " + service);
 
   return (
     <div className="space-y-4 p-2 px-4">
@@ -36,13 +38,13 @@ export default function Storage() {
                   <Thead>
                     <Tr>
                       <Th>Location</Th>
-                      <Th>Used</Th>
-                      <Th>Total</Th>
+                      <Th>Used MB</Th>
+                      <Th>Total MB</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
                     <Tr>
-                      <Td>Recordings</Td>
+                      <Td>Snapshots & Recordings</Td>
                       <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
                       <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
                     </Tr>
@@ -57,8 +59,8 @@ export default function Storage() {
                   <Thead>
                     <Tr>
                       <Th>Location</Th>
-                      <Th>Used</Th>
-                      <Th>Total</Th>
+                      <Th>Used MB</Th>
+                      <Th>Total MB</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
