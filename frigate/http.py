@@ -63,6 +63,7 @@ def create_app(
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
     app.plus_api = plus_api
+    app.camera_error_image = None
 
     app.register_blueprint(bp)
 
@@ -663,10 +664,15 @@ def latest_frame(camera_name):
             current_app.detected_frames_processor.get_current_frame_time(camera_name)
             + 10
         ):
-            error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
+            if current_app.camera_error_image is None:
+                error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
 
-            if len(error_image) > 0:
-                frame = cv2.imread(error_image[0], cv2.IMREAD_UNCHANGED)
+                if len(error_image) > 0:
+                    current_app.camera_error_image = cv2.imread(
+                        error_image[0], cv2.IMREAD_UNCHANGED
+                    )
+
+            frame = current_app.camera_error_image
 
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
