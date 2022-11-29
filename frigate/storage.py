@@ -73,7 +73,9 @@ class StorageMaintainer(threading.Thread):
 
             usages[camera] = {
                 "usage": camera_storage,
-                "bandwidth": self.camera_storage_stats.get(camera, {}).get("bandwidth", 0),
+                "bandwidth": self.camera_storage_stats.get(camera, {}).get(
+                    "bandwidth", 0
+                ),
             }
 
         return usages
