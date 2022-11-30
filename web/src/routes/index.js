@@ -33,6 +33,11 @@ export async function getSystem(_url, _cb, _props) {
   return module.default;
 }
 
+export async function getStorage(_url, _cb, _props) {
+  const module = await import('./Storage.jsx');
+  return module.default;
+}
+
 export async function getStyleGuide(_url, _cb, _props) {
   const module = await import('./StyleGuide.jsx');
   return module.default;

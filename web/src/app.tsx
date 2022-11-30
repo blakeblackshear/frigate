@@ -35,6 +35,7 @@ export default function App() {
                     path="/recording/:camera/:date?/:hour?/:minute?/:second?"
                     getComponent={Routes.getRecording}
                   />
+                  <AsyncRoute path="/storage" getComponent={Routes.getStorage} />
                   <AsyncRoute path="/system" getComponent={Routes.getSystem} />
                   <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
                   <Cameras default path="/" />

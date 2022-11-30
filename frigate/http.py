@@ -27,12 +27,12 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.config import CameraConfig
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
 from frigate.util import clean_camera_user_pass, ffprobe_stream, vainfo_hwaccel
+from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -45,6 +45,7 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
+    storage_maintainer: StorageMaintainer,
     plus_api,
 ):
     app = Flask(__name__)
@@ -62,6 +63,7 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+    app.storage_maintainer = storage_maintainer
     app.plus_api = plus_api
     app.camera_error_image = None
 
@@ -688,6 +690,26 @@ def latest_frame(camera_name):
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/recordings/storage", methods=["GET"])
+def get_recordings_storage_usage():
+    recording_stats = stats_snapshot(
+        current_app.frigate_config, current_app.stats_tracking
+    )["service"]["storage"][RECORD_DIR]
+    total_mb = recording_stats["total"]
+
+    camera_usages: dict[
+        str, dict
+    ] = current_app.storage_maintainer.calculate_camera_usages()
+
+    for camera_name in camera_usages.keys():
+        if camera_usages.get(camera_name, {}).get("usage"):
+            camera_usages[camera_name]["usage_percent"] = (
+                camera_usages.get(camera_name, {}).get("usage", 0) / total_mb
+            ) * 100
+
+    return jsonify(camera_usages)
 
 
 # return hourly summary for recordings of camera

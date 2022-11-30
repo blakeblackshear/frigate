@@ -44,6 +44,7 @@ export default function Sidebar() {
       </Match>
       {birdseye?.enabled ? <Destination href="/birdseye" text="Birdseye" /> : null}
       <Destination href="/events" text="Events" />
+      <Destination href="/storage" text="Storage" />
       <Destination href="/system" text="System" />
       <Separator />
       <div className="flex flex-grow" />
