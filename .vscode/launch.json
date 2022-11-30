@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Python: Frigate",
+      "type": "python",
+      "request": "launch",
+      "module": "frigate",
+      "justMyCode": true
+    }
+  ]
+}
