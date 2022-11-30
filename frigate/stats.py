@@ -125,7 +125,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
     stats: dict[str, dict] = {}
 
     for args in hwaccel_args:
-        if "cuvid" in args:
+        if "cuvid" in args or "nvidia" in args:
             # nvidia GPU
             nvidia_usage = get_nvidia_gpu_stats()
 
@@ -162,7 +162,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
                     stats["intel-vaapi"] = intel_usage
                 else:
                     stats["intel-vaapi"] = {"gpu": -1, "mem": -1}
-        elif "v4l2m2m" in args:
+        elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
             stats["rpi-v4l2m2m"] = {"gpu": -1, "mem": -1}
 
