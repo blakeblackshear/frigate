@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+import shlex
 import subprocess as sp
 import json
 import re
@@ -888,7 +889,7 @@ def vainfo_hwaccel() -> sp.CompletedProcess:
 
 def get_ffmpeg_arg_list(arg: Any) -> list:
     """Use arg if list or convert to list format."""
-    return arg if isinstance(arg, list) else arg.split(" ")
+    return arg if isinstance(arg, list) else shlex.split(arg)
 
 
 class FrameManager(ABC):
