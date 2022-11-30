@@ -32,6 +32,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_record,
     parse_preset_output_rtmp,
 )
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -357,7 +358,13 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
+FFMPEG_GLOBAL_ARGS_DEFAULT = [
+    "-hide_banner",
+    "-loglevel",
+    "warning",
+    "-user_agent",
+    f"FFmpeg Frigate/{VERSION}",
+]
 FFMPEG_INPUT_ARGS_DEFAULT = [
     "-avoid_negative_ts",
     "make_zero",
