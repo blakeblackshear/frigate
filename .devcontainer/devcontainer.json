@@ -60,6 +60,9 @@
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
     "files.trimTrailingWhitespace": true,
     "eslint.workingDirectories": ["./web"],
     "[json][jsonc]": {

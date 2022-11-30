@@ -1,7 +1,8 @@
 {
+  "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Frigate",
+      "name": "Python: Launch Frigate",
       "type": "python",
       "request": "launch",
       "module": "frigate",
