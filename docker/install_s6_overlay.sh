@@ -2,14 +2,20 @@
 
 set -euxo pipefail
 
-s6_arch="${TARGETARCH}"
+s6_version="3.1.2.1"
+
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    s6_arch="amd64"
+    s6_arch="x86_64"
 elif [[ "${TARGETARCH}" == "arm" ]]; then
     s6_arch="armhf"
 elif [[ "${TARGETARCH}" == "arm64" ]]; then
     s6_arch="aarch64"
 fi
-wget -qO /tmp/s6-overlay-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-${s6_arch}-installer"
-chmod +x /tmp/s6-overlay-installer
-/tmp/s6-overlay-installer /rootfs/
+
+mkdir -p /rootfs/
+
+wget -qO- "https://github.com/just-containers/s6-overlay/releases/download/v${s6_version}/s6-overlay-noarch.tar.xz" |
+    tar -C /rootfs/ -Jxpf -
+
+wget -qO- "https://github.com/just-containers/s6-overlay/releases/download/v${s6_version}/s6-overlay-${s6_arch}.tar.xz" |
+    tar -C /rootfs/ -Jxpf -

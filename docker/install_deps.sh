@@ -74,7 +74,7 @@ if [[ "${TARGETARCH}" == "arm" ]]; then
         libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
 fi
 
-apt-get purge gnupg apt-transport-https wget -y
+apt-get purge gnupg apt-transport-https wget xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*

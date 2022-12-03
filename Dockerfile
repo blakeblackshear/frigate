@@ -15,7 +15,7 @@ FROM blakeblackshear/frigate-nginx:1.0.2 AS nginx
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
 RUN apt-get update \
-    && apt-get install -y wget \
+    && apt-get install -y wget xz-utils \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /rootfs
 
@@ -155,6 +155,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
+# TODO: remove after a new verion of s6-overlay is released. See:
+# https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
+ENV S6_SERVICES_READYTIME=50
+
 # Install dependencies
 RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
@@ -221,4 +225,4 @@ FROM deps
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-CMD ["python3", "-u", "-m", "frigate"]
+CMD ["with-contenv", "python3", "-u", "-m", "frigate"]
