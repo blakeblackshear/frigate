@@ -30,6 +30,9 @@ build: version amd64 arm64 armv7
 push: build
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH) .
 
+run: local
+	docker run --rm --volume=${PWD}/config/config.yml:/config/config.yml frigate:latest
+
 run_tests: local
 	docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
 	docker run --rm --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate

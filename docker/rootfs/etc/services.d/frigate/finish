@@ -1,0 +1,7 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Take down the S6 supervision tree when the process fails
+
+if [[ "${1}" -ne 0 && "${1}" -ne 256 ]]; then
+  exec /run/s6/basedir/bin/halt
+fi

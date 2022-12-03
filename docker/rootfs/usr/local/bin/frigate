@@ -2,4 +2,4 @@
 # shellcheck shell=bash
 
 exec 2>&1
-exec nginx
+exec python3 -u -m frigate "${@}"

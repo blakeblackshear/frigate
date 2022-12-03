@@ -10,4 +10,5 @@ else
     config_path="/usr/local/go2rtc/go2rtc.yaml"
 fi
 
+exec 2>&1
 exec go2rtc -config="${config_path}"
