@@ -77,3 +77,64 @@ detectors:
 ```
 
 When using CPU detectors, you can add a CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
+
+## OpenVINO
+
+The OpenVINO detector allows Frigate to run an OpenVINO IR model on Intel CPU, GPU and VPU hardware.
+
+### OpenVINO Devices
+
+The OpenVINO detector supports the Intel-supplied device plugins and can specify one or more devices in the configuration.  See OpenVINO's device naming conventions in the [Device Documentation](https://docs.openvino.ai/latest/openvino_docs_OV_UG_Working_with_devices.html) for more detail. Other supported devices could be `AUTO`, `CPU`, `GPU`, `MYRIAD`, etc.
+
+```yaml
+detectors:
+  ov_detector:
+    type: openvino
+    device: GPU
+```
+
+OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer.  A supported Intel platform is required to use the GPU device with OpenVINO.  The `MYRIAD` device may be run on any platform, including Arm devices.  For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
+
+#### Intel NCS2 VPU and Myriad X Setup
+
+Intel produces a neural net inference accelleration chip called Myriad X.  This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued.  If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device.  The host needs a udev rule installed to handle the NCS2 device.  
+
+```bash
+sudo usermod -a -G users "$(whoami)"
+cat <<EOF > 97-myriad-usbboot.rules
+SUBSYSTEM=="usb", ATTRS{idProduct}=="2485", ATTRS{idVendor}=="03e7", GROUP="users", MODE="0666", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="usb", ATTRS{idProduct}=="f63b", ATTRS{idVendor}=="03e7", GROUP="users", MODE="0666", ENV{ID_MM_DEVICE_IGNORE}="1"
+EOF
+sudo cp 97-myriad-usbboot.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Additionally, the Frigate docker container needs to run with the following configuration:
+
+```bash
+--device-cgroup-rule='c 189:\* rmw' -v /dev/bus/usb:/dev/bus/usb
+```
+or in your compose file:
+
+```yml
+device_cgroup_rules:
+  - 'c 189:* rmw'
+volumes:
+  - /dev/bus/usb:/dev/bus/usb
+```
+
+### OpenVINO Models
+
+The included model for an OpenVINO detector comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model.  Use the model configuration shown below when using the OpenVINO detector.
+
+```yaml
+model:
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+```
