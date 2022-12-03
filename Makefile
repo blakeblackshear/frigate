@@ -31,10 +31,10 @@ push: build
 	docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH) .
 
 run: local
-	docker run --rm --volume=${PWD}/config/config.yml:/config/config.yml frigate:latest
+	docker run --rm --publish=5000:5000 --volume=${PWD}/config/config.yml:/config/config.yml frigate:latest
 
 run_tests: local
-	docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
-	docker run --rm --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate
+	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest python3 -u -m unittest
+	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest python3 -u -m mypy --config-file frigate/mypy.ini frigate
 
 .PHONY: run_tests
