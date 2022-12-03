@@ -35,11 +35,11 @@ class TestGpuStats(unittest.TestCase):
     @patch("subprocess.run")
     def test_intel_gpu_stats(self, sp):
         process = MagicMock()
-        process.returncode = 0
+        process.returncode = 124
         process.stdout = self.intel_results
         sp.return_value = process
         intel_stats = get_intel_gpu_stats()
         assert intel_stats == {
-            "gpu": "10.73 %",
+            "gpu": "1.34 %",
             "mem": "- %",
         }

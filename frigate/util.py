@@ -844,7 +844,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
         else:
             video_avg = 1
 
-        results["gpu"] = round((video_avg + render_avg) / 2, 2)
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)} %"
         results["mem"] = "- %"
         return results
 
