@@ -812,7 +812,8 @@ def get_intel_gpu_stats() -> dict[str, str]:
         capture_output=True,
     )
 
-    if p.returncode != 0:
+    # timeout has a non-zero returncode when timeout is reached
+    if p.returncode != 124:
         logger.error(p.stderr)
         return None
     else:
