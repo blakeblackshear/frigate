@@ -797,7 +797,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
     """Get stats using intel_gpu_top."""
     intel_gpu_top_command = [
         "timeout",
-        "0.1s",
+        "0.5s",
         "intel_gpu_top",
         "-J",
         "-o",
@@ -812,27 +812,39 @@ def get_intel_gpu_stats() -> dict[str, str]:
         capture_output=True,
     )
 
-    if p.returncode != 0:
+    # timeout has a non-zero returncode when timeout is reached
+    if p.returncode != 124:
         logger.error(p.stderr)
         return None
     else:
-        readings = json.loads(f"[{p.stdout}]")
+        reading = "".join(p.stdout.split())
         results: dict[str, str] = {}
 
-        for reading in readings:
-            if reading.get("engines", {}).get("Video/0", {}).get(
-                "busy", 0
-            ) or reading.get("engines", {}).get("Video/1", {}).get("busy", 0):
-                gpu_usage = round(
-                    float(reading.get("engines", {}).get("Video/0", {}).get("busy", 0))
-                    + float(
-                        reading.get("engines", {}).get("Video/1", {}).get("busy", 0)
-                    ),
-                    2,
-                )
-                results["gpu"] = f"{gpu_usage} %"
-                break
+        # render is used for qsv
+        render = []
+        for result in re.findall('"Render/3D/0":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[14:])
+            single = packet.get("busy", 0.0)
+            render.append(float(single))
 
+        if render:
+            render_avg = sum(render) / len(render)
+        else:
+            render_avg = 1
+
+        # video is used for vaapi
+        video = []
+        for result in re.findall('"Video/\d":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[10:])
+            single = packet.get("busy", 0.0)
+            video.append(float(single))
+
+        if video:
+            video_avg = sum(video) / len(video)
+        else:
+            video_avg = 1
+
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)} %"
         results["mem"] = "- %"
         return results
 
