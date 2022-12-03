@@ -160,8 +160,8 @@ ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 # Wait indefinitely for cont-init.d to finish before starting services
 ENV S6_CMD_WAIT_FOR_SERVICES=1
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
-# Configure logging to log to stdout and prepend timestamps
-ENV S6_LOGGING_SCRIPT="T 1 n20 s1000000 T"
+# Configure logging to prepend timestamps, log to stdout, keep 1 archive and rotate on 10MB
+ENV S6_LOGGING_SCRIPT="T 1 n1 s10000000 T"
 # TODO: remove after a new version of s6-overlay is released. See:
 # https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
 ENV S6_SERVICES_READYTIME=50
