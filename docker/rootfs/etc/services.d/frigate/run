@@ -1,9 +1,11 @@
-#!/command/with-contenv bash
+#!/bin/bash
 # shellcheck shell=bash
+# Start the Frigate service
 
-set -euo pipefail
+set -o errexit -o nounset -o pipefail -o xtrace
 
 cd /opt/frigate
 
+# Replace the bash process with the Frigate process, redirecting stderr to stdout
 exec 2>&1
 exec python3 -u -m frigate

@@ -155,17 +155,6 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
-# Fails if cont-init.d fails
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
-# Wait indefinitely for cont-init.d to finish before starting services
-ENV S6_CMD_WAIT_FOR_SERVICES=1
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
-# Configure logging to prepend timestamps, log to stdout, keep 1 archive and rotate on 10MB
-ENV S6_LOGGING_SCRIPT="T 1 n1 s10000000 T"
-# TODO: remove after a new version of s6-overlay is released. See:
-# https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
-ENV S6_SERVICES_READYTIME=50
-
 # Install dependencies
 RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
@@ -181,6 +170,19 @@ EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555
+
+# Fails if cont-init.d fails
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+# Wait indefinitely for cont-init.d to finish before starting services
+ENV S6_CMD_WAIT_FOR_SERVICES=1
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+# Give services (including Frigate) 30 seconds to stop before killing them
+ENV S6_SERVICES_GRACETIME=30000
+# Configure logging to prepend timestamps, log to stdout, keep 1 archive and rotate on 10MB
+ENV S6_LOGGING_SCRIPT="T 1 n1 s10000000 T"
+# TODO: remove after a new version of s6-overlay is released. See:
+# https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
+ENV S6_SERVICES_READYTIME=50
 
 ENTRYPOINT ["/init"]
 CMD []
