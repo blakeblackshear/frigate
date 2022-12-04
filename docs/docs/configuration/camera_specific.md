@@ -3,6 +3,12 @@ id: camera_specific
 title: Camera Specific Configurations
 ---
 
+:::note
+
+This page makes use of presets of FFmpeg args. For more information on presets, see the [FFmpeg Presets](/configuration/ffmpeg_presets) page.
+
+:::
+
 ## MJPEG Cameras
 
 The input and output parameters need to be adjusted for MJPEG cameras
@@ -50,6 +56,7 @@ ffmpeg:
 ## Model/vendor specific setup
 
 ### Annke C800
+
 This camera is H.265 only. To be able to play clips on some devices (like MacOs or iPhone) the H.265 stream has to be repackaged and the audio stream has to be converted to aac. Unfortunately direct playback of in the browser is not working (yet), but the downloaded clip can be played locally.
 
 ```yaml
@@ -69,10 +76,8 @@ cameras:
     rtmp:
       enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
-      width:  # <---- update for your camera's resolution
-      height:  # <---- update for your camera's resolution
-
-
+      width: # <---- update for your camera's resolution
+      height: # <---- update for your camera's resolution
 ```
 
 ### Blue Iris RTSP Cameras
