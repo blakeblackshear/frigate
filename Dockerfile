@@ -71,6 +71,15 @@ WORKDIR /rootfs/usr/local/go2rtc/bin
 RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.5/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
+
+####
+#
+# OpenVino Support
+#
+# 1. Download and convert a model from Intel's Public Open Model Zoo
+# 2. Build libUSB without udev to handle NCS2 enumeration
+#
+####
 # Download and Convert OpenVino model
 FROM base_amd64 AS ov-converter
 ARG DEBIAN_FRONTEND
@@ -114,6 +123,25 @@ RUN /bin/mkdir -p '/usr/local/lib' && \
     cd  /opt/libusb-1.0.25/ && \
     /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
     ldconfig
+
+####
+#
+# TensorRT Support
+#
+# 1. Build the pycuda wheel for cp39-x86_64
+# 2. Download and convert a model for the tensorRT runtime
+#
+####
+# Build CUDA Python Bindings for Python 3.9
+# FROM wget as pycuda-build
+# ARG DEBIAN_FRONTEND
+
+# RUN --mount=type=bind,source=docker/build_pycuda.sh,target=/build/build_pycuda.sh \
+#     /build/build_pycuda.sh
+
+# Download and Convert TensorRT Model
+FROM base_amd64 as tensorrt-converter
+## TODO
 
 
 
