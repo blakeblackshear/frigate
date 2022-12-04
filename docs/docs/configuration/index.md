@@ -142,7 +142,7 @@ birdseye:
 # Optional: ffmpeg configuration
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel warning -user_agent "FFmpeg Frigate"
+  global_args: -hide_banner -loglevel warning
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []

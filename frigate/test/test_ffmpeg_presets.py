@@ -76,8 +76,9 @@ class TestFfmpegPresets(unittest.TestCase):
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         frigate_preset_config.cameras["back"].create_ffmpeg_cmds()
         assert (
-            frigate_preset_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
-            == frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+            # Ignore global and user_agent args in comparison
+            frigate_preset_config.cameras["back"].ffmpeg_cmds[0]["cmd"][6::]
+            == frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"][4::]
         )
 
     def test_ffmpeg_input_preset(self):

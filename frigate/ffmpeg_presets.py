@@ -2,6 +2,12 @@
 
 from typing import Any
 
+from frigate.version import VERSION
+
+_user_agent_args = [
+    "-user_agent",
+    f"FFmpeg Frigate/{VERSION}",
+]
 
 PRESETS_HW_ACCEL = {
     "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
@@ -39,7 +45,8 @@ def parse_preset_hardware_acceleration(arg: Any) -> list[str]:
 
 
 PRESETS_INPUT = {
-    "preset-http-jpeg-generic": [
+    "preset-http-jpeg-generic": _user_agent_args
+    + [
         "-r",
         "{}",
         "-stream_loop",
@@ -59,7 +66,8 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
-    "preset-http-mjpeg-generic": [
+    "preset-http-mjpeg-generic": _user_agent_args
+    + [
         "-avoid_negative_ts",
         "make_zero",
         "-fflags",
@@ -73,7 +81,8 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
-    "preset-http-reolink": [
+    "preset-http-reolink": _user_agent_args
+    + [
         "-avoid_negative_ts",
         "make_zero",
         "-fflags",
@@ -107,7 +116,8 @@ PRESETS_INPUT = {
         "-f",
         "live_flv",
     ],
-    "preset-rtsp-generic": [
+    "preset-rtsp-generic": _user_agent_args
+    + [
         "-avoid_negative_ts",
         "make_zero",
         "-fflags",
@@ -119,7 +129,8 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
-    "preset-rtsp-udp": [
+    "preset-rtsp-udp": _user_agent_args
+    + [
         "-avoid_negative_ts",
         "make_zero",
         "-fflags",
@@ -131,7 +142,10 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
-    "preset-rtsp-blue-iris": [
+    "preset-rtsp-blue-iris": _user_agent_args
+    + [
+        "-user_agent",
+        f"FFmpeg Frigate/{VERSION}",
         "-avoid_negative_ts",
         "make_zero",
         "-flags",
