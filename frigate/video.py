@@ -1,7 +1,7 @@
 import datetime
-import itertools
 import logging
 import multiprocessing as mp
+import os
 import queue
 import random
 import signal
@@ -15,6 +15,7 @@ import cv2
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.const import CACHE_DIR
 from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -203,7 +204,13 @@ def capture_frames(
 
 class CameraWatchdog(threading.Thread):
     def __init__(
-        self, camera_name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event
+        self,
+        camera_name,
+        config: CameraConfig,
+        frame_queue,
+        camera_fps,
+        ffmpeg_pid,
+        stop_event,
     ):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
@@ -267,6 +274,19 @@ class CameraWatchdog(threading.Thread):
 
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
+
+                if self.config.record.enabled and not self.verify_ffmpeg_recordings():
+                    self.logger.error(
+                        f"No recording segments from {self.camera_name}. Exiting ffmpeg..."
+                    )
+                    p["process"] = start_or_restart_ffmpeg(
+                        p["cmd"],
+                        self.logger,
+                        p["logpipe"],
+                        ffmpeg_process=p["process"],
+                    )
+                    continue
+
                 if poll is None:
                     continue
                 p["logpipe"].dump()
@@ -296,6 +316,20 @@ class CameraWatchdog(threading.Thread):
             self.camera_fps,
         )
         self.capture_thread.start()
+
+    def verify_ffmpeg_recordings(self) -> bool:
+        """Checks if ffmpeg is still writing recording segments to cache."""
+        cache_file_names = sorted(
+            [
+                d.split("-")[0]
+                for d in os.listdir(CACHE_DIR)
+                if os.path.isfile(os.path.join(CACHE_DIR, d))
+                and d.endswith(".mp4")
+                and not d.startswith("clip_")
+            ]
+        )
+
+        return self.camera_name in cache_file_names
 
 
 class CameraCapture(threading.Thread):
