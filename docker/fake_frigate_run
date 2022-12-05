@@ -1,0 +1,8 @@
+#!/bin/bash
+# shellcheck shell=bash
+# Start the fake Frigate service
+
+while true; do
+  echo "The fake Frigate service is running..."
+  sleep 5s
+done

@@ -4,6 +4,9 @@
 
 set -o errexit -o nounset -o pipefail
 
-mkdir -p /dev/shm/logs
-chown nobody:nogroup /dev/shm/logs
-chmod 02755 /dev/shm/logs
+
+dirs=(/dev/shm/logs/frigate /dev/shm/logs/go2rtc /dev/shm/logs/nginx)
+
+mkdir -p "${dirs[@]}"
+chown nobody:nogroup "${dirs[@]}"
+chmod 02755 "${dirs[@]}"

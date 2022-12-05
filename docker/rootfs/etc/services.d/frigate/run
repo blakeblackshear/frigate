@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 # Start the Frigate service
 
-set -o errexit -o nounset -o pipefail -o xtrace
+set -o errexit -o nounset -o pipefail
 
 cd /opt/frigate
 

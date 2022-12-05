@@ -192,8 +192,9 @@ CMD []
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
 
-# Do not start frigate on devcontainer
-RUN rm -rf /etc/services.d/frigate
+# Do not start the actual Frigate service on devcontainer as it will be started by VSCode
+# But start a fake service for simulating the logs
+COPY docker/fake_frigate_run /etc/services.d/frigate/run
 
 # Install Node 16
 RUN apt-get update \
