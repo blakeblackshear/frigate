@@ -4,7 +4,6 @@
 
 set -o errexit -o nounset -o pipefail
 
-
 dirs=(/dev/shm/logs/frigate /dev/shm/logs/go2rtc /dev/shm/logs/nginx)
 
 mkdir -p "${dirs[@]}"
