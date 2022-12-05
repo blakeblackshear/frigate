@@ -359,13 +359,7 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = [
-    "-hide_banner",
-    "-loglevel",
-    "warning",
-    "-user_agent",
-    f"FFmpeg Frigate/{VERSION}",
-]
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
 FFMPEG_INPUT_ARGS_DEFAULT = [
     "-avoid_negative_ts",
     "make_zero",
