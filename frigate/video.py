@@ -239,6 +239,7 @@ class CameraWatchdog(threading.Thread):
             self.ffmpeg_other_processes.append(
                 {
                     "cmd": c["cmd"],
+                    "roles": c["roles"],
                     "logpipe": logpipe,
                     "process": start_or_restart_ffmpeg(c["cmd"], self.logger, logpipe),
                 }
@@ -275,7 +276,7 @@ class CameraWatchdog(threading.Thread):
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
 
-                if self.config.record.enabled and not self.verify_ffmpeg_recordings():
+                if self.config.record.enabled and "record" in p["roles"] and not self.verify_ffmpeg_recordings():
                     self.logger.error(
                         f"No recording segments from {self.camera_name}. Exiting ffmpeg..."
                     )
