@@ -7,10 +7,25 @@ import Button from '../components/Button';
 
 export default function Logs() {
   const [logService, setLogService] = useState('frigate');
+  const [logs, setLogs] = useState('frigate');
 
   const { data: frigateLogs } = useSWR('logs/frigate');
   const { data: go2rtcLogs } = useSWR('logs/go2rtc');
   const { data: nginxLogs } = useSWR('logs/nginx');
+
+  useEffect(() => {
+    switch (logService) {
+      case 'frigate':
+        setLogs(frigateLogs);
+        break;
+      case 'go2rtc':
+        setLogs(go2rtcLogs);
+        break;
+      case 'nginx':
+        setLogs(nginxLogs);
+        break;
+    }
+  }, [frigateLogs, go2rtcLogs, nginxLogs, logService, setLogs]);
 
   return (
     <div className="space-y-4 p-2 px-4">
@@ -19,7 +34,7 @@ export default function Logs() {
       <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} setViewMode={setLogService} />
 
       <div className='overflow-auto font-mono text-sm text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 whitespace-pre-wrap'>
-        {logService == 'frigate' ? frigateLogs : (logService == 'go2rtc' ? go2rtcLogs : nginxLogs)}
+        {logs}
       </div>
       <Button className="">
         Copy to Clipboard
