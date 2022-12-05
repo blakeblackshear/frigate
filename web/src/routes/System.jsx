@@ -218,7 +218,7 @@ export default function System() {
           <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {cameraNames.map((camera) => (
               <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-                <div className="text-lg flex justify-between p-4">
+                <div className="capitalize text-lg flex justify-between p-4">
                   <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                   <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
                 </div>
