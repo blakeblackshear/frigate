@@ -15,7 +15,7 @@ export default function Logs() {
 
   const handleCopyLogs = useCallback(() => {
     async function copy() {
-      await window.navigator.clipboard.writeText(JSON.stringify(logs, null, 2));
+      await window.navigator.clipboard.writeText(logs);
     }
     copy();
   }, [logs]);
