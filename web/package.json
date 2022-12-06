@@ -34,7 +34,7 @@
     "@testing-library/preact": "^3.2.2",
     "@testing-library/user-event": "^14.4.3",
     "@types/video.js": "^7.3.49",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.44.0",
     "@vitest/coverage-c8": "^0.25.3",
     "@vitest/ui": "^0.25.3",
