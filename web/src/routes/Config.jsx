@@ -90,7 +90,7 @@ export default function Config() {
         </div>
       </div>
 
-      {success && <div className="max-h-20 text-red-500">{success}</div>}
+      {success && <div className="max-h-20 text-green-500">{success}</div>}
       {error && <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">{error}</div>}
 
       <div id="container" className="h-full" />
