@@ -619,7 +619,7 @@ def config_raw():
     if not os.path.isfile(config_file):
         return "Could not find file", 410
 
-    with open(config_file) as f:
+    with open(config_file, "r") as f:
         raw_config = f.read()
         f.close()
         return raw_config, 200
@@ -632,14 +632,50 @@ def config_save():
     if not new_config:
         return "Config with body param is required", 400
 
+    # Validate the config schema
     try:
         new_yaml = FrigateConfig.parse_raw(new_config)
-        restart_frigate()
-        return "Config successfully saved", 200
     except Exception as e:
         return make_response(
-            jsonify({"success": False, "message": str(traceback.format_exc())}), 400
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                }
+            ),
+            400,
         )
+
+    # Save the config to file
+    try:
+        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
+
+        with open(config_file, "w") as f:
+            f.write(new_config)
+            f.close()
+    except Exception as e:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Could not write config file, be sure that frigate has write permission on the config file.",
+                }
+            ),
+            400,
+        )
+
+    try:
+        restart_frigate()
+    except Exception as e:
+        logging.error(f"Error restarting frigate: {e}")
+
+    return "Config successfully saved", 200
 
 
 @bp.route("/config/schema")
