@@ -1,11 +1,11 @@
 import { h } from 'preact';
 import useSWR from 'swr';
-import CodeEditor from '@uiw/react-textarea-code-editor';
+import axios from 'axios';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import Button from '../components/Button';
-import axios from 'axios';
+import * as monaco from 'monaco-editor';
 
 export default function Config() {
   const { data: config } = useSWR('config/raw');
@@ -40,12 +40,23 @@ export default function Config() {
     await window.navigator.clipboard.writeText(newCode);
   };
 
+  useEffect(() => {
+    if (!config) {
+      return;
+    }
+
+    monaco.editor.create(document.getElementById('container'), {
+      language: 'yaml',
+      value: config,
+    });
+  });
+
   if (!config) {
     return <ActivityIndicator />;
   }
 
   return (
-    <div className="space-y-4 p-2 px-4">
+    <div className="space-y-4 p-2 px-4 h-full">
       <div className="flex justify-between">
         <Heading>Config</Heading>
         <div>
@@ -63,7 +74,7 @@ export default function Config() {
       {success && <div className="max-h-20 text-red-500">{success}</div>}
       {error && <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">{error}</div>}
 
-      <CodeEditor value={config} language="yaml" onChange={(e) => setNewCode(e.target.value)} />
+      <div id="container" className="h-full" />
     </div>
   );
 }

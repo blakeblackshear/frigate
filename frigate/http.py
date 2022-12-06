@@ -622,6 +622,7 @@ def config_raw():
     with open(config_file, "r") as f:
         raw_config = f.read()
         f.close()
+
         return raw_config, 200
 
 
