@@ -9,7 +9,6 @@ import * as monaco from 'monaco-editor';
 
 export default function Config() {
   const { data: config } = useSWR('config/raw');
-  const [newCode, setNewCode] = useState();
   const [success, setSuccess] = useState();
   const [error, setError] = useState();
 
@@ -19,7 +18,7 @@ export default function Config() {
     }
 
     axios
-      .post('config/save', newCode, {
+      .post('config/save', window.editor.getValue(), {
         headers: { 'Content-Type': 'text/plain' },
       })
       .then((response) => {
@@ -37,7 +36,7 @@ export default function Config() {
   };
 
   const handleCopyConfig = async () => {
-    await window.navigator.clipboard.writeText(newCode);
+    await window.navigator.clipboard.writeText(window.editor.getValue());
   };
 
   useEffect(() => {
@@ -45,9 +44,11 @@ export default function Config() {
       return;
     }
 
-    monaco.editor.create(document.getElementById('container'), {
+    window.editor = monaco.editor.create(document.getElementById('container'), {
       language: 'yaml',
       value: config,
+      scrollBeyondLastLine: false,
+      theme: 'vs-dark',
     });
   });
 
@@ -63,11 +64,9 @@ export default function Config() {
           <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
             Copy Config
           </Button>
-          {newCode && (
-            <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
-              Save & Restart
-            </Button>
-          )}
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
+            Save & Restart
+          </Button>
         </div>
       </div>
 
