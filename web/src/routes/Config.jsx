@@ -1,12 +1,13 @@
 import { h, Fragment } from 'preact';
 import useSWR from 'swr';
-import { createReactEditorJS } from 'react-editor-js';
+import CodeEditor from '@uiw/react-textarea-code-editor';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
+import { useState } from 'preact/hooks';
 
 export default function Config() {
   const { data: config } = useSWR('config/raw');
-  const ReactEditorJS = createReactEditorJS();
+  const [newCode, setNewCode] = useState(config);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -16,7 +17,7 @@ export default function Config() {
     <div className="space-y-4 p-2 px-4">
       <Heading>Config</Heading>
 
-      <ReactEditorJS defaultValue={config} />
+      <CodeEditor value={config} language="yaml" onChange={(e) => setNewCode(e.target.value)} />
     </div>
   );
 }
