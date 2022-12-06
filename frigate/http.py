@@ -674,8 +674,9 @@ def config_save():
         restart_frigate()
     except Exception as e:
         logging.error(f"Error restarting frigate: {e}")
+        return "Config successfully saved, unable to restart frigate", 200
 
-    return "Config successfully saved", 200
+    return "Config successfully saved, restarting...", 200
 
 
 @bp.route("/config/schema")

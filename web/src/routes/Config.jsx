@@ -9,7 +9,8 @@ import axios from 'axios';
 
 export default function Config() {
   const { data: config } = useSWR('config/raw');
-  const [newCode, setNewCode] = useState(config);
+  const [newCode, setNewCode] = useState();
+  const [success, setSuccess] = useState();
   const [error, setError] = useState();
 
   const onHandleSaveConfig = async (e) => {
@@ -17,15 +18,22 @@ export default function Config() {
       e.stopPropagation();
     }
 
-    const response = await axios.post('config/save', newCode, {
-      headers: { 'Content-Type': 'text/plain' },
-    });
-    console.log('The resp is ' + response.status + ' and data ' + response.data);
-    if (response.status === 200) {
-      // TODO set success
-    } else {
-      setError(response.data);
-    }
+    axios
+      .post('config/save', newCode, {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setSuccess(response.data);
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          setError(error.response.data.message);
+        } else {
+          setError(error.message);
+        }
+      });
   };
 
   const handleCopyConfig = async () => {
@@ -52,7 +60,8 @@ export default function Config() {
         </div>
       </div>
 
-      {error && <div className="max-h-20 text-red-500">There is an error</div>}
+      {success && <div className="max-h-20 text-red-500">{success}</div>}
+      {error && <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">{error}</div>}
 
       <CodeEditor value={config} language="yaml" onChange={(e) => setNewCode(e.target.value)} />
     </div>
