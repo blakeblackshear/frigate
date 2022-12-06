@@ -599,6 +599,25 @@ def config():
     return jsonify(config)
 
 
+@bp.route("/config/raw")
+def config_raw():
+    config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+    # Check if we can use .yaml instead of .yml
+    config_file_yaml = config_file.replace(".yml", ".yaml")
+
+    if os.path.isfile(config_file_yaml):
+        config_file = config_file_yaml
+
+    if not os.path.isfile(config_file):
+        return "Could not find file", 410
+
+    with open(config_file) as f:
+        raw_config = f.read()
+        f.close()
+        return raw_config, 200
+
+
 @bp.route("/config/schema")
 def config_schema():
     return current_app.response_class(
