@@ -27,11 +27,17 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
+from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
-from frigate.util import clean_camera_user_pass, ffprobe_stream, vainfo_hwaccel
+from frigate.util import (
+    clean_camera_user_pass,
+    ffprobe_stream,
+    restart_frigate,
+    vainfo_hwaccel,
+)
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
@@ -616,6 +622,22 @@ def config_raw():
         raw_config = f.read()
         f.close()
         return raw_config, 200
+
+
+@bp.route("/config/save", methods=["POST"])
+def config_save():
+    new_config = request.get_data().decode()
+    logging.error(f"The data is {new_config}")
+
+    if not new_config:
+        return "Config with body param is required", 400
+
+    try:
+        new_yaml = FrigateConfig.parse_raw(new_config)
+        restart_frigate()
+        return "Config successfully saved", 200
+    except Exception as e:
+        return f"Schema error: {e}", 400
 
 
 @bp.route("/config/schema")
