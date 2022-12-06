@@ -1,13 +1,17 @@
 import { h } from 'preact';
 import useSWR from 'swr';
 import axios from 'axios';
+import { useApiHost } from '../api';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import { useEffect, useState } from 'preact/hooks';
 import Button from '../components/Button';
-import * as monaco from 'monaco-editor';
+import { editor, Uri } from 'monaco-editor';
+import { setDiagnosticsOptions } from 'monaco-yaml';
 
 export default function Config() {
+  const apiHost = useApiHost();
+
   const { data: config } = useSWR('config/raw');
   const [success, setSuccess] = useState();
   const [error, setError] = useState();
@@ -44,9 +48,25 @@ export default function Config() {
       return;
     }
 
-    window.editor = monaco.editor.create(document.getElementById('container'), {
+    const modelUri = Uri.parse('a://b/api/config/schema.json');
+
+    setDiagnosticsOptions({
+      enableSchemaRequest: true,
+      hover: true,
+      completion: true,
+      validate: true,
+      format: true,
+      schemas: [
+        {
+          uri: `${apiHost}/api/config/schema.json`,
+          fileMatch: [String(modelUri)],
+        },
+      ],
+    });
+
+    window.editor = editor.create(document.getElementById('container'), {
       language: 'yaml',
-      value: config,
+      model: editor.createModel(config, 'yaml', modelUri),
       scrollBeyondLastLine: false,
       theme: 'vs-dark',
     });

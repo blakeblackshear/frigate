@@ -680,7 +680,7 @@ def config_save():
     return "Config successfully saved, restarting...", 200
 
 
-@bp.route("/config/schema")
+@bp.route("/config/schema.json")
 def config_schema():
     return current_app.response_class(
         current_app.frigate_config.schema_json(), mimetype="application/json"
