@@ -7,6 +7,7 @@ import json
 import os
 import subprocess as sp
 import time
+import traceback
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
@@ -627,7 +628,6 @@ def config_raw():
 @bp.route("/config/save", methods=["POST"])
 def config_save():
     new_config = request.get_data().decode()
-    logging.error(f"The data is {new_config}")
 
     if not new_config:
         return "Config with body param is required", 400
@@ -637,7 +637,9 @@ def config_save():
         restart_frigate()
         return "Config successfully saved", 200
     except Exception as e:
-        return f"Schema error: {e}", 400
+        return make_response(
+            jsonify({"success": False, "message": str(traceback.format_exc())}), 400
+        )
 
 
 @bp.route("/config/schema")
