@@ -1,15 +1,17 @@
 import logging
 import numpy as np
 
-from frigate.detectors.detection_api import DetectionApi
+from .detection_api import DetectionApi
+from .detector_type import DetectorTypeEnum
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
+
 
 logger = logging.getLogger(__name__)
 
 
 class EdgeTpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_config=None):
+    def __init__(self, det_device=None, model_config=None, **kwargs):
         device_config = {"device": "usb"}
         if not det_device is None:
             device_config = {"device": det_device}
@@ -61,3 +63,6 @@ class EdgeTpuTfl(DetectionApi):
             ]
 
         return detections
+
+
+DetectionApi.register_api(DetectorTypeEnum.edgetpu, EdgeTpuTfl)

@@ -33,6 +33,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_rtmp,
 )
 from frigate.version import VERSION
+from frigate.detectors import DetectorTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -50,12 +51,6 @@ DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 class FrigateBaseModel(BaseModel):
     class Config:
         extra = Extra.forbid
-
-
-class DetectorTypeEnum(str, Enum):
-    edgetpu = "edgetpu"
-    openvino = "openvino"
-    cpu = "cpu"
 
 
 class DetectorConfig(FrigateBaseModel):

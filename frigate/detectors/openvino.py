@@ -2,14 +2,15 @@ import logging
 import numpy as np
 import openvino.runtime as ov
 
-from frigate.detectors.detection_api import DetectionApi
+from .detection_api import DetectionApi
+from .detector_type import DetectorTypeEnum
 
 
 logger = logging.getLogger(__name__)
 
 
 class OvDetector(DetectionApi):
-    def __init__(self, det_device=None, model_config=None, num_threads=1):
+    def __init__(self, det_device=None, model_config=None, num_threads=1, **kwargs):
         self.ov_core = ov.Core()
         self.ov_model = self.ov_core.read_model(model_config.path)
 
@@ -52,3 +53,6 @@ class OvDetector(DetectionApi):
             i += 1
 
         return detections
+
+
+DetectionApi.register_api(DetectorTypeEnum.openvino, OvDetector)

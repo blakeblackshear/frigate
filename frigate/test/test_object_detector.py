@@ -7,8 +7,8 @@ import frigate.object_detection
 
 
 class TestLocalObjectDetector(unittest.TestCase):
-    @patch("frigate.object_detection.EdgeTpuTfl")
-    @patch("frigate.object_detection.CpuTfl")
+    @patch("frigate.detectors.EdgeTpuTfl")
+    @patch("frigate.detectors.CpuTfl")
     def test_localdetectorprocess_given_type_cpu_should_call_cputfl_init(
         self, mock_cputfl, mock_edgetputfl
     ):
@@ -22,8 +22,8 @@ class TestLocalObjectDetector(unittest.TestCase):
         mock_edgetputfl.assert_not_called()
         mock_cputfl.assert_called_once_with(model_config=test_cfg, num_threads=6)
 
-    @patch("frigate.object_detection.EdgeTpuTfl")
-    @patch("frigate.object_detection.CpuTfl")
+    @patch("frigate.detectors.EdgeTpuTfl")
+    @patch("frigate.detectors.CpuTfl")
     def test_localdetectorprocess_given_type_edgtpu_should_call_edgtpu_init(
         self, mock_cputfl, mock_edgetputfl
     ):
@@ -40,7 +40,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         mock_cputfl.assert_not_called()
         mock_edgetputfl.assert_called_once_with(det_device="usb", model_config=test_cfg)
 
-    @patch("frigate.object_detection.CpuTfl")
+    @patch("frigate.detectors.CpuTfl")
     def test_detect_raw_given_tensor_input_should_return_api_detect_raw_result(
         self, mock_cputfl
     ):
@@ -58,7 +58,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         mock_det_api.detect_raw.assert_called_once_with(tensor_input=TEST_DATA)
         assert test_result is mock_det_api.detect_raw.return_value
 
-    @patch("frigate.object_detection.CpuTfl")
+    @patch("frigate.detectors.CpuTfl")
     def test_detect_raw_given_tensor_input_should_call_api_detect_raw_with_transposed_tensor(
         self, mock_cputfl
     ):
@@ -85,7 +85,7 @@ class TestLocalObjectDetector(unittest.TestCase):
 
         assert test_result is mock_det_api.detect_raw.return_value
 
-    @patch("frigate.object_detection.CpuTfl")
+    @patch("frigate.detectors.CpuTfl")
     @patch("frigate.object_detection.load_labels")
     def test_detect_given_tensor_input_should_return_lfiltered_detections(
         self, mock_load_labels, mock_cputfl

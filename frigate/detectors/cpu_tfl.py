@@ -1,14 +1,16 @@
 import logging
 import numpy as np
 
-from frigate.detectors.detection_api import DetectionApi
+from .detection_api import DetectionApi
+from .detector_type import DetectorTypeEnum
 import tflite_runtime.interpreter as tflite
+
 
 logger = logging.getLogger(__name__)
 
 
 class CpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_config=None, num_threads=3):
+    def __init__(self, det_device=None, model_config=None, num_threads=3, **kwargs):
         self.interpreter = tflite.Interpreter(
             model_path=model_config.path or "/cpu_model.tflite", num_threads=num_threads
         )
@@ -44,3 +46,6 @@ class CpuTfl(DetectionApi):
             ]
 
         return detections
+
+
+DetectionApi.register_api(DetectorTypeEnum.cpu, CpuTfl)
