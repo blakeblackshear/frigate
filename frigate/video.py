@@ -219,7 +219,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
-        self.ffmpeg_other_processes = []
+        self.ffmpeg_other_processes: list[dict[str, any]] = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
@@ -276,24 +276,28 @@ class CameraWatchdog(threading.Thread):
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
 
-                if (
-                    self.config.record.enabled
-                    and "record" in p["roles"]
-                    and not self.verify_ffmpeg_recordings()
-                ):
-                    self.logger.error(
-                        f"No recording segments from {self.camera_name}. Exiting ffmpeg..."
+                if self.config.record.enabled and "record" in p["roles"]:
+                    latest_segment_time = self.get_latest_segment_timestamp(
+                        p.get("latest_segment_time", datetime.datetime.now().timestamp())
                     )
-                    p["process"] = start_or_restart_ffmpeg(
-                        p["cmd"],
-                        self.logger,
-                        p["logpipe"],
-                        ffmpeg_process=p["process"],
-                    )
-                    continue
+
+                    if datetime.datetime.now().timestamp() > (latest_segment_time + 30):
+                        self.logger.error(
+                            f"No recording segments from {self.camera_name}. Exiting ffmpeg..."
+                        )
+                        p["process"] = start_or_restart_ffmpeg(
+                            p["cmd"],
+                            self.logger,
+                            p["logpipe"],
+                            ffmpeg_process=p["process"],
+                        )
+                        continue
+                    else:
+                        p["latest_segment_time"] = latest_segment_time
 
                 if poll is None:
                     continue
+
                 p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
@@ -322,19 +326,28 @@ class CameraWatchdog(threading.Thread):
         )
         self.capture_thread.start()
 
-    def verify_ffmpeg_recordings(self) -> bool:
+    def get_latest_segment_timestamp(self, latest_timestamp) -> int:
         """Checks if ffmpeg is still writing recording segments to cache."""
-        cache_file_names = sorted(
+        cache_files = sorted(
             [
-                d.split("-")[0]
+                d
                 for d in os.listdir(CACHE_DIR)
                 if os.path.isfile(os.path.join(CACHE_DIR, d))
                 and d.endswith(".mp4")
                 and not d.startswith("clip_")
             ]
         )
+        newest_segment_timestamp = latest_timestamp
 
-        return self.camera_name in cache_file_names
+        for file in cache_files:
+            if self.camera_name in file:
+                basename = os.path.splitext(file)[0]
+                _, date = basename.rsplit("-", maxsplit=1)
+                ts = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").timestamp()
+                if ts > newest_segment_timestamp:
+                    newest_segment_timestamp = ts
+
+        return newest_segment_timestamp
 
 
 class CameraCapture(threading.Thread):
