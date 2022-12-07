@@ -46,7 +46,7 @@ const clipDuration = (start_time, end_time) => {
     duration = formatDuration(intervalToDuration({ start, end }));
   }
   return duration;
-}
+};
 
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
@@ -100,7 +100,7 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
-  const { data: allSubLabels } = useSWR('sub_labels')
+  const { data: allSubLabels } = useSWR('sub_labels');
 
   const filterValues = useMemo(
     () => ({
@@ -296,21 +296,20 @@ export default function Events({ path, ...props }) {
             </option>
           ))}
         </select>
-        {
-          filterValues.sub_labels.length > 0 && (
-            <select
-              className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-              value={searchParams.sub_label}
-              onChange={(e) => onFilter('sub_label', e.target.value)}
-            >
-              <option value="all">all sub labels</option>
-              {filterValues.sub_labels.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          )}
+        {filterValues.sub_labels.length > 0 && (
+          <select
+            className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
+            value={searchParams.sub_label}
+            onChange={(e) => onFilter('sub_label', e.target.value)}
+          >
+            <option value="all">all sub labels</option>
+            {filterValues.sub_labels.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        )}
         <div ref={datePicker} className="ml-auto">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
@@ -426,7 +425,15 @@ export default function Events({ path, ...props }) {
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" color="red" onClick={(e) => { setDeleteFavoriteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false) }} type="text">
+            <Button
+              className="ml-2"
+              color="red"
+              onClick={(e) => {
+                setDeleteFavoriteState({ ...state, showDeleteFavorite: false });
+                onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false);
+              }}
+              type="text"
+            >
               Delete
             </Button>
           </div>
@@ -465,12 +472,15 @@ export default function Events({ path, ...props }) {
                     <div className="m-2 flex grow">
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
-                          {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} (
-                          {(event.top_score * 100).toFixed(0)}%)
+                          {event.sub_label
+                            ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
+                            : event.label.replaceAll('_', ' ')}{' '}
+                          ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
                           {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()} ({clipDuration(event.start_time, event.end_time)})
+                          {new Date(event.start_time * 1000).toLocaleTimeString()} (
+                          {clipDuration(event.start_time, event.end_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
@@ -499,7 +509,11 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <Delete className="h-6 w-6 cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
+                        <Delete
+                          className="h-6 w-6 cursor-pointer"
+                          stroke="#f87171"
+                          onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
+                        />
 
                         <Download
                           className="h-6 w-6 mt-auto"
@@ -512,15 +526,19 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
-                        <div className='flex justify-center w-full py-2'>
-                          <Tabs selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1} onChange={handleEventDetailTabChange} className='justify'>
-                            <TextTab text='Clip' disabled={!event.has_clip} />
+                        <div className="flex justify-center w-full py-2">
+                          <Tabs
+                            selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
+                            onChange={handleEventDetailTabChange}
+                            className="justify"
+                          >
+                            <TextTab text="Clip" disabled={!event.has_clip} />
                             <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
                           </Tabs>
                         </div>
 
                         <div>
-                          {((eventDetailType == 'clip') && event.has_clip) ? (
+                          {eventDetailType == 'clip' && event.has_clip ? (
                             <VideoPlayer
                               options={{
                                 preload: 'auto',
@@ -533,11 +551,11 @@ export default function Events({ path, ...props }) {
                                 ],
                               }}
                               seekOptions={{ forward: 10, back: 5 }}
-                              onReady={() => { }}
+                              onReady={() => {}}
                             />
                           ) : null}
 
-                          {((eventDetailType == 'image') || !event.has_clip) ? (
+                          {eventDetailType == 'image' || !event.has_clip ? (
                             <div className="flex justify-center">
                               <img
                                 className="flex-grow-0"
