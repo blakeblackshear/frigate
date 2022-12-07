@@ -278,7 +278,9 @@ class CameraWatchdog(threading.Thread):
 
                 if self.config.record.enabled and "record" in p["roles"]:
                     latest_segment_time = self.get_latest_segment_timestamp(
-                        p.get("latest_segment_time", datetime.datetime.now().timestamp())
+                        p.get(
+                            "latest_segment_time", datetime.datetime.now().timestamp()
+                        )
                     )
 
                     if datetime.datetime.now().timestamp() > (latest_segment_time + 30):
