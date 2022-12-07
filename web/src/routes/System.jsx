@@ -7,7 +7,7 @@ import { useWs } from '../api/ws';
 import useSWR from 'swr';
 import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
-import { useCallback, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
 
 const emptyObject = Object.freeze({});
@@ -33,13 +33,6 @@ export default function System() {
   const detectorNames = Object.keys(detectors || emptyObject);
   const gpuNames = Object.keys(gpu_usages || emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
-
-  const handleCopyConfig = useCallback(() => {
-    async function copy() {
-      await window.navigator.clipboard.writeText(JSON.stringify(config, null, 2));
-    }
-    copy();
-  }, [config]);
 
   const onHandleFfprobe = async (camera, e) => {
     if (e) {
@@ -267,16 +260,6 @@ export default function System() {
           <p>System stats update automatically every {config.mqtt.stats_interval} seconds.</p>
         </Fragment>
       )}
-
-      <div className="relative">
-        <Heading size="sm">Config</Heading>
-        <Button className="absolute top-8 right-4" onClick={handleCopyConfig}>
-          Copy to Clipboard
-        </Button>
-        <pre className="overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 max-h-96">
-          {JSON.stringify(config, null, 2)}
-        </pre>
-      </div>
     </div>
   );
 }

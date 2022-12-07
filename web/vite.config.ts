@@ -2,13 +2,16 @@
 import path from "path";
 import { defineConfig } from 'vite'
 import preact from '@preact/preset-vite'
+import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   define: {
     'import.meta.vitest': 'undefined',
   },
-  plugins: [preact()],
+  plugins: [preact(), monacoEditorPlugin.default({
+    customWorkers: [{label: 'yaml', entry: 'monaco-yaml/yaml.worker'}]
+  })],
   test: {
     environment: 'jsdom',
     alias: {

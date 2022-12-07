@@ -1028,3 +1028,8 @@ class FrigateConfig(FrigateBaseModel):
             config = json.loads(raw_config)
 
         return cls.parse_obj(config)
+
+    @classmethod
+    def parse_raw(cls, raw_config):
+        config = load_config_with_no_duplicates(raw_config)
+        return cls.parse_obj(config)
