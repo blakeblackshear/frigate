@@ -283,9 +283,11 @@ class CameraWatchdog(threading.Thread):
                         )
                     )
 
-                    if datetime.datetime.now().timestamp() > (latest_segment_time + 30):
+                    if datetime.datetime.now().timestamp() > (
+                        latest_segment_time + 120
+                    ):
                         self.logger.error(
-                            f"No recording segments from {self.camera_name}. Exiting ffmpeg..."
+                            f"No new recording segments were created for {self.camera_name} in the last 120s. restarting the ffmpeg record process..."
                         )
                         p["process"] = start_or_restart_ffmpeg(
                             p["cmd"],
