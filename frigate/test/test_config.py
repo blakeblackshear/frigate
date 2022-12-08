@@ -1426,6 +1426,33 @@ class TestConfig(unittest.TestCase):
             ValidationError, lambda: frigate_config.runtime_config.cameras
         )
 
+    def test_fails_on_bad_segment_time(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "record": {"enabled": True},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "output_args": {
+                            "record": "-f segment -segment_time 70 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+                        },
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ],
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(
+            ValueError, lambda: frigate_config.runtime_config.ffmpeg.output_args.record
+        )
+
     def test_fails_zone_defines_untracked_object(self):
         config = {
             "mqtt": {"host": "mqtt"},

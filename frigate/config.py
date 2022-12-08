@@ -843,6 +843,18 @@ def verify_recording_retention(camera_config: CameraConfig) -> None:
         )
 
 
+def verify_recording_segments_setup_with_reasonable_time(camera_config: CameraConfig) -> None:
+    """Verify that recording segments are setup and segment time is not greater than 60."""
+    record_args: list[str] = get_ffmpeg_arg_list(camera_config.ffmpeg.output_args.record)
+    seg_arg_index = record_args.index('-segment_time')
+
+    if seg_arg_index < 0:
+        raise ValueError(f"Camera {camera_config.name} has no segment_time arg, segment args are required for record.")
+
+    if int(record_args[seg_arg_index + 1]) > 60:
+        raise ValueError(f"Camera {camera_config.name} has invalid segment_time, segment_time must be 60 or less.")
+
+
 def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
     """Verify that user has not entered zone objects that are not in the tracking config."""
     for zone_name, zone in camera_config.zones.items():
@@ -997,6 +1009,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_config_roles(camera_config)
             verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
+            verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
 
             if camera_config.rtmp.enabled:
