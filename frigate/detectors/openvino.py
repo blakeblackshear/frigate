@@ -3,7 +3,6 @@ import numpy as np
 import openvino.runtime as ov
 
 from .detection_api import DetectionApi
-from .detector_type import DetectorTypeEnum
 
 
 logger = logging.getLogger(__name__)
@@ -53,6 +52,3 @@ class OvDetector(DetectionApi):
             i += 1
 
         return detections
-
-
-DetectionApi.register_api(DetectorTypeEnum.openvino, OvDetector)

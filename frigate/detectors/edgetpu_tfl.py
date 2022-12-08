@@ -2,7 +2,6 @@ import logging
 import numpy as np
 
 from .detection_api import DetectionApi
-from .detector_type import DetectorTypeEnum
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 
@@ -63,6 +62,3 @@ class EdgeTpuTfl(DetectionApi):
             ]
 
         return detections
-
-
-DetectionApi.register_api(DetectorTypeEnum.edgetpu, EdgeTpuTfl)

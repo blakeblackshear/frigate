@@ -2,7 +2,6 @@ import logging
 import numpy as np
 
 from .detection_api import DetectionApi
-from .detector_type import DetectorTypeEnum
 import tflite_runtime.interpreter as tflite
 
 
@@ -46,6 +45,3 @@ class CpuTfl(DetectionApi):
             ]
 
         return detections
-
-
-DetectionApi.register_api(DetectorTypeEnum.cpu, CpuTfl)

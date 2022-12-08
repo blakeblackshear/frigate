@@ -7,8 +7,8 @@ import frigate.object_detection
 
 
 class TestLocalObjectDetector(unittest.TestCase):
-    @patch("frigate.detectors.EdgeTpuTfl")
-    @patch("frigate.detectors.CpuTfl")
+    @patch("frigate.detectors.edgetpu_tfl.EdgeTpuTfl")
+    @patch("frigate.detectors.cpu_tfl.CpuTfl")
     def test_localdetectorprocess_given_type_cpu_should_call_cputfl_init(
         self, mock_cputfl, mock_edgetputfl
     ):
@@ -22,8 +22,8 @@ class TestLocalObjectDetector(unittest.TestCase):
         mock_edgetputfl.assert_not_called()
         mock_cputfl.assert_called_once_with(model_config=test_cfg, num_threads=6)
 
-    @patch("frigate.detectors.EdgeTpuTfl")
-    @patch("frigate.detectors.CpuTfl")
+    @patch("frigate.detectors.edgetpu_tfl.EdgeTpuTfl")
+    @patch("frigate.detectors.cpu_tfl.CpuTfl")
     def test_localdetectorprocess_given_type_edgtpu_should_call_edgtpu_init(
         self, mock_cputfl, mock_edgetputfl
     ):
@@ -40,7 +40,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         mock_cputfl.assert_not_called()
         mock_edgetputfl.assert_called_once_with(det_device="usb", model_config=test_cfg)
 
-    @patch("frigate.detectors.CpuTfl")
+    @patch("frigate.detectors.cpu_tfl.CpuTfl")
     def test_detect_raw_given_tensor_input_should_return_api_detect_raw_result(
         self, mock_cputfl
     ):

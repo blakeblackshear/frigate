@@ -11,7 +11,7 @@ import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import InputTensorEnum
-from frigate.detectors import DetectionApi, DetectorTypeEnum
+from frigate.detectors import create_detector, DetectorTypeEnum
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
@@ -52,12 +52,7 @@ class LocalObjectDetector(ObjectDetector):
         else:
             self.input_transform = None
 
-        if det_type == DetectorTypeEnum.cpu:
-            logger.warning(
-                "CPU detectors are not recommended and should only be used for testing or for trial purposes."
-            )
-
-        self.detect_api = DetectionApi.create(det_type, det_device=det_device, model_config=model_config, num_threads=num_threads)
+        self.detect_api = create_detector(det_type, det_device=det_device, model_config=model_config, num_threads=num_threads)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
