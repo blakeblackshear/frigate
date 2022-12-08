@@ -720,7 +720,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "after": obj.to_dict(),
                     "type": "end",
                 }
-                self.dispatcher.publish("/events", json.dumps(message), retain=False)
+                self.dispatcher.publish("events", json.dumps(message), retain=False)
 
             self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
 
