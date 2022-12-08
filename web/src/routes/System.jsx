@@ -40,18 +40,9 @@ export default function System() {
     }
 
     setState({ ...state, showFfprobe: true });
-    let paths = '';
-    config.cameras[camera].ffmpeg.inputs.forEach((input) => {
-      if (paths) {
-        paths += ',';
-        paths += input.path;
-      } else {
-        paths = input.path;
-      }
-    });
     const response = await axios.get('ffprobe', {
       params: {
-        paths,
+        paths: `camera:${camera}`,
       },
     });
 
@@ -117,7 +108,11 @@ export default function System() {
         <Dialog>
           <div className="p-4">
             <Heading size="lg">Vainfo Output</Heading>
-            {state.vainfo != '' ? <p className="mb-2 max-h-96 overflow-scroll">{state.vainfo}</p> : <ActivityIndicator />}
+            {state.vainfo != '' ? (
+              <p className="mb-2 max-h-96 overflow-scroll">{state.vainfo}</p>
+            ) : (
+              <ActivityIndicator />
+            )}
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
