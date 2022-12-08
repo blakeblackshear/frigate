@@ -21,7 +21,7 @@ def create_detector(det_type: DetectorTypeEnum, **kwargs):
     _api_types = {
         DetectorTypeEnum.cpu: CpuTfl,
         DetectorTypeEnum.edgetpu: EdgeTpuTfl,
-        DetectorTypeEnum.openvino: OvDetector
+        DetectorTypeEnum.openvino: OvDetector,
     }
 
     if det_type == DetectorTypeEnum.cpu:

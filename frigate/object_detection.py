@@ -52,7 +52,12 @@ class LocalObjectDetector(ObjectDetector):
         else:
             self.input_transform = None
 
-        self.detect_api = create_detector(det_type, det_device=det_device, model_config=model_config, num_threads=num_threads)
+        self.detect_api = create_detector(
+            det_type,
+            det_device=det_device,
+            model_config=model_config,
+            num_threads=num_threads,
+        )
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
