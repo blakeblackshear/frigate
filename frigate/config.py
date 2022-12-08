@@ -843,16 +843,24 @@ def verify_recording_retention(camera_config: CameraConfig) -> None:
         )
 
 
-def verify_recording_segments_setup_with_reasonable_time(camera_config: CameraConfig) -> None:
+def verify_recording_segments_setup_with_reasonable_time(
+    camera_config: CameraConfig,
+) -> None:
     """Verify that recording segments are setup and segment time is not greater than 60."""
-    record_args: list[str] = get_ffmpeg_arg_list(camera_config.ffmpeg.output_args.record)
-    seg_arg_index = record_args.index('-segment_time')
+    record_args: list[str] = get_ffmpeg_arg_list(
+        camera_config.ffmpeg.output_args.record
+    )
+    seg_arg_index = record_args.index("-segment_time")
 
     if seg_arg_index < 0:
-        raise ValueError(f"Camera {camera_config.name} has no segment_time arg, segment args are required for record.")
+        raise ValueError(
+            f"Camera {camera_config.name} has no segment_time arg, segment args are required for record."
+        )
 
     if int(record_args[seg_arg_index + 1]) > 60:
-        raise ValueError(f"Camera {camera_config.name} has invalid segment_time, segment_time must be 60 or less.")
+        raise ValueError(
+            f"Camera {camera_config.name} has invalid segment_time, segment_time must be 60 or less."
+        )
 
 
 def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
