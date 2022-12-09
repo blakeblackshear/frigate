@@ -10,7 +10,6 @@ import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  //const timezone = 'America/Chicago';
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
