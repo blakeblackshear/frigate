@@ -277,12 +277,20 @@ class RecordingMaintainer(threading.Thread):
             self.end_time_cache.pop(cache_path, None)
             return
 
-        directory = os.path.join(RECORD_DIR, start_time.replace(tzinfo=datetime.timezone.utc).strftime("%Y-%m-%d/%H"), camera)
+        directory = os.path.join(
+            RECORD_DIR,
+            start_time.replace(tzinfo=datetime.timezone.utc)
+            .astimezone(tz=None)
+            .strftime("%Y-%m-%d/%H"),
+            camera,
+        )
 
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        file_name = f"{start_time.replace(tzinfo=datetime.timezone.utc).strftime('%M.%S.mp4')}"
+        file_name = (
+            f"{start_time.replace(tzinfo=datetime.timezone.utc).strftime('%M.%S.mp4')}"
+        )
         file_path = os.path.join(directory, file_name)
 
         try:

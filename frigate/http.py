@@ -6,6 +6,7 @@ import logging
 import json
 import os
 import subprocess as sp
+import pytz
 import time
 import traceback
 from functools import reduce
@@ -797,11 +798,12 @@ def get_recordings_storage_usage():
 # return hourly summary for recordings of camera
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
+    tz_name = request.args.get("timezone", default="localtime", type=str)
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -811,13 +813,13 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
             ).desc()
         )
     )
@@ -825,14 +827,14 @@ def recordings_summary(camera_name):
     event_groups = (
         Event.select(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", tz_name)
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
         .where(Event.camera == camera_name, Event.has_clip)
         .group_by(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", tz_name)
             ),
         )
         .objects()
@@ -1018,7 +1020,10 @@ def vod_ts(camera_name, start_ts, end_ts):
 
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
 def vod_hour(year_month, day, hour, camera_name):
-    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
+    tz_name = request.args.get("timezone", "utc")
+    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H").replace(
+        tzinfo=pytz.timezone(tz_name)
+    )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
