@@ -2,6 +2,7 @@ import logging
 import numpy as np
 
 from .detection_api import DetectionApi
+from .config import CpuDetectorConfig
 import tflite_runtime.interpreter as tflite
 
 
@@ -9,9 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class CpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_config=None, num_threads=3, **kwargs):
+    def __init__(self, detector_config: CpuDetectorConfig):
         self.interpreter = tflite.Interpreter(
-            model_path=model_config.path or "/cpu_model.tflite", num_threads=num_threads
+            model_path=detector_config.model.path or "/cpu_model.tflite",
+            num_threads=detector_config.num_threads,
         )
 
         self.interpreter.allocate_tensors()

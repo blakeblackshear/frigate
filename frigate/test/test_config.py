@@ -5,8 +5,8 @@ from pydantic import ValidationError
 from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
-    DetectorTypeEnum,
 )
+from frigate.detectors import DetectorTypeEnum
 from frigate.util import load_config_with_no_duplicates
 
 

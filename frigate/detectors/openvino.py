@@ -3,18 +3,19 @@ import numpy as np
 import openvino.runtime as ov
 
 from .detection_api import DetectionApi
+from .config import OpenVinoDetectorConfig
 
 
 logger = logging.getLogger(__name__)
 
 
 class OvDetector(DetectionApi):
-    def __init__(self, det_device=None, model_config=None, num_threads=1, **kwargs):
+    def __init__(self, detector_config: OpenVinoDetectorConfig):
         self.ov_core = ov.Core()
-        self.ov_model = self.ov_core.read_model(model_config.path)
+        self.ov_model = self.ov_core.read_model(detector_config.model.path)
 
         self.interpreter = self.ov_core.compile_model(
-            model=self.ov_model, device_name=det_device
+            model=self.ov_model, device_name=detector_config.device
         )
         logger.info(f"Model Input Shape: {self.interpreter.input(0).shape}")
         self.output_indexes = 0

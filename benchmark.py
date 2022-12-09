@@ -3,7 +3,7 @@ from statistics import mean
 import multiprocessing as mp
 import numpy as np
 import datetime
-from frigate.config import DetectorTypeEnum
+from frigate.detectors import DetectorTypeEnum
 from frigate.object_detection import (
     LocalObjectDetector,
     ObjectDetectProcess,

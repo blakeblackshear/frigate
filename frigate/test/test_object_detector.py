@@ -2,7 +2,13 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-from frigate.config import DetectorTypeEnum, InputTensorEnum, ModelConfig
+from frigate.enums import InputTensorEnum
+from frigate.detectors import DetectorTypeEnum
+from frigate.detectors.config import (
+    CpuDetectorConfig,
+    EdgeTpuDetectorConfig,
+    ModelConfig,
+)
 import frigate.object_detection
 
 
@@ -12,33 +18,31 @@ class TestLocalObjectDetector(unittest.TestCase):
     def test_localdetectorprocess_given_type_cpu_should_call_cputfl_init(
         self, mock_cputfl, mock_edgetputfl
     ):
-        test_cfg = ModelConfig()
-        test_cfg.path = "/test/modelpath"
+        test_cfg = CpuDetectorConfig(num_threads=6)
+        test_cfg.model.path = "/test/modelpath"
         test_obj = frigate.object_detection.LocalObjectDetector(
-            det_type=DetectorTypeEnum.cpu, model_config=test_cfg, num_threads=6
+            detector_config=test_cfg
         )
 
         assert test_obj is not None
         mock_edgetputfl.assert_not_called()
-        mock_cputfl.assert_called_once_with(model_config=test_cfg, num_threads=6)
+        mock_cputfl.assert_called_once_with(detector_config=test_cfg)
 
     @patch("frigate.detectors.edgetpu_tfl.EdgeTpuTfl")
     @patch("frigate.detectors.cpu_tfl.CpuTfl")
     def test_localdetectorprocess_given_type_edgtpu_should_call_edgtpu_init(
         self, mock_cputfl, mock_edgetputfl
     ):
-        test_cfg = ModelConfig()
-        test_cfg.path = "/test/modelpath"
+        test_cfg = EdgeTpuDetectorConfig(device="usb")
+        test_cfg.model.path = "/test/modelpath"
 
         test_obj = frigate.object_detection.LocalObjectDetector(
-            det_type=DetectorTypeEnum.edgetpu,
-            det_device="usb",
-            model_config=test_cfg,
+            detector_config=test_cfg
         )
 
         assert test_obj is not None
         mock_cputfl.assert_not_called()
-        mock_edgetputfl.assert_called_once_with(det_device="usb", model_config=test_cfg)
+        mock_edgetputfl.assert_called_once_with(detector_config=test_cfg)
 
     @patch("frigate.detectors.cpu_tfl.CpuTfl")
     def test_detect_raw_given_tensor_input_should_return_api_detect_raw_result(
@@ -47,7 +51,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
         test_obj_detect = frigate.object_detection.LocalObjectDetector(
-            det_device=DetectorTypeEnum.cpu
+            detector_config=CpuDetectorConfig()
         )
 
         mock_det_api = mock_cputfl.return_value
@@ -65,11 +69,11 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DATA = np.zeros((1, 32, 32, 3), np.uint8)
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
 
-        test_cfg = ModelConfig()
-        test_cfg.input_tensor = InputTensorEnum.nchw
+        test_cfg = CpuDetectorConfig()
+        test_cfg.model.input_tensor = InputTensorEnum.nchw
 
         test_obj_detect = frigate.object_detection.LocalObjectDetector(
-            det_device=DetectorTypeEnum.cpu, model_config=test_cfg
+            detector_config=test_cfg
         )
 
         mock_det_api = mock_cputfl.return_value
@@ -109,9 +113,10 @@ class TestLocalObjectDetector(unittest.TestCase):
             "label-5",
         ]
 
+        test_cfg = CpuDetectorConfig()
+        test_cfg.model = ModelConfig()
         test_obj_detect = frigate.object_detection.LocalObjectDetector(
-            det_device=DetectorTypeEnum.cpu,
-            model_config=ModelConfig(),
+            detector_config=test_cfg,
             labels=TEST_LABEL_FILE,
         )
 

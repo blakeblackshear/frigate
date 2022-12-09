@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import InputTensorEnum
+from frigate.enums import InputTensorEnum
 from frigate.detectors import create_detector, DetectorTypeEnum
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
@@ -35,12 +35,11 @@ def tensor_transform(desired_shape):
 class LocalObjectDetector(ObjectDetector):
     def __init__(
         self,
-        det_type=DetectorTypeEnum.cpu,
-        det_device=None,
-        model_config=None,
-        num_threads=3,
+        detector_config=None,
         labels=None,
     ):
+        model_config = detector_config.model
+
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
@@ -52,12 +51,7 @@ class LocalObjectDetector(ObjectDetector):
         else:
             self.input_transform = None
 
-        self.detect_api = create_detector(
-            det_type,
-            det_device=det_device,
-            model_config=model_config,
-            num_threads=num_threads,
-        )
+        self.detect_api = create_detector(detector_config)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
