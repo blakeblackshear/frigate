@@ -88,6 +88,7 @@ def is_healthy():
 @bp.route("/events/summary")
 def events_summary():
     tz_name = request.args.get("timezone", default="localtime", type=str)
+    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -107,7 +108,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_name)
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset)
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -117,7 +118,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_name)
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset)
             ),
             Event.zones,
         )
@@ -798,12 +799,13 @@ def get_recordings_storage_usage():
 # return hourly summary for recordings of camera
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
-    tz_name = request.args.get("timezone", default="localtime", type=str)
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
+                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -813,13 +815,13 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
+                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_name),
+                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
             ).desc()
         )
     )
@@ -827,14 +829,16 @@ def recordings_summary(camera_name):
     event_groups = (
         Event.select(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", tz_name)
+                "%Y-%m-%d %H",
+                fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset),
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
         .where(Event.camera == camera_name, Event.has_clip)
         .group_by(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", tz_name)
+                "%Y-%m-%d %H",
+                fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset),
             ),
         )
         .objects()

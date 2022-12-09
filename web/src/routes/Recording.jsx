@@ -9,17 +9,22 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  //const timezone = "America/Chicago"
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
   );
 
   const apiHost = useApiHost();
-  const { data: recordingsSummary } = useSWR(`${camera}/recordings/summary`, { revalidateOnFocus: false });
+  const { data: recordingsSummary } = useSWR([`${camera}/recordings/summary`, { timezone }], {
+    revalidateOnFocus: false,
+  });
 
   const recordingParams = {
     before: getUnixTime(endOfHour(currentDate)),
     after: getUnixTime(startOfHour(currentDate)),
+    timezone,
   };
   const { data: recordings } = useSWR([`${camera}/recordings`, recordingParams], { revalidateOnFocus: false });
 
