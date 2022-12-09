@@ -1091,7 +1091,19 @@ def ffprobe():
             {"success": False, "message": f"Path needs to be provided."}, "404"
         )
 
-    if "," in clean_camera_user_pass(path_param):
+    if path_param.startswith("camera"):
+        camera = path_param[7:]
+
+        if camera not in current_app.frigate_config.cameras.keys():
+            return jsonify(
+                {"success": False, "message": f"{camera} is not a valid camera."}, "404"
+            )
+
+        paths = map(
+            lambda input: input.path,
+            current_app.frigate_config.cameras[camera].ffmpeg.inputs,
+        )
+    elif "," in clean_camera_user_pass(path_param):
         paths = path_param.split(",")
     else:
         paths = [path_param]
@@ -1100,7 +1112,7 @@ def ffprobe():
     output = []
 
     for path in paths:
-        ffprobe = ffprobe_stream(path)
+        ffprobe = ffprobe_stream(path.strip())
         output.append(
             {
                 "return_code": ffprobe.returncode,

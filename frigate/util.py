@@ -880,6 +880,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
 
 def ffprobe_stream(path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
+    clean_path = escape_special_characters(path)
     ffprobe_cmd = [
         "ffprobe",
         "-print_format",
@@ -888,7 +889,7 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
         "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
         "-loglevel",
         "quiet",
-        path,
+        clean_path,
     ]
     return sp.run(ffprobe_cmd, capture_output=True)
 
