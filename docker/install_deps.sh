@@ -13,12 +13,13 @@ apt-get -qq install --no-install-recommends -y \
     python3-pip
 
 # add raspberry pi repo
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
-echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
+mkdir -p -m 600 /root/.gnupg
+gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
+echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
 
 # add coral repo
-apt-key adv --fetch-keys https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" >/etc/apt/sources.list.d/coral-edgetpu.list
+wget --quiet -O /usr/share/keyrings/google-edgetpu.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/google-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
 echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
 
 # enable non-free repo
