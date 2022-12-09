@@ -87,7 +87,7 @@ def is_healthy():
 
 @bp.route("/events/summary")
 def events_summary():
-    tz_name = request.args.get("timezone", default="localtime", type=str)
+    tz_name = request.args.get("timezone", default="utc", type=str)
     tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
