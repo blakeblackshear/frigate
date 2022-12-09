@@ -108,7 +108,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset)
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -118,7 +118,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset)
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
             ),
             Event.zones,
         )
