@@ -43,6 +43,11 @@ export async function getConfig(_url, _cb, _props) {
   return module.default;
 }
 
+export async function getLogs(_url, _cb, _props) {
+  const module = await import('./Logs.jsx');
+  return module.default;
+}
+
 export async function getStyleGuide(_url, _cb, _props) {
   const module = await import('./StyleGuide.jsx');
   return module.default;

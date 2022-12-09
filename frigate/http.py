@@ -1142,3 +1142,24 @@ def vainfo():
             else "",
         }
     )
+
+
+@bp.route("/logs/<service>", methods=["GET"])
+def logs(service: str):
+    log_locations = {
+        "frigate": "/dev/shm/logs/frigate/current",
+        "go2rtc": "/dev/shm/logs/go2rtc/current",
+        "nginx": "/dev/shm/logs/nginx/current",
+    }
+    service_location = log_locations.get(service)
+
+    if not service:
+        return f"{service} is not a valid service", 404
+
+    try:
+        file = open(service_location, "r")
+        contents = file.read()
+        file.close()
+        return contents, 200
+    except FileNotFoundError as e:
+        return f"Could not find log file: {e}", 500

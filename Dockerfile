@@ -180,8 +180,8 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 # But this is not working currently because of:
 # https://github.com/just-containers/s6-overlay/issues/503
 ENV S6_SERVICES_GRACETIME=30000
-# Configure logging to prepend timestamps, log to stdout, keep 1 archive and rotate on 10MB
-ENV S6_LOGGING_SCRIPT="T 1 n1 s10000000 T"
+# Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
+ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 # TODO: remove after a new version of s6-overlay is released. See:
 # https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
 ENV S6_SERVICES_READYTIME=50
