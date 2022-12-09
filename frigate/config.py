@@ -850,6 +850,10 @@ def verify_recording_segments_setup_with_reasonable_time(
     record_args: list[str] = get_ffmpeg_arg_list(
         camera_config.ffmpeg.output_args.record
     )
+
+    if record_args[0].startswith("preset"):
+        return
+
     seg_arg_index = record_args.index("-segment_time")
 
     if seg_arg_index < 0:
