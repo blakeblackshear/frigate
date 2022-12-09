@@ -1,5 +1,5 @@
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import copy
 import glob
 import logging
@@ -801,7 +801,6 @@ def get_recordings_storage_usage():
 def recordings_summary(camera_name):
     tz_name = request.args.get("timezone", default="utc", type=str)
     tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
-    logger.error(f"The difference is {tz_offset}")
     recording_groups = (
         Recordings.select(
             fn.strftime(
@@ -1023,12 +1022,12 @@ def vod_ts(camera_name, start_ts, end_ts):
     )
 
 
-@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
-def vod_hour(year_month, day, hour, camera_name):
-    tz_name = request.args.get("timezone", "utc")
-    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H").replace(
-        tzinfo=pytz.timezone(tz_name)
-    )
+# TODO make this nicer when vod module is removed
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+def vod_hour(year_month, day, hour, camera_name, tz_name):
+    tz_name = tz_name.replace("_", "/")
+    parts = year_month.split("-")
+    start_date = datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=pytz.timezone(tz_name)).astimezone(timezone.utc)
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()

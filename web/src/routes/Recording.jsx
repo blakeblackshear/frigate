@@ -10,7 +10,7 @@ import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  //const timezone = "America/Chicago"
+  //const timezone = 'America/Chicago';
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
@@ -24,7 +24,6 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   const recordingParams = {
     before: getUnixTime(endOfHour(currentDate)),
     after: getUnixTime(startOfHour(currentDate)),
-    timezone,
   };
   const { data: recordings } = useSWR([`${camera}/recordings`, recordingParams], { revalidateOnFocus: false });
 
@@ -71,14 +70,17 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
           description: `${camera} recording @ ${h.hour}:00.`,
           sources: [
             {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/master.m3u8`,
+              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/${timezone.replaceAll(
+                '/',
+                '_'
+              )}/master.m3u8`,
               type: 'application/vnd.apple.mpegurl',
             },
           ],
         };
       })
       .reverse();
-  }, [apiHost, date, recordingsSummary, camera]);
+  }, [apiHost, date, recordingsSummary, camera, timezone]);
 
   const playlistIndex = useMemo(() => {
     const index = playlist.findIndex((item) => item.name === hour);
