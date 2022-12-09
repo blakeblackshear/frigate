@@ -79,10 +79,7 @@ def run_detector(
     out_events: dict[str, mp.Event],
     avg_speed,
     start,
-    model_config,
-    det_type,
-    det_device,
-    num_threads,
+    detector_config,
 ):
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
@@ -100,10 +97,7 @@ def run_detector(
 
     frame_manager = SharedMemoryFrameManager()
     object_detector = LocalObjectDetector(
-        det_type=det_type,
-        det_device=det_device,
-        model_config=model_config,
-        num_threads=num_threads,
+        detector_config=detector_config
     )
 
     outputs = {}
@@ -118,7 +112,7 @@ def run_detector(
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
-            connection_id, (1, model_config.height, model_config.width, 3)
+            connection_id, (1, detector_config.model.height, detector_config.model.width, 3)
         )
 
         if input_frame is None:
@@ -141,10 +135,7 @@ class ObjectDetectProcess:
         name,
         detection_queue,
         out_events,
-        model_config,
-        det_type=None,
-        det_device=None,
-        num_threads=3,
+        detector_config,
     ):
         self.name = name
         self.out_events = out_events
@@ -152,10 +143,7 @@ class ObjectDetectProcess:
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
         self.detect_process = None
-        self.model_config = model_config
-        self.det_type = det_type
-        self.det_device = det_device
-        self.num_threads = num_threads
+        self.detector_config = detector_config
         self.start_or_restart()
 
     def stop(self):
@@ -180,10 +168,7 @@ class ObjectDetectProcess:
                 self.out_events,
                 self.avg_inference_speed,
                 self.detection_start,
-                self.model_config,
-                self.det_type,
-                self.det_device,
-                self.num_threads,
+                self.detector_config,
             ),
         )
         self.detect_process.daemon = True
