@@ -86,6 +86,7 @@ def is_healthy():
 
 @bp.route("/events/summary")
 def events_summary():
+    tz_name = request.args.get("timezone", default="localtime", type=str)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -105,7 +106,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_name)
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -115,7 +116,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_name)
             ),
             Event.zones,
         )
