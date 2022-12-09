@@ -65,7 +65,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-        uses: actions/setup-python@v4.3.0
+        uses: actions/setup-python@v4.3.1
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
