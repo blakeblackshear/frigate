@@ -801,11 +801,12 @@ def get_recordings_storage_usage():
 def recordings_summary(camera_name):
     tz_name = request.args.get("timezone", default="utc", type=str)
     tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
+    logger.error(f"The difference is {tz_offset}")
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -815,13 +816,13 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", "utc", tz_offset),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             ).desc()
         )
     )
@@ -830,7 +831,7 @@ def recordings_summary(camera_name):
         Event.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset),
+                fn.datetime(Event.start_time, "unixepoch", tz_offset),
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
@@ -838,7 +839,7 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Event.start_time, "unixepoch", "utc", tz_offset),
+                fn.datetime(Event.start_time, "unixepoch", tz_offset),
             ),
         )
         .objects()
