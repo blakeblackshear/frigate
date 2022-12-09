@@ -1027,7 +1027,9 @@ def vod_ts(camera_name, start_ts, end_ts):
 def vod_hour(year_month, day, hour, camera_name, tz_name):
     tz_name = tz_name.replace("_", "/")
     parts = year_month.split("-")
-    start_date = datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=pytz.timezone(tz_name)).astimezone(timezone.utc)
+    start_date = datetime(
+        int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=pytz.timezone(tz_name)
+    ).astimezone(timezone.utc)
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
