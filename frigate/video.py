@@ -1,7 +1,7 @@
 import datetime
-import itertools
 import logging
 import multiprocessing as mp
+import os
 import queue
 import random
 import signal
@@ -15,6 +15,7 @@ import cv2
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.const import CACHE_DIR
 from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -203,7 +204,13 @@ def capture_frames(
 
 class CameraWatchdog(threading.Thread):
     def __init__(
-        self, camera_name, config, frame_queue, camera_fps, ffmpeg_pid, stop_event
+        self,
+        camera_name,
+        config: CameraConfig,
+        frame_queue,
+        camera_fps,
+        ffmpeg_pid,
+        stop_event,
     ):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
@@ -212,7 +219,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
-        self.ffmpeg_other_processes = []
+        self.ffmpeg_other_processes: list[dict[str, any]] = []
         self.camera_fps = camera_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
@@ -232,6 +239,7 @@ class CameraWatchdog(threading.Thread):
             self.ffmpeg_other_processes.append(
                 {
                     "cmd": c["cmd"],
+                    "roles": c["roles"],
                     "logpipe": logpipe,
                     "process": start_or_restart_ffmpeg(c["cmd"], self.logger, logpipe),
                 }
@@ -267,8 +275,33 @@ class CameraWatchdog(threading.Thread):
 
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
+
+                if self.config.record.enabled and "record" in p["roles"]:
+                    latest_segment_time = self.get_latest_segment_timestamp(
+                        p.get(
+                            "latest_segment_time", datetime.datetime.now().timestamp()
+                        )
+                    )
+
+                    if datetime.datetime.now().timestamp() > (
+                        latest_segment_time + 120
+                    ):
+                        self.logger.error(
+                            f"No new recording segments were created for {self.camera_name} in the last 120s. restarting the ffmpeg record process..."
+                        )
+                        p["process"] = start_or_restart_ffmpeg(
+                            p["cmd"],
+                            self.logger,
+                            p["logpipe"],
+                            ffmpeg_process=p["process"],
+                        )
+                        continue
+                    else:
+                        p["latest_segment_time"] = latest_segment_time
+
                 if poll is None:
                     continue
+
                 p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
@@ -296,6 +329,29 @@ class CameraWatchdog(threading.Thread):
             self.camera_fps,
         )
         self.capture_thread.start()
+
+    def get_latest_segment_timestamp(self, latest_timestamp) -> int:
+        """Checks if ffmpeg is still writing recording segments to cache."""
+        cache_files = sorted(
+            [
+                d
+                for d in os.listdir(CACHE_DIR)
+                if os.path.isfile(os.path.join(CACHE_DIR, d))
+                and d.endswith(".mp4")
+                and not d.startswith("clip_")
+            ]
+        )
+        newest_segment_timestamp = latest_timestamp
+
+        for file in cache_files:
+            if self.camera_name in file:
+                basename = os.path.splitext(file)[0]
+                _, date = basename.rsplit("-", maxsplit=1)
+                ts = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").timestamp()
+                if ts > newest_segment_timestamp:
+                    newest_segment_timestamp = ts
+
+        return newest_segment_timestamp
 
 
 class CameraCapture(threading.Thread):
