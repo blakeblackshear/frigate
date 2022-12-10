@@ -1,36 +1,21 @@
 import logging
 import numpy as np
 
-from .detection_api import DetectionApi
-from .config import EdgeTpuDetectorConfig
+from frigate.detectors.detection_api import DetectionApi
 import tflite_runtime.interpreter as tflite
-from tflite_runtime.interpreter import load_delegate
 
 
 logger = logging.getLogger(__name__)
 
 
-class EdgeTpuTfl(DetectionApi):
-    def __init__(self, detector_config: EdgeTpuDetectorConfig):
-        device_config = {"device": "usb"}
-        if not detector_config.device is None:
-            device_config = {"device": detector_config.device}
+class CpuTfl(DetectionApi):
+    type_key = "cpu"
 
-        edge_tpu_delegate = None
-
-        try:
-            logger.info(f"Attempting to load TPU as {device_config['device']}")
-            edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
-            logger.info("TPU found")
-            self.interpreter = tflite.Interpreter(
-                model_path=detector_config.model.path or "/edgetpu_model.tflite",
-                experimental_delegates=[edge_tpu_delegate],
-            )
-        except ValueError:
-            logger.error(
-                "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
-            )
-            raise
+    def __init__(self, detector_config):
+        self.interpreter = tflite.Interpreter(
+            model_path=detector_config.model.path or "/cpu_model.tflite",
+            num_threads=detector_config.num_threads,
+        )
 
         self.interpreter.allocate_tensors()
 

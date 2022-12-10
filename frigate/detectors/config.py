@@ -8,7 +8,7 @@ from pydantic.fields import PrivateAttr
 
 from frigate.enums import InputTensorEnum, PixelFormatEnum
 from frigate.util import load_labels
-from .detector_type import DetectorTypeEnum
+from .detector_types import DetectorTypeEnum
 
 
 logger = logging.getLogger(__name__)

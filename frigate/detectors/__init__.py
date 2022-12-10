@@ -1,21 +1,11 @@
 import logging
-from enum import Enum
 
 from .detection_api import DetectionApi
-from .detector_type import DetectorTypeEnum
-from .cpu_tfl import CpuTfl
-from .edgetpu_tfl import EdgeTpuTfl
-from .openvino import OvDetector
+from .detector_types import DetectorTypeEnum, api_types
 from .config import ModelConfig, DetectorConfig
 
 
 logger = logging.getLogger(__name__)
-
-api_types = {
-    DetectorTypeEnum.cpu: CpuTfl,
-    DetectorTypeEnum.edgetpu: EdgeTpuTfl,
-    DetectorTypeEnum.openvino: OvDetector,
-}
 
 
 def create_detector(detector_config: DetectorConfig):
