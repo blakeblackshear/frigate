@@ -57,41 +57,17 @@ class ModelConfig(BaseModel):
         extra = Extra.forbid
 
 
-class BaseDetectorConfig(BaseModel):
-    type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
+class DetectorConfig(BaseModel):
+    type: str = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
     model: ModelConfig = Field(
         default=None, title="Detector specific model configuration."
     )
+    num_threads: Optional[int] = Field(default=3, title="Number of detection threads")
+    device: Optional[str] = Field(default="usb", title="Device Type")
 
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
         arbitrary_types_allowed = True
 
-
-class CpuDetectorConfig(BaseDetectorConfig):
-    type: Literal[DetectorTypeEnum.cpu] = Field(
-        default=DetectorTypeEnum.cpu, title="Detector Type"
-    )
-    num_threads: int = Field(default=3, title="Number of detection threads")
-
-
-class EdgeTpuDetectorConfig(BaseDetectorConfig):
-    type: Literal[DetectorTypeEnum.edgetpu] = Field(
-        default=DetectorTypeEnum.edgetpu, title="Detector Type"
-    )
-    device: str = Field(default="usb", title="Device Type")
-
-
-class OpenVinoDetectorConfig(BaseDetectorConfig):
-    type: Literal[DetectorTypeEnum.openvino] = Field(
-        default=DetectorTypeEnum.openvino, title="Detector Type"
-    )
-    device: str = Field(default="usb", title="Device Type")
-
-
-DetectorConfig = Annotated[
-    Union[CpuDetectorConfig, EdgeTpuDetectorConfig, OpenVinoDetectorConfig],
-    Field(discriminator="type"),
-]
 
 DEFAULT_DETECTORS = parse_obj_as(Dict[str, DetectorConfig], {"cpu": {"type": "cpu"}})

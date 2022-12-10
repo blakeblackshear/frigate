@@ -44,12 +44,10 @@ class TestConfig(unittest.TestCase):
             "detectors": {
                 "cpu": {
                     "type": "cpu",
-                    "num_threads": 5,
                     "model": {"path": "/cpu_model.tflite"},
                 },
                 "edgetpu": {
                     "type": "edgetpu",
-                    "device": "usb",
                     "model": {"path": "/edgetpu_model.tflite", "width": 160},
                 },
                 "openvino": {
@@ -70,6 +68,9 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
         assert runtime_config.detectors["edgetpu"].type == DetectorTypeEnum.edgetpu
         assert runtime_config.detectors["openvino"].type == DetectorTypeEnum.openvino
+
+        assert runtime_config.detectors["cpu"].num_threads == 3
+        assert runtime_config.detectors["edgetpu"].device == "usb"
 
         assert runtime_config.model.path == "/default.tflite"
         assert runtime_config.detectors["cpu"].model.path == "/cpu_model.tflite"

@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
+from pydantic import BaseModel, Extra, Field, validator
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
@@ -972,7 +972,7 @@ class FrigateConfig(FrigateBaseModel):
             config.cameras[name] = camera_config
 
         for key, detector in config.detectors.items():
-            detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
+            detector_config: DetectorConfig = DetectorConfig.parse_obj(detector)
             if detector_config.model is None:
                 detector_config.model = config.model
             else:
