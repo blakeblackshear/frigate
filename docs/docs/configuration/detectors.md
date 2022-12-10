@@ -29,6 +29,7 @@ detectors:
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
 
 ## Edge-TPU Detector
+
 The EdgeTPU detector type runs a TensorFlow Lite model utilizing the Google Coral delegate for hardware acceleration. To configure an EdgeTPU detector, set the `"type"` attribute to `"edgetpu"`.
 
 The EdgeTPU device can specified using the `"device"` attribute according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api). If not set, the delegate will use the first device it finds.
@@ -93,6 +94,7 @@ detectors:
 ```
 
 ## OpenVINO Detector
+
 The OpenVINO detector type runs an OpenVINO IR model on Intel CPU, GPU and VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
 
 The OpenVINO device plugin is specified using the `"device"` attribute according to naming conventions in the [Device Documentation](https://docs.openvino.ai/latest/openvino_docs_OV_UG_Working_with_devices.html). Other supported devices could be `AUTO`, `CPU`, `GPU`, `MYRIAD`, etc. If not specified, the default OpenVINO device will be selected by the `AUTO` plugin.
@@ -144,4 +146,39 @@ device_cgroup_rules:
   - 'c 189:* rmw'
 volumes:
   - /dev/bus/usb:/dev/bus/usb
+```
+
+## Custom Detectors
+
+Custom python detector modules can be added at `/opt/frigate/frigate/detectors/plugins` in the container.
+See the below for an example implementation.
+
+```python
+from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Extra, Field
+
+DETECTOR_KEY = "<detector_key>"
+
+# A pydantic model inheriting from `BaseDetectorConfig`
+# Must implement the `type` attribute as below
+# Can add any number of fields to be passed from 
+# configuration to the constructor of your detector.
+class CustomDetectorConfig(BaseDetectorConfig):
+    type: Literal[DETECTOR_KEY]
+    custom_field: str = Field(default="value", title="Custom field description")
+
+
+# The custom detector class must inherit from `DetectionApi`
+# and must implement the `type_key`, `__init__`, 
+# and `detect_raw` methods as below
+class CustomDetector(DetectionApi):
+    type_key = DETECTOR_KEY
+
+    def __init__(self, detector_config: CustomDetectorConfig):
+      ...
+
+    def detect_raw(self, tensor_input):
+      return <list of detections>
 ```

@@ -11,14 +11,16 @@ from tflite_runtime.interpreter import load_delegate
 
 logger = logging.getLogger(__name__)
 
+DETECTOR_KEY = "edgetpu"
+
 
 class EdgeTpuDetectorConfig(BaseDetectorConfig):
-    type: Literal["edgetpu"]
+    type: Literal[DETECTOR_KEY]
     device: str = Field(default="usb", title="Device Type")
 
 
 class EdgeTpuTfl(DetectionApi):
-    type_key = "edgetpu"
+    type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: EdgeTpuDetectorConfig):
         device_config = {"device": "usb"}

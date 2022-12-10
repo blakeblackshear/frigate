@@ -10,14 +10,16 @@ from pydantic import Extra, Field
 
 logger = logging.getLogger(__name__)
 
+DETECTOR_KEY = "openvino"
+
 
 class OvDetectorConfig(BaseDetectorConfig):
-    type: Literal["openvino"]
+    type: Literal[DETECTOR_KEY]
     device: str = Field(default="AUTO", title="Device Type")
 
 
 class OvDetector(DetectionApi):
-    type_key = "openvino"
+    type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: OvDetectorConfig):
         self.ov_core = ov.Core()

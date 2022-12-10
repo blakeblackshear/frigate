@@ -10,14 +10,16 @@ import tflite_runtime.interpreter as tflite
 
 logger = logging.getLogger(__name__)
 
+DETECTOR_KEY = "cpu"
+
 
 class CpuDetectorConfig(BaseDetectorConfig):
-    type: Literal["cpu"]
+    type: Literal[DETECTOR_KEY]
     num_threads: int = Field(default=3, title="Number of detection threads")
 
 
 class CpuTfl(DetectionApi):
-    type_key = "cpu"
+    type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: CpuDetectorConfig):
         self.interpreter = tflite.Interpreter(

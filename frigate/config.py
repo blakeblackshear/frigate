@@ -834,7 +834,7 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ModelConfig, title="Detection model configuration."
     )
     detectors: Dict[str, DetectorConfig] = Field(
-        default=parse_obj_as(Dict[str, DetectorConfig], DEFAULT_DETECTORS),
+        default=DEFAULT_DETECTORS,
         title="Detector hardware configuration.",
     )
     logger: LoggerConfig = Field(

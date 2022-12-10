@@ -76,7 +76,7 @@ detectors:
   # Required: name of the detector
   detector_name:
     # Required: type of the detector
-    # Frigate provided types include 'cpu', 'edgetpu', and 'openvino'
+    # Frigate provided types include 'cpu', 'edgetpu', and 'openvino' (default: shown below)
     # Additional detector types can also be plugged in.
     # Detectors may require additional configuration.
     # Refer to the Detectors configuration page for more information.
