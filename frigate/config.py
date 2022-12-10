@@ -975,6 +975,26 @@ class FrigateConfig(FrigateBaseModel):
             detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
             if detector_config.model is None:
                 detector_config.model = config.model
+            else:
+                model = detector_config.model
+                schema = ModelConfig.schema()["properties"]
+                if (
+                    model.width != schema["width"]["default"]
+                    or model.height != schema["height"]["default"]
+                    or model.labelmap_path is not None
+                    or model.labelmap is not {}
+                    or model.input_tensor != schema["input_tensor"]["default"]
+                    or model.input_pixel_format
+                    != schema["input_pixel_format"]["default"]
+                ):
+                    logger.warning(
+                        "Customizing more than a detector model path is unsupported."
+                    )
+            merged_model = deep_merge(
+                detector_config.model.dict(exclude_unset=True),
+                config.model.dict(exclude_unset=True),
+            )
+            detector_config.model = ModelConfig.parse_obj(merged_model)
             config.detectors[key] = detector_config
 
         return config

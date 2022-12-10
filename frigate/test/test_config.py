@@ -7,7 +7,7 @@ from frigate.config import (
     FrigateConfig,
 )
 from frigate.detectors import DetectorTypeEnum
-from frigate.util import load_config_with_no_duplicates
+from frigate.util import deep_merge, load_config_with_no_duplicates
 
 
 class TestConfig(unittest.TestCase):
@@ -37,6 +37,49 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert "cpu" in runtime_config.detectors.keys()
         assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
+        assert runtime_config.detectors["cpu"].model.width == 320
+
+    def test_detector_custom_model_path(self):
+        config = {
+            "detectors": {
+                "cpu": {
+                    "type": "cpu",
+                    "num_threads": 5,
+                    "model": {"path": "/cpu_model.tflite"},
+                },
+                "edgetpu": {
+                    "type": "edgetpu",
+                    "device": "usb",
+                    "model": {"path": "/edgetpu_model.tflite", "width": 160},
+                },
+                "openvino": {
+                    "type": "openvino",
+                    "device": "usb",
+                },
+            },
+            "model": {"path": "/default.tflite", "width": 512},
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+        runtime_config = frigate_config.runtime_config
+
+        assert "cpu" in runtime_config.detectors.keys()
+        assert "edgetpu" in runtime_config.detectors.keys()
+        assert "openvino" in runtime_config.detectors.keys()
+
+        assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
+        assert runtime_config.detectors["edgetpu"].type == DetectorTypeEnum.edgetpu
+        assert runtime_config.detectors["openvino"].type == DetectorTypeEnum.openvino
+
+        assert runtime_config.model.path == "/default.tflite"
+        assert runtime_config.detectors["cpu"].model.path == "/cpu_model.tflite"
+        assert runtime_config.detectors["edgetpu"].model.path == "/edgetpu_model.tflite"
+        assert runtime_config.detectors["openvino"].model.path == "/default.tflite"
+
+        assert runtime_config.model.width == 512
+        assert runtime_config.detectors["cpu"].model.width == 512
+        assert runtime_config.detectors["edgetpu"].model.width == 160
+        assert runtime_config.detectors["openvino"].model.width == 512
 
     def test_invalid_mqtt_config(self):
         config = {

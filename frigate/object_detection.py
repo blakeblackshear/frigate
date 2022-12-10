@@ -38,16 +38,14 @@ class LocalObjectDetector(ObjectDetector):
         detector_config=None,
         labels=None,
     ):
-        model_config = detector_config.model
-
         self.fps = EventsPerSecond()
         if labels is None:
             self.labels = {}
         else:
             self.labels = load_labels(labels)
 
-        if model_config:
-            self.input_transform = tensor_transform(model_config.input_tensor)
+        if detector_config:
+            self.input_transform = tensor_transform(detector_config.model.input_tensor)
         else:
             self.input_transform = None
 
@@ -96,9 +94,7 @@ def run_detector(
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    object_detector = LocalObjectDetector(
-        detector_config=detector_config
-    )
+    object_detector = LocalObjectDetector(detector_config=detector_config)
 
     outputs = {}
     for name in out_events.keys():
@@ -112,7 +108,8 @@ def run_detector(
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
-            connection_id, (1, detector_config.model.height, detector_config.model.width, 3)
+            connection_id,
+            (1, detector_config.model.height, detector_config.model.width, 3),
         )
 
         if input_frame is None:

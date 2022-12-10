@@ -60,7 +60,7 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
     model: ModelConfig = Field(
-        default_factory=ModelConfig, title="Detector specific model configuration."
+        default=None, title="Detector specific model configuration."
     )
 
     class Config:

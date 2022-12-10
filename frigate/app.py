@@ -186,7 +186,12 @@ class FrigateApp:
             self.detection_out_events[name] = mp.Event()
 
             try:
-                size = max([det.model.height * det.model.width * 3 for (name, det) in self.config.detectors.items()])
+                size = max(
+                    [
+                        det.model.height * det.model.width * 3
+                        for (name, det) in self.config.detectors.items()
+                    ]
+                )
                 shm_in = mp.shared_memory.SharedMemory(
                     name=name,
                     create=True,
