@@ -132,6 +132,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>{camera.replaceAll('_', ' ')} Recordings</Heading>
+      <div className="text-xs">Dates & Times are displayed. in local time</div>
 
       <VideoPlayer
         onReady={(player) => {
