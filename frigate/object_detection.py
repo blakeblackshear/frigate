@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.enums import InputTensorEnum
+from frigate.config import InputTensorEnum
 from frigate.detectors import create_detector
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels

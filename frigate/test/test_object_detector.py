@@ -3,9 +3,8 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from frigate.enums import InputTensorEnum
+from frigate.config import DetectorConfig, InputTensorEnum, ModelConfig
 from frigate.detectors import DetectorTypeEnum
-from frigate.detectors.config import DetectorConfig, ModelConfig
 import frigate.detectors as detectors
 import frigate.object_detection
 
