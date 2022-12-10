@@ -52,7 +52,6 @@ class TestConfig(unittest.TestCase):
                 },
                 "openvino": {
                     "type": "openvino",
-                    "device": "usb",
                 },
             },
             "model": {"path": "/default.tflite", "width": 512},
@@ -71,6 +70,7 @@ class TestConfig(unittest.TestCase):
 
         assert runtime_config.detectors["cpu"].num_threads == 3
         assert runtime_config.detectors["edgetpu"].device == "usb"
+        assert runtime_config.detectors["openvino"].device == "AUTO"
 
         assert runtime_config.model.path == "/default.tflite"
         assert runtime_config.detectors["cpu"].model.path == "/cpu_model.tflite"

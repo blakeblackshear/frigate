@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
@@ -32,7 +32,12 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_record,
     parse_preset_output_rtmp,
 )
-from frigate.detectors import DetectorTypeEnum
+from frigate.detectors import (
+    PixelFormatEnum,
+    InputTensorEnum,
+    ModelConfig,
+    DetectorConfig,
+)
 from frigate.version import VERSION
 
 
@@ -715,70 +720,6 @@ class DatabaseConfig(FrigateBaseModel):
     )
 
 
-class PixelFormatEnum(str, Enum):
-    rgb = "rgb"
-    bgr = "bgr"
-    yuv = "yuv"
-
-
-class InputTensorEnum(str, Enum):
-    nchw = "nchw"
-    nhwc = "nhwc"
-
-
-class ModelConfig(FrigateBaseModel):
-    path: Optional[str] = Field(title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
-    width: int = Field(default=320, title="Object detection model input width.")
-    height: int = Field(default=320, title="Object detection model input height.")
-    labelmap: Dict[int, str] = Field(
-        default_factory=dict, title="Labelmap customization."
-    )
-    input_tensor: InputTensorEnum = Field(
-        default=InputTensorEnum.nhwc, title="Model Input Tensor Shape"
-    )
-    input_pixel_format: PixelFormatEnum = Field(
-        default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
-    )
-    _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
-    _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
-
-    @property
-    def merged_labelmap(self) -> Dict[int, str]:
-        return self._merged_labelmap
-
-    @property
-    def colormap(self) -> Dict[int, Tuple[int, int, int]]:
-        return self._colormap
-
-    def __init__(self, **config):
-        super().__init__(**config)
-
-        self._merged_labelmap = {
-            **load_labels(config.get("labelmap_path", "/labelmap.txt")),
-            **config.get("labelmap", {}),
-        }
-
-        cmap = plt.cm.get_cmap("tab10", len(self._merged_labelmap.keys()))
-
-        self._colormap = {}
-        for key, val in self._merged_labelmap.items():
-            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
-
-
-class DetectorConfig(BaseModel):
-    type: str = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
-    device: Optional[str] = Field(default="usb", title="Device Type")
-    num_threads: Optional[int] = Field(default=3, title="Number of detection threads")
-    model: ModelConfig = Field(
-        default=None, title="Detector specific model configuration."
-    )
-
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
-
-
 class LogLevelEnum(str, Enum):
     debug = "debug"
     info = "info"
@@ -893,7 +834,7 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ModelConfig, title="Detection model configuration."
     )
     detectors: Dict[str, DetectorConfig] = Field(
-        default={name: DetectorConfig(**d) for name, d in DEFAULT_DETECTORS.items()},
+        default=parse_obj_as(Dict[str, DetectorConfig], DEFAULT_DETECTORS),
         title="Detector hardware configuration.",
     )
     logger: LoggerConfig = Field(
@@ -1037,7 +978,7 @@ class FrigateConfig(FrigateBaseModel):
             config.cameras[name] = camera_config
 
         for key, detector in config.detectors.items():
-            detector_config: DetectorConfig = DetectorConfig.parse_obj(detector)
+            detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
             if detector_config.model is None:
                 detector_config.model = config.model
             else:

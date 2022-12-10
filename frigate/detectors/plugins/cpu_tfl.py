@@ -2,19 +2,27 @@ import logging
 import numpy as np
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Extra, Field
 import tflite_runtime.interpreter as tflite
 
 
 logger = logging.getLogger(__name__)
 
 
+class CpuDetectorConfig(BaseDetectorConfig):
+    type: Literal["cpu"]
+    num_threads: int = Field(default=3, title="Number of detection threads")
+
+
 class CpuTfl(DetectionApi):
     type_key = "cpu"
 
-    def __init__(self, detector_config):
+    def __init__(self, detector_config: CpuDetectorConfig):
         self.interpreter = tflite.Interpreter(
             model_path=detector_config.model.path or "/cpu_model.tflite",
-            num_threads=detector_config.num_threads,
+            num_threads=detector_config.num_threads or 3,
         )
 
         self.interpreter.allocate_tensors()

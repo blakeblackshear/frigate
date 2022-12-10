@@ -1,10 +1,14 @@
 import logging
 import importlib
 import pkgutil
+from typing import Union
+from typing_extensions import Annotated
 from enum import Enum
+from pydantic import Field
 
 from . import plugins
 from .detection_api import DetectionApi
+from .detector_config import BaseDetectorConfig
 
 
 logger = logging.getLogger(__name__)
@@ -24,3 +28,8 @@ class StrEnum(str, Enum):
 
 
 DetectorTypeEnum = StrEnum("DetectorTypeEnum", {k: k for k in api_types})
+
+DetectorConfig = Annotated[
+    Union[tuple(BaseDetectorConfig.__subclasses__())],
+    Field(discriminator="type"),
+]

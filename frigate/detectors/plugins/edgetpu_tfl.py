@@ -2,6 +2,9 @@ import logging
 import numpy as np
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Extra, Field
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 
@@ -9,12 +12,17 @@ from tflite_runtime.interpreter import load_delegate
 logger = logging.getLogger(__name__)
 
 
+class EdgeTpuDetectorConfig(BaseDetectorConfig):
+    type: Literal["edgetpu"]
+    device: str = Field(default="usb", title="Device Type")
+
+
 class EdgeTpuTfl(DetectionApi):
     type_key = "edgetpu"
 
-    def __init__(self, detector_config):
+    def __init__(self, detector_config: EdgeTpuDetectorConfig):
         device_config = {"device": "usb"}
-        if not detector_config.device is None:
+        if detector_config.device is not None:
             device_config = {"device": detector_config.device}
 
         edge_tpu_delegate = None
