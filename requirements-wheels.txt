@@ -11,6 +11,8 @@ peewee_migrate == 1.4.*
 psutil == 5.9.*
 pydantic == 1.10.*
 PyYAML == 6.0
+pytz == 2022.6
+tzlocal == 4.2
 types-PyYAML == 6.0.*
 requests == 2.28.*
 types-requests == 2.28.*

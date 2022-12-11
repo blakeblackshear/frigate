@@ -1,15 +1,18 @@
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import copy
 import glob
 import logging
 import json
 import os
 import subprocess as sp
+import pytz
 import time
 import traceback
+
 from functools import reduce
 from pathlib import Path
+from tzlocal import get_localzone_name
 from urllib.parse import unquote
 
 import cv2
@@ -86,6 +89,8 @@ def is_healthy():
 
 @bp.route("/events/summary")
 def events_summary():
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -105,7 +110,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -115,7 +120,7 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
             ),
             Event.zones,
         )
@@ -796,11 +801,13 @@ def get_recordings_storage_usage():
 # return hourly summary for recordings of camera
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -810,13 +817,13 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
             ).desc()
         )
     )
@@ -824,14 +831,16 @@ def recordings_summary(camera_name):
     event_groups = (
         Event.select(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H",
+                fn.datetime(Event.start_time, "unixepoch", tz_offset),
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
         .where(Event.camera == camera_name, Event.has_clip)
         .group_by(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H",
+                fn.datetime(Event.start_time, "unixepoch", tz_offset),
             ),
         )
         .objects()
@@ -1016,8 +1025,20 @@ def vod_ts(camera_name, start_ts, end_ts):
 
 
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
-def vod_hour(year_month, day, hour, camera_name):
-    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
+def vod_hour_no_timezone(year_month, day, hour, camera_name):
+    return vod_hour(
+        year_month, day, hour, camera_name, get_localzone_name().replace("/", "_")
+    )
+
+
+# TODO make this nicer when vod module is removed
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+def vod_hour(year_month, day, hour, camera_name, tz_name):
+    tz_name = tz_name.replace("_", "/")
+    parts = year_month.split("-")
+    start_date = datetime(
+        int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=pytz.timezone(tz_name)
+    ).astimezone(timezone.utc)
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
