@@ -128,20 +128,27 @@ RUN /bin/mkdir -p '/usr/local/lib' && \
 #
 # TensorRT Support
 #
-# 1. Build the pycuda wheel for cp39-x86_64
-# 2. Download and convert a model for the tensorRT runtime
+# 1. Download and convert a model for the tensorRT runtime
 #
 ####
-# Build CUDA Python Bindings for Python 3.9
-# FROM wget as pycuda-build
-# ARG DEBIAN_FRONTEND
-
-# RUN --mount=type=bind,source=docker/build_pycuda.sh,target=/build/build_pycuda.sh \
-#     /build/build_pycuda.sh
 
 # Download and Convert TensorRT Model
 # FROM base_amd64 as tensorrt-converter
-## TODO
+
+# RUN apt-get update && apt-get install -y --no-install-recommends git sudo software-properties-common \
+#     cmake build-essential unzip python3.9-dev libnvinfer-dev python-is-python3 libnvparsers-dev libnvinfer-plugin-dev
+
+# RUN git clone https://github.com/jkjung-avt/tensorrt_demos.git /tensorrt_demos
+
+# ENV CUDA_HOME=/usr/local/cuda
+# ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64
+# ENV PATH=$PATH:$CUDA_HOME/bin
+# RUN python3 -m pip install --upgrade pip
+# # ADD install_protobuf.sh /install_protobuf.sh
+# # RUN /install_protobuf.sh
+# RUN pip3 install cython protobuf onnx==1.4.1
+# RUN cd /tensorrt_demos/yolo && ./download_yolo.sh
+# ADD run.sh /run.sh
 
 
 

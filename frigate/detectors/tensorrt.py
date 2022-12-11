@@ -65,7 +65,7 @@ class TensorRtDetector(DetectionApi):
         outputs = []
         bindings = []
         output_idx = 0
-        stream = cuda.Stream()
+        stream = cuda.cuStream()
         for binding in self.engine:
             binding_dims = self.engine.get_binding_shape(binding)
             if len(binding_dims) == 4:

@@ -3,3 +3,7 @@ tensorrt == 8.5.*
 nvidia-cuda-runtime-cu11 == 11.8.*
 nvidia-cublas-cu11 == 11.11.*
 nvidia-cudnn-cu11 == 8.7.*
+pyindex-nvidia
+polygraphy-trtexec
+# tensorflow
+# easydict

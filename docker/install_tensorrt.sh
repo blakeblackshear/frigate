@@ -2,12 +2,13 @@
 
 set -euxo pipefail
 
-"${CUDA_LIB_VERSION:=11.8}"
-"${CUDA_PKG_VERSION:=11-8}"
-"${CUDNN_VERSION:=8.6.0.84}"
-"${TENSORRT_VERSION:=7.2.2}"
+echo "${CUDA_LIB_VERSION:=11.8}"
+echo "${CUDA_PKG_VERSION:=11-8}"
+echo "${CUDNN_VERSION:=8.6.0.84}"
+echo "${TENSORRT_VERSION:=8.5.1}"
 
 # Add NVidia Repo
+apt-get -qq update && apt-get install -y --no-install-recommends software-properties-common
 # wget -q -O - https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/3bf863cc.pub | apt-key add -
 # echo "deb https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/ /" | tee /etc/apt/sources.list.d/nvidia-cuda.list
 wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.0-1_all.deb
@@ -19,8 +20,8 @@ apt-get -qq update
 apt-get install -y --no-install-recommends \
     cuda-cudart-${CUDA_PKG_VERSION} \
     cuda-compat-${CUDA_PKG_VERSION} \
-    cuda-cupti-${CUDA_PKG_VERSION} && \
-    ln -s cuda-${CUDA_LIB_VERSION} /usr/local/cuda
+    cuda-cupti-${CUDA_PKG_VERSION}
+#ln -s cuda-${CUDA_LIB_VERSION} /usr/local/cuda
 
 # CUDA Runtime
 apt-get install -y --no-install-recommends \
@@ -35,4 +36,8 @@ apt-get install -y --no-install-recommends \
 
 # TensorRT Runtime
 apt-get install -y --no-install-recommends \
-    libvinfer
+    tensorrt-libs python3-libnvinfer
+
+# apt-get clean autoclean -y
+# apt-get autoremove --purge -y
+# rm -rf /var/lib/apt/lists/*
