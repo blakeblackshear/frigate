@@ -16,7 +16,7 @@ DETECTOR_KEY = "edgetpu"
 
 class EdgeTpuDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default="usb", title="Device Type")
+    device: str = Field(default=None, title="Device Type")
 
 
 class EdgeTpuTfl(DetectionApi):

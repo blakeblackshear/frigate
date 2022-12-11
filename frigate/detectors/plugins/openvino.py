@@ -15,7 +15,7 @@ DETECTOR_KEY = "openvino"
 
 class OvDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default="AUTO", title="Device Type")
+    device: str = Field(default=None, title="Device Type")
 
 
 class OvDetector(DetectionApi):
