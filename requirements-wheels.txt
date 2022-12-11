@@ -1,6 +1,7 @@
 click == 8.1.*
 Flask == 2.2.*
 imutils == 0.5.*
+m3u8-generator == 1.5
 matplotlib == 3.6.*
 mypy == 0.942
 numpy == 1.22.*
@@ -10,10 +11,10 @@ peewee == 3.15.*
 peewee_migrate == 1.4.*
 psutil == 5.9.*
 pydantic == 1.10.*
-PyYAML == 6.0
 pytz == 2022.6
-tzlocal == 4.2
+PyYAML == 6.0
 types-PyYAML == 6.0.*
+tzlocal == 4.2
 requests == 2.28.*
 types-requests == 2.28.*
 scipy == 1.8.*
