@@ -114,7 +114,7 @@ export default function System() {
               <ActivityIndicator />
             )}
           </div>
-          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2 whitespace-pre-wrap">
             <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
               Copy
             </Button>
