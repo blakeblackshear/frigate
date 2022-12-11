@@ -1,5 +1,4 @@
 import base64
-from datetime import datetime, timedelta, timezone
 import copy
 import glob
 import logging
@@ -10,7 +9,9 @@ import pytz
 import time
 import traceback
 
+from datetime import datetime, timedelta, timezone
 from functools import reduce
+from m3u8_generator import PlaylistGenerator
 from pathlib import Path
 from tzlocal import get_localzone_name
 from urllib.parse import unquote
@@ -976,8 +977,8 @@ def recording_clip(camera_name, start_ts, end_ts):
     return response
 
 
-@bp.route("/vod/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
-@bp.route("/vod/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
+@bp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/master.m3u8")
+@bp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/master.m3u8")
 def vod_ts(camera_name, start_ts, end_ts):
     recordings = (
         Recordings.select()
@@ -990,41 +991,28 @@ def vod_ts(camera_name, start_ts, end_ts):
         .order_by(Recordings.start_time.asc())
     )
 
-    clips = []
-    durations = []
+    playlist_parts = []
 
     recording: Recordings
     for recording in recordings:
-        clip = {"type": "source", "path": recording.path}
-        duration = int(recording.duration * 1000)
+        playlist_parts.append({
+            "name": recording.path,
+            "duration": recording.duration
+        })
 
-        # Determine if we need to end the last clip early
-        if recording.end_time > end_ts:
-            duration -= int((recording.end_time - end_ts) * 1000)
+    playlist = PlaylistGenerator(playlist_parts).generate()
+    logger.error(f"Playlist is {playlist}")
 
-        if duration > 0:
-            clip["keyFrameDurations"] = [duration]
-            clips.append(clip)
-            durations.append(duration)
-        else:
-            logger.warning(f"Recording clip is missing or empty: {recording.path}")
+    response = make_response()
+    #response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "application/vnd.apple.mpegurl"
+    response.data = playlist
 
-    if not clips:
-        logger.error("No recordings found for the requested time range")
-        return "No recordings found.", 404
-
-    hour_ago = datetime.now() - timedelta(hours=1)
-    return jsonify(
-        {
-            "cache": hour_ago.timestamp() > start_ts,
-            "discontinuity": False,
-            "durations": durations,
-            "sequences": [{"clips": clips}],
-        }
-    )
+    return response
 
 
-@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
+@bp.route("/<year_month>/<day>/<hour>/<camera_name>/master.m3u8")
 def vod_hour_no_timezone(year_month, day, hour, camera_name):
     return vod_hour(
         year_month, day, hour, camera_name, get_localzone_name().replace("/", "_")
@@ -1032,7 +1020,7 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
 
 
 # TODO make this nicer when vod module is removed
-@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+@bp.route("/<year_month>/<day>/<hour>/<camera_name>/<tz_name>/master.m3u8")
 def vod_hour(year_month, day, hour, camera_name, tz_name):
     tz_name = tz_name.replace("_", "/")
     parts = year_month.split("-")
@@ -1046,7 +1034,7 @@ def vod_hour(year_month, day, hour, camera_name, tz_name):
     return vod_ts(camera_name, start_ts, end_ts)
 
 
-@bp.route("/vod/event/<id>")
+@bp.route("/event/<id>/master.m3u8")
 def vod_event(id):
     try:
         event: Event = Event.get(Event.id == id)
