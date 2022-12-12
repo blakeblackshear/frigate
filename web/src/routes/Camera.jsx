@@ -171,7 +171,7 @@ export default function Camera({ camera }) {
               className="mb-4 mr-4"
               key={objectType}
               header={objectType}
-              href={`/events?camera=${camera}&label=${encodeURIComponent(objectType)}`}
+              href={`/events?cameras=${camera}&labels=${encodeURIComponent(objectType)}`}
               media={<img src={`${apiHost}/api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
             />
           ))}
