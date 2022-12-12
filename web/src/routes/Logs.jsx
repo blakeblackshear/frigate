@@ -40,12 +40,13 @@ export default function Logs() {
 
       <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} setViewMode={setLogService} />
 
-      <div className='overflow-auto font-mono text-sm text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 whitespace-pre-wrap'>
-        {logs}
-      </div>
       <Button className="" onClick={handleCopyLogs}>
         Copy to Clipboard
       </Button>
+
+      <div className="overflow-auto font-mono text-sm text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2 whitespace-pre-wrap">
+        {logs}
+      </div>
     </div>
   );
 }

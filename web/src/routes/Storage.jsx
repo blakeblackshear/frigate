@@ -97,7 +97,7 @@ export default function Storage() {
                     <Tbody>
                       <Tr>
                         <Td>{Math.round(camera['usage_percent'] ?? 0)}%</Td>
-                        <Td>{camera['bandwidth']} MB/hr</Td>
+                        <Td>{camera['bandwidth'] ? camera['bandwidth'] : "Calculating..."} MB/hr</Td>
                       </Tr>
                     </Tbody>
                   </Table>
