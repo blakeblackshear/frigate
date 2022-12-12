@@ -1077,6 +1077,7 @@ def vod_ts(camera_name, start_ts, end_ts):
             "cache": hour_ago.timestamp() > start_ts,
             "discontinuity": False,
             "durations": durations,
+            "segment_duration": max(durations),
             "sequences": [{"clips": clips}],
         }
     )
