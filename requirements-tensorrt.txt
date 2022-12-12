@@ -1,9 +1,10 @@
-cuda-python == 11.8.*
-tensorrt == 8.5.*
-nvidia-cuda-runtime-cu11 == 11.8.*
-nvidia-cublas-cu11 == 11.11.*
-nvidia-cudnn-cu11 == 8.7.*
-pyindex-nvidia
-polygraphy-trtexec
-# tensorflow
-# easydict
+nvidia-pyindex; platform_machine == 'x86_64'
+nvidia-tensorrt == 8.4.1.5; platform_machine == 'x86_64'
+cuda-python == 11.7; platform_machine == 'x86_64'
+cython == 0.29.*; platform_machine == 'x86_64'
+nvidia-cuda-runtime-cu11 == 11.7.*; platform_machine == 'x86_64'
+nvidia-cublas-cu11 == 11.10.*; platform_machine == 'x86_64'
+nvidia-cudnn-cu11 == 8.4.*; platform_machine == 'x86_64'
+polygraphy
+tensorflow
+easydict

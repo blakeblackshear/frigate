@@ -5,7 +5,7 @@ import logging
 import ctypes
 import numpy as np
 import tensorrt as trt
-import cuda as cuda
+from cuda import cuda as cuda
 
 # import pycuda.driver as cuda
 # from .object_detector import ObjectDetector
@@ -28,9 +28,10 @@ logger = logging.getLogger(__name__)
 class HostDeviceMem(object):
     """Simple helper data class that's a little nicer to use than a 2-tuple."""
 
-    def __init__(self, host_mem, device_mem):
+    def __init__(self, host_mem, device_mem, nbytes):
         self.host = host_mem
         self.device = device_mem
+        self.nbytes = nbytes
 
     def __str__(self):
         return "Host:\n" + str(self.host) + "\nDevice:\n" + str(self.device)
@@ -38,10 +39,29 @@ class HostDeviceMem(object):
     def __repr__(self):
         return self.__str__()
 
+    def __del__(self):
+        cuda.cuMemFreeHost(self.host)
+        cuda.cuMemFree(self.device)
+
 
 class TensorRtDetector(DetectionApi):
     # class LocalObjectDetector(ObjectDetector):
     def _load_engine(self, model_path):
+        try:
+            ctypes.cdll.LoadLibrary(
+                "/usr/local/lib/python3.9/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.11.0"
+            )
+            ctypes.cdll.LoadLibrary(
+                "/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8"
+            )
+            ctypes.cdll.LoadLibrary(
+                "/media/frigate/models/tensorrt_demos/yolo/libyolo_layer.so"
+            )
+        except OSError as e:
+            logger.error(
+                "ERROR: failed to load libraries. %s",
+                e,
+            )
         with open(model_path, "rb") as f, trt.Runtime(self.trt_logger) as runtime:
             return runtime.deserialize_cuda_engine(f.read())
 
@@ -65,7 +85,7 @@ class TensorRtDetector(DetectionApi):
         outputs = []
         bindings = []
         output_idx = 0
-        stream = cuda.cuStream()
+        err, stream = cuda.cuStreamCreate(0)
         for binding in self.engine:
             binding_dims = self.engine.get_binding_shape(binding)
             if len(binding_dims) == 4:
@@ -78,23 +98,28 @@ class TensorRtDetector(DetectionApi):
                 raise ValueError(
                     "bad dims of binding %s: %s" % (binding, str(binding_dims))
                 )
-            dtype = trt.nptype(self.engine.get_binding_dtype(binding))
+            nbytes = (
+                size
+                * np.dtype(trt.nptype(self.engine.get_binding_dtype(binding))).itemsize
+            )
             # Allocate host and device buffers
-            host_mem = cuda.pagelocked_empty(size, dtype)
-            device_mem = cuda.mem_alloc(host_mem.nbytes)
+            err, host_mem = cuda.cuMemAllocHost(nbytes)
+            assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAllocHost returned {err}"
+            err, device_mem = cuda.cuMemAlloc(nbytes)
+            assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAlloc returned {err}"
             # Append the device buffer to device bindings.
             bindings.append(int(device_mem))
             # Append to the appropriate list.
             if self.engine.binding_is_input(binding):
-                inputs.append(HostDeviceMem(host_mem, device_mem))
+                inputs.append(HostDeviceMem(host_mem, device_mem, nbytes))
             else:
                 # each grid has 3 anchors, each anchor generates a detection
                 # output of 7 float32 values
-                assert size % 7 == 0
-                outputs.append(HostDeviceMem(host_mem, device_mem))
+                assert size % 7 == 0, f"output size was {size}"
+                outputs.append(HostDeviceMem(host_mem, device_mem, nbytes))
                 output_idx += 1
-        assert len(inputs) == 1
-        assert len(outputs) == 1
+        assert len(inputs) == 1, f"inputs len was {len(inputs)}"
+        assert len(outputs) == 1, f"output len was {len(outputs)}"
         return inputs, outputs, bindings, stream
 
     def _do_inference(self):
@@ -105,16 +130,16 @@ class TensorRtDetector(DetectionApi):
         """
         # Transfer input data to the GPU.
         [
-            cuda.memcpy_htod_async(inp.device, inp.host, self.stream)
+            cuda.cuMemcpyHtoDAsync(inp.device, inp.host, inp.nbytes, self.stream)
             for inp in self.inputs
         ]
         # Run inference.
         self.context.execute_async_v2(
-            bindings=self.bindings, stream_handle=self.stream.handle
+            bindings=self.bindings, stream_handle=self.stream.getPtr()
         )
         # Transfer predictions back from the GPU.
         [
-            cuda.memcpy_dtoh_async(out.host, out.device, self.stream)
+            cuda.cuMemcpyDtoHAsync(out.host, out.device, out.nbytes, self.stream)
             for out in self.outputs
         ]
         # Synchronize the stream
@@ -150,6 +175,7 @@ class TensorRtDetector(DetectionApi):
         """Free CUDA memories."""
         del self.outputs
         del self.inputs
+        cuda.cuStreamDestroy(self.stream)
         del self.stream
 
     def _postprocess_yolo(self, trt_outputs, img_w, img_h, conf_th, nms_threshold):
@@ -183,10 +209,10 @@ class TensorRtDetector(DetectionApi):
         # 2..5 - a value between 0 and 1 of the box: [top, left, bottom, right]
 
         # transform [height, width, 3] into (3, H, W)
-        tensor_input = tensor_input.transpose((2, 0, 1)).astype(np.float32)
+        # tensor_input = tensor_input.transpose((2, 0, 1)).astype(np.float32)
 
         # normalize
-        tensor_input /= 255.0
+        # tensor_input /= 255.0
 
         self.inputs[0].host = np.ascontiguousarray(tensor_input)
         trt_outputs = self._do_inference()

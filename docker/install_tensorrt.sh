@@ -2,10 +2,10 @@
 
 set -euxo pipefail
 
-echo "${CUDA_LIB_VERSION:=11.8}"
-echo "${CUDA_PKG_VERSION:=11-8}"
+echo "${CUDA_LIB_VERSION:=11.7}"
+echo "${CUDA_PKG_VERSION:=11-7}"
 echo "${CUDNN_VERSION:=8.6.0.84}"
-echo "${TENSORRT_VERSION:=8.5.1}"
+echo "${TENSORRT_VERSION:=8.4.1}"
 
 # Add NVidia Repo
 apt-get -qq update && apt-get install -y --no-install-recommends software-properties-common
