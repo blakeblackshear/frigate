@@ -296,13 +296,38 @@ class RecordingMaintainer(threading.Thread):
         try:
             if not os.path.exists(file_path):
                 start_frame = datetime.datetime.now().timestamp()
-                # copy then delete is required when recordings are stored on some network drives
-                shutil.copyfile(cache_path, file_path)
-                logger.debug(
-                    f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+
+                # add faststart to kept segments to improve metadata reading
+                ffmpeg_cmd = [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    cache_path,
+                    "-c",
+                    "copy",
+                    "-movflags",
+                    "+faststart",
+                    file_path,
+                ]
+
+                p = sp.run(
+                    ffmpeg_cmd,
+                    encoding="ascii",
+                    capture_output=True,
                 )
 
+                if p.returncode != 0:
+                    logger.error(f"Unable to convert {cache_path} to {file_path}")
+                    logger.error(p.stderr)
+                    return
+                else:
+                    logger.debug(
+                        f"Moved {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                    )
+
                 try:
+                    # get the segment size of the cache file
+                    # file without faststart is same size
                     segment_size = round(
                         float(os.path.getsize(cache_path)) / 1000000, 1
                     )
