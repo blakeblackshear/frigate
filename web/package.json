@@ -38,7 +38,7 @@
     "@types/video.js": "^7.3.49",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
-    "@vitest/coverage-c8": "^0.25.3",
+    "@vitest/coverage-c8": "^0.25.7",
     "@vitest/ui": "^0.25.3",
     "autoprefixer": "^10.4.13",
     "eslint": "^8.28.0",
