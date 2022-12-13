@@ -224,26 +224,26 @@ export default function System() {
                     <Tbody>
                       <Tr key="capture" index="0">
                         <Td>Capture</Td>
-                        <Td>{cameras[camera]['capture_pid']}</Td>
-                        <Td>{cameras[camera]['process_fps']}</Td>
-                        <Td>{cpu_usages[cameras[camera]['capture_pid']]['cpu']}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['capture_pid']]['mem']}%</Td>
+                        <Td>{cameras[camera]['capture_pid'] || "- "}</Td>
+                        <Td>{cameras[camera]['process_fps'] || "- "}</Td>
+                        <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || "- "}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || "- "}%</Td>
                       </Tr>
                       <Tr key="detect" index="1">
                         <Td>Detect</Td>
-                        <Td>{cameras[camera]['pid']}</Td>
+                        <Td>{cameras[camera]['pid'] || "- "}</Td>
                         <Td>
                           {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
                         </Td>
-                        <Td>{cpu_usages[cameras[camera]['pid']]['cpu']}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['pid']]['mem']}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || "- "}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || "- "}%</Td>
                       </Tr>
                       <Tr key="ffmpeg" index="2">
                         <Td>ffmpeg</Td>
-                        <Td>{cameras[camera]['ffmpeg_pid']}</Td>
-                        <Td>{cameras[camera]['camera_fps']}</Td>
-                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['cpu']}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]['mem']}%</Td>
+                        <Td>{cameras[camera]['ffmpeg_pid'] || "- "}</Td>
+                        <Td>{cameras[camera]['camera_fps'] || "- "}</Td>
+                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || "- "}%</Td>
+                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || "- "}%</Td>
                       </Tr>
                     </Tbody>
                   </Table>
