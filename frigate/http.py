@@ -1056,12 +1056,7 @@ def vod_ts(camera_name, start_ts, end_ts):
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
-        # Determine if we need to end the last clip early
-        if recording.end_time > end_ts:
-            duration -= int((recording.end_time - end_ts) * 1000)
-
         if duration > 0:
-            clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
         else:
@@ -1076,6 +1071,7 @@ def vod_ts(camera_name, start_ts, end_ts):
         {
             "cache": hour_ago.timestamp() > start_ts,
             "discontinuity": False,
+            "consistentSequenceMediaInfo": True,
             "durations": durations,
             "segment_duration": max(durations),
             "sequences": [{"clips": clips}],

@@ -72,8 +72,8 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
               src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/${timezone.replaceAll(
                 '/',
                 '_'
-              )}/master.m3u8`,
-              type: 'application/vnd.apple.mpegurl',
+              )}/manifest.mpd`,
+              type: 'application/dash+xml',
             },
           ],
         };
