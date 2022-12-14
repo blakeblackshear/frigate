@@ -167,6 +167,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
                     self.on_mqtt_command,
                 )
 
+            if self.config.cameras[name].onvif.host:
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/ptz/#"
+                )
+
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
