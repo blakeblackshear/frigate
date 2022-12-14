@@ -5,7 +5,7 @@ title: Frequently Asked Questions
 
 ### Fatal Python error: Bus error
 
-This error message is due to a shm-size that is too small. Try updating your shm-size according to [this guide](/installation#calculating-required-shm-size).
+This error message is due to a shm-size that is too small. Try updating your shm-size according to [this guide](../frigate/installation#calculating-required-shm-size).
 
 ### I am seeing a solid green image for my camera.
 

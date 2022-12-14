@@ -3,7 +3,7 @@ id: getting_started
 title: Creating a config file
 ---
 
-This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](/installation). You should also configure your cameras according to the [camera setup guide](/guides/camera_setup)
+This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/guides/camera_setup)
 
 ### Step 1: Configure the MQTT server
 
