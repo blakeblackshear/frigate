@@ -19,6 +19,7 @@ class OnvifCommandEnum(str, Enum):
     move_left = "move_left"
     move_right = "move_right"
     move_up = "move_up"
+    preset = "preset"
     stop = "stop"
 
 
@@ -64,7 +65,6 @@ class OnvifController:
         self.cams[camera_name]["init"] = True
 
     def _stop(self, camera_name: str) -> None:
-        logger.error(f"Stop onvif")
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["move_request"]
         onvif.get_service("ptz").Stop(
@@ -77,7 +77,6 @@ class OnvifController:
         self.cams[camera_name]["active"] = False
 
     def _move(self, camera_name: str, command: OnvifCommandEnum) -> None:
-        logger.error(f"Move onvif {command}")
         if self.cams[camera_name]["active"]:
             logger.warning(
                 f"{camera_name} is already performing an action, stopping..."
@@ -109,7 +108,27 @@ class OnvifController:
 
         onvif.get_service("ptz").ContinuousMove(move_request)
 
-    def handle_command(self, camera_name, command: OnvifCommandEnum) -> None:
+    def _move_to_preset(self, camera_name: str, preset: str) -> None:
+        if not preset in self.cams[camera_name]["presets"]:
+            logger.error(f"{preset} is not a valid preset for {camera_name}")
+            return
+
+        self.cams[camera_name]["active"] = True
+        move_request = self.cams[camera_name]["move_request"]
+        onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
+        preset_token = self.cams[camera_name]["presets"][preset]
+        onvif.get_service("ptz").GotoPreset(
+            {
+                "ProfileToken": move_request.ProfileToken,
+                "PresetToken": preset_token,
+            }
+        )
+        self.cams[camera_name]["active"] = False
+
+
+    def handle_command(
+        self, camera_name: str, command: OnvifCommandEnum, param: str
+    ) -> None:
         if camera_name not in self.cams.keys():
             logger.error(f"Onvif is not setup for {camera_name}")
             return
@@ -117,10 +136,12 @@ class OnvifController:
         if not self.cams[camera_name]["init"]:
             self._init_onvif(camera_name)
 
-        if command == OnvifCommandEnum.stop:
-            self._stop(camera_name)
-        elif command == OnvifCommandEnum.init:
+        if command == OnvifCommandEnum.init:
             # already init
             return
+        elif command == OnvifCommandEnum.stop:
+            self._stop(camera_name)
+        elif command == OnvifCommandEnum.preset:
+            self._move_to_preset(camera_name, param)
         else:
             self._move(camera_name, command)

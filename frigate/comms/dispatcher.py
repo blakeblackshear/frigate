@@ -220,8 +220,13 @@ class Dispatcher:
     def _on_ptz_command(self, camera_name: str, payload: str) -> None:
         """Callback for ptz topic."""
         try:
-            command = OnvifCommandEnum[payload.lower()]
-            self.onvif.handle_command(camera_name, command)
+            if "preset" in payload.lower():
+                param = payload.lower().split("-")[1]
+                self.onvif.handle_command(camera_name, OnvifCommandEnum.preset, param)
+            else:
+                command = OnvifCommandEnum[payload.lower()]
+                self.onvif.handle_command(camera_name, command)
+
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
             logger.error(f"Invalid PTZ command {payload}: {k.with_traceback()}")
