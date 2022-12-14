@@ -33,6 +33,9 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
       ...seekOptions,
     });
 
+    // Allows player to continue on error
+    player.reloadSourceOnError();
+
     // Disable fullscreen on iOS if we have children
     if (
       children &&
