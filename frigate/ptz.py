@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class OnvifCommandEnum(str, Enum):
     """Holds all possible move commands"""
 
+    init = "init"
     move_down = "move_down"
     move_left = "move_left"
     move_right = "move_right"
@@ -36,19 +37,30 @@ class OnvifController:
                     ),
                     "init": False,
                     "active": False,
+                    "presets": {},
                 }
 
     def _init_onvif(self, camera_name: str) -> None:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
+
+        # create init services
         media = onvif.create_media_service()
         profile = media.GetProfiles()[0]
         ptz = onvif.create_ptz_service()
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
         ptz_config = ptz.GetConfigurationOptions(request)
+
+        # setup moving request
         move_request = ptz.create_type("ContinuousMove")
         move_request.ProfileToken = profile.token
         self.cams[camera_name]["move_request"] = move_request
+
+        # setup existing presets
+        presets: list[dict] = ptz.GetPresets({"ProfileToken": profile.token})
+        for preset in presets:
+            self.cams[camera_name]["presets"][preset["Name"]] = preset["token"]
+
         self.cams[camera_name]["init"] = True
 
     def _stop(self, camera_name: str) -> None:
@@ -107,5 +119,8 @@ class OnvifController:
 
         if command == OnvifCommandEnum.stop:
             self._stop(camera_name)
+        elif command == OnvifCommandEnum.init:
+            # already init
+            return
         else:
             self._move(camera_name, command)
