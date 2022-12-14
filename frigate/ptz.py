@@ -21,6 +21,8 @@ class OnvifCommandEnum(str, Enum):
     move_up = "move_up"
     preset = "preset"
     stop = "stop"
+    zoom_in = "zoom_in"
+    zoom_out = "zoom_out"
 
 
 class OnvifController:
@@ -98,7 +100,7 @@ class OnvifController:
                     "y": 0.5,
                 }
             }
-        else:
+        elif command == OnvifCommandEnum.move_down:
             move_request.Velocity = {
                 "PanTilt": {
                     "x": 0,
@@ -125,6 +127,23 @@ class OnvifController:
         )
         self.cams[camera_name]["active"] = False
 
+    def _zoom(self, camera_name: str, command: OnvifCommandEnum) -> None:
+        if self.cams[camera_name]["active"]:
+            logger.warning(
+                f"{camera_name} is already performing an action, stopping..."
+            )
+            self._stop(camera_name)
+
+        self.cams[camera_name]["active"] = True
+        onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
+        move_request = self.cams[camera_name]["move_request"]
+
+        if command == OnvifCommandEnum.zoom_in:
+            move_request.Velocity = {"Zoom": {"x": 0.5}}
+        elif command == OnvifCommandEnum.zoom_out:
+            move_request.Velocity = {"PanTilt": {"x": -0.5}}
+
+        onvif.get_service("ptz").ContinuousMove(move_request)
 
     def handle_command(
         self, camera_name: str, command: OnvifCommandEnum, param: str
@@ -143,5 +162,9 @@ class OnvifController:
             self._stop(camera_name)
         elif command == OnvifCommandEnum.preset:
             self._move_to_preset(camera_name, param)
+        elif (
+            command == OnvifCommandEnum.zoom_in or command == OnvifCommandEnum.zoom_out
+        ):
+            self._zoom(camera_name, command)
         else:
             self._move(camera_name, command)
