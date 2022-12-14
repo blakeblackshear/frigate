@@ -70,7 +70,7 @@ class Dispatcher:
                 camera_name = topic.split("/")[-3]
                 command = topic.split("/")[-2]
                 self._camera_settings_handlers[command](camera_name, payload)
-            except Exception as e:
+            except IndexError as e:
                 logger.error(f"Received invalid set command: {topic}")
                 return
         elif topic.endswith("ptz"):
@@ -78,7 +78,7 @@ class Dispatcher:
                 # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
                 camera_name = topic.split("/")[-2]
                 self._on_ptz_command(camera_name, payload)
-            except Exception as e:
+            except IndexError as e:
                 logger.error(f"Received invalid ptz command: {topic}")
                 return
         elif topic == "restart":
@@ -222,5 +222,8 @@ class Dispatcher:
         try:
             command = OnvifCommandEnum[payload.lower()]
             self.onvif.handle_command(camera_name, command)
-        except Exception as e:
-            return
+            logger.info(f"Setting ptz command to {command} for {camera_name}")
+        except KeyError as k:
+            logger.error(f"Invalid PTZ command {payload}: {k.with_traceback()}")
+        #except Exception as e:
+        #    logger.error(f"Error sending {payload} to {camera_name}: {e}")

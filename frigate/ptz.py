@@ -38,6 +38,7 @@ class OnvifController:
                 }
 
     def _init_onvif(self, camera_name: str) -> None:
+        logger.error(f"Init onvif...")
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         media = onvif.create_media_service()
         profile = media.GetProfiles()[0]
@@ -56,6 +57,7 @@ class OnvifController:
         self.cams[camera_name]["move_request"] = move_request
 
     def _stop(self, camera_name: str) -> None:
+        logger.error(f"Stop onvif")
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["move_request"]
         onvif.get_service("ptz").Stop(
@@ -68,6 +70,7 @@ class OnvifController:
         self.cams[camera_name]["active"] = False
 
     def _move(self, camera_name: str, command: OnvifCommandEnum) -> None:
+        logger.error(f"Move onvif {command}")
         if self.cams[camera_name]["active"]:
             logger.warning(
                 f"{camera_name} is already performing an action, stopping..."
@@ -78,13 +81,13 @@ class OnvifController:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["move_request"]
 
-        if command == OnvifCommandEnum.left:
+        if command == OnvifCommandEnum.move_left:
             move_request.Velocity.PanTilt.x = -0.5
             move_request.Velocity.PanTilt.y = 0
-        elif command == OnvifCommandEnum.right:
+        elif command == OnvifCommandEnum.move_right:
             move_request.Velocity.PanTilt.x = 0.5
             move_request.Velocity.PanTilt.y = 0
-        elif command == OnvifCommandEnum.up:
+        elif command == OnvifCommandEnum.move_up:
             move_request.Velocity.PanTilt.x = 0
             move_request.Velocity.PanTilt.y = 1
         else:
