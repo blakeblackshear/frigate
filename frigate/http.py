@@ -1178,6 +1178,11 @@ def ffprobe():
                 {"success": False, "message": f"{camera} is not a valid camera."}, "404"
             )
 
+        if not current_app.frigate_config.cameras[camera].enabled:
+            return jsonify(
+                {"success": False, "message": f"{camera} is not enabled."}, "404"
+            )
+
         paths = map(
             lambda input: input.path,
             current_app.frigate_config.cameras[camera].ffmpeg.inputs,

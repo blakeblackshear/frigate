@@ -883,6 +883,8 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
     clean_path = escape_special_characters(path)
     ffprobe_cmd = [
         "ffprobe",
+        "-timeout",
+        "1000000",
         "-print_format",
         "json",
         "-show_entries",
