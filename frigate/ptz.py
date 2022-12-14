@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class OnvifCommandEnum(str, Enum):
     """Holds all possible move commands"""
+
     move_down = "move_down"
     move_left = "move_left"
     move_right = "move_right"
@@ -38,7 +39,6 @@ class OnvifController:
                 }
 
     def _init_onvif(self, camera_name: str) -> None:
-        logger.error(f"Init onvif...")
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         media = onvif.create_media_service()
         profile = media.GetProfiles()[0]
@@ -48,13 +48,8 @@ class OnvifController:
         ptz_config = ptz.GetConfigurationOptions(request)
         move_request = ptz.create_type("ContinuousMove")
         move_request.ProfileToken = profile.token
-
-        if move_request.Velocity is None:
-            move_request.Velocity = ptz.GetStatus(
-                {"ProfileToken": profile.token}
-            ).Position
-
         self.cams[camera_name]["move_request"] = move_request
+        self.cams[camera_name]["init"] = True
 
     def _stop(self, camera_name: str) -> None:
         logger.error(f"Stop onvif")
@@ -82,17 +77,23 @@ class OnvifController:
         move_request = self.cams[camera_name]["move_request"]
 
         if command == OnvifCommandEnum.move_left:
-            move_request.Velocity.PanTilt.x = -0.5
-            move_request.Velocity.PanTilt.y = 0
+            move_request.Velocity = {"PanTilt": {"x": -0.5, "y": 0}}
         elif command == OnvifCommandEnum.move_right:
-            move_request.Velocity.PanTilt.x = 0.5
-            move_request.Velocity.PanTilt.y = 0
+            move_request.Velocity = {"PanTilt": {"x": 0.5, "y": 0}}
         elif command == OnvifCommandEnum.move_up:
-            move_request.Velocity.PanTilt.x = 0
-            move_request.Velocity.PanTilt.y = 1
+            move_request.Velocity = {
+                "PanTilt": {
+                    "x": 0,
+                    "y": 0.5,
+                }
+            }
         else:
-            move_request.Velocity.PanTilt.x = 0
-            move_request.Velocity.PanTilt.y = -1
+            move_request.Velocity = {
+                "PanTilt": {
+                    "x": 0,
+                    "y": -0.5,
+                }
+            }
 
         onvif.get_service("ptz").ContinuousMove(move_request)
 
