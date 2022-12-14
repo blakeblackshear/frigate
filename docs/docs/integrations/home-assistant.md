@@ -134,7 +134,7 @@ For advanced usecases, this behavior can be changed with the [RTMP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
-variables from [Frigate API](https://blakeblackshear.github.io/frigate/usage/api#apiconfig)
+variables from [Frigate API](api.md)
 available for the template. Note that no Home Assistant state is available to the
 template, only the camera dict from Frigate.
 
@@ -171,7 +171,7 @@ The Frigate integration seamlessly supports the use of multiple Frigate servers.
 In order for multiple Frigate instances to function correctly, the
 `topic_prefix` and `client_id` parameters must be set differently per server.
 See [MQTT
-configuration](https://blakeblackshear.github.io/frigate/configuration/index#mqtt)
+configuration](mqtt.md)
 for how to set these.
 
 #### API URLs

@@ -23,7 +23,7 @@ mqtt:
   password: <password>
 ```
 
-Frigate supports many configuration options for mqtt. See the [configuration reference](/configuration/index#full-configuration-reference) for more info.
+Frigate supports many configuration options for mqtt. See the [configuration reference](../configuration/index.md#full-configuration-reference) for more info.
 
 ### Step 2: Configure detectors
 
@@ -39,7 +39,7 @@ detectors:
     device: usb
 ```
 
-More details on available detectors can be found [here](/configuration/detectors).
+More details on available detectors can be found [here](../configuration/detectors.md).
 
 ### Step 3: Add a minimal camera configuration
 
@@ -81,11 +81,11 @@ At this point you should be able to start Frigate and see the the video feed in 
 
 If you get a green image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections. If you do not have H264 cameras, make sure you have disabled RTMP. It is possible to enable it, but you must tell ffmpeg to re-encode the video with customized output args.
 
-FFmpeg arguments for other types of cameras can be found [here](/configuration/camera_specific).
+FFmpeg arguments for other types of cameras can be found [here](../configuration/camera_specific.md).
 
 ### Step 5: Configure hardware acceleration (optional)
 
-Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](/configuration/hardware_acceleration) config reference for examples applicable to your hardware.
+Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration.md) config reference for examples applicable to your hardware.
 
 In order to best evaluate the performance impact of hardware acceleration, it is recommended to temporarily disable detection.
 
@@ -121,7 +121,7 @@ cameras:
 
 Now that you have optimized your configuration for decoding the video stream, you will want to check to see where to implement motion masks. To do this, navigate to the camera in the UI, select "Debug" at the top, and enable "Motion boxes" in the options below the video feed. Watch for areas that continuously trigger unwanted motion to be detected. Common areas to mask include camera timestamps and trees that frequently blow in the wind. The goal is to avoid wasting object detection cycles looking at these areas.
 
-Now that you know where you need to mask, use the "Mask & Zone creator" in the options pane to generate the coordinates needed for your config file. More information about masks can be found [here](/configuration/masks).
+Now that you know where you need to mask, use the "Mask & Zone creator" in the options pane to generate the coordinates needed for your config file. More information about masks can be found [here](../configuration/masks.md).
 
 :::caution
 
@@ -184,7 +184,7 @@ cameras:
 
 If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 
-By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](/configuration/index#full-configuration-reference).
+By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/index.md#full-configuration-reference).
 
 ### Step 8: Enable snapshots (optional)
 
@@ -204,4 +204,4 @@ cameras:
     motion: ...
 ```
 
-By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](/configuration/index#full-configuration-reference).
+By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/index.md#full-configuration-reference).
