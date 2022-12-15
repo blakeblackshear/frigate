@@ -62,9 +62,6 @@ This Apache2 configuration snippet then results in unencrypted requests being re
     RewriteCond %{SERVER_NAME} =cctv.mydomain.co.uk
     RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
-```
-### Step 3: Authenticate users at the proxy
-There are many ways to authenticate a website but a simple straightforward approach is to use [Apache2 password files](https://httpd.apache.org/docs/2.4/howto/auth.html).
 ```xml
 <VirtualHost *:443>
     <Location />
