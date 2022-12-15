@@ -2,6 +2,7 @@
 id: reverse_proxy
 title: Setting up a Reverse Proxy
 ---
+
 This guide outlines the basic configuration steps needed to expose your Frigate UI to the internet.
 A common way of accomplishing this is to use a reverse proxy webserver between your router and your Frigate instance.
 A reverse proxy accepts HTTP requests from the public internet and redirects them transparently to internal webserver(s) on your network.
