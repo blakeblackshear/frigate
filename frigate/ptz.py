@@ -65,7 +65,15 @@ class OnvifController:
 
         # get list of supported features
         ptz_config = ptz.GetConfigurationOptions(request)
-        logger.error(f"ptz config is {ptz_config}")
+        supported_features = []
+
+        if ptz_config.get("Spaces", {}).get("ContinuousPanTiltVelocitySpace"):
+            supported_features.append("pt")
+
+        if ptz_config.get("Spaces", {}).get("ContinuousZoomVelocitySpace"):
+            supported_features.append("zoom")
+
+        self.cams[camera_name]["features"] = supported_features
 
         self.cams[camera_name]["init"] = True
 
@@ -171,3 +179,17 @@ class OnvifController:
             self._zoom(camera_name, command)
         else:
             self._move(camera_name, command)
+
+    def get_camera_info(self, camera_name: str) -> dict[str, any]:
+        if camera_name not in self.cams.keys():
+            logger.error(f"Onvif is not setup for {camera_name}")
+            return {}
+
+        if not self.cams[camera_name]["init"]:
+            self._init_onvif(camera_name)
+
+        return {
+            "name": camera_name,
+            "features": self.cams[camera_name]["feautres"],
+            "presets": self.cams[camera_name]["presets"].keys(),
+        }

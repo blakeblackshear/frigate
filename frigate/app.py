@@ -174,6 +174,7 @@ class FrigateApp:
             self.stats_tracking,
             self.detected_frames_processor,
             self.storage_maintainer,
+            self.onvif_controller,
             self.plus_api,
         )
 
