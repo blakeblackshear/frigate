@@ -7,7 +7,7 @@ A common way of accomplishing this is to use a reverse proxy webserver between y
 A reverse proxy accepts HTTP requests from the public internet and redirects them transparently to internal webserver(s) on your network.
 
 The suggested steps are:
-- **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/)) and only expose ports 80/443 from this webserver to the internet
+- **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/) or [NPM](https://github.com/NginxProxyManager/nginx-proxy-manager)) and only expose ports 80/443 from this webserver to the internet
 - **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
 
