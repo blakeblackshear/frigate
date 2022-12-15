@@ -51,9 +51,6 @@ Here we access Frigate via https://cctv.mydomain.co.uk
     RewriteCond %{HTTP:Upgrade} !=websocket [NC]
     RewriteRule /(.*)  http://frigatepi.local:5000/$1 [P,L]
 </VirtualHost>
-```
-### Step 2: Use SSL to encrypt access to your Frigate instance
-Whilst this won't, on its own, stop access to your Frigate webserver it will encrypt all content (such as login credentials).
 Installing SSL is beyond the scope of this document but [Let's Encrypt](https://letsencrypt.org/) is a widely used approach.
 
 This Apache2 configuration snippet then results in unencrypted requests being redirected to webserver SSL port
