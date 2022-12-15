@@ -28,10 +28,12 @@ logger = logging.getLogger(__name__)
 class HostDeviceMem(object):
     """Simple helper data class that's a little nicer to use than a 2-tuple."""
 
-    def __init__(self, host_mem, device_mem, nbytes):
+    def __init__(self, host_mem, device_mem, nbytes, size):
         self.host = host_mem
+        err, self.host_dev = cuda.cuMemHostGetDevicePointer(self.host, 0)
         self.device = device_mem
         self.nbytes = nbytes
+        self.size = size
 
     def __str__(self):
         return "Host:\n" + str(self.host) + "\nDevice:\n" + str(self.device)
@@ -103,7 +105,9 @@ class TensorRtDetector(DetectionApi):
                 * np.dtype(trt.nptype(self.engine.get_binding_dtype(binding))).itemsize
             )
             # Allocate host and device buffers
-            err, host_mem = cuda.cuMemAllocHost(nbytes)
+            err, host_mem = cuda.cuMemHostAlloc(
+                nbytes, Flags=cuda.CU_MEMHOSTALLOC_DEVICEMAP
+            )
             assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAllocHost returned {err}"
             err, device_mem = cuda.cuMemAlloc(nbytes)
             assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAlloc returned {err}"
@@ -111,12 +115,12 @@ class TensorRtDetector(DetectionApi):
             bindings.append(int(device_mem))
             # Append to the appropriate list.
             if self.engine.binding_is_input(binding):
-                inputs.append(HostDeviceMem(host_mem, device_mem, nbytes))
+                inputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
             else:
                 # each grid has 3 anchors, each anchor generates a detection
                 # output of 7 float32 values
                 assert size % 7 == 0, f"output size was {size}"
-                outputs.append(HostDeviceMem(host_mem, device_mem, nbytes))
+                outputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
                 output_idx += 1
         assert len(inputs) == 1, f"inputs len was {len(inputs)}"
         assert len(outputs) == 1, f"output len was {len(outputs)}"
@@ -143,9 +147,9 @@ class TensorRtDetector(DetectionApi):
             for out in self.outputs
         ]
         # Synchronize the stream
-        self.stream.synchronize()
+        cuda.cuStreamSynchronize(self.stream)
         # Return only the host outputs.
-        return [out.host for out in self.outputs]
+        return [np.array([int(out.host_dev)], dtype=np.float32) for out in self.outputs]
 
     def __init__(self, det_device=None, model_config=None, num_threads=1):
         # def __init__(self, detector_config: DetectorConfig, model_path: str):
