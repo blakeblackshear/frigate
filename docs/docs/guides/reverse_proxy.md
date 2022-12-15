@@ -15,7 +15,7 @@ The suggested steps are:
 A reverse proxy can be used to secure access to an internal webserver but the user will be entirely reliant
 on the steps they have taken. You must ensure you are following security best practices.
 This page does not attempt to outline the specific steps needed to secure your internal website.
-Please use your own knowledge to assess and vet them before you install anything on your system.
+Please use your own knowledge to assess and vet the reverse proxy software before you install anything on your system.
 :::
 
 There are several technologies available to implement reverse proxies. This document currently suggests one, using Apache2,
