@@ -3,6 +3,10 @@ import { useState } from 'preact/hooks';
 import useSWR from 'swr';
 import { usePtzCommand } from '../api/ws';
 import ActivityIndicator from './ActivityIndicator';
+import ArrowRightDouble from '../icons/ArrowRightDouble';
+import ArrowUpDouble from '../icons/ArrowUpDouble';
+import ArrowDownDouble from '../icons/ArrowDownDouble';
+import ArrowLeftDouble from '../icons/ArrowLeftDouble';
 import Button from './Button';
 
 export default function CameraControlPanel({ camera = '' }) {
@@ -27,8 +31,24 @@ export default function CameraControlPanel({ camera = '' }) {
   }
 
   return (
-    <div data-testid="control-panel" className="grid grid-cols-1 3xl:grid-cols-4 md:grid-cols-3 gap-4">
-      ptz is enabled with features {ptz.features[0]}
+    <div data-testid="control-panel" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {ptz.features.includes('pt') && (
+        <div className="w-44 p-4">
+          <div className="w-full flex justify-center">
+            <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
+          </div>
+          <div className="w-full flex justify-between">
+            <ArrowLeftDouble className="h-12 p-2 bg-slate-500" />
+            <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
+          </div>
+          <div className="flex justify-center">
+            <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
+          </div>
+        </div>
+      )}
+
+      {ptz.features.includes('zoom') && <div>zoom</div>}
+
       {ptz.presets && (
         <div>
           <div className="p-4">
