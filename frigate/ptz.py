@@ -1,6 +1,7 @@
 """Configure and control camera via onvif."""
 
 import logging
+import site
 
 from enum import Enum
 from onvif import ONVIFCamera
@@ -37,6 +38,7 @@ class OnvifController:
                         cam.onvif.port,
                         cam.onvif.user,
                         cam.onvif.password,
+                        wsdl_dir=site.getsitepackages()[0].replace('dist-packages', 'site-packages') + '/wsdl'
                     ),
                     "init": False,
                     "active": False,
