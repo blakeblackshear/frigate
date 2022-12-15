@@ -561,8 +561,8 @@ export default function Events({ path, ...props }) {
                                 autoplay: true,
                                 sources: [
                                   {
-                                    src: `${apiHost}/vod/event/${event.id}/manifest.mpd`,
-                                    type: 'application/dash+xml',
+                                    src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                                    type: 'application/vnd.apple.mpegurl',
                                   },
                                 ],
                               }}

@@ -5,7 +5,6 @@ import multiprocessing as mp
 import os
 import queue
 import random
-import shutil
 import string
 import subprocess as sp
 import threading
@@ -16,7 +15,7 @@ import psutil
 from peewee import JOIN, DoesNotExist
 
 from frigate.config import RetainModeEnum, FrigateConfig
-from frigate.const import CACHE_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.util import area
 
@@ -173,7 +172,7 @@ class RecordingMaintainer(threading.Thread):
                         duration = -1
 
                     # ensure duration is within expected length
-                    if 0 < duration < 600:
+                    if 0 < duration < MAX_SEGMENT_DURATION:
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
                     else:

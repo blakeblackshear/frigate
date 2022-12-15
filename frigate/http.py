@@ -32,7 +32,7 @@ from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, RECORD_DIR
+from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
@@ -1050,13 +1050,19 @@ def vod_ts(camera_name, start_ts, end_ts):
 
     clips = []
     durations = []
+    max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
     for recording in recordings:
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
-        if duration > 0:
+        # Determine if we need to end the last clip early
+        if recording.end_time > end_ts:
+            duration -= int((recording.end_time - end_ts) * 1000)
+
+        if 0 < duration < max_duration_ms:
+            clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
         else:
