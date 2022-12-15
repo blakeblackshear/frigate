@@ -11,9 +11,13 @@ from cuda import cuda as cuda
 # from .object_detector import ObjectDetector
 # import pycuda.autoinit  # This is needed for initializing CUDA driver
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
+DETECTOR_KEY = "tensorrt"
 
 # def object_detector_factory(detector_config: DetectorConfig, model_path: str):
 #     if detector_config.type != DetectorTypeEnum.tensorrt:
@@ -23,6 +27,11 @@ logger = logging.getLogger(__name__)
 #     except OSError as e:
 #         logger.error("ERROR: failed to load /yolo4/libyolo_layer.so. %s", e)
 #     return LocalObjectDetector(detector_config, model_path)
+
+
+class TensorRTDetectorConfig(BaseDetectorConfig):
+    type: Literal[DETECTOR_KEY]
+    device: str = Field(default=None, title="Device Type")
 
 
 class HostDeviceMem(object):
@@ -47,6 +56,7 @@ class HostDeviceMem(object):
 
 
 class TensorRtDetector(DetectionApi):
+    type_key = DETECTOR_KEY
     # class LocalObjectDetector(ObjectDetector):
     def _load_engine(self, model_path):
         try:
@@ -151,13 +161,13 @@ class TensorRtDetector(DetectionApi):
         # Return only the host outputs.
         return [np.array([int(out.host_dev)], dtype=np.float32) for out in self.outputs]
 
-    def __init__(self, det_device=None, model_config=None, num_threads=1):
+    def __init__(self, detector_config: TensorRTDetectorConfig):
         # def __init__(self, detector_config: DetectorConfig, model_path: str):
         # self.fps = EventsPerSecond()
         self.conf_th = 0.4  ##TODO: model config parameter
         self.nms_threshold = 0.4
         self.trt_logger = trt.Logger(trt.Logger.INFO)
-        self.engine = self._load_engine(model_config.path)
+        self.engine = self._load_engine(detector_config.model.path)
         self.input_shape = self._get_input_shape()
 
         try:
