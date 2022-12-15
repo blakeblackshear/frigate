@@ -26,7 +26,9 @@ and the community is invited to document others through a contribution to this p
 
 In the configuration examples below, only the directives relevant to the reverse proxy approach above are included.
 On Debian Apache2 the configuration file will be named along the lines of `/etc/apache2/sites-available/cctv.conf`
+
 ### Step 1: Configure the Apache2 Reverse Proxy
+
 Make life easier for yourself by presenting your Frigate interface as a DNS sub-domain rather than as a sub-folder of your main domain.
 Here we access Frigate via https://cctv.mydomain.co.uk
 ```xml
