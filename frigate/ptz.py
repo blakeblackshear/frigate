@@ -61,7 +61,7 @@ class OnvifController:
         # setup existing presets
         presets: list[dict] = ptz.GetPresets({"ProfileToken": profile.token})
         for preset in presets:
-            self.cams[camera_name]["presets"][preset["Name"]] = preset["token"]
+            self.cams[camera_name]["presets"][preset["Name"].lower()] = preset["token"]
 
         # get list of supported features
         ptz_config = ptz.GetConfigurationOptions(request)

@@ -42,7 +42,7 @@ export default function CameraControlPanel({ camera = '' }) {
               <option value="">Select Preset</option>
               {ptz.presets.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {item.charAt(0).toUpperCase() + item.slice(1)}
                 </option>
               ))}
             </select>
