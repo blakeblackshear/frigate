@@ -221,14 +221,13 @@ class Dispatcher:
         """Callback for ptz topic."""
         try:
             if "preset" in payload.lower():
+                command = OnvifCommandEnum.preset
                 param = payload.lower().split("-")[1]
-                self.onvif.handle_command(camera_name, OnvifCommandEnum.preset, param)
             else:
                 command = OnvifCommandEnum[payload.lower()]
-                self.onvif.handle_command(camera_name, command)
+                param = ""
 
+            self.onvif.handle_command(camera_name, command, param)
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
             logger.error(f"Invalid PTZ command {payload}: {k}")
-        # except Exception as e:
-        #    logger.error(f"Error sending {payload} to {camera_name}: {e}")
