@@ -26,6 +26,17 @@ export default function CameraControlPanel({ camera = '' }) {
     setCurrentPreset('');
   };
 
+  const onSetMove = async (e, dir) => {
+    e.stopPropagation();
+    sendPtz(`MOVE_${dir}`);
+    setCurrentPreset('');
+  };
+
+  const onSetStop = async (e) => {
+    e.stopPropagation();
+    sendPtz('STOP');
+  };
+
   if (!ptz) {
     return <ActivityIndicator />;
   }
@@ -35,14 +46,22 @@ export default function CameraControlPanel({ camera = '' }) {
       {ptz.features.includes('pt') && (
         <div className="w-44 p-4">
           <div className="w-full flex justify-center">
-            <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
+            <button onMouseDown={(e) => onSetMove(e, 'UP')} onMouseUp={(e) => onSetStop(e)}>
+              <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
+            </button>
           </div>
           <div className="w-full flex justify-between">
-            <ArrowLeftDouble className="h-12 p-2 bg-slate-500" />
-            <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
+            <button onMouseDown={(e) => onSetMove(e, 'LEFT')} onMouseUp={(e) => onSetStop(e)}>
+              <ArrowLeftDouble className="btn h-12 p-2 bg-slate-500" />
+            </button>
+            <button onMouseDown={(e) => onSetMove(e, 'RIGHT')} onMouseUp={(e) => onSetStop(e)}>
+              <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
+            </button>
           </div>
           <div className="flex justify-center">
-            <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
+            <button onMouseDown={(e) => onSetMove(e, 'DOWN')} onMouseUp={(e) => onSetStop(e)}>
+              <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
+            </button>
           </div>
         </div>
       )}
