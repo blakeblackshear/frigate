@@ -186,10 +186,16 @@ class FrigateApp:
             self.detection_out_events[name] = mp.Event()
 
             try:
+                largest_frame = max(
+                    [
+                        det.model.height * det.model.width * 3
+                        for (name, det) in self.config.detectors.items()
+                    ]
+                )
                 shm_in = mp.shared_memory.SharedMemory(
                     name=name,
                     create=True,
-                    size=self.config.model.height * self.config.model.width * 3,
+                    size=largest_frame,
                 )
             except FileExistsError:
                 shm_in = mp.shared_memory.SharedMemory(name=name)
@@ -204,15 +210,12 @@ class FrigateApp:
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
-        for name, detector in self.config.detectors.items():
+        for name, detector_config in self.config.detectors.items():
             self.detectors[name] = ObjectDetectProcess(
                 name,
                 self.detection_queue,
                 self.detection_out_events,
-                self.config.model,
-                detector.type,
-                detector.device,
-                detector.num_threads,
+                detector_config,
             )
 
     def start_detected_frames_processor(self) -> None:

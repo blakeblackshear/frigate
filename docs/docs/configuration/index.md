@@ -74,15 +74,13 @@ mqtt:
 # Optional: Detectors configuration. Defaults to a single CPU detector
 detectors:
   # Required: name of the detector
-  coral:
+  detector_name:
     # Required: type of the detector
-    # Valid values are 'edgetpu' (requires device property below)  `openvino` (see Detectors documentation), and 'cpu'.
-    type: edgetpu
-    # Optional: Edgetpu or OpenVino device name
-    device: usb
-    # Optional: num_threads value passed to the tflite.Interpreter (default: shown below)
-    # This value is only used for CPU types
-    num_threads: 3
+    # Frigate provided types include 'cpu', 'edgetpu', and 'openvino' (default: shown below)
+    # Additional detector types can also be plugged in.
+    # Detectors may require additional configuration.
+    # Refer to the Detectors configuration page for more information.
+    type: cpu
 
 # Optional: Database configuration
 database:

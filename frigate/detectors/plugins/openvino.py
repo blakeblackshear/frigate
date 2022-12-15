@@ -3,18 +3,30 @@ import numpy as np
 import openvino.runtime as ov
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Extra, Field
 
 
 logger = logging.getLogger(__name__)
 
+DETECTOR_KEY = "openvino"
+
+
+class OvDetectorConfig(BaseDetectorConfig):
+    type: Literal[DETECTOR_KEY]
+    device: str = Field(default=None, title="Device Type")
+
 
 class OvDetector(DetectionApi):
-    def __init__(self, det_device=None, model_config=None, num_threads=1):
+    type_key = DETECTOR_KEY
+
+    def __init__(self, detector_config: OvDetectorConfig):
         self.ov_core = ov.Core()
-        self.ov_model = self.ov_core.read_model(model_config.path)
+        self.ov_model = self.ov_core.read_model(detector_config.model.path)
 
         self.interpreter = self.ov_core.compile_model(
-            model=self.ov_model, device_name=det_device
+            model=self.ov_model, device_name=detector_config.device
         )
         logger.info(f"Model Input Shape: {self.interpreter.input(0).shape}")
         self.output_indexes = 0

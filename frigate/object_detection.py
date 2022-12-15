@@ -10,10 +10,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import DetectorTypeEnum, InputTensorEnum
-from frigate.detectors.edgetpu_tfl import EdgeTpuTfl
-from frigate.detectors.openvino import OvDetector
-from frigate.detectors.cpu_tfl import CpuTfl
+from frigate.config import InputTensorEnum
+from frigate.detectors import create_detector
 
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
@@ -37,10 +35,7 @@ def tensor_transform(desired_shape):
 class LocalObjectDetector(ObjectDetector):
     def __init__(
         self,
-        det_type=DetectorTypeEnum.cpu,
-        det_device=None,
-        model_config=None,
-        num_threads=3,
+        detector_config=None,
         labels=None,
     ):
         self.fps = EventsPerSecond()
@@ -49,24 +44,12 @@ class LocalObjectDetector(ObjectDetector):
         else:
             self.labels = load_labels(labels)
 
-        if model_config:
-            self.input_transform = tensor_transform(model_config.input_tensor)
+        if detector_config:
+            self.input_transform = tensor_transform(detector_config.model.input_tensor)
         else:
             self.input_transform = None
 
-        if det_type == DetectorTypeEnum.edgetpu:
-            self.detect_api = EdgeTpuTfl(
-                det_device=det_device, model_config=model_config
-            )
-        elif det_type == DetectorTypeEnum.openvino:
-            self.detect_api = OvDetector(
-                det_device=det_device, model_config=model_config
-            )
-        else:
-            logger.warning(
-                "CPU detectors are not recommended and should only be used for testing or for trial purposes."
-            )
-            self.detect_api = CpuTfl(model_config=model_config, num_threads=num_threads)
+        self.detect_api = create_detector(detector_config)
 
     def detect(self, tensor_input, threshold=0.4):
         detections = []
@@ -94,10 +77,7 @@ def run_detector(
     out_events: dict[str, mp.Event],
     avg_speed,
     start,
-    model_config,
-    det_type,
-    det_device,
-    num_threads,
+    detector_config,
 ):
     threading.current_thread().name = f"detector:{name}"
     logger = logging.getLogger(f"detector.{name}")
@@ -114,12 +94,7 @@ def run_detector(
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    object_detector = LocalObjectDetector(
-        det_type=det_type,
-        det_device=det_device,
-        model_config=model_config,
-        num_threads=num_threads,
-    )
+    object_detector = LocalObjectDetector(detector_config=detector_config)
 
     outputs = {}
     for name in out_events.keys():
@@ -133,7 +108,8 @@ def run_detector(
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
-            connection_id, (1, model_config.height, model_config.width, 3)
+            connection_id,
+            (1, detector_config.model.height, detector_config.model.width, 3),
         )
 
         if input_frame is None:
@@ -156,10 +132,7 @@ class ObjectDetectProcess:
         name,
         detection_queue,
         out_events,
-        model_config,
-        det_type=None,
-        det_device=None,
-        num_threads=3,
+        detector_config,
     ):
         self.name = name
         self.out_events = out_events
@@ -167,10 +140,7 @@ class ObjectDetectProcess:
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
         self.detect_process = None
-        self.model_config = model_config
-        self.det_type = det_type
-        self.det_device = det_device
-        self.num_threads = num_threads
+        self.detector_config = detector_config
         self.start_or_restart()
 
     def stop(self):
@@ -195,10 +165,7 @@ class ObjectDetectProcess:
                 self.out_events,
                 self.avg_inference_speed,
                 self.detection_start,
-                self.model_config,
-                self.det_type,
-                self.det_device,
-                self.num_threads,
+                self.detector_config,
             ),
         )
         self.detect_process.daemon = True

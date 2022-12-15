@@ -2,17 +2,30 @@ import logging
 import numpy as np
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detector_config import BaseDetectorConfig
+from typing import Literal
+from pydantic import Extra, Field
 import tflite_runtime.interpreter as tflite
 from tflite_runtime.interpreter import load_delegate
 
+
 logger = logging.getLogger(__name__)
+
+DETECTOR_KEY = "edgetpu"
+
+
+class EdgeTpuDetectorConfig(BaseDetectorConfig):
+    type: Literal[DETECTOR_KEY]
+    device: str = Field(default=None, title="Device Type")
 
 
 class EdgeTpuTfl(DetectionApi):
-    def __init__(self, det_device=None, model_config=None):
+    type_key = DETECTOR_KEY
+
+    def __init__(self, detector_config: EdgeTpuDetectorConfig):
         device_config = {"device": "usb"}
-        if not det_device is None:
-            device_config = {"device": det_device}
+        if detector_config.device is not None:
+            device_config = {"device": detector_config.device}
 
         edge_tpu_delegate = None
 
@@ -21,7 +34,7 @@ class EdgeTpuTfl(DetectionApi):
             edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
             logger.info("TPU found")
             self.interpreter = tflite.Interpreter(
-                model_path=model_config.path or "/edgetpu_model.tflite",
+                model_path=detector_config.model.path or "/edgetpu_model.tflite",
                 experimental_delegates=[edge_tpu_delegate],
             )
         except ValueError:
