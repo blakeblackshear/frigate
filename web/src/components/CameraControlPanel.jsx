@@ -27,7 +27,7 @@ export default function CameraControlPanel({ camera = '' }) {
   }
 
   return (
-    <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-4 md:grid-cols-3 gap-4">
+    <div data-testid="control-panel" className="grid grid-cols-1 3xl:grid-cols-4 md:grid-cols-3 gap-4">
       ptz is enabled with features {ptz.features[0]}
       {ptz.presets && (
         <div>

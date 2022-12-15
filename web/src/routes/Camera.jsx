@@ -191,6 +191,7 @@ export default function Camera({ camera }) {
 
       {cameraConfig?.onvif?.host && (
         <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4">
+          <Heading size="sm">Control Panel</Heading>
           <CameraControlPanel camera={camera} />
         </div>
       )}
