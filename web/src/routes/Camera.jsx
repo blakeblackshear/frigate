@@ -15,6 +15,7 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import MsePlayer from '../components/MsePlayer';
+import CameraControlPanel from '../components/CameraControlPanel';
 
 const emptyObject = Object.freeze({});
 
@@ -187,6 +188,12 @@ export default function Camera({ camera }) {
       <ButtonsTabbed viewModes={['live', 'debug']} currentViewMode={viewMode} setViewMode={setViewMode} />
 
       {player}
+
+      {cameraConfig?.onvif?.host && (
+        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4">
+          <CameraControlPanel camera={camera} />
+        </div>
+      )}
 
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
