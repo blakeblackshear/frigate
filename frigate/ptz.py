@@ -67,10 +67,10 @@ class OnvifController:
         ptz_config = ptz.GetConfigurationOptions(request)
         supported_features = []
 
-        if ptz_config.get("Spaces", {}).get("ContinuousPanTiltVelocitySpace"):
+        if ptz_config.Spaces and ptz_config.Spaces.ContinuousPanTiltVelocitySpace:
             supported_features.append("pt")
 
-        if ptz_config.get("Spaces", {}).get("ContinuousZoomVelocitySpace"):
+        if ptz_config.Spaces and ptz_config.Spaces.ContinuousZoomVelocitySpace:
             supported_features.append("zoom")
 
         self.cams[camera_name]["features"] = supported_features
@@ -190,6 +190,6 @@ class OnvifController:
 
         return {
             "name": camera_name,
-            "features": self.cams[camera_name]["feautres"],
-            "presets": self.cams[camera_name]["presets"].keys(),
+            "features": self.cams[camera_name]["features"],
+            "presets": list(self.cams[camera_name]["presets"].keys()),
         }
