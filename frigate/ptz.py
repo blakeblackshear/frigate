@@ -52,7 +52,6 @@ class OnvifController:
         ptz = onvif.create_ptz_service()
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
-        ptz_config = ptz.GetConfigurationOptions(request)
 
         # setup moving request
         move_request = ptz.create_type("ContinuousMove")
@@ -63,6 +62,10 @@ class OnvifController:
         presets: list[dict] = ptz.GetPresets({"ProfileToken": profile.token})
         for preset in presets:
             self.cams[camera_name]["presets"][preset["Name"]] = preset["token"]
+
+        # get list of supported features
+        ptz_config = ptz.GetConfigurationOptions(request)
+        logger.error(f"ptz config is {ptz_config}")
 
         self.cams[camera_name]["init"] = True
 
@@ -146,7 +149,7 @@ class OnvifController:
         onvif.get_service("ptz").ContinuousMove(move_request)
 
     def handle_command(
-        self, camera_name: str, command: OnvifCommandEnum, param: str
+        self, camera_name: str, command: OnvifCommandEnum, param: str = ""
     ) -> None:
         if camera_name not in self.cams.keys():
             logger.error(f"Onvif is not setup for {camera_name}")

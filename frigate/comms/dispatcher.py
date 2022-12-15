@@ -229,6 +229,6 @@ class Dispatcher:
 
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
-            logger.error(f"Invalid PTZ command {payload}: {k.with_traceback()}")
+            logger.error(f"Invalid PTZ command {payload}: {k}")
         #except Exception as e:
         #    logger.error(f"Error sending {payload} to {camera_name}: {e}")
