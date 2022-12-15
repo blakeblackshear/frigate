@@ -21,6 +21,7 @@ Please use your own knowledge to assess and vet the reverse proxy software befor
 
 There are several technologies available to implement reverse proxies. This document currently suggests one, using Apache2,
 and the community is invited to document others through a contribution to this page.
+
 ## Apache2 Reverse Proxy
 
 In the configuration examples below, only the directives relevant to the reverse proxy approach above are included.
