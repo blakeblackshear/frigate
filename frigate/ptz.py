@@ -152,7 +152,7 @@ class OnvifController:
         if command == OnvifCommandEnum.zoom_in:
             move_request.Velocity = {"Zoom": {"x": 0.5}}
         elif command == OnvifCommandEnum.zoom_out:
-            move_request.Velocity = {"PanTilt": {"x": -0.5}}
+            move_request.Velocity = {"Zoom": {"x": -0.5}}
 
         onvif.get_service("ptz").ContinuousMove(move_request)
 

@@ -8,6 +8,7 @@ import ArrowUpDouble from '../icons/ArrowUpDouble';
 import ArrowDownDouble from '../icons/ArrowDownDouble';
 import ArrowLeftDouble from '../icons/ArrowLeftDouble';
 import Button from './Button';
+import Heading from './Heading';
 
 export default function CameraControlPanel({ camera = '' }) {
   const { data: ptz } = useSWR(`${camera}/ptz/info`);
@@ -32,6 +33,12 @@ export default function CameraControlPanel({ camera = '' }) {
     setCurrentPreset('');
   };
 
+  const onSetZoom = async (e, dir) => {
+    e.stopPropagation();
+    sendPtz(`ZOOM_${dir}`);
+    setCurrentPreset('');
+  };
+
   const onSetStop = async (e) => {
     e.stopPropagation();
     sendPtz('STOP');
@@ -44,7 +51,10 @@ export default function CameraControlPanel({ camera = '' }) {
   return (
     <div data-testid="control-panel" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {ptz.features.includes('pt') && (
-        <div className="w-44 p-4">
+        <div className="w-44 px-4">
+          <Heading size="xs" className="my-4">
+            Pan / Tilt
+          </Heading>
           <div className="w-full flex justify-center">
             <button onMouseDown={(e) => onSetMove(e, 'UP')} onMouseUp={(e) => onSetStop(e)}>
               <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
@@ -66,11 +76,31 @@ export default function CameraControlPanel({ camera = '' }) {
         </div>
       )}
 
-      {ptz.features.includes('zoom') && <div>zoom</div>}
+      {ptz.features.includes('zoom') && (
+        <div className="w-44 px-4">
+          <Heading size="xs" className="my-4">
+            Zoom
+          </Heading>
+          <div className="w-full flex justify-center">
+            <button onMouseDown={(e) => onSetZoom(e, 'IN')} onMouseUp={(e) => onSetStop(e)}>
+              <div className="h-12 w-12 p-2 text-2xl bg-slate-500">+</div>
+            </button>
+          </div>
+          <div className="h-12" />
+          <div className="flex justify-center">
+            <button onMouseDown={(e) => onSetZoom(e, 'OUT')} onMouseUp={(e) => onSetStop(e)}>
+              <div className="h-12 w-12 p-2 text-2xl bg-slate-500">-</div>
+            </button>
+          </div>
+        </div>
+      )}
 
       {ptz.presets && (
-        <div>
-          <div className="p-4">
+        <div className="px-4">
+          <Heading size="xs" className="my-4">
+            Presets
+          </Heading>
+          <div className="py-4">
             <select
               className="cursor-pointer rounded dark:bg-slate-800"
               value={currentPreset}
