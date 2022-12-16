@@ -4,7 +4,7 @@ import logging
 import site
 
 from enum import Enum
-from onvif import ONVIFCamera
+from onvif import ONVIFCamera, ONVIFError
 
 from frigate.config import FrigateConfig
 
@@ -38,7 +38,7 @@ class OnvifController:
                         cam.onvif.port,
                         cam.onvif.user,
                         cam.onvif.password,
-                        wsdl_dir=site.getsitepackages()[0].replace('dist-packages', 'site-packages') + '/wsdl'
+                        #wsdl_dir=site.getsitepackages()[0].replace('dist-packages', 'site-packages') + '/wsdl'
                     ),
                     "init": False,
                     "active": False,
@@ -50,7 +50,12 @@ class OnvifController:
 
         # create init services
         media = onvif.create_media_service()
-        profile = media.GetProfiles()[0]
+
+        try:
+            profile = media.GetProfiles()[0]
+        except ONVIFError as e:
+            logger.error(f"Unable to connect to camera: {camera_name}: {e}")
+            
         ptz = onvif.create_ptz_service()
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
