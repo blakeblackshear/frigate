@@ -51,17 +51,27 @@ Here we access Frigate via https://cctv.mydomain.co.uk
     RewriteCond %{HTTP:Upgrade} !=websocket [NC]
     RewriteRule /(.*)  http://frigatepi.local:5000/$1 [P,L]
 </VirtualHost>
-Installing SSL is beyond the scope of this document but [Let's Encrypt](https://letsencrypt.org/) is a widely used approach.
+```
 
-This Apache2 configuration snippet then results in unencrypted requests being redirected to webserver SSL port
+### Step 2: Use SSL to encrypt access to your Frigate instance
+
+Whilst this won't, on its own, stop access to your Frigate webserver it will encrypt all content (such as login credentials).
+Installing SSL is beyond the scope of this document but [Let's Encrypt](https://letsencrypt.org/) is a widely used approach.
+This Apache2 configuration snippet then results in unencrypted requests being redirected to the webserver SSL port
+
 ```xml
 <VirtualHost *:80>
-    ServerName cctv.mydomain.co.uk
-
-    RewriteEngine on
-    RewriteCond %{SERVER_NAME} =cctv.mydomain.co.uk
-    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+ServerName cctv.mydomain.co.uk
+RewriteEngine on
+RewriteCond %{SERVER_NAME} =cctv.mydomain.co.uk
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
+```
+
+### Step 3: Authenticate users at the proxy
+
+There are many ways to authenticate a website but a straightforward approach is to use [Apache2 password files](https://httpd.apache.org/docs/2.4/howto/auth.html).
+
 ```xml
 <VirtualHost *:443>
     <Location />
