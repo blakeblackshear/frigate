@@ -25,6 +25,7 @@ module.exports = {
       "configuration/advanced",
       "configuration/hardware_acceleration",
       "configuration/camera_specific",
+      "configuration/ffmpeg_presets",
     ],
     Integrations: [
       "integrations/home-assistant",

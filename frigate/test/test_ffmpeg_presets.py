@@ -77,8 +77,8 @@ class TestFfmpegPresets(unittest.TestCase):
         frigate_preset_config.cameras["back"].create_ffmpeg_cmds()
         assert (
             # Ignore global and user_agent args in comparison
-            frigate_preset_config.cameras["back"].ffmpeg_cmds[0]["cmd"][6::]
-            == frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"][4::]
+            frigate_preset_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
+            == frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
         )
 
     def test_ffmpeg_input_preset(self):
@@ -95,8 +95,10 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_input_args_as_string(self):
-        argsString = " ".join(FFMPEG_INPUT_ARGS_DEFAULT) + ' -some "arg with space"'
-        argsList = FFMPEG_INPUT_ARGS_DEFAULT + ["-some", "arg with space"]
+        # Strip user_agent args here to avoid handling quoting issues
+        defaultArgsList = parse_preset_input(FFMPEG_INPUT_ARGS_DEFAULT, 5)[2::]
+        argsString = " ".join(defaultArgsList) + ' -some "arg with space"'
+        argsList = defaultArgsList + ["-some", "arg with space"]
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["input_args"] = argsString
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()

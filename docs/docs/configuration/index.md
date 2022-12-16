@@ -138,6 +138,7 @@ birdseye:
   mode: objects
 
 # Optional: ffmpeg configuration
+# More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
   global_args: -hide_banner -loglevel warning
@@ -145,15 +146,15 @@ ffmpeg:
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
   # Optional: global input args (default: shown below)
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: preset-rtsp-generic
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
     detect: -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
+    record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
-    rtmp: -c copy -f flv
+    rtmp: preset-rtmp-generic
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level

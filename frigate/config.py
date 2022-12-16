@@ -355,35 +355,10 @@ class BirdseyeCameraConfig(BaseModel):
 
 
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
-FFMPEG_INPUT_ARGS_DEFAULT = [
-    "-avoid_negative_ts",
-    "make_zero",
-    "-fflags",
-    "+genpts+discardcorrupt",
-    "-rtsp_transport",
-    "tcp",
-    "-timeout",
-    "5000000",
-    "-use_wallclock_as_timestamps",
-    "1",
-]
+FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
-RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
-    "-f",
-    "segment",
-    "-segment_time",
-    "10",
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-c",
-    "copy",
-    "-an",
-]
+RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
+RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
 
 class FfmpegOutputArgsConfig(FrigateBaseModel):
