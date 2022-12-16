@@ -31,6 +31,9 @@ class OnvifController:
         self.cams: dict[str, ONVIFCamera] = {}
 
         for cam_name, cam in config.cameras.items():
+            if not cam.enabled:
+                continue
+
             if cam.onvif.host:
                 self.cams[cam_name] = {
                     "onvif": ONVIFCamera(
@@ -55,7 +58,7 @@ class OnvifController:
             profile = media.GetProfiles()[0]
         except ONVIFError as e:
             logger.error(f"Unable to connect to camera: {camera_name}: {e}")
-            
+
         ptz = onvif.create_ptz_service()
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
