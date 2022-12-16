@@ -55,7 +55,7 @@ Here we access Frigate via https://cctv.mydomain.co.uk
 
 ### Step 2: Use SSL to encrypt access to your Frigate instance
 
-Whilst this won't, on its own, stop access to your Frigate webserver it will encrypt all content (such as login credentials).
+Whilst this won't, on its own, prevent access to your Frigate webserver it will encrypt all content (such as login credentials).
 Installing SSL is beyond the scope of this document but [Let's Encrypt](https://letsencrypt.org/) is a widely used approach.
 This Apache2 configuration snippet then results in unencrypted requests being redirected to the webserver SSL port
 
