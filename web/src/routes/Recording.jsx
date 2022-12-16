@@ -7,7 +7,6 @@ import RecordingPlaylist from '../components/RecordingPlaylist';
 import VideoPlayer from '../components/VideoPlayer';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
-import axios from 'axios';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -99,13 +98,8 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   useEffect(() => {
     if (this.player) {
       this.player.playlist.currentItem(playlistIndex);
-
-      // prime next item in playlist
-      if (playlistIndex < playlist.length - 1) {
-        axios.get(playlist?.get(playlistIndex + 1))
-      }
     }
-  }, [playlist, playlistIndex]);
+  }, [playlistIndex]);
 
   useEffect(() => {
     if (this.player) {
