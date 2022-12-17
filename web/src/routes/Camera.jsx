@@ -15,6 +15,7 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import MsePlayer from '../components/MsePlayer';
+import videojs from 'video.js';
 
 const emptyObject = Object.freeze({});
 
@@ -98,13 +99,23 @@ export default function Camera({ camera }) {
   let player;
   if (viewMode === 'live') {
     if (viewSource == 'mse') {
-      player = (
-        <Fragment>
-          <div className="max-w-5xl">
-            <MsePlayer camera={camera} />
-          </div>
-        </Fragment>
-      );
+      if (videojs.browser.IS_IOS) {
+        player = (
+          <Fragment>
+            <div className="w-5xl text-center text-sm">
+              MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+            </div>
+          </Fragment>
+        );
+      } else {
+        player = (
+          <Fragment>
+            <div className="max-w-5xl">
+              <MsePlayer camera={camera} />
+            </div>
+          </Fragment>
+        );
+      }
     } else if (viewSource == 'webrtc') {
       player = (
         <Fragment>
