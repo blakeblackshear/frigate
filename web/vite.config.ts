@@ -10,7 +10,8 @@ export default defineConfig({
     'import.meta.vitest': 'undefined',
   },
   plugins: [preact(), monacoEditorPlugin.default({
-    customWorkers: [{label: 'yaml', entry: 'monaco-yaml/yaml.worker'}]
+    customWorkers: [{ label: 'yaml', entry: 'monaco-yaml/yaml.worker' }],
+    languageWorkers: ['editorWorkerService'], // we don't use any of the default languages
   })],
   test: {
     environment: 'jsdom',

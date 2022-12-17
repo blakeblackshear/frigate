@@ -50,6 +50,13 @@ export default function Config() {
 
     const modelUri = Uri.parse('a://b/api/config/schema.json');
 
+    let yamlModel;
+    if (editor.getModels().length > 0) {
+      yamlModel = editor.getModel(modelUri)
+    } else {
+      yamlModel = editor.createModel(config, 'yaml', modelUri)
+    }
+
     setDiagnosticsOptions({
       enableSchemaRequest: true,
       hover: true,
@@ -66,7 +73,7 @@ export default function Config() {
 
     window.editor = editor.create(document.getElementById('container'), {
       language: 'yaml',
-      model: editor.createModel(config, 'yaml', modelUri),
+      model: yamlModel,
       scrollBeyondLastLine: false,
       theme: 'vs-dark',
     });
