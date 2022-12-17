@@ -225,7 +225,9 @@ COPY web/package.json web/package-lock.json ./
 RUN npm install
 
 COPY web/ ./
-RUN npm run build
+RUN npm run build \
+    && mv dist/BASE_PATH/monacoeditorwork/yaml.worker.bundle.js dist/assets/ \
+    && rm -rf dist/BASE_PATH
 
 # Collect final files in a single layer
 FROM scratch AS rootfs
