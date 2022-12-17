@@ -29,7 +29,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
         <Menu relativeTo={popupRef} onDismiss={() => setState({ showMenu: false })}>
           <div className="flex flex-wrap justify-between items-center">
             <Heading className="p-4 justify-center" size="md">{title}</Heading>
-            <Button className="mx-4" onClick={() => onShowAll() }>
+            <Button tabindex="false" className="mx-4" onClick={() => onShowAll() }>
               Show All
             </Button>
           </div>
