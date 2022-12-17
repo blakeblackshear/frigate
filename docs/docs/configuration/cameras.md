@@ -9,11 +9,11 @@ Several inputs can be configured for each camera and the role of each input can 
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role     | Description                                                                                     |
-| -------- | ----------------------------------------------------------------------------------------------- |
-| `detect` | Main feed for object detection                                                                  |
-| `record` | Saves segments of the video feed based on configuration settings. [docs](/configuration/record) |
-| `rtmp`   | Broadcast as an RTMP feed for other services to consume. [docs](/configuration/rtmp)            |
+| Role     | Description                                                                          |
+| -------- | ------------------------------------------------------------------------------------ |
+| `detect` | Main feed for object detection                                                       |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md) |
+| `rtmp`   | Broadcast as an RTMP feed for other services to consume. [docs](rtmp.md)            |
 
 ```yaml
 mqtt:
@@ -44,4 +44,4 @@ cameras:
   side: ...
 ```
 
-For camera model specific settings check the [camera specific](/configuration/camera_specific) infos.
+For camera model specific settings check the [camera specific](camera_specific.md) infos.

@@ -1,6 +1,10 @@
 module.exports = {
   docs: {
-    Frigate: ["index", "hardware", "installation"],
+    Frigate: [
+      "frigate/index",
+      "frigate/hardware",
+      "frigate/installation",
+    ],
     Guides: [
       "guides/camera_setup",
       "guides/getting_started",
@@ -31,7 +35,11 @@ module.exports = {
       "integrations/api",
       "integrations/mqtt",
     ],
-    Troubleshooting: ["faqs"],
-    Development: ["contributing"],
+    Troubleshooting: [
+      "troubleshooting/faqs",
+    ],
+    Development: [
+      "development/contributing",
+    ],
   },
 };

@@ -9,7 +9,7 @@ Zones cannot have the same name as a camera. If desired, a single zone can inclu
 
 During testing, enable the Zones option for the debug feed so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
-To create a zone, follow [the steps for a "Motion mask"](/configuration/masks), but use the section of the web UI for creating a zone instead.
+To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
 
 ### Restricting zones to specific objects
 
