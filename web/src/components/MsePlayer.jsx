@@ -64,10 +64,11 @@ export default function MsePlayer({ camera, width, height }) {
       }
     };
 
-    video.onpause = () => {
+    return () => {
+      const video = document.getElementById('video');
+      video.srcObject = null;
       ws.close();
-      video.src = null;
-    }
+    };
   }, [url]);
 
   return (
