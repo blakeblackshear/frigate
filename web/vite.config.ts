@@ -11,7 +11,7 @@ export default defineConfig({
   },
   plugins: [preact(), monacoEditorPlugin.default({
     customWorkers: [{ label: 'yaml', entry: 'monaco-yaml/yaml.worker' }],
-    languageWorkers: [], // we don't use any of the default languages
+    languageWorkers: ['editorWorkerService'], // we don't use any of the default languages
   })],
   test: {
     environment: 'jsdom',
