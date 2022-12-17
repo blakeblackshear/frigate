@@ -69,7 +69,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
           description: `${camera} recording @ ${h.hour}:00.`,
           sources: [
             {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/${timezone.replaceAll(
+              src: `${apiHost}vod/${year}-${month}/${day}/${h.hour}/${camera}/${timezone.replaceAll(
                 '/',
                 '_'
               )}/master.m3u8`,
@@ -135,6 +135,9 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
       <div className="text-xs">Dates and times are based on the browser's timezone {timezone}</div>
 
       <VideoPlayer
+        options={{
+          preload: 'auto',
+        }}
         onReady={(player) => {
           player.on('ratechange', () => player.defaultPlaybackRate(player.playbackRate()));
           if (player.playlist) {

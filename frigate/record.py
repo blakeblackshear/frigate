@@ -5,7 +5,6 @@ import multiprocessing as mp
 import os
 import queue
 import random
-import shutil
 import string
 import subprocess as sp
 import threading
@@ -16,7 +15,7 @@ import psutil
 from peewee import JOIN, DoesNotExist
 
 from frigate.config import RetainModeEnum, FrigateConfig
-from frigate.const import CACHE_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.util import area
 
@@ -173,7 +172,7 @@ class RecordingMaintainer(threading.Thread):
                         duration = -1
 
                     # ensure duration is within expected length
-                    if 0 < duration < 600:
+                    if 0 < duration < MAX_SEGMENT_DURATION:
                         end_time = start_time + datetime.timedelta(seconds=duration)
                         self.end_time_cache[cache_path] = (end_time, duration)
                     else:
@@ -296,13 +295,38 @@ class RecordingMaintainer(threading.Thread):
         try:
             if not os.path.exists(file_path):
                 start_frame = datetime.datetime.now().timestamp()
-                # copy then delete is required when recordings are stored on some network drives
-                shutil.copyfile(cache_path, file_path)
-                logger.debug(
-                    f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+
+                # add faststart to kept segments to improve metadata reading
+                ffmpeg_cmd = [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    cache_path,
+                    "-c",
+                    "copy",
+                    "-movflags",
+                    "+faststart",
+                    file_path,
+                ]
+
+                p = sp.run(
+                    ffmpeg_cmd,
+                    encoding="ascii",
+                    capture_output=True,
                 )
 
+                if p.returncode != 0:
+                    logger.error(f"Unable to convert {cache_path} to {file_path}")
+                    logger.error(p.stderr)
+                    return
+                else:
+                    logger.debug(
+                        f"Copied {file_path} in {datetime.datetime.now().timestamp()-start_frame} seconds."
+                    )
+
                 try:
+                    # get the segment size of the cache file
+                    # file without faststart is same size
                     segment_size = round(
                         float(os.path.getsize(cache_path)) / 1000000, 1
                     )
