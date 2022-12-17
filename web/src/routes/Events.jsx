@@ -301,6 +301,8 @@ export default function Events({ path, ...props }) {
           options={filterValues.cameras}
           selection={searchParams.cameras}
           onToggle={(item) => onToggleNamedFilter("cameras", item)}
+          onShowAll={() => onFilter("cameras", ["all"])}
+          onSelectSingle={(item) => onFilter("cameras", item)}
         />
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
@@ -308,6 +310,8 @@ export default function Events({ path, ...props }) {
           options={filterValues.labels}
           selection={searchParams.labels}
           onToggle={(item) => onToggleNamedFilter("labels", item) }
+          onShowAll={() => onFilter("labels", ["all"])}
+          onSelectSingle={(item) => onFilter("labels", item)}
         />
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
@@ -315,6 +319,8 @@ export default function Events({ path, ...props }) {
           options={filterValues.zones}
           selection={searchParams.zones}
           onToggle={(item) => onToggleNamedFilter("zones", item) }
+          onShowAll={() => onFilter("zones", ["all"])}
+          onSelectSingle={(item) => onFilter("zones", item)}
         />
         {
           filterValues.sub_labels.length > 0 && (
@@ -324,6 +330,8 @@ export default function Events({ path, ...props }) {
               options={filterValues.sub_labels}
               selection={searchParams.sub_labels}
               onToggle={(item) => onToggleNamedFilter("sub_labels", item) }
+              onShowAll={() => onFilter("sub_labels", ["all"])}
+              onSelectSingle={(item) => onFilter("sub_labels", item)}
             />
           )}
         <div ref={datePicker} className="ml-auto">
