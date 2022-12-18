@@ -7,7 +7,7 @@ For Home Assistant Addon installations, the config file needs to be in the root 
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
-It is recommended to start with a minimal configuration and add to it as described in [this guide](/guides/getting_started):
+It is recommended to start with a minimal configuration and add to it as described in [this guide](../guides/getting_started.md):
 
 ```yaml
 mqtt:

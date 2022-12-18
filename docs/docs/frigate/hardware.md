@@ -9,7 +9,7 @@ Cameras that output H.264 video and AAC audio will offer the most compatibility 
 
 I recommend Dahua, Hikvision, and Amcrest in that order. Dahua edges out Hikvision because they are easier to find and order, not because they are better cameras. I personally use Dahua cameras because they are easier to purchase directly. In my experience Dahua and Hikvision both have multiple streams with configurable resolutions and frame rates and rock solid streams. They also both have models with large sensors well known for excellent image quality at night. Not all the models are equal. Larger sensors are better than higher resolutions; especially at night. Amcrest is the fallback recommendation because they are rebranded Dahuas. They are rebranding the lower end models with smaller sensors or less configuration options.
 
-Many users have reported various issues with Reolink cameras, so I do not recommend them. If you are using Reolink, I suggest the [Reolink specific configuration](configuration/camera_specific#reolink-410520-possibly-others). Wifi cameras are also not recommended. Their streams are less reliable and cause connection loss and/or lost video data.
+Many users have reported various issues with Reolink cameras, so I do not recommend them. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-410520-possibly-others). Wifi cameras are also not recommended. Their streams are less reliable and cause connection loss and/or lost video data.
 
 Here are some of the camera's I recommend:
 

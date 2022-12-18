@@ -9,7 +9,7 @@ Frigate includes the object models listed below from the Google Coral test data.
 
 Please note: 
  - `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
- - `person` is the only tracked object by default. See the [full configuration reference](https://docs.frigate.video/configuration/index#full-configuration-reference) for an example of expanding the list of tracked objects.
+ - `person` is the only tracked object by default. See the [full configuration reference](index.md#full-configuration-reference) for an example of expanding the list of tracked objects.
 
 <ul>
   {labels.split("\n").map((label) => (
@@ -25,4 +25,4 @@ Models for both CPU and EdgeTPU (Coral) are bundled in the image. You can use yo
 - EdgeTPU Model: `/edgetpu_model.tflite`
 - Labels: `/labelmap.txt`
 
-You also need to update the [model config](/configuration/advanced#model) if they differ from the defaults.
+You also need to update the [model config](advanced.md#model) if they differ from the defaults.

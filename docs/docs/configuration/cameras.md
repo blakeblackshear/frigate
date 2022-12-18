@@ -11,12 +11,12 @@ A camera is enabled by default but can be temporarily disabled by using `enabled
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role       | Description                                                                                          |
-| ---------- | ---------------------------------------------------------------------------------------------------- |
-| `detect`   | Main feed for object detection                                                                       |
-| `record`   | Saves segments of the video feed based on configuration settings. [docs](/configuration/record)      |
-| `restream` | Broadcast as RTSP feed and use the full res stream for live view. [docs](/configuration/restream)    |
-| `rtmp`     | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](/configuration/restream) |
+| Role       | Description                                                                              |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| `detect`   | Main feed for object detection                                                           |
+| `record`   | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
+| `restream` | Broadcast as RTSP feed and use the full res stream for live view. [docs](restream.md)    |
+| `rtmp`     | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
 mqtt:
@@ -48,4 +48,4 @@ cameras:
   side: ...
 ```
 
-For camera model specific settings check the [camera specific](/configuration/camera_specific) infos.
+For camera model specific settings check the [camera specific](camera_specific.md) infos.

@@ -16,3 +16,4 @@ web/node_modules
 web/coverage
 core
 !/web/**/*.ts
+.idea/*
