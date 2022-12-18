@@ -30,6 +30,7 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list~ \
 RUN apt-get -yqq build-dep nginx
 
 RUN apt-get -yqq install --no-install-recommends ca-certificates wget \
+    && update-ca-certificates -f \
     && mkdir /tmp/nginx \
     && wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz \
     && tar -zxf nginx-${NGINX_VERSION}.tar.gz -C /tmp/nginx --strip-components=1 \
