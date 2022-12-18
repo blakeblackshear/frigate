@@ -12,9 +12,6 @@ version:
 local: version
 	docker buildx build --tag frigate:latest --load .
 
-build_web:
-	docker buildx build --target web-dist --output web/dist .
-
 amd64:
 	docker buildx build --platform linux/amd64 --tag $(IMAGE_REPO):$(VERSION)-$(COMMIT_HASH) .
 
