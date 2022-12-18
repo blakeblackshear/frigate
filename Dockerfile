@@ -16,15 +16,15 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /rootfs
 
-FROM ubuntu:20.04 AS nginx
+FROM base AS nginx
 ARG DEBIAN_FRONTEND
 ARG NGINX_VERSION=1.22.1
 ARG VOD_MODULE_VERSION=1.30
 ARG SECURE_TOKEN_MODULE_VERSION=1.4
 ARG RTMP_MODULE_VERSION=1.2.1
 
-RUN cp /etc/apt/sources.list /etc/apt/sources.list~ \
-    && sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list \
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list \
+    && sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list \
     && apt-get update
 
 RUN apt-get -yqq build-dep nginx
