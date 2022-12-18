@@ -1,14 +1,11 @@
 import logging
 
-# from frigate.config import DetectorConfig, DetectorTypeEnum
-# from frigate.util import EventsPerSecond
 import ctypes
 import numpy as np
 import tensorrt as trt
-from cuda import cuda as cuda
+from cuda import cuda, cudart
 
 # import pycuda.driver as cuda
-# from .object_detector import ObjectDetector
 # import pycuda.autoinit  # This is needed for initializing CUDA driver
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -18,15 +15,6 @@ from pydantic import Field
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "tensorrt"
-
-# def object_detector_factory(detector_config: DetectorConfig, model_path: str):
-#     if detector_config.type != DetectorTypeEnum.tensorrt:
-#         return None
-#     try:
-#         ctypes.cdll.LoadLibrary("/yolo4/libyolo_layer.so")
-#     except OSError as e:
-#         logger.error("ERROR: failed to load /yolo4/libyolo_layer.so. %s", e)
-#     return LocalObjectDetector(detector_config, model_path)
 
 
 class TensorRTDetectorConfig(BaseDetectorConfig):
@@ -159,7 +147,12 @@ class TensorRtDetector(DetectionApi):
         # Synchronize the stream
         cuda.cuStreamSynchronize(self.stream)
         # Return only the host outputs.
-        return [np.array([int(out.host_dev)], dtype=np.float32) for out in self.outputs]
+        return [
+            np.array(
+                (ctypes.c_float * out.size).from_address(out.host), dtype=np.float32
+            )
+            for out in self.outputs
+        ]
 
     def __init__(self, detector_config: TensorRTDetectorConfig):
         # def __init__(self, detector_config: DetectorConfig, model_path: str):
@@ -211,9 +204,6 @@ class TensorRtDetector(DetectionApi):
         detections = np.concatenate(detections, axis=0)
 
         return detections
-
-    # def detect(self, tensor_input, threshold=0.4):
-    #     pass
 
     def detect_raw(self, tensor_input):
         # Input tensor has the shape of the [height, width, 3]
