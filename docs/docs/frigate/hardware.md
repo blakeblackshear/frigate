@@ -54,9 +54,9 @@ The OpenVINO detector type is able to run on x86 hosts that have an Intel CPU, G
 Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known examples are below:
 
 | Name                | Inference Speed | Notes                                 |
-| Intel Celeron J4105 | 25 ms           | Inference speeds on CPU were ~ 150 ms |
-| Intel Celeron N4020 | 200 ms          | Inference speeds on CPU were ~ 800 ms |
-| Intel NCS2 VPU      | 60 ms           | May vary based on host device         |
+| Intel Celeron J4105 | ~ 25 ms         | Inference speeds on CPU were ~ 150 ms |
+| Intel Celeron N4020 | ~ 200 ms        | Inference speeds on CPU were ~ 800 ms |
+| Intel NCS2 VPU      | 60 - 65 ms      | May vary based on host device         |
 
 ### TensorRT
 
