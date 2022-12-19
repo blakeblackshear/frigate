@@ -635,7 +635,7 @@ def events():
         excluded_fields.append(Event.thumbnail)
     else:
         selected_columns.append(Event.thumbnail)
-        
+
     if favorites:
         clauses.append((Event.retain_indefinitely == favorites))
 
