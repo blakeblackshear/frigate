@@ -58,6 +58,7 @@ export default function Events({ path, ...props }) {
     labels: props.labels ?? 'all',
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
+    favorites: props.favorites ?? 0,
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -334,6 +335,13 @@ export default function Events({ path, ...props }) {
               onSelectSingle={(item) => onFilter("sub_labels", item)}
             />
           )}
+          
+        <StarRecording
+          className="h-10 w-10 text-yellow-300 cursor-pointer"
+          onClick={() => onFilter("favorites", searchParams.favorites ? 0 : 1)}
+          fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
+        />
+          
         <div ref={datePicker} className="ml-auto">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
