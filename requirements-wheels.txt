@@ -19,7 +19,7 @@ types-requests == 2.28.*
 scipy == 1.8.*
 setproctitle == 1.2.*
 ws4py == 0.5.*
-zeroconf == 0.39.4
+zeroconf == 0.44.0
 # Openvino Library - Custom built with MYRIAD support
 openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.2.0/openvino-2022.2.0-000-cp39-cp39-manylinux_2_31_x86_64.whl; platform_machine == 'x86_64'
 openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.2.0/openvino-2022.2.0-000-cp39-cp39-linux_aarch64.whl; platform_machine == 'aarch64'
