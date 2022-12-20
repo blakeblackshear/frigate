@@ -519,6 +519,7 @@ class RestreamConfig(FrigateBaseModel):
     force_audio: bool = Field(
         default=True, title="Force audio compatibility with the browser."
     )
+    birdseye: bool = Field(default=False, title="Restream the birdseye feed via RTSP.")
     jsmpeg: JsmpegStreamConfig = Field(
         default_factory=JsmpegStreamConfig, title="Jsmpeg Stream Configuration."
     )

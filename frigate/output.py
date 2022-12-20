@@ -28,10 +28,74 @@ logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
-    def __init__(self, in_width, in_height, out_width, out_height, quality):
-        ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
-            " "
-        )
+    def __init__(
+        self,
+        in_width: int,
+        in_height: int,
+        out_width: int,
+        out_height: int,
+        quality: int,
+        birdseye_rtsp: bool = False,
+    ):
+        if birdseye_rtsp:
+            ffmpeg_cmd = [
+                "ffmpeg",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "yuv420p",
+                "-video_size",
+                f"{in_width}x{in_height}",
+                "-i",
+                "pipe:",
+                "-an",
+                "-f",
+                "rtp_mpegts",
+                "-s",
+                f"{out_width}x{out_height}",
+                "-codec:v",
+                "mpeg1video",
+                "-q",
+                f"{quality}",
+                "-bf",
+                "0",
+                "rtp://127.0.0.1:1998",
+                "-f",
+                "mpegts",
+                "-s",
+                f"{out_width}x{out_height}",
+                "-codec:v",
+                "mpeg1video",
+                "-q",
+                f"{quality}",
+                "-bf",
+                "0",
+                "pipe:",
+            ]
+        else:
+            ffmpeg_cmd = [
+                "ffmpeg",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "yuv420p",
+                "-video_size",
+                f"{in_width}x{in_height}",
+                "-i",
+                "pipe:",
+                "-f",
+                "mpegts",
+                "-s",
+                f"{out_width}x{out_height}",
+                "-codec:v",
+                "mpeg1video",
+                "-q",
+                f"{quality}",
+                "-bf",
+                "0",
+                "pipe:",
+            ]
+
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
@@ -386,6 +450,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             config.birdseye.width,
             config.birdseye.height,
             config.birdseye.quality,
+            config.restream.birdseye,
         )
         broadcasters["birdseye"] = BroadcastThread(
             "birdseye", converters["birdseye"], websocket_server
@@ -421,10 +486,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
             # write to the converter for the camera if clients are listening to the specific camera
             converters[camera].write(frame.tobytes())
 
-        # update birdseye if websockets are connected
-        if config.birdseye.enabled and any(
-            ws.environ["PATH_INFO"].endswith("birdseye")
-            for ws in websocket_server.manager
+        if config.birdseye.enabled and (
+            config.restream.birdseye
+            or any(
+                ws.environ["PATH_INFO"].endswith("birdseye")
+                for ws in websocket_server.manager
+            )
         ):
             if birdseye_manager.update(
                 camera,

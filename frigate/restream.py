@@ -42,6 +42,11 @@ class RestreamApi:
                             escape_special_characters(input.path)
                         )
 
+        if self.config.restream.birdseye:
+            self.relays[
+                "birdseye"
+            ] = "ffmpeg:rtp://127.0.0.1:1998#video=h264#audio=none"
+
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
             requests.put("http://127.0.0.1:1984/api/streams", params=params)

@@ -12,7 +12,7 @@ Live view options can be selected while viewing the live stream. The options are
 | Source | Latency | Frame Rate                             | Resolution     | Audio                        | Requires Restream | Other Limitations     |
 | ------ | ------- | -------------------------------------- | -------------- | ---------------------------- | ----------------- | --------------------- |
 | jsmpeg | low     | same as `detect -> fps`, capped at 10  | same as detect | no                           | no                | none                  |
-| mse    | low     | native                                 | native         | yes (depends on audio codec) | yes               | none                  |
+| mse    | low     | native                                 | native         | yes (depends on audio codec) | yes               | not supported on iOS  |
 | webrtc | lowest  | native                                 | native         | yes (depends on audio codec) | yes               | requires extra config |
 
 ### WebRTC extra configuration:

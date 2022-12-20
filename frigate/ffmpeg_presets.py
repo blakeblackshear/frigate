@@ -129,6 +129,51 @@ PRESETS_HW_ACCEL_SCALE = {
     ],
 }
 
+PRESETS_HW_ACCEL_ENCODE_TO_RTSP = {
+    "default": [
+        "-c:v",
+        "libx264",
+        "-g",
+        "50",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+        "-preset:v",
+        "superfast",
+        "-tune:v",
+        "zerolatency",
+    ],
+    "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m", "-g", "50", "-bf", "0"],
+    "preset-intel-vaapi": [
+        "-c:v",
+        "h264_vaapi",
+        "-g",
+        "50",
+        "-bf",
+        "0",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+    ],
+    "preset-intel-qsv-h264": ["-c:v", "h264_qsv"],
+    "preset-intel-qsv-h265": ["-c:v", "hevc_qsv"],
+    "preset-nvidia-h264": [
+        "-c:v",
+        "h264_nvenc",
+        "-g",
+        "50",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "auto",
+        "-preset:v",
+        "p2",
+        "-tune:v",
+        "ll",
+    ],
+}
 
 def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
@@ -136,7 +181,6 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
         return None
 
     return PRESETS_HW_ACCEL_DECODE.get(arg, None)
-
 
 def parse_preset_hardware_acceleration_scale(
     arg: Any,
