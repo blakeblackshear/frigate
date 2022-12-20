@@ -49,7 +49,7 @@ A single Coral can handle many cameras and will be sufficient for the majority o
 
 ### OpenVino
 
-The OpenVINO detector type is able to run on x86 hosts that have an Intel CPU, GPU, or VPU Hardware (ex: Intel NCS2). Arm64 hosts are also supported with VPU hardware.
+The OpenVINO detector type is able to run on x86 hosts that have an Intel CPU, GPU, or VPU Hardware (ex: Intel NCS2). Arm 32/64 hosts are also supported with VPU hardware.
 
 Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known examples are below:
 
