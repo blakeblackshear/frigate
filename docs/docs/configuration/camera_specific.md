@@ -104,7 +104,8 @@ ffmpeg:
 
 ### Reolink Cameras
 
-Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the below configuration is recommended.
+Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the http stream is recommended. 
+Frigate works much better with newer reolink cameras that are setup with the below options:
 
 If available, recommended settings are:
 - `On, fluency first` this sets the camera to CBR (constant bit rate)
