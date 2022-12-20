@@ -31,7 +31,7 @@ run: local
 	docker run --rm --publish=5000:5000 --volume=${PWD}/config/config.yml:/config/config.yml frigate:latest
 
 run_tests: local
-	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest python3 -u -m unittest
+	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest /bin/bash -c "python3 -u -m coverage run -m unittest;python3 -m coverage report --include=frigate/*"
 	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest python3 -u -m mypy --config-file frigate/mypy.ini frigate
 
 .PHONY: run_tests
