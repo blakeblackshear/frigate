@@ -99,6 +99,9 @@ jobs:
       - name: Run mypy
         # Make sure to also update the Makefile target!
         run: docker run --rm --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate
-      - name: Run tests
+      - name: Run tests and measure codecoverage
         # Make sure to also update the Makefile target!
-        run: docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
+        run: docker run --rm --entrypoint=/bin/bash frigate:latest -c "python3 -u -m coverage run -m unittest;python3 -m coverage report --include=frigate/*"
+      - name: Upload codecoverage report to Codecov
+        uses: codecov/codecov-action@v3.1.1
+        
