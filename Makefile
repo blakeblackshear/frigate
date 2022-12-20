@@ -32,7 +32,7 @@ run: local
 
 run_tests: local
 	# Make sure to also check and update the Github Action in pull_request.yml
-	docker run --rm --workdir=/opt/frigate --entrypoint=/bin/bash frigate:latest -c "python3 -u -m coverage run -m unittest;python3 -m coverage report --include=frigate/*"
+	docker run --rm --workdir=/opt/frigate --entrypoint=/bin/bash frigate:latest -c "python3 -u -m coverage run -m unittest;python3 -m coverage report --include=frigate/* --omit=frigate/test/*"
 	docker run --rm --workdir=/opt/frigate --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate
 
 .PHONY: run_tests
