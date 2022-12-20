@@ -337,12 +337,12 @@ export default function Events({ path, ...props }) {
           )}
           
         <StarRecording
-          className="h-10 w-10 text-yellow-300 cursor-pointer"
+          className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
           onClick={() => onFilter("favorites", searchParams.favorites ? 0 : 1)}
           fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
         />
           
-        <div ref={datePicker} className="ml-auto">
+        <div ref={datePicker} className="ml-right">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
             onClick={() => setState({ ...state, showDatePicker: true })}
