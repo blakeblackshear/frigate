@@ -102,9 +102,13 @@ ffmpeg:
   input_args: -avoid_negative_ts make_zero -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
 ```
 
-### Reolink 410/520 (possibly others)
+### Reolink Cameras
 
-![Resolutions](/img/reolink-settings.png)
+Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the below configuration is recommended.
+
+If available, recommended settings are:
+- `On, fluency first` this sets the camera to CBR (constant bit rate)
+- `Interframe Space 1x` this sets the iframe interval to the same as the frame rate
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
