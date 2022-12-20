@@ -61,7 +61,7 @@ Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known
 | Intel Celeron J4105 | ~ 25 ms         | Inference speeds on CPU were ~ 150 ms                                 |
 | Intel Celeron N4020 | 50 - 200 ms     | Inference speeds on CPU were ~ 800 ms, greatly depends on other loads |
 | Intel NCS2 VPU      | 60 - 65 ms      | May vary based on host device                                         |
-| Intel i5 1135G7     | 10 - 15 ms      |                                                                                           |
+| Intel i5 1135G7     | 10 - 15 ms      |                                                                       |
 
 ### TensorRT
 
