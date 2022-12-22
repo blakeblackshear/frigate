@@ -69,6 +69,9 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
+    cameras: List[str] = Field(default=None, title="Cameras to track")
+    address: str = Field(default=None, title="Frigate Detection Queue Server Address")
+    shared_memory: Union[bool, None] = Field(default=None, title="Use Shared Memory")
     model: ModelConfig = Field(
         default=None, title="Detector specific model configuration."
     )
@@ -76,3 +79,18 @@ class BaseDetectorConfig(BaseModel):
     class Config:
         extra = Extra.allow
         arbitrary_types_allowed = True
+
+
+class DetectionServerModeEnum(str, Enum):
+    Full = "full"
+    DetectionOnly = "detection_only"
+
+
+class DetectionServerConfig(BaseModel):
+    mode: DetectionServerModeEnum = Field(
+        default=DetectionServerModeEnum.Full, title="Server mode"
+    )
+    ipc: str = Field(default="ipc://detection_broker.ipc", title="Broker IPC path")
+    addresses: List[str] = Field(
+        default=["tcp://127.0.0.1:5555"], title="Broker TCP addresses"
+    )

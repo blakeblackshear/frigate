@@ -14,9 +14,14 @@ import numpy as np
 import cv2
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.config import (
+    CameraConfig,
+    DetectConfig,
+    PixelFormatEnum,
+    DetectionServerConfig,
+)
 from frigate.const import CACHE_DIR
-from frigate.object_detection import RemoteObjectDetector
+from frigate.detectors import ObjectDetectionClient
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.objects import ObjectTracker
@@ -405,12 +410,11 @@ def capture_camera(name, config: CameraConfig, process_info):
 
 
 def track_camera(
-    name,
+    camera_name,
     config: CameraConfig,
     model_config,
+    server_config: DetectionServerConfig,
     labelmap,
-    detection_queue,
-    result_connection,
     detected_objects_queue,
     process_info,
 ):
@@ -422,8 +426,8 @@ def track_camera(
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
-    threading.current_thread().name = f"process:{name}"
-    setproctitle(f"frigate.process:{name}")
+    threading.current_thread().name = f"process:{camera_name}"
+    setproctitle(f"frigate.process:{camera_name}")
     listen()
 
     frame_queue = process_info["frame_queue"]
@@ -444,8 +448,8 @@ def track_camera(
         motion_threshold,
         motion_contour_area,
     )
-    object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config
+    object_detector = ObjectDetectionClient(
+        camera_name, labelmap, model_config, server_config
     )
 
     object_tracker = ObjectTracker(config.detect)
@@ -453,7 +457,7 @@ def track_camera(
     frame_manager = SharedMemoryFrameManager()
 
     process_frames(
-        name,
+        camera_name,
         frame_queue,
         frame_shape,
         model_config,
@@ -471,7 +475,9 @@ def track_camera(
         stop_event,
     )
 
-    logger.info(f"{name}: exiting subprocess")
+    object_detector.cleanup()
+
+    logger.info(f"{camera_name}: exiting subprocess")
 
 
 def box_overlaps(b1, b2):
@@ -558,7 +564,7 @@ def process_frames(
     detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
-    object_detector: RemoteObjectDetector,
+    object_detector: ObjectDetectionClient,
     object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue,
     process_info: dict,

@@ -3,7 +3,7 @@ from multiprocessing.queues import Queue
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.context import Process
 
-from frigate.object_detection import ObjectDetectProcess
+from frigate.detectors import ObjectDetectProcess
 
 
 class CameraMetricsTypes(TypedDict):

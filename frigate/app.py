@@ -5,6 +5,7 @@ from multiprocessing.synchronize import Event as MpEvent
 import os
 import signal
 import sys
+import threading
 from typing import Optional
 from types import FrameType
 
@@ -18,7 +19,11 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.object_detection import ObjectDetectProcess
+from frigate.detectors import (
+    ObjectDetectProcess,
+    ObjectDetectionBroker,
+    DetectionServerModeEnum,
+)
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
@@ -41,10 +46,9 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
-        self.detection_shms: list[mp.shared_memory.SharedMemory] = []
+        self.detection_shms: dict[str, mp.shared_memory.SharedMemory] = {}
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
@@ -79,6 +83,9 @@ class FrigateApp:
 
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config
+
+        if self.config.server.mode == DetectionServerModeEnum.DetectionOnly:
+            return
 
         for camera_name in self.config.cameras.keys():
             # create camera_metrics
@@ -181,10 +188,15 @@ class FrigateApp:
         comms.append(self.ws_client)
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
+    def start_detection_broker(self) -> None:
+        bind_urls = [self.config.broker.ipc] + self.config.broker.addresses
+        self.detection_broker = ObjectDetectionBroker(
+            bind=bind_urls, shms=self.detection_shms
+        )
+        self.detection_broker.start()
+
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
-            self.detection_out_events[name] = mp.Event()
-
             try:
                 largest_frame = max(
                     [
@@ -207,14 +219,12 @@ class FrigateApp:
             except FileExistsError:
                 shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}")
 
-            self.detection_shms.append(shm_in)
-            self.detection_shms.append(shm_out)
+            self.detection_shms[name] = shm_in
+            self.detection_shms[f"out-{name}"] = shm_out
 
         for name, detector_config in self.config.detectors.items():
             self.detectors[name] = ObjectDetectProcess(
                 name,
-                self.detection_queue,
-                self.detection_out_events,
                 detector_config,
             )
 
@@ -246,29 +256,31 @@ class FrigateApp:
         logger.info(f"Output process started: {output_processor.pid}")
 
     def start_camera_processors(self) -> None:
-        for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
-                logger.info(f"Camera processor not started for disabled camera {name}")
+        for camera_name, config in self.config.cameras.items():
+            if not self.config.cameras[camera_name].enabled:
+                logger.info(
+                    f"Camera processor not started for disabled camera {camera_name}"
+                )
                 continue
 
             camera_process = mp.Process(
                 target=track_camera,
-                name=f"camera_processor:{name}",
+                name=f"camera_processor:{camera_name}",
                 args=(
-                    name,
+                    camera_name,
                     config,
                     self.config.model,
                     self.config.model.merged_labelmap,
-                    self.detection_queue,
-                    self.detection_out_events[name],
                     self.detected_frames_queue,
-                    self.camera_metrics[name],
+                    self.camera_metrics[camera_name],
                 ),
             )
             camera_process.daemon = True
-            self.camera_metrics[name]["process"] = camera_process
+            self.camera_metrics[camera_name]["process"] = camera_process
             camera_process.start()
-            logger.info(f"Camera processor started for {name}: {camera_process.pid}")
+            logger.info(
+                f"Camera processor started for {camera_name}: {camera_process.pid}"
+            )
 
     def start_camera_capture_processes(self) -> None:
         for name, config in self.config.cameras.items():
@@ -330,6 +342,13 @@ class FrigateApp:
     def start(self) -> None:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
+
+        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
+            self.stop()
+            sys.exit()
+
+        signal.signal(signal.SIGTERM, receiveSignal)
+
         try:
             try:
                 self.init_config()
@@ -352,6 +371,13 @@ class FrigateApp:
                 sys.exit(1)
             self.set_environment_vars()
             self.ensure_dirs()
+
+            if self.config.server.mode == DetectionServerModeEnum.DetectionOnly:
+                self.start_detectors()
+                self.start_watchdog()
+                self.stop_event.wait()
+                sys.exit()
+
             self.set_log_levels()
             self.init_queues()
             self.init_database()
@@ -360,8 +386,10 @@ class FrigateApp:
             print(e)
             self.log_process.terminate()
             sys.exit(1)
+
         self.init_restream()
         self.start_detectors()
+        self.start_detection_broker()
         self.start_video_output_processor()
         self.start_detected_frames_processor()
         self.start_camera_processors()
@@ -377,12 +405,6 @@ class FrigateApp:
         self.start_watchdog()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
-        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            self.stop()
-            sys.exit()
-
-        signal.signal(signal.SIGTERM, receiveSignal)
-
         try:
             self.flask_app.run(host="127.0.0.1", port=5001, debug=False)
         except KeyboardInterrupt:
@@ -394,20 +416,22 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
-        self.ws_client.stop()
-        self.detected_frames_processor.join()
-        self.event_processor.join()
-        self.event_cleanup.join()
-        self.recording_maintainer.join()
-        self.recording_cleanup.join()
-        self.stats_emitter.join()
-        self.frigate_watchdog.join()
-        self.db.stop()
+        if self.config.server.mode != DetectionServerModeEnum.DetectionOnly:
+            self.ws_client.stop()
+            self.detected_frames_processor.join()
+            self.event_processor.join()
+            self.event_cleanup.join()
+            self.recording_maintainer.join()
+            self.recording_cleanup.join()
+            self.stats_emitter.join()
+            self.frigate_watchdog.join()
+            self.db.stop()
+            self.detection_broker.stop()
 
         for detector in self.detectors.values():
             detector.stop()
 
         while len(self.detection_shms) > 0:
-            shm = self.detection_shms.pop()
-            shm.close()
-            shm.unlink()
+            shm = self.detection_shms.popitem()
+            shm[1].close()
+            shm[1].unlink()

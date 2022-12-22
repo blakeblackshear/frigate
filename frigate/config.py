@@ -4,12 +4,20 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Annotated
 
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
+from pydantic import (
+    BaseModel,
+    Extra,
+    Field,
+    validator,
+    root_validator,
+    ValidationError,
+    parse_obj_as,
+)
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
@@ -35,8 +43,10 @@ from frigate.ffmpeg_presets import (
 from frigate.detectors import (
     PixelFormatEnum,
     InputTensorEnum,
+    DetectionServerConfig,
     ModelConfig,
-    DetectorConfig,
+    BaseDetectorConfig,
+    DetectionServerModeEnum,
 )
 from frigate.version import VERSION
 
@@ -323,6 +333,12 @@ class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
+
+
+DetectorConfig = Annotated[
+    Union[tuple(BaseDetectorConfig.__subclasses__())],
+    Field(discriminator="type"),
+]
 
 
 class BirdseyeModeEnum(str, Enum):
@@ -797,7 +813,10 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
 
 
 class FrigateConfig(FrigateBaseModel):
-    mqtt: MqttConfig = Field(title="MQTT Configuration.")
+    server: DetectionServerConfig = Field(
+        default_factory=DetectionServerConfig, title="Server configuration"
+    )
+    mqtt: Optional[MqttConfig] = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
     )
@@ -842,7 +861,7 @@ class FrigateConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
-    cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+    cameras: Optional[Dict[str, CameraConfig]] = Field(title="Camera configuration.")
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
         title="Global timestamp style configuration.",
@@ -852,6 +871,50 @@ class FrigateConfig(FrigateBaseModel):
     def runtime_config(self) -> FrigateConfig:
         """Merge camera config with globals."""
         config = self.copy(deep=True)
+
+        for key, detector in config.detectors.items():
+            detector_config: BaseDetectorConfig = parse_obj_as(DetectorConfig, detector)
+
+            if detector_config.cameras is None:
+                detector_config.cameras = (
+                    list(config.cameras.keys()) if config.cameras is not None else []
+                )
+
+            if detector_config.address is None:
+                detector_config.address = config.server.ipc
+
+            if detector_config.shared_memory is None:
+                detector_config.shared_memory = (
+                    detector_config.address == config.server.ipc
+                )
+
+            if detector_config.model is None:
+                detector_config.model = config.model
+            else:
+                model = detector_config.model
+                schema = ModelConfig.schema()["properties"]
+                if (
+                    model.width != schema["width"]["default"]
+                    or model.height != schema["height"]["default"]
+                    or model.labelmap_path is not None
+                    or model.labelmap is not {}
+                    or model.input_tensor != schema["input_tensor"]["default"]
+                    or model.input_pixel_format
+                    != schema["input_pixel_format"]["default"]
+                ):
+                    logger.warning(
+                        "Customizing more than a detector model path is unsupported."
+                    )
+            merged_model = deep_merge(
+                detector_config.model.dict(exclude_unset=True),
+                config.model.dict(exclude_unset=True),
+            )
+            detector_config.model = ModelConfig.parse_obj(merged_model)
+
+            config.detectors[key] = detector_config
+
+        if config.server.mode == DetectionServerModeEnum.DetectionOnly:
+            return config
 
         # MQTT password substitution
         if config.mqtt.password:
@@ -952,32 +1015,6 @@ class FrigateConfig(FrigateBaseModel):
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
 
-        for key, detector in config.detectors.items():
-            detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
-            if detector_config.model is None:
-                detector_config.model = config.model
-            else:
-                model = detector_config.model
-                schema = ModelConfig.schema()["properties"]
-                if (
-                    model.width != schema["width"]["default"]
-                    or model.height != schema["height"]["default"]
-                    or model.labelmap_path is not None
-                    or model.labelmap is not {}
-                    or model.input_tensor != schema["input_tensor"]["default"]
-                    or model.input_pixel_format
-                    != schema["input_pixel_format"]["default"]
-                ):
-                    logger.warning(
-                        "Customizing more than a detector model path is unsupported."
-                    )
-            merged_model = deep_merge(
-                detector_config.model.dict(exclude_unset=True),
-                config.model.dict(exclude_unset=True),
-            )
-            detector_config.model = ModelConfig.parse_obj(merged_model)
-            config.detectors[key] = detector_config
-
         return config
 
     @validator("cameras")
@@ -986,6 +1023,33 @@ class FrigateConfig(FrigateBaseModel):
         for zone in zones:
             if zone in v.keys():
                 raise ValueError("Zones cannot share names with cameras")
+        return v
+
+    @root_validator(pre=True)
+    def ensure_cameras_mqtt_defined(cls, values):
+        server_config = values.get("server", None)
+        if (
+            server_config is not None
+            and server_config.get("mode", DetectionServerModeEnum.Full)
+            == DetectionServerModeEnum.DetectionOnly
+        ):
+            return values
+
+        if values.get("cameras", None) is None:
+            raise ValueError("cameras: field required")
+        if values.get("mqtt", None) is None:
+            raise ValueError("mqtt: field required")
+        return values
+
+    @validator("detectors")
+    def ensure_detectors_have_cameras(cls, v: Dict[str, BaseDetectorConfig], values):
+        for detector in v.values():
+            if values.get("cameras", None) is None and (
+                detector.cameras is None or len(detector.cameras) == 0
+            ):
+                raise ValueError(
+                    "Detectors must specify at least one camera name to process"
+                )
         return v
 
     @classmethod

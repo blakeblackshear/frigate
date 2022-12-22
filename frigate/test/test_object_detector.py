@@ -1,29 +1,207 @@
+import functools
+import threading
 import unittest
-from unittest.mock import Mock, patch
-
+import multiprocessing as mp
+from unittest.mock import MagicMock, Mock, patch
+from multiprocessing.shared_memory import SharedMemory
 import numpy as np
 from pydantic import parse_obj_as
 
-from frigate.config import DetectorConfig, InputTensorEnum, ModelConfig
-from frigate.detectors import DetectorTypeEnum
-import frigate.detectors as detectors
-import frigate.object_detection
+from frigate.config import FrigateConfig, DetectorConfig, InputTensorEnum, ModelConfig
+from frigate.detectors import (
+    DetectorTypeEnum,
+    ObjectDetectionBroker,
+    ObjectDetectionClient,
+    ObjectDetectionWorker,
+)
+from frigate.util import deep_merge
+import frigate.detectors.detector_types as detectors
+
+
+test_tensor_input = np.random.randint(
+    np.iinfo(np.uint8).min,
+    np.iinfo(np.uint8).max,
+    (1, 320, 320, 3),
+    dtype=np.uint8,
+)
+
+test_detection_output = np.random.rand(20, 6).astype("f")
+
+
+def create_detector(det_type):
+    api = Mock()
+    api.return_value.detect_raw = Mock(return_value=test_detection_output)
+    return api
 
 
 class TestLocalObjectDetector(unittest.TestCase):
+    @patch.dict(
+        "frigate.detectors.detector_types.api_types",
+        {det_type: create_detector(det_type) for det_type in DetectorTypeEnum},
+    )
+    def test_socket_client_broker_worker(self):
+        detector_name = "cpu"
+        ipc_address = "ipc://detection_broker.ipc"
+        tcp_address = "tcp://127.0.0.1:5555"
+
+        detector = {"type": "cpu"}
+        test_cases = {
+            "ipc_shm": {"cameras": ["ipc_shm"]},
+            "ipc_no_shm": {"shared_memory": False, "cameras": ["ipc_no_shm"]},
+            "tcp_shm": {
+                "address": tcp_address,
+                "shared_memory": True,
+                "cameras": ["tcp_shm"],
+            },
+            "tcp_no_shm": {"address": tcp_address, "cameras": ["tcp_no_shm"]},
+        }
+
+        class ClientTestThread(threading.Thread):
+            def __init__(
+                self,
+                camera_name,
+                labelmap,
+                model_config,
+                server_config,
+                tensor_input,
+                timeout,
+            ):
+                super().__init__()
+                self.camera_name = camera_name
+                self.labelmap = labelmap
+                self.model_config = model_config
+                self.server_config = server_config
+                self.tensor_input = tensor_input
+                self.timeout = timeout
+
+            def run(self):
+                object_detector = ObjectDetectionClient(
+                    self.camera_name,
+                    self.labelmap,
+                    self.model_config,
+                    self.server_config,
+                    timeout=self.timeout,
+                )
+                try:
+                    object_detector.detect(self.tensor_input)
+                finally:
+                    object_detector.cleanup()
+
+        try:
+            detection_shms: dict[str, SharedMemory] = {}
+            for camera_name in test_cases.keys():
+                shm_name = camera_name
+                out_shm_name = f"out-{camera_name}"
+                try:
+                    shm = SharedMemory(name=shm_name, size=512 * 512 * 3, create=True)
+                except FileExistsError:
+                    shm = SharedMemory(name=shm_name)
+                detection_shms[shm_name] = shm
+                try:
+                    out_shm = SharedMemory(
+                        name=out_shm_name, size=20 * 6 * 4, create=True
+                    )
+                except FileExistsError:
+                    out_shm = SharedMemory(name=out_shm_name)
+                detection_shms[out_shm_name] = out_shm
+
+            self.detection_broker = ObjectDetectionBroker(
+                bind=[ipc_address, tcp_address],
+                shms=detection_shms,
+            )
+            self.detection_broker.start()
+
+            for test_case in test_cases.keys():
+                with self.subTest(test_case=test_case):
+                    camera_name = test_case
+                    shm_name = camera_name
+                    shm = detection_shms[shm_name]
+                    out_shm_name = f"out-{camera_name}"
+                    out_shm = detection_shms[out_shm_name]
+
+                    test_cfg = FrigateConfig.parse_obj(
+                        {
+                            "server": {
+                                "mode": "detection_only",
+                                "ipc": ipc_address,
+                                "addresses": [tcp_address],
+                            },
+                            "detectors": {
+                                detector_name: deep_merge(
+                                    detector, test_cases[test_case]
+                                )
+                            },
+                        }
+                    )
+                    config = test_cfg.runtime_config
+                    detector_config = config.detectors[detector_name]
+                    model_config = detector_config.model
+
+                    tensor_input = np.ndarray(
+                        (1, config.model.height, config.model.width, 3),
+                        dtype=np.uint8,
+                        buffer=shm.buf,
+                    )
+                    tensor_input[:] = test_tensor_input[:]
+                    out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
+
+                    try:
+                        worker = ObjectDetectionWorker(
+                            detector_name,
+                            detector_config,
+                            mp.Value("d", 0.01),
+                            mp.Value("d", 0.0),
+                            None,
+                        )
+                        worker.connect()
+
+                        client = ClientTestThread(
+                            camera_name,
+                            test_cfg.model.merged_labelmap,
+                            model_config,
+                            config.server,
+                            tensor_input,
+                            timeout=10,
+                        )
+                        client.start()
+
+                        client_id, request = worker.wait_for_request()
+                        reply = worker.handle_request(request)
+                        worker.send_reply_final(client_id, reply)
+                    except Exception as ex:
+                        print(ex)
+                    finally:
+                        client.join()
+                        worker.close()
+
+                    self.assertIsNone(
+                        np.testing.assert_array_almost_equal(
+                            out_np, test_detection_output
+                        )
+                    )
+        finally:
+            self.detection_broker.stop()
+            for shm in detection_shms.values():
+                shm.close()
+                shm.unlink()
+
     def test_localdetectorprocess_should_only_create_specified_detector_type(self):
         for det_type in detectors.api_types:
             with self.subTest(det_type=det_type):
                 with patch.dict(
-                    "frigate.detectors.api_types",
-                    {det_type: Mock() for det_type in DetectorTypeEnum},
+                    "frigate.detectors.detector_types.api_types",
+                    {
+                        det_type: create_detector(det_type)
+                        for det_type in DetectorTypeEnum
+                    },
                 ):
                     test_cfg = parse_obj_as(
-                        DetectorConfig, ({"type": det_type, "model": {}})
+                        DetectorConfig,
+                        ({"type": det_type, "model": {}, "cameras": ["test"]}),
                     )
                     test_cfg.model.path = "/test/modelpath"
-                    test_obj = frigate.object_detection.LocalObjectDetector(
-                        detector_config=test_cfg
+                    test_obj = ObjectDetectionWorker(
+                        detector_name="test", detector_config=test_cfg
                     )
 
                     assert test_obj is not None
@@ -34,7 +212,7 @@ class TestLocalObjectDetector(unittest.TestCase):
                             mock_detector.assert_not_called()
 
     @patch.dict(
-        "frigate.detectors.api_types",
+        "frigate.detectors.detector_types.api_types",
         {det_type: Mock() for det_type in DetectorTypeEnum},
     )
     def test_detect_raw_given_tensor_input_should_return_api_detect_raw_result(self):
@@ -42,8 +220,11 @@ class TestLocalObjectDetector(unittest.TestCase):
 
         TEST_DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
-            detector_config=parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+        test_obj_detect = ObjectDetectionWorker(
+            detector_name="test",
+            detector_config=parse_obj_as(
+                DetectorConfig, {"type": "cpu", "model": {}, "cameras": ["test"]}
+            ),
         )
 
         mock_det_api = mock_cputfl.return_value
@@ -55,7 +236,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         assert test_result is mock_det_api.detect_raw.return_value
 
     @patch.dict(
-        "frigate.detectors.api_types",
+        "frigate.detectors.detector_types.api_types",
         {det_type: Mock() for det_type in DetectorTypeEnum},
     )
     def test_detect_raw_given_tensor_input_should_call_api_detect_raw_with_transposed_tensor(
@@ -66,11 +247,13 @@ class TestLocalObjectDetector(unittest.TestCase):
         TEST_DATA = np.zeros((1, 32, 32, 3), np.uint8)
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
 
-        test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+        test_cfg = parse_obj_as(
+            DetectorConfig, {"type": "cpu", "model": {}, "cameras": ["test"]}
+        )
         test_cfg.model.input_tensor = InputTensorEnum.nchw
 
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
-            detector_config=test_cfg
+        test_obj_detect = ObjectDetectionWorker(
+            detector_name="test", detector_config=test_cfg
         )
 
         mock_det_api = mock_cputfl.return_value
@@ -87,10 +270,10 @@ class TestLocalObjectDetector(unittest.TestCase):
         assert test_result is mock_det_api.detect_raw.return_value
 
     @patch.dict(
-        "frigate.detectors.api_types",
+        "frigate.detectors.detector_types.api_types",
         {det_type: Mock() for det_type in DetectorTypeEnum},
     )
-    @patch("frigate.object_detection.load_labels")
+    @patch("frigate.detectors.detection_worker.load_labels")
     def test_detect_given_tensor_input_should_return_lfiltered_detections(
         self, mock_load_labels
     ):
@@ -115,9 +298,12 @@ class TestLocalObjectDetector(unittest.TestCase):
             "label-5",
         ]
 
-        test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
+        test_cfg = parse_obj_as(
+            DetectorConfig, {"type": "cpu", "model": {}, "cameras": ["test"]}
+        )
         test_cfg.model = ModelConfig()
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
+        test_obj_detect = ObjectDetectionWorker(
+            detector_name="test",
             detector_config=test_cfg,
             labels=TEST_LABEL_FILE,
         )
