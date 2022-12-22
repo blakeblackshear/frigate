@@ -6,7 +6,7 @@ export default function Birdseye() {
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading size="2xl">Birdseye</Heading>
-      <div>
+      <div className="max-w-7xl">
         <JSMpegPlayer camera="birdseye" />
       </div>
     </div>
