@@ -48,6 +48,65 @@ export default function CameraControlPanel({ camera = '' }) {
     return <ActivityIndicator />;
   }
 
+  document.addEventListener('keydown', (e) => {
+    if (!e) {
+      return;
+    }
+
+    if (e.repeat) {
+      e.preventDefault();
+      return;
+    }
+
+    console.log('Handling key down ' + e.key);
+
+    if (ptz.features.includes('pt')) {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        onSetMove(e, 'LEFT');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        onSetMove(e, 'RIGHT');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        onSetMove(e, 'UP');
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        onSetMove(e, 'DOWN');
+      }
+
+      if (ptz.features.includes('zoom')) {
+        if (e.key == '+') {
+          e.preventDefault();
+          onSetZoom(e, 'IN');
+        } else if (e.key == '-') {
+          e.preventDefault();
+          onSetZoom(e, 'OUT');
+        }
+      }
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (!e || e.repeat) {
+      return;
+    }
+
+    console.log('Handling key up ' + e.key);
+
+    if (
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === '+' ||
+      e.key === '-'
+    ) {
+      e.preventDefault();
+      onSetStop(e);
+    }
+  });
+
   return (
     <div data-testid="control-panel" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {ptz.features.includes('pt') && (
