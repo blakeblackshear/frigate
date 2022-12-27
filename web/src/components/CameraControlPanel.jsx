@@ -58,8 +58,6 @@ export default function CameraControlPanel({ camera = '' }) {
       return;
     }
 
-    console.log('Handling key down ' + e.key);
-
     if (ptz.features.includes('pt')) {
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
@@ -91,8 +89,6 @@ export default function CameraControlPanel({ camera = '' }) {
     if (!e || e.repeat) {
       return;
     }
-
-    console.log('Handling key up ' + e.key);
 
     if (
       e.key === 'ArrowLeft' ||
