@@ -142,13 +142,13 @@ export default function CameraControlPanel({ camera = '' }) {
           </Heading>
           <div className="w-full flex justify-center">
             <button onMouseDown={(e) => onSetZoom(e, 'IN')} onMouseUp={(e) => onSetStop(e)}>
-              <div className="h-12 w-12 p-2 text-2xl bg-slate-500">+</div>
+              <div className="h-12 w-12 p-2 text-2xl bg-slate-500 select-none">+</div>
             </button>
           </div>
           <div className="h-12" />
           <div className="flex justify-center">
             <button onMouseDown={(e) => onSetZoom(e, 'OUT')} onMouseUp={(e) => onSetStop(e)}>
-              <div className="h-12 w-12 p-2 text-2xl bg-slate-500">-</div>
+              <div className="h-12 w-12 p-2 text-2xl bg-slate-500 select-none">-</div>
             </button>
           </div>
         </div>
