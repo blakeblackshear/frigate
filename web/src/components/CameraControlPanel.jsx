@@ -115,20 +115,64 @@ export default function CameraControlPanel({ camera = '' }) {
             Pan / Tilt
           </Heading>
           <div className="w-full flex justify-center">
-            <button onMouseDown={(e) => onSetMove(e, 'UP')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetMove(e, 'UP')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetMove(e, 'UP');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
             </button>
           </div>
           <div className="w-full flex justify-between">
-            <button onMouseDown={(e) => onSetMove(e, 'LEFT')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetMove(e, 'LEFT')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetMove(e, 'LEFT');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <ArrowLeftDouble className="btn h-12 p-2 bg-slate-500" />
             </button>
-            <button onMouseDown={(e) => onSetMove(e, 'RIGHT')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetMove(e, 'RIGHT')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetMove(e, 'RIGHT');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
             </button>
           </div>
           <div className="flex justify-center">
-            <button onMouseDown={(e) => onSetMove(e, 'DOWN')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetMove(e, 'DOWN')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetMove(e, 'DOWN');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
             </button>
           </div>
@@ -141,13 +185,35 @@ export default function CameraControlPanel({ camera = '' }) {
             Zoom
           </Heading>
           <div className="w-full flex justify-center">
-            <button onMouseDown={(e) => onSetZoom(e, 'IN')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetZoom(e, 'IN')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetZoom(e, 'IN');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <div className="h-12 w-12 p-2 text-2xl bg-slate-500 select-none">+</div>
             </button>
           </div>
           <div className="h-12" />
           <div className="flex justify-center">
-            <button onMouseDown={(e) => onSetZoom(e, 'OUT')} onMouseUp={(e) => onSetStop(e)}>
+            <button
+              onMouseDown={(e) => onSetZoom(e, 'OUT')}
+              onMouseUp={(e) => onSetStop(e)}
+              onTouchStart={(e) => {
+                onSetZoom(e, 'OUT');
+                e.preventDefault();
+              }}
+              onTouchEnd={(e) => {
+                onSetStop(e);
+                e.preventDefault();
+              }}
+            >
               <div className="h-12 w-12 p-2 text-2xl bg-slate-500 select-none">-</div>
             </button>
           </div>
