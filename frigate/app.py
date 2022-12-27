@@ -6,7 +6,7 @@ import os
 import signal
 import sys
 import threading
-from typing import Optional
+from typing import Optional, Any
 from types import FrameType
 
 import traceback
@@ -23,7 +23,7 @@ from frigate.detectors import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.majordomo import QueueBroker
+from frigate.majordomo import QueueBroker, BrokerWorker
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -186,7 +186,9 @@ class FrigateApp:
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
     def start_queue_broker(self) -> None:
-        def detect_no_shm(worker, service_name, body):
+        def detect_no_shm(
+            worker: BrokerWorker, service_name: bytes, body: list[bytes]
+        ) -> list[bytes]:
             in_shm = self.detection_shms[str(service_name, "ascii")]
             tensor_input = in_shm.buf
             body = body[0:2] + [tensor_input]

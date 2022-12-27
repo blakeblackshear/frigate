@@ -183,7 +183,7 @@ class ObjectDetectProcess:
 
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
-        self.detect_process = None
+        self.detect_process: mp.Process
 
         self.start_or_restart()
 

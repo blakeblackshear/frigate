@@ -827,7 +827,7 @@ class FrigateConfig(FrigateBaseModel):
     server: ServerConfig = Field(
         default_factory=ServerConfig, title="Server configuration"
     )
-    mqtt: Optional[MqttConfig] = Field(title="MQTT Configuration.")
+    mqtt: MqttConfig = Field(default={}, title="MQTT Configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
     )
@@ -872,7 +872,7 @@ class FrigateConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
-    cameras: Optional[Dict[str, CameraConfig]] = Field(title="Camera configuration.")
+    cameras: Dict[str, CameraConfig] = Field(default={}, title="Camera configuration.")
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
         title="Global timestamp style configuration.",

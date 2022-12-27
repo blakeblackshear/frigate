@@ -22,12 +22,23 @@ from majortomo import error, protocol
 from majortomo.config import DEFAULT_BIND_URL
 from majortomo.broker import (
     Broker,
-    Worker as BrokerWorker,
+    Worker as MdpBrokerWorker,
     ServicesContainer,
     id_to_int,
 )
 from majortomo.util import TextOrBytes, text_to_ascii_bytes
 from majortomo.worker import DEFAULT_ZMQ_LINGER, Worker as MdpWorker
+
+
+class BrokerWorker(MdpBrokerWorker):
+    """Worker objects represent a connected / known MDP worker process"""
+
+    def __init__(
+        self, worker_id: bytes, service: bytes, expire_at: float, next_heartbeat: float
+    ):
+        super().__init__(worker_id, service, expire_at, next_heartbeat)
+        self.request_handler: str
+        self.request_params: list[str] = []
 
 
 class QueueServicesContainer(ServicesContainer):
@@ -187,25 +198,6 @@ class QueueBroker(Broker):
         if worker.request_handler in self.request_handlers:
             handler = self.request_handlers[worker.request_handler]
             body = handler(worker, service_name, body)
-        return body
-
-
-class MultiBindableBroker:
-    def __init__(
-        self,
-        bind: Union[str, List[str]] = [DEFAULT_BIND_URL],
-        shms: dict[str, SharedMemory] = {},
-    ):
-        super().__init__(bind)
-        self.shms = shms
-
-    def on_worker_request(
-        self, worker: BrokerWorker, service_name: bytes, body: List[bytes]
-    ) -> List[bytes]:
-        if "DETECT_NO_SHM" == worker.request_handler:
-            in_shm = self.shms[str(service_name, "ascii")]
-            tensor_input = in_shm.buf
-            body = body[0:2] + [tensor_input]
         return body
 
 
