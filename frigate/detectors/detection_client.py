@@ -3,7 +3,7 @@ import multiprocessing as mp
 from multiprocessing.shared_memory import SharedMemory
 from majortomo import Client
 from frigate.util import EventsPerSecond
-from .detector_config import ModelConfig, DetectionServerConfig
+from .detector_config import ModelConfig
 
 
 class ObjectDetectionClient:
@@ -12,7 +12,7 @@ class ObjectDetectionClient:
         camera_name: str,
         labels,
         model_config: ModelConfig,
-        server_config: DetectionServerConfig,
+        server_address: str,
         timeout=None,
     ):
         self.camera_name = camera_name
@@ -29,7 +29,7 @@ class ObjectDetectionClient:
         self.out_np_shm = np.ndarray((20, 6), dtype=np.float32, buffer=self.out_shm.buf)
 
         self.timeout = timeout
-        self.detection_client = Client(server_config.ipc)
+        self.detection_client = Client(server_address)
         self.detection_client.connect()
 
     def detect(self, tensor_input, threshold=0.4):

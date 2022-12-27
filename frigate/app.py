@@ -17,16 +17,13 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, ServerModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
-from frigate.detectors import (
-    ObjectDetectProcess,
-    ObjectDetectionBroker,
-    DetectionServerModeEnum,
-)
+from frigate.detectors import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
+from frigate.majordomo import QueueBroker
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -84,7 +81,7 @@ class FrigateApp:
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config
 
-        if self.config.server.mode == DetectionServerModeEnum.DetectionOnly:
+        if self.config.server.mode == ServerModeEnum.DetectionOnly:
             return
 
         for camera_name in self.config.cameras.keys():
@@ -188,12 +185,17 @@ class FrigateApp:
         comms.append(self.ws_client)
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
-    def start_detection_broker(self) -> None:
+    def start_queue_broker(self) -> None:
+        def detect_no_shm(worker, service_name, body):
+            in_shm = self.detection_shms[str(service_name, "ascii")]
+            tensor_input = in_shm.buf
+            body = body[0:2] + [tensor_input]
+            return body
+
         bind_urls = [self.config.broker.ipc] + self.config.broker.addresses
-        self.detection_broker = ObjectDetectionBroker(
-            bind=bind_urls, shms=self.detection_shms
-        )
-        self.detection_broker.start()
+        self.queue_broker = QueueBroker(bind=bind_urls)
+        self.queue_broker.register_request_handler("DETECT_NO_SHM", detect_no_shm)
+        self.queue_broker.start()
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -372,7 +374,7 @@ class FrigateApp:
             self.set_environment_vars()
             self.ensure_dirs()
 
-            if self.config.server.mode == DetectionServerModeEnum.DetectionOnly:
+            if self.config.server.mode == ServerModeEnum.DetectionOnly:
                 self.start_detectors()
                 self.start_watchdog()
                 self.stop_event.wait()
@@ -389,7 +391,7 @@ class FrigateApp:
 
         self.init_restream()
         self.start_detectors()
-        self.start_detection_broker()
+        self.start_queue_broker()
         self.start_video_output_processor()
         self.start_detected_frames_processor()
         self.start_camera_processors()
@@ -416,7 +418,7 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
-        if self.config.server.mode != DetectionServerModeEnum.DetectionOnly:
+        if self.config.server.mode != ServerModeEnum.DetectionOnly:
             self.ws_client.stop()
             self.detected_frames_processor.join()
             self.event_processor.join()
@@ -426,7 +428,7 @@ class FrigateApp:
             self.stats_emitter.join()
             self.frigate_watchdog.join()
             self.db.stop()
-            self.detection_broker.stop()
+            self.queue_broker.stop()
 
         for detector in self.detectors.values():
             detector.stop()

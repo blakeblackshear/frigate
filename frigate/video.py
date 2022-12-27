@@ -14,12 +14,7 @@ import numpy as np
 import cv2
 from setproctitle import setproctitle
 
-from frigate.config import (
-    CameraConfig,
-    DetectConfig,
-    PixelFormatEnum,
-    DetectionServerConfig,
-)
+from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum, ServerConfig
 from frigate.const import CACHE_DIR
 from frigate.detectors import ObjectDetectionClient
 from frigate.log import LogPipe
@@ -413,7 +408,7 @@ def track_camera(
     camera_name,
     config: CameraConfig,
     model_config,
-    server_config: DetectionServerConfig,
+    server_config: ServerConfig,
     labelmap,
     detected_objects_queue,
     process_info,
@@ -449,7 +444,7 @@ def track_camera(
         motion_contour_area,
     )
     object_detector = ObjectDetectionClient(
-        camera_name, labelmap, model_config, server_config
+        camera_name, labelmap, model_config, server_config.ipc
     )
 
     object_tracker = ObjectTracker(config.detect)

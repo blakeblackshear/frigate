@@ -43,10 +43,8 @@ from frigate.ffmpeg_presets import (
 from frigate.detectors import (
     PixelFormatEnum,
     InputTensorEnum,
-    DetectionServerConfig,
     ModelConfig,
     BaseDetectorConfig,
-    DetectionServerModeEnum,
 )
 from frigate.version import VERSION
 
@@ -812,9 +810,22 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
                 )
 
 
+class ServerModeEnum(str, Enum):
+    Full = "full"
+    DetectionOnly = "detection_only"
+
+
+class ServerConfig(BaseModel):
+    mode: ServerModeEnum = Field(default=ServerModeEnum.Full, title="Server mode")
+    ipc: str = Field(default="ipc://queue_broker.ipc", title="Broker IPC path")
+    addresses: List[str] = Field(
+        default=["tcp://127.0.0.1:5555"], title="Broker TCP addresses"
+    )
+
+
 class FrigateConfig(FrigateBaseModel):
-    server: DetectionServerConfig = Field(
-        default_factory=DetectionServerConfig, title="Server configuration"
+    server: ServerConfig = Field(
+        default_factory=ServerConfig, title="Server configuration"
     )
     mqtt: Optional[MqttConfig] = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -913,7 +924,7 @@ class FrigateConfig(FrigateBaseModel):
 
             config.detectors[key] = detector_config
 
-        if config.server.mode == DetectionServerModeEnum.DetectionOnly:
+        if config.server.mode == ServerModeEnum.DetectionOnly:
             return config
 
         # MQTT password substitution
@@ -1030,8 +1041,8 @@ class FrigateConfig(FrigateBaseModel):
         server_config = values.get("server", None)
         if (
             server_config is not None
-            and server_config.get("mode", DetectionServerModeEnum.Full)
-            == DetectionServerModeEnum.DetectionOnly
+            and server_config.get("mode", ServerModeEnum.Full)
+            == ServerModeEnum.DetectionOnly
         ):
             return values
 

@@ -79,18 +79,3 @@ class BaseDetectorConfig(BaseModel):
     class Config:
         extra = Extra.allow
         arbitrary_types_allowed = True
-
-
-class DetectionServerModeEnum(str, Enum):
-    Full = "full"
-    DetectionOnly = "detection_only"
-
-
-class DetectionServerConfig(BaseModel):
-    mode: DetectionServerModeEnum = Field(
-        default=DetectionServerModeEnum.Full, title="Server mode"
-    )
-    ipc: str = Field(default="ipc://detection_broker.ipc", title="Broker IPC path")
-    addresses: List[str] = Field(
-        default=["tcp://127.0.0.1:5555"], title="Broker TCP addresses"
-    )

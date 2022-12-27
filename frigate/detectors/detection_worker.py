@@ -1,28 +1,23 @@
 import datetime
 import logging
 import os
-import signal
 import threading
 import numpy as np
 import multiprocessing as mp
 from multiprocessing.shared_memory import SharedMemory
-from majortomo import Worker, WorkerRequestsIterator, error, protocol
-from majortomo.util import TextOrBytes, text_to_ascii_bytes
 from typing import List
 
+from frigate.majordomo import QueueWorker
 from frigate.util import listen, EventsPerSecond, load_labels
 from .detector_config import InputTensorEnum, BaseDetectorConfig
 from .detector_types import create_detector
 
 from setproctitle import setproctitle
 
-DEFAULT_ZMQ_LINGER = 2500
-READY_SHM = b"\007"
-
 logger = logging.getLogger(__name__)
 
 
-class ObjectDetectionWorker(Worker):
+class ObjectDetectionWorker(QueueWorker):
     def __init__(
         self,
         detector_name: str,
@@ -30,23 +25,13 @@ class ObjectDetectionWorker(Worker):
         avg_inference_speed: mp.Value = mp.Value("d", 0.01),
         detection_start: mp.Value = mp.Value("d", 0.00),
         labels=None,
-        heartbeat_interval=protocol.DEFAULT_HEARTBEAT_INTERVAL,
-        heartbeat_timeout=protocol.DEFAULT_HEARTBEAT_TIMEOUT,
-        zmq_context=None,
-        zmq_linger=DEFAULT_ZMQ_LINGER,
+        stop_event: mp.Event = None,
     ):
-        self.broker_url = detector_config.address
-        self.service_names = [
-            text_to_ascii_bytes(service_name)
-            for service_name in detector_config.cameras
-        ]
         super().__init__(
-            self.broker_url,
-            b"",
-            heartbeat_interval,
-            heartbeat_timeout,
-            zmq_context,
-            zmq_linger,
+            broker_url=detector_config.address,
+            service_names=detector_config.cameras,
+            handler_name="DETECT_NO_SHM" if not detector_config.shared_memory else None,
+            stop_event=stop_event,
         )
         self.detector_name = detector_name
         self.detector_config = detector_config
@@ -80,12 +65,7 @@ class ObjectDetectionWorker(Worker):
 
         self.detect_api = create_detector(self.detector_config)
 
-    def _send_ready(self):
-        command = READY_SHM if self.detector_config.shared_memory else protocol.READY
-        for service_name in self.service_names:
-            self._send(command, service_name)
-
-    def handle_request(self, request):
+    def handle_request(self, client_id: bytes, request: List[bytes]):
         self.detection_start.value = datetime.datetime.now().timestamp()
 
         # expected request format:
@@ -100,6 +80,7 @@ class ObjectDetectionWorker(Worker):
                 self.detection_start.value = 0.0
                 return frames
             frames.append(detections.tobytes())
+
         elif len(request) == 3:
             camera_name = request[0].decode("ascii")
             shm_shape = (
@@ -186,17 +167,7 @@ def run_detector(
         detection_start,
         labels,
     )
-
-    def receiveSignal(signalNumber, frame):
-        worker.close()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    worker_iter = WorkerRequestsIterator(worker)
-    for request in worker_iter:
-        reply = worker.handle_request(request)
-        worker_iter.send_reply_final(reply)
+    worker.start()
 
 
 class ObjectDetectProcess:

@@ -10,10 +10,10 @@ from pydantic import parse_obj_as
 from frigate.config import FrigateConfig, DetectorConfig, InputTensorEnum, ModelConfig
 from frigate.detectors import (
     DetectorTypeEnum,
-    ObjectDetectionBroker,
     ObjectDetectionClient,
     ObjectDetectionWorker,
 )
+from frigate.majordomo import QueueBroker
 from frigate.util import deep_merge
 import frigate.detectors.detector_types as detectors
 
@@ -34,6 +34,60 @@ def create_detector(det_type):
     return api
 
 
+def start_broker(ipc_address, tcp_address, camera_names):
+    detection_shms: dict[str, SharedMemory] = {}
+
+    def detect_no_shm(worker, service_name, body):
+        in_shm = detection_shms[str(service_name, "ascii")]
+        tensor_input = in_shm.buf
+        body = body[0:2] + [tensor_input]
+        return body
+
+    queue_broker = QueueBroker(bind=[ipc_address, tcp_address])
+    queue_broker.register_request_handler("DETECT_NO_SHM", detect_no_shm)
+    queue_broker.start()
+
+    for camera_name in camera_names:
+        shm_name = camera_name
+        out_shm_name = f"out-{camera_name}"
+        try:
+            shm = SharedMemory(name=shm_name, size=512 * 512 * 3, create=True)
+        except FileExistsError:
+            shm = SharedMemory(name=shm_name, create=False)
+        detection_shms[shm_name] = shm
+        try:
+            out_shm = SharedMemory(name=out_shm_name, size=20 * 6 * 4, create=True)
+        except FileExistsError:
+            out_shm = SharedMemory(name=out_shm_name, create=False)
+        detection_shms[out_shm_name] = out_shm
+
+    return queue_broker, detection_shms
+
+
+class WorkerTestThread(threading.Thread):
+    def __init__(self, detector_name, detector_config, stop_event):
+        super().__init__()
+        self.detector_name = detector_name
+        self.detector_config = detector_config
+        self.stop_event = stop_event
+
+    def run(self):
+        worker = ObjectDetectionWorker(
+            self.detector_name,
+            self.detector_config,
+            mp.Value("d", 0.01),
+            mp.Value("d", 0.0),
+            None,
+            self.stop_event,
+        )
+        worker.connect()
+        if not self.stop_event.is_set():
+            client_id, request = worker.wait_for_request()
+            reply = worker.handle_request(client_id, request)
+            worker.send_reply_final(client_id, reply)
+        worker.close()
+
+
 class TestLocalObjectDetector(unittest.TestCase):
     @patch.dict(
         "frigate.detectors.detector_types.api_types",
@@ -41,7 +95,7 @@ class TestLocalObjectDetector(unittest.TestCase):
     )
     def test_socket_client_broker_worker(self):
         detector_name = "cpu"
-        ipc_address = "ipc://detection_broker.ipc"
+        ipc_address = "ipc://queue_broker.ipc"
         tcp_address = "tcp://127.0.0.1:5555"
 
         detector = {"type": "cpu"}
@@ -56,60 +110,11 @@ class TestLocalObjectDetector(unittest.TestCase):
             "tcp_no_shm": {"address": tcp_address, "cameras": ["tcp_no_shm"]},
         }
 
-        class ClientTestThread(threading.Thread):
-            def __init__(
-                self,
-                camera_name,
-                labelmap,
-                model_config,
-                server_config,
-                tensor_input,
-                timeout,
-            ):
-                super().__init__()
-                self.camera_name = camera_name
-                self.labelmap = labelmap
-                self.model_config = model_config
-                self.server_config = server_config
-                self.tensor_input = tensor_input
-                self.timeout = timeout
-
-            def run(self):
-                object_detector = ObjectDetectionClient(
-                    self.camera_name,
-                    self.labelmap,
-                    self.model_config,
-                    self.server_config,
-                    timeout=self.timeout,
-                )
-                try:
-                    object_detector.detect(self.tensor_input)
-                finally:
-                    object_detector.cleanup()
-
         try:
-            detection_shms: dict[str, SharedMemory] = {}
-            for camera_name in test_cases.keys():
-                shm_name = camera_name
-                out_shm_name = f"out-{camera_name}"
-                try:
-                    shm = SharedMemory(name=shm_name, size=512 * 512 * 3, create=True)
-                except FileExistsError:
-                    shm = SharedMemory(name=shm_name)
-                detection_shms[shm_name] = shm
-                try:
-                    out_shm = SharedMemory(
-                        name=out_shm_name, size=20 * 6 * 4, create=True
-                    )
-                except FileExistsError:
-                    out_shm = SharedMemory(name=out_shm_name)
-                detection_shms[out_shm_name] = out_shm
-
-            self.detection_broker = ObjectDetectionBroker(
-                bind=[ipc_address, tcp_address],
-                shms=detection_shms,
+            queue_broker, detection_shms = None, None
+            queue_broker, detection_shms = start_broker(
+                ipc_address, tcp_address, test_cases.keys()
             )
-            self.detection_broker.start()
 
             for test_case in test_cases.keys():
                 with self.subTest(test_case=test_case):
@@ -136,6 +141,7 @@ class TestLocalObjectDetector(unittest.TestCase):
                     config = test_cfg.runtime_config
                     detector_config = config.detectors[detector_name]
                     model_config = detector_config.model
+                    stop_event = mp.Event()
 
                     tensor_input = np.ndarray(
                         (1, config.model.height, config.model.width, 3),
@@ -146,33 +152,26 @@ class TestLocalObjectDetector(unittest.TestCase):
                     out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
 
                     try:
-                        worker = ObjectDetectionWorker(
-                            detector_name,
-                            detector_config,
-                            mp.Value("d", 0.01),
-                            mp.Value("d", 0.0),
-                            None,
+                        client = None
+                        worker = WorkerTestThread(
+                            detector_name, detector_config, stop_event
                         )
-                        worker.connect()
+                        worker.start()
 
-                        client = ClientTestThread(
+                        client = ObjectDetectionClient(
                             camera_name,
                             test_cfg.model.merged_labelmap,
                             model_config,
-                            config.server,
-                            tensor_input,
+                            config.server.ipc,
                             timeout=10,
                         )
-                        client.start()
-
-                        client_id, request = worker.wait_for_request()
-                        reply = worker.handle_request(request)
-                        worker.send_reply_final(client_id, reply)
-                    except Exception as ex:
-                        print(ex)
+                        client.detect(tensor_input)
                     finally:
-                        client.join()
-                        worker.close()
+                        stop_event.set()
+                        if client is not None:
+                            client.cleanup()
+                        if worker is not None:
+                            worker.join()
 
                     self.assertIsNone(
                         np.testing.assert_array_almost_equal(
@@ -180,10 +179,11 @@ class TestLocalObjectDetector(unittest.TestCase):
                         )
                     )
         finally:
-            self.detection_broker.stop()
-            for shm in detection_shms.values():
-                shm.close()
-                shm.unlink()
+            if queue_broker is not None:
+                queue_broker.stop()
+                for shm in detection_shms.values():
+                    shm.close()
+                    shm.unlink()
 
     def test_localdetectorprocess_should_only_create_specified_detector_type(self):
         for det_type in detectors.api_types:
