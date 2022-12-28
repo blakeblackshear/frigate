@@ -202,3 +202,18 @@ yolov7-tiny-416
 ### Configuration Parameters
 
 **TODO**
+
+Sample:
+
+```yaml
+detectors:
+  tensorrt:
+    type: tensorrt
+
+model:
+  path: /trt-models/yolov7-tiny-416.trt
+  labelmap_path: /trt-models/coco_91cl.txt
+  input_tensor: nchw
+  width: 416
+  height: 416
+```

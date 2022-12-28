@@ -32,3 +32,6 @@ do
     python3 onnx_to_tensorrt.py -m ${model}
     cp /tensorrt_demos/yolo/${model}.trt ${OUTPUT_FOLDER}/${model}.trt;
 done
+
+# Download Labelmap
+wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl.txt -O ${OUTPUT_FOLDER}/coco_91cl.txt
