@@ -2,8 +2,14 @@ import logging
 
 import ctypes
 import numpy as np
-import tensorrt as trt
-from cuda import cuda, cudart
+
+try:
+    import tensorrt as trt
+    from cuda import cuda, cudart
+
+    TRT_SUPPORT = True
+except ModuleNotFoundError as e:
+    TRT_SUPPORT = False
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -14,27 +20,28 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "tensorrt"
 
+if TRT_SUPPORT:
 
-class TrtLogger(trt.ILogger):
-    def __init__(self):
-        trt.ILogger.__init__(self)
+    class TrtLogger(trt.ILogger):
+        def __init__(self):
+            trt.ILogger.__init__(self)
 
-    def log(self, severity, msg):
-        logger.log(self.getSeverity(severity), msg)
+        def log(self, severity, msg):
+            logger.log(self.getSeverity(severity), msg)
 
-    def getSeverity(self, sev: trt.ILogger.Severity) -> int:
-        if sev == trt.ILogger.VERBOSE:
-            return logging.DEBUG
-        elif sev == trt.ILogger.INFO:
-            return logging.INFO
-        elif sev == trt.ILogger.WARNING:
-            return logging.WARNING
-        elif sev == trt.ILogger.ERROR:
-            return logging.ERROR
-        elif sev == trt.ILogger.INTERNAL_ERROR:
-            return logging.CRITICAL
-        else:
-            return logging.DEBUG
+        def getSeverity(self, sev: trt.ILogger.Severity) -> int:
+            if sev == trt.ILogger.VERBOSE:
+                return logging.DEBUG
+            elif sev == trt.ILogger.INFO:
+                return logging.INFO
+            elif sev == trt.ILogger.WARNING:
+                return logging.WARNING
+            elif sev == trt.ILogger.ERROR:
+                return logging.ERROR
+            elif sev == trt.ILogger.INTERNAL_ERROR:
+                return logging.CRITICAL
+            else:
+                return logging.DEBUG
 
 
 class TensorRTDetectorConfig(BaseDetectorConfig):
@@ -174,6 +181,10 @@ class TensorRtDetector(DetectionApi):
         ]
 
     def __init__(self, detector_config: TensorRTDetectorConfig):
+        assert (
+            TRT_SUPPORT
+        ), f"TensorRT libraries not found, {DETECTOR_KEY} detector not present"
+
         (cuda_err,) = cuda.cuInit(0)
         assert (
             cuda_err == cuda.CUresult.CUDA_SUCCESS
