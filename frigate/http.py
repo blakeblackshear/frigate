@@ -832,6 +832,24 @@ def latest_frame(camera_name):
         response.headers["Content-Type"] = "image/jpeg"
         response.headers["Cache-Control"] = "no-store"
         return response
+    elif camera_name == "birdseye" and current_app.frigate_config.restream.birdseye:
+        frame = cv2.cvtColor(
+            current_app.detected_frames_processor.get_current_frame(camera_name),
+            cv2.COLOR_YUV2BGR_I420,
+        )
+
+        height = int(request.args.get("h", str(frame.shape[0])))
+        width = int(height * frame.shape[1] / frame.shape[0])
+
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        )
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        response.headers["Cache-Control"] = "no-store"
+        return response
     else:
         return "Camera named {} not found".format(camera_name), 404
 

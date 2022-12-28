@@ -152,7 +152,7 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config, frame_manager: SharedMemoryFrameManager):
+    def __init__(self, config: FrigateConfig, frame_manager: SharedMemoryFrameManager):
         self.config = config
         self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
@@ -463,6 +463,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
 
     birdseye_manager = BirdsEyeFrameManager(config, frame_manager)
 
+    if config.restream.birdseye:
+        birdseye_buffer = frame_manager.create(
+            "birdseye",
+            birdseye_manager.yuv_shape[0] * birdseye_manager.yuv_shape[1],
+        )
+
     while not stop_event.is_set():
         try:
             (
@@ -500,7 +506,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 frame_time,
                 frame,
             ):
-                converters["birdseye"].write(birdseye_manager.frame.tobytes())
+                frame_bytes = birdseye_manager.frame.tobytes()
+
+                if config.restream.birdseye:
+                    birdseye_buffer[:] = frame_bytes
+
+                converters["birdseye"].write(frame_bytes)
 
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")

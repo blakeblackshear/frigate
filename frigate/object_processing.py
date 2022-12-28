@@ -880,6 +880,12 @@ class TrackedObjectProcessor(threading.Thread):
             return {}
 
     def get_current_frame(self, camera, draw_options={}):
+        if camera == "birdseye":
+            return self.frame_manager.get(
+                "birdseye",
+                (self.config.birdseye.height * 3 // 2, self.config.birdseye.width),
+            )
+
         return self.camera_states[camera].get_current_frame(draw_options)
 
     def get_current_frame_time(self, camera) -> int:
