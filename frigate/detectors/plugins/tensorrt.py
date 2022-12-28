@@ -83,9 +83,7 @@ class TensorRtDetector(DetectionApi):
             )
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
-            ctypes.cdll.LoadLibrary(
-                "/media/frigate/models/tensorrt_demos/yolo/libyolo_layer.so"
-            )
+            ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")
         except OSError as e:
             logger.error(
                 "ERROR: failed to load libraries. %s",
@@ -250,11 +248,9 @@ class TensorRtDetector(DetectionApi):
         # 1 - score
         # 2..5 - a value between 0 and 1 of the box: [top, left, bottom, right]
 
-        # transform [height, width, 3] into (3, H, W)
-        # tensor_input = tensor_input.transpose((2, 0, 1)).astype(np.float32)
-
         # normalize
-        # tensor_input /= 255.0
+        tensor_input = tensor_input.astype(np.float32)
+        tensor_input /= 255.0
 
         self.inputs[0].host = np.ascontiguousarray(tensor_input.astype(np.float32))
         trt_outputs = self._do_inference()

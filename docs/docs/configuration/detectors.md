@@ -3,11 +3,10 @@ id: detectors
 title: Detectors
 ---
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, and `openvino`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
-
-**Note**: There is not yet support for Nvidia GPUs to perform object detection with tensorflow. It can be used for ffmpeg decoding, but not object detection.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## CPU Detector (not recommended)
+
 The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
 
 The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
@@ -60,6 +59,7 @@ detectors:
 ```
 
 ### Native Coral (Dev Board)
+
 _warning: may have [compatibility issues](https://github.com/blakeblackshear/frigate/issues/1706) after `v0.9.x`_
 
 ```yaml
@@ -99,7 +99,7 @@ The OpenVINO detector type runs an OpenVINO IR model on Intel CPU, GPU and VPU h
 
 The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/latest/openvino_docs_OV_UG_Working_with_devices.html). Other supported devices could be `AUTO`, `CPU`, `GPU`, `MYRIAD`, etc. If not specified, the default OpenVINO device will be selected by the `AUTO` plugin.
 
-OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer.  A supported Intel platform is required to use the `GPU` device with OpenVINO.  The `MYRIAD` device may be run on any platform, including Arm devices.  For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
+OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
 
 An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector.
 
@@ -121,7 +121,7 @@ model:
 
 ### Intel NCS2 VPU and Myriad X Setup
 
-Intel produces a neural net inference accelleration chip called Myriad X.  This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued.  If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device.  The host needs a udev rule installed to handle the NCS2 device.  
+Intel produces a neural net inference accelleration chip called Myriad X. This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued. If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device. The host needs a udev rule installed to handle the NCS2 device.
 
 ```bash
 sudo usermod -a -G users "$(whoami)"
@@ -139,11 +139,66 @@ Additionally, the Frigate docker container needs to run with the following confi
 ```bash
 --device-cgroup-rule='c 189:\* rmw' -v /dev/bus/usb:/dev/bus/usb
 ```
+
 or in your compose file:
 
 ```yml
 device_cgroup_rules:
-  - 'c 189:* rmw'
+  - "c 189:* rmw"
 volumes:
   - /dev/bus/usb:/dev/bus/usb
 ```
+
+## NVidia TensorRT Detector
+
+NVidia GPUs may be used for object detection using the TensorRT libraries.
+
+### Minimum Hardware Support
+
+**TODO**
+
+### Generate Models
+
+The models used for TensorRT must be preprocessed on the same hardware platform that they will run on. This means that each user must run additional setup to generate these model files for the TensorRT library. A script is provided that will build several common models.
+
+To generate the model files, create a new folder to save the models, download the script, and launch a docker container that will run the script.
+
+```bash
+mkdir trt-models
+wget https://github.com/blakeblackshear/frigate/raw/master/docker/tensorrt_models.sh
+docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
+```
+
+The `trt-models` folder can then be mapped into your frigate container as `trt-models` and the models referenced from the config.
+
+If your GPU does not support FP16 operations, you can pass the environment variable `-e USE_FP16=False` to the `docker run` command to disable it.
+
+Specific models can be selected by passing an environment variable to the `docker run` command. Use the form `-e YOLO_MODELS=yolov4-416,yolov4-tiny-416` to select one or more model names. The models available are shown below.
+
+```
+yolov3-288
+yolov3-416
+yolov3-608
+yolov3-spp-288
+yolov3-spp-416
+yolov3-spp-608
+yolov3-tiny-288
+yolov3-tiny-416
+yolov4-288
+yolov4-416
+yolov4-608
+yolov4-csp-256
+yolov4-csp-512
+yolov4-p5-448
+yolov4-p5-896
+yolov4-tiny-288
+yolov4-tiny-416
+yolov4x-mish-320
+yolov4x-mish-640
+yolov7-tiny-288
+yolov7-tiny-416
+```
+
+### Configuration Parameters
+
+**TODO**
