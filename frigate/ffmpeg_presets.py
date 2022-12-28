@@ -153,7 +153,7 @@ def parse_preset_hardware_acceleration_scale(
         scale.extend(detect_args)
         return scale
 
-    scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
+    scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"]).copy()
     scale[1] = scale[1].format(fps, width, height)
     return scale
 
