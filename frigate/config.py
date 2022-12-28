@@ -627,14 +627,15 @@ class CameraConfig(FrigateBaseModel):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
             detect_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.detect)
-            scale_args = parse_preset_hardware_acceleration_scale(ffmpeg_input.hwaccel_args, self.detect.fps, self.detect.width, self.detect.height)
-
-            ffmpeg_output_args = (
-                scale_args
-                + detect_args
-                + ffmpeg_output_args
-                + ["pipe:"]
+            scale_detect_args = parse_preset_hardware_acceleration_scale(
+                ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args,
+                detect_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
             )
+
+            ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
             rtmp_args = get_ffmpeg_arg_list(
                 parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)

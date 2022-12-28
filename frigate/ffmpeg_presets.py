@@ -140,19 +140,21 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
 
 def parse_preset_hardware_acceleration_scale(
     arg: Any,
+    detect_args: list[str],
     fps: int,
     width: int,
     height: int,
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str):
-        scale = PRESETS_HW_ACCEL_SCALE["default"]
+        scale = PRESETS_HW_ACCEL_SCALE["default"].copy()
         scale[1] = str(fps)
         scale[3] = f"{width}x{height}"
+        scale.extend(detect_args)
         return scale
 
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
-    scale[1] = scale[1].format(fps, height, width)
+    scale[1] = scale[1].format(fps, width, height)
     return scale
 
 
@@ -282,7 +284,9 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
         return None
 
     if arg == "preset-jpeg-generic":
-        return PRESETS_INPUT[arg].format(f"{detect_fps}")
+        input = PRESETS_INPUT[arg].copy()
+        input[1] = str(detect_fps)
+        return input
 
     return PRESETS_INPUT.get(arg, None)
 

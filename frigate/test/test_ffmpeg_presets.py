@@ -66,6 +66,25 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
+    def test_ffmpeg_hwaccel_scale_preset(self):
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "fps=10,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
     def test_default_ffmpeg_input_arg_preset(self):
         frigate_config = FrigateConfig(**self.default_ffmpeg)
 
