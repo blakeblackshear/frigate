@@ -1,7 +1,7 @@
 import numpy as np
 import multiprocessing as mp
 from multiprocessing.shared_memory import SharedMemory
-from majortomo import Client
+from frigate.majortomo import Client
 from frigate.util import EventsPerSecond
 from .detector_config import ModelConfig
 

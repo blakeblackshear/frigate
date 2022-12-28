@@ -1,12 +1,12 @@
 import logging
 import multiprocessing as mp
 from multiprocessing.queues import Queue
+from multiprocessing.shared_memory import SharedMemory
 from multiprocessing.synchronize import Event as MpEvent
 import os
 import signal
 import sys
-import threading
-from typing import Optional, Any
+from typing import Optional
 from types import FrameType
 
 import traceback
@@ -23,7 +23,7 @@ from frigate.detectors import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.majordomo import QueueBroker, BrokerWorker
+from frigate.majortomo import Broker, ServiceWorker
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -45,7 +45,7 @@ class FrigateApp:
         self.stop_event: MpEvent = mp.Event()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
-        self.detection_shms: dict[str, mp.shared_memory.SharedMemory] = {}
+        self.detection_shms: dict[str, SharedMemory] = {}
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
@@ -187,15 +187,15 @@ class FrigateApp:
 
     def start_queue_broker(self) -> None:
         def detect_no_shm(
-            worker: BrokerWorker, service_name: bytes, body: list[bytes]
+            worker: ServiceWorker, service_name: bytes, body: list[bytes]
         ) -> list[bytes]:
             in_shm = self.detection_shms[str(service_name, "ascii")]
             tensor_input = in_shm.buf
             body = body[0:2] + [tensor_input]
             return body
 
-        bind_urls = [self.config.broker.ipc] + self.config.broker.addresses
-        self.queue_broker = QueueBroker(bind=bind_urls)
+        bind_urls = [self.config.server.ipc] + self.config.server.addresses
+        self.queue_broker = Broker(bind=bind_urls)
         self.queue_broker.register_request_handler("DETECT_NO_SHM", detect_no_shm)
         self.queue_broker.start()
 
@@ -208,20 +208,18 @@ class FrigateApp:
                         for (name, det) in self.config.detectors.items()
                     ]
                 )
-                shm_in = mp.shared_memory.SharedMemory(
+                shm_in = SharedMemory(
                     name=name,
                     create=True,
                     size=largest_frame,
                 )
             except FileExistsError:
-                shm_in = mp.shared_memory.SharedMemory(name=name)
+                shm_in = SharedMemory(name=name)
 
             try:
-                shm_out = mp.shared_memory.SharedMemory(
-                    name=f"out-{name}", create=True, size=20 * 6 * 4
-                )
+                shm_out = SharedMemory(name=f"out-{name}", create=True, size=20 * 6 * 4)
             except FileExistsError:
-                shm_out = mp.shared_memory.SharedMemory(name=f"out-{name}")
+                shm_out = SharedMemory(name=f"out-{name}")
 
             self.detection_shms[name] = shm_in
             self.detection_shms[f"out-{name}"] = shm_out
@@ -274,6 +272,7 @@ class FrigateApp:
                     camera_name,
                     config,
                     self.config.model,
+                    self.config.server,
                     self.config.model.merged_labelmap,
                     self.detected_frames_queue,
                     self.camera_metrics[camera_name],
@@ -377,6 +376,7 @@ class FrigateApp:
             self.ensure_dirs()
 
             if self.config.server.mode == ServerModeEnum.DetectionOnly:
+                logger.info("Starting server in detection only mode.")
                 self.start_detectors()
                 self.start_watchdog()
                 self.stop_event.wait()

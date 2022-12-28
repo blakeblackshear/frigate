@@ -819,7 +819,7 @@ class ServerConfig(BaseModel):
     mode: ServerModeEnum = Field(default=ServerModeEnum.Full, title="Server mode")
     ipc: str = Field(default="ipc://queue_broker.ipc", title="Broker IPC path")
     addresses: List[str] = Field(
-        default=["tcp://127.0.0.1:5555"], title="Broker TCP addresses"
+        default=["tcp://0.0.0.0:5555"], title="Broker TCP addresses"
     )
 
 

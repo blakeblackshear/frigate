@@ -13,7 +13,7 @@ from frigate.detectors import (
     ObjectDetectionClient,
     ObjectDetectionWorker,
 )
-from frigate.majordomo import QueueBroker
+from frigate.majortomo import Broker
 from frigate.util import deep_merge
 import frigate.detectors.detector_types as detectors
 
@@ -43,7 +43,7 @@ def start_broker(ipc_address, tcp_address, camera_names):
         body = body[0:2] + [tensor_input]
         return body
 
-    queue_broker = QueueBroker(bind=[ipc_address, tcp_address])
+    queue_broker = Broker(bind=[ipc_address, tcp_address])
     queue_broker.register_request_handler("DETECT_NO_SHM", detect_no_shm)
     queue_broker.start()
 

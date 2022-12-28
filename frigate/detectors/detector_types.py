@@ -7,7 +7,7 @@ from .detection_api import DetectionApi
 from . import plugins
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("frigate.detectors")
 
 
 class StrEnum(str, Enum):

@@ -13,7 +13,6 @@ pydantic == 1.10.*
 PyYAML == 6.0
 pytz == 2022.6
 pyzmq == 24.0.1
-majortomo == 0.2.0
 tzlocal == 4.2
 types-PyYAML == 6.0.*
 requests == 2.28.*

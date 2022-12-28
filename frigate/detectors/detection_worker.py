@@ -7,7 +7,7 @@ import multiprocessing as mp
 from multiprocessing.shared_memory import SharedMemory
 from typing import List
 
-from frigate.majordomo import QueueWorker
+from frigate.majortomo import Worker
 from frigate.util import listen, EventsPerSecond, load_labels
 from .detector_config import InputTensorEnum, BaseDetectorConfig
 from .detector_types import create_detector
@@ -17,7 +17,7 @@ from setproctitle import setproctitle
 logger = logging.getLogger(__name__)
 
 
-class ObjectDetectionWorker(QueueWorker):
+class ObjectDetectionWorker(Worker):
     def __init__(
         self,
         detector_name: str,
@@ -94,7 +94,9 @@ class ObjectDetectionWorker(QueueWorker):
             if out_np is None:
                 out_shm = self.detection_shms.get(f"out-{camera_name}", None)
                 if out_shm is None:
-                    out_shm = SharedMemory(name=f"out-{camera_name}", create=False)
+                    out_shm = self.detection_shms[f"out-{camera_name}"] = SharedMemory(
+                        name=f"out-{camera_name}", create=False
+                    )
                 out_np = self.detection_outputs[camera_name] = np.ndarray(
                     (20, 6), dtype=np.float32, buffer=out_shm.buf
                 )
@@ -183,7 +185,7 @@ class ObjectDetectProcess:
 
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
-        self.detect_process: mp.Process
+        self.detect_process: mp.Process = None
 
         self.start_or_restart()
 
