@@ -11,6 +11,7 @@ services:
     shm_size: "256mb"
     build:
       context: .
+      # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
     deploy:
           resources:
@@ -28,6 +29,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config/config.yml:/config/config.yml:ro
       - ./debug:/media/frigate
+      # Create the trt-models folder using the documented method of generating TRT models
+      # - ./debug/trt-models:/trt-models
       - /dev/bus/usb:/dev/bus/usb
   mqtt:
     container_name: mqtt

@@ -304,3 +304,9 @@ COPY --from=rootfs / /
 FROM frigate AS frigate-tensorrt
 RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
+
+# Dev Container w/ TRT
+FROM devcontainer AS devcontainer-trt
+
+RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
+    pip3 install -U /deps/trt-wheels/*.whl
