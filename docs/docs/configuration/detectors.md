@@ -155,7 +155,19 @@ NVidia GPUs may be used for object detection using the TensorRT libraries.
 
 ### Minimum Hardware Support
 
-**TODO**
+The TensorRT detector uses the 11.x series of CUDA libraries which have minor version compatibility. The minimum driver version on the host system must be `>=450.80.02`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
+
+> **TODO:** NVidia claims support on compute 3.5 and 3.7, but marks it as deprecated. This would have some, but not all, Kepler GPUs as possibly working. This needs testing before making any claims of support.
+
+There are improved capabilities in newer GPU architectures that TensorRT can benefit from, such as INT8 operations and Tensor cores. The features compatible with your hardware will be optimized when the model is converted to a trt file. Currently the script provided for generating the model provides a switch to enable/disable FP16 operations. If you wish to use newer features such as INT8 optimization, more work is required.
+
+#### Compatibility References:
+
+[NVIDIA TensorRT Support Matrix](https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-841/support-matrix/index.html)
+
+[NVIDIA CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html)
+
+[NVIDIA GPU Compute Capability](https://developer.nvidia.com/cuda-gpus)
 
 ### Generate Models
 
@@ -165,7 +177,7 @@ To generate the model files, create a new folder to save the models, download th
 
 ```bash
 mkdir trt-models
-wget https://github.com/blakeblackshear/frigate/raw/master/docker/tensorrt_models.sh
+wget https://raw.githubusercontent.com/blakeblackshear/frigate/nvidia-detector/docker/tensorrt_models.sh
 chmod +x tensorrt_models.sh
 docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
 ```
@@ -202,19 +214,21 @@ yolov7-tiny-416
 
 ### Configuration Parameters
 
-**TODO**
+The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpu) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
-Sample:
+The TensorRT detector uses `.trt` model files that are located in `/trt-models/` by default. These model file path and dimensions used will depend on which model you have generated.
 
 ```yaml
 detectors:
   tensorrt:
     type: tensorrt
+    device: 0 #This is the default, select the first GPU
 
 model:
   path: /trt-models/yolov7-tiny-416.trt
   labelmap_path: /trt-models/coco_91cl.txt
   input_tensor: nchw
+  input_pixel_format: rgb
   width: 416
   height: 416
 ```

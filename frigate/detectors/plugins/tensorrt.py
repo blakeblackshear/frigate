@@ -46,7 +46,7 @@ if TRT_SUPPORT:
 
 class TensorRTDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default=None, title="Device Type")
+    device: int = Field(default=0, title="GPU Device Index")
 
 
 class HostDeviceMem(object):
@@ -90,9 +90,8 @@ class TensorRtDetector(DetectionApi):
                 e,
             )
 
-        self.runtime = trt.Runtime(self.trt_logger)
-        with open(model_path, "rb") as f:
-            return self.runtime.deserialize_cuda_engine(f.read())
+        with open(model_path, "rb") as f, trt.Runtime(self.trt_logger) as runtime:
+            return runtime.deserialize_cuda_engine(f.read())
 
     def _get_input_shape(self):
         """Get input shape of the TensorRT YOLO engine."""
@@ -120,7 +119,6 @@ class TensorRtDetector(DetectionApi):
         outputs = []
         bindings = []
         output_idx = 0
-        err, stream = cuda.cuStreamCreate(0)
         for binding in self.engine:
             binding_dims = self.engine.get_binding_shape(binding)
             if len(binding_dims) == 4:
@@ -159,7 +157,7 @@ class TensorRtDetector(DetectionApi):
                 output_idx += 1
         assert len(inputs) == 1, f"inputs len was {len(inputs)}"
         assert len(outputs) == 1, f"output len was {len(outputs)}"
-        return inputs, outputs, bindings, stream
+        return inputs, outputs, bindings
 
     def _do_inference(self):
         """do_inference (for TensorRT 7.0+)
@@ -167,15 +165,33 @@ class TensorRtDetector(DetectionApi):
         dimension networks.
         Inputs and outputs are expected to be lists of HostDeviceMem objects.
         """
+        # Push CUDA Context
+        cuda.cuCtxPushCurrent(self.cu_ctx)
+
         # Transfer input data to the GPU.
-        [cuda.cuMemcpyHtoD(inp.device, inp.host, inp.nbytes) for inp in self.inputs]
+        [
+            cuda.cuMemcpyHtoDAsync(inp.device, inp.host, inp.nbytes, self.stream)
+            for inp in self.inputs
+        ]
+
         # Run inference.
-        if not self.context.execute_v2(bindings=self.bindings):
+        if not self.context.execute_async_v2(
+            bindings=self.bindings, stream_handle=self.stream
+        ):
             logger.warn(f"Execute returned false")
+
         # Transfer predictions back from the GPU.
-        [cuda.cuMemcpyDtoH(out.host, out.device, out.nbytes) for out in self.outputs]
+        [
+            cuda.cuMemcpyDtoHAsync(out.host, out.device, out.nbytes, self.stream)
+            for out in self.outputs
+        ]
+
         # Synchronize the stream
-        # cuda.cuStreamSynchronize(self.stream)
+        cuda.cuStreamSynchronize(self.stream)
+
+        # Pop CUDA Context
+        cuda.cuCtxPopCurrent()
+
         # Return only the host outputs.
         return [
             np.array(
@@ -193,9 +209,18 @@ class TensorRtDetector(DetectionApi):
         assert (
             cuda_err == cuda.CUresult.CUDA_SUCCESS
         ), f"Failed to initialize cuda {cuda_err}"
-        err, self.cu_ctx = cuda.cuCtxCreate(cuda.CUctx_flags.CU_CTX_MAP_HOST, 0)
+        err, dev_count = cuda.cuDeviceGetCount()
+        logger.debug(f"Num Available Devices: {dev_count}")
+        assert (
+            detector_config.device < dev_count
+        ), f"Invalid TensorRT Device Config. Device {detector_config.device} Invalid."
+        err, self.cu_ctx = cuda.cuCtxCreate(
+            cuda.CUctx_flags.CU_CTX_MAP_HOST, detector_config.device
+        )
+
         self.conf_th = 0.4  ##TODO: model config parameter
         self.nms_threshold = 0.4
+        err, self.stream = cuda.cuStreamCreate(0)
         self.trt_logger = TrtLogger()
         self.engine = self._load_engine(detector_config.model.path)
         self.input_shape = self._get_input_shape()
@@ -206,7 +231,6 @@ class TensorRtDetector(DetectionApi):
                 self.inputs,
                 self.outputs,
                 self.bindings,
-                self.stream,
             ) = self._allocate_buffers()
         except Exception as e:
             logger.error(e)
@@ -217,12 +241,14 @@ class TensorRtDetector(DetectionApi):
 
     def __del__(self):
         """Free CUDA memories."""
-        del self.outputs
-        del self.inputs
-        cuda.cuStreamDestroy(self.stream)
-        del self.stream
+        if self.outputs is not None:
+            del self.outputs
+        if self.inputs is not None:
+            del self.inputs
+        if self.stream is not None:
+            cuda.cuStreamDestroy(self.stream)
+            del self.stream
         del self.engine
-        del self.runtime
         del self.context
         del self.trt_logger
         cuda.cuCtxDestroy(self.cu_ctx)
@@ -257,7 +283,7 @@ class TensorRtDetector(DetectionApi):
         # normalize
         if self.input_shape[-1] != trt.int8:
             tensor_input = tensor_input.astype(self.input_shape[-1])
-        tensor_input /= 255.0
+            tensor_input /= 255.0
 
         self.inputs[0].host = np.ascontiguousarray(
             tensor_input.astype(self.input_shape[-1])
