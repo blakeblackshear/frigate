@@ -22,15 +22,13 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import BASE_DIR
+from frigate.const import BASE_DIR, BIRDSEYE_PIPE
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
-
-    BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 
     def __init__(
         self,
@@ -43,9 +41,9 @@ class FFMpegConverter:
     ):
         if birdseye_rtsp:
             try:
-                os.mkfifo(self.BIRDSEYE_PIPE, mode=0o777)
-                stdin = os.open(self.BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-                self.bd_pipe = os.open(self.BIRDSEYE_PIPE, os.O_WRONLY)
+                os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+                stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+                self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
                 os.close(stdin)
             except Exception as e:
                 print(f"The exception is {e}")
