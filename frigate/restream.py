@@ -45,7 +45,7 @@ class RestreamApi:
         if self.config.restream.birdseye:
             self.relays[
                 "birdseye"
-            ] = "ffmpeg:rtp://127.0.0.1:1998#video=h264#audio=none"
+            ] = f"exec:ffmpeg -hide_banner -f rawvideo -pix_fmt yuv420p -s {self.config.birdseye.width}x{self.config.birdseye.height} -i /tmp/birdseye -tune zerolatency -preset ultrafast -c:v libx264 -rtsp_transport tcp -f rtsp {{output}}"
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}

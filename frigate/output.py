@@ -3,6 +3,7 @@ import glob
 import logging
 import math
 import multiprocessing as mp
+import os
 import queue
 import signal
 import subprocess as sp
@@ -28,6 +29,9 @@ logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
+
+    BIRDSEYE_PIPE = "/tmp/birdseye"
+
     def __init__(
         self,
         in_width: int,
@@ -38,63 +42,39 @@ class FFMpegConverter:
         birdseye_rtsp: bool = False,
     ):
         if birdseye_rtsp:
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-f",
-                "rawvideo",
-                "-pix_fmt",
-                "yuv420p",
-                "-video_size",
-                f"{in_width}x{in_height}",
-                "-i",
-                "pipe:",
-                "-an",
-                "-f",
-                "rtp_mpegts",
-                "-s",
-                f"{out_width}x{out_height}",
-                "-codec:v",
-                "mpeg1video",
-                "-q",
-                f"{quality}",
-                "-bf",
-                "0",
-                "rtp://127.0.0.1:1998",
-                "-f",
-                "mpegts",
-                "-s",
-                f"{out_width}x{out_height}",
-                "-codec:v",
-                "mpeg1video",
-                "-q",
-                f"{quality}",
-                "-bf",
-                "0",
-                "pipe:",
-            ]
+            try:
+                os.mkfifo(self.BIRDSEYE_PIPE, mode=0o777)
+                stdin = os.open(self.BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+                self.bd_pipe = os.open(self.BIRDSEYE_PIPE, os.O_WRONLY)
+                os.close(stdin)
+            except Exception as e:
+                print(f"The exception is {e}")
+                self.bd_pipe = None
         else:
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-f",
-                "rawvideo",
-                "-pix_fmt",
-                "yuv420p",
-                "-video_size",
-                f"{in_width}x{in_height}",
-                "-i",
-                "pipe:",
-                "-f",
-                "mpegts",
-                "-s",
-                f"{out_width}x{out_height}",
-                "-codec:v",
-                "mpeg1video",
-                "-q",
-                f"{quality}",
-                "-bf",
-                "0",
-                "pipe:",
-            ]
+            self.bd_pipe = None
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            "yuv420p",
+            "-video_size",
+            f"{in_width}x{in_height}",
+            "-i",
+            "pipe:",
+            "-f",
+            "mpegts",
+            "-s",
+            f"{out_width}x{out_height}",
+            "-codec:v",
+            "mpeg1video",
+            "-q",
+            f"{quality}",
+            "-bf",
+            "0",
+            "pipe:",
+        ]
 
         self.process = sp.Popen(
             ffmpeg_cmd,
@@ -104,8 +84,15 @@ class FFMpegConverter:
             start_new_session=True,
         )
 
-    def write(self, b):
+    def write(self, b) -> None:
         self.process.stdin.write(b)
+
+        if self.bd_pipe:
+            try:
+                os.write(self.bd_pipe, b)
+            except BrokenPipeError:
+                # catch error when no one is listening
+                return
 
     def read(self, length):
         try:
@@ -114,6 +101,9 @@ class FFMpegConverter:
             return False
 
     def exit(self):
+        if self.bd_pipe:
+            os.close(self.bd_pipe)
+
         self.process.terminate()
         try:
             self.process.communicate(timeout=30)
