@@ -47,7 +47,7 @@ class RestreamApi:
         if self.config.restream.birdseye:
             self.relays[
                 "birdseye"
-            ] = f"exec:ffmpeg -hide_banner -f rawvideo -pix_fmt yuv420p -s {self.config.birdseye.width}x{self.config.birdseye.height} -r 10 -i {BIRDSEYE_PIPE} {' '.join(parse_preset_hardware_acceleration_encode(self.config.ffmpeg.hwaccel_args))} -rtsp_transport tcp -f rtsp {{output}}"
+            ] = f"exec:ffmpeg -hide_banner -f rawvideo -pix_fmt yuv420p -video_size {self.config.birdseye.width}x{self.config.birdseye.height} -r 10 -i {BIRDSEYE_PIPE} {' '.join(parse_preset_hardware_acceleration_encode(self.config.ffmpeg.hwaccel_args))} -rtsp_transport tcp -f rtsp {{output}}"
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
