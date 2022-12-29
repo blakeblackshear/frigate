@@ -5,7 +5,7 @@ import numpy as np
 
 try:
     import tensorrt as trt
-    from cuda import cuda, cudart
+    from cuda import cuda
 
     TRT_SUPPORT = True
 except ModuleNotFoundError as e:
@@ -72,7 +72,7 @@ class HostDeviceMem(object):
 
 class TensorRtDetector(DetectionApi):
     type_key = DETECTOR_KEY
-    # class LocalObjectDetector(ObjectDetector):
+
     def _load_engine(self, model_path):
         try:
             ctypes.cdll.LoadLibrary(
@@ -100,9 +100,15 @@ class TensorRtDetector(DetectionApi):
         assert self.engine.binding_is_input(binding)
         binding_dims = self.engine.get_binding_shape(binding)
         if len(binding_dims) == 4:
-            return tuple(binding_dims[2:])
+            return (
+                tuple(binding_dims[2:]),
+                trt.nptype(self.engine.get_binding_dtype(binding)),
+            )
         elif len(binding_dims) == 3:
-            return tuple(binding_dims[1:])
+            return (
+                tuple(binding_dims[1:]),
+                trt.nptype(self.engine.get_binding_dtype(binding)),
+            )
         else:
             raise ValueError(
                 "bad dims of binding %s: %s" % (binding, str(binding_dims))
@@ -249,10 +255,13 @@ class TensorRtDetector(DetectionApi):
         # 2..5 - a value between 0 and 1 of the box: [top, left, bottom, right]
 
         # normalize
-        tensor_input = tensor_input.astype(np.float32)
+        if self.input_shape[-1] != trt.int8:
+            tensor_input = tensor_input.astype(self.input_shape[-1])
         tensor_input /= 255.0
 
-        self.inputs[0].host = np.ascontiguousarray(tensor_input.astype(np.float32))
+        self.inputs[0].host = np.ascontiguousarray(
+            tensor_input.astype(self.input_shape[-1])
+        )
         trt_outputs = self._do_inference()
 
         raw_detections = self._postprocess_yolo(trt_outputs, self.conf_th)
