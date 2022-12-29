@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 class FFMpegConverter:
 
-    BIRDSEYE_PIPE = "/tmp/birdseye"
+    BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 
     def __init__(
         self,
