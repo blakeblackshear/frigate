@@ -39,14 +39,10 @@ class FFMpegConverter:
         birdseye_rtsp: bool = False,
     ):
         if birdseye_rtsp:
-            try:
-                os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
-                stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-                self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
-                os.close(stdin)
-            except Exception as e:
-                print(f"The exception is {e}")
-                self.bd_pipe = None
+            os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+            stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+            self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
+            os.close(stdin)
         else:
             self.bd_pipe = None
 
@@ -100,6 +96,7 @@ class FFMpegConverter:
     def exit(self):
         if self.bd_pipe:
             os.close(self.bd_pipe)
+            os.remove(BIRDSEYE_PIPE)
 
         self.process.terminate()
         try:

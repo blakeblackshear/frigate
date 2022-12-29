@@ -7,6 +7,7 @@ from frigate.util import escape_special_characters
 
 from frigate.config import FrigateConfig
 from frigate.const import BIRDSEYE_PIPE
+from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class RestreamApi:
         if self.config.restream.birdseye:
             self.relays[
                 "birdseye"
-            ] = f"exec:ffmpeg -hide_banner -f rawvideo -pix_fmt yuv420p -s {self.config.birdseye.width}x{self.config.birdseye.height} -i {BIRDSEYE_PIPE} -tune zerolatency -preset ultrafast -c:v libx264 -rtsp_transport tcp -f rtsp {{output}}"
+            ] = f"exec:ffmpeg -hide_banner -f rawvideo -pix_fmt yuv420p -s {self.config.birdseye.width}x{self.config.birdseye.height} -i {BIRDSEYE_PIPE} {' '.join(parse_preset_hardware_acceleration_encode(self.config.ffmpeg.hwaccel_args))} -rtsp_transport tcp -f rtsp {{output}}"
 
         for name, path in self.relays.items():
             params = {"src": path, "name": name}
