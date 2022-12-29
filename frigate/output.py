@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
-
     def __init__(
         self,
         in_width: int,
