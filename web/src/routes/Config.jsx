@@ -48,6 +48,11 @@ export default function Config() {
       return;
     }
 
+    if (window.editor) {
+      // we don't need to recreate the editor if it already exists
+      return;
+    }
+
     const modelUri = Uri.parse('a://b/api/config/schema.json');
 
     let yamlModel;
