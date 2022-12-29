@@ -129,22 +129,7 @@ PRESETS_HW_ACCEL_SCALE = {
     ],
 }
 
-PRESETS_HW_ACCEL_ENCODE_TO_RTSP = {
-    "default": [
-        "-c:v",
-        "libx264",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-preset:v",
-        "superfast",
-        "-tune:v",
-        "zerolatency",
-    ],
-    "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m", "-g", "50", "-bf", "0"],
+PRESETS_HW_ACCEL_ENCODE = {
     "preset-intel-vaapi": [
         "-c:v",
         "h264_vaapi",
@@ -156,9 +141,51 @@ PRESETS_HW_ACCEL_ENCODE_TO_RTSP = {
         "high",
         "-level:v",
         "4.1",
+        "-sei:v",
+        "0",
     ],
-    "preset-intel-qsv-h264": ["-c:v", "h264_qsv"],
-    "preset-intel-qsv-h265": ["-c:v", "hevc_qsv"],
+    "preset-intel-qsv-h264": [
+        "-c:v",
+        "h264_qsv",
+        "-g",
+        "50",
+        "-bf",
+        "0",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+        "-async_depth:v",
+        "1",
+    ],
+    "preset-intel-qsv-h265": [
+        "-c:v",
+        "h264_qsv",
+        "-g",
+        "50",
+        "-bf",
+        "0",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+        "-async_depth:v",
+        "1",
+    ],
+    "preset-amd-vaapi": [
+        "-c:v",
+        "h264_vaapi",
+        "-g",
+        "50",
+        "-bf",
+        "0",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+        "-sei:v",
+        "0",
+    ],
     "preset-nvidia-h264": [
         "-c:v",
         "h264_nvenc",
@@ -173,7 +200,36 @@ PRESETS_HW_ACCEL_ENCODE_TO_RTSP = {
         "-tune:v",
         "ll",
     ],
+    "preset-nvidia-h265": [
+        "-c:v",
+        "h264_nvenc",
+        "-g",
+        "50",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "auto",
+        "-preset:v",
+        "p2",
+        "-tune:v",
+        "ll",
+    ],
+    "default": [
+        "-c:v",
+        "libx264",
+        "-g",
+        "50",
+        "-profile:v",
+        "high",
+        "-level:v",
+        "4.1",
+        "-preset:v",
+        "superfast",
+        "-tune:v",
+        "zerolatency",
+    ],
 }
+
 
 def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
@@ -200,6 +256,14 @@ def parse_preset_hardware_acceleration_scale(
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"]).copy()
     scale[1] = scale[1].format(fps, width, height)
     return scale
+
+
+def parse_preset_hardware_acceleration_encode(arg: Any) -> list[str]:
+    """Return the correct scaling preset or default preset if none is set."""
+    if not isinstance(arg, str):
+        return PRESETS_HW_ACCEL_ENCODE["default"]
+
+    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"])
 
 
 PRESETS_INPUT = {
@@ -322,108 +386,6 @@ PRESETS_INPUT = {
 }
 
 
-PRESETS_HW_ACCEL_ENCODE = {
-    "preset-intel-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
-    ],
-    "preset-intel-qsv-h264": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-intel-qsv-h265": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-amd-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
-    ],
-    "preset-nvidia-h264": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "preset-nvidia-h265": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "default": [
-        "-c:v",
-        "libx264",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-preset:v",
-        "superfast",
-        "-tune:v",
-        "zerolatency",
-    ],
-}
-
-
 def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
@@ -435,14 +397,6 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
         return input
 
     return PRESETS_INPUT.get(arg, None)
-
-
-def parse_preset_hardware_acceleration_encode(arg: Any) -> list[str]:
-    """Return the correct scaling preset or default preset if none is set."""
-    if not isinstance(arg, str):
-        return PRESETS_HW_ACCEL_ENCODE["default"]
-
-    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"])
 
 
 PRESETS_RECORD_OUTPUT = {
