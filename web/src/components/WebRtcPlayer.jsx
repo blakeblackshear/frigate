@@ -19,7 +19,7 @@ export default function WebRtcPlayer({ camera, width, height }) {
       const msg = JSON.parse(ev.data);
 
       if (msg.type === 'webrtc/candidate') {
-        pc.addIceCandidate({ candidate: msg.value, sdpMid: '' });
+        pc.addIceCandidate({ candidate: msg.value, sdpMid: '0' });
       } else if (msg.type === 'webrtc/answer') {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
