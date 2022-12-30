@@ -1095,11 +1095,17 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
 # TODO make this nicer when vod module is removed
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
 def vod_hour(year_month, day, hour, camera_name, tz_name):
-    tz_name = tz_name.replace(",", "/")
+    tz_offset = int(
+        datetime.now(pytz.timezone(tz_name.replace(",", "/")))
+        .utcoffset()
+        .total_seconds()
+        / 60
+        / 60
+    )
     parts = year_month.split("-")
     start_date = datetime(
-        int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=pytz.timezone(tz_name)
-    ).astimezone(timezone.utc)
+        int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc
+    ) - timedelta(hours=tz_offset)
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
