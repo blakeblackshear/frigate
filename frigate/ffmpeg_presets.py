@@ -9,39 +9,153 @@ _user_agent_args = [
     f"FFmpeg Frigate/{VERSION}",
 ]
 
-PRESETS_HW_ACCEL = {
+PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
     "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
     "preset-intel-vaapi": [
+        "-hwaccel_flags",
+        "allow_profile_mismatch",
         "-hwaccel",
         "vaapi",
         "-hwaccel_device",
         "/dev/dri/renderD128",
         "-hwaccel_output_format",
-        "yuv420p",
+        "vaapi",
     ],
-    "preset-intel-qsv-h264": ["-c:v", "h264_qsv"],
-    "preset-intel-qsv-h265": ["-c:v", "hevc_qsv"],
+    "preset-intel-qsv-h264": [
+        "-hwaccel",
+        "qsv",
+        "-qsv_device",
+        "/dev/dri/renderD128",
+        "-hwaccel_output_format",
+        "qsv",
+        "-c:v",
+        "h264_qsv",
+    ],
+    "preset-intel-qsv-h265": [
+        "-hwaccel",
+        "qsv",
+        "-qsv_device",
+        "/dev/dri/renderD128",
+        "-hwaccel_output_format",
+        "qsv",
+        "-c:v",
+        "hevc_qsv",
+    ],
     "preset-amd-vaapi": [
+        "-hwaccel_flags",
+        "allow_profile_mismatch",
         "-hwaccel",
         "vaapi",
         "-hwaccel_device",
         "/dev/dri/renderD128",
         "-hwaccel_output_format",
-        "yuv420p",
+        "vaapi",
     ],
-    "preset-nvidia-h264": ["-c:v", "h264_cuvid"],
-    "preset-nvidia-h265": ["-c:v", "hevc_cuvid"],
-    "preset-nvidia-mjpeg": ["-c:v", "mjpeg_cuvid"],
+    "preset-nvidia-h264": [
+        "-hwaccel",
+        "cuda",
+        "-hwaccel_output_format",
+        "cuda",
+        "-extra_hw_frames",
+        "2",
+        "-c:v",
+        "h264_cuvid",
+    ],
+    "preset-nvidia-h265": [
+        "-hwaccel",
+        "cuda",
+        "-hwaccel_output_format",
+        "cuda",
+        "-extra_hw_frames",
+        "2",
+        "-c:v",
+        "hevc_cuvid",
+    ],
+    "preset-nvidia-mjpeg": [
+        "-hwaccel",
+        "cuda",
+        "-hwaccel_output_format",
+        "cuda",
+        "-extra_hw_frames",
+        "2",
+        "-c:v",
+        "mjpeg_cuvid",
+    ],
+}
+
+PRESETS_HW_ACCEL_SCALE = {
+    "preset-intel-vaapi": [
+        "-vf",
+        "fps={},deinterlace_vaapi=rate=field:auto=1,scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "preset-intel-qsv-h264": [
+        "-vf",
+        "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "preset-intel-qsv-h265": [
+        "-vf",
+        "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "preset-amd-vaapi": [
+        "-vf",
+        "fps={},deinterlace_vaapi=rate=field:auto=1,scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "preset-nvidia-h264": [
+        "-vf",
+        "fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "preset-nvidia-h265": [
+        "-vf",
+        "fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "-f",
+        "rawvideo",
+    ],
+    "default": [
+        "-r",
+        "{}",
+        "-s",
+        "{}",
+    ],
 }
 
 
-def parse_preset_hardware_acceleration(arg: Any) -> list[str]:
+def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
-    return PRESETS_HW_ACCEL.get(arg, None)
+    return PRESETS_HW_ACCEL_DECODE.get(arg, None)
+
+
+def parse_preset_hardware_acceleration_scale(
+    arg: Any,
+    detect_args: list[str],
+    fps: int,
+    width: int,
+    height: int,
+) -> list[str]:
+    """Return the correct scaling preset or default preset if none is set."""
+    if not isinstance(arg, str):
+        scale = PRESETS_HW_ACCEL_SCALE["default"].copy()
+        scale[1] = str(fps)
+        scale[3] = f"{width}x{height}"
+        scale.extend(detect_args)
+        return scale
+
+    scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"]).copy()
+    scale[1] = scale[1].format(fps, width, height)
+    return scale
 
 
 PRESETS_INPUT = {
@@ -170,7 +284,9 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
         return None
 
     if arg == "preset-jpeg-generic":
-        return PRESETS_INPUT[arg].format(f"{detect_fps}")
+        input = PRESETS_INPUT[arg].copy()
+        input[1] = str(detect_fps)
+        return input
 
     return PRESETS_INPUT.get(arg, None)
 

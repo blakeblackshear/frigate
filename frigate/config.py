@@ -27,7 +27,8 @@ from frigate.util import (
     load_labels,
 )
 from frigate.ffmpeg_presets import (
-    parse_preset_hardware_acceleration,
+    parse_preset_hardware_acceleration_decode,
+    parse_preset_hardware_acceleration_scale,
     parse_preset_input,
     parse_preset_output_record,
     parse_preset_output_rtmp,
@@ -626,18 +627,15 @@ class CameraConfig(FrigateBaseModel):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
             detect_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.detect)
-
-            ffmpeg_output_args = (
-                [
-                    "-r",
-                    str(self.detect.fps),
-                    "-s",
-                    f"{self.detect.width}x{self.detect.height}",
-                ]
-                + detect_args
-                + ffmpeg_output_args
-                + ["pipe:"]
+            scale_detect_args = parse_preset_hardware_acceleration_scale(
+                ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args,
+                detect_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
             )
+
+            ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
             rtmp_args = get_ffmpeg_arg_list(
                 parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)
@@ -667,12 +665,14 @@ class CameraConfig(FrigateBaseModel):
             ffmpeg_input.global_args or self.ffmpeg.global_args
         )
         hwaccel_args = get_ffmpeg_arg_list(
-            ffmpeg_input.hwaccel_args
-            or parse_preset_hardware_acceleration(self.ffmpeg.hwaccel_args)
+            parse_preset_hardware_acceleration_decode(ffmpeg_input.hwaccel_args)
+            or ffmpeg_input.hwaccel_args
+            or parse_preset_hardware_acceleration_decode(self.ffmpeg.hwaccel_args)
             or self.ffmpeg.hwaccel_args
         )
         input_args = get_ffmpeg_arg_list(
-            ffmpeg_input.input_args
+            parse_preset_input(ffmpeg_input.input_args, self.detect.fps)
+            or ffmpeg_input.input_args
             or parse_preset_input(self.ffmpeg.input_args, self.detect.fps)
             or self.ffmpeg.input_args
         )
