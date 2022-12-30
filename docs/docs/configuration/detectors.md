@@ -151,7 +151,7 @@ volumes:
 
 ## NVidia TensorRT Detector
 
-NVidia GPUs may be used for object detection using the TensorRT libraries.
+NVidia GPUs may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt` tag suffix. This detector is designed to work with Yolo models for object detection.
 
 ### Minimum Hardware Support
 
