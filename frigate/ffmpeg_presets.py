@@ -230,7 +230,6 @@ PRESETS_HW_ACCEL_ENCODE = {
     ],
 }
 
-
 def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
@@ -257,14 +256,12 @@ def parse_preset_hardware_acceleration_scale(
     scale[1] = scale[1].format(fps, width, height)
     return scale
 
-
 def parse_preset_hardware_acceleration_encode(arg: Any) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str):
         return PRESETS_HW_ACCEL_ENCODE["default"]
 
     return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"])
-
 
 PRESETS_INPUT = {
     "preset-http-jpeg-generic": _user_agent_args
