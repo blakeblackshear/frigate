@@ -36,7 +36,19 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
+          target: frigate
           tags: |
             ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push TensorRT
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          target: frigate-tensorrt
+          tags: |
+            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
           cache-from: type=gha
           cache-to: type=gha,mode=max

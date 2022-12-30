@@ -1,1 +1,2 @@
 scikit-build == 0.14.1
+nvidia-pyindex
