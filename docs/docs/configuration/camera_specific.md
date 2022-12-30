@@ -89,9 +89,15 @@ ffmpeg:
   input_args: preset-rtsp-blue-iris
 ```
 
-### Reolink 410/520 (possibly others)
+### Reolink Cameras
 
-![Resolutions](/img/reolink-settings.png)
+Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the http stream is recommended.
+Frigate works much better with newer reolink cameras that are setup with the below options:
+
+If available, recommended settings are:
+
+- `On, fluency first` this sets the camera to CBR (constant bit rate)
+- `Interframe Space 1x` this sets the iframe interval to the same as the frame rate
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
