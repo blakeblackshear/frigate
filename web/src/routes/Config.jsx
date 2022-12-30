@@ -48,7 +48,7 @@ export default function Config() {
       return;
     }
 
-    if (window.editor) {
+    if (document.getElementById('container').children.length > 0) {
       // we don't need to recreate the editor if it already exists
       return;
     }
