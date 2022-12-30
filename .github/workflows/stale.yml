@@ -21,5 +21,6 @@ jobs:
           exempt-draft-pr: true
           exempt-issue-labels: 'pinned,security'
           exempt-pr-labels: 'pinned,security'
+          operations-per-run: 120
       - name: Print outputs
         run: echo ${{ join(steps.stale.outputs.*, ',') }}
