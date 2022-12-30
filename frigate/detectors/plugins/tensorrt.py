@@ -315,5 +315,4 @@ class TensorRtDetector(DetectionApi):
                 detections, np.zeros((append_cnt, 6), np.float32), axis=0
             )
 
-        # self.fps.update()
         return detections
