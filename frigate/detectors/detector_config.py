@@ -69,6 +69,9 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
+    cameras: List[str] = Field(default=None, title="Cameras to track")
+    address: str = Field(default=None, title="Frigate Detection Queue Server Address")
+    shared_memory: Union[bool, None] = Field(default=None, title="Use Shared Memory")
     model: ModelConfig = Field(
         default=None, title="Detector specific model configuration."
     )

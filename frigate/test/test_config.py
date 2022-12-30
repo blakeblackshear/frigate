@@ -45,14 +45,14 @@ class TestConfig(unittest.TestCase):
                 "cpu": {
                     "type": "cpu",
                     "model": {"path": "/cpu_model.tflite"},
+                    "cameras": ["test"],
                 },
                 "edgetpu": {
                     "type": "edgetpu",
                     "model": {"path": "/edgetpu_model.tflite", "width": 160},
+                    "cameras": ["test"],
                 },
-                "openvino": {
-                    "type": "openvino",
-                },
+                "openvino": {"type": "openvino", "cameras": ["test"]},
             },
             "model": {"path": "/default.tflite", "width": 512},
         }

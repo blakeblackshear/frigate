@@ -4,7 +4,7 @@
 
 set -o errexit -o nounset -o pipefail
 
-dirs=(/dev/shm/logs/frigate /dev/shm/logs/go2rtc /dev/shm/logs/nginx)
+dirs=("/dev/shm/$HOSTNAME/logs/frigate" /dev/shm/$HOSTNAME/logs/go2rtc /dev/shm/$HOSTNAME/logs/nginx)
 
 mkdir -p "${dirs[@]}"
 chown nobody:nogroup "${dirs[@]}"

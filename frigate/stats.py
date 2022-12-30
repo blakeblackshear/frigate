@@ -17,7 +17,7 @@ from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_stats
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats
-from frigate.object_detection import ObjectDetectProcess
+from frigate.detectors import ObjectDetectProcess
 
 logger = logging.getLogger(__name__)
 

@@ -1233,10 +1233,11 @@ def vainfo():
 
 @bp.route("/logs/<service>", methods=["GET"])
 def logs(service: str):
+    HOSTNAME = os.environ.get("HOSTNAME", "frigate")
     log_locations = {
-        "frigate": "/dev/shm/logs/frigate/current",
-        "go2rtc": "/dev/shm/logs/go2rtc/current",
-        "nginx": "/dev/shm/logs/nginx/current",
+        "frigate": f"/dev/shm/{HOSTNAME}/logs/frigate/current",
+        "go2rtc": f"/dev/shm/{HOSTNAME}/logs/go2rtc/current",
+        "nginx": f"/dev/shm/{HOSTNAME}/logs/nginx/current",
     }
     service_location = log_locations.get(service)
 
