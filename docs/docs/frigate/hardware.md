@@ -66,7 +66,7 @@ Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known
 
 ### TensorRT
 
-The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU.
+The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which supports the 11.x series of CUDA libraries. The minimum driver version on the host system must be `>=450.80.02`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the [TensorRT docs for more info](/configuration/detectors#nvidia-tensorrt-detector).
 
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
