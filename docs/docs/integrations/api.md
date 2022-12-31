@@ -244,10 +244,6 @@ HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can b
 
 HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
 
-### `GET /vod/event/<event-id>/index.m3u8`
-
-HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
-
 ### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
