@@ -565,6 +565,7 @@ def events():
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
+    favorites = request.args.get("favorites", type=int)
 
     clauses = []
     excluded_fields = []
@@ -634,6 +635,9 @@ def events():
         excluded_fields.append(Event.thumbnail)
     else:
         selected_columns.append(Event.thumbnail)
+
+    if favorites:
+        clauses.append((Event.retain_indefinitely == favorites))
 
     if len(clauses) == 0:
         clauses.append((True))
