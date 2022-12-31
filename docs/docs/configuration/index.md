@@ -356,6 +356,9 @@ restream:
   enabled: True
   # Optional: Force audio compatibility with browsers (default: shown below)
   force_audio: True
+  # Optional: Restream birdseye via RTSP (default: shown below)
+  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
+  birdseye: False
   # Optional: jsmpeg stream configuration for WebUI
   jsmpeg:
     # Optional: Set the height of the jsmpeg stream. (default: 720)
