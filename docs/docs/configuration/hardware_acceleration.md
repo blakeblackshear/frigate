@@ -58,6 +58,14 @@ services:
   frigate:
     ...
     image: blakeblackshear/frigate:stable
+    deploy:    # <------------- Add this section
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0'] # this is only needed when using multiple GPUs
+              count: 1 # number of GPUs
+              capabilities: [gpu]
     environment:
       NVIDIA_VISIBLE_DEVICES: all # add this variable as well (or adjust it as needed when you have multiple GPUs)
       NVIDIA_DRIVER_CAPABILITIES: compute,utility,video # probably not needed
