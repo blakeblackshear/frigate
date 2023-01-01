@@ -87,7 +87,7 @@ PRESETS_HW_ACCEL_DECODE = {
 PRESETS_HW_ACCEL_SCALE = {
     "preset-intel-vaapi": [
         "-vf",
-        "fps={},deinterlace_vaapi=rate=field:auto=1,scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
+        "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
         "rawvideo",
     ],
@@ -105,7 +105,7 @@ PRESETS_HW_ACCEL_SCALE = {
     ],
     "preset-amd-vaapi": [
         "-vf",
-        "fps={},deinterlace_vaapi=rate=field:auto=1,scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
+        "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
         "rawvideo",
     ],
