@@ -247,7 +247,7 @@ def parse_preset_hardware_acceleration_scale(
     height: int,
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
-    if not isinstance(arg, str) or ' ' in arg:
+    if not isinstance(arg, str) or " " in arg:
         scale = PRESETS_HW_ACCEL_SCALE["default"].copy()
         scale[1] = str(fps)
         scale[3] = f"{width}x{height}"
