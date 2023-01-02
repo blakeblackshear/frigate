@@ -1250,10 +1250,10 @@ def vainfo():
         {
             "return_code": vainfo.returncode,
             "stderr": vainfo.stderr.decode("unicode_escape").strip()
-            if vainfo.stderr.decode()
+            if vainfo.returncode != 0
             else "",
             "stdout": vainfo.stdout.decode("unicode_escape").strip()
-            if vainfo.stdout.decode()
+            if vainfo.returncode == 0
             else "",
         }
     )
