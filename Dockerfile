@@ -68,7 +68,7 @@ RUN rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.5/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.6/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
