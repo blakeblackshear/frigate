@@ -15,6 +15,22 @@ Different live view technologies (ex: MSE, WebRTC) support different audio codec
 
 Birdseye RTSP restream can be enabled at `restream -> birdseye` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
 
+#### Changing Restream Codec
+
+Generally it is recommended to let the codec from the camera be copied. But there may be some cases where h265 needs to be transcoded as h264 or an MJPEG stream can be encoded and restreamed as h264. In this case the encoding will need to be set, if any hardware acceleration presets are set then that will be used to encode the stream.
+
+```yaml
+ffmpeg:
+  hwaccel_args: your-hwaccel-preset # <- highly recommended so the GPU is used
+
+cameras:
+  mjpeg_cam:
+    ffmpeg:
+      ...
+    restream:
+      video_encoding: h264
+```
+
 ### RTMP (Deprecated)
 
 In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvantages however including being incompatible with H.265, high bitrates, and certain audio codecs. RTMP is deprecated and it is recommended to move to the new restream role.
