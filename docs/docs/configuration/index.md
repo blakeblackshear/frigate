@@ -37,6 +37,8 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 :::
 
+**Note:**  Dynamic configuration values are currently supported in the following sections: `mqtt.password` and `cameras.<name>.ffmpeg.inputs.[].path`.  Dynamic values can be set using environment variables with names starting with `FRIGATE_`.  For example, `{FRIGATE_MQTT_PASSWORD}`, `{FRIGATE_RTSP_USER}`, `{FRIGATE_RTSP_PASSWORD}`.
+
 ```yaml
 mqtt:
   # Optional: Enable mqtt server (default: shown below)
