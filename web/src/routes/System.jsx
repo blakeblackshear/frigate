@@ -203,54 +203,58 @@ export default function System() {
           )}
 
           <Heading size="lg">Cameras</Heading>
-          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
-            {cameraNames.map((camera) => (
-              <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-                <div className="capitalize text-lg flex justify-between p-4">
-                  <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                  <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
+          {!cameras ? (
+            <ActivityIndicator />
+          ) : (
+            <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+              {cameraNames.map((camera) => (
+                <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                  <div className="capitalize text-lg flex justify-between p-4">
+                    <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
+                    <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
+                  </div>
+                  <div className="p-2">
+                    <Table className="w-full">
+                      <Thead>
+                        <Tr>
+                          <Th>Process</Th>
+                          <Th>P-ID</Th>
+                          <Th>fps</Th>
+                          <Th>Cpu %</Th>
+                          <Th>Memory %</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr key="capture" index="0">
+                          <Td>Capture</Td>
+                          <Td>{cameras[camera]['capture_pid'] || '- '}</Td>
+                          <Td>{cameras[camera]['process_fps'] || '- '}</Td>
+                          <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
+                        </Tr>
+                        <Tr key="detect" index="1">
+                          <Td>Detect</Td>
+                          <Td>{cameras[camera]['pid'] || '- '}</Td>
+                          <Td>
+                            {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                          </Td>
+                          <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
+                        </Tr>
+                        <Tr key="ffmpeg" index="2">
+                          <Td>ffmpeg</Td>
+                          <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
+                          <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
+                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
+                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </div>
                 </div>
-                <div className="p-2">
-                  <Table className="w-full">
-                    <Thead>
-                      <Tr>
-                        <Th>Process</Th>
-                        <Th>P-ID</Th>
-                        <Th>fps</Th>
-                        <Th>Cpu %</Th>
-                        <Th>Memory %</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr key="capture" index="0">
-                        <Td>Capture</Td>
-                        <Td>{cameras[camera]['capture_pid'] || "- "}</Td>
-                        <Td>{cameras[camera]['process_fps'] || "- "}</Td>
-                        <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || "- "}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || "- "}%</Td>
-                      </Tr>
-                      <Tr key="detect" index="1">
-                        <Td>Detect</Td>
-                        <Td>{cameras[camera]['pid'] || "- "}</Td>
-                        <Td>
-                          {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
-                        </Td>
-                        <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || "- "}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || "- "}%</Td>
-                      </Tr>
-                      <Tr key="ffmpeg" index="2">
-                        <Td>ffmpeg</Td>
-                        <Td>{cameras[camera]['ffmpeg_pid'] || "- "}</Td>
-                        <Td>{cameras[camera]['camera_fps'] || "- "}</Td>
-                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || "- "}%</Td>
-                        <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || "- "}%</Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <p>System stats update automatically every {config.mqtt.stats_interval} seconds.</p>
         </Fragment>
