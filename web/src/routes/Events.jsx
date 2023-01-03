@@ -107,12 +107,15 @@ export default function Events({ path, ...props }) {
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
-      zones: Object.values(config?.cameras || {})
-        .reduce((memo, camera) => {
-          memo = memo.concat(Object.keys(camera?.zones || {}));
-          return memo;
-        }, [])
-        .filter((value, i, self) => self.indexOf(value) === i),
+      zones: [
+        ...Object.values(config?.cameras || {})
+          .reduce((memo, camera) => {
+            memo = memo.concat(Object.keys(camera?.zones || {}));
+            return memo;
+          }, [])
+          .filter((value, i, self) => self.indexOf(value) === i),
+        'None',
+      ],
       labels: Object.values(config?.cameras || {})
         .reduce((memo, camera) => {
           memo = memo.concat(camera?.objects?.track || []);
@@ -159,12 +162,12 @@ export default function Events({ path, ...props }) {
       // don't remove all if only one option
       if (currentItems.length > 1) {
         currentItems.splice(currentItems.indexOf(item), 1);
-        items = currentItems.join(",");
+        items = currentItems.join(',');
       } else {
-        items = ["all"];
+        items = ['all'];
       }
     } else {
-      let currentItems = searchParams[name].length > 0 ? searchParams[name].split(",") : [];
+      let currentItems = searchParams[name].length > 0 ? searchParams[name].split(',') : [];
 
       if (currentItems.includes(item)) {
         // don't remove the last item in the filter list
@@ -172,12 +175,12 @@ export default function Events({ path, ...props }) {
           currentItems.splice(currentItems.indexOf(item), 1);
         }
 
-        items = currentItems.join(",");
-      } else if ((currentItems.length + 1) == filterValues[name].length) {
-        items = ["all"];
+        items = currentItems.join(',');
+      } else if (currentItems.length + 1 == filterValues[name].length) {
+        items = ['all'];
       } else {
         currentItems.push(item);
-        items = currentItems.join(",");
+        items = currentItems.join(',');
       }
     }
 
@@ -301,47 +304,46 @@ export default function Events({ path, ...props }) {
           title="Cameras"
           options={filterValues.cameras}
           selection={searchParams.cameras}
-          onToggle={(item) => onToggleNamedFilter("cameras", item)}
-          onShowAll={() => onFilter("cameras", ["all"])}
-          onSelectSingle={(item) => onFilter("cameras", item)}
+          onToggle={(item) => onToggleNamedFilter('cameras', item)}
+          onShowAll={() => onFilter('cameras', ['all'])}
+          onSelectSingle={(item) => onFilter('cameras', item)}
         />
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           title="Labels"
           options={filterValues.labels}
           selection={searchParams.labels}
-          onToggle={(item) => onToggleNamedFilter("labels", item) }
-          onShowAll={() => onFilter("labels", ["all"])}
-          onSelectSingle={(item) => onFilter("labels", item)}
+          onToggle={(item) => onToggleNamedFilter('labels', item)}
+          onShowAll={() => onFilter('labels', ['all'])}
+          onSelectSingle={(item) => onFilter('labels', item)}
         />
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
           title="Zones"
           options={filterValues.zones}
           selection={searchParams.zones}
-          onToggle={(item) => onToggleNamedFilter("zones", item) }
-          onShowAll={() => onFilter("zones", ["all"])}
-          onSelectSingle={(item) => onFilter("zones", item)}
+          onToggle={(item) => onToggleNamedFilter('zones', item)}
+          onShowAll={() => onFilter('zones', ['all'])}
+          onSelectSingle={(item) => onFilter('zones', item)}
         />
-        {
-          filterValues.sub_labels.length > 0 && (
-            <MultiSelect
-              className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-              title="Sub Labels"
-              options={filterValues.sub_labels}
-              selection={searchParams.sub_labels}
-              onToggle={(item) => onToggleNamedFilter("sub_labels", item) }
-              onShowAll={() => onFilter("sub_labels", ["all"])}
-              onSelectSingle={(item) => onFilter("sub_labels", item)}
-            />
-          )}
-          
+        {filterValues.sub_labels.length > 0 && (
+          <MultiSelect
+            className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
+            title="Sub Labels"
+            options={filterValues.sub_labels}
+            selection={searchParams.sub_labels}
+            onToggle={(item) => onToggleNamedFilter('sub_labels', item)}
+            onShowAll={() => onFilter('sub_labels', ['all'])}
+            onSelectSingle={(item) => onFilter('sub_labels', item)}
+          />
+        )}
+
         <StarRecording
           className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
-          onClick={() => onFilter("favorites", searchParams.favorites ? 0 : 1)}
+          onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
           fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
         />
-          
+
         <div ref={datePicker} className="ml-right">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
