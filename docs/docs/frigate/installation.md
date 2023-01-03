@@ -38,7 +38,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -55,7 +55,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/network/storage:/media/frigate
       - /path/to/local/disk:/db
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
@@ -111,7 +111,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -135,7 +135,7 @@ docker run -d \
   --device /dev/dri/renderD128 \
   --shm-size=64m \
   -v /path/to/your/storage:/media/frigate \
-  -v /path/to/your/config.yml:/config/config.yml:ro \
+  -v /path/to/your/config.yml:/config/config.yml \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
