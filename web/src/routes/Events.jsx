@@ -122,7 +122,7 @@ export default function Events({ path, ...props }) {
           return memo;
         }, config?.objects?.track || [])
         .filter((value, i, self) => self.indexOf(value) === i),
-      sub_labels: Object.values(allSubLabels || []),
+      sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), "None"] : [],
     }),
     [config, allSubLabels]
   );
