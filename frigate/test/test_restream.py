@@ -44,21 +44,29 @@ class TestRestream(TestCase):
             },
         }
 
-    @patch("frigate.restream.requests")
-    def test_rtsp_stream(self, mock_requests) -> None:
+    def test_rtsp_stream(self) -> None:
         """Test that the normal rtsp stream is sent plainly."""
         frigate_config = FrigateConfig(**self.config)
         restream = RestreamApi(frigate_config)
         restream.add_cameras()
         assert restream.relays["back"].startswith("rtsp")
 
-    @patch("frigate.restream.requests")
-    def test_http_stream(self, mock_requests) -> None:
+    def test_http_stream(self) -> None:
         """Test that the http stream is sent via ffmpeg."""
         frigate_config = FrigateConfig(**self.config)
         restream = RestreamApi(frigate_config)
         restream.add_cameras()
         assert not restream.relays["front"].startswith("rtsp")
+
+    def test_restream_codec_change(self) -> None:
+        """Test that the http stream is sent via ffmpeg."""
+        self.config["cameras"]["front"]["restream"]["video_encoding"] = "h265"
+        self.config["ffmpeg"] = {"hwaccel_args": "preset-nvidia-h264"}
+        frigate_config = FrigateConfig(**self.config)
+        restream = RestreamApi(frigate_config)
+        restream.add_cameras()
+        assert "#hardware=cuda" in restream.relays["front"]
+        assert "#video=h265" in restream.relays["front"]
 
 
 if __name__ == "__main__":

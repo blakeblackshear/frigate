@@ -515,8 +515,6 @@ class JsmpegStreamConfig(FrigateBaseModel):
 
 
 class RestreamCodecEnum(str, Enum):
-    """Represents different options for encoding the restream."""
-
     copy = "copy"
     h264 = "h264"
     h265 = "h265"
@@ -524,8 +522,8 @@ class RestreamCodecEnum(str, Enum):
 
 class RestreamConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Restreaming enabled.")
-    video_codec: RestreamCodecEnum = Field(
-        defualt=RestreamCodecEnum.copy, title="Method for encoding the restream."
+    video_encoding: RestreamCodecEnum = Field(
+        default=RestreamCodecEnum.copy, title="Method for encoding the restream."
     )
     force_audio: bool = Field(
         default=True, title="Force audio compatibility with the browser."
