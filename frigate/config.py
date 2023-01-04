@@ -66,7 +66,7 @@ class UIConfig(FrigateBaseModel):
 
 class MqttConfig(FrigateBaseModel):
     enabled: bool = Field(title="Enable MQTT Communication.", default=True)
-    host: str = Field(title="MQTT Host")
+    host: str = Field(default="", title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
     client_id: str = Field(default="frigate", title="MQTT Client ID")
