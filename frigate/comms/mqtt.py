@@ -85,7 +85,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self, client: mqtt.Client, userdata: Any, message: mqtt.MQTTMessage
     ) -> None:
         self._dispatcher(
-            message.topic.replace(f"{self.mqtt_config.topic_prefix}/", ""),
+            message.topic.replace(f"{self.mqtt_config.topic_prefix}/", "", 1),
             message.payload.decode(),
         )
 
