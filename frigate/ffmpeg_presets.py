@@ -12,7 +12,7 @@ _user_agent_args = [
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
     "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
-    "preset-intel-vaapi": [
+    "preset-vaapi": [
         "-hwaccel_flags",
         "allow_profile_mismatch",
         "-hwaccel",
@@ -41,16 +41,6 @@ PRESETS_HW_ACCEL_DECODE = {
         "qsv",
         "-c:v",
         "hevc_qsv",
-    ],
-    "preset-amd-vaapi": [
-        "-hwaccel_flags",
-        "allow_profile_mismatch",
-        "-hwaccel",
-        "vaapi",
-        "-hwaccel_device",
-        "/dev/dri/renderD128",
-        "-hwaccel_output_format",
-        "vaapi",
     ],
     "preset-nvidia-h264": [
         "-hwaccel",
@@ -85,7 +75,7 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-intel-vaapi": [
+    "preset-vaapi": [
         "-vf",
         "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
@@ -100,12 +90,6 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-intel-qsv-h265": [
         "-vf",
         "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-amd-vaapi": [
-        "-vf",
-        "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
         "rawvideo",
     ],
@@ -130,7 +114,7 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
-    "preset-intel-vaapi": [
+    "preset-vaapi": [
         "-c:v",
         "h264_vaapi",
         "-g",
@@ -171,20 +155,6 @@ PRESETS_HW_ACCEL_ENCODE = {
         "4.1",
         "-async_depth:v",
         "1",
-    ],
-    "preset-amd-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
     ],
     "preset-nvidia-h264": [
         "-c:v",
