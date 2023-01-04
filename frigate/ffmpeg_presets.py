@@ -114,90 +114,12 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
-    "preset-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
-    ],
-    "preset-intel-qsv-h264": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-intel-qsv-h265": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-nvidia-h264": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "preset-nvidia-h265": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "default": [
-        "-c:v",
-        "libx264",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-preset:v",
-        "superfast",
-        "-tune:v",
-        "zerolatency",
-    ],
+    "preset-vaapi": "ffmpeg -hide_banner -vaapi_device /dev/dri/renderD128 {} -vf 'format=yuv420p,hwupload' -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 {}",
+    "preset-intel-qsv-h264": "ffmepg -hide_banner {} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {}",
+    "preset-intel-qsv-h265": "ffmepg -hide_banner {} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {}",
+    "preset-nvidia-h264": "ffmepg -hide_banner {} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {}",
+    "preset-nvidia-h265": "ffmepg -hide_banner {} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {}",
+    "default": "ffmepg -hide_banner {} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {}",
 }
 
 
@@ -229,12 +151,12 @@ def parse_preset_hardware_acceleration_scale(
     return scale
 
 
-def parse_preset_hardware_acceleration_encode(arg: Any) -> list[str]:
+def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str) -> str:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str):
-        return PRESETS_HW_ACCEL_ENCODE["default"]
+        return PRESETS_HW_ACCEL_ENCODE["default"] % (input, output)
 
-    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"])
+    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]) % (input, output)
 
 
 PRESETS_INPUT = {
