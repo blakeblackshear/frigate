@@ -11,18 +11,22 @@ This page makes use of presets of FFmpeg args. For more information on presets, 
 
 ## MJPEG Cameras
 
-The input and output parameters need to be adjusted for MJPEG cameras
+Note that mjpeg cameras require encoding the video into h264 for recording, and restream roles. This will use significantly more CPU than if the cameras supported h264 feeds directly. It is recommended to use the restream role to create an h264 restream and then use that as the source for ffmpeg.
 
 ```yaml
-input_args: preset-http-mjpeg-generic
-```
-
-Note that mjpeg cameras require encoding the video into h264 for recording, and rtmp roles. This will use significantly more CPU than if the cameras supported h264 feeds directly.
-
-```yaml
-output_args:
-  record: preset-record-mjpeg
-  rtmp: preset-rtmp-mjpeg
+  mjpeg_cam:
+    ffmpeg:
+      inputs:
+        - path: rtsp://localhost:8554/mjpeg_cam
+          roles:
+            - detect
+            - record
+        - path: {your_mjpeg_stream_url}
+          roles:
+            - restream
+    restream:
+      enabled: true
+      video_encoding: h264
 ```
 
 ## JPEG Stream Cameras
