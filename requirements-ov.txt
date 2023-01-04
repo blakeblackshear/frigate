@@ -1,3 +1,3 @@
-numpy == 1.19.*
+numpy == 1.24.*
 openvino == 2022.*
 openvino-dev[tensorflow2] == 2022.*
