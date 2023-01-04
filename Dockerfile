@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2
+# syntax = docker/dockerfile-upstream:master-labs
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
