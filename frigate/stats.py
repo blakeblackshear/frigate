@@ -84,7 +84,9 @@ def get_temperatures() -> dict[str, float]:
     return temps
 
 
-def get_processing_stats(config: FrigateConfig, stats: dict[str, str], hwaccel_errors: list[str]) -> None:
+def get_processing_stats(
+    config: FrigateConfig, stats: dict[str, str], hwaccel_errors: list[str]
+) -> None:
     """Get stats for cpu / gpu."""
 
     async def run_tasks() -> None:
@@ -109,7 +111,9 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
         all_stats["cpu_usages"] = cpu_stats
 
 
-async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]) -> None:
+async def set_gpu_stats(
+    config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]
+) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
 
@@ -250,7 +254,7 @@ class StatsEmitter(threading.Thread):
         self.stats_tracking = stats_tracking
         self.dispatcher = dispatcher
         self.stop_event = stop_event
-        self.hwaccel_errors = []
+        self.hwaccel_errors: list[str] = []
 
     def run(self) -> None:
         time.sleep(10)
