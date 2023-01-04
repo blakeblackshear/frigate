@@ -356,6 +356,10 @@ restream:
   enabled: True
   # Optional: Force audio compatibility with browsers (default: shown below)
   force_audio: True
+  # Optional: Video encoding to be used. By default the codec will be copied but
+  # it can be switched to another or an MJPEG stream can be encoded and restreamed
+  # as h264 (default: shown below)
+  video_encoding: "copy"
   # Optional: Restream birdseye via RTSP (default: shown below)
   # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
   birdseye: False

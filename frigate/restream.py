@@ -3,18 +3,33 @@
 
 import logging
 import requests
-from frigate.util import escape_special_characters
 
-from frigate.config import FrigateConfig
+from typing import Optional
+
+from frigate.config import FrigateConfig, RestreamCodecEnum
 from frigate.const import BIRDSEYE_PIPE
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.ffmpeg_presets import (
+    parse_preset_hardware_acceleration_encode,
+    parse_preset_hardware_acceleration_go2rtc_engine,
+)
+from frigate.util import escape_special_characters
 
 logger = logging.getLogger(__name__)
 
 
-def get_manual_go2rtc_stream(camera_url: str) -> str:
+def get_manual_go2rtc_stream(
+    camera_url: str, codec: RestreamCodecEnum, engine: Optional[str]
+) -> str:
     """Get a manual stream for go2rtc."""
-    return f"ffmpeg:{camera_url}#video=copy#audio=aac#audio=opus"
+    if codec == RestreamCodecEnum.copy:
+        return f"ffmpeg:{camera_url}#video=copy#audio=aac#audio=opus"
+
+    if engine:
+        return (
+            f"ffmpeg:{camera_url}#video={codec}#hardware={engine}#audio=aac#audio=opus"
+        )
+
+    return f"ffmpeg:{camera_url}#video={codec}#audio=aac#audio=opus"
 
 
 class RestreamApi:
@@ -41,7 +56,11 @@ class RestreamApi:
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
                         self.relays[cam_name] = get_manual_go2rtc_stream(
-                            escape_special_characters(input.path)
+                            escape_special_characters(input.path),
+                            camera.restream.video_encoding,
+                            parse_preset_hardware_acceleration_go2rtc_engine(
+                                self.config.ffmpeg.hwaccel_args
+                            ),
                         )
 
         if self.config.restream.birdseye:
