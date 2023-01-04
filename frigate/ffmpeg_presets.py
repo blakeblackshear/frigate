@@ -114,7 +114,6 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
-    "preset-vaapi": "ffmpeg -hide_banner -vaapi_device /dev/dri/renderD128 {0} -vf 'format=yuv420p,hwupload' -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
