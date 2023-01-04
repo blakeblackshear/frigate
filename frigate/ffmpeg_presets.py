@@ -156,7 +156,10 @@ def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str)
     if not isinstance(arg, str):
         return PRESETS_HW_ACCEL_ENCODE["default"] % (input, output)
 
-    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]) % (input, output)
+    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]) % (
+        input,
+        output,
+    )
 
 
 PRESETS_INPUT = {
