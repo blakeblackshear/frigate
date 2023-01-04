@@ -121,7 +121,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
 
         if args and args not in hwaccel_args:
             hwaccel_args.append(args)
-     
+
         for stream_input in camera.ffmpeg.inputs:
             args = stream_input.hwaccel_args
 
