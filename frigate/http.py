@@ -861,7 +861,7 @@ def latest_frame(camera_name):
 @bp.route("/recordings/storage", methods=["GET"])
 def get_recordings_storage_usage():
     recording_stats = stats_snapshot(
-        current_app.frigate_config, current_app.stats_tracking
+        current_app.frigate_config, current_app.stats_tracking, []
     )["service"]["storage"][RECORD_DIR]
     total_mb = recording_stats["total"]
 
