@@ -84,13 +84,15 @@ def get_temperatures() -> dict[str, float]:
     return temps
 
 
-def get_processing_stats(config: FrigateConfig, stats: dict[str, str]) -> None:
+def get_processing_stats(
+    config: FrigateConfig, stats: dict[str, str], hwaccel_errors: list[str]
+) -> None:
     """Get stats for cpu / gpu."""
 
     async def run_tasks() -> None:
         await asyncio.wait(
             [
-                asyncio.create_task(set_gpu_stats(config, stats)),
+                asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
                 asyncio.create_task(set_cpu_stats(stats)),
             ]
         )
@@ -109,7 +111,9 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
         all_stats["cpu_usages"] = cpu_stats
 
 
-async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
+async def set_gpu_stats(
+    config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]
+) -> None:
     """Parse GPUs from hwaccel args and use for stats."""
     hwaccel_args = []
 
@@ -119,7 +123,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
         if isinstance(args, list):
             args = " ".join(args)
 
-        if args and args not in hwaccel_args:
+        if args and args not in hwaccel_args and args not in hwaccel_errors:
             hwaccel_args.append(args)
 
         for stream_input in camera.ffmpeg.inputs:
@@ -144,6 +148,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
                 stats[name] = nvidia_usage
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
+                hwaccel_errors.append(args)
         elif "qsv" in args:
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
@@ -152,6 +157,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
                 stats["intel-qsv"] = intel_usage
             else:
                 stats["intel-qsv"] = {"gpu": -1, "mem": -1}
+                hwaccel_errors.append(args)
         elif "vaapi" in args:
             driver = os.environ.get(DRIVER_ENV_VAR)
 
@@ -163,6 +169,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
                     stats["amd-vaapi"] = amd_usage
                 else:
                     stats["amd-vaapi"] = {"gpu": -1, "mem": -1}
+                    hwaccel_errors.append(args)
             else:
                 # intel VAAPI GPU
                 intel_usage = get_intel_gpu_stats()
@@ -171,6 +178,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
                     stats["intel-vaapi"] = intel_usage
                 else:
                     stats["intel-vaapi"] = {"gpu": -1, "mem": -1}
+                    hwaccel_errors.append(args)
         elif "v4l2m2m" in args or "rpi" in args:
             # RPi v4l2m2m is currently not able to get usage stats
             stats["rpi-v4l2m2m"] = {"gpu": -1, "mem": -1}
@@ -180,7 +188,7 @@ async def set_gpu_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> Non
 
 
 def stats_snapshot(
-    config: FrigateConfig, stats_tracking: StatsTrackingTypes
+    config: FrigateConfig, stats_tracking: StatsTrackingTypes, hwaccel_errors: list[str]
 ) -> dict[str, Any]:
     """Get a snapshot of the current stats that are being tracked."""
     camera_metrics = stats_tracking["camera_metrics"]
@@ -219,7 +227,7 @@ def stats_snapshot(
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 
-    get_processing_stats(config, stats)
+    get_processing_stats(config, stats, hwaccel_errors)
 
     stats["service"] = {
         "uptime": (int(time.time()) - stats_tracking["started"]),
@@ -255,10 +263,13 @@ class StatsEmitter(threading.Thread):
         self.stats_tracking = stats_tracking
         self.dispatcher = dispatcher
         self.stop_event = stop_event
+        self.hwaccel_errors: list[str] = []
 
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
-            stats = stats_snapshot(self.config, self.stats_tracking)
+            stats = stats_snapshot(
+                self.config, self.stats_tracking, self.hwaccel_errors
+            )
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
         logger.info(f"Exiting watchdog...")
