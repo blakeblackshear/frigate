@@ -25,7 +25,7 @@ ffmpeg:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: preset-intel-vaapi
+  hwaccel_args: preset-vaapi
 ```
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
 
@@ -42,7 +42,7 @@ ffmpeg:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: preset-amd-vaapi
+  hwaccel_args: preset-vaapi
 ```
 
 ### NVIDIA GPU

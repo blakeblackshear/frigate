@@ -12,7 +12,7 @@ _user_agent_args = [
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
     "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
-    "preset-intel-vaapi": [
+    "preset-vaapi": [
         "-hwaccel_flags",
         "allow_profile_mismatch",
         "-hwaccel",
@@ -41,16 +41,6 @@ PRESETS_HW_ACCEL_DECODE = {
         "qsv",
         "-c:v",
         "hevc_qsv",
-    ],
-    "preset-amd-vaapi": [
-        "-hwaccel_flags",
-        "allow_profile_mismatch",
-        "-hwaccel",
-        "vaapi",
-        "-hwaccel_device",
-        "/dev/dri/renderD128",
-        "-hwaccel_output_format",
-        "vaapi",
     ],
     "preset-nvidia-h264": [
         "-hwaccel",
@@ -85,7 +75,7 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-intel-vaapi": [
+    "preset-vaapi": [
         "-vf",
         "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
@@ -100,12 +90,6 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-intel-qsv-h265": [
         "-vf",
         "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-amd-vaapi": [
-        "-vf",
-        "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
         "-f",
         "rawvideo",
     ],
@@ -130,104 +114,11 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
-    "preset-intel-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
-    ],
-    "preset-intel-qsv-h264": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-intel-qsv-h265": [
-        "-c:v",
-        "h264_qsv",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-async_depth:v",
-        "1",
-    ],
-    "preset-amd-vaapi": [
-        "-c:v",
-        "h264_vaapi",
-        "-g",
-        "50",
-        "-bf",
-        "0",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-sei:v",
-        "0",
-    ],
-    "preset-nvidia-h264": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "preset-nvidia-h265": [
-        "-c:v",
-        "h264_nvenc",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "auto",
-        "-preset:v",
-        "p2",
-        "-tune:v",
-        "ll",
-    ],
-    "default": [
-        "-c:v",
-        "libx264",
-        "-g",
-        "50",
-        "-profile:v",
-        "high",
-        "-level:v",
-        "4.1",
-        "-preset:v",
-        "superfast",
-        "-tune:v",
-        "zerolatency",
-    ],
+    "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
+    "preset-nvidia-h265": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
+    "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
 
 PRESETS_HW_ACCEL_GO2RTC_ENGINE = {
@@ -268,12 +159,15 @@ def parse_preset_hardware_acceleration_scale(
     return scale
 
 
-def parse_preset_hardware_acceleration_encode(arg: Any) -> list[str]:
+def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str) -> str:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str):
-        return PRESETS_HW_ACCEL_ENCODE["default"]
+        return PRESETS_HW_ACCEL_ENCODE["default"].format(input, output)
 
-    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"])
+    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]).format(
+        input,
+        output,
+    )
 
 
 def parse_preset_hardware_acceleration_go2rtc_engine(arg: Any) -> list[str]:
