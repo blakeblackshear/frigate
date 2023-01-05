@@ -33,6 +33,7 @@ module.exports = {
       "configuration/ffmpeg_presets",
     ],
     Integrations: [
+      "integrations/plus",
       "integrations/home-assistant",
       "integrations/api",
       "integrations/mqtt",
