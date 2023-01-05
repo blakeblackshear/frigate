@@ -11,7 +11,7 @@ Frigate+ is under active development and currently only offers the ability to su
 
 Frigate+ offers models trained from scratch and specifically designed for the way Frigate NVR analyzes video footage. They offer higher accuracy with less resources. By uploading your own labeled examples, your model can be uniquely tuned for accuracy in your specific conditions. After tuning, performance is evaluated against a broad dataset and real world examples submitted by other Frigate+ users to prevent overfitting.
 
-Custom models also include a more relevant set of objects for security cameras such as person, face, car, license plate, delivery truck, package, dog, cat, deer, and more. Interested in detecting an object unique to you? Upload examples to incorporate your own objects without worrying that you are reducing the accuracy of other other object types in the model.
+Custom models also include a more relevant set of objects for security cameras such as person, face, car, license plate, delivery truck, package, dog, cat, deer, and more. Interested in detecting an object unique to you? Upload examples to incorporate your own objects without worrying that you are reducing the accuracy of other object types in the model.
 
 ## Setup
 
