@@ -706,15 +706,17 @@ def load_labels(path, encoding="utf-8"):
       Dictionary mapping indices to labels.
     """
     with open(path, "r", encoding=encoding) as f:
+        labels = {index: "unknown" for index in range(91)}
         lines = f.readlines()
         if not lines:
             return {}
 
         if lines[0].split(" ", maxsplit=1)[0].isdigit():
             pairs = [line.split(" ", maxsplit=1) for line in lines]
-            return {int(index): label.strip() for index, label in pairs}
+            labels.update({int(index): label.strip() for index, label in pairs})
         else:
-            return {index: line.strip() for index, line in enumerate(lines)}
+            labels.update({index: line.strip() for index, line in enumerate(lines)})
+        return labels
 
 
 def clean_camera_user_pass(line: str) -> str:
