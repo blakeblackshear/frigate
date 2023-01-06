@@ -132,7 +132,8 @@ RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/rele
 COPY labelmap.txt .
 # Copy OpenVino model
 COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
-RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt
+RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
+    sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 
 
 
