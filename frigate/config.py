@@ -962,6 +962,12 @@ class FrigateConfig(FrigateBaseModel):
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
 
+        # get list of unique enabled labels for tracking
+        enabled_labels = set(config.objects.track)
+
+        for _, camera in config.cameras.items():
+            enabled_labels.update(camera.objects.track)
+
         for key, detector in config.detectors.items():
             detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
             if detector_config.model is None:
@@ -986,6 +992,7 @@ class FrigateConfig(FrigateBaseModel):
                 config.model.dict(exclude_unset=True),
             )
             detector_config.model = ModelConfig.parse_obj(merged_model)
+            detector_config.model.create_colormap(enabled_labels)
             config.detectors[key] = detector_config
 
         return config
