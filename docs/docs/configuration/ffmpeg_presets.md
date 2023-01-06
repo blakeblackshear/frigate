@@ -24,7 +24,7 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 
 ### Input Args Presets
 
-Input args presets help make the config more readable and handle usecases for differnet types of streams to ensure maximum compatibility.
+Input args presets help make the config more readable and handle use cases for different types of streams to ensure maximum compatibility.
 
 See [the camera specific docs](/configuration/camera_specific.md) for more info on non-standard cameras and recommendations for using them in frigate.
 
@@ -36,11 +36,11 @@ See [the camera specific docs](/configuration/camera_specific.md) for more info 
 | preset-rtmp-generic       | RTMP Stream             |                                                     |
 | preset-rtsp-generic       | RTSP Stream             | This is the default when nothing is specified       |
 | preset-rtsp-udp           | RTSP Stream via UDP     | Use when camera is UDP only                         |
-| preset-rtsp-blue-iris     | Blue Iris RTSP Stream   | Use when consuming a strema from Blue Iris          |
+| preset-rtsp-blue-iris     | Blue Iris RTSP Stream   | Use when consuming a stream from Blue Iris          |
 
 :::caution
 
-It is important to be mindful of input args when using restreams. For example, when using a reolink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
+It is important to be mindful of input args when using restream because you can have a mix of protocols. `http` and `rtmp` presets cannot be used with `rtsp` streams. For example, when using a reolink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
 
 :::
 
@@ -64,7 +64,7 @@ cameras:
 
 ### Output Args Presets
 
-Output args presets help make the config more readable and handle usecases for different types of streams to ensure consistent recordings.
+Output args presets help make the config more readable and handle use cases for different types of streams to ensure consistent recordings.
 
 | Preset                      | Usage                             | Other Notes                                   |
 | --------------------------- | --------------------------------- | --------------------------------------------- |
