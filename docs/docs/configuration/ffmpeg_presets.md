@@ -38,6 +38,30 @@ See [the camera specific docs](/configuration/camera_specific.md) for more info 
 | preset-rtsp-udp           | RTSP Stream via UDP     | Use when camera is UDP only                         |
 | preset-rtsp-blue-iris     | Blue Iris RTSP Stream   | Use when consuming a strema from Blue Iris          |
 
+:::caution
+
+It is important to be mindful of input args when using restreams. For example, when using a relink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
+
+:::
+
+```yaml
+cameras:
+  reolink_cam:
+    ffmpeg:
+      inputs:
+        - path: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=admin&password={FRIGATE_CAM_PASSWORD}
+          input_args: preset-http-reolink
+          roles:
+            - detect
+        - path: rtsp://192.168.0.10:8554/garage
+          input_args: preset-rtsp-generic
+          roles:
+            - record
+        - path: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=admin&password={FRIGATE_CAM_PASSWORD}
+          roles:
+            - restream
+```
+
 ### Output Args Presets
 
 Output args presets help make the config more readable and handle usecases for different types of streams to ensure consistent recordings.
