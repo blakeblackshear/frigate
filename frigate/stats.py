@@ -123,7 +123,7 @@ async def set_gpu_stats(
         if isinstance(args, list):
             args = " ".join(args)
 
-        if args and args not in hwaccel_args and args not in hwaccel_errors:
+        if args and args not in hwaccel_args:
             hwaccel_args.append(args)
 
         for stream_input in camera.ffmpeg.inputs:
@@ -138,7 +138,10 @@ async def set_gpu_stats(
     stats: dict[str, dict] = {}
 
     for args in hwaccel_args:
-        if "cuvid" in args or "nvidia" in args:
+        if args in hwaccel_errors:
+            # known erroring args should automatically return as error
+            stats["error-gpu"] = {"gpu": -1, "mem": -1}
+        elif "cuvid" in args or "nvidia" in args:
             # nvidia GPU
             nvidia_usage = get_nvidia_gpu_stats()
 
