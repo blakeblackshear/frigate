@@ -40,7 +40,7 @@ See [the camera specific docs](/configuration/camera_specific.md) for more info 
 
 :::caution
 
-It is important to be mindful of input args when using restreams. For example, when using a relink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
+It is important to be mindful of input args when using restreams. For example, when using a reolink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
 
 :::
 
