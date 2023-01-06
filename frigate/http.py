@@ -762,7 +762,11 @@ def version():
 
 @bp.route("/stats")
 def stats():
-    stats = stats_snapshot(current_app.frigate_config, current_app.stats_tracking, current_app.hwaccel_errors)
+    stats = stats_snapshot(
+        current_app.frigate_config,
+        current_app.stats_tracking,
+        current_app.hwaccel_errors,
+    )
     return jsonify(stats)
 
 
@@ -862,7 +866,9 @@ def latest_frame(camera_name):
 @bp.route("/recordings/storage", methods=["GET"])
 def get_recordings_storage_usage():
     recording_stats = stats_snapshot(
-        current_app.frigate_config, current_app.stats_tracking, current_app.hwaccel_errors
+        current_app.frigate_config,
+        current_app.stats_tracking,
+        current_app.hwaccel_errors,
     )["service"]["storage"][RECORD_DIR]
     total_mb = recording_stats["total"]
 
