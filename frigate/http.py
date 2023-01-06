@@ -761,7 +761,7 @@ def version():
 
 @bp.route("/stats")
 def stats():
-    stats = stats_snapshot(current_app.frigate_config, current_app.stats_tracking)
+    stats = stats_snapshot(current_app.frigate_config, current_app.stats_tracking, [])
     return jsonify(stats)
 
 
