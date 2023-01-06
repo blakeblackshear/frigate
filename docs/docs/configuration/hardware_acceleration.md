@@ -93,8 +93,14 @@ ffmpeg:
 ```
 
 If everything is working correctly, you should see a significant improvement in performance.
-Verify that hardware decoding is working by running `docker exec -it frigate nvidia-smi`, which should show the ffmpeg
+Verify that hardware decoding is working by running `nvidia-smi`, which should show the ffmpeg
 processes:
+
+:::note
+
+nvidia-smi may not show ffmpeg processes when run inside the container [due to docker limitations](https://github.com/NVIDIA/nvidia-docker/issues/179#issuecomment-645579458)
+
+:::
 
 ```
 +-----------------------------------------------------------------------------+
