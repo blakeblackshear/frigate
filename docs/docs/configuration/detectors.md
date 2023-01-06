@@ -171,9 +171,9 @@ There are improved capabilities in newer GPU architectures that TensorRT can ben
 
 ### Generate Models
 
-The models used for TensorRT must be preprocessed on the same hardware platform that they will run on. This means that each user must run additional setup to generate these model files for the TensorRT library. A script is provided that will build several common models.
+The model used for TensorRT must be preprocessed on the same hardware platform that they will run on. This means that each user must run additional setup to generate a model file for the TensorRT library. A script is provided that will build several common models.
 
-To generate the model files, create a new folder to save the models, download the script, and launch a docker container that will run the script.
+To generate model files, create a new folder to save the models, download the script, and launch a docker container that will run the script.
 
 ```bash
 mkdir trt-models
