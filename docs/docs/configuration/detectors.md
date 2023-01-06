@@ -228,7 +228,6 @@ detectors:
 
 model:
   path: /trt-models/yolov7-tiny-416.trt
-  labelmap_path: /trt-models/coco_91cl.txt
   input_tensor: nchw
   input_pixel_format: rgb
   width: 416
