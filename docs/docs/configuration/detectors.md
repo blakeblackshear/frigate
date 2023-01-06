@@ -159,6 +159,8 @@ The TensorRT detector uses the 11.x series of CUDA libraries which have minor ve
 
 > **TODO:** NVidia claims support on compute 3.5 and 3.7, but marks it as deprecated. This would have some, but not all, Kepler GPUs as possibly working. This needs testing before making any claims of support.
 
+To use the TensorRT detector, make sure your host system has the [nvidia-container-runtime](https://docs.docker.com/config/containers/resource_constraints/#access-an-nvidia-gpu) installed to pass through the GPU to the container and the host system has a compatible driver installed for your GPU.
+
 There are improved capabilities in newer GPU architectures that TensorRT can benefit from, such as INT8 operations and Tensor cores. The features compatible with your hardware will be optimized when the model is converted to a trt file. Currently the script provided for generating the model provides a switch to enable/disable FP16 operations. If you wish to use newer features such as INT8 optimization, more work is required.
 
 #### Compatibility References:
@@ -171,13 +173,13 @@ There are improved capabilities in newer GPU architectures that TensorRT can ben
 
 ### Generate Models
 
-The models used for TensorRT must be preprocessed on the same hardware platform that they will run on. This means that each user must run additional setup to generate these model files for the TensorRT library. A script is provided that will build several common models.
+The model used for TensorRT must be preprocessed on the same hardware platform that they will run on. This means that each user must run additional setup to generate a model file for the TensorRT library. A script is provided that will build several common models.
 
-To generate the model files, create a new folder to save the models, download the script, and launch a docker container that will run the script.
+To generate model files, create a new folder to save the models, download the script, and launch a docker container that will run the script.
 
 ```bash
 mkdir trt-models
-wget https://raw.githubusercontent.com/blakeblackshear/frigate/nvidia-detector/docker/tensorrt_models.sh
+wget https://raw.githubusercontent.com/blakeblackshear/frigate/docker/tensorrt_models.sh
 chmod +x tensorrt_models.sh
 docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
 ```
