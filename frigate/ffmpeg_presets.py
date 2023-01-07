@@ -303,7 +303,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
     if not isinstance(arg, str):
         return None
 
-    if arg == "preset-jpeg-generic":
+    if arg == "preset-http-jpeg-generic":
         input = PRESETS_INPUT[arg].copy()
         input[1] = str(detect_fps)
         return input
