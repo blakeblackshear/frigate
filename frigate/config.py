@@ -968,7 +968,7 @@ class FrigateConfig(FrigateBaseModel):
         for _, camera in config.cameras.items():
             enabled_labels.update(camera.objects.track)
 
-        config.model.create_colormap(enabled_labels)
+        config.model.create_colormap(sorted(enabled_labels))
 
         for key, detector in config.detectors.items():
             detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
