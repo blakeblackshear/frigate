@@ -52,6 +52,8 @@ mqtt:
   # NOTE: must be unique if you are running multiple instances
   client_id: frigate
   # Optional: user
+  # NOTE: MQTT user can be specified with an environment variables that must begin with 'FRIGATE_'.
+  #       e.g. user: '{FRIGATE_MQTT_USER}'
   user: mqtt_user
   # Optional: password
   # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.

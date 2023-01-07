@@ -863,8 +863,9 @@ class FrigateConfig(FrigateBaseModel):
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 
-        # MQTT password substitution
-        if config.mqtt.password:
+        # MQTT user/password substitutions
+        if config.mqtt.user or config.mqtt.password:
+            config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
         # Global config to propagate down to camera level
