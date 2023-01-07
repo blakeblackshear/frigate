@@ -7,7 +7,7 @@ from typing import Any
 from frigate.version import VERSION
 from frigate.const import BTBN_PATH
 
-TIMEOUT_PARAM = "-timeout" if not os.path.exists(BTBN_PATH) else "-stimeout"
+TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
 
 _user_agent_args = [
     "-user_agent",
