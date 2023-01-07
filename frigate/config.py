@@ -36,8 +36,10 @@ from frigate.ffmpeg_presets import (
 from frigate.detectors import (
     PixelFormatEnum,
     InputTensorEnum,
-    ModelConfig,
     DetectorConfig,
+    ModelConfig,
+    AudioModelConfig,
+    ObjectModelConfig,
 )
 from frigate.version import VERSION
 
@@ -51,7 +53,7 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 
-DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_TRACKED_OBJECTS = ["person", "Speech"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 
 
@@ -358,6 +360,7 @@ class BirdseyeCameraConfig(BaseModel):
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
+DETECT_AUDIO_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "s16le", "-ar", "16000", "-ac", "1"]
 RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
 RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
@@ -365,6 +368,10 @@ RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 class FfmpegOutputArgsConfig(FrigateBaseModel):
     detect: Union[str, List[str]] = Field(
         default=DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT,
+        title="Detect role FFmpeg output arguments.",
+    )
+    detect_audio: Union[str, List[str]] = Field(
+        default=DETECT_AUDIO_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Detect role FFmpeg output arguments.",
     )
     record: Union[str, List[str]] = Field(
@@ -398,6 +405,7 @@ class CameraRoleEnum(str, Enum):
     restream = "restream"
     rtmp = "rtmp"
     detect = "detect"
+    detect_audio = "detect_audio"
 
 
 class CameraInput(FrigateBaseModel):
@@ -597,6 +605,7 @@ class CameraConfig(FrigateBaseModel):
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
             has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
+            has_audio = "detect_audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
@@ -606,6 +615,8 @@ class CameraConfig(FrigateBaseModel):
 
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
+            if has_audio:
+                config["ffmpeg"]["inputs"][0]["roles"].append("detect_audio")
 
         super().__init__(**config)
 
@@ -646,6 +657,15 @@ class CameraConfig(FrigateBaseModel):
             )
 
             ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
+        if "detect_audio" in ffmpeg_input.roles:
+            detect_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.detect_audio)
+
+            pipe = f"/tmp/{self.name}-audio"
+            try:
+                os.mkfifo(pipe)
+            except FileExistsError:
+                pass
+            ffmpeg_output_args = detect_args + ["-y", pipe] + ffmpeg_output_args
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
             rtmp_args = get_ffmpeg_arg_list(
                 parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)
@@ -815,8 +835,11 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
-    model: ModelConfig = Field(
-        default_factory=ModelConfig, title="Detection model configuration."
+    audio_model: AudioModelConfig = Field(
+        default_factory=AudioModelConfig, title="Audio model configuration."
+    )
+    model: ObjectModelConfig = Field(
+        default_factory=ObjectModelConfig, title="Detection model configuration."
     )
     detectors: Dict[str, DetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
@@ -975,25 +998,21 @@ class FrigateConfig(FrigateBaseModel):
             if detector_config.model is None:
                 detector_config.model = config.model
             else:
-                model = detector_config.model
-                schema = ModelConfig.schema()["properties"]
-                if (
-                    model.width != schema["width"]["default"]
-                    or model.height != schema["height"]["default"]
-                    or model.labelmap_path is not None
-                    or model.labelmap is not {}
-                    or model.input_tensor != schema["input_tensor"]["default"]
-                    or model.input_pixel_format
-                    != schema["input_pixel_format"]["default"]
-                ):
+                detector_model = detector_config.model.dict(exclude_unset=True)
+                # If any keys are set in the detector_model other than type or path, warn
+                if any(key not in ["type", "path"] for key in detector_model.keys()):
                     logger.warning(
-                        "Customizing more than a detector model path is unsupported."
+                        "Customizing more than a detector model type or path is unsupported."
                     )
-            merged_model = deep_merge(
-                detector_config.model.dict(exclude_unset=True),
-                config.model.dict(exclude_unset=True),
-            )
-            detector_config.model = ModelConfig.parse_obj(merged_model)
+                merged_model = deep_merge(
+                    detector_model,
+                    config.model.dict(exclude_unset=True)
+                    if detector_config.model.type == "object"
+                    else config.audio_model.dict(exclude_unset=True),
+                )
+                detector_config.model = parse_obj_as(
+                    ModelConfig, {"type": detector_config.model.type, **merged_model}
+                )
             config.detectors[key] = detector_config
 
         return config

@@ -13,6 +13,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.audio import capture_audio, process_audio
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
@@ -42,6 +43,7 @@ class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
+        self.audio_detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
@@ -104,6 +106,7 @@ class FrigateApp:
                 "read_start": mp.Value("d", 0.0),
                 "ffmpeg_pid": mp.Value("i", 0),
                 "frame_queue": mp.Queue(maxsize=2),
+                "audio_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
@@ -182,7 +185,7 @@ class FrigateApp:
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
     def start_detectors(self) -> None:
-        for name in self.config.cameras.keys():
+        for name, camera_config in self.config.cameras.items():
             self.detection_out_events[name] = mp.Event()
 
             try:
@@ -190,6 +193,7 @@ class FrigateApp:
                     [
                         det.model.height * det.model.width * 3
                         for (name, det) in self.config.detectors.items()
+                        if det.model.type == "object"
                     ]
                 )
                 shm_in = mp.shared_memory.SharedMemory(
@@ -210,10 +214,43 @@ class FrigateApp:
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
+            if any(
+                ["detect_audio" in input.roles for input in camera_config.ffmpeg.inputs]
+            ):
+                self.detection_out_events[f"{name}-audio"] = mp.Event()
+                try:
+                    shm_in_audio = mp.shared_memory.SharedMemory(
+                        name=f"{name}-audio",
+                        create=True,
+                        size=int(
+                            round(
+                                self.config.audio_model.duration
+                                * self.config.audio_model.sample_rate
+                            )
+                        )
+                        * 4,  # stored as float32, so 4 bytes per sample
+                    )
+                except FileExistsError:
+                    shm_in_audio = mp.shared_memory.SharedMemory(name=f"{name}-audio")
+
+                try:
+                    shm_out_audio = mp.shared_memory.SharedMemory(
+                        name=f"out-{name}-audio", create=True, size=20 * 6 * 4
+                    )
+                except FileExistsError:
+                    shm_out_audio = mp.shared_memory.SharedMemory(
+                        name=f"out-{name}-audio"
+                    )
+
+                self.detection_shms.append(shm_in_audio)
+                self.detection_shms.append(shm_out_audio)
+
         for name, detector_config in self.config.detectors.items():
             self.detectors[name] = ObjectDetectProcess(
                 name,
-                self.detection_queue,
+                self.audio_detection_queue
+                if detector_config.model.type == "audio"
+                else self.detection_queue,
                 self.detection_out_events,
                 detector_config,
             )
@@ -244,6 +281,54 @@ class FrigateApp:
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
+
+    def start_audio_processors(self) -> None:
+        # Make sure we have audio detectors
+        if not any(
+            [det.model.type == "audio" for det in self.config.detectors.values()]
+        ):
+            return
+
+        for name, config in self.config.cameras.items():
+            if not any(
+                ["detect_audio" in inputs.roles for inputs in config.ffmpeg.inputs]
+            ):
+                continue
+            if not config.enabled:
+                logger.info(f"Audio processor not started for disabled camera {name}")
+                continue
+
+            audio_capture = mp.Process(
+                target=capture_audio,
+                name=f"audio_capture:{name}",
+                args=(
+                    name,
+                    self.config.audio_model,
+                    self.camera_metrics[name],
+                ),
+            )
+            audio_capture.daemon = True
+            self.camera_metrics[name]["audio_capture"] = audio_capture
+            audio_capture.start()
+            logger.info(f"Audio capture started for {name}: {audio_capture.pid}")
+
+            audio_process = mp.Process(
+                target=process_audio,
+                name=f"audio_process:{name}",
+                args=(
+                    name,
+                    config,
+                    self.config.audio_model,
+                    self.config.audio_model.merged_labelmap,
+                    self.audio_detection_queue,
+                    self.detection_out_events[f"{name}-audio"],
+                    self.camera_metrics[name],
+                ),
+            )
+            audio_process.daemon = True
+            self.camera_metrics[name]["audio_process"] = audio_process
+            audio_process.start()
+            logger.info(f"Audio processor started for {name}: {audio_process.pid}")
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
@@ -364,6 +449,7 @@ class FrigateApp:
         self.start_detectors()
         self.start_video_output_processor()
         self.start_detected_frames_processor()
+        self.start_audio_processors()
         self.start_camera_processors()
         self.start_camera_capture_processes()
         self.start_storage_maintainer()

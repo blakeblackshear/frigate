@@ -915,7 +915,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def get(self, name, timeout_ms=0):
+    def get(self, name):
         pass
 
     @abstractmethod
@@ -956,13 +956,13 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def get(self, name, shape):
+    def get(self, name, shape, dtype=np.uint8):
         if name in self.shm_store:
             shm = self.shm_store[name]
         else:
             shm = shared_memory.SharedMemory(name=name)
             self.shm_store[name] = shm
-        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+        return np.ndarray(shape, dtype=dtype, buffer=shm.buf)
 
     def close(self, name):
         if name in self.shm_store:

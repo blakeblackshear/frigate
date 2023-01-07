@@ -44,7 +44,7 @@ class LocalObjectDetector(ObjectDetector):
         else:
             self.labels = load_labels(labels)
 
-        if detector_config:
+        if detector_config.model.type == "object":
             self.input_transform = tensor_transform(detector_config.model.input_tensor)
         else:
             self.input_transform = None
@@ -107,10 +107,24 @@ def run_detector(
             connection_id = detection_queue.get(timeout=5)
         except queue.Empty:
             continue
-        input_frame = frame_manager.get(
-            connection_id,
-            (1, detector_config.model.height, detector_config.model.width, 3),
-        )
+        if detector_config.model.type == "audio":
+            input_frame = frame_manager.get(
+                connection_id,
+                (
+                    int(
+                        round(
+                            detector_config.model.duration
+                            * detector_config.model.sample_rate
+                        )
+                    ),
+                ),
+                dtype=np.float32,
+            )
+        else:
+            input_frame = frame_manager.get(
+                connection_id,
+                (1, detector_config.model.height, detector_config.model.width, 3),
+            )
 
         if input_frame is None:
             continue
@@ -180,11 +194,18 @@ class RemoteObjectDetector:
         self.detection_queue = detection_queue
         self.event = event
         self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
-        self.np_shm = np.ndarray(
-            (1, model_config.height, model_config.width, 3),
-            dtype=np.uint8,
-            buffer=self.shm.buf,
-        )
+        if model_config.type == "audio":
+            self.np_shm = np.ndarray(
+                (int(round(model_config.duration * model_config.sample_rate)),),
+                dtype=np.float32,
+                buffer=self.shm.buf,
+            )
+        else:
+            self.np_shm = np.ndarray(
+                (1, model_config.height, model_config.width, 3),
+                dtype=np.uint8,
+                buffer=self.shm.buf,
+            )
         self.out_shm = mp.shared_memory.SharedMemory(
             name=f"out-{self.name}", create=False
         )

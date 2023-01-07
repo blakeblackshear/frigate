@@ -12,7 +12,7 @@ FROM debian:11-slim AS slim-base
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
 RUN apt-get update \
-    && apt-get install -y wget xz-utils \
+    && apt-get install -y wget xz-utils unzip \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /rootfs
 
@@ -93,7 +93,10 @@ COPY labelmap.txt .
 COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
-
+# Get Audio Model and labels
+RUN wget -qO edgetpu_audio_model.tflite https://tfhub.dev/google/coral-model/yamnet/classification/coral/1?coral-format=tflite
+RUN wget -qO cpu_audio_model.tflite https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite
+RUN unzip -q edgetpu_audio_model.tflite yamnet_label_list.txt && chmod +r yamnet_label_list.txt
 
 
 FROM wget AS s6-overlay
