@@ -9,11 +9,14 @@ from frigate.object_detection import ObjectDetectProcess
 class CameraMetricsTypes(TypedDict):
     camera_fps: Synchronized
     capture_process: Optional[Process]
+    audio_capture: Optional[Process]
+    audio_process: Optional[Process]
     detection_enabled: Synchronized
     detection_fps: Synchronized
     detection_frame: Synchronized
     ffmpeg_pid: Synchronized
     frame_queue: Queue
+    audio_queue: Queue
     motion_enabled: Synchronized
     improve_contrast_enabled: Synchronized
     motion_threshold: Synchronized

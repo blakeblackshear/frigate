@@ -108,6 +108,8 @@ class FrigateApp:
                 "frame_queue": mp.Queue(maxsize=2),
                 "audio_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
+                "audio_capture": None,
+                "audio_process": None,
                 "process": None,
             }
 
