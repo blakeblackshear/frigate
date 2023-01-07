@@ -1,8 +1,13 @@
 """Handles inserting and maintaining ffmpeg presets."""
 
+import os
+
 from typing import Any
 
 from frigate.version import VERSION
+from frigate.const import BTBN_PATH
+
+TIMEOUT_PARAM = "-timeout" if not os.path.exists(BTBN_PATH) else "-stimeout"
 
 _user_agent_args = [
     "-user_agent",
@@ -258,7 +263,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "tcp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
@@ -271,7 +276,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "udp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
@@ -290,7 +295,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "tcp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
