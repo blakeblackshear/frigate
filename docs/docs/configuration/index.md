@@ -53,6 +53,9 @@ mqtt:
   client_id: frigate
   # Optional: user
   user: mqtt_user
+  # NOTE: MQTT user can be specified with an environment variables that must begin with 'FRIGATE_'.
+  #       e.g. user: '{FRIGATE_MQTT_USER}'
+  password: password
   # Optional: password
   # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
   #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'

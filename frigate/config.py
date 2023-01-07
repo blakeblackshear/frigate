@@ -866,6 +866,9 @@ class FrigateConfig(FrigateBaseModel):
         # MQTT password substitution
         if config.mqtt.password:
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+        # MQTT user substitution
+        if config.mqtt.user:
+            config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
 
         # Global config to propagate down to camera level
         global_config = config.dict(
