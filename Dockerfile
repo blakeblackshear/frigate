@@ -144,6 +144,11 @@ RUN pip3 install -r requirements.txt
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
+# Make this a separate target so it can be built/cached optionally
+FROM wheels as trt-wheels
+ARG DEBIAN_FRONTEND
+ARG TARGETARCH
+
 # Add TensorRT wheels to another folder
 COPY requirements-tensorrt.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r requirements-tensorrt.txt
@@ -263,11 +268,11 @@ COPY --from=rootfs / /
 
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
-RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
-RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
