@@ -51,4 +51,3 @@ jobs:
           tags: |
             ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
           cache-from: type=gha
-          cache-to: type=gha,mode=max
