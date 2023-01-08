@@ -40,6 +40,7 @@ if [[ "${TARGETARCH}" == "arm" ]]; then
     # add raspberry pi repo
     gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
     echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
+    apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
 fi
 
@@ -48,6 +49,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     # add raspberry pi repo
     gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
     echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] https://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list
+    apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
 fi
 
