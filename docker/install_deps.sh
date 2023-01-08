@@ -12,10 +12,7 @@ apt-get -qq install --no-install-recommends -y \
     unzip locales tzdata libxml2 xz-utils \
     python3-pip
 
-# add raspberry pi repo
 mkdir -p -m 600 /root/.gnupg
-gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
-echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
 
 # add coral repo
 wget --quiet -O /usr/share/keyrings/google-edgetpu.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
@@ -30,13 +27,9 @@ apt-get -qq update
 apt-get -qq install --no-install-recommends --no-install-suggests -y \
     libedgetpu1-max python3-tflite-runtime python3-pycoral
 
-# btbn-ffmpeg -> amd64 / arm64
-if [[ "${TARGETARCH}" == "amd64" || "${TARGETARCH}" == "arm64" ]]; then
-    if [[ "${TARGETARCH}" == "amd64" ]]; then
-        btbn_arch="64"
-    else
-        btbn_arch="arm64"
-    fi
+# btbn-ffmpeg -> amd64
+if [[ "${TARGETARCH}" == "amd64" ]]; then
+    btbn_arch="arm64"
     mkdir -p /usr/lib/btbn-ffmpeg
     wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux${btbn_arch}-gpl-5.1.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
@@ -45,6 +38,17 @@ fi
 
 # ffmpeg -> arm32
 if [[ "${TARGETARCH}" == "arm" ]]; then
+    # add raspberry pi repo
+    gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
+    echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
+    apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
+fi
+
+# ffmpeg -> arm64
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    # add raspberry pi repo
+    gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
+    echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] https://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
 fi
 

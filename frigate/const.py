@@ -7,6 +7,7 @@ YAML_EXT = (".yaml", ".yml")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 MAX_SEGMENT_DURATION = 600
+BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
 # Regex Consts
 

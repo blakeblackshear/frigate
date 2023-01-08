@@ -1,8 +1,13 @@
 """Handles inserting and maintaining ffmpeg presets."""
 
+import os
+
 from typing import Any
 
 from frigate.version import VERSION
+from frigate.const import BTBN_PATH
+
+TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
 
 _user_agent_args = [
     "-user_agent",
@@ -114,6 +119,8 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
+    "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
+    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
@@ -122,6 +129,8 @@ PRESETS_HW_ACCEL_ENCODE = {
 }
 
 PRESETS_HW_ACCEL_GO2RTC_ENGINE = {
+    "preset-rpi-32-h264": "v4l2m2m",
+    "preset-rpi-64-h264": "v4l2m2m",
     "preset-intel-vaapi": "vaapi",
     "preset-intel-qsv-h264": "vaapi",  # go2rtc doesn't support qsv
     "preset-intel-qsv-h265": "vaapi",
@@ -258,7 +267,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "tcp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
@@ -271,7 +280,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "udp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
@@ -290,7 +299,7 @@ PRESETS_INPUT = {
         "+genpts+discardcorrupt",
         "-rtsp_transport",
         "tcp",
-        "-timeout",
+        TIMEOUT_PARAM,
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
