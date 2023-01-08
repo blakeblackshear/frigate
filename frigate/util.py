@@ -780,7 +780,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
     )
 
     if p.returncode != 0:
-        logger.error(p.stderr)
+        logger.error(f"Unable to poll radeon GPU stats: {p.stderr}")
         return None
     else:
         usages = p.stdout.split(",")
@@ -816,7 +816,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
     # timeout has a non-zero returncode when timeout is reached
     if p.returncode != 124:
-        logger.error(p.stderr)
+        logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
         return None
     else:
         reading = "".join(p.stdout.split())
@@ -866,7 +866,7 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
     )
 
     if p.returncode != 0:
-        logger.error(p.stderr)
+        logger.error(f"Unable to poll nvidia GPU stats: {p.stderr}")
         return None
     else:
         usages = p.stdout.split("\n")[1].strip().split(",")
