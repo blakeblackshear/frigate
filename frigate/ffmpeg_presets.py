@@ -80,6 +80,8 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
+    "preset-rpi-32-h264": ["-f", "rawvideo", "-pix_fmt", "yuv420p"],
+    "preset-rpi-64-h264": ["-f", "rawvideo", "-pix_fmt", "yuv420p"],
     "preset-vaapi": [
         "-vf",
         "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
