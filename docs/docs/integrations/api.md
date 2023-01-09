@@ -166,6 +166,7 @@ Events from the database. Accepts the following query string parameters:
 | `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1) |
 | `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
+| `in_progress`        | int  | Limit to events in progress (0 or 1)          |
 
 ### `GET /api/events/summary`
 
