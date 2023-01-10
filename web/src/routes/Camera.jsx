@@ -170,7 +170,7 @@ export default function Camera({ camera }) {
         </select>
       </div>
 
-      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
+      <ButtonsTabbed viewModes={['live', 'debug']} currentViewMode={viewMode} setViewMode={setViewMode} />
 
       {player}
 
