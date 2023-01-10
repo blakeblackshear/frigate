@@ -90,9 +90,11 @@ export default function System() {
             {state.ffprobe != '' ? <p className="mb-2">{state.ffprobe}</p> : <ActivityIndicator />}
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            (window.navigator.clipboard && (
             <Button className="ml-2" onClick={() => onCopyFfprobe()} type="text">
               Copy
             </Button>
+            ))
             <Button
               className="ml-2"
               onClick={() => setState({ ...state, ffprobe: '', showFfprobe: false })}
@@ -115,9 +117,11 @@ export default function System() {
             )}
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2 whitespace-pre-wrap">
-            <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
-              Copy
-            </Button>
+            {window.navigator.clipboard && (
+              <Button className="ml-2" onClick={() => onCopyVainfo()} type="text">
+                Copy
+              </Button>
+            )}
             <Button className="ml-2" onClick={() => setState({ ...state, vainfo: '', showVainfo: false })} type="text">
               Close
             </Button>

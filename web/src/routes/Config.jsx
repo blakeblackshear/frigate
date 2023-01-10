@@ -57,9 +57,9 @@ export default function Config() {
 
     let yamlModel;
     if (editor.getModels().length > 0) {
-      yamlModel = editor.getModel(modelUri)
+      yamlModel = editor.getModel(modelUri);
     } else {
-      yamlModel = editor.createModel(config, 'yaml', modelUri)
+      yamlModel = editor.createModel(config, 'yaml', modelUri);
     }
 
     setDiagnosticsOptions({
@@ -93,9 +93,11 @@ export default function Config() {
       <div className="flex justify-between">
         <Heading>Config</Heading>
         <div>
-          <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
-            Copy Config
-          </Button>
+          {window.navigator.clipboard && (
+            <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
+              Copy Config
+            </Button>
+          )}
           <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
             Save & Restart
           </Button>
