@@ -187,7 +187,7 @@ export default function System() {
                       <Table className="w-full">
                         <Thead>
                           <Tr>
-                            <Th>Gpu %</Th>
+                            <Th>GPU %</Th>
                             <Th>Memory %</Th>
                           </Tr>
                         </Thead>
