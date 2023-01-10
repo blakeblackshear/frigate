@@ -602,8 +602,13 @@ def events():
         # for example a sub label 'bob' would get events
         # with sub labels 'bob' and 'bob, john'
         sub_label_clauses = []
+        filtered_sub_labels = sub_labels.split(",")
 
-        for label in sub_labels.split(","):
+        if "None" in filtered_sub_labels:
+            filtered_sub_labels.remove("None")
+            sub_label_clauses.append((Event.sub_label.is_null()))
+
+        for label in filtered_sub_labels:
             sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label}*"))
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
@@ -613,8 +618,13 @@ def events():
         # use matching so events with multiple zones
         # still match on a search where any zone matches
         zone_clauses = []
+        filtered_zones = zones.split(",")
 
-        for zone in zones.split(","):
+        if "None" in filtered_zones:
+            filtered_zones.remove("None")
+            zone_clauses.append((Event.zones.length() == 0))
+
+        for zone in filtered_zones:
             zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
 
         zone_clause = reduce(operator.or_, zone_clauses)
