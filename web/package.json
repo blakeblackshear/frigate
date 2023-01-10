@@ -14,6 +14,7 @@
   "dependencies": {
     "@cycjimmy/jsmpeg-player": "^6.0.5",
     "axios": "^1.2.2",
+    "copy-to-clipboard": "3.3.3",
     "date-fns": "^2.29.3",
     "idb-keyval": "^6.2.0",
     "immer": "^9.0.16",

@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
+import copy from 'copy-to-clipboard';
 
 const emptyObject = Object.freeze({});
 
@@ -54,7 +55,7 @@ export default function System() {
   };
 
   const onCopyFfprobe = async () => {
-    await window.navigator.clipboard.writeText(JSON.stringify(state.ffprobe, null, 2));
+    copy(JSON.stringify(state.ffprobe, null, 2));
     setState({ ...state, ffprobe: '', showFfprobe: false });
   };
 
@@ -73,7 +74,7 @@ export default function System() {
   };
 
   const onCopyVainfo = async () => {
-    await window.navigator.clipboard.writeText(JSON.stringify(state.vaifp, null, 2));
+    copy(JSON.stringify(state.vainfo, null, 2));
     setState({ ...state, vainfo: '', showVainfo: false });
   };
 

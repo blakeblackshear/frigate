@@ -8,6 +8,7 @@ import { useEffect, useState } from 'preact/hooks';
 import Button from '../components/Button';
 import { editor, Uri } from 'monaco-editor';
 import { setDiagnosticsOptions } from 'monaco-yaml';
+import copy from 'copy-to-clipboard';
 
 export default function Config() {
   const apiHost = useApiHost();
@@ -40,7 +41,7 @@ export default function Config() {
   };
 
   const handleCopyConfig = async () => {
-    await window.navigator.clipboard.writeText(window.editor.getValue());
+    copy(window.editor.getValue());
   };
 
   useEffect(() => {
