@@ -93,7 +93,7 @@ export default function Config() {
       <div className="flex justify-between">
         <Heading>Config</Heading>
         <div>
-          {window.navigator.clipboard.writeText && (
+          {window.navigator.clipboard && (
             <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
               Copy Config
             </Button>
