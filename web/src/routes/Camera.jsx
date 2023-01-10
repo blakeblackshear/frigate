@@ -77,7 +77,7 @@ export default function Camera({ camera }) {
         labelPosition="after"
       />
       <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Motion Masks" labelPosition="after" />
       <Switch
         checked={options['motion']}
         id="motion"
