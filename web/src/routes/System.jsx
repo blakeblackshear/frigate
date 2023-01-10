@@ -74,7 +74,7 @@ export default function System() {
   };
 
   const onCopyVainfo = async () => {
-    copy(JSON.stringify(state.vaifp, null, 2));
+    copy(JSON.stringify(state.vainfo, null, 2));
     setState({ ...state, vainfo: '', showVainfo: false });
   };
 
