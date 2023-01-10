@@ -142,7 +142,6 @@ export default function System() {
                     <Thead>
                       <Tr>
                         <Th>P-ID</Th>
-                        <Th>Detection Status</Th>
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
                       </Tr>
@@ -150,7 +149,6 @@ export default function System() {
                     <Tbody>
                       <Tr>
                         <Td>{detectors[detector]['pid']}</Td>
-                        <Td>{detectors[detector]['detection_start'] > 0 ? ('running') : ('idle')}</Td>
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
                       </Tr>
