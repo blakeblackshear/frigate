@@ -90,13 +90,13 @@ PRESETS_HW_ACCEL_SCALE = {
     ],
     "preset-intel-qsv-h264": [
         "-vf",
-        "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "vpp_qsv=framerate={},scale_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
         "-f",
         "rawvideo",
     ],
     "preset-intel-qsv-h265": [
         "-vf",
-        "vpp_qsv=framerate={}:scale_mode=1:w={}:h={}:detail=50:denoise=100:deinterlace=2:format=nv12,hwdownload,format=nv12,format=yuv420p",
+        "vpp_qsv=framerate={},scale_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
         "-f",
         "rawvideo",
     ],
