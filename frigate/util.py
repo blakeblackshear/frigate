@@ -818,16 +818,16 @@ def get_cpu_stats() -> dict[str, dict]:
             try:
 
                 if docker_memlimit > 0:
-                    memRes = int(stats[5])
-                    memPct = str(
-                        round((float(memRes) / float(docker_memlimit)) * 100, 1)
+                    mem_res = int(stats[5])
+                    mem_pct = str(
+                        round((float(mem_res) / float(docker_memlimit)) * 100, 1)
                     )
                 else:
-                    memPct = stats[9]
+                    mem_pct = stats[9]
 
                 usages[stats[0]] = {
                     "cpu": stats[8],
-                    "mem": memPct,
+                    "mem": mem_pct,
                 }
             except:
                 continue
