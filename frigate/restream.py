@@ -22,14 +22,14 @@ def get_manual_go2rtc_stream(
 ) -> str:
     """Get a manual stream for go2rtc."""
     if codec == RestreamCodecEnum.copy:
-        return f"ffmpeg:{camera_url}#video=copy#audio=aac#audio=opus#backchannel=0"
+        return f"ffmpeg:{camera_url}#video=copy#audio=aac#audio=opus"
 
     if engine:
         return (
-            f"ffmpeg:{camera_url}#video={codec}#hardware={engine}#audio=aac#audio=opus#backchannel=0"
+            f"ffmpeg:{camera_url}#video={codec}#hardware={engine}#audio=aac#audio=opus"
         )
 
-    return f"ffmpeg:{camera_url}#video={codec}#audio=aac#audio=opus#backchannel=0"
+    return f"ffmpeg:{camera_url}#video={codec}#audio=aac#audio=opus"
 
 
 class RestreamApi:
@@ -52,7 +52,8 @@ class RestreamApi:
                         input.path.startswith("rtsp")
                         and not camera.restream.force_audio
                     ):
-                        self.relays[cam_name] = f"{escape_special_characters(input.path)}#backchannel=0"
+                        self.relays[cam_name] = 
+                            f"{escape_special_characters(input.path)}#backchannel=0"
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
                         self.relays[cam_name] = get_manual_go2rtc_stream(
