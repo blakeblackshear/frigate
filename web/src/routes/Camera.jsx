@@ -30,7 +30,7 @@ export default function Camera({ camera }) {
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'mse');
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['mse'];
+  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -77,7 +77,7 @@ export default function Camera({ camera }) {
         labelPosition="after"
       />
       <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Motion Masks" labelPosition="after" />
       <Switch
         checked={options['motion']}
         id="motion"
@@ -98,7 +98,7 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (viewSource == 'mse') {
+    if (viewSource == 'mse' && cameraConfig.restream.enabled) {
       if (videojs.browser.IS_IOS) {
         player = (
           <Fragment>
@@ -116,7 +116,7 @@ export default function Camera({ camera }) {
           </Fragment>
         );
       }
-    } else if (viewSource == 'webrtc') {
+    } else if (viewSource == 'webrtc' && cameraConfig.restream.enabled) {
       player = (
         <Fragment>
           <div className="max-w-5xl">
@@ -170,7 +170,7 @@ export default function Camera({ camera }) {
         </select>
       </div>
 
-      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
+      <ButtonsTabbed viewModes={['live', 'debug']} currentViewMode={viewMode} setViewMode={setViewMode} />
 
       {player}
 
