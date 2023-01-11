@@ -566,7 +566,7 @@ def events():
     has_snapshot = request.args.get("has_snapshot", type=int)
     in_progress = request.args.get("in_progress", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
-    
+
     favorites = request.args.get("favorites", type=int)
 
     clauses = []
