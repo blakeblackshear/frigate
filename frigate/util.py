@@ -738,11 +738,68 @@ def escape_special_characters(path: str) -> str:
         return path
 
 
+def get_cgroups_version() -> str:
+    """Determine what version of cgroups is enabled"""
+
+    stat_command = ["stat", "-fc", "%T", "/sys/fs/cgroup"]
+
+    p = sp.run(
+        stat_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode == 0:
+        value: str = p.stdout.strip().lower()
+
+        if value == "cgroup2fs":
+            return "cgroup2"
+        elif value == "tmpfs":
+            return "cgroup"
+        else:
+            logger.debug(
+                f"Could not determine cgroups version: unhandled filesystem {value}"
+            )
+    else:
+        logger.debug(f"Could not determine cgroups version:  {p.stderr}")
+
+    return "unknown"
+
+
+def get_docker_memlimit_bytes() -> int:
+    """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected"""
+
+    # check running a supported cgroups version
+    if get_cgroups_version() == "cgroup2":
+
+        memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
+
+        p = sp.run(
+            memlimit_command,
+            encoding="ascii",
+            capture_output=True,
+        )
+
+        if p.returncode == 0:
+            value: str = p.stdout.strip()
+
+            if value.isnumeric():
+                return int(value)
+            elif value.lower() == "max":
+                return -1
+        else:
+            logger.debug(f"Unable to get docker memlimit: {p.stderr}")
+
+    return -1
+
+
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
     usages = {}
     # -n=2 runs to ensure extraneous values are not included
     top_command = ["top", "-b", "-n", "2"]
+
+    docker_memlimit = get_docker_memlimit_bytes() / 1024
 
     p = sp.run(
         top_command,
@@ -759,9 +816,18 @@ def get_cpu_stats() -> dict[str, dict]:
         for line in lines:
             stats = list(filter(lambda a: a != "", line.strip().split(" ")))
             try:
+
+                if docker_memlimit > 0:
+                    mem_res = int(stats[5])
+                    mem_pct = str(
+                        round((float(mem_res) / float(docker_memlimit)) * 100, 1)
+                    )
+                else:
+                    mem_pct = stats[9]
+
                 usages[stats[0]] = {
                     "cpu": stats[8],
-                    "mem": stats[9],
+                    "mem": mem_pct,
                 }
             except:
                 continue
