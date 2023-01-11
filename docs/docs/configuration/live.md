@@ -24,6 +24,9 @@ webRTC works by creating a websocket connection on extra ports. One of the follo
     * For local webRTC, you will need to create your own go2rtc config:
 
 ```yaml
+log:
+  format: text
+
 webrtc:
   listen: ":8555"
   candidates:

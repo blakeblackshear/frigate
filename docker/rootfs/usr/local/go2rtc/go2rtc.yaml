@@ -1,3 +1,6 @@
+log:
+  format: text
+
 webrtc:
   listen: ":8555"
   candidates:

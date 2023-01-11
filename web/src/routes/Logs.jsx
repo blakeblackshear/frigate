@@ -38,7 +38,7 @@ export default function Logs() {
     <div className="space-y-4 p-2 px-4">
       <Heading>Logs</Heading>
 
-      <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} setViewMode={setLogService} />
+      <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} currentViewMode={logService} setViewMode={setLogService} />
 
       <Button className="" onClick={handleCopyLogs}>
         Copy to Clipboard
