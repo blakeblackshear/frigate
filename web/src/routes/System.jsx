@@ -144,6 +144,7 @@ export default function System() {
                         <Th>P-ID</Th>
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
+                        <Th>Memory %</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -151,6 +152,7 @@ export default function System() {
                         <Td>{detectors[detector]['pid']}</Td>
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
+                        <Td>{cpu_usages[detectors[detector]['pid']]?.['mem'] || '- '}%</Td>
                       </Tr>
                     </Tbody>
                   </Table>
