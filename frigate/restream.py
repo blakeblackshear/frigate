@@ -52,7 +52,9 @@ class RestreamApi:
                         input.path.startswith("rtsp")
                         and not camera.restream.force_audio
                     ):
-                        self.relays[cam_name] = escape_special_characters(input.path)
+                        self.relays[
+                            cam_name
+                        ] = f"{escape_special_characters(input.path)}#backchannel=0"
                     else:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
                         self.relays[cam_name] = get_manual_go2rtc_stream(
