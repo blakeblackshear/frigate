@@ -564,8 +564,8 @@ def events():
     before = request.args.get("before", type=float)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
+    in_progress = request.args.get("in_progress", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
-    in_progress = request.args.get("in_progress", default=0, type=int)
     
     favorites = request.args.get("favorites", type=int)
 
@@ -633,13 +633,13 @@ def events():
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
+    if not in_progress is None:
+        clauses.append((Event.end_time.is_null(in_progress)))
+
     if not include_thumbnails:
         excluded_fields.append(Event.thumbnail)
     else:
         selected_columns.append(Event.thumbnail)
-
-    if in_progress:
-        clauses.append((Event.end_time.is_null()))
 
     if favorites:
         clauses.append((Event.retain_indefinitely == favorites))
