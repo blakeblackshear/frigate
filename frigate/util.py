@@ -737,9 +737,10 @@ def escape_special_characters(path: str) -> str:
         # path does not have user:pass
         return path
 
+
 def get_cgroups_version() -> str:
     """Determine what version of cgroups is enabled"""
-    
+
     stat_command = ["stat", "-fc", "%T", "/sys/fs/cgroup"]
 
     p = sp.run(
@@ -756,10 +757,12 @@ def get_cgroups_version() -> str:
         elif value == "tmpfs":
             return "cgroup"
         else:
-            logger.debug(f"Could not determine cgroups version: unhandled filesystem {value}")
+            logger.debug(
+                f"Could not determine cgroups version: unhandled filesystem {value}"
+            )
     else:
         logger.debug(f"Could not determine cgroups version:  {p.stderr}")
-    
+
     return "unknown"
 
 
@@ -767,7 +770,7 @@ def get_docker_memlimit_bytes() -> int:
     """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected"""
 
     # check running a supported cgroups version
-    if (get_cgroups_version() == "cgroup2"):
+    if get_cgroups_version() == "cgroup2":
 
         memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
 
@@ -786,7 +789,7 @@ def get_docker_memlimit_bytes() -> int:
                 return -1
         else:
             logger.debug(f"Unable to get docker memlimit: {p.stderr}")
-            
+
     return -1
 
 
