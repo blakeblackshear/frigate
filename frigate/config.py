@@ -949,6 +949,10 @@ class FrigateConfig(FrigateBaseModel):
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
 
+            # ONVIF substitution
+            if camera_config.onvif.password:
+                camera_config.onvif.password = camera_config.onvif.password.format(**FRIGATE_ENV_VARS)
+
             # Add default filters
             object_keys = camera_config.objects.track
             if camera_config.objects.filters is None:
