@@ -68,9 +68,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp # <----- Update for your camera
           roles:
             - detect
-            - rtmp
-    rtmp:
-      enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
       width: 1280 # <---- update for your camera's resolution
       height: 720 # <---- update for your camera's resolution
@@ -80,7 +77,7 @@ cameras:
 
 At this point you should be able to start Frigate and see the the video feed in the UI.
 
-If you get a green image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections. If you do not have H264 cameras, make sure you have disabled RTMP. It is possible to enable it, but you must tell ffmpeg to re-encode the video with customized output args.
+If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
 
 FFmpeg arguments for other types of cameras can be found [here](../configuration/camera_specific.md).
 
@@ -148,7 +145,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp
           roles:
             - detect
-            - rtmp
     detect:
       width: 1280
       height: 720
@@ -173,7 +169,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp
           roles:
             - detect
-            - rtmp
         - path: rtsp://10.0.10.10:554/high_res_stream # <----- Add high res stream
           roles:
             - record
