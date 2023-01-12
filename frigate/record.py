@@ -279,7 +279,7 @@ class RecordingMaintainer(threading.Thread):
         directory = os.path.join(
             RECORD_DIR,
             start_time.
-            .astimezone(tz=datetime.timezone.utc)
+            start_time.astimezone(tz=datetime.timezone.utc)
             .strftime("%Y-%m-%d/%H"),
             camera,
         )
