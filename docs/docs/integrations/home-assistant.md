@@ -64,7 +64,7 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 | Option            | Description                                                                                                                                                                                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RTMP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTMP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTMP streams](#streams) below. |
+| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTMP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#streams) below. |
 
 ## Entities Provided
 
@@ -124,13 +124,17 @@ https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
 
 ## RTMP stream
 
-In order for the live streams to function they need to be accessible on the RTMP
-port (default: `1935`) at `<frigatehost>:1935`. Home Assistant will directly
+RTMP is deprecated and it is recommended to switch to use RTSP restreams.
+
+## RTSP stream
+
+In order for the live streams to function they need to be accessible on the RTSP
+port (default: `8554`) at `<frigatehost>:8554`. Home Assistant will directly
 connect to that streaming port when the live camera is viewed.
 
-#### RTMP URL Template
+#### RTSP URL Template
 
-For advanced usecases, this behavior can be changed with the [RTMP URL
+For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
@@ -142,24 +146,24 @@ This is potentially useful when Frigate is behind a reverse proxy, and/or when
 the default stream port is otherwise not accessible to Home Assistant (e.g.
 firewall rules).
 
-###### RTMP URL Template Examples
+###### RTSP URL Template Examples
 
 Use a different port number:
 
 ```
-rtmp://<frigate_host>:2000/live/front_door
+rtsp://<frigate_host>:2000/front_door
 ```
 
 Use the camera name in the stream URL:
 
 ```
-rtmp://<frigate_host>:2000/live/{{ name }}
+rtsp://<frigate_host>:2000/{{ name }}
 ```
 
 Use the camera name in the stream URL, converting it to lowercase first:
 
 ```
-rtmp://<frigate_host>:2000/live/{{ name|lower }}
+rtsp://<frigate_host>:2000/{{ name|lower }}
 ```
 
 ## Multiple Instance Support
