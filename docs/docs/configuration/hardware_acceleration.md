@@ -57,7 +57,7 @@ If you have multiple Nvidia graphic card, you can add them with their ids obtain
 services:
   frigate:
     ...
-    image: blakeblackshear/frigate:stable
+    image: ghcr.io/blakeblackshear/frigate:stable
     deploy:    # <------------- Add this section
       resources:
         reservations:
