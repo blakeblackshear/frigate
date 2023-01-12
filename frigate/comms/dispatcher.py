@@ -1,4 +1,4 @@
-"""Handle communication between frigate and other applications."""
+"""Handle communication between Frigate and other applications."""
 
 import logging
 
@@ -29,7 +29,7 @@ class Communicator(ABC):
 
 
 class Dispatcher:
-    """Handle communication between frigate and communicators."""
+    """Handle communication between Frigate and communicators."""
 
     def __init__(
         self,

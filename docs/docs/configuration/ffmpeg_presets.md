@@ -7,7 +7,7 @@ Some presets of FFmpeg args are provided by default to make the configuration ea
 
 ### Hwaccel Presets
 
-It is highly recommended to use hwaccel presets in the config. These presets not only replace the longer args, but they also give frigate hints of what hardware is available and allows frigate to make other optimizations using the GPU such as when encoding the birdseye restream or when scaling a stream that has a size different than the native stream size.
+It is highly recommended to use hwaccel presets in the config. These presets not only replace the longer args, but they also give Frigate hints of what hardware is available and allows Frigate to make other optimizations using the GPU such as when encoding the birdseye restream or when scaling a stream that has a size different than the native stream size.
 
 See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on how to setup hwaccel for your GPU / iGPU.
 
@@ -26,7 +26,7 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 
 Input args presets help make the config more readable and handle use cases for different types of streams to ensure maximum compatibility.
 
-See [the camera specific docs](/configuration/camera_specific.md) for more info on non-standard cameras and recommendations for using them in frigate.
+See [the camera specific docs](/configuration/camera_specific.md) for more info on non-standard cameras and recommendations for using them in Frigate.
 
 | Preset                    | Usage                   | Other Notes                                         |
 | ------------------------- | ----------------------- | --------------------------------------------------- |

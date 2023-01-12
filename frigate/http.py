@@ -747,7 +747,7 @@ def config_save():
             jsonify(
                 {
                     "success": False,
-                    "message": f"Could not write config file, be sure that frigate has write permission on the config file.",
+                    "message": f"Could not write config file, be sure that Frigate has write permission on the config file.",
                 }
             ),
             400,
@@ -756,8 +756,8 @@ def config_save():
     try:
         restart_frigate()
     except Exception as e:
-        logging.error(f"Error restarting frigate: {e}")
-        return "Config successfully saved, unable to restart frigate", 200
+        logging.error(f"Error restarting Frigate: {e}")
+        return "Config successfully saved, unable to restart Frigate", 200
 
     return "Config successfully saved, restarting...", 200
 

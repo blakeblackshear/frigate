@@ -7,7 +7,7 @@ This guide walks through the steps to build a configuration file for Frigate. It
 
 ### Step 1: Configure the MQTT server (Optional)
 
-Use of a functioning MQTT server is optional for frigate, but required for the home assistant integration. Start by adding the mqtt section at the top level in your config:
+Use of a functioning MQTT server is optional for Frigate, but required for the home assistant integration. Start by adding the mqtt section at the top level in your config:
 
 If using mqtt:
 ```yaml
