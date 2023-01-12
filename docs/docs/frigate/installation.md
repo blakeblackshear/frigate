@@ -119,7 +119,7 @@ services:
           size: 1000000000
     ports:
       - "5000:5000"
-      - "1935:1935" # RTMP feeds
+      - "8554:8554" # RTSP feeds
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
