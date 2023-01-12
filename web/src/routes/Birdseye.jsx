@@ -97,7 +97,7 @@ export default function Birdseye() {
         <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-fit">
           <Heading size="sm">Control Panel</Heading>
           {ptzCameras.map((camera) => (
-            <div key={camera}>
+            <div className="p-4" key={camera}>
               <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
               <CameraControlPanel camera={camera} />
             </div>
