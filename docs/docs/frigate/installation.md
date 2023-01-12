@@ -103,7 +103,7 @@ services:
     container_name: frigate
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
-    image: blakeblackshear/frigate:stable
+    image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
@@ -139,8 +139,8 @@ docker run -d \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
-  -p 1935:1935 \
-  blakeblackshear/frigate:stable
+  -p 8554:8554 \
+  ghcr.io/blakeblackshear/frigate:stable
 ```
 
 ## Home Assistant Operating System (HassOS)
