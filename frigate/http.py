@@ -884,6 +884,10 @@ def get_recordings_storage_usage():
         current_app.stats_tracking,
         current_app.hwaccel_errors,
     )["service"]["storage"][RECORD_DIR]
+
+    if not recording_stats:
+        return jsonify({})
+
     total_mb = recording_stats["total"]
 
     camera_usages: dict[
