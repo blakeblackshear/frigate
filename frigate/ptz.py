@@ -41,17 +41,14 @@ class OnvifController:
                         cam.onvif.port,
                         cam.onvif.user,
                         cam.onvif.password,
-                        wsdl_dir=site.getsitepackages()[0].replace(
-                            "dist-packages", "site-packages"
-                        )
-                        + "/wsdl",
+                        wsdl_dir="/home/vscode/.local/lib/python3.4/site-packages/wsdl/",
                     ),
                     "init": False,
                     "active": False,
                     "presets": {},
                 }
 
-    def _init_onvif(self, camera_name: str) -> None:
+    def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
 
         # create init services
@@ -61,6 +58,7 @@ class OnvifController:
             profile = media.GetProfiles()[0]
         except ONVIFError as e:
             logger.error(f"Unable to connect to camera: {camera_name}: {e}")
+            return False
 
         ptz = onvif.create_ptz_service()
         request = ptz.create_type("GetConfigurationOptions")
@@ -89,6 +87,7 @@ class OnvifController:
         self.cams[camera_name]["features"] = supported_features
 
         self.cams[camera_name]["init"] = True
+        return True
 
     def _stop(self, camera_name: str) -> None:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
@@ -177,7 +176,8 @@ class OnvifController:
             return
 
         if not self.cams[camera_name]["init"]:
-            self._init_onvif(camera_name)
+            if not self._init_onvif(camera_name):
+                return
 
         if command == OnvifCommandEnum.init:
             # already init

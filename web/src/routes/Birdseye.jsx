@@ -6,6 +6,8 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import MsePlayer from '../components/MsePlayer';
 import useSWR from 'swr';
+import { useMemo } from 'preact/hooks';
+import CameraControlPanel from '../components/CameraControlPanel';
 
 export default function Birdseye() {
   const { data: config } = useSWR('config');
@@ -15,6 +17,16 @@ export default function Birdseye() {
     getDefaultLiveMode(config)
   );
   const sourceValues = ['mse', 'webrtc', 'jsmpeg'];
+
+  const ptzCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.cameras)
+      .filter(([_, conf]) => conf.onvif?.host)
+      .map(([_, camera]) => camera.name);
+  }, [config]);
 
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
@@ -80,6 +92,18 @@ export default function Birdseye() {
       </div>
 
       {player}
+
+      {ptzCameras && (
+        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-fit">
+          <Heading size="sm">Control Panel</Heading>
+          {ptzCameras.map((camera) => (
+            <div key={camera}>
+              <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
+              <CameraControlPanel camera={camera} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
