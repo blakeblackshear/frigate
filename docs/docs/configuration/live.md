@@ -9,11 +9,11 @@ Frigate has different live view options, some of which require [restream](restre
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                             | Resolution     | Audio                        | Requires Restream | Other Limitations                |
-| ------ | ------- | -------------------------------------- | -------------- | ---------------------------- | ----------------- | -------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10  | same as detect | no                           | no                | none                             |
-| mse    | low     | native                                 | native         | yes (depends on audio codec) | yes               | not supported on iOS or Firefox  |
-| webrtc | lowest  | native                                 | native         | yes (depends on audio codec) | yes               | requires extra config            |
+| Source | Latency | Frame Rate                             | Resolution     | Audio                        | Requires Restream | Other Limitations                            |
+| ------ | ------- | -------------------------------------- | -------------- | ---------------------------- | ----------------- | -------------------------------------------- |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10  | same as detect | no                           | no                | none                                         |
+| mse    | low     | native                                 | native         | yes (depends on audio codec) | yes               | not supported on iOS, Firefox is h.264 only  |
+| webrtc | lowest  | native                                 | native         | yes (depends on audio codec) | yes               | requires extra config, doesn't support h.265 |
 
 ### WebRTC extra configuration:
 
