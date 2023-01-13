@@ -10,7 +10,7 @@ import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
   const { data: config } = useSWR('config');
-  const timezone = config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
@@ -114,8 +114,12 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary || !recordings) {
+  if (!recordingsSummary || !recordings || !config) {
     return <ActivityIndicator />;
+  }
+
+  if (config.ui.timezone) {
+    timezone = config.ui.timezone;
   }
 
   if (recordingsSummary.length === 0) {
