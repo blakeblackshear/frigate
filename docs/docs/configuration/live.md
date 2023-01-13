@@ -28,7 +28,6 @@ log:
   format: text
 
 webrtc:
-  listen: ":8555"
   candidates:
     - <Frigate host ip address>:8555 # <--- enter Frigate host IP here
     - stun:8555

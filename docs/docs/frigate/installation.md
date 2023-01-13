@@ -120,6 +120,8 @@ services:
     ports:
       - "5000:5000"
       - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
@@ -140,6 +142,8 @@ docker run -d \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
   -p 8554:8554 \
+  -p 8555:8555/tcp \
+  -p 8555:8555/udp \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
