@@ -80,44 +80,14 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-rpi-32-h264": ["-f", "rawvideo", "-pix_fmt", "yuv420p"],
-    "preset-rpi-64-h264": ["-f", "rawvideo", "-pix_fmt", "yuv420p"],
-    "preset-vaapi": [
-        "-vf",
-        "fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-intel-qsv-h264": [
-        "-vf",
-        "vpp_qsv=framerate={},scale_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-intel-qsv-h265": [
-        "-vf",
-        "vpp_qsv=framerate={},scale_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-nvidia-h264": [
-        "-vf",
-        "fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "preset-nvidia-h265": [
-        "-vf",
-        "fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-        "-f",
-        "rawvideo",
-    ],
-    "default": [
-        "-r",
-        "{}",
-        "-s",
-        "{}",
-    ],
+    "preset-rpi-32-h264": "-r {} -s {}x{} -f rawvideo -pix_fmt yuv420p",
+    "preset-rpi-64-h264": "-r {} -s {}x{} -f rawvideo -pix_fmt yuv420p",
+    "preset-vaapi": "-vf fps={},scale_vaapi=w={}:h={},hwdownload,format=yuv420p -f rawvideo",
+    "preset-intel-qsv-h264": "-r {} -vf vpp_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
+    "preset-intel-qsv-h265": "-r {} -vf vpp_qsv=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
+    "preset-nvidia-h264": "-vf fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
+    "preset-nvidia-h265": "-vf fps={},scale_cuda=w={}:h={}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
+    "default": "-r {} -s {}x{}",
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
@@ -159,15 +129,18 @@ def parse_preset_hardware_acceleration_scale(
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str) or " " in arg:
-        scale = PRESETS_HW_ACCEL_SCALE["default"].copy()
-        scale[1] = str(fps)
-        scale[3] = f"{width}x{height}"
+        scale = PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height).split(" ")
         scale.extend(detect_args)
         return scale
 
-    scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"]).copy()
-    scale[1] = scale[1].format(fps, width, height)
-    return scale
+    scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
+
+    if scale:
+        return scale.format(fps, width, height).split(" ")
+    else:
+        scale = scale.format(fps, width, height).split(" ")
+        scale.extend(detect_args)
+        return scale
 
 
 def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str) -> str:
