@@ -60,7 +60,17 @@ class FrigateBaseModel(BaseModel):
         extra = Extra.forbid
 
 
+class LiveModeEnum(str, Enum):
+    jsmpeg = "jsmpeg"
+    mse = "mse"
+    webrtc = "webrtc"
+
+
 class UIConfig(FrigateBaseModel):
+    live_mode: LiveModeEnum = Field(
+        default=LiveModeEnum.mse, title="Default Live Mode."
+    )
+    timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
 
 
