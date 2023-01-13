@@ -25,7 +25,7 @@ export default function Storage() {
   let storage_usage;
   if (
     service &&
-    service['storage']['/media/frigate/recordings']['total'] != service['storage']['/media/frigate/recordings']['total']
+    service['storage']['/media/frigate/recordings']['total'] != service['storage']['/media/frigate/clips']['total']
   ) {
     storage_usage = (
       <Fragment>
