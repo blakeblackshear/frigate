@@ -295,7 +295,7 @@ export default function Events({ path, ...props }) {
     return <ActivityIndicator />;
   }
 
-  const timezone = config.ui.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezone = config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return (
     <div className="space-y-4 p-2 px-4 w-full">
