@@ -17,7 +17,7 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
   mjpeg_cam:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/mjpeg_cam
+        - path: rtsp://127.0.0.1:8554/mjpeg_cam
           roles:
             - detect
             - record
