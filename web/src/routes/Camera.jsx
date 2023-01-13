@@ -29,7 +29,10 @@ export default function Camera({ camera }) {
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'mse');
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
+    `${camera}-source`,
+    getDefaultLiveMode(config, cameraConfig)
+  );
   const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
@@ -77,7 +80,13 @@ export default function Camera({ camera }) {
         labelPosition="after"
       />
       <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Motion Masks" labelPosition="after" />
+      <Switch
+        checked={options['mask']}
+        id="mask"
+        onChange={handleSetOption}
+        label="Motion Masks"
+        labelPosition="after"
+      />
       <Switch
         checked={options['motion']}
         id="motion"
@@ -190,4 +199,16 @@ export default function Camera({ camera }) {
       </div>
     </div>
   );
+}
+
+function getDefaultLiveMode(config, cameraConfig) {
+  if (cameraConfig) {
+    if (cameraConfig.restream.enabled) {
+      return config.ui.live_mode;
+    }
+
+    return 'jsmpeg';
+  }
+
+  return undefined;
 }
