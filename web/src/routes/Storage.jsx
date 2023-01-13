@@ -18,11 +18,42 @@ export default function Storage() {
 
   const { service } = stats || initialStats || emptyObject;
 
+  let storage_usage;
+  if (
+    service &&
+    service['storage']['/media/frigate/recordings']['total'] != service['storage']['/media/frigate/recordings']['total']
+  ) {
+    storage_usage = (
+      <Fragment>
+        <Tr>
+          <Td>Recordings</Td>
+          <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
+          <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
+        </Tr>
+        <Tr>
+          <Td>Snapshots</Td>
+          <Td>{service['storage']['/media/frigate/clips']['used']}</Td>
+          <Td>{service['storage']['/media/frigate/clips']['total']}</Td>
+        </Tr>
+      </Fragment>
+    );
+  } else {
+    storage_usage = (
+      <Fragment>
+        <Tr>
+          <Td>Recordings & Snapshots</Td>
+          <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
+          <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
+        </Tr>
+      </Fragment>
+    );
+  }
+
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>Storage</Heading>
 
-      {(!service || !storage) ? (
+      {!service || !storage ? (
         <div>
           <ActivityIndicator />
         </div>
@@ -41,13 +72,7 @@ export default function Storage() {
                       <Th>Total MB</Th>
                     </Tr>
                   </Thead>
-                  <Tbody>
-                    <Tr>
-                      <Td>Snapshots & Recordings</Td>
-                      <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
-                      <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
-                    </Tr>
-                  </Tbody>
+                  <Tbody>{storage_usage}</Tbody>
                 </Table>
               </div>
             </div>
@@ -97,7 +122,7 @@ export default function Storage() {
                     <Tbody>
                       <Tr>
                         <Td>{Math.round(camera['usage_percent'] ?? 0)}%</Td>
-                        <Td>{camera['bandwidth'] ? camera['bandwidth'] : "Calculating..."} MB/hr</Td>
+                        <Td>{camera['bandwidth'] ? camera['bandwidth'] : 'Calculating...'} MB/hr</Td>
                       </Tr>
                     </Tbody>
                   </Table>
