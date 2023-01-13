@@ -23,22 +23,14 @@ Larger resolutions **do** improve performance if the objects are very small in t
 
 For the Dahua/Loryta 5442 camera, I use the following settings:
 
-**Main Stream (Recording)**
+**Main Stream (Recording & RTSP)**
 
 - Encode Mode: H.264
 - Resolution: 2688\*1520
 - Frame Rate(FPS): 15
 - I Frame Interval: 30
 
-**Sub Stream 1 (RTMP)**
-
-- Enable: Sub Stream 1
-- Encode Mode: H.264
-- Resolution: 720\*576
-- Frame Rate: 10
-- I Frame Interval: 10
-
-**Sub Stream 2 (Detection)**
+**Sub Stream (Detection)**
 
 - Enable: Sub Stream 2
 - Encode Mode: H.264
