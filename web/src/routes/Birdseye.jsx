@@ -6,7 +6,6 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import MsePlayer from '../components/MsePlayer';
 import useSWR from 'swr';
-import videojs from 'video.js';
 
 export default function Birdseye() {
   const { data: config } = useSWR('config');
@@ -20,19 +19,19 @@ export default function Birdseye() {
 
   let player;
   if (viewSource == 'mse' && config.restream.birdseye) {
-    if (videojs.browser.IS_IOS) {
+    if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className="w-5xl text-center text-sm">
-            MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+          <div className="max-w-5xl">
+            <MsePlayer camera="birdseye" />
           </div>
         </Fragment>
       );
     } else {
       player = (
         <Fragment>
-          <div className="max-w-5xl">
-            <MsePlayer camera="birdseye" />
+          <div className="w-5xl text-center text-sm">
+            MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
           </div>
         </Fragment>
       );
