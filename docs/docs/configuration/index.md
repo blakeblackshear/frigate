@@ -486,4 +486,13 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+# Optional
+ui:
+  # Optional: Set the default live mode for cameras in the UI (default: shown below)
+  live_mode: mse
+  # Optional: Set a timezone to use in the UI (default: use browser local time)
+  timezone: None
+  # Optional: Use an experimental recordings / camera view UI (default: shown below)
+  experimental_ui: False
 ```
