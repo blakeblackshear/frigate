@@ -26,7 +26,7 @@ You can access a higher resolution mjpeg stream by appending `h=height-in-pixels
 
 ### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
-The most recent frame that frigate has finished processing. It is a full resolution image by default.
+The most recent frame that Frigate has finished processing. It is a full resolution image by default.
 
 Accepts the following query string parameters:
 
@@ -63,7 +63,7 @@ Sample response:
     "camera_fps": 5.0,
     /***************
      * Number of times detection is run per second. This can be higher than
-     * your camera FPS because frigate often looks at the same frame multiple times
+     * your camera FPS because Frigate often looks at the same frame multiple times
      * or in multiple locations
      ***************/
     "detection_fps": 1.5,
@@ -76,11 +76,11 @@ Sample response:
      ***************/
     "pid": 34,
     /***************
-     * Frames per second being processed by frigate.
+     * Frames per second being processed by Frigate.
      ***************/
     "process_fps": 5.1,
     /***************
-     * Frames per second skip for processing by frigate.
+     * Frames per second skip for processing by Frigate.
      ***************/
     "skipped_fps": 0.0
   },

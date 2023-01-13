@@ -180,7 +180,7 @@ export default function System() {
                   <div className="p-2">
                     {gpu_usages[gpu]['gpu'] == -1 ? (
                       <div className="p-4">
-                        There was an error getting usage stats. Either your GPU does not support this or frigate does
+                        There was an error getting usage stats. Either your GPU does not support this or Frigate does
                         not have proper access.
                       </div>
                     ) : (

@@ -39,9 +39,9 @@ Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only recor
 
 Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for 24/7 recording (but can also affect events).
 
-Let's say you have frigate configured so that your doorbell camera would retain the last **2** days of 24/7 recording.
+Let's say you have Frigate configured so that your doorbell camera would retain the last **2** days of 24/7 recording.
 - With the `all` option all 48 hours of those two days would be kept and viewable.
-- With the `motion` option the only parts of those 48 hours would be segments that frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
+- With the `motion` option the only parts of those 48 hours would be segments that Frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
 - With the `active_objects` option the only segments that would be kept are those where there was a true positive object that was not considered stationary.
 
 The same options are available with events. Let's consider a scenario where you drive up and park in your driveway, go inside, then come back out 4 hours later.

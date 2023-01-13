@@ -184,7 +184,7 @@ chmod +x tensorrt_models.sh
 docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
 ```
 
-The `trt-models` folder can then be mapped into your frigate container as `trt-models` and the models referenced from the config.
+The `trt-models` folder can then be mapped into your Frigate container as `trt-models` and the models referenced from the config.
 
 If your GPU does not support FP16 operations, you can pass the environment variable `-e USE_FP16=False` to the `docker run` command to disable it.
 

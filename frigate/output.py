@@ -148,7 +148,7 @@ class BirdsEyeFrameManager:
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
 
-        # initialize the frame as black and with the frigate logo
+        # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
         self.blank_frame[:] = 128
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
@@ -176,7 +176,7 @@ class BirdsEyeFrameManager:
                 x_offset : x_offset + transparent_layer.shape[0],
             ] = transparent_layer
         else:
-            logger.warning("Unable to read frigate logo")
+            logger.warning("Unable to read Frigate logo")
 
         self.frame[:] = self.blank_frame
 

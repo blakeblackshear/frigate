@@ -9,7 +9,7 @@ This error message is due to a shm-size that is too small. Try updating your shm
 
 ### I am seeing a solid green image for my camera.
 
-A solid green image means that frigate has not received any frames from ffmpeg. Check the logs to see why ffmpeg is exiting and adjust your ffmpeg args accordingly.
+A solid green image means that Frigate has not received any frames from ffmpeg. Check the logs to see why ffmpeg is exiting and adjust your ffmpeg args accordingly.
 
 ### How can I get sound or audio in my recordings? {#audio-in-recordings}
 
@@ -46,7 +46,7 @@ These messages in the logs are expected in certain situations. Frigate checks th
 
 ### "On connect called"
 
-If you see repeated "On connect called" messages in your config, check for another instance of frigate. This happens when multiple frigate containers are trying to connect to mqtt with the same client_id.
+If you see repeated "On connect called" messages in your config, check for another instance of Frigate. This happens when multiple Frigate containers are trying to connect to mqtt with the same client_id.
 
 ### Error: Database Is Locked
 

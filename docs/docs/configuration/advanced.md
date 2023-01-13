@@ -105,6 +105,6 @@ To do this:
 
 1. Download your ffmpeg build and uncompress to a folder on the host (let's use `/home/appdata/frigate/custom-ffmpeg` for this example).
 2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
-3. Restart frigate and the custom version will be used if the mapping was done correctly.
+3. Restart Frigate and the custom version will be used if the mapping was done correctly.
 
 NOTE: The folder that is mapped from the host needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then `/home/appdata/frigate/custom-ffmpeg` needs to be mapped to `/usr/lib/btbn-ffmpeg`.
