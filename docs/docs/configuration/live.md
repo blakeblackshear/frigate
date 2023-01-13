@@ -21,7 +21,14 @@ webRTC works by creating a websocket connection on extra ports. One of the follo
 * Frigate is run with `network_mode: host` to support automatic UDP port pass through locally and remotely. See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
 * Frigate is run with `network_mode: bridge` and has:
     * Router setup to forward port `8555` to port `8555` on the Frigate device.
-    * For local webRTC, you will need to create your own go2rtc config:
+    * Added port to your docker ports list, for example:
+    ```yaml
+        ports:
+      - "5000:5000" # Frigate Web UI
+      - "8555:8555" # go2rtc
+      - "8554:8554" # RTSP feeds
+    ```
+    * For local webRTC, you will need to create your own go2rtc config file:
 
 ```yaml
 log:
@@ -34,11 +41,12 @@ webrtc:
     - stun:8555
 ```
 
-and pass that config to Frigate via docker or `frigate-go2rtc.yaml` for addon users:
+You then need to pass that config to Frigate via docker (see below), or create it as `frigate-go2rtc.yaml` for addon users.
 
-See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
 
 ```yaml
 volumes:
   - /path/to/your/go2rtc.yaml:/config/frigate-go2rtc.yaml:ro
 ```
+
+See https://github.com/AlexxIT/go2rtc#module-webrtc for more details on configuring go2rtc.
