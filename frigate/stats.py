@@ -215,6 +215,7 @@ def stats_snapshot(
             "process_fps": round(camera_stats["process_fps"].value, 2),
             "skipped_fps": round(camera_stats["skipped_fps"].value, 2),
             "detection_fps": round(camera_stats["detection_fps"].value, 2),
+            "detection_enabled": camera_stats["detection_enabled"].value,
             "pid": pid,
             "capture_pid": cpid,
             "ffmpeg_pid": ffmpeg_pid,
