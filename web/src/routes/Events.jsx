@@ -122,7 +122,7 @@ export default function Events({ path, ...props }) {
           return memo;
         }, config?.objects?.track || [])
         .filter((value, i, self) => self.indexOf(value) === i),
-      sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), "None"] : [],
+      sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
     [config, allSubLabels]
   );
@@ -294,6 +294,8 @@ export default function Events({ path, ...props }) {
   if (!config) {
     return <ActivityIndicator />;
   }
+
+  const timezone = config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return (
     <div className="space-y-4 p-2 px-4 w-full">
@@ -512,8 +514,8 @@ export default function Events({ path, ...props }) {
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
-                          {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()} (
+                          {new Date(event.start_time * 1000).toLocaleDateString({ timeZone: timezone })}{' '}
+                          {new Date(event.start_time * 1000).toLocaleTimeString({ timeZone: timezone })} (
                           {clipDuration(event.start_time, event.end_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
