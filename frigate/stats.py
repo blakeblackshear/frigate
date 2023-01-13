@@ -241,7 +241,11 @@ def stats_snapshot(
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
-        storage_stats = shutil.disk_usage(path)
+        try:
+            storage_stats = shutil.disk_usage(path)
+        except FileNotFoundError:
+            stats["service"]["storage"][path] = {}
+
         stats["service"]["storage"][path] = {
             "total": round(storage_stats.total / 1000000, 1),
             "used": round(storage_stats.used / 1000000, 1),
