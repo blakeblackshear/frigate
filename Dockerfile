@@ -27,7 +27,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.7/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.8/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
