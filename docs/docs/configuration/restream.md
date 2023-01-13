@@ -48,7 +48,7 @@ cameras:
   test_cam:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/test_cam # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam # <--- the name here must match the name of the camera
           roles:
             - record
             - detect
@@ -66,7 +66,7 @@ cameras:
   test_cam:
     ffmpeg:
       inputs:
-        - path: rtsp://localhost:8554/test_cam # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam # <--- the name here must match the name of the camera
           roles:
             - record
         - path: rtsp://192.168.1.5:554/stream # <--- camera high res stream
