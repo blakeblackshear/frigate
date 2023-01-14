@@ -24,7 +24,7 @@ export default function Config() {
 
     axios
       .post('config/save', window.editor.getValue(), {
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'text/plain', 'Save-Option': 'restart' },
       })
       .then((response) => {
         if (response.status === 200) {
@@ -46,8 +46,8 @@ export default function Config() {
     }
 
     axios
-      .post('config/saveonly', window.editor.getValue(), {
-        headers: { 'Content-Type': 'text/plain' },
+      .post('config/save', window.editor.getValue(), {
+        headers: { 'Content-Type': 'text/plain', 'Save-Option': 'saveonly' },
       })
       .then((response) => {
         if (response.status === 200) {
