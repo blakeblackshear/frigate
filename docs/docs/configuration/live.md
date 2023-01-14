@@ -24,7 +24,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
     1. Create your own go2rtc config, based on [Frigate's internal go2rtc config](https://github.com/blakeblackshear/frigate/blob/dev/docker/rootfs/usr/local/go2rtc/go2rtc.yaml).
     2. Add your internal IP to the list of `candidates`. Here is an example, assuming that `192.168.1.10` is the local IP of the device running Frigate:
 
-        ```yaml
+        ```yaml title="/config/frigate-go2rtc.yaml"
         log:
           format: text
 
