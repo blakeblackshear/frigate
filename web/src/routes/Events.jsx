@@ -296,6 +296,7 @@ export default function Events({ path, ...props }) {
   }
 
   const timezone = config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const locale = window.navigator?.language || 'en-US';
 
   return (
     <div className="space-y-4 p-2 px-4 w-full">
@@ -514,8 +515,8 @@ export default function Events({ path, ...props }) {
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
-                          {new Date(event.start_time * 1000).toLocaleDateString({ timeZone: timezone })}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString({ timeZone: timezone })} (
+                          {new Date(event.start_time * 1000).toLocaleDateString(locale, { timeZone: timezone })}{' '}
+                          {new Date(event.start_time * 1000).toLocaleTimeString(locale, { timeZone: timezone })} (
                           {clipDuration(event.start_time, event.end_time)})
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
