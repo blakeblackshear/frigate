@@ -48,6 +48,7 @@ export default function Sidebar() {
       <Destination href="/storage" text="Storage" />
       <Destination href="/system" text="System" />
       <Destination href="/config" text="Config" />
+      <Destination href="/go2rtc" text="Go2RTC" />
       <Destination href="/logs" text="Logs" />
       <Separator />
       <div className="flex flex-grow" />
