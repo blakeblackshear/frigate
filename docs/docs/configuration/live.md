@@ -17,7 +17,7 @@ Live view options can be selected while viewing the live stream. The options are
 
 ### WebRTC extra configuration:
 
-WebRTC works by creating a WebSocket connection on port `8555`. However, it requires additional configuration:
+WebRTC works through by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 * For external access, over internet, setup your router to forward port `8555` to port `8555` on the Frigate device.
 * For internal/local access, you will need to let go2rtc know your own go2rtc config:
@@ -29,7 +29,6 @@ WebRTC works by creating a WebSocket connection on port `8555`. However, it requ
           format: text
 
         webrtc:
-          listen: ":8555"
           candidates:
             - 192.168.1.10:8555
             - stun:8555
@@ -41,5 +40,14 @@ WebRTC works by creating a WebSocket connection on port `8555`. However, it requ
         volumes:
           - /path/to/your/go2rtc.yaml:/config/frigate-go2rtc.yaml:ro
         ```
+
+:::note
+
+If you are having difficulties to make WebRTC work, and you are running Frigate through docker, you may want to try changing the container network mode:
+
+* `network: host`, in this mode, you don't need to forward any ports. The services inside of the Frigate container will have full access to the network interfaces of your host machine, as if they were running natively and not in a container. This network mode is recommended by go2rtc, but we recommend you only use it if necessary.
+* `network: bridge` creates a virtual network interface for the container, and the container will have full access to it. You also don't need to forward any ports, however, the IP for accessing Frigate locally will differ from the IP of the host machine. Your router will see Frigate as if it was a new device connected in the network.
+
+:::
 
 See https://github.com/AlexxIT/go2rtc#module-webrtc for more information about this.
