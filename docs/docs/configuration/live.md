@@ -17,7 +17,7 @@ Live view options can be selected while viewing the live stream. The options are
 
 ### WebRTC extra configuration:
 
-WebRTC works through by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
+WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 * For external access, over internet, setup your router to forward port `8555` to port `8555` on the Frigate device.
 * For internal/local access, you will need to let go2rtc know your own go2rtc config:
