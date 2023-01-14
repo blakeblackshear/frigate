@@ -36,7 +36,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 
     3. Mount this config file at `/config/frigate-go2rtc.yaml`. Here is an example, if you run Frigate through docker-compose:
 
-        ```yaml
+        ```yaml title="docker-compose.yaml"
         volumes:
           - /path/to/your/go2rtc.yaml:/config/frigate-go2rtc.yaml
         ```
