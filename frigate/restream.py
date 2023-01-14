@@ -60,7 +60,7 @@ class RestreamApi:
                         input.path.startswith("rtsp")
                         and camera.restream.video_encoding
                         == RestreamVideoCodecEnum.copy
-                        and not camera.restream.audio_encoding
+                        and camera.restream.audio_encoding
                         == [RestreamAudioCodecEnum.copy]
                     ):
                         self.relays[
