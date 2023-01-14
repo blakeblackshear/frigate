@@ -19,7 +19,7 @@ Live view options can be selected while viewing the live stream. The options are
 
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
-* For external access, over internet, setup your router to forward port `8555` to port `8555` on the Frigate device.
+* For external access, over internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
 * For internal/local access, you will need to let go2rtc know your own go2rtc config:
     1. Create your own go2rtc config, based on [Frigate's internal go2rtc config](https://github.com/blakeblackshear/frigate/blob/dev/docker/rootfs/usr/local/go2rtc/go2rtc.yaml).
     2. Add your internal IP to the list of `candidates`. Here is an example, assuming that `192.168.1.10` is the local IP of the device running Frigate:
