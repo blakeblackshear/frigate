@@ -269,7 +269,9 @@ COPY --from=rootfs / /
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl
+    pip3 install -U /deps/trt-wheels/*.whl && \
+    ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
+    ldconfig
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
