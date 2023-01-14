@@ -38,6 +38,8 @@ PRESETS_HW_ACCEL_DECODE = {
         "h264_qsv",
     ],
     "preset-intel-qsv-h265": [
+        "-load_plugin",
+        "hevc_hw",
         "-hwaccel",
         "qsv",
         "-qsv_device",
