@@ -17,27 +17,29 @@ Live view options can be selected while viewing the live stream. The options are
 
 ### WebRTC extra configuration:
 
-webRTC works by creating a websocket connection on extra ports. One of the following is required for webRTC to work:
-* Frigate is run with `network_mode: host` to support automatic UDP port pass through locally and remotely. See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
-* Frigate is run with `network_mode: bridge` and has:
-    * Router setup to forward port `8555` to port `8555` on the Frigate device.
-    * For local webRTC, you will need to create your own go2rtc config:
+WebRTC works by creating a WebSocket connection on port `8555`. However, it requires additional configuration:
 
-```yaml
-log:
-  format: text
+* For external access, over internet, setup your router to forward port `8555` to port `8555` on the Frigate device.
+* For internal/local access, you will need to let go2rtc know your own go2rtc config:
+    1. Create your own go2rtc config, based on [Frigate's internal go2rtc config](https://github.com/blakeblackshear/frigate/blob/dev/docker/rootfs/usr/local/go2rtc/go2rtc.yaml).
+    2. Add your internal IP to the list of `candidates`. Here is an example, assuming that `192.168.1.10` is the local IP of the device running Frigate:
 
-webrtc:
-  candidates:
-    - <Frigate host ip address>:8555 # <--- enter Frigate host IP here
-    - stun:8555
-```
+        ```yaml
+        log:
+          format: text
 
-and pass that config to Frigate via docker or `frigate-go2rtc.yaml` for addon users:
+        webrtc:
+          listen: ":8555"
+          candidates:
+            - 192.168.1.10:8555
+            - stun:8555
+        ```
 
-See https://github.com/AlexxIT/go2rtc#module-webrtc for more details
+    3. Place this config file at `/config/frigate-go2rtc.yaml`. Here is an example, if you run Frigate through docker-compose:
 
-```yaml
-volumes:
-  - /path/to/your/go2rtc.yaml:/config/frigate-go2rtc.yaml:ro
-```
+        ```yaml
+        volumes:
+          - /path/to/your/go2rtc.yaml:/config/frigate-go2rtc.yaml:ro
+        ```
+
+See https://github.com/AlexxIT/go2rtc#module-webrtc for more information about this.
