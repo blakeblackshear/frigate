@@ -247,6 +247,13 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
+    "preset-rtsp-restream": _user_agent_args
+    + [
+        "-rtsp_transport",
+        "tcp",
+        TIMEOUT_PARAM,
+        "5000000",
+    ],
     "preset-rtsp-udp": _user_agent_args
     + [
         "-avoid_negative_ts",
@@ -311,7 +318,7 @@ PRESETS_RECORD_OUTPUT = {
         "copy",
         "-an",
     ],
-    "preset-record-generic-audio": [
+    "preset-record-generic-audio-aac": [
         "-f",
         "segment",
         "-segment_time",
@@ -326,6 +333,20 @@ PRESETS_RECORD_OUTPUT = {
         "copy",
         "-c:a",
         "aac",
+    ],
+    "preset-record-generic-audio-copy": [
+        "-f",
+        "segment",
+        "-segment_time",
+        "10",
+        "-segment_format",
+        "mp4",
+        "-reset_timestamps",
+        "1",
+        "-strftime",
+        "1",
+        "-c",
+        "copy",
     ],
     "preset-record-mjpeg": [
         "-f",
