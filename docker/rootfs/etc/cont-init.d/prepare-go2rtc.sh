@@ -32,7 +32,7 @@ if webrtc_port=$(
         -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
         -H "Content-Type: application/json" \
         http://supervisor/addons/self/info |
-        jq --exit-status --raw-output '.data.network["22/tcp"]'
+        jq --exit-status --raw-output '.data.network["8555/tcp"]'
 ) && [[ "${webrtc_port}" =~ ${port_regex} ]]; then
     webrtc_port="${BASH_REMATCH[1]}"
     echo "Got WebRTC port from supervisor: ${ip_address}" >&2
