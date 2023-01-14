@@ -15,7 +15,7 @@ Different live view technologies (ex: MSE, WebRTC) support different audio codec
 
 Birdseye RTSP restream can be enabled at `restream -> birdseye` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
 
-#### Changing Restream Codec
+#### Changing Restream Codec {#changing-restream-codec}
 
 Generally it is recommended to let the codec from the camera be copied. But there may be some cases where h265 needs to be transcoded as h264 or an MJPEG stream can be encoded and restreamed as h264. In this case the encoding will need to be set, if any hardware acceleration presets are set then that will be used to encode the stream.
 
