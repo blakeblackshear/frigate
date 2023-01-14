@@ -19,9 +19,9 @@ if ip_address=$(
         jq --exit-status --raw-output '.data.ipv4.address[0]'
 ) && [[ "${ip_address}" =~ ${ip_regex} ]]; then
     ip_address="${BASH_REMATCH[1]}"
-    echo "Got IP address from supervisor: ${ip_address}"
+    echo "Got IP address from supervisor: ${ip_address}" >&2
 else
-    echo "Failed to get IP address from supervisor"
+    echo "Failed to get IP address from supervisor" >&2
     # Exit with success so that the container can still start
     exit 0
 fi
@@ -35,9 +35,9 @@ if webrtc_port=$(
         jq --exit-status --raw-output '.data.network["22/tcp"]'
 ) && [[ "${webrtc_port}" =~ ${port_regex} ]]; then
     webrtc_port="${BASH_REMATCH[1]}"
-    echo "Got WebRTC port from supervisor: ${ip_address}"
+    echo "Got WebRTC port from supervisor: ${ip_address}" >&2
 else
-    echo "Failed to get WebRTC port from supervisor"
+    echo "Failed to get WebRTC port from supervisor" >&2
     # Exit with success so that the container can still start
     exit 0
 fi
