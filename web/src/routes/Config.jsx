@@ -40,6 +40,29 @@ export default function Config() {
       });
   };
 
+  const onHandleSaveConfigOnly = async (e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    axios
+      .post('config/saveonly', window.editor.getValue(), {
+        headers: { 'Content-Type': 'text/plain' },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setSuccess(response.data);
+        }
+      })
+      .catch((error) => {
+        if (error.response) {
+          setError(error.response.data.message);
+        } else {
+          setError(error.message);
+        }
+      });
+  };
+
   const handleCopyConfig = async () => {
     copy(window.editor.getValue());
   };
@@ -99,6 +122,9 @@ export default function Config() {
           </Button>
           <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
             Save & Restart
+          </Button>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfigOnly(e)}>
+            Save Only
           </Button>
         </div>
       </div>

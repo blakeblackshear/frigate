@@ -762,6 +762,54 @@ def config_save():
     return "Config successfully saved, restarting...", 200
 
 
+@bp.route("/config/saveonly", methods=["POST"])
+def config_save():
+    new_config = request.get_data().decode()
+
+    if not new_config:
+        return "Config with body param is required", 400
+
+    # Validate the config schema
+    try:
+        new_yaml = FrigateConfig.parse_raw(new_config)
+    except Exception as e:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                }
+            ),
+            400,
+        )
+
+    # Save the config to file
+    try:
+        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
+
+        with open(config_file, "w") as f:
+            f.write(new_config)
+            f.close()
+    except Exception as e:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Could not write config file, be sure that Frigate has write permission on the config file.",
+                }
+            ),
+            400,
+        )
+
+    return "Config successfully saved", 200
+
+
 @bp.route("/config/schema.json")
 def config_schema():
     return current_app.response_class(
