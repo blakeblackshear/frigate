@@ -5,7 +5,7 @@ import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
-const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
+const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
   const keyRef = useRef([]);
 
   const date = new Date();
@@ -287,8 +287,8 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
   };
 
   return (
-    <div className="select-none w-96 flex flex-shrink" ref={calendarRef}>
-      <div className="py-4 px-6">
+    <div className="select-none w-full flex flex-shrink" ref={calendarRef}>
+      <div className="px-6">
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
             <div
@@ -329,6 +329,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
         </div>
         <div className="mt-3">{renderCalendar()}</div>
       </div>
+      {children}
     </div>
   );
 };
