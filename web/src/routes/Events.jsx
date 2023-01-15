@@ -23,8 +23,8 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
-import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 import MultiSelect from '../components/MultiSelect';
+import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TimeAgo from '../components/TimeAgo';
 
 const API_LIMIT = 25;
@@ -39,16 +39,6 @@ const monthsAgo = (num) => {
   let date = new Date();
   date.setMonth(date.getMonth() - num);
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000;
-};
-
-const clipDuration = (start_time, end_time) => {
-  const start = fromUnixTime(start_time);
-  const end = fromUnixTime(end_time);
-  let duration = 'In Progress';
-  if (end_time) {
-    duration = formatDuration(intervalToDuration({ start, end }));
-  }
-  return duration;
 };
 
 export default function Events({ path, ...props }) {
@@ -513,26 +503,20 @@ export default function Events({ path, ...props }) {
                         <div className="capitalize text-lg font-bold">
                           {event.sub_label
                             ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
-                            : event.label.replaceAll('_', ' ')}{' '}
+                            : event.label.replaceAll('_', ' ')}
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm flex">
-                          <span className="mr-1 flex items-center">
-                            <Clock className="h-5 w-5 mr-2 inline" />
-                            {`${new Date(event.start_time * 1000).toLocaleDateString(locale, {
-                              timeZone: timezone,
-                            })}`}
-                          </span>
-                          <span className="mr-1 flex items-center">
-                            {`${new Date(event.start_time * 1000).toLocaleTimeString(locale, {
-                              timeZone: timezone,
-                            })} `}{' '}
-                            -
-                          </span>
-                          <span className="mr-1 flex items-center">
-                            <TimeAgo time={event.end_time * 1000} />
-                          </span>{' '}
-                          - {`${clipDuration(event.start_time, event.end_time)}`}
+                          <Clock className="h-5 w-5 mr-2 inline" />
+                          {formatUnixTimestampToDateTime(event.start_time, locale, timezone)}
+                          <div className="hidden md:inline">
+                            <span className="m-1">-</span>
+                            <TimeAgo time={event.start_time * 1000} dense />
+                          </div>
+                          <div className="hidden md:inline">
+                            <span className="m-1">-</span>
+                            {getDurationFromTimestamps(event.start_time, event.end_time)}
+                          </div>
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
