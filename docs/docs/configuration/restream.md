@@ -7,9 +7,9 @@ title: Restream
 
 Frigate can restream your video feed as an RTSP feed for other applications such as Home Assistant to utilize it at `rtsp://<frigate_host>:8554/<camera_name>`. Port 8554 must be open. [This allows you to use a video feed for detection in Frigate and Home Assistant live view at the same time without having to make two separate connections to the camera](#reduce-connections-to-camera). The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
-#### Force Audio
+#### Copy Audio
 
-Different live view technologies (ex: MSE, WebRTC) support different audio codecs. The `restream -> force_audio` flag tells the restream to make multiple streams available so that all live view technologies are supported. Some camera streams don't work well with this, in which case `restream -> force_audio` should be disabled.
+Different live view technologies (ex: MSE, WebRTC) support different audio codecs. The `restream -> audio_encoding` field tells the restream to make multiple streams available so that all live view technologies are supported. Some camera streams don't work well with this, in which case `restream -> audio_encoding` should be set to `copy` only.
 
 #### Birdseye Restream
 

@@ -6,7 +6,7 @@ import requests
 
 from typing import Optional
 
-from frigate.config import FrigateConfig, RestreamCodecEnum
+from frigate.config import FrigateConfig, RestreamAudioCodecEnum, RestreamVideoCodecEnum
 from frigate.const import BIRDSEYE_PIPE
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
@@ -18,18 +18,26 @@ logger = logging.getLogger(__name__)
 
 
 def get_manual_go2rtc_stream(
-    camera_url: str, codec: RestreamCodecEnum, engine: Optional[str]
+    camera_url: str,
+    aCodecs: list[RestreamAudioCodecEnum],
+    vCodec: RestreamVideoCodecEnum,
+    engine: Optional[str],
 ) -> str:
     """Get a manual stream for go2rtc."""
-    if codec == RestreamCodecEnum.copy:
-        return f"ffmpeg:{camera_url}#video=copy#audio=aac#audio=opus"
+    stream = f"ffmpeg:{camera_url}"
 
-    if engine:
-        return (
-            f"ffmpeg:{camera_url}#video={codec}#hardware={engine}#audio=aac#audio=opus"
-        )
+    for aCodec in aCodecs:
+        stream += f"#audio={aCodec}"
 
-    return f"ffmpeg:{camera_url}#video={codec}#audio=aac#audio=opus"
+    if vCodec == RestreamVideoCodecEnum.copy:
+        stream += "#video=copy"
+    else:
+        stream += f"#video={vCodec}"
+
+        if engine:
+            stream += f"#hardware={engine}"
+
+    return stream
 
 
 class RestreamApi:
@@ -50,7 +58,10 @@ class RestreamApi:
                 if "restream" in input.roles:
                     if (
                         input.path.startswith("rtsp")
-                        and not camera.restream.force_audio
+                        and camera.restream.video_encoding
+                        == RestreamVideoCodecEnum.copy
+                        and camera.restream.audio_encoding
+                        == [RestreamAudioCodecEnum.copy]
                     ):
                         self.relays[
                             cam_name
@@ -59,6 +70,7 @@ class RestreamApi:
                         # go2rtc only supports rtsp for direct relay, otherwise ffmpeg is used
                         self.relays[cam_name] = get_manual_go2rtc_stream(
                             escape_special_characters(input.path),
+                            camera.restream.audio_encoding,
                             camera.restream.video_encoding,
                             parse_preset_hardware_acceleration_go2rtc_engine(
                                 self.config.ffmpeg.hwaccel_args

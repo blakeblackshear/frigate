@@ -524,16 +524,26 @@ class JsmpegStreamConfig(FrigateBaseModel):
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality.")
 
 
-class RestreamCodecEnum(str, Enum):
+class RestreamVideoCodecEnum(str, Enum):
     copy = "copy"
     h264 = "h264"
     h265 = "h265"
 
 
+class RestreamAudioCodecEnum(str, Enum):
+    aac = "aac"
+    copy = "copy"
+    opus = "opus"
+
+
 class RestreamConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Restreaming enabled.")
-    video_encoding: RestreamCodecEnum = Field(
-        default=RestreamCodecEnum.copy, title="Method for encoding the restream."
+    audio_encoding: list[RestreamAudioCodecEnum] = Field(
+        default=[RestreamAudioCodecEnum.aac, RestreamAudioCodecEnum.opus],
+        title="Codecs to supply for audio.",
+    )
+    video_encoding: RestreamVideoCodecEnum = Field(
+        default=RestreamVideoCodecEnum.copy, title="Method for encoding the restream."
     )
     force_audio: bool = Field(
         default=True, title="Force audio compatibility with the browser."

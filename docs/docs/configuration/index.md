@@ -356,8 +356,12 @@ rtmp:
 restream:
   # Optional: Enable the restream (default: True)
   enabled: True
-  # Optional: Force audio compatibility with browsers (default: shown below)
-  force_audio: True
+  # Optional: Set the audio codecs to restream with
+  # possible values are aac, copy, opus. Set to copy
+  # only to avoid transcoding (default: shown below)
+  audio_encoding:
+    - aac
+    - opus
   # Optional: Video encoding to be used. By default the codec will be copied but
   # it can be switched to another or an MJPEG stream can be encoded and restreamed
   # as h264 (default: shown below)
