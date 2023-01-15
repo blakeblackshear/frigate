@@ -16,6 +16,15 @@ export const getNowYesterdayInLong = (): number => {
   return dateToLong(getNowYesterday());
 };
 
+/**
+ * This function takes in a unix timestamp, locale, timezone,
+ * and returns a dateTime string.
+ * If unixTimestamp is not provided, it returns 'Invalid time'
+ * @param unixTimestamp: number
+ * @param locale: string
+ * @param timezone: string
+ * @returns string - dateTime or 'Invalid time' if unixTimestamp is not provided
+ */
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, locale: string, timezone: string): string => {
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
