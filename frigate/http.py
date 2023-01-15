@@ -710,7 +710,7 @@ def config_raw():
 
 @bp.route("/config/save", methods=["POST"])
 def config_save():
-    save_option = request.headers.get('Save-Option')
+    save_option = request.headers.get("Save-Option")
 
     new_config = request.get_data().decode()
 
@@ -755,7 +755,7 @@ def config_save():
             400,
         )
 
-    if(save_option == "restart"):
+    if save_option == "restart":
         try:
             restart_frigate()
         except Exception as e:
@@ -765,6 +765,7 @@ def config_save():
         return "Config successfully saved, restarting...", 200
     else:
         return "Config successfully saved.", 200
+
 
 @bp.route("/config/schema.json")
 def config_schema():
