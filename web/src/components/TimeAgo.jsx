@@ -1,23 +1,26 @@
 import { h } from 'preact';
 
-function timeAgo(timeString) {
-  if (!timeString) return 'Invalid Time';
+const timeAgo = ({ time, dense = false }) => {
+  if (!time) return 'Invalid Time';
   try {
     const currentTime = new Date();
-    const pastTime = new Date(timeString);
+    const pastTime = new Date(time);
     const elapsedTime = currentTime - pastTime;
     if (elapsedTime < 0) return 'Invalid Time';
 
     const timeUnits = [
-      { unit: 'year', value: 31536000 },
-      { unit: 'month', value: 0 },
-      { unit: 'day', value: 86400 },
-      { unit: 'hour', value: 3600 },
-      { unit: 'minute', value: 60 },
-      { unit: 'second', value: 1 },
+      { unit: 'ye', full: 'year', value: 31536000 },
+      { unit: 'mo', full: 'month', value: 0 },
+      { unit: 'day', full: 'day', value: 86400 },
+      { unit: 'h', full: 'hour', value: 3600 },
+      { unit: 'm', full: 'minute', value: 60 },
+      { unit: 's', full: 'second', value: 1 },
     ];
 
     let elapsed = elapsedTime / 1000;
+    if (elapsed < 60) {
+      return 'just now';
+    }
 
     for (let i = 0; i < timeUnits.length; i++) {
       // if months
@@ -39,20 +42,20 @@ function timeAgo(timeString) {
 
         if (monthDiff > 0) {
           const unitAmount = monthDiff;
-          return `${unitAmount} ${timeUnits[i].unit}${unitAmount > 1 ? 's' : ''} ago`;
+          return `${unitAmount}${dense ? timeUnits[i].unit[0] : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
         }
       } else if (elapsed >= timeUnits[i].value) {
         const unitAmount = Math.floor(elapsed / timeUnits[i].value);
-        return `${unitAmount} ${timeUnits[i].unit}${unitAmount > 1 ? 's' : ''} ago`;
+        return `${unitAmount}${dense ? timeUnits[i].unit[0] : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
       }
     }
   } catch {
     return 'Invalid Time';
   }
-}
+};
 
-const TimeAgo = ({ time }) => {
-  return <span>{timeAgo(time)}</span>;
+const TimeAgo = (props) => {
+  return <span>{timeAgo({ ...props })}</span>;
 };
 
 export default TimeAgo;
