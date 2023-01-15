@@ -514,8 +514,7 @@ export default function Events({ path, ...props }) {
                             <TimeAgo time={event.start_time * 1000} dense />
                           </div>
                           <div className="hidden md:inline">
-                            <span className="m-1">-</span>
-                            {getDurationFromTimestamps(event.start_time, event.end_time)}
+                            <span className="m-1" />( {getDurationFromTimestamps(event.start_time, event.end_time)} )
                           </div>
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
