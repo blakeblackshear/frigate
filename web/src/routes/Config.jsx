@@ -23,7 +23,7 @@ export default function Config() {
     }
 
     axios
-      .post('config/save?save_option='+save_option, window.editor.getValue(), {
+      .post(`config/save?save_option=${save_option}`, window.editor.getValue(), {
         headers: { 'Content-Type': 'text/plain' },
       })
       .then((response) => {
