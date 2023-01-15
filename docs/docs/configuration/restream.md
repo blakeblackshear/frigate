@@ -47,8 +47,11 @@ One connection is made to the camera. One for the restream, `detect` and `record
 cameras:
   test_cam:
     ffmpeg:
+      output_args:
+        record: preset-record-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera
+          input_args: preset-rtsp-restream
           roles:
             - record
             - detect
@@ -65,8 +68,11 @@ Two connections are made to the camera. One for the sub stream, one for the rest
 cameras:
   test_cam:
     ffmpeg:
+      output_args:
+        record: preset-record-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera
+          input_args: preset-rtsp-restream
           roles:
             - record
         - path: rtsp://192.168.1.5:554/stream # <--- camera high res stream
