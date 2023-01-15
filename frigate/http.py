@@ -710,6 +710,8 @@ def config_raw():
 
 @bp.route("/config/save", methods=["POST"])
 def config_save():
+    save_option = request.args.get("save_option")
+
     new_config = request.get_data().decode()
 
     if not new_config:
@@ -753,13 +755,16 @@ def config_save():
             400,
         )
 
-    try:
-        restart_frigate()
-    except Exception as e:
-        logging.error(f"Error restarting Frigate: {e}")
-        return "Config successfully saved, unable to restart Frigate", 200
+    if save_option == "restart":
+        try:
+            restart_frigate()
+        except Exception as e:
+            logging.error(f"Error restarting Frigate: {e}")
+            return "Config successfully saved, unable to restart Frigate", 200
 
-    return "Config successfully saved, restarting...", 200
+        return "Config successfully saved, restarting...", 200
+    else:
+        return "Config successfully saved.", 200
 
 
 @bp.route("/config/schema.json")

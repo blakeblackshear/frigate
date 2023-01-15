@@ -17,13 +17,13 @@ export default function Config() {
   const [success, setSuccess] = useState();
   const [error, setError] = useState();
 
-  const onHandleSaveConfig = async (e) => {
+  const onHandleSaveConfig = async (e, save_option) => {
     if (e) {
       e.stopPropagation();
     }
 
     axios
-      .post('config/save', window.editor.getValue(), {
+      .post(`config/save?save_option=${save_option}`, window.editor.getValue(), {
         headers: { 'Content-Type': 'text/plain' },
       })
       .then((response) => {
@@ -97,8 +97,11 @@ export default function Config() {
           <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
             Copy Config
           </Button>
-          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "restart")}>
             Save & Restart
+          </Button>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "saveonly")}>
+            Save Only
           </Button>
         </div>
       </div>
