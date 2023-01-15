@@ -15,6 +15,7 @@ import { UploadPlus } from '../icons/UploadPlus';
 import { Clip } from '../icons/Clip';
 import { Zone } from '../icons/Zone';
 import { Camera } from '../icons/Camera';
+import { Clock } from '../icons/Clock';
 import { Delete } from '../icons/Delete';
 import { Download } from '../icons/Download';
 import Menu, { MenuItem } from '../components/Menu';
@@ -515,13 +516,23 @@ export default function Events({ path, ...props }) {
                             : event.label.replaceAll('_', ' ')}{' '}
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
-                        <div className="text-sm">
-                          <p>
-                            {`${new Date(event.start_time * 1000).toLocaleDateString(locale, { timeZone: timezone })} `}
-                            {`${new Date(event.start_time * 1000).toLocaleTimeString(locale, { timeZone: timezone })} `}
-                            - <TimeAgo time={event.end_time * 1000} />
-                            {` - ${clipDuration(event.start_time, event.end_time)}`}
-                          </p>
+                        <div className="text-sm flex">
+                          <span className="mr-1 flex items-center">
+                            <Clock className="h-5 w-5 mr-2 inline" />
+                            {`${new Date(event.start_time * 1000).toLocaleDateString(locale, {
+                              timeZone: timezone,
+                            })}`}
+                          </span>
+                          <span className="mr-1 flex items-center">
+                            {`${new Date(event.start_time * 1000).toLocaleTimeString(locale, {
+                              timeZone: timezone,
+                            })} `}{' '}
+                            -
+                          </span>
+                          <span className="mr-1 flex items-center">
+                            <TimeAgo time={event.end_time * 1000} />
+                          </span>{' '}
+                          - {`${clipDuration(event.start_time, event.end_time)}`}
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
