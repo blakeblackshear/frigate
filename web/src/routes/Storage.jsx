@@ -22,6 +22,13 @@ export default function Storage() {
     return <ActivityIndicator />;
   }
 
+  const getUnitSize = (MB) => {
+    if (isNaN(MB) || MB < 0) return 'Invalid number';
+    if (MB < 1024) return `${MB} MB`;
+
+    return `${(MB / 1024).toFixed(2)} GB`;
+  };
+
   let storage_usage;
   if (
     service &&
@@ -31,13 +38,13 @@ export default function Storage() {
       <Fragment>
         <Tr>
           <Td>Recordings</Td>
-          <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
-          <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['used'])}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['total'])}</Td>
         </Tr>
         <Tr>
           <Td>Snapshots</Td>
-          <Td>{service['storage']['/media/frigate/clips']['used']}</Td>
-          <Td>{service['storage']['/media/frigate/clips']['total']}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/clips']['used'])}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/clips']['total'])}</Td>
         </Tr>
       </Fragment>
     );
@@ -46,8 +53,8 @@ export default function Storage() {
       <Fragment>
         <Tr>
           <Td>Recordings & Snapshots</Td>
-          <Td>{service['storage']['/media/frigate/recordings']['used']}</Td>
-          <Td>{service['storage']['/media/frigate/recordings']['total']}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['used'])}</Td>
+          <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['total'])}</Td>
         </Tr>
       </Fragment>
     );
@@ -67,8 +74,8 @@ export default function Storage() {
                 <Thead>
                   <Tr>
                     <Th>Location</Th>
-                    <Th>Used MB</Th>
-                    <Th>Total MB</Th>
+                    <Th>Used</Th>
+                    <Th>Total</Th>
                   </Tr>
                 </Thead>
                 <Tbody>{storage_usage}</Tbody>
@@ -82,20 +89,20 @@ export default function Storage() {
                 <Thead>
                   <Tr>
                     <Th>Location</Th>
-                    <Th>Used MB</Th>
-                    <Th>Total MB</Th>
+                    <Th>Used</Th>
+                    <Th>Total</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   <Tr>
                     <Td>/dev/shm</Td>
-                    <Td>{service['storage']['/dev/shm']['used']}</Td>
-                    <Td>{service['storage']['/dev/shm']['total']}</Td>
+                    <Td>{getUnitSize(service['storage']['/dev/shm']['used'])}</Td>
+                    <Td>{getUnitSize(service['storage']['/dev/shm']['total'])}</Td>
                   </Tr>
                   <Tr>
                     <Td>/tmp/cache</Td>
-                    <Td>{service['storage']['/tmp/cache']['used']}</Td>
-                    <Td>{service['storage']['/tmp/cache']['total']}</Td>
+                    <Td>{getUnitSize(service['storage']['/tmp/cache']['used'])}</Td>
+                    <Td>{getUnitSize(service['storage']['/tmp/cache']['total'])}</Td>
                   </Tr>
                 </Tbody>
               </Table>
@@ -121,7 +128,7 @@ export default function Storage() {
                   <Tbody>
                     <Tr>
                       <Td>{Math.round(camera['usage_percent'] ?? 0)}%</Td>
-                      <Td>{camera['bandwidth'] ? camera['bandwidth'] : 'Calculating...'} MB/hr</Td>
+                      <Td>{camera['bandwidth'] ? getUnitSize(camera['bandwidth']) : 'Calculating...'}/hr</Td>
                     </Tr>
                   </Tbody>
                 </Table>
