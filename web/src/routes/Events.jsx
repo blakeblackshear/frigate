@@ -24,6 +24,7 @@ import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 import MultiSelect from '../components/MultiSelect';
+import TimeAgo from '../components/TimeAgo';
 
 const API_LIMIT = 25;
 
@@ -515,9 +516,12 @@ export default function Events({ path, ...props }) {
                           ({(event.top_score * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm">
-                          {new Date(event.start_time * 1000).toLocaleDateString(locale, { timeZone: timezone })}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString(locale, { timeZone: timezone })} (
-                          {clipDuration(event.start_time, event.end_time)})
+                          <p>
+                            {`${new Date(event.start_time * 1000).toLocaleDateString(locale, { timeZone: timezone })} `}
+                            {`${new Date(event.start_time * 1000).toLocaleTimeString(locale, { timeZone: timezone })} `}
+                            - <TimeAgo time={event.end_time * 1000} />
+                            {` - ${clipDuration(event.start_time, event.end_time)}`}
+                          </p>
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
