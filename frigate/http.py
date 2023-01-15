@@ -710,7 +710,7 @@ def config_raw():
 
 @bp.route("/config/save", methods=["POST"])
 def config_save():
-    save_option = request.headers.get("Save-Option")
+    save_option = request.args.get("save_option")
 
     new_config = request.get_data().decode()
 
