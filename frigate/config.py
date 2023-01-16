@@ -405,7 +405,6 @@ class FfmpegConfig(FrigateBaseModel):
 
 class CameraRoleEnum(str, Enum):
     record = "record"
-    restream = "restream"
     rtmp = "rtmp"
     detect = "detect"
 
@@ -524,34 +523,9 @@ class JsmpegStreamConfig(FrigateBaseModel):
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality.")
 
 
-class RestreamVideoCodecEnum(str, Enum):
-    copy = "copy"
-    h264 = "h264"
-    h265 = "h265"
-
-
-class RestreamAudioCodecEnum(str, Enum):
-    aac = "aac"
-    copy = "copy"
-    opus = "opus"
-
-
-class RestreamConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="Restreaming enabled.")
-    audio_encoding: list[RestreamAudioCodecEnum] = Field(
-        default=[RestreamAudioCodecEnum.aac, RestreamAudioCodecEnum.opus],
-        title="Codecs to supply for audio.",
-    )
-    video_encoding: RestreamVideoCodecEnum = Field(
-        default=RestreamVideoCodecEnum.copy, title="Method for encoding the restream."
-    )
-    force_audio: bool = Field(
-        default=True, title="Force audio compatibility with the browser."
-    )
-    birdseye: bool = Field(default=False, title="Restream the birdseye feed via RTSP.")
-    jsmpeg: JsmpegStreamConfig = Field(
-        default_factory=JsmpegStreamConfig, title="Jsmpeg Stream Configuration."
-    )
+class RestreamConfig(BaseModel):
+    class Config:
+        extra = Extra.allow
 
 
 class CameraUiConfig(FrigateBaseModel):
@@ -577,9 +551,6 @@ class CameraConfig(FrigateBaseModel):
     )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="RTMP restreaming configuration."
-    )
-    restream: RestreamConfig = Field(
-        default_factory=RestreamConfig, title="Restreaming configuration."
     )
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Snapshot configuration."
@@ -621,7 +592,6 @@ class CameraConfig(FrigateBaseModel):
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
-                "restream",
             ]
 
             if has_rtmp:
@@ -758,11 +728,6 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
             f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
         )
 
-    if camera_config.restream.enabled and not "restream" in assigned_roles:
-        raise ValueError(
-            f"Camera {camera_config.name} has restream enabled, but restream is not assigned to an input."
-        )
-
 
 def verify_old_retain_config(camera_config: CameraConfig) -> None:
     """Leave log if old retain_days is used."""
@@ -895,7 +860,6 @@ class FrigateConfig(FrigateBaseModel):
                 "record": ...,
                 "snapshots": ...,
                 "rtmp": ...,
-                "restream": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
