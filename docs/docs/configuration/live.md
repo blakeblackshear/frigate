@@ -25,6 +25,16 @@ restream:
     test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
 ```
 
+However, chances are that your camera already provides at least one usable audio type, so you just need restream to add the missing one. For example, if your camera outputs audio in AAC format:
+
+```yaml
+restream:
+  streams:
+    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=copy#audio=opus
+```
+
+Which will reuse your camera AAC audio, while also adding one track in OPUS format.
+
 If your camera uses RTSP and supports the audio type for the live view you want to use, then you can pass the camera stream to go2rtc without ffmpeg.
 
 ```yaml
