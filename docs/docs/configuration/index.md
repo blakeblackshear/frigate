@@ -126,6 +126,9 @@ environment_vars:
 birdseye:
   # Optional: Enable birdseye view (default: shown below)
   enabled: True
+  # Optional: Restream birdseye via RTSP (default: shown below)
+  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
+  restream: False
   # Optional: Width of the output resolution (default: shown below)
   width: 1280
   # Optional: Height of the output resolution (default: shown below)
@@ -352,32 +355,18 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# NOTE: Can be overridden at the camera level
+# Uses https://github.com/AlexxIT/go2rtc
 restream:
-  # Optional: Enable the restream (default: True)
-  enabled: True
-  # Optional: Set the audio codecs to restream with
-  # possible values are aac, copy, opus. Set to copy
-  # only to avoid transcoding (default: shown below)
-  audio_encoding:
-    - aac
-    - opus
-  # Optional: Video encoding to be used. By default the codec will be copied but
-  # it can be switched to another or an MJPEG stream can be encoded and restreamed
-  # as h264 (default: shown below)
-  video_encoding: "copy"
-  # Optional: Restream birdseye via RTSP (default: shown below)
-  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
-  birdseye: False
-  # Optional: jsmpeg stream configuration for WebUI
-  jsmpeg:
-    # Optional: Set the height of the jsmpeg stream. (default: 720)
-    # This must be less than or equal to the height of the detect stream. Lower resolutions
-    # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
-    height: 720
-    # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
-    # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
-    quality: 8
+
+# Optional: jsmpeg stream configuration for WebUI
+live:
+  # Optional: Set the height of the jsmpeg stream. (default: 720)
+  # This must be less than or equal to the height of the detect stream. Lower resolutions
+  # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+  height: 720
+  # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+  quality: 8
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
