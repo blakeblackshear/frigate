@@ -826,7 +826,7 @@ class FrigateConfig(FrigateBaseModel):
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )
-    restream: RestreamConfig = Field(
+    go2rtc: RestreamConfig = Field(
         default_factory=RestreamConfig, title="Global restream configuration."
     )
     birdseye: BirdseyeConfig = Field(

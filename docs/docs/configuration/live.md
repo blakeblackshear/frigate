@@ -20,7 +20,7 @@ Live view options can be selected while viewing the live stream. The options are
 MSE Requires AAC audio, WebRTC requires PCMU/PCMA, or opus audio. If you want to support both MSE and WebRTC then your restream config needs to use ffmpeg to set both.
 
 ```yaml
-restream:
+go2rtc:
   streams:
     test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
 ```
@@ -28,7 +28,7 @@ restream:
 However, chances are that your camera already provides at least one usable audio type, so you just need restream to add the missing one. For example, if your camera outputs audio in AAC format:
 
 ```yaml
-restream:
+go2rtc:
   streams:
     test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=copy#audio=opus
 ```
@@ -38,7 +38,7 @@ Which will reuse your camera AAC audio, while also adding one track in OPUS form
 If your camera uses RTSP and supports the audio type for the live view you want to use, then you can pass the camera stream to go2rtc without ffmpeg.
 
 ```yaml
-restream:
+go2rtc:
   streams:
     test_cam: rtsp://192.168.1.5:554/live0
 ```
@@ -53,13 +53,13 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
   1. Add your internal IP to the list of `candidates`. Here is an example, assuming that `192.168.1.10` is the local IP of the device running Frigate:
 
      ```yaml
-     restream:
+     go2rtc:
        streams:
          test_cam: ...
-     webrtc:
-       candidates:
-         - 192.168.1.10:8555
-         - stun:8555
+       webrtc:
+         candidates:
+           - 192.168.1.10:8555
+           - stun:8555
      ```
 
 :::note
