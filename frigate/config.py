@@ -823,6 +823,9 @@ class FrigateConfig(FrigateBaseModel):
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
     )
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Live playback settings."
+    )
     restream: RestreamConfig = Field(
         default_factory=RestreamConfig, title="Global restream configuration."
     )
@@ -864,6 +867,7 @@ class FrigateConfig(FrigateBaseModel):
                 "record": ...,
                 "snapshots": ...,
                 "rtmp": ...,
+                "live": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
