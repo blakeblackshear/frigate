@@ -57,7 +57,7 @@ cameras:
   test_cam:
     ffmpeg:
       output_args:
-        record: preset-record-audio-copy
+        record: preset-record-generic-audio-copy
       inputs:
         - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream

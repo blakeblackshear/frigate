@@ -14,7 +14,7 @@ By default, Frigate removes audio from recordings to reduce the likelihood of fa
 ```yaml title="frigate.yml"
 ffmpeg:
   output_args:
-    record: preset-record-generic-audio
+    record: preset-record-generic-audio-aac
 ```
 
 ### My mjpeg stream or snapshots look green and crazy
