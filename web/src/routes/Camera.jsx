@@ -23,6 +23,7 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
+  const restreamEnabled = config?.restream && Object.keys(config.restream).includes(camera);
 
   const cameraConfig = config?.cameras[camera];
   const jsmpegWidth = cameraConfig
@@ -32,8 +33,7 @@ export default function Camera({ camera }) {
     `${camera}-source`,
     getDefaultLiveMode(config, cameraConfig)
   );
-  const sourceValues =
-    config?.restream && Object.keys(config.restream).includes(camera) ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
+  const sourceValues = restreamEnabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -107,7 +107,7 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (viewSource == 'mse' && cameraConfig.restream.enabled) {
+    if (viewSource == 'mse' && restreamEnabled) {
       if ('MediaSource' in window) {
         player = (
           <Fragment>
@@ -125,7 +125,7 @@ export default function Camera({ camera }) {
           </Fragment>
         );
       }
-    } else if (viewSource == 'webrtc' && cameraConfig.restream.enabled) {
+    } else if (viewSource == 'webrtc' && restreamEnabled) {
       player = (
         <Fragment>
           <div className="max-w-5xl">
@@ -201,9 +201,9 @@ export default function Camera({ camera }) {
   );
 }
 
-function getDefaultLiveMode(config, cameraConfig) {
+function getDefaultLiveMode(config, cameraConfig, restreamEnabled) {
   if (cameraConfig) {
-    if (cameraConfig.restream.enabled) {
+    if (restreamEnabled) {
       return config.ui.live_mode;
     }
 
