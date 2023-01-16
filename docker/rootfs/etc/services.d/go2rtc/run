@@ -4,12 +4,8 @@
 
 set -o errexit -o nounset -o pipefail
 
-if [[ -f "/config/frigate-go2rtc.yaml" ]]; then
-    config_path="/config/frigate-go2rtc.yaml"
-else
-    config_path="/usr/local/go2rtc/go2rtc.yaml"
-fi
+raw_config=$(python3 /usr/local/go2rtc/create_config.py)
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout
 exec 2>&1
-exec go2rtc -config="${config_path}"
+exec go2rtc -config="${raw_config}"

@@ -102,17 +102,6 @@ PRESETS_HW_ACCEL_ENCODE = {
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
 
-PRESETS_HW_ACCEL_GO2RTC_ENGINE = {
-    "preset-rpi-32-h264": "v4l2m2m",
-    "preset-rpi-64-h264": "v4l2m2m",
-    "preset-intel-vaapi": "vaapi",
-    "preset-intel-qsv-h264": "vaapi",  # go2rtc doesn't support qsv
-    "preset-intel-qsv-h265": "vaapi",
-    "preset-amd-vaapi": "vaapi",
-    "preset-nvidia-h264": "cuda",
-    "preset-nvidia-h265": "cuda",
-}
-
 
 def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
@@ -154,14 +143,6 @@ def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str)
         input,
         output,
     )
-
-
-def parse_preset_hardware_acceleration_go2rtc_engine(arg: Any) -> list[str]:
-    """Return the correct engine for the preset otherwise returns None."""
-    if not isinstance(arg, str):
-        return None
-
-    return PRESETS_HW_ACCEL_GO2RTC_ENGINE.get(arg)
 
 
 PRESETS_INPUT = {

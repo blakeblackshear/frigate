@@ -7,29 +7,11 @@ title: Restream
 
 Frigate can restream your video feed as an RTSP feed for other applications such as Home Assistant to utilize it at `rtsp://<frigate_host>:8554/<camera_name>`. Port 8554 must be open. [This allows you to use a video feed for detection in Frigate and Home Assistant live view at the same time without having to make two separate connections to the camera](#reduce-connections-to-camera). The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
-#### Copy Audio
-
-Different live view technologies (ex: MSE, WebRTC) support different audio codecs. The `restream -> audio_encoding` field tells the restream to make multiple streams available so that all live view technologies are supported. Some camera streams don't work well with this, in which case `restream -> audio_encoding` should be set to `copy` only.
+Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `go2rtc` in the config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc#configuration) for more advanced configurations and features.
 
 #### Birdseye Restream
 
-Birdseye RTSP restream can be enabled at `restream -> birdseye` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
-
-#### Changing Restream Codec {#changing-restream-codec}
-
-Generally it is recommended to let the codec from the camera be copied. But there may be some cases where h265 needs to be transcoded as h264 or an MJPEG stream can be encoded and restreamed as h264. In this case the encoding will need to be set, if any hardware acceleration presets are set then that will be used to encode the stream.
-
-```yaml
-ffmpeg:
-  hwaccel_args: your-hwaccel-preset # <- highly recommended so the GPU is used
-
-cameras:
-  mjpeg_cam:
-    ffmpeg:
-      ...
-    restream:
-      video_encoding: h264
-```
+Birdseye RTSP restream can be enabled at `birdseye -> restream` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
 
 ### RTMP (Deprecated)
 
@@ -44,20 +26,21 @@ Some cameras only support one active connection or you may just want to have a s
 One connection is made to the camera. One for the restream, `detect` and `record` connect to the restream.
 
 ```yaml
+go2rtc:
+  streams:
+    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
+
 cameras:
   test_cam:
     ffmpeg:
       output_args:
-        record: preset-record-audio-copy
+        record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
             - detect
-        - path: rtsp://192.168.1.5:554/live0 # <--- 1 connection to camera stream
-          roles:
-            - restream
 ```
 
 ### With Sub Stream
@@ -65,20 +48,23 @@ cameras:
 Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
 
 ```yaml
+go2rtc:
+  streams:
+    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
+    test_cam_sub: ffmpeg:rtsp://192.168.1.5:554/substream#video=copy#audio=aac#audio=opus
+
 cameras:
   test_cam:
     ffmpeg:
       output_args:
-        record: preset-record-audio-copy
+        record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://192.168.1.5:554/stream # <--- camera high res stream
-          roles:
-            - restream
-        - path: rtsp://192.168.1.5:554/substream # <--- camera sub stream
+        - path: rtsp://127.0.0.1:8554/test_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
+          input_args: preset-rtsp-restream
           roles:
             - detect
 ```
