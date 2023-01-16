@@ -7,7 +7,7 @@ title: Restream
 
 Frigate can restream your video feed as an RTSP feed for other applications such as Home Assistant to utilize it at `rtsp://<frigate_host>:8554/<camera_name>`. Port 8554 must be open. [This allows you to use a video feed for detection in Frigate and Home Assistant live view at the same time without having to make two separate connections to the camera](#reduce-connections-to-camera). The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
-Frigate Restream uses [go2rtc](https://github.com/AlexxIT/go2rtc) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `restream` config, see go2rtc docs for more advanced configurations and features.
+Frigate Restream uses [go2rtc](https://github.com/AlexxIT/go2rtc) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `restream` config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc#configuration) for more advanced configurations and features.
 
 #### Birdseye Restream
 
