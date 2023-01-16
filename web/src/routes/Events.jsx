@@ -414,6 +414,7 @@ export default function Events({ path, ...props }) {
           />
         </Menu>
       )}
+
       {state.showCalendar && (
         <span>
           <Menu
@@ -426,7 +427,10 @@ export default function Events({ path, ...props }) {
               dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
               close={() => setState({ ...state, showCalendar: false })}
             >
-              <Timepicker />
+              <Timepicker
+                dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
+                onChange={handleSelectDateRange}
+              />
             </Calendar>
           </Menu>
         </span>
