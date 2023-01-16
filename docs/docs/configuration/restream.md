@@ -9,10 +9,6 @@ Frigate can restream your video feed as an RTSP feed for other applications such
 
 Frigate Restream uses [go2rtc](https://github.com/AlexxIT/go2rtc) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `restream` config, see go2rtc docs for more advanced configurations and features.
 
-#### Copy Audio
-
-Different live view technologies (ex: MSE, WebRTC) support different audio codecs. The `restream -> audio_encoding` field tells the restream to make multiple streams available so that all live view technologies are supported. Some camera streams don't work well with this, in which case `restream -> audio_encoding` should be set to `copy` only.
-
 #### Birdseye Restream
 
 Birdseye RTSP restream can be enabled at `birdseye -> restream` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
