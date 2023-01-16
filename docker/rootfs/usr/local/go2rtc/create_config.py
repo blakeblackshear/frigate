@@ -4,6 +4,8 @@ import json
 import os
 import yaml
 
+
+FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
 # Check if we can use .yaml instead of .yml
@@ -26,5 +28,8 @@ if not go2rtc_config.get("log", {}).get("format"):
 
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     go2rtc_config["webrtc"] = {"candidates": ["stun:8555"]}
+
+for name in go2rtc_config.get("streams", {}):
+    go2rtc_config["streams"][name] = go2rtc_config["streams"][name].format(**FRIGATE_ENV_VARS)
 
 print(json.dumps(go2rtc_config))
