@@ -738,7 +738,10 @@ def verify_valid_live_stream_name(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> None:
     """Verify that a restream exists to use for live view."""
-    if camera_config.live.stream_name not in frigate_config.go2rtc.dict().get("streams", {}).keys():
+    if (
+        camera_config.live.stream_name
+        not in frigate_config.go2rtc.dict().get("streams", {}).keys()
+    ):
         return ValueError(
             f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
         )
