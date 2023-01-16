@@ -18,7 +18,7 @@ export default function Birdseye() {
   }
 
   let player;
-  if (viewSource == 'mse' && config.restream.birdseye) {
+  if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
         <Fragment>

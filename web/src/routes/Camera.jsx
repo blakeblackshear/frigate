@@ -26,13 +26,14 @@ export default function Camera({ camera }) {
 
   const cameraConfig = config?.cameras[camera];
   const jsmpegWidth = cameraConfig
-    ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
     `${camera}-source`,
     getDefaultLiveMode(config, cameraConfig)
   );
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
+  const sourceValues =
+    config?.restream && Object.keys(config.restream).includes(camera) ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -136,7 +137,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.live.height} />
           </div>
         </Fragment>
       );
