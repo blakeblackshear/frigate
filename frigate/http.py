@@ -41,6 +41,7 @@ from frigate.util import (
     ffprobe_stream,
     restart_frigate,
     vainfo_hwaccel,
+    get_tz_modifiers,
 )
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -91,7 +92,7 @@ def is_healthy():
 @bp.route("/events/summary")
 def events_summary():
     tz_name = request.args.get("timezone", default="utc", type=str)
-    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
+    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -111,7 +112,10 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
+                "%Y-%m-%d",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -121,7 +125,10 @@ def events_summary():
             Event.camera,
             Event.label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", tz_offset)
+                "%Y-%m-%d",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ),
             Event.zones,
         )
@@ -912,12 +919,14 @@ def get_recordings_storage_usage():
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
     tz_name = request.args.get("timezone", default="utc", type=str)
-    tz_offset = f"{int(datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()/60/60)} hour"
+    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -927,13 +936,17 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", tz_offset),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).desc()
         )
     )
@@ -942,7 +955,9 @@ def recordings_summary(camera_name):
         Event.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Event.start_time, "unixepoch", tz_offset),
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
@@ -950,7 +965,9 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Event.start_time, "unixepoch", tz_offset),
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ),
         )
         .objects()
@@ -1147,17 +1164,11 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
 # TODO make this nicer when vod module is removed
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
 def vod_hour(year_month, day, hour, camera_name, tz_name):
-    tz_offset = int(
-        datetime.now(pytz.timezone(tz_name.replace(",", "/")))
-        .utcoffset()
-        .total_seconds()
-        / 60
-        / 60
-    )
     parts = year_month.split("-")
-    start_date = datetime(
-        int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc
-    ) - timedelta(hours=tz_offset)
+    start_date = (
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+    )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
