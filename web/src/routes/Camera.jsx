@@ -23,7 +23,7 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
-  const restreamEnabled = config?.restream && Object.keys(config.restream).includes(camera);
+  const restreamEnabled = config?.restream?.streams && Object.keys(config.restream.streams).includes(camera);
 
   const cameraConfig = config?.cameras[camera];
   const jsmpegWidth = cameraConfig
