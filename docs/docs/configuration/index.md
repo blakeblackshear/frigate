@@ -360,6 +360,9 @@ go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
 live:
+  # Optional: Set the name of the stream that should be used for live view
+  # in frigate WebUI. (default: name of camera)
+  stream_name: camera_name
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.

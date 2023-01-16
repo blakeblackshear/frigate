@@ -43,6 +43,34 @@ go2rtc:
     test_cam: rtsp://192.168.1.5:554/live0
 ```
 
+### Setting Stream For Live UI
+
+There may be some cameras that you would prefer to use the sub stream for live view, but the main stream for recording. This can be done via `live -> stream_name`.
+
+```yaml
+go2rtc:
+  streams:
+    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
+    test_cam_sub: ffmpeg:rtsp://192.168.1.5:554/substream#video=copy#audio=aac#audio=opus
+
+cameras:
+  test_cam:
+    ffmpeg:
+      output_args:
+        record: preset-record-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/test_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+    live:
+      stream_name: test_cam_sub
+```
+
 ### WebRTC extra configuration:
 
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
