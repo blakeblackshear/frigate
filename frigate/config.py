@@ -344,6 +344,7 @@ class BirdseyeModeEnum(str, Enum):
 
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
+    restream: bool = Field(default=False, title="Restream birdseye via RTSP.")
     width: int = Field(default=1280, title="Birdseye width.")
     height: int = Field(default=720, title="Birdseye height.")
     quality: int = Field(
