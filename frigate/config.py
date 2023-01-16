@@ -519,9 +519,9 @@ class RtmpConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="RTMP restreaming enabled.")
 
 
-class JsmpegStreamConfig(FrigateBaseModel):
-    height: int = Field(default=720, title="Live camera view height.")
-    quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality.")
+class CameraLiveConfig(FrigateBaseModel):
+    height: int = Field(default=720, title="Live camera view height")
+    quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
 
 class RestreamConfig(BaseModel):
@@ -552,6 +552,9 @@ class CameraConfig(FrigateBaseModel):
     )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="RTMP restreaming configuration."
+    )
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Live playback settings."
     )
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Snapshot configuration."
