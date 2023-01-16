@@ -27,4 +27,4 @@ if not go2rtc_config.get("log", {}).get("format"):
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     go2rtc_config["webrtc"] = {"candidates": ["stun:8555"]}
 
-print(yaml.dump(go2rtc_config, default_flow_style=False))
+print(json.dumps(go2rtc_config))
