@@ -1044,7 +1044,9 @@ class SharedMemoryFrameManager(FrameManager):
 
 
 def get_tz_modifiers(tz_name: str) -> Tuple[str, str]:
-    seconds_offset = datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
+    seconds_offset = (
+        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
+    )
     hours_offset = int(seconds_offset / 60 / 60)
     minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
     hour_modifier = f"{hours_offset} hour"
