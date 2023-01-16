@@ -27,5 +27,4 @@ if not go2rtc_config.get("log", {}).get("format"):
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     go2rtc_config["webrtc"] = {"candidates": ["stun:8555"]}
 
-with open('/usr/local/go2rtc/bin/config.yaml', 'w') as yaml_file:
-    yaml.dump(go2rtc_config, yaml_file)
+print(yaml.dump(go2rtc_config, default_flow_style=False))
