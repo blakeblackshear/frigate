@@ -25,6 +25,22 @@ tar -zxf ${VOD_MODULE_VERSION}.tar.gz -C /tmp/nginx-vod-module --strip-component
 rm ${VOD_MODULE_VERSION}.tar.gz
     # Patch MAX_CLIPS to allow more clips to be added than the default 128
 sed -i 's/MAX_CLIPS (128)/MAX_CLIPS (1080)/g' /tmp/nginx-vod-module/vod/media_set.h
+patch -d /tmp/nginx-vod-module/ -p1 << 'EOF'
+--- a/vod/avc_hevc_parser.c       2022-06-27 11:38:10.000000000 +0000
++++ b/vod/avc_hevc_parser.c       2023-01-16 11:25:10.900521298 +0000
+@@ -3,6 +3,9 @@
+ bool_t
+ avc_hevc_parser_rbsp_trailing_bits(bit_reader_state_t* reader)
+ {
++	// https://github.com/blakeblackshear/frigate/issues/4572
++	return TRUE;
++
+ 	uint32_t one_bit;
+
+ 	if (reader->stream.eof_reached)
+EOF
+
+
 mkdir /tmp/nginx-secure-token-module
 wget https://github.com/kaltura/nginx-secure-token-module/archive/refs/tags/${SECURE_TOKEN_MODULE_VERSION}.tar.gz
 tar -zxf ${SECURE_TOKEN_MODULE_VERSION}.tar.gz -C /tmp/nginx-secure-token-module --strip-components=1
