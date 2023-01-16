@@ -23,9 +23,9 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
-  const restreamEnabled = config?.go2rtc?.streams && Object.keys(config.go2rtc.streams).includes(camera);
 
   const cameraConfig = config?.cameras[camera];
+  const restreamEnabled = cameraConfig && Object.keys(config.go2rtc.streams).includes(cameraConfig.live.stream_name);
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
