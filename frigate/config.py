@@ -520,6 +520,7 @@ class RtmpConfig(FrigateBaseModel):
 
 
 class CameraLiveConfig(FrigateBaseModel):
+    stream_name: str = Field(default="", title="Name of restream to use as live view.")
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
 
@@ -733,6 +734,16 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         )
 
 
+def verify_valid_live_stream_name(
+    frigate_config: FrigateConfig, camera_config: CameraConfig
+) -> None:
+    """Verify that a restream exists to use for live view."""
+    if camera_config.live.stream_name not in frigate_config.go2rtc.streams.keys():
+        return ValueError(
+            f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
+        )
+
+
 def verify_old_retain_config(camera_config: CameraConfig) -> None:
     """Leave log if old retain_days is used."""
     if not camera_config.record.retain_days is None:
@@ -940,7 +951,12 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.dict(exclude_unset=True),
                 )
 
+            # Set live view stream if none is set
+            if not camera_config.live.stream_name:
+                camera_config.live.stream_name = name
+
             verify_config_roles(camera_config)
+            verify_valid_live_stream_name(config, camera_config)
             verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
