@@ -92,7 +92,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 
 :::tip
 
-This extra configuration is probably not required if you installed Frigate through the Home Assistant add-on, as Frigate uses the Supervisor's API to get both the local IP of the device and the port that go2rtc's WebRTC interface has been forwarded to.
+This extra configuration may not be required if Frigate has been installed as a Home Assistant add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
 
 However, defining the candidates manually will not hurt even if you are using the Home Assistant add-on. You should do this if the Frigate add-on fails to detect this information. If it's the case, you will see some warnings like the below in the add-on logs page during the initialization:
 
