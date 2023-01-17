@@ -21,7 +21,9 @@ In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvanta
 
 Some cameras only support one active connection or you may just want to have a single connection open to the camera. The RTSP restream allows this to be possible.
 
-### With Single Stream
+### RTSP Streams
+
+#### With Single Stream
 
 One connection is made to the camera. One for the restream, `detect` and `record` connect to the restream.
 
@@ -45,7 +47,7 @@ cameras:
             - detect
 ```
 
-### With Sub Stream
+#### With Sub Stream
 
 Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
 
@@ -58,6 +60,59 @@ go2rtc:
     test_cam_sub:
       - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
       - ffmpeg:test_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
+
+cameras:
+  test_cam:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/test_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+```
+
+### HTTP/RTMP Streams
+
+
+#### With Single Stream
+
+One connection is made to the camera. One for the restream, `detect` and `record` connect to the restream.
+
+```yaml
+go2rtc:
+  streams:
+    test_cam: 
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:test_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+
+cameras:
+  test_cam:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+```
+
+#### With Sub Stream
+
+Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
+
+```yaml
+go2rtc:
+  streams:
+    test_cam: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
+    test_cam_sub: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
 
 cameras:
   test_cam:
