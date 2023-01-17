@@ -951,8 +951,12 @@ class FrigateConfig(FrigateBaseModel):
 
             # ONVIF substitution
             if camera_config.onvif.user or camera_config.onvif.password:
-                camera_config.onvif.user = camera_config.onvif.user.format(**FRIGATE_ENV_VARS)
-                camera_config.onvif.password = camera_config.onvif.password.format(**FRIGATE_ENV_VARS)
+                camera_config.onvif.user = camera_config.onvif.user.format(
+                    **FRIGATE_ENV_VARS
+                )
+                camera_config.onvif.password = camera_config.onvif.password.format(
+                    **FRIGATE_ENV_VARS
+                )
 
             # Add default filters
             object_keys = camera_config.objects.track
