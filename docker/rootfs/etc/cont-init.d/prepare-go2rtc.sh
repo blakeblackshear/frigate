@@ -5,6 +5,7 @@
 set -o errexit -o nounset -o pipefail
 
 function get_ip_and_port() {
+    local ip_address
     # Example: 192.168.1.10/24
     local ip_regex='^([0-9]{1,3}\.{3}[0-9]{1,3})/[0-9]{1,2}$'
     if ip_address=$(
@@ -21,6 +22,7 @@ function get_ip_and_port() {
         return 0
     fi
 
+    local webrtc_port
     local port_regex='^([0-9]{1,5})$'
     if webrtc_port=$(
         curl -fsSL \
