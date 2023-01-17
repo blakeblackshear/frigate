@@ -76,7 +76,7 @@ cameras:
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
-- For internal/local access, and you are running through docker, you will need to use a custom go2rtc config:
+- For internal/local access, unless you are running through the add-on, you will also need to set the WebRTC candidates list in the go2rtc config:
 
   1. Add your internal IP to the list of `candidates`. Here is an example, assuming that `192.168.1.10` is the local IP of the device running Frigate:
 
