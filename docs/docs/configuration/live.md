@@ -19,6 +19,8 @@ Live view options can be selected while viewing the live stream. The options are
 
 MSE Requires AAC audio, WebRTC requires PCMU/PCMA, or opus audio. If you want to support both MSE and WebRTC then your restream config needs to use ffmpeg to set both.
 
+#### RTSP Streams
+
 ```yaml
 go2rtc:
   streams:
@@ -37,13 +39,23 @@ go2rtc:
 
 Which will reuse your camera AAC audio, while also adding one track in OPUS format.
 
-If your camera uses RTSP and supports the audio type for the live view you want to use, then you can pass the camera stream to go2rtc without ffmpeg.
+#### HTTP Streams
 
 ```yaml
 go2rtc:
   streams:
-    test_cam: rtsp://192.168.1.5:554/live0
+    test_cam: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=aac#audio=opus
 ```
+
+However, chances are that your camera already provides at least one usable audio type, so you just need restream to add the missing one. For example, if your camera outputs audio in AAC format:
+
+```yaml
+go2rtc:
+  streams:
+    test_cam: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
+```
+
+Which will reuse your camera AAC audio, while also adding one track in OPUS format.
 
 ### Setting Stream For Live UI
 
