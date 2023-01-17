@@ -76,12 +76,23 @@ database:
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm-size of **64MB** is fine for setups with 2 or less 1080p cameras. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
+The default shm size of **64MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
 
-You can calculate the necessary shm-size for each camera with the following formula using the resolution specified for detect:
+The Frigate container also stores logs in shm, which can take up to **30MB**, so make sure to take this into account in your math as well.
 
-```
-(width * height * 1.5 * 9 + 270480)/1048576 + 30 = <shm size in MB>
+You can calculate the necessary shm size for each camera with the following formula using the resolution specified for detect:
+
+```console
+# Replace <width> and <height>
+$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 9 + 270480) / 1048576))'
+
+# Example for 1280x720
+$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 9 + 270480) / 1048576))'
+12.12MB
+
+# Example for eight cameras detecting at 1280x720, including logs
+$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576) * 8 + 30))'
+126.99MB
 ```
 
 The shm size cannot be set per container for Home Assistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
