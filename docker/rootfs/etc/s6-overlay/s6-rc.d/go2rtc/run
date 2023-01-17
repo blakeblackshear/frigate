@@ -11,9 +11,4 @@ raw_config=$(python3 /usr/local/go2rtc/create_config.py)
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout
 exec 2>&1
-
-echo starting go2rtc
-sleep 20s
-exit 0
-
 exec go2rtc -config="${raw_config}"
