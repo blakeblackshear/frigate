@@ -35,21 +35,24 @@ class OnvifController:
                 continue
 
             if cam.onvif.host:
-                self.cams[cam_name] = {
-                    "onvif": ONVIFCamera(
-                        cam.onvif.host,
-                        cam.onvif.port,
-                        cam.onvif.user,
-                        cam.onvif.password,
-                        wsdl_dir=site.getsitepackages()[0].replace(
-                            "dist-packages", "site-packages"
-                        )
-                        + "/wsdl",
-                    ),
-                    "init": False,
-                    "active": False,
-                    "presets": {},
-                }
+                try:
+                    self.cams[cam_name] = {
+                        "onvif": ONVIFCamera(
+                            cam.onvif.host,
+                            cam.onvif.port,
+                            cam.onvif.user,
+                            cam.onvif.password,
+                            wsdl_dir=site.getsitepackages()[0].replace(
+                                "dist-packages", "site-packages"
+                            )
+                            + "/wsdl",
+                        ),
+                        "init": False,
+                        "active": False,
+                        "presets": {},
+                    }
+                except ONVIFError as e:
+                    logger.error(f"Onvif connection to {cam.name} failed: {e}")
 
     def _init_onvif(self, camera_name: str) -> bool:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
