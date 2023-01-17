@@ -139,35 +139,30 @@ class MqttClient(Communicator):  # type: ignore[misc]
         )
 
         # register callbacks
+        callback_types = [
+            "recordings",
+            "snapshots",
+            "detect",
+            "motion",
+            "improve_contrast",
+            "motion_threshold",
+            "motion_contour_area",
+        ]
+
         for name in self.config.cameras.keys():
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/recordings/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/snapshots/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/detect/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/improve_contrast/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_threshold/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
-                self.on_mqtt_command,
-            )
+            for callback in callback_types:
+                # We need to pre-clear existing set topics because in previous
+                # versions the webUI retained on the /set topic but this is
+                # no longer the case.
+                self.client.publish(
+                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
+                    None,
+                    retain=True,
+                )
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
+                    self.on_mqtt_command,
+                )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command

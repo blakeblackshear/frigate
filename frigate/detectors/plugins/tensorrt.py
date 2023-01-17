@@ -75,12 +75,6 @@ class TensorRtDetector(DetectionApi):
 
     def _load_engine(self, model_path):
         try:
-            ctypes.cdll.LoadLibrary(
-                "/usr/local/lib/python3.9/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.11.0"
-            )
-            ctypes.cdll.LoadLibrary(
-                "/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8"
-            )
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
             ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")

@@ -18,7 +18,7 @@ export default function Birdseye() {
   }
 
   let player;
-  if (viewSource == 'mse' && config.restream.birdseye) {
+  if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
@@ -36,7 +36,7 @@ export default function Birdseye() {
         </Fragment>
       );
     }
-  } else if (viewSource == 'webrtc' && config.restream.birdseye) {
+  } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
         <div className="max-w-5xl">
@@ -61,7 +61,7 @@ export default function Birdseye() {
           Birdseye
         </Heading>
 
-        {config.restream.birdseye && (
+        {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
             value={viewSource}

@@ -27,7 +27,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.8/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.9/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
@@ -269,7 +269,9 @@ COPY --from=rootfs / /
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl
+    pip3 install -U /deps/trt-wheels/*.whl && \
+    ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
+    ldconfig
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt

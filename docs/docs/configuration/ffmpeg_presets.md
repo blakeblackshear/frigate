@@ -28,15 +28,16 @@ Input args presets help make the config more readable and handle use cases for d
 
 See [the camera specific docs](/configuration/camera_specific.md) for more info on non-standard cameras and recommendations for using them in Frigate.
 
-| Preset                    | Usage                   | Other Notes                                         |
-| ------------------------- | ----------------------- | --------------------------------------------------- |
-| preset-http-jpeg-generic  | HTTP Live Jpeg          | Recommend restreaming live jpeg instead             |
-| preset-http-mjpeg-generic | HTTP Mjpeg Stream       | Recommend restreaming mjpeg stream instead          |
-| preset-http-reolink       | Reolink HTTP-FLV Stream | Only for reolink http, not when restreaming as rtsp |
-| preset-rtmp-generic       | RTMP Stream             |                                                     |
-| preset-rtsp-generic       | RTSP Stream             | This is the default when nothing is specified       |
-| preset-rtsp-udp           | RTSP Stream via UDP     | Use when camera is UDP only                         |
-| preset-rtsp-blue-iris     | Blue Iris RTSP Stream   | Use when consuming a stream from Blue Iris          |
+| Preset                    | Usage                     | Other Notes                                         |
+| ------------------------- | ------------------------- | --------------------------------------------------- |
+| preset-http-jpeg-generic  | HTTP Live Jpeg            | Recommend restreaming live jpeg instead             |
+| preset-http-mjpeg-generic | HTTP Mjpeg Stream         | Recommend restreaming mjpeg stream instead          |
+| preset-http-reolink       | Reolink HTTP-FLV Stream   | Only for reolink http, not when restreaming as rtsp |
+| preset-rtmp-generic       | RTMP Stream               |                                                     |
+| preset-rtsp-generic       | RTSP Stream               | This is the default when nothing is specified       |
+| preset-rtsp-restream      | RTSP Stream from restream | Use when using rtsp restream as source              |
+| preset-rtsp-udp           | RTSP Stream via UDP       | Use when camera is UDP only                         |
+| preset-rtsp-blue-iris     | Blue Iris RTSP Stream     | Use when consuming a stream from Blue Iris          |
 
 :::caution
 
@@ -66,10 +67,11 @@ cameras:
 
 Output args presets help make the config more readable and handle use cases for different types of streams to ensure consistent recordings.
 
-| Preset                      | Usage                             | Other Notes                                   |
-| --------------------------- | --------------------------------- | --------------------------------------------- |
-| preset-record-generic       | Record WITHOUT audio              | This is the default when nothing is specified |
-| preset-record-generic-audio | Record WITH audio                 | Use this to enable audio in recordings        |
-| preset-record-mjpeg         | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead    |
-| preset-record-jpeg          | Record live jpeg                  | Recommend restreaming live jpeg instead       |
-| preset-record-ubiquiti      | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio   |
+| Preset                           | Usage                             | Other Notes                                   |
+| -------------------------------- | --------------------------------- | --------------------------------------------- |
+| preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified |
+| preset-record-generic-audio-aac  | Record WITH aac audio             | Use this to enable audio in recordings        |
+| preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings        |
+| preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead    |
+| preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead       |
+| preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio   |
