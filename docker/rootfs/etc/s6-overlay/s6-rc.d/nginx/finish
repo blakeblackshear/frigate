@@ -1,6 +1,6 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
-# Take down the S6 supervision tree when the service exits
+# Take down the S6 supervision tree when the service fails
 
 set -o errexit -o nounset -o pipefail
 
