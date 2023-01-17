@@ -205,9 +205,6 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 ENV S6_SERVICES_GRACETIME=30000
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
-# TODO: remove after a new version of s6-overlay is released. See:
-# https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
-ENV S6_SERVICES_READYTIME=50
 
 ENTRYPOINT ["/init"]
 CMD []
