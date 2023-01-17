@@ -52,8 +52,12 @@ There may be some cameras that you would prefer to use the sub stream for live v
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
-    test_cam_sub: ffmpeg:rtsp://192.168.1.5:554/substream#video=copy#audio=aac#audio=opus
+    test_cam: 
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:test_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+    test_cam_sub:
+      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:test_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
 
 cameras:
   test_cam:
