@@ -194,15 +194,6 @@ EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555
 
-# Fails if cont-init.d fails
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
-# Wait indefinitely for cont-init.d to finish before starting services
-ENV S6_CMD_WAIT_FOR_SERVICES=1
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
-# Give services (including Frigate) 30 seconds to stop before killing them
-# But this is not working currently because of:
-# https://github.com/just-containers/s6-overlay/issues/503
-ENV S6_SERVICES_GRACETIME=30000
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 
