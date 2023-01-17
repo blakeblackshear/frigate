@@ -46,4 +46,4 @@ if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
     get_ip_and_port
 fi
 
-python3 /usr/local/go2rtc/create_config.py > /dev/shm/go2rtc.yaml
+python3 /usr/local/go2rtc/create_config.py
