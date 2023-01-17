@@ -28,11 +28,11 @@ if not go2rtc_config.get("log", {}).get("format"):
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     default_candidates = []
     # Use FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL as candidate if set
-    if os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL"):
-        default_candidates.append(
-            os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL")
-        )
+    internal_candidate = os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL", None)
+    if internal_candidate is not None:
+        default_candidates.append(internal_candidate)
     default_candidates.append("stun:8555")
+
     go2rtc_config["webrtc"] = {"candidates": default_candidates}
 
 # Write YAML config to /dev/shm/go2rtc.yaml
