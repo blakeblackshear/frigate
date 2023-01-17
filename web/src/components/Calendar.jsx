@@ -256,12 +256,12 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
             onkeydown={(e) => handleKeydown(e, day, idx)}
             ref={(ref) => (keyRef.current[idx] = ref)}
             tabIndex={day.month === 0 ? day.date : null}
-            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
+            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer hover:border hover:rounded-md border-gray-600 ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
             }
-              ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
-              ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
-              ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
+              ${isFirstDayInRange(day) ? ' rounded-l-xl hover:rounded-l-xl' : ''}
+              ${isSelectedRange(day) ? ' bg-blue-600 hover:rounded-none' : ''}
+              ${isLastDayInRange(day) ? ' rounded-r-xl hover:rounded-r-xl' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
             key={idx}
           >
