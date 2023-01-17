@@ -9,7 +9,7 @@ exit_code_container=$(cat /run/s6-linux-init-container-results/exitcode)
 readonly exit_code_container
 readonly exit_code_service="${1}"
 readonly exit_code_signal="${2}"
-readonly service="frigate"
+readonly service="Frigate"
 
 echo "Service ${service} exited with code ${exit_code_service} (by signal ${exit_code_signal})" >&2
 
