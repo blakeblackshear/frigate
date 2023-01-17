@@ -30,7 +30,9 @@ However, chances are that your camera already provides at least one usable audio
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=copy#audio=opus
+    test_cam: 
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:test_cam#audio=opus # <- copy of the stream which transcodes audio to opus
 ```
 
 Which will reuse your camera AAC audio, while also adding one track in OPUS format.
