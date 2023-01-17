@@ -22,8 +22,9 @@ elif [[ "${exit_code_service}" -ne 0 ]]; then
     echo "${exit_code_service}" > /run/s6-linux-init-container-results/exitcode
   fi
 else
-  # If the service exited with code 0, then we want to set the container exit code to 1 if it's 0
-  if [[ "${exit_code_container}" -eq 0 ]]; then
+  # go2rtc is not supposed to exit, so even when it exits with 0 we make the
+  # container with 1. We only tolerate it when Frigate is restarting.
+  if [[ "${exit_code_container}" -eq 0 && ! -f /dev/shm/restarting-frigate ]]; then
     echo "1" > /run/s6-linux-init-container-results/exitcode
   fi
 fi
