@@ -20,7 +20,7 @@ if config_file.endswith((".yaml", ".yml")):
 elif config_file.endswith(".json"):
     config = json.loads(raw_config)
 
-go2rtc_config: dict[str, any] = config["go2rtc"]
+go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
 if not go2rtc_config.get("log", {}).get("format"):
     go2rtc_config["log"] = {"format": "text"}
