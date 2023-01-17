@@ -37,4 +37,4 @@ if not go2rtc_config.get("webrtc", {}).get("candidates", []):
 
 # Write YAML config to /dev/shm/go2rtc.yaml
 with open("/dev/shm/go2rtc.yaml", "w") as f:
-    yaml.dump(config, f)
+    yaml.dump(go2rtc_config, f)
