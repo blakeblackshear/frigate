@@ -205,7 +205,7 @@ FROM deps AS devcontainer
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VSCode
 # But start a fake service for simulating the logs
-COPY docker/fake_frigate_run /etc/services.d/frigate/run
+COPY docker/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
 
 # Install Node 16
 RUN apt-get update \
