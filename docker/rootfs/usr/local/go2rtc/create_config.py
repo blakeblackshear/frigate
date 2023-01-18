@@ -5,6 +5,7 @@ import os
 import yaml
 
 
+BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
 # Check if we can use .yaml instead of .yml
@@ -20,12 +21,27 @@ if config_file.endswith((".yaml", ".yml")):
 elif config_file.endswith(".json"):
     config = json.loads(raw_config)
 
-go2rtc_config: dict[str, any] = config["go2rtc"]
+go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
-if not go2rtc_config.get("log", {}).get("format"):
+# we want to ensure that logs are easy to read
+if go2rtc_config.get("log") is None:
     go2rtc_config["log"] = {"format": "text"}
+elif go2rtc_config["log"].get("format") is None:
+    go2rtc_config["log"]["format"] = "text"
 
+# should set default stun server so webrtc can work
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     go2rtc_config["webrtc"] = {"candidates": ["stun:8555"]}
+
+# need to replace ffmpeg command when using ffmpeg4
+if not os.path.exists(BTBN_PATH):
+    if go2rtc_config.get("ffmpeg") is None:
+        go2rtc_config["ffmpeg"] = {
+            "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+        }
+    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
+        go2rtc_config["ffmpeg"][
+            "rtsp"
+        ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
 
 print(json.dumps(go2rtc_config))
