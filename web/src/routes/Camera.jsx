@@ -112,7 +112,7 @@ export default function Camera({ camera }) {
         player = (
           <Fragment>
             <div className="max-w-5xl">
-              <MsePlayer camera={camera} />
+              <MsePlayer camera={cameraConfig.live.stream_name} />
             </div>
           </Fragment>
         );
@@ -129,7 +129,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div className="max-w-5xl">
-            <WebRtcPlayer camera={camera} />
+            <WebRtcPlayer camera={cameraConfig.live.stream_name} />
           </div>
         </Fragment>
       );
