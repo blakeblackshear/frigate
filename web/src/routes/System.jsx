@@ -246,11 +246,14 @@ export default function System() {
                           <Td>Detect</Td>
                           <Td>{cameras[camera]['pid'] || '- '}</Td>
 
-                          {cameras[camera]['detection_enabled'] == 1 ? (
-                            <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
-                          ) : (
-                            <Td>disabled</Td>
-                          )}
+                          {(() => {
+                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1) 
+                              return <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
+                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0) 
+                              return <Td>disabled</Td>
+                            
+                            return <Td>- </Td>
+                          })()}
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
