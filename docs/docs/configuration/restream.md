@@ -50,7 +50,7 @@ cameras:
       output_args:
         record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/htp_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+        - path: rtsp://127.0.0.1:8554/http_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
