@@ -6,6 +6,11 @@ on:
       - dev
       - master
 
+# only run the latest commit to avoid cache overwrites
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   PYTHON_VERSION: 3.9
 
