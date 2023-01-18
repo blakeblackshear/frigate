@@ -106,16 +106,20 @@ If available, recommended settings are:
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
 ```yaml
+go2rtc:
+  reolink: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
+  reolink_sub: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
+
 cameras:
   reolink:
     ffmpeg:
-      input_args: preset-http-reolink
       inputs:
-        - path: http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password
+        - path: rtsp://127.0.0.1:8554/reolink?video=copy&audio=aac
+          input_args: preset-rtsp-restream
           roles:
             - record
-            - rtmp
-        - path: http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
+        - path: rtsp://127.0.0.1:8554/reolink?video=copy
+          input_args: preset-rtsp-restream
           roles:
             - detect
     detect:

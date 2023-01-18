@@ -17,30 +17,16 @@ Live view options can be selected while viewing the live stream. The options are
 
 ### Audio Support
 
-MSE Requires AAC audio, WebRTC requires PCMU/PCMA, or opus audio. If you want to support both MSE and WebRTC then your restream config needs to use ffmpeg to set both.
+MSE Requires AAC audio, WebRTC requires PCMU/PCMA, or opus audio. If you want to support both MSE and WebRTC then your restream config needs to make sure both are enabled.
 
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
-```
-
-However, chances are that your camera already provides at least one usable audio type, so you just need restream to add the missing one. For example, if your camera outputs audio in AAC format:
-
-```yaml
-go2rtc:
-  streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=copy#audio=opus
-```
-
-Which will reuse your camera AAC audio, while also adding one track in OPUS format.
-
-If your camera uses RTSP and supports the audio type for the live view you want to use, then you can pass the camera stream to go2rtc without ffmpeg.
-
-```yaml
-go2rtc:
-  streams:
-    test_cam: rtsp://192.168.1.5:554/live0
+    rtsp_cam: # <- for RTSP streams
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
+      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+    http_cam: # <- for http streams
+      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
 ```
 
 ### Setting Stream For Live UI
@@ -50,8 +36,12 @@ There may be some cameras that you would prefer to use the sub stream for live v
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
-    test_cam_sub: ffmpeg:rtsp://192.168.1.5:554/substream#video=copy#audio=aac#audio=opus
+    rtsp_cam: 
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+    rtsp_cam_sub:
+      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:rtsp_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
 
 cameras:
   test_cam:

@@ -28,42 +28,77 @@ One connection is made to the camera. One for the restream, `detect` and `record
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
+    rtsp_cam: # <- for RTSP streams
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
+      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+    http_cam: # <- for http streams
+      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
 
 cameras:
-  test_cam:
+  rtsp_cam:
     ffmpeg:
       output_args:
         record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+        - path: rtsp://127.0.0.1:8554/rtsp_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+            - detect
+  http_cam:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/http_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
             - detect
 ```
 
-### With Sub Stream
+#### With Sub Stream
 
 Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
 
 ```yaml
 go2rtc:
   streams:
-    test_cam: ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac#audio=opus
-    test_cam_sub: ffmpeg:rtsp://192.168.1.5:554/substream#video=copy#audio=aac#audio=opus
+    rtsp_cam: 
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+    rtsp_cam_sub:
+      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:rtsp_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
+    http_cam:
+      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+    http_cam_sub:
+      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
 
 cameras:
-  test_cam:
+  rtsp_cam:
     ffmpeg:
       output_args:
         record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+        - path: rtsp://127.0.0.1:8554/rtsp_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/test_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
+        - path: rtsp://127.0.0.1:8554/rtsp_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+  http_cam:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/http_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/http_cam_sub?video=copy&audio=aac # <--- the name here must match the name of the camera_sub in restream
           input_args: preset-rtsp-restream
           roles:
             - detect
