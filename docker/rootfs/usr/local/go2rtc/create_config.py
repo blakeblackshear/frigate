@@ -6,6 +6,7 @@ import yaml
 
 
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
+FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
 # Check if we can use .yaml instead of .yml
@@ -50,5 +51,14 @@ if not os.path.exists(BTBN_PATH):
         go2rtc_config["ffmpeg"][
             "rtsp"
         ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+        
+for name in go2rtc_config.get("streams", {}):
+    stream = go2rtc_config["streams"][name]
+
+    if isinstance(stream, str):
+        go2rtc_config["streams"][name] = go2rtc_config["streams"][name].format(**FRIGATE_ENV_VARS)
+    elif isinstance(stream, list):
+        for i, stream in enumerate(stream):
+            go2rtc_config["streams"][name][i] = stream.format(**FRIGATE_ENV_VARS)
 
 print(json.dumps(go2rtc_config))
