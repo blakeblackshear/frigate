@@ -10,7 +10,9 @@ apt-get -qq install --no-install-recommends -y \
     wget \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3-pip
+    python3-pip \
+    curl \
+    jq
 
 mkdir -p -m 600 /root/.gnupg
 

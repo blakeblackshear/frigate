@@ -29,9 +29,16 @@ if go2rtc_config.get("log") is None:
 elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
-# should set default stun server so webrtc can work
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
-    go2rtc_config["webrtc"] = {"candidates": ["stun:8555"]}
+    default_candidates = []
+    # use internal candidate if it was discovered when running through the add-on
+    internal_candidate = os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL", None)
+    if internal_candidate is not None:
+        default_candidates.append(internal_candidate)
+    # should set default stun server so webrtc can work
+    default_candidates.append("stun:8555")
+
+    go2rtc_config["webrtc"] = {"candidates": default_candidates}
 
 # need to replace ffmpeg command when using ffmpeg4
 if not os.path.exists(BTBN_PATH):
