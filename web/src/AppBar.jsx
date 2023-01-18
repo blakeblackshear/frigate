@@ -78,7 +78,7 @@ export default function AppBar() {
       {showDialogWait ? (
         <Prompt
           title="Restart in progress"
-          text="Please wait a few seconds for the restart to complete before reloading the page."
+          text="This can take up to one minute, please wait before reloading the page."
         />
       ) : null}
     </Fragment>

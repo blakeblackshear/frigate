@@ -769,7 +769,10 @@ def config_save():
             logging.error(f"Error restarting Frigate: {e}")
             return "Config successfully saved, unable to restart Frigate", 200
 
-        return "Config successfully saved, restarting...", 200
+        return (
+            "Config successfully saved, restarting (this can take up to one minute)...",
+            200,
+        )
     else:
         return "Config successfully saved.", 200
 

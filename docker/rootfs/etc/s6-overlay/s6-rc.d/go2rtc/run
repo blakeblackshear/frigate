@@ -4,6 +4,9 @@
 
 set -o errexit -o nounset -o pipefail
 
+# Tell S6-Overlay not to restart this service
+s6-svc -O .
+
 raw_config=$(python3 /usr/local/go2rtc/create_config.py)
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout

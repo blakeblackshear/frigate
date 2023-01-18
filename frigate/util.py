@@ -628,13 +628,8 @@ def clipped(obj, frame_shape):
 
 
 def restart_frigate():
-    proc = psutil.Process(1)
-    # if this is running via s6, sigterm pid 1
-    if proc.name() == "s6-svscan":
-        proc.terminate()
-    # otherwise, just try and exit frigate
-    else:
-        os.kill(os.getpid(), signal.SIGTERM)
+    # S6 overlay is configured to exit once the Frigate process exits
+    os.kill(os.getpid(), signal.SIGTERM)
 
 
 class EventsPerSecond:
