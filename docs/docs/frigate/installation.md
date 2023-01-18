@@ -95,7 +95,7 @@ $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576)
 126.99MB
 ```
 
-The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor shares the host `/dev/shm` with all add-ons. Usuallly the host `/dev/shm` has half the size of your total memory, so if your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB there without any additional configuration.
+The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
 
 
 ### Raspberry Pi 3/4
