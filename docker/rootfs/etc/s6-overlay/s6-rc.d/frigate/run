@@ -7,7 +7,9 @@ set -o errexit -o nounset -o pipefail
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
-cd /opt/frigate
+echo "[INFO] Starting Frigate..." >&2
+
+cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frigate" >&2
 
 # Replace the bash process with the Frigate process, redirecting stderr to stdout
 exec 2>&1

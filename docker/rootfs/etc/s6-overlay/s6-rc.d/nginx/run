@@ -2,6 +2,10 @@
 # shellcheck shell=bash
 # Start the NGINX service
 
+set -o errexit -o nounset -o pipefail
+
+echo "[INFO] Starting NGINX..." >&2
+
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
 exec nginx
