@@ -192,7 +192,7 @@ RUN ldconfig
 EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
-EXPOSE 8555
+EXPOSE 8555/tcp 8555/udp
 
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
