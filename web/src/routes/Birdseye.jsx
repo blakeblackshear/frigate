@@ -91,19 +91,21 @@ export default function Birdseye() {
         )}
       </div>
 
-      {player}
+      <div className="xl:flex justify-between">
+        {player}
 
-      {ptzCameras && (
-        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min">
-          <Heading size="sm">Control Panel</Heading>
-          {ptzCameras.map((camera) => (
-            <div className="p-4" key={camera}>
-              <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
-              <CameraControlPanel camera={camera} />
-            </div>
-          ))}
-        </div>
-      )}
+        {ptzCameras && (
+          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min">
+            <Heading size="sm">Control Panel</Heading>
+            {ptzCameras.map((camera) => (
+              <div className="p-4" key={camera}>
+                <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
+                <CameraControlPanel camera={camera} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
