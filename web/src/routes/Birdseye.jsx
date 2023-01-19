@@ -94,7 +94,7 @@ export default function Birdseye() {
       {player}
 
       {ptzCameras && (
-        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-fit">
+        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min">
           <Heading size="sm">Control Panel</Heading>
           {ptzCameras.map((camera) => (
             <div className="p-4" key={camera}>

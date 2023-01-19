@@ -104,79 +104,81 @@ export default function CameraControlPanel({ camera = '' }) {
   });
 
   return (
-    <div data-testid="control-panel" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {ptz.features.includes('pt') && (
-        <div className="w-44 px-4">
-          <Heading size="xs" className="my-4">
-            Pan / Tilt
-          </Heading>
-          <div className="w-full flex justify-center">
-            <button
-              onMouseDown={(e) => onSetMove(e, 'UP')}
-              onMouseUp={(e) => onSetStop(e)}
-              onTouchStart={(e) => {
-                onSetMove(e, 'UP');
-                e.preventDefault();
-              }}
-              onTouchEnd={(e) => {
-                onSetStop(e);
-                e.preventDefault();
-              }}
-            >
-              <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
-            </button>
-          </div>
-          <div className="w-full flex justify-between">
-            <button
-              onMouseDown={(e) => onSetMove(e, 'LEFT')}
-              onMouseUp={(e) => onSetStop(e)}
-              onTouchStart={(e) => {
-                onSetMove(e, 'LEFT');
-                e.preventDefault();
-              }}
-              onTouchEnd={(e) => {
-                onSetStop(e);
-                e.preventDefault();
-              }}
-            >
-              <ArrowLeftDouble className="btn h-12 p-2 bg-slate-500" />
-            </button>
-            <button
-              onMouseDown={(e) => onSetMove(e, 'RIGHT')}
-              onMouseUp={(e) => onSetStop(e)}
-              onTouchStart={(e) => {
-                onSetMove(e, 'RIGHT');
-                e.preventDefault();
-              }}
-              onTouchEnd={(e) => {
-                onSetStop(e);
-                e.preventDefault();
-              }}
-            >
-              <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <button
-              onMouseDown={(e) => onSetMove(e, 'DOWN')}
-              onMouseUp={(e) => onSetStop(e)}
-              onTouchStart={(e) => {
-                onSetMove(e, 'DOWN');
-                e.preventDefault();
-              }}
-              onTouchEnd={(e) => {
-                onSetStop(e);
-                e.preventDefault();
-              }}
-            >
-              <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
-            </button>
+    <div data-testid="control-panel" className="p-4 sm:flex justify-start">
+      {ptz.features.includes('zoom') && (
+        <div className="flex justify-center">
+          <div className="w-44 px-4">
+            <Heading size="xs" className="my-4">
+              Pan / Tilt
+            </Heading>
+            <div className="w-full flex justify-center">
+              <button
+                onMouseDown={(e) => onSetMove(e, 'UP')}
+                onMouseUp={(e) => onSetStop(e)}
+                onTouchStart={(e) => {
+                  onSetMove(e, 'UP');
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  onSetStop(e);
+                  e.preventDefault();
+                }}
+              >
+                <ArrowUpDouble className="h-12 p-2 bg-slate-500" />
+              </button>
+            </div>
+            <div className="w-full flex justify-between">
+              <button
+                onMouseDown={(e) => onSetMove(e, 'LEFT')}
+                onMouseUp={(e) => onSetStop(e)}
+                onTouchStart={(e) => {
+                  onSetMove(e, 'LEFT');
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  onSetStop(e);
+                  e.preventDefault();
+                }}
+              >
+                <ArrowLeftDouble className="btn h-12 p-2 bg-slate-500" />
+              </button>
+              <button
+                onMouseDown={(e) => onSetMove(e, 'RIGHT')}
+                onMouseUp={(e) => onSetStop(e)}
+                onTouchStart={(e) => {
+                  onSetMove(e, 'RIGHT');
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  onSetStop(e);
+                  e.preventDefault();
+                }}
+              >
+                <ArrowRightDouble className="h-12 p-2 bg-slate-500" />
+              </button>
+            </div>
+            <div className="flex justify-center">
+              <button
+                onMouseDown={(e) => onSetMove(e, 'DOWN')}
+                onMouseUp={(e) => onSetStop(e)}
+                onTouchStart={(e) => {
+                  onSetMove(e, 'DOWN');
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  onSetStop(e);
+                  e.preventDefault();
+                }}
+              >
+                <ArrowDownDouble className="h-12 p-2 bg-slate-500" />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {ptz.features.includes('zoom') && (
-        <div className="w-44 px-4">
+        <div className="px-4 sm:w-44">
           <Heading size="xs" className="my-4">
             Zoom
           </Heading>
