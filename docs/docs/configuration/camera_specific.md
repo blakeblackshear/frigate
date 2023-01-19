@@ -107,8 +107,9 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 
 ```yaml
 go2rtc:
-  reolink: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
-  reolink_sub: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
+  streams:
+    reolink: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus
+    reolink_sub: ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
 
 cameras:
   reolink:
