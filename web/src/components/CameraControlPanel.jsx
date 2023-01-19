@@ -104,7 +104,7 @@ export default function CameraControlPanel({ camera = '' }) {
   });
 
   return (
-    <div data-testid="control-panel" className="p-4 sm:flex justify-start">
+    <div data-testid="control-panel" className="p-4 text-center sm:flex justify-start">
       {ptz.features.includes('pt') && (
         <div className="flex justify-center">
           <div className="w-44 px-4">
