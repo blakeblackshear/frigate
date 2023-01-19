@@ -57,7 +57,7 @@ cameras:
             - detect
 ```
 
-#### With Sub Stream
+### With Sub Stream
 
 Two connections are made to the camera. One for the sub stream, one for the restream, `record` connects to the restream.
 
@@ -102,4 +102,16 @@ cameras:
           input_args: preset-rtsp-restream
           roles:
             - detect
+```
+
+## Advanced Restream Configurations
+
+The [exec](https://github.com/AlexxIT/go2rtc#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+
+NOTE: The output will need to be passed with two curly braces `{{output}}`
+
+```yaml
+go2rtc:
+  streams:
+    stream1: exec:ffmpeg -hide_banner -re -stream_loop -1 -i /media/BigBuckBunny.mp4 -c copy -rtsp_transport tcp -f rtsp {{output}}
 ```
