@@ -45,7 +45,7 @@ ffmpeg:
 
 These instructions are based on the [jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux)
 
-Additional congiguration is needed for the docker container to be able to access the Nvidia GPU and this depends on how docker is being run:
+Additional configuration is needed for the docker container to be able to access the Nvidia GPU and this depends on how docker is being run:
 
 #### Docker Compose
 
