@@ -54,7 +54,6 @@ services:
   frigate:
     ...
     image: ghcr.io/blakeblackshear/frigate:stable
-    runtime: nvidia
     deploy:    # <------------- Add this section
       resources:
         reservations:
