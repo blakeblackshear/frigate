@@ -870,7 +870,7 @@ def latest_frame(camera_name):
         response.headers["Content-Type"] = "image/jpeg"
         response.headers["Cache-Control"] = "no-store"
         return response
-    elif camera_name == "birdseye" and current_app.frigate_config.restream.birdseye:
+    elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
             current_app.detected_frames_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
