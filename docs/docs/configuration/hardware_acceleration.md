@@ -70,8 +70,8 @@ services:
 docker run -d \
   --name frigate \
   ...
-  -e 'NVIDIA_VISIBLE_DEVICES'='all' \
-  -l 'NVIDIA_DRIVER_CAPABILITIES'='all' \
+  --gpus=all \
+  --runtime=nvidia \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
