@@ -409,19 +409,6 @@ timestamp_style:
   #           "shadow" (shadow for font)
   effect: None
 
-# Optional: connect to ONVIF camera
-# to enable PTZ controls.
-onvif:
-  # Required: host of the camera being connected to.
-  host: 0.0.0.0
-  # Optional: ONVIF port for device (default: shown below).
-  port: 8000
-  # Optional: username for login.
-  # NOTE: Some devices require admin to access ONVIF.
-  user: admin
-  # Optional: password for login.
-  password: admin
-
 # Required
 cameras:
   # Required: name of the camera
@@ -509,6 +496,19 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+    # Optional: connect to ONVIF camera
+    # to enable PTZ controls.
+    onvif:
+      # Required: host of the camera being connected to.
+      host: 0.0.0.0
+      # Optional: ONVIF port for device (default: shown below).
+      port: 8000
+      # Optional: username for login.
+      # NOTE: Some devices require admin to access ONVIF.
+      user: admin
+      # Optional: password for login.
+      password: admin
 
 # Optional
 ui:

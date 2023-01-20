@@ -48,3 +48,21 @@ cameras:
 ```
 
 For camera model specific settings check the [camera specific](camera_specific.md) infos.
+
+## Setting up camera PTZ controls
+
+Add onvif config to camera
+
+```yaml
+cameras:
+  back:
+    ffmpeg:
+      ...
+    onvif:
+      host: 10.0.10.10
+      port: 8000
+      user: admin
+      password: "{FRIGATE_RTSP_PASSWORD}"
+```
+
+then PTZ controls will be available in the cameras WebUI.
