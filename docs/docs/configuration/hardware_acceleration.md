@@ -45,13 +45,16 @@ ffmpeg:
 
 These instructions are based on the [jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux)
 
-Add `--gpus all` to your docker run command or update your compose file.
-If you have multiple Nvidia graphic card, you can add them with their ids obtained via `nvidia-smi` command
+Additional congiguration is needed for the docker container to be able to access the Nvidia GPU and this depends on how docker is being run:
+
+#### Docker Compose
+
 ```yaml
 services:
   frigate:
     ...
     image: ghcr.io/blakeblackshear/frigate:stable
+    runtime: nvidia
     deploy:    # <------------- Add this section
       resources:
         reservations:
@@ -61,6 +64,19 @@ services:
               count: 1 # number of GPUs
               capabilities: [gpu]
 ```
+
+#### Docker Run CLI
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  -e 'NVIDIA_VISIBLE_DEVICES'='all' \
+  -l 'NVIDIA_DRIVER_CAPABILITIES'='all' \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+#### Setup Decoder
 
 The decoder you need to pass in the `hwaccel_args` will depend on the input video.
 
