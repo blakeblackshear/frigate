@@ -71,7 +71,6 @@ docker run -d \
   --name frigate \
   ...
   --gpus=all \
-  --runtime=nvidia \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
