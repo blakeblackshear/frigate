@@ -287,7 +287,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
   };
 
   return (
-    <div className="select-none w-full flex flex-shrink" ref={calendarRef}>
+    <div className="select-none w-11/12 flex" ref={calendarRef}>
       <div className="px-6">
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
