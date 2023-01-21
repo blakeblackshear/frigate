@@ -11,17 +11,19 @@ const TimePicker = ({ dateRange, onChange }) => {
     if (!dateRange.after) return setTimeRange(new Set());
   }, [dateRange.after]);
 
-  // We subtract one from the before time to count the exact number of days in unix timestamp selected in the calendar
+  /**
+   * Initializes two variables before and after with date objects,
+   * If they are not null, it creates a new Date object with the value of the property and if not,
+   * it creates a new Date object with the current hours to 0 and 24 respectively.
+   */
   const before = dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
   const after = dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
 
   /**
-
-  numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
-  The loop iterates through the days starting from the after date's day to the before date's day.
-  If the before date's hour is 0, it skips it.
-
-  */
+   * numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
+   * The loop iterates through the days starting from the after date's day to the before date's day.
+   * If the before date's hour is 0, it skips it.
+   */
   const numberOfDaysSelected = new Set(
     [...Array(before.getDate() - after.getDate() + 1)].map((_, i) => after.getDate() + i)
   );
@@ -30,12 +32,17 @@ const TimePicker = ({ dateRange, onChange }) => {
   // Create repeating array with the number of hours for each day selected ...23,24,0,1,2...
   const hoursInDays = Array.from({ length: numberOfDaysSelected.size * 24 }, (_, i) => i % 24);
 
+  // function for handling the selected time from the provided list
   const handleTime = (hour) => {
     if (!hour) return;
 
     const _timeRange = new Set([...timeRange]);
     _timeRange.add(hour);
 
+    /**
+     * Check if the variable "hour" exists in the "timeRange" set.
+     * If it does, reset the timepicker
+     */
     setError(null);
     if (timeRange.has(hour)) {
       setTimeRange(new Set());
@@ -49,8 +56,8 @@ const TimePicker = ({ dateRange, onChange }) => {
     //update after
     if (_timeRange.size === 1) {
       // check if the first selected value is within first day
-      const selDay = Math.ceil(Math.min(..._timeRange) / 24);
-      if (selDay !== 1) {
+      const selectedDay = Math.ceil(Math.min(..._timeRange) / 24);
+      if (selectedDay !== 1) {
         return setError('Select a time on the initial day!');
       }
 
@@ -111,6 +118,7 @@ const TimePicker = ({ dateRange, onChange }) => {
     return !!timeRange.has(idx);
   };
 
+  // background colors for each day
   const isSelectedCss = 'bg-blue-600 transition-all duration-50 hover:rounded-none';
   function randomGrayTone(shade) {
     const grayTones = [
