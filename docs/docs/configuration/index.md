@@ -355,7 +355,7 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v0.1-rc9)
+# Uses https://github.com/AlexxIT/go2rtc (v1.0.0)
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
