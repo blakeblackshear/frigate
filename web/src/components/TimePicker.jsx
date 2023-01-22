@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { h } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { ArrowDropdown } from '../icons/ArrowDropdown';
@@ -32,6 +31,15 @@ const TimePicker = ({ dateRange, onChange }) => {
      */
     for (let hour = after.getHours(); hour < beforeOffset; hour++) {
       setTimeRange((timeRange) => timeRange.add(hour));
+    }
+
+    /**
+     * find an element by the id timeIndex- concatenated with the minimum value from timeRange array,
+     * and if that element is present, it will scroll into view if needed
+     */
+    const element = document.getElementById(`timeIndex-${Math.min(...timeRange)}`);
+    if (element) {
+      element.scrollIntoViewIfNeeded(true);
     }
   }, [dateRange, timeRange, reset]);
 
@@ -198,6 +206,7 @@ const TimePicker = ({ dateRange, onChange }) => {
             {hoursInDays.map((_, idx) => (
               <div
                 key={idx}
+                id={`timeIndex-${idx}`}
                 className={`${isSelected(idx) ? isSelectedCss : ''}
                 ${isHovered(idx) ? 'opacity-30 bg-slate-900 transition duration-150 ease-in-out' : ''}
                 ${Math.min(...timeRange) === idx ? 'rounded-t-lg' : ''}
