@@ -8,10 +8,10 @@ const TimePicker = ({ dateRange, onChange }) => {
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState(new Set());
   const [hoverIdx, setHoverIdx] = useState(null);
+  const [reset, setReset] = useState(false);
 
   useEffect(() => {
-    if (!dateRange.after) return setTimeRange(new Set());
-    if (timeRange.size > 0) return;
+    if (reset) return;
 
     const after = new Date(dateRange.after);
     const before = new Date(dateRange.before);
@@ -33,7 +33,7 @@ const TimePicker = ({ dateRange, onChange }) => {
     for (let hour = after.getHours(); hour < beforeOffset; hour++) {
       setTimeRange((timeRange) => timeRange.add(hour));
     }
-  }, [dateRange.after, dateRange.before, timeRange.size]);
+  }, [dateRange, timeRange, reset]);
 
   /**
    * Initializes two variables before and after with date objects,
@@ -71,13 +71,16 @@ const TimePicker = ({ dateRange, onChange }) => {
       const _timeRange = new Set([...timeRange]);
       _timeRange.add(hour);
 
+      // reset error messages
+      setError(null);
+
       /**
        * Check if the variable "hour" exists in the "timeRange" set.
        * If it does, reset the timepicker
        */
-      setError(null);
       if (timeRange.has(hour)) {
         setTimeRange(new Set());
+        setReset(true);
         const resetBefore = before.setDate(after.getDate() + numberOfDaysSelected.size - 1);
         return onChange({
           after: after.setHours(0, 0, 0, 0) / 1000,
