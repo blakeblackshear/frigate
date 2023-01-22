@@ -10,7 +10,15 @@ const TimePicker = ({ dateRange, onChange }) => {
 
   useEffect(() => {
     if (!dateRange.after) return setTimeRange(new Set());
-  }, [dateRange.after]);
+
+    const after = new Date(dateRange.after).getHours();
+    const before = new Date(dateRange.before).getHours();
+
+    // prefill the timeRange if after & before exist
+    for (let i = after; i < before; i++) {
+      setTimeRange((timeRange) => timeRange.add(i));
+    }
+  }, [dateRange]);
 
   /**
    * Initializes two variables before and after with date objects,
