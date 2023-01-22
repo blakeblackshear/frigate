@@ -121,7 +121,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
     (day) => {
       if (!state.timeRange.after || !state.timeRange.before) return;
 
-      return day.timestamp < state.timeRange.before && day.timestamp >= state.timeRange.after;
+      return day.timestamp < state.timeRange.before && day.timestamp >= new Date(state.timeRange.after).setHours(0);
     },
     [state.timeRange]
   );
@@ -129,14 +129,17 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
   const isFirstDayInRange = useCallback(
     (day) => {
       if (isCurrentDay(day)) return;
-      return state.timeRange.after === day.timestamp;
+      return new Date(state.timeRange.after).setHours(0) === day.timestamp;
     },
     [state.timeRange.after]
   );
 
   const isLastDayInRange = useCallback(
     (day) => {
-      return state.timeRange.before === new Date(day.timestamp).setHours(24, 0, 0, 0);
+      return (
+        new Date(state.timeRange.before).setHours(24) === new Date(day.timestamp).setHours(24) ||
+        state.timeRange.before === new Date(day.timestamp).setHours(24)
+      );
     },
     [state.timeRange.before]
   );
