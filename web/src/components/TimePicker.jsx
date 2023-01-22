@@ -6,6 +6,7 @@ import { ArrowDropup } from '../icons/ArrowDropup';
 const TimePicker = ({ dateRange, onChange }) => {
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState(new Set());
+  const [hoverIdx, setHoverIdx] = useState(null);
 
   useEffect(() => {
     if (!dateRange.after) return setTimeRange(new Set());
@@ -132,8 +133,15 @@ const TimePicker = ({ dateRange, onChange }) => {
     [timeRange]
   );
 
+  const isHovered = useCallback(
+    (idx) => {
+      return timeRange.size === 1 && idx > Math.max(...timeRange) && idx <= hoverIdx;
+    },
+    [timeRange, hoverIdx]
+  );
+
   // background colors for each day
-  const isSelectedCss = 'bg-blue-600 transition-all duration-50 hover:rounded-none';
+  const isSelectedCss = 'bg-blue-600 transition duration-300 ease-in-out hover:rounded-none';
   function randomGrayTone(shade) {
     const grayTones = [
       'bg-[#212529]/50',
@@ -153,11 +161,11 @@ const TimePicker = ({ dateRange, onChange }) => {
   return (
     <>
       {error ? <span className="text-red-400 text-center text-xs absolute top-1 right-0 pr-2">{error}</span> : null}
-      <div className="mt-2 pr-5 hidden xs:block" aria-label="Calendar timepicker, select a time range">
+      <div className="mt-2 pr-3 hidden xs:block" aria-label="Calendar timepicker, select a time range">
         <div className="flex items-center justify-center">
           <ArrowDropup className="w-10 text-center" />
         </div>
-        <div className="w-24 px-1">
+        <div className="w-20 px-1">
           <div
             className="border border-gray-400/50 cursor-pointer hide-scroll shadow-md rounded-md"
             style={{ maxHeight: '17rem', overflowY: 'scroll' }}
@@ -166,8 +174,11 @@ const TimePicker = ({ dateRange, onChange }) => {
               <div
                 key={idx}
                 className={`${isSelected(idx) ? isSelectedCss : ''}
-            ${Math.min(...timeRange) === idx ? 'rounded-t-lg' : ''}
-            ${Math.max(...timeRange) === idx ? 'rounded-b-lg' : ''}`}
+                ${isHovered(idx) ? 'opacity-30 bg-slate-900 transition duration-150 ease-in-out' : ''}
+                ${Math.min(...timeRange) === idx ? 'rounded-t-lg' : ''}
+                ${timeRange.size > 1 && Math.max(...timeRange) === idx ? 'rounded-b-lg' : ''}`}
+                onMouseEnter={() => setHoverIdx(idx)}
+                onMouseLeave={() => setHoverIdx(null)}
               >
                 <div
                   className={`
