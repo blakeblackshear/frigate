@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { h } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { ArrowDropdown } from '../icons/ArrowDropdown';
@@ -10,15 +11,29 @@ const TimePicker = ({ dateRange, onChange }) => {
 
   useEffect(() => {
     if (!dateRange.after) return setTimeRange(new Set());
+    if (timeRange.size > 0) return;
 
-    const after = new Date(dateRange.after).getHours();
-    const before = new Date(dateRange.before).getHours();
+    const after = new Date(dateRange.after);
+    const before = new Date(dateRange.before);
 
-    // prefill the timeRange if after & before exist
-    for (let i = after; i < before; i++) {
-      setTimeRange((timeRange) => timeRange.add(i));
+    if (!after || !before) return;
+    if (before.getHours() === 0) return;
+
+    /**
+     * calculates the number of hours between two dates, by finding the difference in days,
+     * converting it to hours and adding the hours from the before date.
+     */
+    const days = Math.max(before.getDate() - after.getDate());
+    const hourOffset = days * 24;
+    const beforeOffset = hourOffset + before.getHours();
+
+    /**
+     * Fills the timeRange by iterating over the hours between 'after' and 'before' during component mount, to keep the selected hours persistent.
+     */
+    for (let hour = after.getHours(); hour < beforeOffset; hour++) {
+      setTimeRange((timeRange) => timeRange.add(hour));
     }
-  }, [dateRange]);
+  }, [dateRange.after, dateRange.before, timeRange.size]);
 
   /**
    * Initializes two variables before and after with date objects,
@@ -32,7 +47,6 @@ const TimePicker = ({ dateRange, onChange }) => {
   const after = useMemo(() => {
     return dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
   }, [dateRange]);
-
   /**
    * numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
    * The loop iterates through the days starting from the after date's day to the before date's day.
