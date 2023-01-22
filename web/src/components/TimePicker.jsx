@@ -9,14 +9,24 @@ const TimePicker = ({ dateRange, onChange }) => {
   const [hoverIdx, setHoverIdx] = useState(null);
   const [reset, setReset] = useState(false);
 
+  /**
+   * Initializes two variables before and after with date objects,
+   * If they are not null, it creates a new Date object with the value of the property and if not,
+   * it creates a new Date object with the current hours to 0 and 24 respectively.
+   */
+  const before = useMemo(() => {
+    return dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
+  }, [dateRange]);
+
+  const after = useMemo(() => {
+    return dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
+  }, [dateRange]);
+
   useEffect(() => {
     if (reset) return;
 
-    const after = new Date(dateRange.after);
-    const before = new Date(dateRange.before);
-
     if (!after || !before) return;
-    if (before.getHours() === 0) return;
+    if (before.getHours() === 0 && after.getHours() === 0) return setTimeRange(new Set());
 
     /**
      * calculates the number of hours between two dates, by finding the difference in days,
@@ -41,20 +51,8 @@ const TimePicker = ({ dateRange, onChange }) => {
     if (element) {
       element.scrollIntoViewIfNeeded(true);
     }
-  }, [dateRange, timeRange, reset]);
+  }, [after, before, timeRange, reset]);
 
-  /**
-   * Initializes two variables before and after with date objects,
-   * If they are not null, it creates a new Date object with the value of the property and if not,
-   * it creates a new Date object with the current hours to 0 and 24 respectively.
-   */
-  const before = useMemo(() => {
-    return dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
-  }, [dateRange]);
-
-  const after = useMemo(() => {
-    return dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
-  }, [dateRange]);
   /**
    * numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
    * The loop iterates through the days starting from the after date's day to the before date's day.
