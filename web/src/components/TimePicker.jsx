@@ -19,11 +19,11 @@ const TimePicker = ({ dateRange, onChange }) => {
    */
   const before = useMemo(() => {
     return dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
-  }, [dateRange.before]);
+  }, [dateRange]);
 
   const after = useMemo(() => {
     return dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
-  }, [dateRange.after]);
+  }, [dateRange]);
 
   /**
    * numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
@@ -31,7 +31,7 @@ const TimePicker = ({ dateRange, onChange }) => {
    * If the before date's hour is 0, it skips it.
    */
   const numberOfDaysSelected = useMemo(() => {
-    return new Set([...Array(before.getDate() - after.getDate() + 1)].map((_, i) => after.getDate() + i));
+    return new Set([...Array(Math.max(1, before.getDate() - after.getDate() + 1))].map((_, i) => after.getDate() + i));
   }, [before, after]);
 
   if (before.getHours() === 0) numberOfDaysSelected.delete(before.getDate());
