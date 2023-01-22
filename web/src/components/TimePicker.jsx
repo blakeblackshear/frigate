@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { ArrowDropdown } from '../icons/ArrowDropdown';
 import { ArrowDropup } from '../icons/ArrowDropup';
 
@@ -16,107 +16,121 @@ const TimePicker = ({ dateRange, onChange }) => {
    * If they are not null, it creates a new Date object with the value of the property and if not,
    * it creates a new Date object with the current hours to 0 and 24 respectively.
    */
-  const before = dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
-  const after = dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
+  const before = useMemo(() => {
+    return dateRange.before ? new Date(dateRange.before) : new Date(new Date().setHours(24, 0, 0, 0));
+  }, [dateRange.before]);
+
+  const after = useMemo(() => {
+    return dateRange.after ? new Date(dateRange.after) : new Date(new Date().setHours(0, 0, 0, 0));
+  }, [dateRange.after]);
 
   /**
    * numberOfDaysSelected is a set that holds the number of days selected in the dateRange.
    * The loop iterates through the days starting from the after date's day to the before date's day.
    * If the before date's hour is 0, it skips it.
    */
-  const numberOfDaysSelected = new Set(
-    [...Array(before.getDate() - after.getDate() + 1)].map((_, i) => after.getDate() + i)
-  );
+  const numberOfDaysSelected = useMemo(() => {
+    return new Set([...Array(before.getDate() - after.getDate() + 1)].map((_, i) => after.getDate() + i));
+  }, [before, after]);
+
   if (before.getHours() === 0) numberOfDaysSelected.delete(before.getDate());
 
   // Create repeating array with the number of hours for each day selected ...23,24,0,1,2...
-  const hoursInDays = Array.from({ length: numberOfDaysSelected.size * 24 }, (_, i) => i % 24);
+  const hoursInDays = useMemo(() => {
+    return Array.from({ length: numberOfDaysSelected.size * 24 }, (_, i) => i % 24);
+  }, [numberOfDaysSelected]);
 
   // function for handling the selected time from the provided list
-  const handleTime = (hour) => {
-    if (!hour) return;
+  const handleTime = useCallback(
+    (hour) => {
+      if (!hour) return;
 
-    const _timeRange = new Set([...timeRange]);
-    _timeRange.add(hour);
+      const _timeRange = new Set([...timeRange]);
+      _timeRange.add(hour);
 
-    /**
-     * Check if the variable "hour" exists in the "timeRange" set.
-     * If it does, reset the timepicker
-     */
-    setError(null);
-    if (timeRange.has(hour)) {
-      setTimeRange(new Set());
-      const resetBefore = before.setDate(after.getDate() + numberOfDaysSelected.size - 1);
-      return onChange({
-        after: after.setHours(0, 0, 0, 0) / 1000,
-        before: new Date(resetBefore).setHours(24, 0, 0, 0) / 1000,
-      });
-    }
-
-    //update after
-    if (_timeRange.size === 1) {
-      // check if the first selected value is within first day
-      const selectedDay = Math.ceil(Math.min(..._timeRange) / 24);
-      if (selectedDay !== 1) {
-        return setError('Select a time on the initial day!');
+      /**
+       * Check if the variable "hour" exists in the "timeRange" set.
+       * If it does, reset the timepicker
+       */
+      setError(null);
+      if (timeRange.has(hour)) {
+        setTimeRange(new Set());
+        const resetBefore = before.setDate(after.getDate() + numberOfDaysSelected.size - 1);
+        return onChange({
+          after: after.setHours(0, 0, 0, 0) / 1000,
+          before: new Date(resetBefore).setHours(24, 0, 0, 0) / 1000,
+        });
       }
 
-      // calculate days offset
-      const dayOffsetAfter = new Date(after).setHours(Math.min(..._timeRange));
+      //update after
+      if (_timeRange.size === 1) {
+        // check if the first selected value is within first day
+        const selectedDay = Math.ceil(Math.min(..._timeRange) / 24);
+        if (selectedDay !== 1) {
+          return setError('Select a time on the initial day!');
+        }
 
-      let dayOffsetBefore = before;
-      if (numberOfDaysSelected.size === 1) {
-        dayOffsetBefore = new Date(after).setHours(Math.min(..._timeRange) + 1);
+        // calculate days offset
+        const dayOffsetAfter = new Date(after).setHours(Math.min(..._timeRange));
+
+        let dayOffsetBefore = before;
+        if (numberOfDaysSelected.size === 1) {
+          dayOffsetBefore = new Date(after).setHours(Math.min(..._timeRange) + 1);
+        }
+
+        onChange({
+          after: dayOffsetAfter / 1000,
+          before: dayOffsetBefore / 1000,
+        });
       }
 
-      onChange({
-        after: dayOffsetAfter / 1000,
-        before: dayOffsetBefore / 1000,
-      });
-    }
+      //update before
+      if (_timeRange.size > 1) {
+        let selectedDay = Math.ceil(Math.max(..._timeRange) / 24);
 
-    //update before
-    if (_timeRange.size > 1) {
-      let selectedDay = Math.ceil(Math.max(..._timeRange) / 24);
+        // if user selects time 00:00 for the next day, add one day
+        if (hour === 24 && selectedDay === numberOfDaysSelected.size - 1) {
+          selectedDay += 1;
+        }
 
-      // if user selects time 00:00 for the next day, add one day
-      if (hour === 24 && selectedDay === numberOfDaysSelected.size - 1) {
-        selectedDay += 1;
+        // Check if end time is on the last day
+        if (selectedDay !== numberOfDaysSelected.size) {
+          return setError('Ending must occur on final day!');
+        }
+
+        // Check if end time is later than start time
+        const startHour = Math.min(..._timeRange);
+        if (hour <= startHour) {
+          return setError('Ending hour must be greater than start time!');
+        }
+
+        // Add all hours between start and end times to the set
+        for (let x = startHour; x <= hour; x++) {
+          _timeRange.add(x);
+        }
+
+        // calculate days offset
+        const dayOffsetBefore = new Date(dateRange.after);
+        onChange({
+          after: dateRange.after / 1000,
+          // we add one hour to get full 60min of last selected hour
+          before: dayOffsetBefore.setHours(Math.max(..._timeRange) + 1) / 1000,
+        });
       }
 
-      // Check if end time is on the last day
-      if (selectedDay !== numberOfDaysSelected.size) {
-        return setError('Ending must occur on final day!');
+      for (let i = 0; i < _timeRange.size; i++) {
+        setTimeRange((timeRange) => timeRange.add(Array.from(_timeRange)[i]));
       }
+    },
+    [after, before, timeRange, dateRange.after, numberOfDaysSelected.size, onChange]
+  );
 
-      // Check if end time is later than start time
-      const startHour = Math.min(..._timeRange);
-      if (hour <= startHour) {
-        return setError('Ending hour must be greater than start time!');
-      }
-
-      // Add all hours between start and end times to the set
-      for (let x = startHour; x <= hour; x++) {
-        _timeRange.add(x);
-      }
-
-      // calculate days offset
-      const dayOffsetBefore = new Date(dateRange.after);
-      onChange({
-        after: dateRange.after / 1000,
-        // we add one hour to get full 60min of last selected hour
-        before: dayOffsetBefore.setHours(Math.max(..._timeRange) + 1) / 1000,
-      });
-    }
-
-    for (let i = 0; i < _timeRange.size; i++) {
-      setTimeRange((timeRange) => timeRange.add(Array.from(_timeRange)[i]));
-    }
-  };
-
-  const isSelected = (after, before, idx) => {
-    return !!timeRange.has(idx);
-  };
+  const isSelected = useCallback(
+    (idx) => {
+      return !!timeRange.has(idx);
+    },
+    [timeRange]
+  );
 
   // background colors for each day
   const isSelectedCss = 'bg-blue-600 transition-all duration-50 hover:rounded-none';
@@ -151,7 +165,7 @@ const TimePicker = ({ dateRange, onChange }) => {
             {hoursInDays.map((_, idx) => (
               <div
                 key={idx}
-                className={`${isSelected(dateRange.after, dateRange.before, idx) ? isSelectedCss : ''}
+                className={`${isSelected(idx) ? isSelectedCss : ''}
             ${Math.min(...timeRange) === idx ? 'rounded-t-lg' : ''}
             ${Math.max(...timeRange) === idx ? 'rounded-b-lg' : ''}`}
               >
