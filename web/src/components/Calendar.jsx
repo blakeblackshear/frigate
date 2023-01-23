@@ -102,8 +102,9 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
       ...prev,
       selectedDay: todayTimestamp,
       monthDetails: getMonthDetails(year, month),
+      timeRange: { ...dateRange },
     }));
-  }, [year, month, getMonthDetails]);
+  }, [year, month, getMonthDetails, dateRange]);
 
   useEffect(() => {
     // add refs for keyboard navigation
@@ -136,10 +137,14 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
 
   const isLastDayInRange = useCallback(
     (day) => {
-      return (
-        new Date(state.timeRange.before).setHours(24) === new Date(day.timestamp).setHours(24) ||
-        state.timeRange.before === new Date(day.timestamp).setHours(24)
-      );
+      // if the hour is not above 0, we will use 24 hour.
+      const beforeHour = new Date(state.timeRange.before).getHours() || 24;
+
+      /**
+       * When user selects a day in the calendar, the before will be 00:00.
+       * When user selects a time in timepicker, the day.timestamp hour must be changed to match the selected end () hour.
+       */
+      return state.timeRange.before === new Date(day.timestamp).setHours(beforeHour);
     },
     [state.timeRange.before]
   );
