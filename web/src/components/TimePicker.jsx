@@ -23,10 +23,14 @@ const TimePicker = ({ dateRange, onChange }) => {
   }, [dateRange]);
 
   useEffect(() => {
-    if (reset || !before) return;
+    /**
+     * This will reset hours when user selects another date in the calendar.
+     */
+    if (before.getHours() === 0 && after.getHours() === 0 && timeRange.size > 1) return setTimeRange(new Set());
+  }, [after, before, timeRange]);
 
-    if (before.getHours() === 0 && after.getHours() === 0) return setTimeRange(new Set());
-
+  useEffect(() => {
+    if (reset || !after) return;
     /**
      * calculates the number of hours between two dates, by finding the difference in days,
      * converting it to hours and adding the hours from the before date.
@@ -46,9 +50,11 @@ const TimePicker = ({ dateRange, onChange }) => {
      * find an element by the id timeIndex- concatenated with the minimum value from timeRange array,
      * and if that element is present, it will scroll into view if needed
      */
-    const element = document.getElementById(`timeIndex-${Math.min(...timeRange)}`);
-    if (element) {
-      element.scrollIntoViewIfNeeded(true);
+    if (timeRange.size > 1) {
+      const element = document.getElementById(`timeIndex-${Math.min(...timeRange)}`);
+      if (element) {
+        element.scrollIntoViewIfNeeded(true);
+      }
     }
   }, [after, before, timeRange, reset]);
 
