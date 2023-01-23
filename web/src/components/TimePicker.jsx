@@ -51,7 +51,7 @@ const TimePicker = ({ dateRange, onChange }) => {
      * and if that element is present, it will scroll into view if needed
      */
     if (timeRange.size > 1) {
-      const element = document.getElementById(`timeIndex-${Math.min(...timeRange)}`);
+      const element = document.getElementById(`timeIndex-${Math.max(...timeRange)}`);
       if (element) {
         element.scrollIntoViewIfNeeded(true);
       }
