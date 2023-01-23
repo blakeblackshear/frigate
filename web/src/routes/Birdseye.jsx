@@ -37,7 +37,7 @@ export default function Birdseye() {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className="max-w-5xl">
+          <div className="max-w-5xl xl:w-1/2">
             <MsePlayer camera="birdseye" />
           </div>
         </Fragment>
@@ -54,7 +54,7 @@ export default function Birdseye() {
   } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
-        <div className="max-w-5xl">
+        <div className="max-w-5xl xl:w-1/2">
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -62,7 +62,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className="max-w-7xl">
+        <div className="max-w-7xl xl:w-1/2">
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -95,7 +95,7 @@ export default function Birdseye() {
         {player}
 
         {ptzCameras && (
-          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min">
+          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">
             <Heading size="sm">Control Panel</Heading>
             {ptzCameras.map((camera) => (
               <div className="p-4" key={camera}>
