@@ -23,9 +23,8 @@ const TimePicker = ({ dateRange, onChange }) => {
   }, [dateRange]);
 
   useEffect(() => {
-    if (reset) return;
+    if (reset || !before) return;
 
-    if (!after || !before) return;
     if (before.getHours() === 0 && after.getHours() === 0) return setTimeRange(new Set());
 
     /**
@@ -34,7 +33,7 @@ const TimePicker = ({ dateRange, onChange }) => {
      */
     const days = Math.max(before.getDate() - after.getDate());
     const hourOffset = days * 24;
-    const beforeOffset = hourOffset + before.getHours();
+    const beforeOffset = before.getHours() ? hourOffset + before.getHours() : 0;
 
     /**
      * Fills the timeRange by iterating over the hours between 'after' and 'before' during component mount, to keep the selected hours persistent.
@@ -156,7 +155,6 @@ const TimePicker = ({ dateRange, onChange }) => {
     },
     [after, before, timeRange, dateRange.after, numberOfDaysSelected.size, onChange]
   );
-
   const isSelected = useCallback(
     (idx) => {
       return !!timeRange.has(idx);
