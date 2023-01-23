@@ -71,7 +71,7 @@ const TimePicker = ({ dateRange, onChange }) => {
   // function for handling the selected time from the provided list
   const handleTime = useCallback(
     (hour) => {
-      if (!hour) return;
+      if (isNaN(hour)) return;
 
       const _timeRange = new Set([...timeRange]);
       _timeRange.add(hour);
@@ -96,8 +96,8 @@ const TimePicker = ({ dateRange, onChange }) => {
       //update after
       if (_timeRange.size === 1) {
         // check if the first selected value is within first day
-        const selectedDay = Math.ceil(Math.min(..._timeRange) / 24);
-        if (selectedDay !== 1) {
+        const firstSelectedHour = Math.ceil(Math.max(..._timeRange));
+        if (firstSelectedHour > 23) {
           return setError('Select a time on the initial day!');
         }
 
