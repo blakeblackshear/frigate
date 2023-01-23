@@ -491,4 +491,9 @@ ui:
   timezone: None
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   experimental_ui: False
+
+# Optional: Telemetry configuration
+telemetry:
+  # Optional: Enable the latest version outbound check (default: shown below)
+  version_check: True
 ```
