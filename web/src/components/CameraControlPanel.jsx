@@ -218,7 +218,7 @@ export default function CameraControlPanel({ camera = '' }) {
         </div>
       )}
 
-      {ptz.presets && (
+      {(ptz.presets || []).length > 0 && (
         <div className="px-4">
           <Heading size="xs" className="my-4">
             Presets
