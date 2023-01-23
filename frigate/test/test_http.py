@@ -209,7 +209,13 @@ class TestHttp(unittest.TestCase):
 
     def test_event_retention(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
 
