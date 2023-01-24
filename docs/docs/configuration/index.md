@@ -495,5 +495,6 @@ ui:
 # Optional: Telemetry configuration
 telemetry:
   # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
   version_check: True
 ```
