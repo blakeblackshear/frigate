@@ -91,3 +91,4 @@ rm -rf /var/lib/apt/lists/*
 curl -fsSL \
     "https://github.com/mikefarah/yq/releases/download/v4.30.8/yq_linux_$(dpkg --print-architecture)" \
     --output /usr/local/bin/yq
+chmod +x /usr/local/bin/yq

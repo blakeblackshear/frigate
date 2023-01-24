@@ -198,7 +198,7 @@ EXPOSE 8555/tcp 8555/udp
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 
 ENTRYPOINT ["/init"]
-CMD []
+CMD ["/etc/s6-overlay/validate_services.sh"]
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
