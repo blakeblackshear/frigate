@@ -10,7 +10,7 @@ s6-svc -O .
 function get_ip_and_port_from_supervisor() {
     local ip_address
     # Example: 192.168.1.10/24
-    local ip_regex='^([0-9]{1,3}\.{3}[0-9]{1,3})/[0-9]{1,2}$'
+    local ip_regex='^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/[0-9]{1,2}$'
     if ip_address=$(
         curl -fsSL \
             -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
@@ -32,7 +32,7 @@ function get_ip_and_port_from_supervisor() {
             -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
             -H "Content-Type: application/json" \
             http://supervisor/addons/self/info |
-            jq --exit-status --raw-output '.data.network["22/tcp"]'
+            jq --exit-status --raw-output '.data.network["8555/tcp"]'
     ) && [[ "${webrtc_port}" =~ ${port_regex} ]]; then
         webrtc_port="${BASH_REMATCH[1]}"
         echo "[INFO] Got WebRTC port from supervisor: ${ip_address}" >&2
