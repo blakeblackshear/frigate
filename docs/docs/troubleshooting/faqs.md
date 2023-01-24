@@ -11,7 +11,7 @@ This error message is due to a shm-size that is too small. Try updating your shm
 
 By default, Frigate removes audio from recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to set a [FFmpeg preset](/configuration/ffmpeg_presets) that supports audio:
 
-```yaml title="frigate.yml"
+```yaml
 ffmpeg:
   output_args:
     record: preset-record-generic-audio-aac

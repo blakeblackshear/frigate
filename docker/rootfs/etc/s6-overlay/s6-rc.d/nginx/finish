@@ -11,7 +11,7 @@ readonly exit_code_service="${1}"
 readonly exit_code_signal="${2}"
 readonly service="NGINX"
 
-echo "Service ${service} exited with code ${exit_code_service} (by signal ${exit_code_signal})" >&2
+echo "[INFO] Service ${service} exited with code ${exit_code_service} (by signal ${exit_code_signal})" >&2
 
 if [[ "${exit_code_service}" -eq 256 ]]; then
   if [[ "${exit_code_container}" -eq 0 ]]; then

@@ -3,7 +3,7 @@ id: index
 title: Configuration File
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yml`.
+For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yaml`.
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -87,7 +87,7 @@ detectors:
 # Optional: Database configuration
 database:
   # The path to store the SQLite DB (default: shown below)
-  path: /media/frigate/frigate.db
+  path: /config/frigate.db
 
 # Optional: model modifications
 model:
