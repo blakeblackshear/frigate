@@ -411,6 +411,10 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
+
+                # empty contents of file before unlinking https://github.com/blakeblackshear/frigate/issues/4769
+                with open(p, "w"):
+                    pass
                 p.unlink(missing_ok=True)
 
     def expire_recordings(self):
