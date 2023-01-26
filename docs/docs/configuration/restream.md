@@ -118,3 +118,15 @@ go2rtc:
   streams:
     stream1: exec:ffmpeg -hide_banner -re -stream_loop -1 -i /media/BigBuckBunny.mp4 -c copy -rtsp_transport tcp -f rtsp {{output}}
 ```
+
+## Go2rtc Exec
+
+Go2rtc offers the ability to [run a full command with exec](https://github.com/AlexxIT/go2rtc#source-exec) and calls for `{output}` at the end of the stream. Due to frigate's handling of templates, the output will need to be passed as `{{output}}`.
+
+ex:
+
+```yaml
+go2rtc:
+  streams:
+    test: exec:ffmpeg -hide_banner -re -stream_loop -1 -i /media/BigBuckBunny.mp4 -c copy -rtsp_transport tcp -f rtsp {{output}}
+```
