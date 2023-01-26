@@ -31,8 +31,9 @@ go2rtc:
     rtsp_cam: # <- for RTSP streams
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
       - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
-    http_cam: # <- for http streams
-      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+    http_cam: # <- for other streams
+      - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio
+      - ffmpeg:http_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 
 cameras:
   rtsp_cam:
@@ -71,9 +72,11 @@ go2rtc:
       - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
       - ffmpeg:rtsp_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
     http_cam:
-      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+      - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:http_cam#audio=opus # <- copy of the stream which transcodes audio to opus
     http_cam_sub:
-      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+      - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=user&password=password # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - ffmpeg:http_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
 
 cameras:
   rtsp_cam:
