@@ -236,6 +236,10 @@ PRESETS_INPUT = {
         "tcp",
         TIMEOUT_PARAM,
         "5000000",
+        "-fflags",
+        "nobuffer",
+        "-flags",
+        "low_delay",
     ],
     "preset-rtsp-udp": _user_agent_args
     + [
