@@ -74,6 +74,10 @@ class UIConfig(FrigateBaseModel):
     use_experimental: bool = Field(default=False, title="Experimental UI")
 
 
+class TelemetryConfig(FrigateBaseModel):
+    version_check: bool = Field(default=True, title="Enable latest version check.")
+
+
 class MqttConfig(FrigateBaseModel):
     enabled: bool = Field(title="Enable MQTT Communication.", default=True)
     host: str = Field(default="", title="MQTT Host")
@@ -818,6 +822,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
+    telemetry: TelemetryConfig = Field(
+        default_factory=TelemetryConfig, title="Telemetry configuration."
+    )
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )

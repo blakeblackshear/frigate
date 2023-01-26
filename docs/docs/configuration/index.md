@@ -491,4 +491,10 @@ ui:
   timezone: None
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   experimental_ui: False
+
+# Optional: Telemetry configuration
+telemetry:
+  # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  version_check: True
 ```

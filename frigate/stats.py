@@ -22,7 +22,11 @@ from frigate.object_detection import ObjectDetectProcess
 logger = logging.getLogger(__name__)
 
 
-def get_latest_version() -> str:
+def get_latest_version(config: FrigateConfig) -> str:
+
+    if not config.telemetry.version_check:
+        return "disabled"
+
     try:
         request = requests.get(
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
@@ -40,6 +44,7 @@ def get_latest_version() -> str:
 
 
 def stats_init(
+    config: FrigateConfig,
     camera_metrics: dict[str, CameraMetricsTypes],
     detectors: dict[str, ObjectDetectProcess],
 ) -> StatsTrackingTypes:
@@ -47,7 +52,7 @@ def stats_init(
         "camera_metrics": camera_metrics,
         "detectors": detectors,
         "started": int(time.time()),
-        "latest_frigate_version": get_latest_version(),
+        "latest_frigate_version": get_latest_version(config),
     }
     return stats_tracking
 
