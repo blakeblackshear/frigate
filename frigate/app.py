@@ -155,7 +155,9 @@ class FrigateApp:
         self.db.bind(models)
 
     def init_stats(self) -> None:
-        self.stats_tracking = stats_init(self.camera_metrics, self.detectors)
+        self.stats_tracking = stats_init(
+            self.config, self.camera_metrics, self.detectors
+        )
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(

@@ -355,7 +355,7 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.0.0)
+# Uses https://github.com/AlexxIT/go2rtc (v1.0.1)
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
@@ -491,4 +491,10 @@ ui:
   timezone: None
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   experimental_ui: False
+
+# Optional: Telemetry configuration
+telemetry:
+  # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  version_check: True
 ```
