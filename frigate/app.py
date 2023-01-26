@@ -17,7 +17,7 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, DEFAULT_DB_PATH, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, CONFIG_DIR, DEFAULT_DB_PATH, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
