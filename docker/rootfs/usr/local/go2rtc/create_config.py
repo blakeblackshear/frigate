@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 import yaml
 
 
@@ -41,7 +42,7 @@ if not go2rtc_config.get("webrtc", {}).get("candidates", []):
 
     go2rtc_config["webrtc"] = {"candidates": default_candidates}
 else:
-    print("[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually")
+    print("[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually", file=sys.stderr)
 
 # need to replace ffmpeg command when using ffmpeg4
 if not os.path.exists(BTBN_PATH):
