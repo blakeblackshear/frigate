@@ -26,7 +26,8 @@ go2rtc:
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
       - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
     http_cam: # <- for http streams
-      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+      - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio
+      - ffmpeg:http_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
 ### Setting Stream For Live UI
