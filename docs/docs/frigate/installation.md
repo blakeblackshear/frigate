@@ -44,7 +44,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml:rw
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -61,7 +61,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml:rw
       - /path/to/network/storage:/media/frigate
       - /path/to/local/disk:/db
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
@@ -141,7 +141,7 @@ docker run -d \
   --device /dev/dri/renderD128 \
   --shm-size=64m \
   -v /path/to/your/storage:/media/frigate \
-  -v /path/to/your/config.yml:/config/config.yml:ro \
+  -v /path/to/your/config.yml:/config/config.yml:rw \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
