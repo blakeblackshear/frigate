@@ -117,7 +117,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml:rw
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
