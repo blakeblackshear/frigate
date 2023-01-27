@@ -53,6 +53,7 @@ def stats_init(
         "detectors": detectors,
         "started": int(time.time()),
         "latest_frigate_version": get_latest_version(config),
+        "last_updated": int(time.time()),
     }
     return stats_tracking
 
@@ -244,6 +245,7 @@ def stats_snapshot(
         "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
         "temperatures": get_temperatures(),
+        "last_updated": int(time.time()),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:

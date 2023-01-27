@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
+import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
 
 const emptyObject = Object.freeze({});
@@ -83,6 +84,12 @@ export default function System() {
       <Heading>
         System <span className="text-sm">{service.version}</span>
       </Heading>
+
+      {service.last_updated && (
+        <p>
+          <span>Last refreshed: <TimeAgo time={service.last_updated * 1000} dense /></span>
+        </p>
+      )}
 
       {state.showFfprobe && (
         <Dialog>
@@ -247,11 +254,11 @@ export default function System() {
                           <Td>{cameras[camera]['pid'] || '- '}</Td>
 
                           {(() => {
-                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1) 
+                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
                               return <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
-                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0) 
+                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
                               return <Td>disabled</Td>
-                            
+
                             return <Td>- </Td>
                           })()}
 

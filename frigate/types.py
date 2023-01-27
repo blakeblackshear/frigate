@@ -29,3 +29,4 @@ class StatsTrackingTypes(TypedDict):
     detectors: dict[str, ObjectDetectProcess]
     started: int
     latest_frigate_version: str
+    last_updated: int
