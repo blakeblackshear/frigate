@@ -100,19 +100,15 @@ class RecordingMaintainer(threading.Thread):
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
-                ####
-                # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
-                ####
-                # logger.warning(
-                #     f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
-                # )
+                retain_mode = self.config.cameras[camera].record.retain.mode
+                # this is only true when retain_mode is all. with other modes, segments are expected to age out.
+                if retain_mode == RetainModeEnum.all:
+                    logger.warning(
+                        f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
+                    )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
                     cache_path = f["cache_path"]
-                    ####
-                    # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
-                    ####
-                    # logger.warning(f"Discarding a recording segment: {cache_path}")
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
