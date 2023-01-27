@@ -25,7 +25,8 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const restreamEnabled = cameraConfig && Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.live.stream_name);
+  const restreamEnabled =
+    cameraConfig && Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.live.stream_name);
   const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
@@ -61,6 +62,10 @@ export default function Camera({ camera }) {
 
   if (!cameraConfig || !sourceIsLoaded) {
     return <ActivityIndicator />;
+  }
+
+  if (!restreamEnabled) {
+    setViewSource('jsmpeg');
   }
 
   const optionContent = showSettings ? (
