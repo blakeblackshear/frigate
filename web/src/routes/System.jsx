@@ -21,7 +21,8 @@ export default function System() {
   const {
     value: { payload: stats },
   } = useWs('stats');
-  const { data: initialStats } = useSWR('stats');
+
+  const { data: initialStats, isValidating } = useSWR('stats');
 
   const {
     cpu_usages,
@@ -87,7 +88,12 @@ export default function System() {
 
       {service.last_updated && (
         <p>
-          <span>Last refreshed: <TimeAgo time={service.last_updated * 1000} dense /></span>
+          <span>Last refreshed: </span>
+          {isValidating ? (
+            <ActivityIndicator size="sm" center={false} />
+          ) : (
+            <TimeAgo time={service.last_updated * 1000} dense />
+          )}
         </p>
       )}
 
@@ -255,11 +261,15 @@ export default function System() {
 
                           {(() => {
                             if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
-                              return <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
+                              return (
+                                <Td>
+                                  {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                                </Td>
+                              );
                             else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
-                              return <Td>disabled</Td>
+                              return <Td>disabled</Td>;
 
-                            return <Td>- </Td>
+                            return <Td>- </Td>;
                           })()}
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
