@@ -26,7 +26,7 @@ go2rtc:
     ...
 ```
 
-**NOTE:** This does not apply to localhost requests to there is no need to provide credentials when using the restream as a source for frigate cameras.
+**NOTE:** This does not apply to localhost requests, there is no need to provide credentials when using the restream as a source for frigate cameras.
 
 ## RTMP (Deprecated)
 
