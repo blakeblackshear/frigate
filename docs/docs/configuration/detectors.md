@@ -101,7 +101,7 @@ The OpenVINO device to be used is specified using the `"device"` attribute accor
 
 OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector. This detector also supports YOLOx models, and has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. If using `yolox_tiny`, or any other YOLOx variant, make sure to set `input_tensor: nchw` and `model_type: yolox`, along with the appropriate width/height settings (416 for `yolox_tiny`). There is currently no support for other types of YOLO models.
 
 ```yaml
 detectors:
@@ -116,6 +116,7 @@ model:
   height: 300
   input_tensor: nhwc
   input_pixel_format: bgr
+  model_type: ssd
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 ```
 
