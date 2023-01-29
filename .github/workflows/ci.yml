@@ -19,6 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Image Build
     steps:
+      - id: lowercaseRepo
+        uses: ASzc/change-string-case-action@v1
+        with:
+          string: ${{ github.repository }}
       - name: Check out code
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -43,7 +47,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           target: frigate
           tags: |
-            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push TensorRT
@@ -54,5 +58,5 @@ jobs:
           platforms: linux/amd64
           target: frigate-tensorrt
           tags: |
-            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
           cache-from: type=gha
