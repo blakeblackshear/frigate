@@ -269,7 +269,7 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info("Waiting for ffmpeg to exit gracefully...")
                     self.ffmpeg_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg didnt exit. Force killing...")
+                    self.logger.info("FFmpeg did not exit. Force killing...")
                     self.ffmpeg_detect_process.kill()
                     self.ffmpeg_detect_process.communicate()
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
