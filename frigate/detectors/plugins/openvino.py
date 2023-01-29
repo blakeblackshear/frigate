@@ -3,8 +3,7 @@ import numpy as np
 import openvino.runtime as ov
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.config import ModelTypeEnum
+from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from typing import Literal
 from pydantic import Extra, Field
 
