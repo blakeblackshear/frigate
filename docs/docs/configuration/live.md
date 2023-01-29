@@ -24,10 +24,10 @@ go2rtc:
   streams:
     rtsp_cam: # <- for RTSP streams
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
-      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
     http_cam: # <- for http streams
       - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio
-      - ffmpeg:http_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+      - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
 ### Setting Stream For Live UI
@@ -39,10 +39,10 @@ go2rtc:
   streams:
     rtsp_cam: 
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
-      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to opus
     rtsp_cam_sub:
       - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
-      - ffmpeg:rtsp_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
+      - "ffmpeg:rtsp_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus
 
 cameras:
   test_cam:
