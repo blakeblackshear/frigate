@@ -113,9 +113,13 @@ cameras:
         - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
 ```
 
-### Step 6: Enable recording (optional)
+### Step 6: Enable recording and/or snapshots
 
-To enable recording video, add the `record` role to a stream and enable it in the config.
+In order to see Events in the Frigate UI, either snapshots or record will need to be enabled.
+
+#### Record
+
+To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, turning it on via the UI will not have any effect.
 
 ```yaml
 mqtt: ...
@@ -142,7 +146,7 @@ If you don't have separate streams for detect and record, you would just add the
 
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/index.md#full-configuration-reference).
 
-### Step 7: Enable snapshots (optional)
+#### Snapshots
 
 To enable snapshots of your events, just enable it in the config. Snapshots are taken from the detect stream because it is the only stream decoded.
 
@@ -162,7 +166,7 @@ cameras:
 
 By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/index.md#full-configuration-reference).
 
-### Step 8: Follow up guides
+### Step 7: Follow up guides
 
 Now that you have a working install, you can use the following guides for additional features:
 
