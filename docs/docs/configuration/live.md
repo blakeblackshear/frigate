@@ -3,17 +3,17 @@ id: live
 title: Live View
 ---
 
-Frigate has different live view options, some of which require [restream](restream.md) to be enabled.
+Frigate has different live view options, some of which require the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
 ## Live View Options
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires Restream | Other Limitations                            |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | ----------------- | -------------------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no                | none                                         |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes               | not supported on iOS, Firefox is h.264 only  |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes               | requires extra config, doesn't support h.265 |
+| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                            |
+| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | -------------------------------------------- |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                         |
+| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | not supported on iOS, Firefox is h.264 only  |
+| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265 |
 
 ### Audio Support
 
@@ -37,11 +37,11 @@ There may be some cameras that you would prefer to use the sub stream for live v
 ```yaml
 go2rtc:
   streams:
-    rtsp_cam: 
-      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+    rtsp_cam:
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
       - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to opus
     rtsp_cam_sub:
-      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
+      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
       - "ffmpeg:rtsp_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus
 
 cameras:
@@ -69,15 +69,15 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
 - For internal/local access, unless you are running through the add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
-     ```yaml title="/config/frigate.yaml"
-     go2rtc:
-       streams:
-         test_cam: ...
-       webrtc:
-         candidates:
-           - 192.168.1.10:8555
-           - stun:8555
-     ```
+  ```yaml title="/config/frigate.yaml"
+  go2rtc:
+    streams:
+      test_cam: ...
+    webrtc:
+      candidates:
+        - 192.168.1.10:8555
+        - stun:8555
+  ```
 
 :::tip
 
