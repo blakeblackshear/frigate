@@ -8,7 +8,7 @@ Birdseye offers different modes to customize which cameras show under which circ
  - **continuous:** All cameras are always included
  - **motion:** Cameras that have detected motion within the last 30 seconds are included
  - **objects:** Cameras that have tracked an active object within the last 30 seconds are included
- - **all:** Cameras that have tracked an active object or detected motion within the last 30 seconds are included
+ - **any:** Cameras that have tracked an active object or detected motion within the last 30 seconds are included
 
 ### Custom Birdseye Icon
 
