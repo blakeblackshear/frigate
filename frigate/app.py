@@ -343,7 +343,7 @@ class FrigateApp:
 
         if available_shm < min_req_shm:
             logger.warning(
-                f"The current SHM size of {current_shm}MB is too small, recommend increasing it to at least {calculated_shm}MB."
+                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
             )
 
     def start(self) -> None:
