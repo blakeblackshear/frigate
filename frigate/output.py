@@ -200,6 +200,10 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
+        if mode == BirdseyeModeEnum.any and ( object_box_count > 0 or motion_box_count > 0):
+            return True
+
+
     def update_frame(self):
         # determine how many cameras are tracking objects within the last 30 seconds
         active_cameras = set(

@@ -128,6 +128,7 @@ birdseye:
   # Optional: Mode of the view. Available options are: objects, motion, and continuous
   #   objects - cameras are included if they have had a tracked object within the last 30 seconds
   #   motion - cameras are included if motion was detected in the last 30 seconds
+  #   any - cameras are included if motion or objects were detected within the last 30 seconds
   #   continuous - all cameras are included always
   mode: objects
 

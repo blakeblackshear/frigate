@@ -312,6 +312,7 @@ class ObjectConfig(FrigateBaseModel):
 class BirdseyeModeEnum(str, Enum):
     objects = "objects"
     motion = "motion"
+    any = "any"
     continuous = "continuous"
 
 
