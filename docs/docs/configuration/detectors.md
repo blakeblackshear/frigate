@@ -116,7 +116,6 @@ model:
   height: 300
   input_tensor: nhwc
   input_pixel_format: bgr
-  model_type: ssd
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 ```
 
@@ -128,7 +127,7 @@ detectors:
     type: openvino
     device: AUTO
     model:
-      path: /<path>/<to>/yolox_tiny.xml
+      path: /path/to/yolox_tiny.xml
 
 model:
   width: 416
@@ -136,7 +135,7 @@ model:
   input_tensor: nchw
   input_pixel_format: bgr
   model_type: yolox
-  labelmap_path: /<path>/<to>/coco_80cl.txt
+  labelmap_path: /path/to/coco_80cl.txt
 ```
 
 ### Intel NCS2 VPU and Myriad X Setup

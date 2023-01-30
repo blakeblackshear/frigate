@@ -39,7 +39,6 @@ class OvDetector(DetectionApi):
             try:
                 tensor_shape = self.interpreter.output(self.output_indexes).shape
                 logger.info(f"Model Output-{self.output_indexes} Shape: {tensor_shape}")
-                logger.info(f"Model Output-{self.output_indexes} Shape: {tensor_shape}")
                 self.output_indexes += 1
             except:
                 logger.info(f"Model has {self.output_indexes} Output Tensors")
@@ -93,9 +92,9 @@ class OvDetector(DetectionApi):
                 ]
                 i += 1
             return detections
-
         elif(self.ov_model_type == ModelTypeEnum.yolox):
             out_tensor = infer_request.get_output_tensor()
+            # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
             results = out_tensor.data
             results[..., :2] = (results[..., :2] + self.grids) * self.expanded_strides
             results[..., 2:4] = np.exp(results[..., 2:4]) * self.expanded_strides
@@ -117,7 +116,6 @@ class OvDetector(DetectionApi):
 
             for object_detected in ordered:
                 if i < 20:
-                # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
                     detections[i] = [
                         object_detected[6],  # Label ID
                         object_detected[5],  # Confidence
@@ -126,8 +124,6 @@ class OvDetector(DetectionApi):
                         (object_detected[1]+(object_detected[3]/2))/self.h,  # y_max
                         (object_detected[0]+(object_detected[2]/2))/self.w,  # x_max
                     ]
-                    #logger.info(object_detected)
-                    #logger.info(detections[i])
                     i += 1
                 else:
                     break
