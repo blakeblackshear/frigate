@@ -341,7 +341,7 @@ class FrigateApp:
                 1,
             )
 
-        if calculated_shm < current_shm or True:
+        if calculated_shm < current_shm:
             logger.warning(
                 f"The current SHM size of {current_shm}MB is too small, recommend increasing it to at least {calculated_shm}MB."
             )
