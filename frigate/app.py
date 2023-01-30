@@ -3,6 +3,7 @@ import multiprocessing as mp
 from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 import os
+import shutil
 import signal
 import sys
 from typing import Optional
@@ -329,6 +330,22 @@ class FrigateApp:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
 
+    def check_shm(self) -> None:
+        available_shm = round(shutil.disk_usage("/dev/shm").total / 1000000, 1)
+        min_req_shm = 30
+
+        for _, camera in self.config.cameras.items():
+            min_req_shm += round(
+                (camera.detect.width * camera.detect.height * 1.5 * 9 + 270480)
+                / 1048576,
+                1,
+            )
+
+        if available_shm < min_req_shm:
+            logger.warning(
+                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
+            )
+
     def start(self) -> None:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
@@ -377,6 +394,7 @@ class FrigateApp:
         self.start_recording_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
+        self.check_shm()
         # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
