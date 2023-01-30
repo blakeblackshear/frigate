@@ -20,7 +20,7 @@ jobs:
     name: Image Build
     steps:
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v1
+        uses: ASzc/change-string-case-action@v5
         with:
           string: ${{ github.repository }}
       - name: Check out code
