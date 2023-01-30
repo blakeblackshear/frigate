@@ -247,7 +247,7 @@ PRESETS_INPUT = {
         "tcp",
         TIMEOUT_PARAM,
         "5000000",
-    ],    
+    ],
     "preset-rtsp-udp": _user_agent_args
     + [
         "-avoid_negative_ts",
