@@ -241,6 +241,13 @@ PRESETS_INPUT = {
         "-flags",
         "low_delay",
     ],
+    "preset-rtsp-restream-safe": _user_agent_args
+    + [
+        "-rtsp_transport",
+        "tcp",
+        TIMEOUT_PARAM,
+        "5000000",
+    ],    
     "preset-rtsp-udp": _user_agent_args
     + [
         "-avoid_negative_ts",
