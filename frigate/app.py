@@ -331,17 +331,17 @@ class FrigateApp:
         self.frigate_watchdog.start()
 
     def check_shm(self) -> None:
-        current_shm = round(shutil.disk_usage("/dev/shm").total / 1000000, 1)
-        calculated_shm = 30
+        available_shm = round(shutil.disk_usage("/dev/shm").total / 1000000, 1)
+        min_req_shm = 30
 
         for _, camera in self.config.cameras.items():
-            calculated_shm += round(
+            min_req_shm += round(
                 (camera.detect.width * camera.detect.height * 1.5 * 9 + 270480)
                 / 1048576,
                 1,
             )
 
-        if calculated_shm < current_shm:
+        if available_shm < min_req_shm
             logger.warning(
                 f"The current SHM size of {current_shm}MB is too small, recommend increasing it to at least {calculated_shm}MB."
             )
