@@ -117,6 +117,9 @@ class FrigateApp:
         if not "werkzeug" in self.config.logger.logs:
             logging.getLogger("werkzeug").setLevel("ERROR")
 
+        if not "ws4py" in self.config.logger.logs:
+            logging.getLogger("ws4py").setLevel("ERROR")
+
     def init_queues(self) -> None:
         # Queues for clip processing
         self.event_queue: Queue = mp.Queue()

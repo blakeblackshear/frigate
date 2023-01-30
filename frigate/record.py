@@ -100,12 +100,9 @@ class RecordingMaintainer(threading.Thread):
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
-                retain_mode = self.config.cameras[camera].record.retain.mode
-                # this is only true when retain_mode is all. with other modes, segments are expected to age out.
-                if retain_mode == RetainModeEnum.all:
-                    logger.warning(
-                        f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
-                    )
+                logger.warning(
+                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
+                )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
                     cache_path = f["cache_path"]
@@ -223,6 +220,19 @@ class RecordingMaintainer(threading.Thread):
                             cache_path,
                             record_mode,
                         )
+                    # if it doesn't overlap with an event, go ahead and drop the segment
+                    # if it ends more than the configured pre_capture for the camera
+                    else:
+                        pre_capture = self.config.cameras[
+                            camera
+                        ].record.events.pre_capture
+                        most_recently_processed_frame_time = self.recordings_info[
+                            camera
+                        ][-1][0]
+                        retain_cutoff = most_recently_processed_frame_time - pre_capture
+                        if end_time.timestamp() < retain_cutoff:
+                            Path(cache_path).unlink(missing_ok=True)
+                            self.end_time_cache.pop(cache_path, None)
                 # else retain days includes this segment
                 else:
                     record_mode = self.config.cameras[camera].record.retain.mode
