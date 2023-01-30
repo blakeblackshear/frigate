@@ -3,7 +3,7 @@ id: getting_started
 title: Getting started
 ---
 
-This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/guides/camera_setup). Pay particular attention to the section on choosing a detect resolution.
+This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/frigate/camera_setup). Pay particular attention to the section on choosing a detect resolution.
 
 ### Step 1: Add a detect stream
 
