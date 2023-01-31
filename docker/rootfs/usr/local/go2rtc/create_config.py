@@ -31,12 +31,6 @@ if go2rtc_config.get("log") is None:
 elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
-# the audio from the rtsp stream should use offer aac by default
-if go2rtc_config.get("rtsp") is None:
-    go2rtc_config["rtsp"] = {"default_query": "mp4"}
-elif go2rtc_config["rtsp"].get("default_query") is None:
-    go2rtc_config["rtsp"]["default_query"] = "mp4"
-
 if not go2rtc_config.get("webrtc", {}).get("candidates", []):
     default_candidates = []
     # use internal candidate if it was discovered when running through the add-on
