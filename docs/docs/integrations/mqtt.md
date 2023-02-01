@@ -163,9 +163,9 @@ Topic with current motion contour area for a camera. Published value is an integ
 
 Topic to send PTZ commands to camera.
 
-| Command              | Description                                                                             |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| preset-<preset_name> | send command to move to preset with name <preset_name>                                  |
-| MOVE_<dir>           | send command to continuously move in <dir>, possible values are [UP, DOWN, LEFT, RIGHT] |
-| ZOOM_<dir>           | send command to continuously zoom <dir>, possible values are [IN, OUT]                  |
-| STOP                 | send command to stop moving                                                             |
+| Command                | Description                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `preset-<preset_name>` | send command to move to preset with name <preset_name>                                  |
+| `MOVE_<dir>`           | send command to continuously move in <dir>, possible values are [UP, DOWN, LEFT, RIGHT] |
+| `ZOOM_<dir>`           | send command to continuously zoom <dir>, possible values are [IN, OUT]                  |
+| `STOP`                 | send command to stop moving                                                             |
