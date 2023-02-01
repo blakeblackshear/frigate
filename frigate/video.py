@@ -404,6 +404,9 @@ def capture_camera(name, config: CameraConfig, process_info):
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
+    threading.current_thread().name = f"capture:{name}"
+    setproctitle(f"frigate.capture:{name}")
+
     frame_queue = process_info["frame_queue"]
     camera_watchdog = CameraWatchdog(
         name,
