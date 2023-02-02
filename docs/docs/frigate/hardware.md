@@ -57,12 +57,21 @@ More information is available [in the detector docs](/configuration/detectors#op
 
 Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known examples are below:
 
-| Name                | Inference Speed | Notes                                                                 |
-| ------------------- | --------------- | --------------------------------------------------------------------- |
-| Intel Celeron J4105 | ~ 25 ms         | Inference speeds on CPU were ~ 150 ms                                 |
-| Intel Celeron N4020 | 50 - 200 ms     | Inference speeds on CPU were ~ 800 ms, greatly depends on other loads |
-| Intel NCS2 VPU      | 60 - 65 ms      | May vary based on host device                                         |
-| Intel i5 1135G7     | 10 - 15 ms      |                                                                       |
+| Name                 | Inference Speed | Notes                                                                 |
+| -------------------- | --------------- | --------------------------------------------------------------------- |
+| Intel NCS2 VPU       | 60 - 65 ms      | May vary based on host device                                         |
+| Intel Celeron J4105  | ~ 25 ms         | Inference speeds on CPU were 150 - 200 ms                             |
+| Intel Celeron N3060  | 130 - 150 ms    | Inference speeds on CPU were ~ 550 ms                                 |
+| Intel Celeron N3205U | ~ 120 ms        | Inference speeds on CPU were ~ 380 ms                                 |
+| Intel Celeron N4020  | 50 - 200 ms     | Inference speeds on CPU were ~ 800 ms, greatly depends on other loads |
+| Intel i3 6100T       | 15 - 35 ms      | Inference speeds on CPU were 60 - 120 ms                              |
+| Intel i3 8100        | ~ 15 ms         | Inference speeds on CPU were ~ 65 ms                                  |
+| Intel i5 4590        | ~ 20 ms         | Inference speeds on CPU were ~ 230 ms                                 |
+| Intel i5 6500        | ~ 15 ms         | Inference speeds on CPU were ~ 150 ms                                 |
+| Intel i5 7200u       | 15 - 25 ms      | Inference speeds on CPU were ~ 150 ms                                 |
+| Intel i5 7500        | ~ 15 ms         | Inference speeds on CPU were ~ 260 ms                                 |
+| Intel i5 1135G7      | 10 - 15 ms      |                                                                       |
+| Intel i5 12600K      | ~ 15 ms         | Inference speeds on CPU were ~ 35 ms                                  |
 
 ### TensorRT
 
