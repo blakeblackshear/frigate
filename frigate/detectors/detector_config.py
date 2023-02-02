@@ -22,9 +22,11 @@ class InputTensorEnum(str, Enum):
     nchw = "nchw"
     nhwc = "nhwc"
 
+
 class ModelTypeEnum(str, Enum):
     ssd = "ssd"
     yolox = "yolox"
+
 
 class ModelConfig(BaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")

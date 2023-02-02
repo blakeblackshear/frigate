@@ -17,6 +17,7 @@ class OvDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     device: str = Field(default=None, title="Device Type")
 
+
 class OvDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
@@ -43,9 +44,8 @@ class OvDetector(DetectionApi):
             except:
                 logger.info(f"Model has {self.output_indexes} Output Tensors")
                 break
-
-        if(self.ov_model_type == ModelTypeEnum.yolox):
-            self.num_classes = tensor_shape[2]-5
+        if self.ov_model_type == ModelTypeEnum.yolox:
+            self.num_classes = tensor_shape[2] - 5
             logger.info(f"YOLOX model has {self.num_classes} classes")
             self.set_strides_grids()
 
@@ -64,7 +64,6 @@ class OvDetector(DetectionApi):
             grids.append(grid)
             shape = grid.shape[:2]
             expanded_strides.append(np.full((*shape, 1), stride))
-
         self.grids = np.concatenate(grids, 1)
         self.expanded_strides = np.concatenate(expanded_strides, 1)
 
@@ -72,7 +71,7 @@ class OvDetector(DetectionApi):
         infer_request = self.interpreter.create_infer_request()
         infer_request.infer([tensor_input])
 
-        if(self.ov_model_type == ModelTypeEnum.ssd):
+        if self.ov_model_type == ModelTypeEnum.ssd:
             results = infer_request.get_output_tensor()
 
             detections = np.zeros((20, 6), np.float32)
@@ -92,7 +91,7 @@ class OvDetector(DetectionApi):
                 ]
                 i += 1
             return detections
-        elif(self.ov_model_type == ModelTypeEnum.yolox):
+        elif self.ov_model_type == ModelTypeEnum.yolox:
             out_tensor = infer_request.get_output_tensor()
             # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
             results = out_tensor.data
@@ -100,8 +99,10 @@ class OvDetector(DetectionApi):
             results[..., 2:4] = np.exp(results[..., 2:4]) * self.expanded_strides
             image_pred = results[0, ...]
 
-            class_conf = np.max(image_pred[:, 5:5+self.num_classes], axis=1, keepdims=True)
-            class_pred = np.argmax(image_pred[: , 5:5+self.num_classes], axis=1)
+            class_conf = np.max(
+                image_pred[:, 5 : 5 + self.num_classes], axis=1, keepdims=True
+            )
+            class_pred = np.argmax(image_pred[:, 5 : 5 + self.num_classes], axis=1)
             class_pred = np.expand_dims(class_pred, axis=1)
 
             conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= 0.3).squeeze()
@@ -119,13 +120,16 @@ class OvDetector(DetectionApi):
                     detections[i] = [
                         object_detected[6],  # Label ID
                         object_detected[5],  # Confidence
-                        (object_detected[1]-(object_detected[3]/2))/self.h,  # y_min
-                        (object_detected[0]-(object_detected[2]/2))/self.w,  # x_min
-                        (object_detected[1]+(object_detected[3]/2))/self.h,  # y_max
-                        (object_detected[0]+(object_detected[2]/2))/self.w,  # x_max
+                        (object_detected[1] - (object_detected[3] / 2))
+                        / self.h,  # y_min
+                        (object_detected[0] - (object_detected[2] / 2))
+                        / self.w,  # x_min
+                        (object_detected[1] + (object_detected[3] / 2))
+                        / self.h,  # y_max
+                        (object_detected[0] + (object_detected[2] / 2))
+                        / self.w,  # x_max
                     ]
                     i += 1
                 else:
                     break
-
             return detections
