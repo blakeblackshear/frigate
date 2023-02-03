@@ -13,7 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateWatchdog(threading.Thread):
-    def __init__(self, config: FrigateConfig, detectors: dict[str, ObjectDetectProcess], stop_event: MpEvent):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        detectors: dict[str, ObjectDetectProcess],
+        stop_event: MpEvent,
+    ):
         threading.Thread.__init__(self)
         self.name = "frigate_watchdog"
         self.config = config
