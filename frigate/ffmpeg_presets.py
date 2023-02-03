@@ -236,6 +236,13 @@ PRESETS_INPUT = {
         "tcp",
         TIMEOUT_PARAM,
         "5000000",
+    ],
+    "preset-rtsp-restream-low-latency": _user_agent_args
+    + [
+        "-rtsp_transport",
+        "tcp",
+        TIMEOUT_PARAM,
+        "5000000",
         "-fflags",
         "nobuffer",
         "-flags",
