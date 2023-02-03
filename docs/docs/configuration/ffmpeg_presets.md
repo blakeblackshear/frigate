@@ -28,16 +28,17 @@ Input args presets help make the config more readable and handle use cases for d
 
 See [the camera specific docs](/configuration/camera_specific.md) for more info on non-standard cameras and recommendations for using them in Frigate.
 
-| Preset                    | Usage                     | Other Notes                                         |
-| ------------------------- | ------------------------- | --------------------------------------------------- |
-| preset-http-jpeg-generic  | HTTP Live Jpeg            | Recommend restreaming live jpeg instead             |
-| preset-http-mjpeg-generic | HTTP Mjpeg Stream         | Recommend restreaming mjpeg stream instead          |
-| preset-http-reolink       | Reolink HTTP-FLV Stream   | Only for reolink http, not when restreaming as rtsp |
-| preset-rtmp-generic       | RTMP Stream               |                                                     |
-| preset-rtsp-generic       | RTSP Stream               | This is the default when nothing is specified       |
-| preset-rtsp-restream      | RTSP Stream from restream | Use when using rtsp restream as source              |
-| preset-rtsp-udp           | RTSP Stream via UDP       | Use when camera is UDP only                         |
-| preset-rtsp-blue-iris     | Blue Iris RTSP Stream     | Use when consuming a stream from Blue Iris          |
+| Preset                           | Usage                     | Other Notes                                                                                      |
+| -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| preset-http-jpeg-generic         | HTTP Live Jpeg            | Recommend restreaming live jpeg instead                                                          |
+| preset-http-mjpeg-generic        | HTTP Mjpeg Stream         | Recommend restreaming mjpeg stream instead                                                       |
+| preset-http-reolink              | Reolink HTTP-FLV Stream   | Only for reolink http, not when restreaming as rtsp                                              |
+| preset-rtmp-generic              | RTMP Stream               |                                                                                                  |
+| preset-rtsp-generic              | RTSP Stream               | This is the default when nothing is specified                                                    |
+| preset-rtsp-restream             | RTSP Stream from restream | Use for rtsp restream as source for frigate                                                      |
+| preset-rtsp-restream-low-latency | RTSP Stream from restream | Use for rtsp restream as source for frigate to lower latency, may cause issues with some cameras |
+| preset-rtsp-udp                  | RTSP Stream via UDP       | Use when camera is UDP only                                                                      |
+| preset-rtsp-blue-iris            | Blue Iris RTSP Stream     | Use when consuming a stream from Blue Iris                                                       |
 
 :::caution
 
