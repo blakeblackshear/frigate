@@ -764,7 +764,7 @@ def config_save():
 
     if save_option == "restart":
         try:
-            restart_frigate()
+            restart_frigate(current_app.frigate_config)
         except Exception as e:
             logging.error(f"Error restarting Frigate: {e}")
             return "Config successfully saved, unable to restart Frigate", 200

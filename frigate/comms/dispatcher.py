@@ -65,7 +65,7 @@ class Dispatcher:
                 logger.error(f"Received invalid set command: {topic}")
                 return
         elif topic == "restart":
-            restart_frigate()
+            restart_frigate(self.config)
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Handle publishing to communicators."""
