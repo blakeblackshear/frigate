@@ -330,7 +330,7 @@ class FrigateApp:
         self.stats_emitter.start()
 
     def start_watchdog(self) -> None:
-        self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+        self.frigate_watchdog = FrigateWatchdog(self.config, self.detectors, self.stop_event)
         self.frigate_watchdog.start()
 
     def check_shm(self) -> None:
