@@ -22,7 +22,6 @@ import os
 import psutil
 import pytz
 
-from frigate.config import FrigateConfig
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
@@ -628,7 +627,7 @@ def clipped(obj, frame_shape):
         return False
 
 
-def restart_frigate(config: FrigateConfig):
+def restart_frigate(config):
     # disable detect for cameras to speed up restart
     for _, camera in config.cameras.items():
         camera.detect.enabled = False
