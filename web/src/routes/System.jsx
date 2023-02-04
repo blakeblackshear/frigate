@@ -187,8 +187,9 @@ export default function System() {
                   <div className="p-2">
                     {gpu_usages[gpu]['gpu'] == -1 ? (
                       <div className="p-4">
-                        There was an error getting usage stats. Either your GPU does not support this or Frigate does
-                        not have proper access.
+                        There was an error getting usage stats. This does not mean hardware acceleration is not working.
+                        Either your GPU does not support this or Frigate does not have proper access to get statistics.
+                        This is expected for the Home Assistant addon.
                       </div>
                     ) : (
                       <Table className="w-full">

@@ -23,7 +23,7 @@ The easiest live view to get working is MSE. After adding this to the config, re
 
 ### What if my video doesn't play?
 
-If you are unable to see your video feed, first check the go2rtc logs in the Frigate UI under Logs in the sidebar. If go2rtc is having difficulty connecting to your camera, you should see some error messages in the log. If you do not see any errors, then video codec of the stream may not be supported in your browser. If your camera stream is set to H265, try switching to H264. You can see more information about [video codec compatibility](https://github.com/AlexxIT/go2rtc#codecs-madness) in the go2rtc documentation. If you are not able to switch your camera settings from H265 to H264 or your stream is a different format such as MJPEG, you can use go2rtc to re-encode the video using the [FFmpeg parameters](https://github.com/AlexxIT/go2rtc#source-ffmpeg). It supports rotating and resizing video feeds and hardware acceleration. Keep in mind that transcoding video from one format to another is a resource intensive task and you may be better off using the built-in jsmpeg view. Here is an example of a config that will re-encode the stream to H264 without hardware acceleration:
+If you are unable to see your video feed, first check the go2rtc logs in the Frigate UI under Logs in the sidebar. If go2rtc is having difficulty connecting to your camera, you should see some error messages in the log. If you do not see any errors, then the video codec of the stream may not be supported in your browser. If your camera stream is set to H265, try switching to H264. You can see more information about [video codec compatibility](https://github.com/AlexxIT/go2rtc#codecs-madness) in the go2rtc documentation. If you are not able to switch your camera settings from H265 to H264 or your stream is a different format such as MJPEG, you can use go2rtc to re-encode the video using the [FFmpeg parameters](https://github.com/AlexxIT/go2rtc#source-ffmpeg). It supports rotating and resizing video feeds and hardware acceleration. Keep in mind that transcoding video from one format to another is a resource intensive task and you may be better off using the built-in jsmpeg view. Here is an example of a config that will re-encode the stream to H264 without hardware acceleration:
 
 ```yaml
 go2rtc:
@@ -31,6 +31,15 @@ go2rtc:
     back:
       - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
       - "ffmpeg:back#video=h264"
+```
+
+Some camera streams may need to use the ffmpeg module in go2rtc. This has the downside of slower startup times, but has compatibility with more stream types.
+
+```yaml
+go2rtc:
+  streams:
+    back:
+      - ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
 ```
 
 If you can see the video but do not have audio, this is most likely because your camera's audio stream is not AAC. If possible, update your camera's audio settings to AAC. If your cameras do not support AAC audio, you will need to tell go2rtc to re-encode the audio to AAC on demand if you want audio. This will use additional CPU and add some latency. To add AAC audio on demand, you can update your go2rtc config as follows:
@@ -51,6 +60,15 @@ go2rtc:
     back:
       - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
       - "ffmpeg:back#video=h264#audio=aac"
+```
+
+When using the ffmpeg module, you would add AAC audio like this:
+
+```yaml
+go2rtc:
+  streams:
+    back:
+      - "ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#video=copy#audio=copy#audio=aac"
 ```
 
 ## Next steps
