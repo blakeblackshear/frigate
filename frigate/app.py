@@ -416,6 +416,11 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
+        # Set the events for the camera processor processes because
+        # they may be waiting on the event coming out of the detection process
+        for name in self.config.cameras.keys():
+            self.detection_out_events[name].set()
+
         self.dispatcher.stop()
         self.detected_frames_processor.join()
         self.event_processor.join()
