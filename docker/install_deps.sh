@@ -63,7 +63,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     # intel-opencl-icd specifically for GPU support in OpenVino
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd \
-        mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 radeontop intel-gpu-tools
+        mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver i965-va-driver-shaders libmfx1 radeontop intel-gpu-tools
     rm -f /etc/apt/sources.list.d/debian-testing.list
 fi
 
