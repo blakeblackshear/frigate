@@ -23,6 +23,11 @@ class InputTensorEnum(str, Enum):
     nhwc = "nhwc"
 
 
+class ModelTypeEnum(str, Enum):
+    ssd = "ssd"
+    yolox = "yolox"
+
+
 class ModelConfig(BaseModel):
     path: Optional[str] = Field(title="Custom Object detection model path.")
     labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
@@ -36,6 +41,9 @@ class ModelConfig(BaseModel):
     )
     input_pixel_format: PixelFormatEnum = Field(
         default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
+    )
+    model_type: ModelTypeEnum = Field(
+        default=ModelTypeEnum.ssd, title="Object Detection Model Type"
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()

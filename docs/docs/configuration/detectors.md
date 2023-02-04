@@ -101,7 +101,7 @@ The OpenVINO device to be used is specified using the `"device"` attribute accor
 
 OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
 
 ```yaml
 detectors:
@@ -117,6 +117,25 @@ model:
   input_tensor: nhwc
   input_pixel_format: bgr
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+```
+
+This detector also supports YOLOx models, and has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. Frigate does not come with `yolox_tiny` model, you will need to follow [OpenVINO documentation](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) to provide your own model to Frigate. There is currently no support for other types of YOLO models (YOLOv3, YOLOv4, etc...). Below is an example of how `yolox_tiny` and other yolox variants can be used in Frigate:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: AUTO
+    model:
+      path: /path/to/yolox_tiny.xml
+
+model:
+  width: 416
+  height: 416
+  input_tensor: nchw
+  input_pixel_format: bgr
+  model_type: yolox
+  labelmap_path: /path/to/coco_80cl.txt
 ```
 
 ### Intel NCS2 VPU and Myriad X Setup
