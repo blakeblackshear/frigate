@@ -926,6 +926,17 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         "--format=csv",
     ]
 
+    if (
+        "CUDA_VISIBLE_DEVICES" in os.environ
+        and os.environ["CUDA_VISIBLE_DEVICES"].isdigit()
+    ):
+        nvidia_smi_command.extend(["--id", os.environ["CUDA_VISIBLE_DEVICES"]])
+    elif (
+        "NVIDIA_VISIBLE_DEVICES" in os.environ
+        and os.environ["NVIDIA_VISIBLE_DEVICES"].isdigit()
+    ):
+        nvidia_smi_command.extend(["--id", os.environ["NVIDIA_VISIBLE_DEVICES"]])
+
     p = sp.run(
         nvidia_smi_command,
         encoding="ascii",
