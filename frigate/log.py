@@ -10,7 +10,8 @@ from logging import handlers
 from typing import Optional
 from types import FrameType
 from setproctitle import setproctitle
-from typing import Deque
+from typing import Deque, Optional
+from types import FrameType
 from collections import deque
 
 from frigate.util import clean_camera_user_pass
@@ -41,7 +42,7 @@ def log_process(log_queue: Queue) -> None:
 
     stop_event = mp.Event()
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]):
+    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
