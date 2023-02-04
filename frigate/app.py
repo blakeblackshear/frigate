@@ -183,8 +183,7 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        self.ws_client = WebSocketClient(self.config)
-        comms.append(self.ws_client)
+        comms.append(WebSocketClient(self.config))
         self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
 
     def start_detectors(self) -> None:
@@ -417,7 +416,7 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
-        self.ws_client.stop()
+        self.dispatcher.stop()
         self.detected_frames_processor.join()
         self.event_processor.join()
         self.event_cleanup.join()
