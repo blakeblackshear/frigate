@@ -33,6 +33,15 @@ go2rtc:
       - "ffmpeg:back#video=h264"
 ```
 
+Some camera streams may need to use the ffmpeg module in go2rtc. This has the downside of slower startup times, but has compatibility with more stream types.
+
+```yaml
+go2rtc:
+  streams:
+    back:
+      - ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+```
+
 If you can see the video but do not have audio, this is most likely because your camera's audio stream is not AAC. If possible, update your camera's audio settings to AAC. If your cameras do not support AAC audio, you will need to tell go2rtc to re-encode the audio to AAC on demand if you want audio. This will use additional CPU and add some latency. To add AAC audio on demand, you can update your go2rtc config as follows:
 
 ```yaml
@@ -51,6 +60,15 @@ go2rtc:
     back:
       - rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
       - "ffmpeg:back#video=h264#audio=aac"
+```
+
+When using the ffmpeg module, you would add AAC audio like this:
+
+```yaml
+go2rtc:
+  streams:
+    back:
+      - "ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#video=copy#audio=copy#audio=aac"
 ```
 
 ## Next steps
