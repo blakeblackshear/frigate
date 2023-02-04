@@ -283,8 +283,10 @@ class StatsEmitter(threading.Thread):
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
+            logger.debug("Starting stats collection")
             stats = stats_snapshot(
                 self.config, self.stats_tracking, self.hwaccel_errors
             )
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
-        logger.info(f"Exiting watchdog...")
+            logger.debug("Finished stats collection")
+        logger.info(f"Exiting stats emitter...")
