@@ -2,7 +2,9 @@
 import logging
 import threading
 import os
+import signal
 import queue
+import multiprocessing as mp
 from multiprocessing.queues import Queue
 from logging import handlers
 from setproctitle import setproctitle
@@ -34,10 +36,21 @@ def log_process(log_queue: Queue) -> None:
     threading.current_thread().name = f"logger"
     setproctitle("frigate.logger")
     listener_configurer()
+
+    stop_event = mp.Event()
+
+    def receiveSignal(signalNumber, frame):
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     while True:
         try:
-            record = log_queue.get(timeout=5)
+            record = log_queue.get(timeout=1)
         except (queue.Empty, KeyboardInterrupt):
+            if stop_event.is_set():
+                break
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
