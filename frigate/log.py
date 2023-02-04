@@ -7,6 +7,8 @@ import queue
 import multiprocessing as mp
 from multiprocessing.queues import Queue
 from logging import handlers
+from typing import Optional
+from types import FrameType
 from setproctitle import setproctitle
 from typing import Deque
 from collections import deque
