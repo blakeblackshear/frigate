@@ -160,6 +160,7 @@ def capture_frames(
     fps: mp.Value,
     skipped_fps: mp.Value,
     current_frame: mp.Value,
+    stop_event: mp.Event,
 ):
 
     frame_size = frame_shape[0] * frame_shape[1]
@@ -177,6 +178,9 @@ def capture_frames(
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except Exception as e:
+            # shutdown has been initiated
+            if stop_event.is_set():
+                break
             logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() != None:
@@ -340,6 +344,7 @@ class CameraWatchdog(threading.Thread):
             self.frame_shape,
             self.frame_queue,
             self.camera_fps,
+            self.stop_event,
         )
         self.capture_thread.start()
 
@@ -368,13 +373,16 @@ class CameraWatchdog(threading.Thread):
 
 
 class CameraCapture(threading.Thread):
-    def __init__(self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps):
+    def __init__(
+        self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps, stop_event
+    ):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
         self.camera_name = camera_name
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
+        self.stop_event = stop_event
         self.skipped_fps = EventsPerSecond()
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
@@ -392,6 +400,7 @@ class CameraCapture(threading.Thread):
             self.fps,
             self.skipped_fps,
             self.current_frame,
+            self.stop_event,
         )
 
 
@@ -461,7 +470,7 @@ def track_camera(
         motion_contour_area,
     )
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config
+        name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
     object_tracker = ObjectTracker(config.detect)
@@ -723,9 +732,6 @@ def process_frames(
                         object_filters,
                     )
                 )
-                # if frigate is exiting
-                if stop_event.is_set():
-                    return
 
             #########
             # merge objects, check for clipped objects and look again up to 4 times
@@ -790,9 +796,7 @@ def process_frames(
                             refining = True
                         else:
                             selected_objects.append(obj)
-                        # if frigate is exiting
-                        if stop_event.is_set():
-                            return
+
                 # set the detections list to only include top, complete objects
                 # and new detections
                 detections = selected_objects
