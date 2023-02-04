@@ -39,7 +39,7 @@ def log_process(log_queue: Queue) -> None:
 
     stop_event = mp.Event()
 
-    def receiveSignal(signalNumber, frame):
+    def receiveSignal(signalNumber: int, frame: Optional[FrameType]):
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
