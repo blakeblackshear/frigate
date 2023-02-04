@@ -463,7 +463,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 current_tracked_objects,
                 motion_boxes,
                 regions,
-            ) = video_output_queue.get(True, 10)
+            ) = video_output_queue.get(True, 1)
         except queue.Empty:
             continue
 

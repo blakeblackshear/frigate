@@ -104,7 +104,7 @@ def run_detector(
 
     while not stop_event.is_set():
         try:
-            connection_id = detection_queue.get(timeout=5)
+            connection_id = detection_queue.get(timeout=1)
         except queue.Empty:
             continue
         input_frame = frame_manager.get(

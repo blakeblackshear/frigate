@@ -67,7 +67,7 @@ class EventProcessor(threading.Thread):
 
         while not self.stop_event.is_set():
             try:
-                event_type, camera, event_data = self.event_queue.get(timeout=10)
+                event_type, camera, event_data = self.event_queue.get(timeout=1)
             except queue.Empty:
                 continue
 

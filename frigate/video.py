@@ -601,7 +601,7 @@ def process_frames(
             break
 
         try:
-            frame_time = frame_queue.get(True, 10)
+            frame_time = frame_queue.get(True, 1)
         except queue.Empty:
             continue
 
