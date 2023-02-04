@@ -438,3 +438,15 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
+
+        for queue in [
+            self.event_queue,
+            self.event_processed_queue,
+            self.video_output_queue,
+            self.detected_frames_queue,
+            self.recordings_info_queue,
+        ]:
+            while not queue.empty():
+                queue.get_nowait()
+            queue.close()
+            queue.join_thread()
