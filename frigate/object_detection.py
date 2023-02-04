@@ -180,12 +180,13 @@ class ObjectDetectProcess:
 
 
 class RemoteObjectDetector:
-    def __init__(self, name, labels, detection_queue, event, model_config):
+    def __init__(self, name, labels, detection_queue, event, model_config, stop_event):
         self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue
         self.event = event
+        self.stop_event = stop_event
         self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
         self.np_shm = np.ndarray(
             (1, model_config.height, model_config.width, 3),
@@ -200,11 +201,14 @@ class RemoteObjectDetector:
     def detect(self, tensor_input, threshold=0.4):
         detections = []
 
+        if self.stop_event.is_set():
+            return detections
+
         # copy input to shared memory
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
-        result = self.event.wait(timeout=10.0)
+        result = self.event.wait(timeout=5.0)
 
         # if it timed out
         if result is None:

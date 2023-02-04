@@ -416,10 +416,15 @@ class FrigateApp:
         logger.info(f"Stopping...")
         self.stop_event.set()
 
-        # Set the events for the camera processor processes because
-        # they may be waiting on the event coming out of the detection process
-        for name in self.config.cameras.keys():
-            self.detection_out_events[name].set()
+        for detector in self.detectors.values():
+            detector.stop()
+
+        # Empty the detection queue and set the events for all requests
+        while not self.detection_queue.empty():
+            connection_id = self.detection_queue.get(timeout=1)
+            self.detection_out_events[connection_id].set()
+        self.detection_queue.close()
+        self.detection_queue.join_thread()
 
         self.dispatcher.stop()
         self.detected_frames_processor.join()
@@ -430,9 +435,6 @@ class FrigateApp:
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
-
-        for detector in self.detectors.values():
-            detector.stop()
 
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
@@ -445,6 +447,7 @@ class FrigateApp:
             self.video_output_queue,
             self.detected_frames_queue,
             self.recordings_info_queue,
+            self.log_queue,
         ]:
             while not queue.empty():
                 queue.get_nowait()
