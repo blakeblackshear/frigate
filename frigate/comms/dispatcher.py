@@ -27,6 +27,11 @@ class Communicator(ABC):
         """Pass receiver so communicators can pass commands."""
         pass
 
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop the communicator."""
+        pass
+
 
 class Dispatcher:
     """Handle communication between Frigate and communicators."""
@@ -71,6 +76,10 @@ class Dispatcher:
         """Handle publishing to communicators."""
         for comm in self.comms:
             comm.publish(topic, payload, retain)
+
+    def stop(self) -> None:
+        for comm in self.comms:
+            comm.stop()
 
     def _on_detect_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""

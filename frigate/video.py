@@ -601,7 +601,7 @@ def process_frames(
             break
 
         try:
-            frame_time = frame_queue.get(True, 10)
+            frame_time = frame_queue.get(True, 1)
         except queue.Empty:
             continue
 
@@ -723,6 +723,9 @@ def process_frames(
                         object_filters,
                     )
                 )
+                # if frigate is exiting
+                if stop_event.is_set():
+                    return
 
             #########
             # merge objects, check for clipped objects and look again up to 4 times
@@ -787,6 +790,9 @@ def process_frames(
                             refining = True
                         else:
                             selected_objects.append(obj)
+                        # if frigate is exiting
+                        if stop_event.is_set():
+                            return
                 # set the detections list to only include top, complete objects
                 # and new detections
                 detections = selected_objects

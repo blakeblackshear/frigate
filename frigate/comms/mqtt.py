@@ -35,6 +35,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
             f"{self.mqtt_config.topic_prefix}/{topic}", payload, retain=retain
         )
 
+    def stop(self) -> None:
+        self.client.disconnect()
+
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
         for camera_name, camera in self.config.cameras.items():

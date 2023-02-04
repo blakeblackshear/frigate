@@ -109,14 +109,15 @@ class FFMpegConverter:
 
 
 class BroadcastThread(threading.Thread):
-    def __init__(self, camera, converter, websocket_server):
+    def __init__(self, camera, converter, websocket_server, stop_event):
         super(BroadcastThread, self).__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
+        self.stop_event = stop_event
 
     def run(self):
-        while True:
+        while not self.stop_event.is_set():
             buf = self.converter.read(65536)
             if buf:
                 manager = self.websocket_server.manager
@@ -426,7 +427,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             cam_config.live.quality,
         )
         broadcasters[camera] = BroadcastThread(
-            camera, converters[camera], websocket_server
+            camera, converters[camera], websocket_server, stop_event
         )
 
     if config.birdseye.enabled:
@@ -439,7 +440,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             config.birdseye.restream,
         )
         broadcasters["birdseye"] = BroadcastThread(
-            "birdseye", converters["birdseye"], websocket_server
+            "birdseye", converters["birdseye"], websocket_server, stop_event
         )
 
     websocket_thread.start()
@@ -463,7 +464,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 current_tracked_objects,
                 motion_boxes,
                 regions,
-            ) = video_output_queue.get(True, 10)
+            ) = video_output_queue.get(True, 1)
         except queue.Empty:
             continue
 
