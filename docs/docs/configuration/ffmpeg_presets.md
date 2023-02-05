@@ -47,21 +47,22 @@ It is important to be mindful of input args when using restream because you can 
 :::
 
 ```yaml
+go2rtc:
+  streams:
+    reolink_cam: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=admin&password=password
+
 cameras:
   reolink_cam:
     ffmpeg:
       inputs:
-        - path: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=admin&password={FRIGATE_CAM_PASSWORD}
+        - path: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=admin&password=password
           input_args: preset-http-reolink
           roles:
             - detect
-        - path: rtsp://192.168.0.10:8554/garage
+        - path: rtsp://127.0.0.1:8554/reolink_cam
           input_args: preset-rtsp-generic
           roles:
             - record
-        - path: http://192.168.0.139/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=admin&password={FRIGATE_CAM_PASSWORD}
-          roles:
-            - restream
 ```
 
 ### Output Args Presets
