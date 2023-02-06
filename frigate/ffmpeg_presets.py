@@ -6,8 +6,34 @@ from typing import Any
 
 from frigate.version import VERSION
 from frigate.const import BTBN_PATH
+from frigate.util import vainfo_hwaccel
 
 TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
+GPU_DEVICE_PARAM = None
+
+
+def get_gpu_device() -> str:
+    """Gets the appropriate Intel/AMD GPU device."""
+    if GPU_DEVICE_PARAM:
+        return GPU_DEVICE_PARAM
+
+    devices = filter(lambda d: d.startswith("render"), os.listdir("/dev/dri"))
+
+    if len(devices) < 2:
+        GPU_DEVICE_PARAM = "renderD128"
+        return GPU_DEVICE_PARAM
+    else:
+        for device in devices:
+            check = vainfo_hwaccel(device_name=device)
+
+            if check.returncode == 0:
+                GPU_DEVICE_PARAM = device
+                return GPU_DEVICE_PARAM
+
+    raise ValueError(
+        "Hardware acceleration was requested but no suitable GPU was found."
+    )
+
 
 _user_agent_args = [
     "-user_agent",
@@ -23,7 +49,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "vaapi",
         "-hwaccel_device",
-        "/dev/dri/renderD128",
+        get_gpu_device(),
         "-hwaccel_output_format",
         "vaapi",
     ],
@@ -31,7 +57,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        "/dev/dri/renderD128",
+        get_gpu_device(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
@@ -43,7 +69,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        "/dev/dri/renderD128",
+        get_gpu_device(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
