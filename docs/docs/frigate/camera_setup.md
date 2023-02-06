@@ -3,7 +3,7 @@ id: camera_setup
 title: Camera setup
 ---
 
-Cameras configured to output H.264 video and AAC audio will offer the most compatibility with all features of Frigate and Home Assistant. H.265 has better compression, but far less compatibility. Safari and Edge are the only browsers able to play H.265. Ideally, cameras should be configured directly for the desired resolutions and frame rates you want to use in Frigate. Reducing frame rates within Frigate will waste CPU resources decoding extra frames that are discarded. There are three different goals that you want to tune your stream configurations around.
+Cameras configured to output H.264 video and AAC audio will offer the most compatibility with all features of Frigate and Home Assistant. H.265 has better compression, but less compatibility. Chrome 108+, Safari and Edge are the only browsers able to play H.265 and only support a limited number of H.265 profiles. Ideally, cameras should be configured directly for the desired resolutions and frame rates you want to use in Frigate. Reducing frame rates within Frigate will waste CPU resources decoding extra frames that are discarded. There are three different goals that you want to tune your stream configurations around.
 
 - **Detection**: This is the only stream that Frigate will decode for processing. Also, this is the stream where snapshots will be generated from. The resolution for detection should be tuned for the size of the objects you want to detect. See [Choosing a detect resolution](#choosing-a-detect-resolution) for more details. The recommended frame rate is 5fps, but may need to be higher for very fast moving objects. Higher resolutions and frame rates will drive higher CPU usage on your server.
 
