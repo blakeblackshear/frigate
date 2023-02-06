@@ -1,5 +1,6 @@
 """Handles inserting and maintaining ffmpeg presets."""
 
+import logging
 import os
 
 from typing import Any
@@ -10,6 +11,9 @@ from frigate.util import vainfo_hwaccel
 
 TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
 GPU_DEVICE_PARAM = None
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_gpu_device() -> str:
@@ -25,6 +29,8 @@ def get_gpu_device() -> str:
     else:
         for device in devices:
             check = vainfo_hwaccel(device_name=device)
+
+            logger.debug(f"{device} return vainfo status code: {check.returncode}")
 
             if check.returncode == 0:
                 GPU_DEVICE_PARAM = device
