@@ -978,7 +978,11 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
 
 def vainfo_hwaccel(device_name: Optional[str]) -> sp.CompletedProcess:
     """Run vainfo."""
-    ffprobe_cmd = ["vainfo"] if not device_name else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
+    ffprobe_cmd = (
+        ["vainfo"]
+        if not device_name
+        else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
+    )
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
