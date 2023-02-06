@@ -41,7 +41,7 @@ def get_gpu_device() -> str:
                 GPU_DEVICE_PARAM = f"/dev/dri/{device}"
                 return GPU_DEVICE_PARAM
 
-    logger.error("Hardware acceleration was requested but no suitable GPU was found.")
+    return ""
 
 
 _user_agent_args = [
