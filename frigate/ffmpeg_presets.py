@@ -26,7 +26,7 @@ def get_gpu_device() -> str:
     if GPU_DEVICE_PARAM:
         return GPU_DEVICE_PARAM
 
-    devices = filter(lambda d: d.startswith("render"), os.listdir("/dev/dri"))
+    devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
 
     if len(devices) < 2:
         GPU_DEVICE_PARAM = "renderD128"
