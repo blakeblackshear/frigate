@@ -29,7 +29,7 @@ def get_gpu_device() -> str:
     devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
 
     if len(devices) < 2:
-        GPU_DEVICE_PARAM = "renderD128"
+        GPU_DEVICE_PARAM = "/dev/dri/renderD128"
         return GPU_DEVICE_PARAM
     else:
         for device in devices:
@@ -38,7 +38,7 @@ def get_gpu_device() -> str:
             logger.debug(f"{device} return vainfo status code: {check.returncode}")
 
             if check.returncode == 0:
-                GPU_DEVICE_PARAM = device
+                GPU_DEVICE_PARAM = f"/dev/dri/{device}"
                 return GPU_DEVICE_PARAM
 
     raise ValueError(
