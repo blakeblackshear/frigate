@@ -10,7 +10,7 @@ from frigate.const import BTBN_PATH
 from frigate.util import vainfo_hwaccel
 
 TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
-GPU_DEVICE_PARAM = None
+GPU_DEVICE_PARAM = ""
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 
 def get_gpu_device() -> str:
     """Gets the appropriate Intel/AMD GPU device."""
+    if not os.path.exists("/dev/dri"):
+        return ""
+
+    global GPU_DEVICE_PARAM
+
     if GPU_DEVICE_PARAM:
         return GPU_DEVICE_PARAM
 
