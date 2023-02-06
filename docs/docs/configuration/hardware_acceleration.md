@@ -17,7 +17,7 @@ ffmpeg:
 
 ### Intel-based CPUs (<10th Generation) via VAAPI
 
-VAAPI supports automatic profile selection so it will work automatically with both h264 and h265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
 
 ```yaml
 ffmpeg:
@@ -30,14 +30,14 @@ ffmpeg:
 
 QSV must be set specifically based on the video encoding of the stream.
 
-#### h264 streams
+#### H.264 streams
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-intel-qsv-h264
 ```
 
-#### h265 streams
+#### H.265 streams
 
 ```yaml
 ffmpeg:
