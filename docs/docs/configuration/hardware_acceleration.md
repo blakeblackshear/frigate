@@ -46,7 +46,7 @@ ffmpeg:
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
-VAAPI supports automatic profile selection so it will work automatically with both h264 and h265 streams.
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
 **Note:** You also need to set `LIBVA_DRIVER_NAME=radeonsi` as an environment variable on the container.
 
