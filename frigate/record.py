@@ -95,8 +95,8 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
-        # delete all cached files past the most recent 5
-        keep_count = 5
+        # delete all cached files past the most recent 20
+        keep_count = 20
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
