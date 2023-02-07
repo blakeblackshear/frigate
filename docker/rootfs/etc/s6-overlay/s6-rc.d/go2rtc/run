@@ -35,7 +35,7 @@ function get_ip_and_port_from_supervisor() {
             jq --exit-status --raw-output '.data.network["8555/tcp"]'
     ) && [[ "${webrtc_port}" =~ ${port_regex} ]]; then
         webrtc_port="${BASH_REMATCH[1]}"
-        echo "[INFO] Got WebRTC port from supervisor: ${ip_address}" >&2
+        echo "[INFO] Got WebRTC port from supervisor: ${webrtc_port}" >&2
     else
         echo "[WARN] Failed to get WebRTC port from supervisor" >&2
         return 0
