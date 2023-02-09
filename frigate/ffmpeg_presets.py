@@ -9,41 +9,44 @@ from frigate.version import VERSION
 from frigate.const import BTBN_PATH
 from frigate.util import vainfo_hwaccel
 
-TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
-GPU_DEVICE_PARAM = ""
-
 
 logger = logging.getLogger(__name__)
 
 
-def get_gpu_device() -> str:
-    """Gets the appropriate Intel/AMD GPU device."""
-    if not os.path.exists("/dev/dri"):
-        return ""
+class LibvaGpuSelector:
+    "Automatically selects the correct libva GPU."
 
-    global GPU_DEVICE_PARAM
+    _selected_gpu = None
 
-    if GPU_DEVICE_PARAM:
-        return GPU_DEVICE_PARAM
+    def get_selected_gpu(self) -> str:
+        """Get selected libva GPU."""
+        if not os.path.exists("/dev/dri"):
+            return ""
 
-    devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
+        if self._selected_gpu:
+            return self._selected_gpu
 
-    if len(devices) < 2:
-        GPU_DEVICE_PARAM = "/dev/dri/renderD128"
-        return GPU_DEVICE_PARAM
-    else:
+        devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
+
+        if len(devices) < 2:
+            self._selected_gpu = "/dev/dri/renderD128"
+            return self._selected_gpu
+
         for device in devices:
             check = vainfo_hwaccel(device_name=device)
 
             logger.debug(f"{device} return vainfo status code: {check.returncode}")
 
             if check.returncode == 0:
-                GPU_DEVICE_PARAM = f"/dev/dri/{device}"
-                return GPU_DEVICE_PARAM
+                self._selected_gpu = f"/dev/dri/{device}"
+                return self._selected_gpu
 
-    return ""
+        return ""
 
 
+TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
+
+_gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
     "-user_agent",
     f"FFmpeg Frigate/{VERSION}",
@@ -58,7 +61,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "vaapi",
         "-hwaccel_device",
-        get_gpu_device(),
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "vaapi",
     ],
@@ -66,7 +69,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        get_gpu_device(),
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
@@ -78,7 +81,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        get_gpu_device(),
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
@@ -130,7 +133,7 @@ PRESETS_HW_ACCEL_SCALE = {
 PRESETS_HW_ACCEL_ENCODE = {
     "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
-    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
+    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
@@ -178,6 +181,7 @@ def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str)
     return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]).format(
         input,
         output,
+        _gpu_selector.get_selected_gpu(),
     )
 
 
