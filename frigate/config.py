@@ -372,6 +372,9 @@ class BirdseyeModeEnum(str, Enum):
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
     restream: bool = Field(default=False, title="Restream birdseye via RTSP.")
+    sort_cameras: bool = Field(
+        default=False, title="Sort cameras by position and name."
+    )
     width: int = Field(default=1280, title="Birdseye width.")
     height: int = Field(default=720, title="Birdseye height.")
     quality: int = Field(
@@ -388,6 +391,9 @@ class BirdseyeConfig(FrigateBaseModel):
 # uses BaseModel because some global attributes are not available at the camera level
 class BirdseyeCameraConfig(BaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
+    position: int = Field(
+        default=0, title="Position of the camera in the birdseye view."
+    )
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode for camera."
     )

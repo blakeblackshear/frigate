@@ -4,6 +4,7 @@ import logging
 import math
 import multiprocessing as mp
 import os
+import operator
 import queue
 import signal
 import subprocess as sp
@@ -292,8 +293,21 @@ class BirdsEyeFrameManager:
         # calculate layout dimensions
         layout_dim = math.ceil(math.sqrt(len(active_cameras)))
 
+        # check if we need to reset the layout because sorting is enabled and there are new cameras to add
+        reset_layout = (
+            True
+            if self.config.birdseye.sort_cameras
+            and len(active_cameras.difference(self.active_cameras)) > 0
+            else False
+        )
+
         # reset the layout if it needs to be different
-        if layout_dim != self.layout_dim:
+        if layout_dim != self.layout_dim or reset_layout:
+            if reset_layout:
+                logger.debug(
+                    f"Added new cameras and Birdseye sorting is enabled, resetting layout..."
+                )
+
             logger.debug(f"Changing layout size from {self.layout_dim} to {layout_dim}")
             self.layout_dim = layout_dim
 
@@ -326,6 +340,21 @@ class BirdsEyeFrameManager:
         added_cameras = active_cameras.difference(self.active_cameras)
 
         self.active_cameras = active_cameras
+
+        if self.config.birdseye.sort_cameras:
+            # this also converts added_cameras from a set to a list since we need
+            # to pop elements in order
+            added_cameras = sorted(
+                added_cameras,
+                # sort cameras by the position and by name if the position is the same
+                key=lambda added_camera: (
+                    self.config.cameras[added_camera].birdseye.position,
+                    added_camera,
+                ),
+                # we're popping out elements from the end, so this needs to be reverse
+                # as we want the last element to be the first
+                reverse=True,
+            )
 
         # update each position in the layout
         for position, camera in enumerate(self.camera_layout, start=0):
