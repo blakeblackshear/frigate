@@ -64,6 +64,9 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd \
         mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 radeontop intel-gpu-tools
+    # something about this dependency requires it to be installed in a separate call rather than in the line above
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+        i965-va-driver-shaders
     rm -f /etc/apt/sources.list.d/debian-testing.list
 fi
 
