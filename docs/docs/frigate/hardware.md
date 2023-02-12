@@ -80,10 +80,15 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name     | Model           | Inference Speed |
-| -------- | --------------- | --------------- |
-| RTX 3050 | yolov4-tiny-416 | ~ 5 ms          |
-| RTX 3050 | yolov7-tiny-416 | ~ 6 ms          |
+| Name            | Inference Speed   |
+| --------------- | ----------------- |
+| GTX 1060 6GB    | ~ 7 ms            |
+| GTX 1070        | ~ 6 ms            |
+| GTX 1660 SUPER  | ~ 4 ms            |
+| RTX 3050        | 5 - 7 ms          |
+| RTX 3070 Mobile | ~ 5 ms            |
+| Quadro P400 2GB | 20 - 25 ms        |
+| Quadro P2000    | ~ 12 ms           |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
