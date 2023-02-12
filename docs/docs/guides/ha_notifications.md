@@ -45,7 +45,7 @@ automation:
               https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg
             tag: '{{trigger.payload_json["after"]["id"]}}'
             when: '{{trigger.payload_json["after"]["start_time"]|int}}'
-            entity_id: camera.{{trigger.payload_json["after"]["camera"]}}
+            entity_id: camera.{{trigger.payload_json["after"]["camera"] | replace("-","_") | lower}}
     mode: single
 ```
 
