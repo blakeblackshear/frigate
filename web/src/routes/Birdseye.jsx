@@ -10,7 +10,10 @@ import useSWR from 'swr';
 export default function Birdseye() {
   const { data: config } = useSWR('config');
 
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence('birdseye-source', 'mse');
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
+    'birdseye-source', 
+    getDefaultLiveMode(config)
+  );
   const sourceValues = ['mse', 'webrtc', 'jsmpeg'];
 
   if (!config || !sourceIsLoaded) {
@@ -79,4 +82,17 @@ export default function Birdseye() {
       {player}
     </div>
   );
+}
+
+
+function getDefaultLiveMode(config) {
+  if (config) {
+    if (config.birdseye.restream) {
+      return config.ui.live_mode;
+    }
+
+    return 'jsmpeg';
+  }
+
+  return undefined;
 }

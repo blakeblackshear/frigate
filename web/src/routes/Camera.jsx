@@ -32,7 +32,7 @@ export default function Camera({ camera }) {
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
     `${camera}-source`,
-    getDefaultLiveMode(config, cameraConfig)
+    getDefaultLiveMode(config, cameraConfig, restreamEnabled)
   );
   const sourceValues = restreamEnabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
