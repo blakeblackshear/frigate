@@ -88,7 +88,7 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | RTX 3050        | 5 - 7 ms          |
 | RTX 3070 Mobile | ~ 5 ms            |
 | Quadro P400 2GB | 20 - 25 ms        |
-| Qudro P2000     | ~ 15 ms           |
+| Quadro P2000     | ~ 15 ms          |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
