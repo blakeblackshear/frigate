@@ -85,7 +85,9 @@ export default function System() {
         <Heading>
           System <span className="text-sm">{service.version}</span>
         </Heading>
-        <Link href={'/live/webrtc'}>go2rtc dashboard</Link>
+        <Link className="p-2" target="_blank" rel="noopener noreferrer" href={'/live/webrtc'}>
+          go2rtc dashboard
+        </Link>
       </div>
 
       {service.last_updated && (
