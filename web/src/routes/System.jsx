@@ -85,14 +85,16 @@ export default function System() {
         <Heading>
           System <span className="text-sm">{service.version}</span>
         </Heading>
-        <Link
-          className="p-1 text-blue-500 hover:underline"
-          target="_blank"
-          rel="noopener noreferrer"
-          href={'/live/webrtc'}
-        >
-          go2rtc dashboard
-        </Link>
+        {config && (
+          <Link
+            className="p-1 text-blue-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="live/webrtc"
+          >
+            go2rtc dashboard
+          </Link>
+        )}
       </div>
 
       {service.last_updated && (
