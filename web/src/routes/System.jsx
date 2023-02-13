@@ -86,7 +86,7 @@ export default function System() {
           System <span className="text-sm">{service.version}</span>
         </Heading>
         <Link
-          className="p-1 text-blue-700 hover:underline"
+          className="p-1 text-blue-500 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
           href={'/live/webrtc'}
