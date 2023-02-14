@@ -5,9 +5,9 @@ import os
 import sys
 import yaml
 
-import sys
-
-sys.path.insert(0, "/opt/frigate/frigate/ffmpeg_presets.py")
+sys.path.insert(0, "/opt/frigate")
+from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+sys.path.remove("/opt/frigate")
 
 
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
@@ -24,9 +24,9 @@ with open(config_file) as f:
     raw_config = f.read()
 
 if config_file.endswith((".yaml", ".yml")):
-    config = yaml.safe_load(raw_config)
+    config: dict[str, any] = yaml.safe_load(raw_config)
 elif config_file.endswith(".json"):
-    config = json.loads(raw_config)
+    config: dict[str, any] = json.loads(raw_config)
 
 go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
@@ -86,7 +86,7 @@ for name in go2rtc_config.get("streams", {}):
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):
-    birdseye = config.get("birdseye")
+    birdseye: dict[str, any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
     ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(config.get('ffmpeg', {}).get('hwaccel_args'), input, '-rtsp_transport tcp -f rtsp {output}')}"
