@@ -6,12 +6,11 @@ import sys
 import yaml
 
 sys.path.insert(0, "/opt/frigate")
+from frigate.const import BIRDSEYE_PIPE, BTBN_PATH
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 sys.path.remove("/opt/frigate")
 
 
-BTBN_PATH = "/usr/lib/btbn-ffmpeg"
-BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
