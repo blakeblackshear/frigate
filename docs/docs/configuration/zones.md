@@ -17,7 +17,7 @@ Often you will only want events to be created when an object enters areas of int
 
 ```yaml
 camera:
-   record:
+  record:
     events:
       required_zones:
         - entire_yard
