@@ -11,6 +11,24 @@ During testing, enable the Zones option for the debug feed so you can adjust as 
 
 To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
 
+### Restricting events to specific zones
+
+Often you will only want events to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to be notified when an object enters your entire_yard zone, the config would be:
+
+```yaml
+camera:
+  record:
+    events:
+      required_zones:
+        - entire_yard
+  snapshots:
+    required_zones:
+      - entire_yard
+  zones:
+    entire_yard:
+      coordinates: ...
+```
+
 ### Restricting zones to specific objects
 
 Sometimes you want to limit a zone to specific object types to have more granular control of when events/snapshots are saved. The following example will limit one zone to person objects and the other to cars.
