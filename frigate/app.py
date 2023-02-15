@@ -28,7 +28,6 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
-from frigate.restream import RestreamApi
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -172,10 +171,6 @@ class FrigateApp:
             self.storage_maintainer,
             self.plus_api,
         )
-
-    def init_restream(self) -> None:
-        self.restream = RestreamApi(self.config)
-        self.restream.add_cameras()
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -381,7 +376,6 @@ class FrigateApp:
             print(e)
             self.log_process.terminate()
             sys.exit(1)
-        self.init_restream()
         self.start_detectors()
         self.start_video_output_processor()
         self.start_detected_frames_processor()
