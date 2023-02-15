@@ -80,7 +80,9 @@ export default function RelativeModal({
 
       // too close to bottom
       if (top + menuHeight > windowHeight - WINDOW_PADDING + window.scrollY) {
-        newTop = WINDOW_PADDING;
+        // If the pop-up modal would extend beyond the bottom of the visible window,
+        // reposition the modal to appear above the clicked icon instead
+        newTop = top - menuHeight;
       }
 
       if (top <= WINDOW_PADDING + window.scrollY) {
