@@ -99,7 +99,7 @@ class FFMpegConverter:
                     # we know the pipe was being read from and now it is not
                     # so we should recreate the pipe to ensure no partially-read
                     # frames exist
-                    logger.error("Recreating the pipe because it was read from and now is not")
+                    logger.debug("Recreating the birdseye pipe because it was read from and now is not")
                     self.recreate_birdseye_pipe()
 
                 return
