@@ -80,11 +80,11 @@ class FFMpegConverter:
 
         if os.path.exists(BIRDSEYE_PIPE):
             os.remove(BIRDSEYE_PIPE)
-            os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
-            stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-            self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
-            os.close(stdin)
 
+        os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+        stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+        self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
+        os.close(stdin)
         self.reading_birdseye = False
 
     def write(self, b) -> None:
