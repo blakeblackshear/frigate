@@ -49,7 +49,7 @@ TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
     "-user_agent",
-    f"FFmpeg Frigate/{VERSION}",
+    f'"FFmpeg Frigate/{VERSION}"',
 ]
 
 PRESETS_HW_ACCEL_DECODE = {
