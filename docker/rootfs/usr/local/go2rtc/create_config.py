@@ -68,7 +68,7 @@ elif go2rtc_config["rtsp"].get("default_query") is None:
 # set ffmpeg defaults
 if go2rtc_config.get("ffmpeg") is None:
     go2rtc_config["ffmpeg"] = {
-        "http": f"{parse_preset_input['preset-http-reolink'].join(' ')} -i {{input}}"
+        "http": f"{' '.join(parse_preset_input('preset-http-reolink'))} -i {{input}}"
     }
 
     if not os.path.exists(BTBN_PATH):
@@ -78,7 +78,7 @@ if go2rtc_config.get("ffmpeg") is None:
         ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
 else:
     if go2rtc_config["ffmpeg"].get("http") is None:
-        go2rtc_config["ffmpeg"]["http"] = f"{parse_preset_input['preset-http-reolink'].join(' ')} -i {{input}}"
+        go2rtc_config["ffmpeg"]["http"] = f"{' '.join(parse_preset_input('preset-http-reolink'))} -i {{input}}"
 
     if not os.path.exists(BTBN_PATH) and go2rtc_config["ffmpeg"].get("rtsp") is None:
         # need to replace ffmpeg command when using ffmpeg4
