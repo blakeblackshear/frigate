@@ -38,16 +38,10 @@ class FFMpegConverter:
         quality: int,
         birdseye_rtsp: bool = False,
     ):
-        if birdseye_rtsp:
-            if os.path.exists(BIRDSEYE_PIPE):
-                os.remove(BIRDSEYE_PIPE)
+        self.bd_pipe = None
 
-            os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
-            stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-            self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
-            os.close(stdin)
-        else:
-            self.bd_pipe = None
+        if birdseye_rtsp:
+            self.recreate_birdseye_pipe()
 
         ffmpeg_cmd = [
             "ffmpeg",
@@ -80,14 +74,36 @@ class FFMpegConverter:
             start_new_session=True,
         )
 
+    def recreate_birdseye_pipe(self) -> None:
+        if self.bd_pipe:
+            os.close(self.bd_pipe)
+
+        if os.path.exists(BIRDSEYE_PIPE):
+            os.remove(BIRDSEYE_PIPE)
+
+        os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+        stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+        self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
+        os.close(stdin)
+        self.reading_birdseye = False
+
     def write(self, b) -> None:
         self.process.stdin.write(b)
 
         if self.bd_pipe:
             try:
                 os.write(self.bd_pipe, b)
+                self.reading_birdseye = True
             except BrokenPipeError:
-                # catch error when no one is listening
+                if self.reading_birdseye:
+                    # we know the pipe was being read from and now it is not
+                    # so we should recreate the pipe to ensure no partially-read
+                    # frames exist
+                    logger.debug(
+                        "Recreating the birdseye pipe because it was read from and now is not"
+                    )
+                    self.recreate_birdseye_pipe()
+
                 return
 
     def read(self, length):
