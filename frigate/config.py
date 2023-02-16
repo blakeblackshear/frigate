@@ -370,9 +370,16 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "1"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
-DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
+DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
+    "-threads",
+    "1",
+    "-f",
+    "rawvideo",
+    "-pix_fmt",
+    "yuv420p",
+]
 RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
 RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
