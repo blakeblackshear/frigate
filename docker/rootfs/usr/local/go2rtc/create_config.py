@@ -7,7 +7,11 @@ import yaml
 
 sys.path.insert(0, "/opt/frigate")
 from frigate.const import BIRDSEYE_PIPE, BTBN_PATH
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.ffmpeg_presets import (
+    parse_preset_hardware_acceleration_encode,
+    parse_preset_input,
+)
+
 sys.path.remove("/opt/frigate")
 
 
@@ -61,13 +65,23 @@ if go2rtc_config.get("rtsp") is None:
 elif go2rtc_config["rtsp"].get("default_query") is None:
     go2rtc_config["rtsp"]["default_query"] = "mp4"
 
-# need to replace ffmpeg command when using ffmpeg4
-if not os.path.exists(BTBN_PATH):
-    if go2rtc_config.get("ffmpeg") is None:
-        go2rtc_config["ffmpeg"] = {
-            "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-        }
-    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
+# set ffmpeg defaults
+if go2rtc_config.get("ffmpeg") is None:
+    go2rtc_config["ffmpeg"] = {
+        "http": f"{parse_preset_input['preset-http-reolink'].join(' ')} -i {{input}}"
+    }
+
+    if not os.path.exists(BTBN_PATH):
+        # need to replace ffmpeg command when using ffmpeg4
+        go2rtc_config["ffmpeg"][
+            "rtsp"
+        ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+else:
+    if go2rtc_config["ffmpeg"].get("http") is None:
+        go2rtc_config["ffmpeg"]["http"] = f"{parse_preset_input['preset-http-reolink'].join(' ')} -i {{input}}"
+
+    if not os.path.exists(BTBN_PATH) and go2rtc_config["ffmpeg"].get("rtsp") is None:
+        # need to replace ffmpeg command when using ffmpeg4
         go2rtc_config["ffmpeg"][
             "rtsp"
         ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
