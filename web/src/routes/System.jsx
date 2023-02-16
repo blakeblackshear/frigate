@@ -81,13 +81,27 @@ export default function System() {
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading>
-        System <span className="text-sm">{service.version}</span>
-      </Heading>
+      <div className="flex justify-between">
+        <Heading>
+          System <span className="text-sm">{service.version}</span>
+        </Heading>
+        {config && (
+          <Link
+            className="p-1 text-blue-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="live/webrtc"
+          >
+            go2rtc dashboard
+          </Link>
+        )}
+      </div>
 
       {service.last_updated && (
         <p>
-          <span>Last refreshed: <TimeAgo time={service.last_updated * 1000} dense /></span>
+          <span>
+            Last refreshed: <TimeAgo time={service.last_updated * 1000} dense />
+          </span>
         </p>
       )}
 
@@ -256,11 +270,15 @@ export default function System() {
 
                           {(() => {
                             if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
-                              return <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
+                              return (
+                                <Td>
+                                  {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                                </Td>
+                              );
                             else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
-                              return <Td>disabled</Td>
+                              return <Td>disabled</Td>;
 
-                            return <Td>- </Td>
+                            return <Td>- </Td>;
                           })()}
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
