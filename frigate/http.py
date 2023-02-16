@@ -183,6 +183,15 @@ def send_to_plus(id):
         message = f"Event {id} not found"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 404)
+        
+    if event.end_time is None:
+        logger.error(f"Unable to load clean snapshot for in-progress event: {event.id}")
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for in-progress event"}
+            ),
+            400,
+        )
 
     if event.plus_id:
         message = "Already submitted to plus"
@@ -194,6 +203,15 @@ def send_to_plus(id):
         filename = f"{event.camera}-{event.id}-clean.png"
         image = cv2.imread(os.path.join(CLIPS_DIR, filename))
     except Exception:
+        logger.error(f"Unable to load clean png for event: {event.id}")
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for event"}
+            ),
+            400,
+        )
+        
+    if image is None or image.size == 0:
         logger.error(f"Unable to load clean png for event: {event.id}")
         return make_response(
             jsonify(
