@@ -22,7 +22,7 @@ for _, name, _ in _included_modules:
     try:
         # currently openvino may fail when importing
         # on an arm device with 64 KiB page size.
-        plugin_modules += importlib.import_module(name)
+        plugin_modules.append(importlib.import_module(name))
     except ImportError as e:
         logger.error(f"Error importing detector runtime: {e}")
 
