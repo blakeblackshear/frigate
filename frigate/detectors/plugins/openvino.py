@@ -134,8 +134,6 @@ class OvDetector(DetectionApi):
                     break
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov8:
-            infer_request = self.interpreter.create_infer_request()
-            infer_request.infer([tensor_input])
             out_tensor = infer_request.get_output_tensor()
             results = out_tensor.data[0]
             output_data = np.transpose(results)
@@ -170,8 +168,6 @@ class OvDetector(DetectionApi):
                     break              
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov5:
-            infer_request = self.interpreter.create_infer_request()
-            infer_request.infer([tensor_input])
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
             conf_mask = (output_data[:, 4] >= 0.5).squeeze()
