@@ -144,7 +144,7 @@ class OvDetector(DetectionApi):
             # add scores to the last column
             dets = np.concatenate((output_data, scores), axis=1)
             # filter out lines with scores below threshold
-            dets = dets[dets[:, -1] > 0.3, :]
+            dets = dets[dets[:, -1] > 0.5, :]
             # limit to top 20 scores, descending order
             ordered = dets[dets[:, -1].argsort()[::-1]][:20]
             detections = np.zeros((20, 6), np.float32)
@@ -172,7 +172,7 @@ class OvDetector(DetectionApi):
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
             # filter out lines with scores below threshold
-            conf_mask = (output_data[:, 4] >= 0.3).squeeze()
+            conf_mask = (output_data[:, 4] >= 0.5).squeeze()
             output_data = output_data[conf_mask]
             # limit to top 20 scores, descending order
             ordered = output_data[output_data[:, 4].argsort()[::-1]][:20]
