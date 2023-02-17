@@ -1,2 +1,2 @@
-scikit-build == 0.16.4
+scikit-build == 0.16.7
 nvidia-pyindex
