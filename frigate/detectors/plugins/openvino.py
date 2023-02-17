@@ -1,22 +1,14 @@
 import logging
-
-
-logger = logging.getLogger(__name__)
-
-try:
-    # currently openvino may fail when importing
-    # on an arm device with 64 KiB page size
-    import openvino.runtime as ov
-except ImportError as e:
-    logger.error(f"Error importing openvino runtime: {e}")
-
 import numpy as np
-from pydantic import Extra, Field
-from typing import Literal
+import openvino.runtime as ov
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from typing import Literal
+from pydantic import Extra, Field
 
+
+logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "openvino"
 
