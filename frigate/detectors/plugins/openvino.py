@@ -140,19 +140,20 @@ class OvDetector(DetectionApi):
             scores = np.max(output_data[:, 4:], axis=1)
             if len(scores) == 0:
                 return np.zeros((20, 6), np.float32)
-
             scores = np.expand_dims(scores, axis=1)
-            dets = np.concatenate((output_data, scores), axis=1) # add scores to the last column
-            dets = dets[dets[:,-1] > 0.5,:] # filter out lines with scores below threshold
-
-            ordered = dets[dets[:, -1].argsort()[::-1]][:20] # limit to top 20 scores, descending order
+            # add scores to the last column
+            dets = np.concatenate((output_data, scores), axis=1)
+            # filter out lines with scores below threshold
+            dets = dets[dets[:, -1] > 0.3, :]
+            # limit to top 20 scores, descending order
+            ordered = dets[dets[:, -1].argsort()[::-1]][:20]
             detections = np.zeros((20, 6), np.float32)
             i = 0
 
             for object_detected in ordered:
                 if i < 20:
                     detections[i] = [
-                        np.argmax(object_detected[4:-1])  ,  # Label ID
+                        np.argmax(object_detected[4:-1]),  # Label ID
                         object_detected[-1],  # Confidence
                         (object_detected[1] - (object_detected[3] / 2))
                         / self.h,  # y_min
@@ -165,14 +166,16 @@ class OvDetector(DetectionApi):
                     ]
                     i += 1
                 else:
-                    break              
+                    break
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov5:
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
-            conf_mask = (output_data[:, 4] >= 0.5).squeeze()
+            # filter out lines with scores below threshold
+            conf_mask = (output_data[:, 4] >= 0.3).squeeze()
             output_data = output_data[conf_mask]
-            ordered = output_data[output_data[:, 4].argsort()[::-1]][:20] # limit to top 20 scores, descending order
+            # limit to top 20 scores, descending order
+            ordered = output_data[output_data[:, 4].argsort()[::-1]][:20]
 
             detections = np.zeros((20, 6), np.float32)
             i = 0
@@ -180,7 +183,7 @@ class OvDetector(DetectionApi):
             for object_detected in ordered:
                 if i < 20:
                     detections[i] = [
-                        np.argmax(object_detected[5:])  ,  # Label ID
+                        np.argmax(object_detected[5:]),  # Label ID
                         object_detected[4],  # Confidence
                         (object_detected[1] - (object_detected[3] / 2))
                         / self.h,  # y_min
