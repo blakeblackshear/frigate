@@ -231,6 +231,10 @@ yolov4x-mish-320
 yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
+yolov7-640
+yolov7-320
+yolov7x-640
+yolov7x-320
 ```
 
 ### Configuration Parameters
