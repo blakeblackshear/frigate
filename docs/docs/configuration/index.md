@@ -174,7 +174,6 @@ detect:
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
   # Optional: enables detection for the camera (default: True)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: True
   # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
@@ -322,7 +321,6 @@ record:
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
   # Optional: save a clean PNG copy of the snapshot image (default: shown below)
   clean_copy: True
