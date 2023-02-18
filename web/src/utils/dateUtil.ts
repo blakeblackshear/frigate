@@ -25,26 +25,27 @@ export const getNowYesterdayInLong = (): number => {
  * @param timezone: string
  * @returns string - dateTime or 'Invalid time' if unixTimestamp is not provided
  */
-export const formatUnixTimestampToDateTime = (
-  unixTimestamp: number,
-  locale: string,
-  timezone: string,
-  use12HourFormat: boolean
-): string => {
+interface DateTimeStyle {
+  timezone: string;
+  use12hour: boolean | undefined;
+  dateStyle: 'full' | 'long' | 'medium' | 'short';
+  timeStyle: 'full' | 'long' | 'medium' | 'short';
+}
+
+export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
+  const { timezone, use12hour, dateStyle, timeStyle } = config;
+  const locale = window.navigator?.language || 'en-US';
+
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
   }
   try {
     const date = new Date(unixTimestamp * 1000);
     const formatter = new Intl.DateTimeFormat(locale, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: use12HourFormat ? 'numeric' : '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: timezone,
-      hour12: use12HourFormat !== null ? use12HourFormat : undefined,
+      dateStyle,
+      timeStyle,
+      timeZone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      hour12: use12hour !== null ? use12hour : undefined,
     });
     return formatter.format(date);
   } catch (error) {
