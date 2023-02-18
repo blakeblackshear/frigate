@@ -72,6 +72,7 @@ class UIConfig(FrigateBaseModel):
     )
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
+    use12hour: Optional[bool] = Field(title="Override UI time format.")
 
 
 class TelemetryConfig(FrigateBaseModel):
