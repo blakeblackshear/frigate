@@ -25,7 +25,12 @@ export const getNowYesterdayInLong = (): number => {
  * @param timezone: string
  * @returns string - dateTime or 'Invalid time' if unixTimestamp is not provided
  */
-export const formatUnixTimestampToDateTime = (unixTimestamp: number, locale: string, timezone: string): string => {
+export const formatUnixTimestampToDateTime = (
+  unixTimestamp: number,
+  locale: string,
+  timezone: string,
+  use12HourFormat: boolean
+): string => {
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
   }
@@ -35,10 +40,11 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, locale: str
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      hour: '2-digit',
+      hour: use12HourFormat ? 'numeric' : '2-digit',
       minute: '2-digit',
       second: '2-digit',
       timeZone: timezone,
+      hour12: use12HourFormat !== null ? use12HourFormat : undefined,
     });
     return formatter.format(date);
   } catch (error) {
