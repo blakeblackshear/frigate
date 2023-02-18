@@ -67,6 +67,18 @@ class OvDetector(DetectionApi):
         self.grids = np.concatenate(grids, 1)
         self.expanded_strides = np.concatenate(expanded_strides, 1)
 
+    ## Takes in class ID, confidence score, and array of [x, y, w, h] that describes detection position,
+    ## returns an array that's easily passable back to Frigate.
+    def process_yolo(self, class_id, conf, pos):
+        return [
+            class_id,  # class ID
+            conf,  # confidence score
+            (pos[1] - (pos[3] / 2)) / self.h,  # y_min
+            (pos[0] - (pos[2] / 2)) / self.w,  # x_min
+            (pos[1] + (pos[3] / 2)) / self.h,  # y_max
+            (pos[0] + (pos[2] / 2)) / self.w,  # x_max
+        ]
+
     def detect_raw(self, tensor_input):
         infer_request = self.interpreter.create_infer_request()
         infer_request.infer([tensor_input])
@@ -113,25 +125,11 @@ class OvDetector(DetectionApi):
             ordered = dets[dets[:, 5].argsort()[::-1]][:20]
 
             detections = np.zeros((20, 6), np.float32)
-            i = 0
 
-            for object_detected in ordered:
-                if i < 20:
-                    detections[i] = [
-                        object_detected[6],  # Label ID
-                        object_detected[5],  # Confidence
-                        (object_detected[1] - (object_detected[3] / 2))
-                        / self.h,  # y_min
-                        (object_detected[0] - (object_detected[2] / 2))
-                        / self.w,  # x_min
-                        (object_detected[1] + (object_detected[3] / 2))
-                        / self.h,  # y_max
-                        (object_detected[0] + (object_detected[2] / 2))
-                        / self.w,  # x_max
-                    ]
-                    i += 1
-                else:
-                    break
+            for i, object_detected in enumerate(ordered):
+                detections[i] = self.process_yolo(
+                    object_detected[6], object_detected[5], object_detected[:4]
+                )
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov8:
             out_tensor = infer_request.get_output_tensor()
@@ -148,25 +146,13 @@ class OvDetector(DetectionApi):
             # limit to top 20 scores, descending order
             ordered = dets[dets[:, -1].argsort()[::-1]][:20]
             detections = np.zeros((20, 6), np.float32)
-            i = 0
 
-            for object_detected in ordered:
-                if i < 20:
-                    detections[i] = [
-                        np.argmax(object_detected[4:-1]),  # Label ID
-                        object_detected[-1],  # Confidence
-                        (object_detected[1] - (object_detected[3] / 2))
-                        / self.h,  # y_min
-                        (object_detected[0] - (object_detected[2] / 2))
-                        / self.w,  # x_min
-                        (object_detected[1] + (object_detected[3] / 2))
-                        / self.h,  # y_max
-                        (object_detected[0] + (object_detected[2] / 2))
-                        / self.w,  # x_max
-                    ]
-                    i += 1
-                else:
-                    break
+            for i, object_detected in enumerate(ordered):
+                detections[i] = self.process_yolo(
+                    np.argmax(object_detected[4:-1]),
+                    object_detected[-1],
+                    object_detected[:4],
+                )
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov5:
             out_tensor = infer_request.get_output_tensor()
@@ -178,23 +164,11 @@ class OvDetector(DetectionApi):
             ordered = output_data[output_data[:, 4].argsort()[::-1]][:20]
 
             detections = np.zeros((20, 6), np.float32)
-            i = 0
 
-            for object_detected in ordered:
-                if i < 20:
-                    detections[i] = [
-                        np.argmax(object_detected[5:]),  # Label ID
-                        object_detected[4],  # Confidence
-                        (object_detected[1] - (object_detected[3] / 2))
-                        / self.h,  # y_min
-                        (object_detected[0] - (object_detected[2] / 2))
-                        / self.w,  # x_min
-                        (object_detected[1] + (object_detected[3] / 2))
-                        / self.h,  # y_max
-                        (object_detected[0] + (object_detected[2] / 2))
-                        / self.w,  # x_max
-                    ]
-                    i += 1
-                else:
-                    break
+            for i, object_detected in enumerate(ordered):
+                detections[i] = self.process_yolo(
+                    np.argmax(object_detected[5:]),
+                    object_detected[4],
+                    object_detected[:4],
+                )
             return detections
