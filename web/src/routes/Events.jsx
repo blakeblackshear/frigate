@@ -508,7 +508,7 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />
-                          {formatUnixTimestampToDateTime(event.start_time, locale, timezone)}
+                          {formatUnixTimestampToDateTime(event.start_time, locale, timezone, config.ui?.use12hour)}
                           <div className="hidden md:inline">
                             <span className="m-1">-</span>
                             <TimeAgo time={event.start_time * 1000} dense />
