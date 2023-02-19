@@ -86,6 +86,9 @@ class UIConfig(FrigateBaseModel):
     timeStyle: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
     )
+    strftime_fmt: Optional[str] = Field(
+        None, title="Override date and time format using strftime syntax."
+    )
 
 
 class TelemetryConfig(FrigateBaseModel):
