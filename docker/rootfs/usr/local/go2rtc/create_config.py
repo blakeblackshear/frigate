@@ -51,7 +51,6 @@ if not go2rtc_config.get("webrtc", {}).get("candidates", []):
 else:
     print(
         "[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually",
-        file=sys.stderr,
     )
 
 # sets default RTSP response to be equivalent to ?video=h264,h265&audio=aac

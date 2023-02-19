@@ -4,17 +4,18 @@
 
 set -o errexit -o nounset -o pipefail
 
-echo "[INFO] Starting go2rtc healthcheck service..." >&2
+# Logs should be sent to stdout so that s6 can collect them
 
 # Give some additional time for go2rtc to start before start pinging
 sleep 10s
+echo "[INFO] Starting go2rtc healthcheck service..."
 
-while sleep 1m; do
+while sleep 1s; do
     # Check if the service is running
-    if ! timeout 10s curl -fsSL http://127.0.0.1:1984/api/streams >/dev/null; then
-        echo "[ERROR] The go2rtc service is not responding to ping, restarting..." >&2
+    if ! timeout 10s curl -fsSL -o /dev/null http://127.0.0.1:1984/api/streams 2>&1; then
+        echo "[ERROR] The go2rtc service is not responding to ping, restarting..."
         # We can also use -r instead of -t to send kill signal rather than term
-        s6-svc -t /var/run/service/go2rtc
+        s6-svc -t /var/run/service/go2rtc 2>&1
         # Give some additional time to go2rtc to restart before start pinging again
         sleep 10s
     fi
