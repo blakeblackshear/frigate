@@ -9,7 +9,7 @@ echo "[INFO] Starting go2rtc healthcheck service..." >&2
 while sleep 1m; do
     # Check if the service is running
     if ! timeout 10s curl -fsSL http://127.0.0.1:1984/api/streams >/dev/null; then
-        echo "[ERROR] The go2rtc is not responding to ping, restarting it..." >&2
+        echo "[ERROR] The go2rtc service is not responding to ping, restarting..." >&2
         # We can also use -r instead of -t to send kill signal rather than term
         s6-svc -t /var/run/service/go2rtc
     fi
