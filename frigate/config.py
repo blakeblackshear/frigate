@@ -80,14 +80,14 @@ class UIConfig(FrigateBaseModel):
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
     use12hour: Optional[bool] = Field(title="Override UI time format.")
-    dateStyle: DateTimeStyleEnum = Field(
+    date_style: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.short, title="Override UI dateStyle."
     )
-    timeStyle: DateTimeStyleEnum = Field(
+    time_style: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
     )
     strftime_fmt: Optional[str] = Field(
-        None, title="Override date and time format using strftime syntax."
+        default=None, title="Override date and time format using strftime syntax."
     )
 
 
