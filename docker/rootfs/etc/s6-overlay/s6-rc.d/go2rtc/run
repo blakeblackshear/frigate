@@ -41,17 +41,19 @@ function get_ip_and_port_from_supervisor() {
     export FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL="${ip_address}:${webrtc_port}"
 }
 
-echo "[INFO] Preparing go2rtc config..." >&2
+if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
+    echo "[INFO] Preparing go2rtc config..." >&2
 
-if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
-    # Running as a Home Assistant add-on, infer the IP address and port
-    get_ip_and_port_from_supervisor
+    if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
+        # Running as a Home Assistant add-on, infer the IP address and port
+        get_ip_and_port_from_supervisor
+    fi
+
+    python3 /usr/local/go2rtc/create_config.py
 fi
-
-raw_config=$(python3 /usr/local/go2rtc/create_config.py)
 
 echo "[INFO] Starting go2rtc..." >&2
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout
 exec 2>&1
-exec go2rtc -config="${raw_config}"
+exec go2rtc -config=/dev/shm/go2rtc.yaml
