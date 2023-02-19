@@ -10,7 +10,7 @@ set -o errexit -o nounset -o pipefail
 sleep 10s
 echo "[INFO] Starting go2rtc healthcheck service..."
 
-while sleep 1s; do
+while sleep 60s; do
     # Check if the service is running
     if ! timeout 10s curl -fsSL -o /dev/null http://127.0.0.1:1984/api/streams 2>&1; then
         echo "[ERROR] The go2rtc service is not responding to ping, restarting..."
