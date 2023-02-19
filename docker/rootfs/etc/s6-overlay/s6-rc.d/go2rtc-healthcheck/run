@@ -1,16 +1,21 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
-# Start the go2rtc healthcheck service
+# Start the go2rtc-healthcheck service
 
 set -o errexit -o nounset -o pipefail
 
 echo "[INFO] Starting go2rtc healthcheck service..." >&2
 
+# Give some additional time for go2rtc to start before start pinging
+sleep 10s
+
 while sleep 1m; do
     # Check if the service is running
-    if ! timeout 10s curl -fsSL http://127.0.0.1:1984/api/streams >/dev/null; then
+    if ! timeout 10s curl -fsSL http://127.0.0.1:1984/api/stressams >/dev/null; then
         echo "[ERROR] The go2rtc service is not responding to ping, restarting..." >&2
         # We can also use -r instead of -t to send kill signal rather than term
         s6-svc -t /var/run/service/go2rtc
+        # Give some additional time to go2rtc to restart before start pinging again
+        sleep 10s
     fi
 done
