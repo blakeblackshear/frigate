@@ -4,9 +4,6 @@
 
 set -o errexit -o nounset -o pipefail
 
-# Tell S6-Overlay not to restart this service
-s6-svc -O .
-
 function get_ip_and_port_from_supervisor() {
     local ip_address
     # Example: 192.168.1.10/24
