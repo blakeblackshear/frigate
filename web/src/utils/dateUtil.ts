@@ -38,13 +38,13 @@ export const getNowYesterdayInLong = (): number => {
 interface DateTimeStyle {
   timezone: string;
   use12hour: boolean | undefined;
-  dateStyle: 'full' | 'long' | 'medium' | 'short';
-  timeStyle: 'full' | 'long' | 'medium' | 'short';
+  date_style: 'full' | 'long' | 'medium' | 'short';
+  time_style: 'full' | 'long' | 'medium' | 'short';
   strftime_fmt: string;
 }
 
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
-  const { timezone, use12hour, dateStyle, timeStyle, strftime_fmt } = config;
+  const { timezone, use12hour, date_style, time_style, strftime_fmt } = config;
   const locale = window.navigator?.language || 'en-US';
 
   if (isNaN(unixTimestamp)) {
@@ -61,8 +61,8 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
 
     // else use Intl.DateTimeFormat
     const formatter = new Intl.DateTimeFormat(locale, {
-      dateStyle,
-      timeStyle,
+      dateStyle: date_style,
+      timeStyle: time_style,
       timeZone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
       hour12: use12hour !== null ? use12hour : undefined,
     });
