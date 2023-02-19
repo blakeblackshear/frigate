@@ -4,8 +4,7 @@
 
 set -o errexit -o nounset -o pipefail
 
-# Tell S6-Overlay not to restart this service
-s6-svc -O .
+# Logs should be sent to stdout so that s6 can collect them
 
 function get_ip_and_port_from_supervisor() {
     local ip_address
@@ -19,9 +18,9 @@ function get_ip_and_port_from_supervisor() {
             jq --exit-status --raw-output '.data.ipv4.address[0]'
     ) && [[ "${ip_address}" =~ ${ip_regex} ]]; then
         ip_address="${BASH_REMATCH[1]}"
-        echo "[INFO] Got IP address from supervisor: ${ip_address}" >&2
+        echo "[INFO] Got IP address from supervisor: ${ip_address}"
     else
-        echo "[WARN] Failed to get IP address from supervisor" >&2
+        echo "[WARN] Failed to get IP address from supervisor"
         return 0
     fi
 
@@ -35,26 +34,28 @@ function get_ip_and_port_from_supervisor() {
             jq --exit-status --raw-output '.data.network["8555/tcp"]'
     ) && [[ "${webrtc_port}" =~ ${port_regex} ]]; then
         webrtc_port="${BASH_REMATCH[1]}"
-        echo "[INFO] Got WebRTC port from supervisor: ${webrtc_port}" >&2
+        echo "[INFO] Got WebRTC port from supervisor: ${webrtc_port}"
     else
-        echo "[WARN] Failed to get WebRTC port from supervisor" >&2
+        echo "[WARN] Failed to get WebRTC port from supervisor"
         return 0
     fi
 
     export FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL="${ip_address}:${webrtc_port}"
 }
 
-echo "[INFO] Preparing go2rtc config..." >&2
+if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
+    echo "[INFO] Preparing go2rtc config..."
 
-if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
-    # Running as a Home Assistant add-on, infer the IP address and port
-    get_ip_and_port_from_supervisor
+    if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
+        # Running as a Home Assistant add-on, infer the IP address and port
+        get_ip_and_port_from_supervisor
+    fi
+
+    python3 /usr/local/go2rtc/create_config.py
 fi
 
-raw_config=$(python3 /usr/local/go2rtc/create_config.py)
-
-echo "[INFO] Starting go2rtc..." >&2
+echo "[INFO] Starting go2rtc..."
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout
 exec 2>&1
-exec go2rtc -config="${raw_config}"
+exec go2rtc -config=/dev/shm/go2rtc.yaml

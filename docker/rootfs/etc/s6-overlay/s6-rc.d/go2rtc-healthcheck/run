@@ -1,0 +1,22 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the go2rtc-healthcheck service
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+# Give some additional time for go2rtc to start before start pinging
+sleep 10s
+echo "[INFO] Starting go2rtc healthcheck service..."
+
+while sleep 30s; do
+    # Check if the service is running
+    if ! curl --connect-timeout 10 --fail --silent --show-error --output /dev/null http://127.0.0.1:1984/api/streams 2>&1; then
+        echo "[ERROR] The go2rtc service is not responding to ping, restarting..."
+        # We can also use -r instead of -t to send kill signal rather than term
+        s6-svc -t /var/run/service/go2rtc 2>&1
+        # Give some additional time to go2rtc to restart before start pinging again
+        sleep 10s
+    fi
+done

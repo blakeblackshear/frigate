@@ -7,6 +7,6 @@ set -o errexit -o nounset -o pipefail
 
 readonly exit_code_service="${1}"
 readonly exit_code_signal="${2}"
-readonly service="go2rtc"
+readonly service="go2rtc-healthcheck"
 
 echo "[INFO] The ${service} service exited with code ${exit_code_service} (by signal ${exit_code_signal})"

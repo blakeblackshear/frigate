@@ -8,6 +8,7 @@ import yaml
 sys.path.insert(0, "/opt/frigate")
 from frigate.const import BIRDSEYE_PIPE, BTBN_PATH
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+
 sys.path.remove("/opt/frigate")
 
 
@@ -50,7 +51,6 @@ if not go2rtc_config.get("webrtc", {}).get("candidates", []):
 else:
     print(
         "[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually",
-        file=sys.stderr,
     )
 
 # sets default RTSP response to be equivalent to ?video=h264,h265&audio=aac
@@ -95,5 +95,6 @@ if config.get("birdseye", {}).get("restream", False):
     else:
         go2rtc_config["streams"] = {"birdseye": ffmpeg_cmd}
 
-
-print(json.dumps(go2rtc_config))
+# Write go2rtc_config to /dev/shm/go2rtc.yaml
+with open("/dev/shm/go2rtc.yaml", "w") as f:
+    yaml.dump(go2rtc_config, f)
