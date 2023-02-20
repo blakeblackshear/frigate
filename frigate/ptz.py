@@ -76,7 +76,12 @@ class OnvifController:
         self.cams[camera_name]["move_request"] = move_request
 
         # setup existing presets
-        presets: list[dict] = ptz.GetPresets({"ProfileToken": profile.token})
+        try:
+            presets: list[dict] = ptz.GetPresets({"ProfileToken": profile.token})
+        except ONVIFError as e:
+            logger.error(f"Unable to get presets from camera: {camera_name}: {e}")
+            return False
+
         for preset in presets:
             self.cams[camera_name]["presets"][preset["Name"].lower()] = preset["token"]
 
