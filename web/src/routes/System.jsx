@@ -90,7 +90,7 @@ export default function System() {
             className="p-1 text-blue-500 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
-            href="live/webrtc"
+            href="/live/webrtc/"
           >
             go2rtc dashboard
           </Link>
