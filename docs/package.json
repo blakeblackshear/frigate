@@ -20,8 +20,8 @@
     "clsx": "^1.2.1",
     "raw-loader": "^4.0.2",
     "prism-react-renderer": "^1.3.5",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "browserslist": {
     "production": [
@@ -36,7 +36,7 @@
     ]
   },
   "devDependencies": {
-    "@types/react": "^17.0.0",
+    "@types/react": "^18.0.28",
     "@docusaurus/module-type-aliases": "2.2.0"
   },
   "engines": {
