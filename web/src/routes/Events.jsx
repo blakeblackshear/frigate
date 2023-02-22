@@ -287,9 +287,6 @@ export default function Events({ path, ...props }) {
     return <ActivityIndicator />;
   }
 
-  const timezone = config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const locale = window.navigator?.language || 'en-US';
-
   return (
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
@@ -508,7 +505,7 @@ export default function Events({ path, ...props }) {
                         </div>
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />
-                          {formatUnixTimestampToDateTime(event.start_time, locale, timezone)}
+                          {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
                           <div className="hidden md:inline">
                             <span className="m-1">-</span>
                             <TimeAgo time={event.start_time * 1000} dense />

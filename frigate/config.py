@@ -66,12 +66,29 @@ class LiveModeEnum(str, Enum):
     webrtc = "webrtc"
 
 
+class DateTimeStyleEnum(str, Enum):
+    full = "full"
+    long = "long"
+    medium = "medium"
+    short = "short"
+
+
 class UIConfig(FrigateBaseModel):
     live_mode: LiveModeEnum = Field(
         default=LiveModeEnum.mse, title="Default Live Mode."
     )
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
+    use12hour: Optional[bool] = Field(title="Override UI time format.")
+    date_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.short, title="Override UI dateStyle."
+    )
+    time_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
+    )
+    strftime_fmt: Optional[str] = Field(
+        default=None, title="Override date and time format using strftime syntax."
+    )
 
 
 class TelemetryConfig(FrigateBaseModel):
