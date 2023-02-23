@@ -45,11 +45,12 @@ interface DateTimeStyle {
 
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
   const { timezone, time_format, date_style, time_style, strftime_fmt } = config;
-  const locale = window.navigator?.language || 'en-US';
+  const locale = window.navigator?.language || 'en-us';
 
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
   }
+
   try {
     const date = new Date(unixTimestamp * 1000);
 

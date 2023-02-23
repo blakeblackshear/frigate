@@ -477,18 +477,6 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
-      # Optional: Override browser locale and show time in 12 / 24 hour format (default: use browser locale)
-      use12hour: False
-      # Optional: Set the date style for a specified length. 
-      # Options are: full, long, medium, sort (default: shown below).
-      date_style: short
-      # Optional: Set the time style for a specified length. 
-      # Options are: full, long, medium, sort (default: shown below).
-      time_style: medium
-      # Optional: Ability to manually override the date / time styling to use strftime format
-      # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
-      # possible values are shown above (default: not set)
-      strftime_fmt: "%Y/%m/%d %H:%M"
 
 # Optional
 ui:
@@ -498,6 +486,29 @@ ui:
   timezone: None
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   experimental_ui: False
+  # Optional: Set the time format used.
+  # Options are browser, hour12, or hour24 (default: shown below)
+  time-format: browser
+  # Optional: Set the date style for a specified length.
+  # Options are: full, long, medium, sort
+  # Examples:
+  #    short: 2/11/23
+  #    medium: Feb 11, 2023
+  #    full: Saturday, February 11, 2023
+  # (default: shown below).
+  date_style: short
+  # Optional: Set the time style for a specified length.
+  # Options are: full, long, medium, sort
+  # Examples:
+  #    short: 8:14 PM
+  #    medium: 8:15:22 PM
+  #    full: 8:15:22 PM Mountain Standard Time
+  # (default: shown below).
+  time_style: medium
+  # Optional: Ability to manually override the date / time styling to use strftime format
+  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
+  # possible values are shown above (default: not set)
+  strftime_fmt: "%Y/%m/%d %H:%M"
 
 # Optional: Telemetry configuration
 telemetry:
