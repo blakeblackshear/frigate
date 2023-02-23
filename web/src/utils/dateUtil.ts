@@ -37,14 +37,14 @@ export const getNowYesterdayInLong = (): number => {
  */
 interface DateTimeStyle {
   timezone: string;
-  use12hour: boolean | undefined;
+  time_format: 'browser' | '12hour' | '24hour';
   date_style: 'full' | 'long' | 'medium' | 'short';
   time_style: 'full' | 'long' | 'medium' | 'short';
   strftime_fmt: string;
 }
 
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
-  const { timezone, use12hour, date_style, time_style, strftime_fmt } = config;
+  const { timezone, time_format, date_style, time_style, strftime_fmt } = config;
   const locale = window.navigator?.language || 'en-US';
 
   if (isNaN(unixTimestamp)) {
@@ -64,7 +64,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
       dateStyle: date_style,
       timeStyle: time_style,
       timeZone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-      hour12: use12hour !== null ? use12hour : undefined,
+      hour12: time_format !== 'browser' ? time_format == '12hour' : undefined,
     });
     return formatter.format(date);
   } catch (error) {
