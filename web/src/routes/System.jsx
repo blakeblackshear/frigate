@@ -300,5 +300,5 @@ export default function System() {
 }
 
 function jsonCleaner(key, value) {
-  return value.replace(/[\\n]+/gi, '');
+  return value.replace(/[\\\s]+/gi, '');
 }
