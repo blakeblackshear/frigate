@@ -171,10 +171,12 @@ class RecordingMaintainer(threading.Thread):
                     else:
                         if duration == -1:
                             logger.warning(
-                                f"Failed to probe corrupt segment {f}: {p.returncode} - {p.stderr}"
+                                f"Failed to probe corrupt segment {cache_path}: {p.returncode} - {p.stderr}"
                             )
 
-                        logger.warning(f"Discarding a corrupt recording segment: {f}")
+                        logger.warning(
+                            f"Discarding a corrupt recording segment: {cache_path}"
+                        )
                         Path(cache_path).unlink(missing_ok=True)
                         continue
 
