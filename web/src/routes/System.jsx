@@ -351,7 +351,3 @@ export default function System() {
     </div>
   );
 }
-
-function jsonCleaner(key, value) {
-  return value.replace(/[\\\s]+/gi, '');
-}
