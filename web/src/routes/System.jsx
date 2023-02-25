@@ -56,7 +56,7 @@ export default function System() {
   };
 
   const onCopyFfprobe = async () => {
-    copy(JSON.stringify(JSON.stringify(state.ffprobe), jsonCleaner, 2));
+    copy(JSON.stringify(state.ffprobe).replace(/[\\\s]+/gi, ''));
     setState({ ...state, ffprobe: '', showFfprobe: false });
   };
 
@@ -79,7 +79,7 @@ export default function System() {
   };
 
   const onCopyVainfo = async () => {
-    copy(JSON.stringify(JSON.stringify(state.vainfo), jsonCleaner, 2));
+    copy(JSON.stringify(state.vainfo).replace(/[\\\s]+/gi, ''));
     setState({ ...state, vainfo: '', showVainfo: false });
   };
 
