@@ -37,7 +37,22 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 :::
 
-**Note:** Environment variable substitution is only supported for MQTT password and camera ffmpeg paths. Only environment variables starting with `FRIGATE_` will be used.  For example, `{FRIGATE_MQTT_PASSWORD}`, `{FRIGATE_RTSP_USER}`, `{FRIGATE_RTSP_PASSWORD}`.
+**Note:** The following values will be replaced at runtime by using environment variables
+
+- `{FRIGATE_MQTT_USER}`
+- `{FRIGATE_MQTT_PASSWORD}`
+- `{FRIGATE_RTSP_USER}`
+- `{FRIGATE_RTSP_PASSWORD}`
+
+for example:
+```yaml
+mqtt:
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+```yaml
+- path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
+```
 
 ```yaml
 mqtt:
