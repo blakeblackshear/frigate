@@ -68,7 +68,11 @@ export default function System() {
     const response = await axios.get('vainfo');
 
     if (response.status === 200) {
-      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(response.data, null, 2) });
+      setState({
+        ...state,
+        showVainfo: true,
+        vainfo: response.data,
+      });
     } else {
       setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.' });
     }
@@ -128,10 +132,22 @@ export default function System() {
 
       {state.showVainfo && (
         <Dialog>
-          <div className="p-4">
+          <div className="p-4 overflow-scroll whitespace-pre-line">
             <Heading size="lg">Vainfo Output</Heading>
             {state.vainfo != '' ? (
-              <p className="mb-2 max-h-96 overflow-scroll">{state.vainfo}</p>
+              <div className="mb-2 max-h-96 whitespace-pre-line">
+                <div className="">Return Code:</div>
+                <br />
+                <div>{state.vainfo.return_code}</div>
+                <br />
+                <div className="">Process Error:</div>
+                <br />
+                <div>{state.vainfo.stderr}</div>
+                <br />
+                <div className="">Process Output:</div>
+                <br />
+                {state.vainfo.stdout}
+              </div>
             ) : (
               <ActivityIndicator />
             )}
