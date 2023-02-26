@@ -1296,12 +1296,12 @@ def ffprobe():
         output.append(
             {
                 "return_code": ffprobe.returncode,
-                "stderr": json.loads(ffprobe.stderr.decode("unicode_escape").strip())
-                if ffprobe.stderr.decode()
-                else {},
+                "stderr": ffprobe.stderr.decode("unicode_escape").strip()
+                if ffprobe.returncode != 0
+                else "",
                 "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                if ffprobe.stdout.decode()
-                else {},
+                if ffprobe.returncode == 0
+                else "",
             }
         )
 
