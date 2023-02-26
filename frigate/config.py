@@ -66,6 +66,12 @@ class LiveModeEnum(str, Enum):
     webrtc = "webrtc"
 
 
+class TimeFormatEnum(str, Enum):
+    browser = "browser"
+    hours12 = "12hour"
+    hours24 = "24hour"
+
+
 class DateTimeStyleEnum(str, Enum):
     full = "full"
     long = "long"
@@ -79,7 +85,9 @@ class UIConfig(FrigateBaseModel):
     )
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
-    use12hour: Optional[bool] = Field(title="Override UI time format.")
+    time_format: TimeFormatEnum = Field(
+        default=TimeFormatEnum.browser, title="Override UI time format."
+    )
     date_style: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.short, title="Override UI dateStyle."
     )
