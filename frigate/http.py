@@ -6,7 +6,8 @@ import logging
 import json
 import os
 import subprocess as sp
-from prometheus_client import REGISTRY, generate_latest
+from prometheus_client import REGISTRY, generate_latest, make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import pytz
 import time
 import traceback
@@ -36,7 +37,8 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
-from frigate.prometheus_exporter import FrigateCollector
+from frigate.prometheus_exporter import setupRegistry
+
 from frigate.stats import stats_snapshot
 from frigate.util import (
     clean_camera_user_pass,
@@ -83,7 +85,11 @@ def create_app(
 
     app.register_blueprint(bp)
 
-    
+
+
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+        "/metrics": make_wsgi_app(registry=setupRegistry())
+    })
 
     return app
 
@@ -824,7 +830,7 @@ def stats():
     return jsonify(stats)
 
 
-@bp.route("/metrics")
+@bp.route("/metrics2")
 def metrics():
 
     return generate_latest()

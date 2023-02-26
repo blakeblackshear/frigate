@@ -1,6 +1,8 @@
 from prometheus_client import CollectorRegistry
 from prometheus_client.metrics_core import GaugeMetricFamily
-from requester import Requester
+
+from frigate.requester import Requester
+
 
 
 def setupRegistry():
