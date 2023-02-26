@@ -487,7 +487,7 @@ ui:
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   experimental_ui: False
   # Optional: Set the time format used.
-  # Options are browser, hours12, or hours24 (default: shown below)
+  # Options are browser, 12hour, or 24hour (default: shown below)
   time_format: browser
   # Optional: Set the date style for a specified length.
   # Options are: full, long, medium, sort

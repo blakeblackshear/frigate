@@ -68,8 +68,8 @@ class LiveModeEnum(str, Enum):
 
 class TimeFormatEnum(str, Enum):
     browser = "browser"
-    hours12 = "hours12"
-    hours24 = "hours24"
+    hours12 = "12hour"
+    hours24 = "24hour"
 
 
 class DateTimeStyleEnum(str, Enum):
