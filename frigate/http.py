@@ -6,6 +6,7 @@ import logging
 import json
 import os
 import subprocess as sp
+from prometheus_client import REGISTRY, generate_latest
 import pytz
 import time
 import traceback
@@ -35,6 +36,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
+from frigate.prometheus_exporter import FrigateCollector
 from frigate.stats import stats_snapshot
 from frigate.util import (
     clean_camera_user_pass,
@@ -80,6 +82,8 @@ def create_app(
     app.hwaccel_errors = []
 
     app.register_blueprint(bp)
+
+    
 
     return app
 
@@ -818,6 +822,12 @@ def stats():
         current_app.hwaccel_errors,
     )
     return jsonify(stats)
+
+
+@bp.route("/metrics")
+def metrics():
+
+    return generate_latest()
 
 
 @bp.route("/<camera_name>")
