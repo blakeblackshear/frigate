@@ -640,7 +640,9 @@ def events():
             sub_label_clauses.append((Event.sub_label.is_null()))
 
         for label in filtered_sub_labels:
-            sub_label_clauses.append((Event.sub_label.cast("text") == label)) # include exact matches
+            sub_label_clauses.append(
+                (Event.sub_label.cast("text") == label)
+            )  # include exact matches
 
             # include this label when part of a list
             sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
