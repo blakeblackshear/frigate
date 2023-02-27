@@ -322,7 +322,9 @@ def get_sub_labels():
         sub_labels.remove(None)
 
     if split_joined:
-        for label in sub_labels:
+        original_labels = sub_labels.copy()
+
+        for label in original_labels:
             if "," in label:
                 sub_labels.remove(label)
                 parts = label.split(",")
