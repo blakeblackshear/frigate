@@ -66,6 +66,7 @@ export default function Events({ path, ...props }) {
     has_clip: false,
     has_snapshot: false,
     plus_id: undefined,
+    end_time: null,
   });
   const [deleteFavoriteState, setDeleteFavoriteState] = useState({
     deletingFavoriteEventId: null,
