@@ -6,8 +6,6 @@ import logging
 import json
 import os
 import subprocess as sp
-from prometheus_client import REGISTRY, generate_latest, make_wsgi_app
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import pytz
 import time
 import traceback
@@ -16,6 +14,8 @@ from functools import reduce
 from pathlib import Path
 from tzlocal import get_localzone_name
 from urllib.parse import unquote
+from prometheus_client import REGISTRY, generate_latest, make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 import cv2
 
