@@ -333,6 +333,7 @@ def get_sub_labels():
                     if not (part.strip()) in sub_labels:
                         sub_labels.append(part.strip())
 
+    sub_labels.sort()
     return jsonify(sub_labels)
 
 
