@@ -191,6 +191,7 @@ export default function Events({ path, ...props }) {
       has_clip: event.has_clip,
       has_snapshot: event.has_snapshot,
       plus_id: event.plus_id,
+      end_time: event.end_time,
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
