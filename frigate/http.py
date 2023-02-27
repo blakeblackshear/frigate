@@ -85,11 +85,9 @@ def create_app(
 
     app.register_blueprint(bp)
 
-
-
-    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-        "/metrics": make_wsgi_app(registry=setupRegistry())
-    })
+    app.wsgi_app = DispatcherMiddleware(
+        app.wsgi_app, {"/metrics": make_wsgi_app(registry=setupRegistry())}
+    )
 
     return app
 
