@@ -830,12 +830,6 @@ def stats():
     return jsonify(stats)
 
 
-@bp.route("/metrics2")
-def metrics():
-
-    return generate_latest()
-
-
 @bp.route("/<camera_name>")
 def mjpeg_feed(camera_name):
     fps = int(request.args.get("fps", "3"))
