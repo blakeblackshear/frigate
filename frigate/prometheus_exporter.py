@@ -68,7 +68,7 @@ class CustomCollector:
         )
 
         for k, d in data.items():
-            add_metric(ffmpeg_pid, k, d, "ffmpeg_pid")
+            add_metric(ffmpeg_up, k, d is not None, "ffmpeg_up")
             add_metric(detect_pid, k, d, "pid")
             add_metric(capture_pid, k, d, "capture_pid")
             add_metric(camera_fps, k, d, "camera_fps")
