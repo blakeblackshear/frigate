@@ -28,8 +28,8 @@ class CustomCollector:
         data = json.loads(urlopen(self.stats_url).read())
 
         # camera stats
-        ffmpeg_pid = GaugeMetricFamily(
-            "frigate_ffmpeg_pid", "PID for ffmpeg process", labels=["camera"]
+        ffmpeg_up = GaugeMetricFamily(
+            "frigate_ffmpeg_up", "Whether the ffmpeg process for a camera is up", labels=["camera"]
         )
         capture_pid = GaugeMetricFamily(
             "frigate_capture_pid",
