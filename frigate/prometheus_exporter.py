@@ -77,7 +77,7 @@ class CustomCollector:
             add_metric(skipped_fps, k, d, "skipped_fps")
             add_metric(detection_enabled, k, d, "detection_enabled")
 
-        yield ffmpeg_pid
+        yield ffmpeg_up
         yield capture_pid
         yield detect_pid
         yield camera_fps
