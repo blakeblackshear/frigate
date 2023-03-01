@@ -29,7 +29,9 @@ class CustomCollector:
 
         # camera stats
         ffmpeg_up = GaugeMetricFamily(
-            "frigate_ffmpeg_up", "Whether the ffmpeg process for a camera is up", labels=["camera"]
+            "frigate_ffmpeg_up",
+            "Whether the ffmpeg process for a camera is up",
+            labels=["camera"],
         )
         capture_pid = GaugeMetricFamily(
             "frigate_capture_pid",

@@ -28,7 +28,7 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
-from frigate.stats import StatsEmitter, stats_init
+from frigate.monitoring.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera

@@ -13,15 +13,15 @@ services:
       context: .
       # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
-    deploy:
-          resources:
-              reservations:
-                  devices:
-                      - driver: nvidia
-                        count: 1
-                        capabilities: [gpu]
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
+    # deploy:
+    #       resources:
+    #           reservations:
+    #               devices:
+    #                   - driver: nvidia
+    #                     count: 1
+    #                     capabilities: [gpu]
+    # devices:
+    #  - /dev/bus/usb:/dev/bus/usb
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - .:/workspace/frigate:cached
@@ -31,7 +31,7 @@ services:
       - ./debug:/media/frigate
       # Create the trt-models folder using the documented method of generating TRT models
       # - ./debug/trt-models:/trt-models
-      - /dev/bus/usb:/dev/bus/usb
+    #  - /dev/bus/usb:/dev/bus/usb
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:1.6

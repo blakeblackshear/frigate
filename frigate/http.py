@@ -37,9 +37,9 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.object_processing import TrackedObject
-from frigate.prometheus_exporter import setupRegistry
+from frigate.monitoring.prometheus import setupRegistry
 
-from frigate.stats import stats_snapshot
+from frigate.monitoring.stats import stats_snapshot
 from frigate.util import (
     clean_camera_user_pass,
     ffprobe_stream,
