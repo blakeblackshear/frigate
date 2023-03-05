@@ -57,6 +57,7 @@ mqtt:
   # Optional: password
   # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
   #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'
+  # This is only supported on Frigate 0.12 and above!
   password: password
   # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
   tls_ca_certs: /path/to/ca.crt
