@@ -111,6 +111,7 @@ def events_summary():
         Event.select(
             Event.camera,
             Event.label,
+            Event.sub_label,
             fn.strftime(
                 "%Y-%m-%d",
                 fn.datetime(
@@ -124,6 +125,7 @@ def events_summary():
         .group_by(
             Event.camera,
             Event.label,
+            Event.sub_label,
             fn.strftime(
                 "%Y-%m-%d",
                 fn.datetime(
