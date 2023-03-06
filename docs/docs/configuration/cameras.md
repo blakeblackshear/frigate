@@ -48,3 +48,28 @@ cameras:
 ```
 
 For camera model specific settings check the [camera specific](camera_specific.md) infos.
+
+## Rotate Cameras
+
+Cameras can be rotate to '90', '180' or '270' (-90) degrees by using `rotate: XX`.
+The camera will only rotate to valid arguments: '90', '180' or '270', invalid arguments disable the rotation.
+
+```yaml
+mqtt:
+  host: mqtt.server.com
+cameras:
+  back:
+    enabled: True
+    ffmpeg:
+      inputs:
+        - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          roles:
+            - detect
+            - record
+    rotate: 90
+    detect:
+      width: 1280
+      height: 720
+```
+
+The default value is '0', no rotation enable.
