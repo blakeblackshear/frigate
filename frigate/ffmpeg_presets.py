@@ -388,31 +388,31 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
     return PRESETS_INPUT.get(arg, None)
 
 
-PRESETS_RECORD_OUTPUT = "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1"
+PRESETS_RECORD_OUTPUT = "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 {0} {1}"
 PRESETS_RECORD_VIDEO_AUDIO = {
     "preset-record-generic": {
-        "video": " -c:v copy",
-        "audio": " -an",
+        "video": "-c:v copy",
+        "audio": "-an",
     },
     "preset-record-generic-audio-aac": {
-        "video": " -c:v copy",
-        "audio": " -c:a aac",
+        "video": "-c:v copy",
+        "audio": "-c:a aac",
     },
     "preset-record-generic-audio-copy": {
-        "video": " -c:v copy",
-        "audio": " -c:a copy",
+        "video": "-c:v copy",
+        "audio": "-c:a copy",
     },
     "preset-record-mjpeg": {
-        "video": " -c:v libx264",
-        "audio": " -an",
+        "video": "-c:v libx264",
+        "audio": "-an",
     },
     "preset-record-jpeg": {
-        "video": " -c:v libx264",
-        "audio": " -an",
+        "video": "-c:v libx264",
+        "audio": "-an",
     },
     "preset-record-ubiquiti": {
-        "video": " -c:v copy",
-        "audio": " -ar 44100 -c:a aac",
+        "video": "-c:v copy",
+        "audio": "-ar 44100 -c:a aac",
     },
 }
 
@@ -430,10 +430,10 @@ def parse_preset_output_record(arg: Any, hw_acc: Any, rotate: int) -> list[str]:
     
     video = preset_record_video_audio["video"]
     transpose =_parse_rotation_scale(hw_acc, "record", rotate)
-    if transpose != "" or not "copy" in video:
+    if transpose != "":
         video = transpose + " -c:v libx264"
 
-    return (PRESETS_RECORD_OUTPUT + video + audio).split(" ")
+    return PRESETS_RECORD_OUTPUT.format(video, audio).split(" ")
 
 
 PRESETS_RTMP_OUTPUT = {
