@@ -66,6 +66,7 @@ export default function Events({ path, ...props }) {
     has_clip: false,
     has_snapshot: false,
     plus_id: undefined,
+    end_time: null,
   });
   const [deleteFavoriteState, setDeleteFavoriteState] = useState({
     deletingFavoriteEventId: null,
@@ -190,6 +191,7 @@ export default function Events({ path, ...props }) {
       has_clip: event.has_clip,
       has_snapshot: event.has_snapshot,
       plus_id: event.plus_id,
+      end_time: event.end_time,
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
