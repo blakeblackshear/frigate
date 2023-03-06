@@ -19,6 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Image Build
     steps:
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
       - id: lowercaseRepo
         uses: ASzc/change-string-case-action@v5
         with:

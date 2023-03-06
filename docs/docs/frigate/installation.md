@@ -163,7 +163,10 @@ docker run -d \
 
 :::caution
 
-Due to limitations in Home Assistant Operating System, utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
+There are important limitations in Home Assistant Operating System to be aware of:
+- Utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
+- AMD GPUs are not supported because HA OS does not include the mesa driver.
+- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
 :::
 
@@ -193,6 +196,13 @@ There are several versions of the addon available:
 | Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
 
 ## Home Assistant Supervised
+
+:::caution
+
+There are important limitations in Home Assistant Supervised to be aware of:
+- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
+
+:::
 
 :::tip
 

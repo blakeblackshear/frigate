@@ -30,6 +30,12 @@ elif config_file.endswith(".json"):
 
 go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
+# Need to enable CORS for go2rtc so the frigate integration / card work automatically
+if go2rtc_config.get("api") is None:
+    go2rtc_config["api"] = {"origin": "*"}
+elif go2rtc_config["api"].get("origin") is None:
+    go2rtc_config["api"]["origin"] = "*"
+
 # we want to ensure that logs are easy to read
 if go2rtc_config.get("log") is None:
     go2rtc_config["log"] = {"format": "text"}
