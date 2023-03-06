@@ -291,6 +291,126 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
+    def test_ffmpeg_output_record_rotate_90_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 90
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-record-generic-audio-aac" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-vf transpose=clock -c:v libx264 -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_rotate_180_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-rpi-64-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-rpi-64-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-vf transpose=clock,transpose=clock -c:v libx264 -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_rotate_180_vaapi_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-vaapi"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-vaapi" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-vf transpose_vaapi=reverse -c:v libx264 -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_rotate_180_qsv_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-intel-qsv-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-intel-qsv-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-vf vpp_qsv=transpose=reverse -c:v libx264 -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_rotate_270_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 270
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-vf transpose=cclock -c:v libx264 -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_rotate_wrong_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 20
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-generic-audio-aac"
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-c:v copy -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
     def test_ffmpeg_output_rtmp_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "rtmp"

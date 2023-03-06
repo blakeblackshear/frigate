@@ -690,7 +690,11 @@ class CameraConfig(FrigateBaseModel):
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
             record_args = get_ffmpeg_arg_list(
-                parse_preset_output_record(self.ffmpeg.output_args.record)
+                parse_preset_output_record(
+                    self.ffmpeg.output_args.record,
+                    ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args,
+                    self.rotate,
+                )
                 or self.ffmpeg.output_args.record
             )
 

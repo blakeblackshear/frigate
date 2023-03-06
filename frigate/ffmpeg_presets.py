@@ -119,14 +119,38 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_SCALE_ROTATION = {
-    "preset-rpi-32-h264": " -vf transpose={0}",
-    "preset-rpi-64-h264": " -vf transpose={0}",
-    "preset-vaapi": "transpose_vaapi={0},",
-    "preset-intel-qsv-h264": "transpose={0}:",
-    "preset-intel-qsv-h265": "transpose={0}:",
-    "preset-nvidia-h264": "transpose={0},",
-    "preset-nvidia-h265": "transpose={0},",
-    "default": " -vf transpose={0}",
+    "preset-rpi-32-h264": {
+        "detect": " -vf transpose={0}",
+        "record": " -vf transpose={0}",
+    },
+    "preset-rpi-64-h264": {
+        "detect": " -vf transpose={0}",
+        "record": " -vf transpose={0}",
+    },
+    "preset-vaapi": {
+        "detect": "transpose_vaapi={0},",
+        "record": " -vf transpose_vaapi={0}",
+    },
+    "preset-intel-qsv-h264": {
+        "detect": "transpose={0}:",
+        "record": " -vf vpp_qsv=transpose={0}",
+    },
+    "preset-intel-qsv-h265": {
+        "detect": "transpose={0}:",
+        "record": " -vf vpp_qsv=transpose={0}",
+    },
+    "preset-nvidia-h264": {
+        "detect": "transpose={0},",
+        "record": " -vf transpose={0}",
+    },
+    "preset-nvidia-h265": {
+        "detect": "transpose={0},",
+        "record": " -vf transpose={0}",
+    },
+    "default": {
+        "detect": " -vf transpose={0}",
+        "record": " -vf transpose={0}",
+    },
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
@@ -151,6 +175,7 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
 
 def _parse_rotation_scale(
     arg: Any,
+    mode: str,
     rotate: int,
 ) -> str:
     """Return the correct rotation scale or "" if preset none is set."""
@@ -169,7 +194,7 @@ def _parse_rotation_scale(
     else : # Rotation not need or not supported
         return ""
 
-    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").format(transpose)
+    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").get(mode).format(transpose)
 
 
 def parse_preset_hardware_acceleration_scale(
@@ -186,7 +211,7 @@ def parse_preset_hardware_acceleration_scale(
         scale.extend(detect_args)
         return scale
 
-    transpose =_parse_rotation_scale(arg, rotate)
+    transpose =_parse_rotation_scale(arg, "detect", rotate)
 
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
 
@@ -363,109 +388,52 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
     return PRESETS_INPUT.get(arg, None)
 
 
-PRESETS_RECORD_OUTPUT = {
-    "preset-record-generic": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c",
-        "copy",
-        "-an",
-    ],
-    "preset-record-generic-audio-aac": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c:v",
-        "copy",
-        "-c:a",
-        "aac",
-    ],
-    "preset-record-generic-audio-copy": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c",
-        "copy",
-    ],
-    "preset-record-mjpeg": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c:v",
-        "libx264",
-        "-an",
-    ],
-    "preset-record-jpeg": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c:v",
-        "libx264",
-        "-an",
-    ],
-    "preset-record-ubiquiti": [
-        "-f",
-        "segment",
-        "-segment_time",
-        "10",
-        "-segment_format",
-        "mp4",
-        "-reset_timestamps",
-        "1",
-        "-strftime",
-        "1",
-        "-c:v",
-        "copy",
-        "-ar",
-        "44100",
-        "-c:a",
-        "aac",
-    ],
+PRESETS_RECORD_OUTPUT = "-f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1"
+PRESETS_RECORD_VIDEO_AUDIO = {
+    "preset-record-generic": {
+        "video": " -c:v copy",
+        "audio": " -an",
+    },
+    "preset-record-generic-audio-aac": {
+        "video": " -c:v copy",
+        "audio": " -c:a aac",
+    },
+    "preset-record-generic-audio-copy": {
+        "video": " -c:v copy",
+        "audio": " -c:a copy",
+    },
+    "preset-record-mjpeg": {
+        "video": " -c:v libx264",
+        "audio": " -an",
+    },
+    "preset-record-jpeg": {
+        "video": " -c:v libx264",
+        "audio": " -an",
+    },
+    "preset-record-ubiquiti": {
+        "video": " -c:v copy",
+        "audio": " -ar 44100 -c:a aac",
+    },
 }
 
 
-def parse_preset_output_record(arg: Any) -> list[str]:
+def parse_preset_output_record(arg: Any, hw_acc: Any, rotate: int) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
-    return PRESETS_RECORD_OUTPUT.get(arg, None)
+    preset_record_video_audio = PRESETS_RECORD_VIDEO_AUDIO.get(arg, None)
+    if not preset_record_video_audio:
+        return None
+
+    audio = preset_record_video_audio["audio"]
+    
+    video = preset_record_video_audio["video"]
+    transpose =_parse_rotation_scale(hw_acc, "record", rotate)
+    if transpose != "" or not "copy" in video:
+        video = transpose + " -c:v libx264"
+
+    return (PRESETS_RECORD_OUTPUT + video + audio).split(" ")
 
 
 PRESETS_RTMP_OUTPUT = {
