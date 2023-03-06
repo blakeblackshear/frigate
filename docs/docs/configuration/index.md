@@ -490,7 +490,7 @@ ui:
   # Options are browser, 12hour, or 24hour (default: shown below)
   time_format: browser
   # Optional: Set the date style for a specified length.
-  # Options are: full, long, medium, sort
+  # Options are: full, long, medium, short
   # Examples:
   #    short: 2/11/23
   #    medium: Feb 11, 2023
@@ -498,7 +498,7 @@ ui:
   # (default: shown below).
   date_style: short
   # Optional: Set the time style for a specified length.
-  # Options are: full, long, medium, sort
+  # Options are: full, long, medium, short
   # Examples:
   #    short: 8:14 PM
   #    medium: 8:15:22 PM
