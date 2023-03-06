@@ -52,6 +52,17 @@ _user_agent_args = [
     f"FFmpeg Frigate/{VERSION}",
 ]
 
+PRESETS_FFMPEG_HW_ACCEL = {
+    "preset-rpi-32-h264": "h264_v4l2m2m",
+    "preset-rpi-64-h264": "h264_v4l2m2m",
+    "preset-vaapi": "h264_vaapi",
+    "preset-intel-qsv-h264": "h264_qsv",     # From Sandy Bridge (gen 6)
+    "preset-intel-qsv-h265": "h264_qsv",     # From Sandy Bridge (gen 6)
+    "preset-nvidia-h264": "h264_nvenc",
+    "preset-nvidia-h265": "h264_nvenc",
+    "default":  "libx264",  # SW codecs
+}
+
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
     "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
@@ -430,8 +441,9 @@ def parse_preset_output_record(arg: Any, hw_acc: Any, rotate: int) -> list[str]:
     
     video = preset_record_video_audio["video"]
     transpose =_parse_rotation_scale(hw_acc, "record", rotate)
-    if transpose != "":
-        video = transpose + " -c:v libx264"
+    if transpose != "" or not "copy" in video:
+        encode = PRESETS_FFMPEG_HW_ACCEL.get(hw_acc, "libx264")
+        video = transpose + " -c:v " + encode
 
     return PRESETS_RECORD_OUTPUT.format(video, audio).split(" ")
 

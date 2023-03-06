@@ -307,7 +307,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-record-generic-audio-aac" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose=clock -c:v libx264 -c:a aac" in (
+        assert "-vf transpose=clock -c:v h264_nvenc -c:a aac" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -327,7 +327,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-rpi-64-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose=clock,transpose=clock -c:v libx264 -c:a aac" in (
+        assert "-vf transpose=clock,transpose=clock -c:v h264_v4l2m2m -c:a aac" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -347,7 +347,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-vaapi" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose_vaapi=reverse -c:v libx264 -c:a aac" in (
+        assert "-vf transpose_vaapi=reverse -c:v h264_vaapi -c:a aac" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -367,7 +367,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-intel-qsv-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf vpp_qsv=transpose=reverse -c:v libx264 -c:a aac" in (
+        assert "-vf vpp_qsv=transpose=reverse -c:v h264_qsv -c:a aac" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -387,7 +387,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-nvidia-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose=cclock -c:v libx264 -c:a aac" in (
+        assert "-vf transpose=cclock -c:v h264_nvenc -c:a aac" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -408,6 +408,22 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert "-c:v copy -c:a aac" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_preset_hw_accel(self):
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-rpi-32-h264"
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-mjpeg"
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-record-generic-audio-aac" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-c:v h264_v4l2m2m -an" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
