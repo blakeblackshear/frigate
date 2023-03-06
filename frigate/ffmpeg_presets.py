@@ -126,7 +126,7 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:{3}w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h264": "-r {0} -vf fps={0},{3}scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h265": "-r {0} -vf fps={0},{3}scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "default": "-r {0} -s {1}x{2}",
+    "default": "-r {0}{3} -s {1}x{2}",
 }
 
 PRESETS_HW_ACCEL_SCALE_ROTATION = {
@@ -218,7 +218,7 @@ def parse_preset_hardware_acceleration_scale(
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str) or " " in arg:
-        scale = PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height).split(" ")
+        scale = PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height, "").split(" ")
         scale.extend(detect_args)
         return scale
 
@@ -432,6 +432,8 @@ def parse_preset_output_record(arg: Any, hw_acc: Any, rotate: int) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
+    if not isinstance(hw_acc, str):
+        hw_acc = "default"
 
     preset_record_video_audio = PRESETS_RECORD_VIDEO_AUDIO.get(arg, None)
     if not preset_record_video_audio:

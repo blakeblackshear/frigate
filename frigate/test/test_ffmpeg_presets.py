@@ -420,10 +420,23 @@ class TestFfmpegPresets(unittest.TestCase):
         ] = "preset-record-mjpeg"
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
-        assert "preset-record-generic-audio-aac" not in (
+        assert "preset-record-mjpeg" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert "-c:v h264_v4l2m2m -an" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+
+    def test_ffmpeg_output_record_preset_no_hw_accel(self):
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
+            "record"
+        ] = "preset-record-mjpeg"
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-record-mjpeg" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert "-c:v libx264 -an" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
