@@ -108,14 +108,25 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-rpi-32-h264": "-r {0} -s {1}x{2}",
-    "preset-rpi-64-h264": "-r {0} -s {1}x{2}",
-    "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=yuv420p",
-    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-rpi-32-h264": "-r {0}{3} -s {1}x{2}",
+    "preset-rpi-64-h264": "-r {0}{3} -s {1}x{2}",
+    "preset-vaapi": "-r {0} -vf fps={0},{3}scale_vaapi=w={1}:h={2},hwdownload,format=yuv420p",
+    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:{3}w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:{3}w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-nvidia-h264": "-r {0} -vf fps={0},{3}scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-nvidia-h265": "-r {0} -vf fps={0},{3}scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "default": "-r {0} -s {1}x{2}",
+}
+
+PRESETS_HW_ACCEL_SCALE_ROTATION = {
+    "preset-rpi-32-h264": " -vf transpose={0}",
+    "preset-rpi-64-h264": " -vf transpose={0}",
+    "preset-vaapi": "transpose_vaapi={0},",
+    "preset-intel-qsv-h264": "transpose={0}:",
+    "preset-intel-qsv-h265": "transpose={0}:",
+    "preset-nvidia-h264": "transpose={0},",
+    "preset-nvidia-h265": "transpose={0},",
+    "default": " -vf transpose={0}",
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
@@ -138,12 +149,36 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     return PRESETS_HW_ACCEL_DECODE.get(arg, None)
 
 
+def _parse_rotation_scale(
+    arg: Any,
+    rotate: int,
+) -> str:
+    """Return the correct rotation scale or "" if preset none is set."""
+    if not isinstance(arg, str) or " " in arg:
+        return ""
+
+    if rotate == 90:
+        transpose = "clock"
+    elif rotate == 180:
+        if arg.startswith("preset-vaapi") or arg.startswith("preset-intel-qsv"):
+            transpose = "reverse"
+        else: # No 'reverse' option suported, then 2 'clocks' rotations
+            transpose =  "clock,transpose=clock"
+    elif rotate == 270:
+        transpose =  "cclock"
+    else : # Rotation not need or not supported
+        return ""
+
+    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").format(transpose)
+
+
 def parse_preset_hardware_acceleration_scale(
     arg: Any,
     detect_args: list[str],
     fps: int,
     width: int,
     height: int,
+    rotate: int,
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str) or " " in arg:
@@ -151,14 +186,16 @@ def parse_preset_hardware_acceleration_scale(
         scale.extend(detect_args)
         return scale
 
+    transpose =_parse_rotation_scale(arg, rotate)
+
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
 
     if scale:
-        scale = scale.format(fps, width, height).split(" ")
+        scale = scale.format(fps, width, height, transpose).split(" ")
         scale.extend(detect_args)
         return scale
     else:
-        scale = scale.format(fps, width, height).split(" ")
+        scale = scale.format(fps, width, height, transpose).split(" ")
         scale.extend(detect_args)
         return scale
 

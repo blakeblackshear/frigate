@@ -85,6 +85,141 @@ class TestFfmpegPresets(unittest.TestCase):
             in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
+    def test_ffmpeg_hwaccel_rotate_90_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 90
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "fps=10,transpose=clock,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
+    def test_ffmpeg_hwaccel_rotate_180_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-rpi-64-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-rpi-64-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "-r 10 -vf transpose=clock,transpose=clock -s 2560x1920"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
+    def test_ffmpeg_hwaccel_rotate_180_vaapi_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-vaapi"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-vaapi" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "-r 10 -vf fps=10,transpose_vaapi=reverse,scale_vaapi=w=2560:h=1920,hwdownload,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
+    def test_ffmpeg_hwaccel_rotate_180_qsv_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-intel-qsv-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-intel-qsv-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "-r 10 -vf vpp_qsv=framerate=10:transpose=reverse:w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
+    def test_ffmpeg_hwaccel_rotate_270_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 270
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "fps=10,transpose=cclock,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
+    def test_ffmpeg_hwaccel_rotate_wrong_preset(self):
+        self.default_ffmpeg["cameras"]["back"][
+            "rotate"
+        ] = 20
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
+            "hwaccel_args"
+        ] = "preset-nvidia-h264"
+        self.default_ffmpeg["cameras"]["back"]["detect"] = {
+            "height": 1920,
+            "width": 2560,
+            "fps": 10,
+        }
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        frigate_config.cameras["back"].create_ffmpeg_cmds()
+        assert "preset-nvidia-h264" not in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        )
+        assert (
+            "fps=10,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        )
+
     def test_default_ffmpeg_input_arg_preset(self):
         frigate_config = FrigateConfig(**self.default_ffmpeg)
 

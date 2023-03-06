@@ -576,6 +576,7 @@ class CameraUiConfig(FrigateBaseModel):
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex=REGEX_CAMERA_NAME)
     enabled: bool = Field(default=True, title="Enable camera.")
+    rotate: int = Field(default=0, title="Rotate camera: 0º, 90º, 180º or 270º(-90º)")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -674,6 +675,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
+                self.rotate,
             )
 
             ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
