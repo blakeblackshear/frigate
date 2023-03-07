@@ -151,12 +151,12 @@ PRESETS_HW_ACCEL_SCALE_ROTATION = {
         "record": " -vf vpp_qsv=transpose={0}",
     },
     "preset-nvidia-h264": {
-        "detect": "transpose={0},",
-        "record": " -vf transpose={0}",
+        "detect": "hwdownload,format=nv12,transpose={0},hwupload,",  # Currently SW rotation
+        "record": " -vf hwdownload,format=nv12,transpose={0},hwupload",  # Currently SW rotation
     },
     "preset-nvidia-h265": {
-        "detect": "transpose={0},",
-        "record": " -vf transpose={0}",
+        "detect": "hwdownload,format=nv12,transpose={0},hwupload,",  # Currently SW rotation
+        "record": " -vf hwdownload,format=nv12,transpose={0},hwupload",  # Currently SW rotation
     },
     "default": {
         "detect": " -vf transpose={0}",

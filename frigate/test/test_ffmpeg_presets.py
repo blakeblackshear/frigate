@@ -101,7 +101,7 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert (
-            "fps=10,transpose=clock,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            "fps=10,hwdownload,format=nv12,transpose=clock,hwupload,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
             in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
@@ -180,7 +180,7 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert (
-            "fps=10,transpose=cclock,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
+            "fps=10,hwdownload,format=nv12,transpose=cclock,hwupload,scale_cuda=w=2560:h=1920:format=nv12,hwdownload,format=nv12,format=yuv420p"
             in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
@@ -288,8 +288,9 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-record-generic-audio-aac" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose=clock -c:v h264_nvenc -c:a aac" in (
-            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        assert (
+            "-vf hwdownload,format=nv12,transpose=clock,hwupload -c:v h264_nvenc -c:a aac"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
     def test_ffmpeg_output_record_rotate_180_preset(self):
@@ -356,8 +357,9 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-nvidia-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-vf transpose=cclock -c:v h264_nvenc -c:a aac" in (
-            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        assert (
+            "-vf hwdownload,format=nv12,transpose=cclock,hwupload -c:v h264_nvenc -c:a aac"
+            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
     def test_ffmpeg_output_record_rotate_wrong_preset(self):
