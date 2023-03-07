@@ -462,6 +462,7 @@ class CameraInput(FrigateBaseModel):
 
 class CameraFfmpegConfig(FfmpegConfig):
     inputs: List[CameraInput] = Field(title="Camera inputs.")
+    rotate: int = Field(default=0, title="Rotate camera: 0º, 90º, 180º or 270º(-90º)")
 
     @validator("inputs")
     def validate_roles(cls, v):
@@ -576,7 +577,6 @@ class CameraUiConfig(FrigateBaseModel):
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(title="Camera name.", regex=REGEX_CAMERA_NAME)
     enabled: bool = Field(default=True, title="Enable camera.")
-    rotate: int = Field(default=0, title="Rotate camera: 0º, 90º, 180º or 270º(-90º)")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -675,7 +675,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
-                self.rotate,
+                self.ffmpeg.rotate,
             )
 
             ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
@@ -693,7 +693,7 @@ class CameraConfig(FrigateBaseModel):
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
                     ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args,
-                    self.rotate,
+                    self.ffmpeg.rotate,
                 )
                 or self.ffmpeg.output_args.record
             )

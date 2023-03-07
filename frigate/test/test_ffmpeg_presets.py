@@ -86,7 +86,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_90_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 90
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 90
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -106,7 +106,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_180_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-rpi-64-h264"
@@ -125,7 +125,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_180_vaapi_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-vaapi"
@@ -145,7 +145,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_180_qsv_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-intel-qsv-h264"
@@ -165,7 +165,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_270_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 270
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 270
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -185,7 +185,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_wrong_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 20
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 20
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -276,7 +276,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_90_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 90
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 90
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -293,7 +293,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-rpi-64-h264"
@@ -310,7 +310,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_vaapi_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-vaapi"
@@ -327,7 +327,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_qsv_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-intel-qsv-h264"
@@ -344,7 +344,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_270_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 270
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 270
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -361,7 +361,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_wrong_preset(self):
-        self.default_ffmpeg["cameras"]["back"]["rotate"] = 20
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["rotate"] = 20
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"

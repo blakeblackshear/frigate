@@ -66,7 +66,7 @@ cameras:
           roles:
             - detect
             - record
-    rotate: 90
+      rotate: 90
     detect:
       width: 1280
       height: 720

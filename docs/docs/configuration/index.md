@@ -427,8 +427,8 @@ cameras:
       # Optional: camera specific output args (default: inherit)
       # output_args:
 
-    # Optional: rotation for this camera, allowed values are: 90, 180 or 270 (-90). (default: shown below)
-    rotate: 0
+      # Optional: rotation for this camera, allowed values are: 90, 180 or 270 (-90). (default: shown below)
+      rotate: 0
 
     # Optional: timeout for highest scoring image before allowing it
     # to be replaced by a newer image. (default: shown below)
