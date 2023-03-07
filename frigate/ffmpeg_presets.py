@@ -56,11 +56,11 @@ PRESETS_FFMPEG_HW_ACCEL = {
     "preset-rpi-32-h264": "h264_v4l2m2m",
     "preset-rpi-64-h264": "h264_v4l2m2m",
     "preset-vaapi": "h264_vaapi",
-    "preset-intel-qsv-h264": "h264_qsv",     # From Sandy Bridge (gen 6)
-    "preset-intel-qsv-h265": "h264_qsv",     # From Sandy Bridge (gen 6)
+    "preset-intel-qsv-h264": "h264_qsv",  # From Sandy Bridge (gen 6)
+    "preset-intel-qsv-h265": "h264_qsv",  # From Sandy Bridge (gen 6)
     "preset-nvidia-h264": "h264_nvenc",
     "preset-nvidia-h265": "h264_nvenc",
-    "default":  "libx264",  # SW codecs
+    "default": "libx264",  # SW codecs
 }
 
 PRESETS_HW_ACCEL_DECODE = {
@@ -198,14 +198,14 @@ def _parse_rotation_scale(
     elif rotate == 180:
         if arg.startswith("preset-vaapi") or arg.startswith("preset-intel-qsv"):
             transpose = "reverse"
-        else: # No 'reverse' option suported, then 2 'clocks' rotations
-            transpose =  "clock,transpose=clock"
+        else:  # No 'reverse' option suported, then 2 'clocks' rotations
+            transpose = "clock,transpose=clock"
     elif rotate == 270:
-        transpose =  "cclock"
-    else : # Rotation not need or not supported
+        transpose = "cclock"
+    else:  # Rotation not need or not supported
         return ""
 
-    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").get(mode).format(transpose)
+    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").get(mode, "").format(transpose)
 
 
 def parse_preset_hardware_acceleration_scale(
@@ -218,11 +218,13 @@ def parse_preset_hardware_acceleration_scale(
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str) or " " in arg:
-        scale = PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height, "").split(" ")
+        scale = (
+            PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height, "").split(" ")
+        )
         scale.extend(detect_args)
         return scale
 
-    transpose =_parse_rotation_scale(arg, "detect", rotate)
+    transpose = _parse_rotation_scale(arg, "detect", rotate)
 
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
 
@@ -440,9 +442,9 @@ def parse_preset_output_record(arg: Any, hw_acc: Any, rotate: int) -> list[str]:
         return None
 
     audio = preset_record_video_audio["audio"]
-    
+
     video = preset_record_video_audio["video"]
-    transpose =_parse_rotation_scale(hw_acc, "record", rotate)
+    transpose = _parse_rotation_scale(hw_acc, "record", rotate)
     if transpose != "" or not "copy" in video:
         encode = PRESETS_FFMPEG_HW_ACCEL.get(hw_acc, "libx264")
         video = transpose + " -c:v " + encode

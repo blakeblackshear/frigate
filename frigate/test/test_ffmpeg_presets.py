@@ -86,9 +86,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_90_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 90
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 90
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -108,9 +106,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_180_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-rpi-64-h264"
@@ -119,21 +115,17 @@ class TestFfmpegPresets(unittest.TestCase):
             "width": 2560,
             "fps": 10,
         }
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-rpi-64-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert (
-            "-r 10 -vf transpose=clock,transpose=clock -s 2560x1920"
-            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        assert "-r 10 -vf transpose=clock,transpose=clock -s 2560x1920" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
     def test_ffmpeg_hwaccel_rotate_180_vaapi_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-vaapi"
@@ -142,7 +134,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "width": 2560,
             "fps": 10,
         }
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-vaapi" not in (
@@ -154,9 +145,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_180_qsv_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-intel-qsv-h264"
@@ -165,7 +154,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "width": 2560,
             "fps": 10,
         }
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-intel-qsv-h264" not in (
@@ -177,9 +165,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_270_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 270
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 270
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -199,9 +185,7 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_hwaccel_rotate_wrong_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 20
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 20
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
@@ -244,7 +228,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-rtmp-generic" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert (" ".join(parse_preset_input("preset-rtmp-generic", 5))) in (
+        assert " ".join(parse_preset_input("preset-rtmp-generic", 5)) in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -292,16 +276,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_90_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 90
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 90
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-record-generic-audio-aac" not in (
@@ -312,16 +293,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-rpi-64-h264"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-rpi-64-h264" not in (
@@ -332,16 +310,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_vaapi_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-vaapi"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-vaapi" not in (
@@ -352,16 +327,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_180_qsv_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 180
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 180
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-intel-qsv-h264"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-intel-qsv-h264" not in (
@@ -372,16 +344,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_270_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 270
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 270
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-nvidia-h264" not in (
@@ -392,16 +361,13 @@ class TestFfmpegPresets(unittest.TestCase):
         )
 
     def test_ffmpeg_output_record_rotate_wrong_preset(self):
-        self.default_ffmpeg["cameras"]["back"][
-            "rotate"
-        ] = 20
+        self.default_ffmpeg["cameras"]["back"]["rotate"] = 20
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"][
             "hwaccel_args"
         ] = "preset-nvidia-h264"
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
         ] = "preset-record-generic-audio-aac"
-
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-nvidia-h264" not in (
