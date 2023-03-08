@@ -205,7 +205,11 @@ def _parse_rotation_scale(
     else:  # Rotation not need or not supported
         return ""
 
-    return PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, "").get(mode, "").format(transpose)
+    return (
+        PRESETS_HW_ACCEL_SCALE_ROTATION.get(arg, {"detect": "", "record": ""})
+        .get(mode, "")
+        .format(transpose)
+    )
 
 
 def parse_preset_hardware_acceleration_scale(
