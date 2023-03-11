@@ -51,7 +51,7 @@ For camera model specific settings check the [camera specific](camera_specific.m
 
 ## Rotate Cameras
 
-This field is totally optional, **the recomendation is use the _go2rtc_** to rotate the stream as a restream so the rotation is only done once instead of doing one for every rol defined in the camera (e.g. detect and record).
+This field is totally optional, **the recomendation is use the _go2rtc_** to rotate the stream as a restream so the rotation is only done once instead of doing one for every role defined in the camera (e.g. detect and record).
 
 Cameras can be rotate to '90', '180' or '270' (-90) degrees by using `rotate: XX`.
 The camera will only rotate to valid arguments: '90', '180' or '270', invalid arguments disable the rotation.
