@@ -11,77 +11,67 @@ def setupRegistry():
     return myregistry
 
 
-def add_metric(metric, label, data, key, multiplier=1.0):
+def add_metric(metric, label, stats, key, multiplier=1.0):
     try:
-        string = str(data[key])
-        value = float(re.findall(r"\d+", string)[0])
+        string = str(stats[key])
+        value = float(re.findall(r'\d+', string)[0])
         metric.add_metric([label], value * multiplier)
     except (KeyError, TypeError, IndexError):
         pass
 
 
 class CustomCollector:
+
     def __init__(self):
         self.stats_url = "http://localhost:5000/api/stats"
+        self.process_stats = {}
+
+    def add_metric_process(self, metric, stats, camera_name, pid_name, process_name, cpu_or_memory, process_type):
+        try:
+            pid = str(stats[camera_name][pid_name])
+            label_values = [pid, camera_name, process_name, process_type]
+            metric.add_metric(label_values, self.process_stats[pid][cpu_or_memory])
+            del self.process_stats[pid][cpu_or_memory]
+        except (KeyError, TypeError, IndexError):
+            pass
 
     def collect(self):
-        data = json.loads(urlopen(self.stats_url).read())
+        stats = json.loads(urlopen(self.stats_url).read())
+        self.process_stats = stats['cpu_usages']
+
+        # process stats for cameras, detectors and other
+        cpu_usages = GaugeMetricFamily('frigate_cpu_usage_percent', 'Process CPU usage %',
+                                       labels=['pid', 'name', 'process', 'type'])
+        mem_usages = GaugeMetricFamily('frigate_mem_usage_percent', 'Process memory usage %',
+                                       labels=['pid', 'name', 'process', 'type'])
 
         # camera stats
-        ffmpeg_up = GaugeMetricFamily(
-            "frigate_ffmpeg_up",
-            "Whether the ffmpeg process for a camera is up",
-            labels=["camera"],
-        )
-        capture_pid = GaugeMetricFamily(
-            "frigate_capture_pid",
-            "PID for the ffmpeg process that consumes this camera",
-            labels=["camera"],
-        )
-        detect_pid = GaugeMetricFamily(
-            "frigate_detect_pid",
-            "PID for the process that runs detection for this camera",
-            labels=["camera"],
-        )
-        camera_fps = GaugeMetricFamily(
-            "frigate_camera_fps",
-            "Frames per second being consumed from your camera.",
-            labels=["camera"],
-        )
-        detection_fps = GaugeMetricFamily(
-            "frigate_detection_fps",
-            "Number of times detection is run per second.",
-            labels=["camera"],
-        )
-        process_fps = GaugeMetricFamily(
-            "frigate_process_fps",
-            "Frames per second being processed by frigate.",
-            labels=["camera"],
-        )
-        skipped_fps = GaugeMetricFamily(
-            "frigate_skipped_fps",
-            "Frames per second skip for processing by frigate.",
-            labels=["camera"],
-        )
-        detection_enabled = GaugeMetricFamily(
-            "frigate_detection_enabled",
-            "Detection enabled for camera",
-            labels=["camera"],
-        )
+        camera_fps = GaugeMetricFamily('frigate_camera_fps', 'Frames per second being consumed from your camera.',
+                                       labels=['camera_name'])
+        detection_fps = GaugeMetricFamily('frigate_detection_fps', 'Number of times detection is run per second.',
+                                          labels=['camera_name'])
+        process_fps = GaugeMetricFamily('frigate_process_fps', 'Frames per second being processed by frigate.',
+                                        labels=['camera_name'])
+        skipped_fps = GaugeMetricFamily('frigate_skipped_fps', 'Frames per second skip for processing by frigate.',
+                                        labels=['camera_name'])
+        detection_enabled = GaugeMetricFamily('frigate_detection_enabled', 'Detection enabled for camera',
+                                              labels=['camera_name'])
 
-        for k, d in data.items():
-            add_metric(ffmpeg_up, k, d is not None, "ffmpeg_up")
-            add_metric(detect_pid, k, d, "pid")
-            add_metric(capture_pid, k, d, "capture_pid")
-            add_metric(camera_fps, k, d, "camera_fps")
-            add_metric(detection_fps, k, d, "detection_fps")
-            add_metric(process_fps, k, d, "process_fps")
-            add_metric(skipped_fps, k, d, "skipped_fps")
-            add_metric(detection_enabled, k, d, "detection_enabled")
+        for camera_name, camera_stats in stats.items():
+            add_metric(camera_fps, camera_name, camera_stats, 'camera_fps')
+            add_metric(detection_fps, camera_name, camera_stats, 'detection_fps')
+            add_metric(process_fps, camera_name, camera_stats, 'process_fps')
+            add_metric(skipped_fps, camera_name, camera_stats, 'skipped_fps')
+            add_metric(detection_enabled, camera_name, camera_stats, 'detection_enabled')
 
-        yield ffmpeg_up
-        yield capture_pid
-        yield detect_pid
+            self.add_metric_process(cpu_usages, stats, camera_name, 'ffmpeg_pid', 'ffmpeg', 'cpu', 'Camera')
+            self.add_metric_process(cpu_usages, stats, camera_name, 'capture_pid', 'capture', 'cpu', 'Camera')
+            self.add_metric_process(cpu_usages, stats, camera_name, 'pid', 'detect', 'cpu', 'Camera')
+
+            self.add_metric_process(mem_usages, stats, camera_name, 'ffmpeg_pid', 'ffmpeg', 'mem', 'Camera')
+            self.add_metric_process(mem_usages, stats, camera_name, 'capture_pid', 'capture', 'mem', 'Camera')
+            self.add_metric_process(mem_usages, stats, camera_name, 'pid', 'detect', 'mem', 'Camera')
+
         yield camera_fps
         yield detection_fps
         yield process_fps
@@ -90,55 +80,39 @@ class CustomCollector:
 
         # detector stats
         try:
-            yield GaugeMetricFamily(
-                "frigate_detection_total_fps",
-                "Sum of detection_fps across all cameras and detectors.",
-                value=data["detection_fps"],
-            )
+            yield GaugeMetricFamily('frigate_detection_total_fps',
+                                    'Sum of detection_fps across all cameras and detectors.',
+                                    value=stats['detection_fps'])
         except KeyError:
             pass
 
-        detector_inference_speed = GaugeMetricFamily(
-            "frigate_detector_inference_speed_seconds",
-            "Time spent running object detection in seconds.",
-            labels=["name"],
-        )
-        detector_pid = GaugeMetricFamily(
-            "frigate_detector_pid",
-            "PID for the shared process that runs object detection on the detector",
-            labels=["name"],
-        )
-        detector_detection_start = GaugeMetricFamily(
-            "frigate_detection_start",
-            "Detector start time (unix timestamp)",
-            labels=["name"],
-        )
+        detector_inference_speed = GaugeMetricFamily('frigate_detector_inference_speed_seconds',
+                                                     'Time spent running object detection in seconds.', labels=['name'])
+
+        detector_detection_start = GaugeMetricFamily('frigate_detection_start',
+                                                     'Detector start time (unix timestamp)',
+                                                     labels=['name'])
+
         try:
-            for k, d in data["detectors"].items():
-                add_metric(
-                    detector_inference_speed, k, d, "inference_speed", 0.001
-                )  # ms to seconds
-                add_metric(detector_pid, k, d, "pid")
-                add_metric(detector_detection_start, k, d, "detection_start")
+            for detector_name, detector_stats in stats['detectors'].items():
+                add_metric(detector_inference_speed, detector_name, detector_stats, 'inference_speed',
+                           0.001)  # ms to seconds
+                add_metric(detector_detection_start, detector_name, detector_stats, 'detection_start')
+                self.add_metric_process(cpu_usages, stats['detectors'], detector_name, 'pid', 'detect', 'cpu',
+                                        'Detector')
+                self.add_metric_process(mem_usages, stats['detectors'], detector_name, 'pid', 'detect', 'mem',
+                                        'Detector')
         except KeyError:
             pass
 
         yield detector_inference_speed
-        yield detector_pid
         yield detector_detection_start
 
-        # process stats
-        cpu_usages = GaugeMetricFamily(
-            "frigate_cpu_usage_percent", "Process CPU usage %", labels=["pid"]
-        )
-        mem_usages = GaugeMetricFamily(
-            "frigate_mem_usage_percent", "Process memory usage %", labels=["pid"]
-        )
-
+        # remaining process stats
         try:
-            for k, d in data["cpu_usages"].items():
-                add_metric(cpu_usages, k, d, "cpu")
-                add_metric(mem_usages, k, d, "mem")
+            for process_id, pid_stats in self.process_stats.items():
+                add_metric(cpu_usages, process_id, pid_stats, 'cpu')
+                add_metric(mem_usages, process_id, pid_stats, 'mem')
         except KeyError:
             pass
 
@@ -146,17 +120,13 @@ class CustomCollector:
         yield mem_usages
 
         # gpu stats
-        gpu_usages = GaugeMetricFamily(
-            "frigate_gpu_usage_percent", "GPU utilisation %", labels=["gpu"]
-        )
-        gpu_mem_usages = GaugeMetricFamily(
-            "frigate_gpu_mem_usage_percent", "GPU memory usage %", labels=["gpu"]
-        )
+        gpu_usages = GaugeMetricFamily('frigate_gpu_usage_percent', 'GPU utilisation %', labels=['gpu_name'])
+        gpu_mem_usages = GaugeMetricFamily('frigate_gpu_mem_usage_percent', 'GPU memory usage %', labels=['gpu_name'])
 
         try:
-            for k, d in data["gpu_usages"].items():
-                add_metric(gpu_usages, k, d, "gpu")
-                add_metric(gpu_usages, k, d, "mem")
+            for gpu_name, gpu_stats in stats['gpu_usages'].items():
+                add_metric(gpu_usages, gpu_name, gpu_stats, 'gpu')
+                add_metric(gpu_usages, gpu_name, gpu_stats, 'mem')
         except KeyError:
             pass
 
@@ -164,26 +134,17 @@ class CustomCollector:
         yield gpu_mem_usages
 
         # service stats
-        uptime_seconds = GaugeMetricFamily(
-            "frigate_service_uptime_seconds", "Uptime seconds"
-        )
-        last_updated_timestamp = GaugeMetricFamily(
-            "frigate_service_last_updated_timestamp",
-            "Stats recorded time (unix timestamp)",
-        )
+        uptime_seconds = GaugeMetricFamily('frigate_service_uptime_seconds', 'Uptime seconds')
+        last_updated_timestamp = GaugeMetricFamily('frigate_service_last_updated_timestamp',
+                                                   'Stats recorded time (unix timestamp)')
 
         try:
-            s = data["service"]
-            add_metric(uptime_seconds, "", s, "uptime")
-            add_metric(last_updated_timestamp, "", s, "last_updated")
+            service_stats = stats['service']
+            add_metric(uptime_seconds, '', service_stats, 'uptime')
+            add_metric(last_updated_timestamp, '', service_stats, 'last_updated')
 
-            info = {
-                "latest_version": data["service"]["latest_version"],
-                "version": data["service"]["version"],
-            }
-            yield InfoMetricFamily(
-                "frigate_service", "Frigate version info", value=info
-            )
+            info = {'latest_version': stats['service']['latest_version'], 'version': stats['service']['version']}
+            yield InfoMetricFamily('frigate_service', 'Frigate version info', value=info)
 
         except KeyError:
             pass
@@ -193,25 +154,17 @@ class CustomCollector:
 
         # service->temperatures: no data for me
 
-        storage_free = GaugeMetricFamily(
-            "frigate_storage_free_bytes", "Storage free bytes", labels=["storage"]
-        )
-        storage_mount_type = InfoMetricFamily(
-            "frigate_storage_mount_type", "Storage mount type", labels=["storage"]
-        )
-        storage_total = GaugeMetricFamily(
-            "frigate_storage_total_bytes", "Storage total bytes", labels=["storage"]
-        )
-        storage_used = GaugeMetricFamily(
-            "frigate_storage_used_bytes", "Storage used bytes", labels=["storage"]
-        )
+        storage_free = GaugeMetricFamily('frigate_storage_free_bytes', 'Storage free bytes', labels=['storage'])
+        storage_mount_type = InfoMetricFamily('frigate_storage_mount_type', 'Storage mount type', labels=['storage'])
+        storage_total = GaugeMetricFamily('frigate_storage_total_bytes', 'Storage total bytes', labels=['storage'])
+        storage_used = GaugeMetricFamily('frigate_storage_used_bytes', 'Storage used bytes', labels=['storage'])
 
         try:
-            for k, d in data["service"]["storage"].items():
-                add_metric(storage_free, k, d, "free", 1e6)  # MB to bytes
-                add_metric(storage_total, k, d, "total", 1e6)  # MB to bytes
-                add_metric(storage_used, k, d, "used", 1e6)  # MB to bytes
-                storage_mount_type.add_metric(k, {"mount_type": d["mount_type"]})
+            for storage_path, storage_stats in stats['service']['storage'].items():
+                add_metric(storage_free, storage_path, storage_stats, 'free', 1e6)  # MB to bytes
+                add_metric(storage_total, storage_path, storage_stats, 'total', 1e6)  # MB to bytes
+                add_metric(storage_used, storage_path, storage_stats, 'used', 1e6)  # MB to bytes
+                storage_mount_type.add_metric(storage_path, {'mount_type': storage_stats['mount_type']})
         except KeyError:
             pass
 
