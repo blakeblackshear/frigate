@@ -44,11 +44,13 @@ It is not recommended to copy this full configuration file. Only specify values 
 - `{FRIGATE_RTSP_PASSWORD}`
 
 for example:
+
 ```yaml
 mqtt:
   user: "{FRIGATE_MQTT_USER}"
   password: "{FRIGATE_MQTT_PASSWORD}"
 ```
+
 ```yaml
 - path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
 ```
@@ -502,7 +504,7 @@ ui:
   # Optional: Set a timezone to use in the UI (default: use browser local time)
   timezone: None
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
-  experimental_ui: False
+  use_experimental: False
   # Optional: Set the time format used.
   # Options are browser, 12hour, or 24hour (default: shown below)
   time_format: browser
