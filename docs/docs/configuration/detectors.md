@@ -138,6 +138,29 @@ model:
   labelmap_path: /path/to/coco_80cl.txt
 ```
 
+### ArmNN detector ( orange pi 5 )
+
+You need to put ArmNN binaries for them to be located in a way, when `/usr/lib/ArmNN-linux-aarch64/libarmnnDelegate.so` is correct.
+Download binaries from https://github.com/ARM-software/armnn/releases for your platform
+
+
+```yaml
+detectors:
+  armnn:
+    type: armnn
+    num_threads: 8
+#    model:
+#      path: //cpu_model.tflite  # used by default. 
+
+model:
+  width: 320
+  height: 320
+
+```
+
+In order for GPU to work you need to have `armnn-latest-all` installed as well as `clinfo` should show
+output for the GPU support. See (hardware acceleration)[hardware_acceleration.md].
+
 ### Intel NCS2 VPU and Myriad X Setup
 
 Intel produces a neural net inference accelleration chip called Myriad X. This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued. If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device. The host needs a udev rule installed to handle the NCS2 device.

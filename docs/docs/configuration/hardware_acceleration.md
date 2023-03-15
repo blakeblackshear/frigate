@@ -15,6 +15,78 @@ ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 ```
 
+### Orange Pi 5 ( ArmNN )
+
+Ensure you have installed
+
+```sh
+ffmpeg/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,upgradable to: 7:5.1.2-3]
+libavcodec58/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libavdevice58/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libavfilter7/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libavformat58/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libavutil56/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libpostproc55/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+librockchip-mpp1/jammy,now 1.5.0-1+git230210.c145c84~jammy1 arm64 [installed,automatic]
+libswresample3/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+libswscale5/jammy,now 7:4.4.2-0ubuntu0.22.04.1+rkmpp20230207 arm64 [installed,automatic]
+```
+from https://github.com/orangepi-xunlong/rk-rootfs-build/tree/rk3588_packages_jammy
+
+```yaml
+ffmpeg:
+  hwaccel_args: -hwaccel drm -hwaccel_device /dev/dri/renderD128 -c:v h264_rkmpp
+```
+
+Also, for the CPU and GPU accelleration you should use `armnn` detector on this board [see](detectors.md)
+
+Install packages [see tutorials](https://github.com/ARM-software/armnn/blob/branches/armnn_23_02/InstallationViaAptRepository.md)
+
+```sh
+armnn-latest-all/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+armnn-latest-cpu-gpu-ref/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+armnn-latest-cpu-gpu/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+armnn-latest-cpu/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+armnn-latest-gpu/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+armnn-latest-ref/jammy,now 23.02-1~ubuntu22.04 arm64 [installed]
+libarmnn-cpuacc-backend32/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+libarmnn-cpuref-backend32/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+libarmnn-gpuacc-backend32/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+libarmnn22/unstable,now 20.08-12 arm64 [installed,automatic]
+libarmnn32/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+libarmnnaclcommon22/unstable,now 20.08-12 arm64 [installed]
+libarmnnaclcommon32/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+libarmnntfliteparser24/jammy,now 23.02-1~ubuntu22.04 arm64 [installed,automatic]
+```
+
+In order for the GPU to work install packages
+
+```sh
+libmali-g610-x11/jammy,now 1.0.2.4 arm64 [installed]
+libmali-valhall-g610-g6p0-x11-gbm/now 1.9-1 arm64 [installed,local]
+```
+
+for Ubuntu
+
+```sh
+apt install ocl-icd-opencl-dev
+mkdir -p /etc/OpenCL/vendors/
+dpkg -i libmali-valhall-g610-g6p0-x11_1.9-1_arm64.deb
+```
+
+`clinfo | grep 'Device Name'` should show you a full output of available data about Mali GPU
+
+```sh
+root@23cfa5ff7203:/opt/frigate# clinfo | grep 'Device Name'
+  Device Name                                     Mali-LODX r0p0
+    Device Name                                   Mali-LODX r0p0
+    Device Name                                   Mali-LODX r0p0
+    Device Name                                   Mali-LODX r0p0
+```
+
+
+
+
 ### Intel-based CPUs (<10th Generation) via VAAPI
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
