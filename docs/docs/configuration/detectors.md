@@ -159,7 +159,7 @@ model:
 ```
 
 In order for GPU to work you need to have `armnn-latest-all` installed as well as `clinfo` should show
-output for the GPU support. See (hardware acceleration)[hardware_acceleration.md].
+output for the GPU support. See [hardware acceleration](hardware_acceleration.md).
 
 ### Intel NCS2 VPU and Myriad X Setup
 
