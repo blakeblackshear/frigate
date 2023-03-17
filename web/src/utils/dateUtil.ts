@@ -56,7 +56,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
 
     // use strftime_fmt if defined in config file
     if (strftime_fmt) {
-      const strftime_locale = strftime.localizeByIdentifier(locale);
+      const strftime_locale = strftime.timezone(getTimezoneOffset(timezone)).localizeByIdentifier(locale);
       return strftime_locale(strftime_fmt, date);
     }
 
@@ -114,3 +114,17 @@ export const getDurationFromTimestamps = (start_time: number, end_time: number |
   }
   return duration;
 };
+
+/**
+ * Adapted from https://stackoverflow.com/a/29268535 this takes a timezone string and
+ * returns the offset of that timezone from UTC in minutes.
+ * @param timezone string representation of the timezone the user is requesting
+ * @returns number of minutes offset from UTC
+ */
+const getTimezoneOffset = (timezone: string): number => {
+  const date = new Date();
+  let iso = date.toLocaleString('en-us', { timeZone: timezone, hour12: false }).replace(', ', 'T');
+  iso += '.' + date.getMilliseconds().toString().padStart(3, '0');
+  const lie = new Date(iso + 'Z');
+  return  -(lie.getMilliseconds() - date.getMilliseconds()) / 60 / 1000;
+}
