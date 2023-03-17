@@ -56,7 +56,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
 
     // use strftime_fmt if defined in config file
     if (strftime_fmt) {
-      const strftime_locale = strftime.timezone(getTimezoneOffset(date, timezone)).localizeByIdentifier(locale);
+      const strftime_locale = strftime.timezone(getUTCOffset(date, timezone)).localizeByIdentifier(locale);
       return strftime_locale(strftime_fmt, date);
     }
 
@@ -121,8 +121,8 @@ export const getDurationFromTimestamps = (start_time: number, end_time: number |
  * @param timezone string representation of the timezone the user is requesting
  * @returns number of minutes offset from UTC
  */
-const getTimezoneOffset = (date: Date, timezone: string): number => {
-  const utcDate = new Date(date.getMilliseconds() - (date.getTimezoneOffset() * 60 * 1000));
+const getUTCOffset = (date: Date, timezone: string): number => {
+  const utcDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000));
   // locale of en-CA is required for proper locale format
   let iso = utcDate.toLocaleString('en-CA', { timeZone: timezone, hour12: false }).replace(', ', 'T');
   iso += '.' + utcDate.getMilliseconds().toString().padStart(3, '0');
