@@ -59,7 +59,7 @@ cameras:
           roles:
             - detect
     live:
-      stream_name: test_cam_sub
+      stream_name: rtsp_cam_sub
 ```
 
 ### WebRTC extra configuration:
