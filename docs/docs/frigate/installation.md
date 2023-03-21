@@ -104,9 +104,9 @@ By default, the Raspberry Pi limits the amount of memory available to the GPU. I
 
 Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
-## Docker
+## Docker Compose
 
-Running in Docker with compose is the recommended install method:
+Running in Docker Compose is the recommended install method:
 
 ```yaml
 version: "3.9"
@@ -138,7 +138,17 @@ services:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
 
-If you can't use docker compose, you can run the container with something similar to this:
+If you are not running in privileged mode, you need to add capability `PERFMON` for GPU stats to work.
+
+```yaml
+  # Only supported on Linux kernel >= 5.8
+  cap_add: 
+    - PERFMON
+```
+
+## Docker CLI
+
+Alternatively, you can run the container using the `docker run` command. An example is shown below:
 
 ```bash
 docker run -d \
@@ -147,6 +157,7 @@ docker run -d \
   --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
   --device /dev/bus/usb:/dev/bus/usb \
   --device /dev/dri/renderD128 \
+  --cap-add=PERFMON \
   --shm-size=64m \
   -v /path/to/your/storage:/media/frigate \
   -v /path/to/your/config.yml:/config/config.yml \
