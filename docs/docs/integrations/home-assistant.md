@@ -32,7 +32,7 @@ Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
 - Then add/configure the integration:
 
 ```
-Home Assistant > Configuration > Integrations > Add Integration > Frigate
+Home Assistant > Settings > Devices & Services > Add Integration > Frigate
 ```
 
 Note: You will also need
