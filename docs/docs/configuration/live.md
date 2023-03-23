@@ -101,4 +101,4 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 
 :::
 
-See https://github.com/AlexxIT/go2rtc#module-webrtc for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#module-webrtc) for more information about this.
