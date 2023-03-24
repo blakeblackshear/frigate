@@ -4,6 +4,7 @@ set -euxo pipefail
 
 apt-get -qq update
 
+# TODO: move all apt-get installs to dedicated script for having it in a single Docker layer = performance of reruns.
 apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
