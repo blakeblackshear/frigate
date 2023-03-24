@@ -53,10 +53,18 @@ cd /tmp
 git clone https://github.com/FFmpeg/FFmpeg.git
 cd FFmpeg
 
+ARCH=$(uname -m)
+EXTRA_CFLAGS="-I/usr/local/include"
+EXTRA_LDFLAGS="-L/usr/local/lib"
+
+if [ "$ARCH" = "aarch64" ]; then
+    EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv8-a+crc"
+fi
+
 PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" ./configure \
     --enable-rkmpp \
-    --extra-cflags="-I/usr/local/include" \
-    --extra-ldflags="-L/usr/local/lib" \
+    --extra-cflags="${EXTRA_CFLAGS}" \
+    --extra-ldflags="${EXTRA_LDFLAGS}" \
     --extra-libs="-lpthread -lm -latomic" \
     --arch=arm64 \
     --enable-gmp \
