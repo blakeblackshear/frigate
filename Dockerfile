@@ -178,6 +178,11 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
+# Install mpp empowerred ffmpeg for arm64
+RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=bind,source=docker/mpp.sh,target=/deps/mpp.sh \
+    /deps/mpp.sh
+
 # Install dependencies
 RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
