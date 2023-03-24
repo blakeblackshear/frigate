@@ -47,6 +47,13 @@ if [[ "${TARGETARCH}" == "arm" ]]; then
 fi
 
 # ffmpeg -> arm64
+if command -v ffmpeg >/dev/null 2>&1; then
+    HAS_FFMPEG=1
+else
+    HAS_FFMPEG=0
+fi
+
+if [[ "${HAS_FFMPEG}" == 0 ]]; then
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     # add raspberry pi repo
     gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
@@ -54,6 +61,8 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
 fi
+fi
+
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
