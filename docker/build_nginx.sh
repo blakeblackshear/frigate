@@ -56,7 +56,7 @@ ARCH=$(uname -m)
 CC_OPT="-O3 -Wno-error=implicit-fallthrough"
 
 if [ "$ARCH" = "aarch64" ]; then
-    CC_OPT="${CC_OPT} -march=armv8-a+crc"
+    CC_OPT="${CC_OPT} -march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
 fi
 
 ./configure --prefix=/usr/local/nginx \

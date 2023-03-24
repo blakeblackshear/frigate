@@ -29,7 +29,17 @@ cd /tmp
 git clone https://github.com/rockchip-linux/mpp.git
 cd mpp
 mkdir build || true && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local ../
+
+ARCH=$(uname -m)
+EXTRA_CFLAGS=""
+EXTRA_CXXFLAGS=""
+
+if [ "$ARCH" = "aarch64" ]; then
+    EXTRA_CFLAGS="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+    EXTRA_CXXFLAGS="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+fi
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_FLAGS="${EXTRA_CFLAGS}" -DCMAKE_CXX_FLAGS="${EXTRA_CXXFLAGS}" ../
 make -j$(nproc)
 make install
 ldconfig
@@ -58,7 +68,7 @@ EXTRA_CFLAGS="-I/usr/local/include"
 EXTRA_LDFLAGS="-L/usr/local/lib"
 
 if [ "$ARCH" = "aarch64" ]; then
-    EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv8-a+crc"
+    EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
 fi
 
 PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" ./configure \
@@ -83,7 +93,6 @@ PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" ./configure \
     --enable-libsoxr \
     --enable-libssh \
     --enable-libvorbis \
-    --enable-libvpx \
     --enable-libzimg \
     --enable-libwebp \
     --enable-libx264 \
