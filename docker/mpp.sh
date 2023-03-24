@@ -10,6 +10,7 @@ if [ -e /usr/local/include/mpp/mpp.h ] || [ -e /usr/include/mpp/mpp.h ] || pkg-c
 else
 # Install mpp from sources
 apt-get -qq update
+# TODO: move all apt-get installs to dedicated script for having it in a single Docker layer = performance of reruns.
 apt-get install -y git build-essential yasm pkg-config \
 libtool coreutils autoconf automake build-essential cmake \
 doxygen git graphviz imagemagick libasound2-dev libass-dev \

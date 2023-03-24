@@ -9,11 +9,12 @@ RTMP_MODULE_VERSION="1.2.1"
 
 cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
 sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list
-apt-get update
+apt-get -qq update
 
 apt-get -yqq build-dep nginx
 
-apt-get -yqq install --no-install-recommends ca-certificates wget
+# TODO: move all apt-get installs to dedicated script for having it in a single Docker layer = performance of reruns.
+apt-get -yqq install --no-install-recommends ca-certificates wget libaio-dev
 update-ca-certificates -f
 mkdir /tmp/nginx
 wget -nv https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
@@ -60,7 +61,6 @@ if [ "$ARCH" = "aarch64" ]; then
 fi
 
 ./configure --prefix=/usr/local/nginx \
-    --with-file-aio \
     --with-http_sub_module \
     --with-http_ssl_module \
     --with-threads \
