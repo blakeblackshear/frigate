@@ -52,6 +52,13 @@ rm v${RTMP_MODULE_VERSION}.tar.gz
 
 cd /tmp/nginx
 
+ARCH=$(uname -m)
+CC_OPT="-O3 -Wno-error=implicit-fallthrough"
+
+if [ "$ARCH" = "aarch64" ]; then
+    CC_OPT="${CC_OPT} -march=armv8-a+crc"
+fi
+
 ./configure --prefix=/usr/local/nginx \
     --with-file-aio \
     --with-http_sub_module \
@@ -60,7 +67,7 @@ cd /tmp/nginx
     --add-module=../nginx-vod-module \
     --add-module=../nginx-secure-token-module \
     --add-module=../nginx-rtmp-module \
-    --with-cc-opt="-O3 -Wno-error=implicit-fallthrough"
+    --with-cc-opt="${CC_OPT}"
 
 make -j$(nproc) && make install
 rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default
