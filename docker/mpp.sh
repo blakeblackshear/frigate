@@ -36,8 +36,8 @@ EXTRA_CFLAGS=""
 EXTRA_CXXFLAGS=""
 
 if [ "$ARCH" = "aarch64" ]; then
-    EXTRA_CFLAGS="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
-    EXTRA_CXXFLAGS="-march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+    EXTRA_CFLAGS="-march=armv8-a+crc"
+    EXTRA_CXXFLAGS="-march=armv8-a+crc"
 fi
 
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_FLAGS="${EXTRA_CFLAGS}" -DCMAKE_CXX_FLAGS="${EXTRA_CXXFLAGS}" ../
@@ -69,7 +69,7 @@ EXTRA_CFLAGS="-I/usr/local/include"
 EXTRA_LDFLAGS="-L/usr/local/lib"
 
 if [ "$ARCH" = "aarch64" ]; then
-    EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+    EXTRA_CFLAGS="${EXTRA_CFLAGS} -march=armv8-a+crc"
 fi
 
 PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" ./configure \
@@ -94,7 +94,6 @@ PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" ./configure \
     --enable-libsoxr \
     --enable-libssh \
     --enable-libvorbis \
-    --enable-libzimg \
     --enable-libwebp \
     --enable-libx264 \
     --enable-libx265 \
