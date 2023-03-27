@@ -62,7 +62,7 @@ cameras:
       host: 10.0.10.10
       port: 8000
       user: admin
-      password: "{FRIGATE_RTSP_PASSWORD}"
+      password: password
 ```
 
 then PTZ controls will be available in the cameras WebUI.
