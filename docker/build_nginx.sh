@@ -14,7 +14,7 @@ apt-get -qq update
 apt-get -yqq build-dep nginx
 
 # TODO: move all apt-get installs to dedicated script for having it in a single Docker layer = performance of reruns.
-apt-get -yqq install --no-install-recommends ca-certificates wget libaio-dev
+apt-get -yqq install --no-install-recommends ca-certificates wget libaio-dev libpcre3 libpcre3-dev
 update-ca-certificates -f
 mkdir /tmp/nginx
 wget -nv https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
@@ -57,7 +57,7 @@ ARCH=$(uname -m)
 CC_OPT="-O3 -Wno-error=implicit-fallthrough"
 
 if [ "$ARCH" = "aarch64" ]; then
-    CC_OPT="${CC_OPT} -march=armv8-a+crc -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+    CC_OPT="${CC_OPT} -march=armv8-a+crc"
 fi
 
 ./configure --prefix=/usr/local/nginx \
