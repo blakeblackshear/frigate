@@ -56,6 +56,14 @@ mqtt:
 ```
 
 ```yaml
+onvif:
+  host: 10.0.10.10
+  port: 8000
+  user: "{FRIGATE_RTSP_USER}"
+  password: "{FRIGATE_RTSP_PASSWORD}"
+```
+
+```yaml
 mqtt:
   # Optional: Enable mqtt server (default: shown below)
   enabled: True
