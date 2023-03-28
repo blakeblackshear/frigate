@@ -16,7 +16,7 @@ Note that mjpeg cameras require encoding the video into h264 for recording, and 
 ```yaml
 go2rtc:
   streams:
-    mjpeg_cam: ffmpeg:{your_mjpeg_stream_url}#video=h264#hardware # <- use hardware acceleration to create an h264 stream usable for other components.
+    mjpeg_cam: "ffmpeg:{your_mjpeg_stream_url}#video=h264#hardware" # <- use hardware acceleration to create an h264 stream usable for other components.
 
 cameras:
   ...
@@ -110,7 +110,7 @@ go2rtc:
   streams:
     reolink: 
       - http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password
-      - ffmpeg:reolink#audio=opus
+      - "ffmpeg:reolink#audio=opus"
     reolink_sub: 
       - http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password
 
