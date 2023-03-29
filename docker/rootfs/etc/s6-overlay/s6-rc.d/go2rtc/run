@@ -54,8 +54,17 @@ if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
     python3 /usr/local/go2rtc/create_config.py
 fi
 
+readonly config_path="/config"
+
+if [[ -x "${config_path}/go2rtc" ]]; then
+  readonly binary_path="${config_path}/go2rtc"
+  echo "[WARN] Using go2rtc binary from '${binary_path}' instead of the embedded one" >&2
+else
+  readonly binary_path="/usr/local/go2rtc/bin/go2rtc"
+fi
+
 echo "[INFO] Starting go2rtc..."
 
 # Replace the bash process with the go2rtc process, redirecting stderr to stdout
 exec 2>&1
-exec go2rtc -config=/dev/shm/go2rtc.yaml
+exec "${binary_path}" -config=/dev/shm/go2rtc.yaml
