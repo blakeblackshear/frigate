@@ -502,7 +502,7 @@ ui:
   # Optional: Set the default live mode for cameras in the UI (default: shown below)
   live_mode: mse
   # Optional: Set a timezone to use in the UI (default: use browser local time)
-  timezone: None
+  # timezone: America/Denver
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
   use_experimental: False
   # Optional: Set the time format used.
