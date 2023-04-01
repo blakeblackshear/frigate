@@ -58,7 +58,7 @@ readonly config_path="/config"
 
 if [[ -x "${config_path}/go2rtc" ]]; then
   readonly binary_path="${config_path}/go2rtc"
-  echo "[WARN] Using go2rtc binary from '${binary_path}' instead of the embedded one" >&2
+  echo "[WARN] Using go2rtc binary from '${binary_path}' instead of the embedded one"
 else
   readonly binary_path="/usr/local/go2rtc/bin/go2rtc"
 fi
