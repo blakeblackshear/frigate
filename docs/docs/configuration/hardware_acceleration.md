@@ -63,6 +63,20 @@ A more complete list of cards and ther compatible drivers is available in the [d
 
 If your distribution does not offer NVIDIA driver packages, you can [download them here](https://www.nvidia.com/en-us/drivers/unix/).
 
+### KHADAS VIM3 SBC
+
+This SBC is equipped with the Verisilicon TPU. Khadas Website (https://www.khadas.com/vim3)
+config.yml  
+```  
+  vim3:
+    type: vim3
+ ```
+
+NOTE! - most distributions do not include a working galcore.ko kernel driver that matches the NPU module. [Download galcore.ko](https://drive.google.com/file/d/1pxCDMp686kCuYvdABJsWFBVvXnMBXk0z/view?usp=sharing) and place in the /lib/modules/4.9.241/kernel/drivers/amlogic/ directory [Download link TBC]
+Debian11 build link 
+
+This needs to run in Docker --priviledged mode
+
 #### Docker Configuration
 
 Additional configuration is needed for the Docker container to be able to access the NVIDIA GPU. The supported method for this is to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) and specify the GPU to Docker. How you do this depends on how Docker is being run:
