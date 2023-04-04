@@ -75,6 +75,18 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
         libva-drm2 mesa-va-drivers
 fi
 
+# Check if the platform is a VIM3 and download TF delegate drivers for NPU
+VIM3_RELEASE="Vim3_tflite_delegate-0.1"
+if cat /proc/cpuinfo | grep -q VIM3
+then
+    wget -q  https://github.com/RichardPar/Vim3_tflite_delegate/archive/refs/tags/v0.1.tar.gz -O - | tar -xz 
+    if [ -d "$VIM3_RELEASE" ]; then
+         mv "$VIM3_RELEASE/library" /lib/vim3
+         echo "/lib/vim3" > /etc/ld.so.conf.d/vim3.conf
+         rm -rf "$VIM3_RELEASE"
+      fi
+fi
+
 # not sure why 32bit arm requires all these
 if [[ "${TARGETARCH}" == "arm" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
@@ -84,6 +96,7 @@ if [[ "${TARGETARCH}" == "arm" ]]; then
         gfortran openexr libatlas-base-dev libtbb-dev libdc1394-22-dev libopenexr-dev \
         libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
 fi
+
 
 apt-get purge gnupg apt-transport-https wget xz-utils -y
 apt-get clean autoclean -y
