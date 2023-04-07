@@ -133,6 +133,7 @@ cameras:
 Unifi protect cameras require the rtspx stream to be used with go2rtc.
 To utilize a Unifi protect camera, modify the rtsps link to begin with rtspx.
 Additionally, remove the "?enableSrtp" from the end of the Unifi link.
+
 ```yaml
 go2rtc:
   streams:
