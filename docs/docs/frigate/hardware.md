@@ -48,7 +48,7 @@ A single Coral can handle many cameras and will be sufficient for the majority o
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
-- x86 & Arm32/64 hosts with VPU Hardware (ex: Intel NCS2)
+- x86 & Arm64 hosts with VPU Hardware (ex: Intel NCS2)
 
 More information is available [in the detector docs](/configuration/detectors#openvino-detector)
 
