@@ -133,11 +133,6 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN if [ "${TARGETARCH}" = "arm" ]; \
-    then echo "[global]" > /etc/pip.conf \
-    && echo "extra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf; \
-    fi
-
 COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 

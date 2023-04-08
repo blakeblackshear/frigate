@@ -1,15 +1,8 @@
-name: CI
+name: Maintain Cache
 
 on:
-  push:
-    branches:
-      - dev
-      - master
-
-# only run the latest commit to avoid cache overwrites
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+  schedule:
+    - cron: "13 0 * * 0,4"
 
 env:
   PYTHON_VERSION: 3.9
@@ -42,26 +35,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create version file
         run: make version
-      - name: Create short sha
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
-          push: true
+          push: false
           platforms: linux/amd64,linux/arm64
           target: frigate
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Build and push TensorRT
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64
-          target: frigate-tensorrt
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
           cache-from: type=gha
