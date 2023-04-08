@@ -23,15 +23,11 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 My current favorite is the Minisforum GK41 because of the dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                                                                                                                                                                                                                                                              | Coral Inference Speed | Coral Compatibility | Notes                                                                                                                             |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Odyssey X86 Blue J4125 (<a href="https://amzn.to/3oH4BKi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) (<a href="https://www.seeedstudio.com/Frigate-NVR-with-Odyssey-Blue-and-Coral-USB-Accelerator.html?utm_source=Frigate" target="_blank" rel="nofollow noopener sponsored">SeeedStudio</a>) | 9-10ms          | M.2 B+M, USB        | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Minisforum GK41 (<a href="https://amzn.to/3ptnb8D" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                  | 9-10ms          | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Beelink GK55 (<a href="https://amzn.to/35E79BC" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                     | 9-10ms          | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Intel NUC (<a href="https://amzn.to/3psFlHi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                        | 8-10ms          | USB                 | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion. Requires extra parts. |
-| BMAX B2 Plus (<a href="https://amzn.to/3a6TBh8" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                     | 10-12ms         | USB                 | Good balance of performance and cost. Also capable of running many other services at the same time as Frigate.                          |
-| Atomic Pi (<a href="https://amzn.to/2YjpY9m" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                        | 16ms            | USB                 | Good option for a dedicated low power board with a small number of cameras. Can leverage Intel QuickSync for stream decoding.           |
-| Raspberry Pi 4 (64bit) (<a href="https://amzn.to/2YhSGHH" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                           | 10-15ms         | USB                 | Can handle a small number of cameras.                                                                                                   |
+| Name                                                                                                                                                                                                                                                                                                              | Coral Inference Speed | Coral Compatibility | Notes                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Odyssey X86 Blue J4125 (<a href="https://amzn.to/3oH4BKi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) (<a href="https://www.seeedstudio.com/Frigate-NVR-with-Odyssey-Blue-and-Coral-USB-Accelerator.html?utm_source=Frigate" target="_blank" rel="nofollow noopener sponsored">SeeedStudio</a>) | 9-10ms                | M.2 B+M, USB        | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
+| Minisforum GK41 (<a href="https://amzn.to/3ptnb8D" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                  | 9-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
+| Intel NUC (<a href="https://amzn.to/3psFlHi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                        | 8-10ms                | USB                 | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion. Requires extra parts. |
 
 ## Detectors
 
@@ -50,6 +46,7 @@ A single Coral can handle many cameras and will be sufficient for the majority o
 ### OpenVino
 
 The OpenVINO detector type is able to run on:
+
 - 6th Gen Intel Platforms and newer that have an iGPU
 - x86 & Arm32/64 hosts with VPU Hardware (ex: Intel NCS2)
 
@@ -80,15 +77,15 @@ The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | Inference Speed   |
-| --------------- | ----------------- |
-| GTX 1060 6GB    | ~ 7 ms            |
-| GTX 1070        | ~ 6 ms            |
-| GTX 1660 SUPER  | ~ 4 ms            |
-| RTX 3050        | 5 - 7 ms          |
-| RTX 3070 Mobile | ~ 5 ms            |
-| Quadro P400 2GB | 20 - 25 ms        |
-| Quadro P2000    | ~ 12 ms           |
+| Name            | Inference Speed |
+| --------------- | --------------- |
+| GTX 1060 6GB    | ~ 7 ms          |
+| GTX 1070        | ~ 6 ms          |
+| GTX 1660 SUPER  | ~ 4 ms          |
+| RTX 3050        | 5 - 7 ms        |
+| RTX 3070 Mobile | ~ 5 ms          |
+| Quadro P400 2GB | 20 - 25 ms      |
+| Quadro P2000    | ~ 12 ms         |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
