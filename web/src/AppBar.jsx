@@ -9,7 +9,7 @@ import FrigateRestartIcon from './icons/FrigateRestart';
 import Prompt from './components/Prompt';
 import { useDarkMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
-import { useRestart } from './api/mqtt';
+import { useRestart } from './api/ws';
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -78,7 +78,7 @@ export default function AppBar() {
       {showDialogWait ? (
         <Prompt
           title="Restart in progress"
-          text="Please wait a few seconds for the restart to complete before reloading the page."
+          text="This can take up to one minute, please wait before reloading the page."
         />
       ) : null}
     </Fragment>

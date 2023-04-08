@@ -9,11 +9,38 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
 from pydantic.fields import PrivateAttr
 
-from frigate.const import BASE_DIR, CACHE_DIR, YAML_EXT
-from frigate.util import create_mask, deep_merge, load_labels
+from frigate.const import (
+    BASE_DIR,
+    CACHE_DIR,
+    REGEX_CAMERA_NAME,
+    YAML_EXT,
+)
+from frigate.util import (
+    create_mask,
+    deep_merge,
+    get_ffmpeg_arg_list,
+    escape_special_characters,
+    load_config_with_no_duplicates,
+    load_labels,
+)
+from frigate.ffmpeg_presets import (
+    parse_preset_hardware_acceleration_decode,
+    parse_preset_hardware_acceleration_scale,
+    parse_preset_input,
+    parse_preset_output_record,
+    parse_preset_output_rtmp,
+)
+from frigate.detectors import (
+    PixelFormatEnum,
+    InputTensorEnum,
+    ModelConfig,
+    DetectorConfig,
+)
+from frigate.version import VERSION
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,23 +60,52 @@ class FrigateBaseModel(BaseModel):
         extra = Extra.forbid
 
 
-class DetectorTypeEnum(str, Enum):
-    edgetpu = "edgetpu"
-    cpu = "cpu"
+class LiveModeEnum(str, Enum):
+    jsmpeg = "jsmpeg"
+    mse = "mse"
+    webrtc = "webrtc"
 
 
-class DetectorConfig(FrigateBaseModel):
-    type: DetectorTypeEnum = Field(default=DetectorTypeEnum.cpu, title="Detector Type")
-    device: str = Field(default="usb", title="Device Type")
-    num_threads: int = Field(default=3, title="Number of detection threads")
+class TimeFormatEnum(str, Enum):
+    browser = "browser"
+    hours12 = "12hour"
+    hours24 = "24hour"
+
+
+class DateTimeStyleEnum(str, Enum):
+    full = "full"
+    long = "long"
+    medium = "medium"
+    short = "short"
 
 
 class UIConfig(FrigateBaseModel):
+    live_mode: LiveModeEnum = Field(
+        default=LiveModeEnum.mse, title="Default Live Mode."
+    )
+    timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
+    time_format: TimeFormatEnum = Field(
+        default=TimeFormatEnum.browser, title="Override UI time format."
+    )
+    date_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.short, title="Override UI dateStyle."
+    )
+    time_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
+    )
+    strftime_fmt: Optional[str] = Field(
+        default=None, title="Override date and time format using strftime syntax."
+    )
+
+
+class TelemetryConfig(FrigateBaseModel):
+    version_check: bool = Field(default=True, title="Enable latest version check.")
 
 
 class MqttConfig(FrigateBaseModel):
-    host: str = Field(title="MQTT Host")
+    enabled: bool = Field(title="Enable MQTT Communication.", default=True)
+    host: str = Field(default="", title="MQTT Host")
     port: int = Field(default=1883, title="MQTT Port")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
     client_id: str = Field(default="frigate", title="MQTT Client ID")
@@ -317,6 +373,7 @@ class BirdseyeModeEnum(str, Enum):
 
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
+    restream: bool = Field(default=False, title="Restream birdseye via RTSP.")
     width: int = Field(default=1280, title="Birdseye width.")
     height: int = Field(default=720, title="Birdseye height.")
     quality: int = Field(
@@ -338,36 +395,20 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
-FFMPEG_INPUT_ARGS_DEFAULT = [
-    "-avoid_negative_ts",
-    "make_zero",
-    "-fflags",
-    "+genpts+discardcorrupt",
-    "-rtsp_transport",
-    "tcp",
-    "-timeout",
-    "5000000",
-    "-use_wallclock_as_timestamps",
-    "1",
-]
-DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
-RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-c", "copy", "-f", "flv"]
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = [
+# Note: Setting threads to less than 2 caused several issues with recording segments
+# https://github.com/blakeblackshear/frigate/issues/5659
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "2"]
+FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
+DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
+    "-threads",
+    "2",
     "-f",
-    "segment",
-    "-segment_time",
-    "10",
-    "-segment_format",
-    "mp4",
-    "-reset_timestamps",
-    "1",
-    "-strftime",
-    "1",
-    "-c",
-    "copy",
-    "-an",
+    "rawvideo",
+    "-pix_fmt",
+    "yuv420p",
 ]
+RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
+RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
 
 class FfmpegOutputArgsConfig(FrigateBaseModel):
@@ -513,12 +554,18 @@ class CameraMqttConfig(FrigateBaseModel):
 
 
 class RtmpConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="RTMP restreaming enabled.")
+    enabled: bool = Field(default=False, title="RTMP restreaming enabled.")
 
 
 class CameraLiveConfig(FrigateBaseModel):
+    stream_name: str = Field(default="", title="Name of restream to use as live view.")
     height: int = Field(default=720, title="Live camera view height")
     quality: int = Field(default=8, ge=1, le=31, title="Live camera view quality")
+
+
+class RestreamConfig(BaseModel):
+    class Config:
+        extra = Extra.allow
 
 
 class CameraUiConfig(FrigateBaseModel):
@@ -529,7 +576,8 @@ class CameraUiConfig(FrigateBaseModel):
 
 
 class CameraConfig(FrigateBaseModel):
-    name: Optional[str] = Field(title="Camera name.", regex="^[a-zA-Z0-9_-]+$")
+    name: Optional[str] = Field(title="Camera name.", regex=REGEX_CAMERA_NAME)
+    enabled: bool = Field(default=True, title="Enable camera.")
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     best_image_timeout: int = Field(
         default=60,
@@ -582,7 +630,15 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
-            config["ffmpeg"]["inputs"][0]["roles"] = ["record", "rtmp", "detect"]
+            has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
+
+            config["ffmpeg"]["inputs"][0]["roles"] = [
+                "record",
+                "detect",
+            ]
+
+            if has_rtmp:
+                config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
         super().__init__(**config)
 
@@ -613,36 +669,29 @@ class CameraConfig(FrigateBaseModel):
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []
         if "detect" in ffmpeg_input.roles:
-            detect_args = (
-                self.ffmpeg.output_args.detect
-                if isinstance(self.ffmpeg.output_args.detect, list)
-                else self.ffmpeg.output_args.detect.split(" ")
+            detect_args = get_ffmpeg_arg_list(self.ffmpeg.output_args.detect)
+            scale_detect_args = parse_preset_hardware_acceleration_scale(
+                ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args,
+                detect_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
             )
-            ffmpeg_output_args = (
-                [
-                    "-r",
-                    str(self.detect.fps),
-                    "-s",
-                    f"{self.detect.width}x{self.detect.height}",
-                ]
-                + detect_args
-                + ffmpeg_output_args
-                + ["pipe:"]
-            )
+
+            ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
         if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
-            rtmp_args = (
-                self.ffmpeg.output_args.rtmp
-                if isinstance(self.ffmpeg.output_args.rtmp, list)
-                else self.ffmpeg.output_args.rtmp.split(" ")
+            rtmp_args = get_ffmpeg_arg_list(
+                parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)
+                or self.ffmpeg.output_args.rtmp
             )
+
             ffmpeg_output_args = (
                 rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
             )
         if "record" in ffmpeg_input.roles and self.record.enabled:
-            record_args = (
-                self.ffmpeg.output_args.record
-                if isinstance(self.ffmpeg.output_args.record, list)
-                else self.ffmpeg.output_args.record.split(" ")
+            record_args = get_ffmpeg_arg_list(
+                parse_preset_output_record(self.ffmpeg.output_args.record)
+                or self.ffmpeg.output_args.record
             )
 
             ffmpeg_output_args = (
@@ -655,18 +704,20 @@ class CameraConfig(FrigateBaseModel):
         if len(ffmpeg_output_args) == 0:
             return None
 
-        global_args = ffmpeg_input.global_args or self.ffmpeg.global_args
-        hwaccel_args = ffmpeg_input.hwaccel_args or self.ffmpeg.hwaccel_args
-        input_args = ffmpeg_input.input_args or self.ffmpeg.input_args
-
-        global_args = (
-            global_args if isinstance(global_args, list) else global_args.split(" ")
+        global_args = get_ffmpeg_arg_list(
+            ffmpeg_input.global_args or self.ffmpeg.global_args
         )
-        hwaccel_args = (
-            hwaccel_args if isinstance(hwaccel_args, list) else hwaccel_args.split(" ")
+        hwaccel_args = get_ffmpeg_arg_list(
+            parse_preset_hardware_acceleration_decode(ffmpeg_input.hwaccel_args)
+            or ffmpeg_input.hwaccel_args
+            or parse_preset_hardware_acceleration_decode(self.ffmpeg.hwaccel_args)
+            or self.ffmpeg.hwaccel_args
         )
-        input_args = (
-            input_args if isinstance(input_args, list) else input_args.split(" ")
+        input_args = get_ffmpeg_arg_list(
+            parse_preset_input(ffmpeg_input.input_args, self.detect.fps)
+            or ffmpeg_input.input_args
+            or parse_preset_input(self.ffmpeg.input_args, self.detect.fps)
+            or self.ffmpeg.input_args
         )
 
         cmd = (
@@ -674,7 +725,7 @@ class CameraConfig(FrigateBaseModel):
             + global_args
             + hwaccel_args
             + input_args
-            + ["-i", ffmpeg_input.path]
+            + ["-i", escape_special_characters(ffmpeg_input.path)]
             + ffmpeg_output_args
         )
 
@@ -685,40 +736,6 @@ class DatabaseConfig(FrigateBaseModel):
     path: str = Field(
         default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
     )
-
-
-class ModelConfig(FrigateBaseModel):
-    path: Optional[str] = Field(title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
-    width: int = Field(default=320, title="Object detection model input width.")
-    height: int = Field(default=320, title="Object detection model input height.")
-    labelmap: Dict[int, str] = Field(
-        default_factory=dict, title="Labelmap customization."
-    )
-    _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
-    _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
-
-    @property
-    def merged_labelmap(self) -> Dict[int, str]:
-        return self._merged_labelmap
-
-    @property
-    def colormap(self) -> Dict[int, Tuple[int, int, int]]:
-        return self._colormap
-
-    def __init__(self, **config):
-        super().__init__(**config)
-
-        self._merged_labelmap = {
-            **load_labels(config.get("labelmap_path", "/labelmap.txt")),
-            **config.get("labelmap", {}),
-        }
-
-        cmap = plt.cm.get_cmap("tab10", len(self._merged_labelmap.keys()))
-
-        self._colormap = {}
-        for key, val in self._merged_labelmap.items():
-            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
 
 class LogLevelEnum(str, Enum):
@@ -738,6 +755,98 @@ class LoggerConfig(FrigateBaseModel):
     )
 
 
+def verify_config_roles(camera_config: CameraConfig) -> None:
+    """Verify that roles are setup in the config correctly."""
+    assigned_roles = list(
+        set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
+    )
+
+    if camera_config.record.enabled and not "record" in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
+        )
+
+    if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
+        )
+
+
+def verify_valid_live_stream_name(
+    frigate_config: FrigateConfig, camera_config: CameraConfig
+) -> None:
+    """Verify that a restream exists to use for live view."""
+    if (
+        camera_config.live.stream_name
+        not in frigate_config.go2rtc.dict().get("streams", {}).keys()
+    ):
+        return ValueError(
+            f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
+        )
+
+
+def verify_old_retain_config(camera_config: CameraConfig) -> None:
+    """Leave log if old retain_days is used."""
+    if not camera_config.record.retain_days is None:
+        logger.warning(
+            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+        )
+        if camera_config.record.retain.days == 0:
+            camera_config.record.retain.days = camera_config.record.retain_days
+
+
+def verify_recording_retention(camera_config: CameraConfig) -> None:
+    """Verify that recording retention modes are ranked correctly."""
+    rank_map = {
+        RetainModeEnum.all: 0,
+        RetainModeEnum.motion: 1,
+        RetainModeEnum.active_objects: 2,
+    }
+
+    if (
+        camera_config.record.retain.days != 0
+        and rank_map[camera_config.record.retain.mode]
+        > rank_map[camera_config.record.events.retain.mode]
+    ):
+        logger.warning(
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+        )
+
+
+def verify_recording_segments_setup_with_reasonable_time(
+    camera_config: CameraConfig,
+) -> None:
+    """Verify that recording segments are setup and segment time is not greater than 60."""
+    record_args: list[str] = get_ffmpeg_arg_list(
+        camera_config.ffmpeg.output_args.record
+    )
+
+    if record_args[0].startswith("preset"):
+        return
+
+    seg_arg_index = record_args.index("-segment_time")
+
+    if seg_arg_index < 0:
+        raise ValueError(
+            f"Camera {camera_config.name} has no segment_time in recording output args, segment args are required for record."
+        )
+
+    if int(record_args[seg_arg_index + 1]) > 60:
+        raise ValueError(
+            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be 60 or less."
+        )
+
+
+def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
+    """Verify that user has not entered zone objects that are not in the tracking config."""
+    for zone_name, zone in camera_config.zones.items():
+        for obj in zone.objects:
+            if obj not in camera_config.objects.track:
+                raise ValueError(
+                    f"Zone {zone_name} is configured to track {obj} but that object type is not added to objects -> track."
+                )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -747,11 +856,14 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
+    telemetry: TelemetryConfig = Field(
+        default_factory=TelemetryConfig, title="Telemetry configuration."
+    )
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )
     detectors: Dict[str, DetectorConfig] = Field(
-        default={name: DetectorConfig(**d) for name, d in DEFAULT_DETECTORS.items()},
+        default=DEFAULT_DETECTORS,
         title="Detector hardware configuration.",
     )
     logger: LoggerConfig = Field(
@@ -763,11 +875,14 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
-    live: CameraLiveConfig = Field(
-        default_factory=CameraLiveConfig, title="Global live configuration."
-    )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
+    )
+    live: CameraLiveConfig = Field(
+        default_factory=CameraLiveConfig, title="Live playback settings."
+    )
+    go2rtc: RestreamConfig = Field(
+        default_factory=RestreamConfig, title="Global restream configuration."
     )
     birdseye: BirdseyeConfig = Field(
         default_factory=BirdseyeConfig, title="Birdseye configuration."
@@ -795,18 +910,19 @@ class FrigateConfig(FrigateBaseModel):
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 
-        # MQTT password substitution
-        if config.mqtt.password:
+        # MQTT user/password substitutions
+        if config.mqtt.user or config.mqtt.password:
+            config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
-        # Global config to propegate down to camera level
+        # Global config to propagate down to camera level
         global_config = config.dict(
             include={
                 "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
-                "live": ...,
                 "rtmp": ...,
+                "live": ...,
                 "objects": ...,
                 "motion": ...,
                 "detect": ...,
@@ -879,45 +995,59 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.dict(exclude_unset=True),
                 )
 
-            # check runtime config
-            assigned_roles = list(
-                set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
-            )
-            if camera_config.record.enabled and not "record" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has record enabled, but record is not assigned to an input."
-                )
+            # Set live view stream if none is set
+            if not camera_config.live.stream_name:
+                camera_config.live.stream_name = name
 
-            if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
-                raise ValueError(
-                    f"Camera {name} has rtmp enabled, but rtmp is not assigned to an input."
-                )
+            verify_config_roles(camera_config)
+            verify_valid_live_stream_name(config, camera_config)
+            verify_old_retain_config(camera_config)
+            verify_recording_retention(camera_config)
+            verify_recording_segments_setup_with_reasonable_time(camera_config)
+            verify_zone_objects_are_tracked(camera_config)
 
-            # backwards compatibility for retain_days
-            if not camera_config.record.retain_days is None:
+            if camera_config.rtmp.enabled:
                 logger.warning(
-                    "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
+                    "RTMP restream is deprecated in favor of the restream role, recommend disabling RTMP."
                 )
-                if camera_config.record.retain.days == 0:
-                    camera_config.record.retain.days = camera_config.record.retain_days
 
-            # warning if the higher level record mode is potentially more restrictive than the events
-            rank_map = {
-                RetainModeEnum.all: 0,
-                RetainModeEnum.motion: 1,
-                RetainModeEnum.active_objects: 2,
-            }
-            if (
-                camera_config.record.retain.days != 0
-                and rank_map[camera_config.record.retain.mode]
-                > rank_map[camera_config.record.events.retain.mode]
-            ):
-                logger.warning(
-                    f"{name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
-                )
-            # generage the ffmpeg commands
+            # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()
             config.cameras[name] = camera_config
+
+        # get list of unique enabled labels for tracking
+        enabled_labels = set(config.objects.track)
+
+        for _, camera in config.cameras.items():
+            enabled_labels.update(camera.objects.track)
+
+        config.model.create_colormap(sorted(enabled_labels))
+
+        for key, detector in config.detectors.items():
+            detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
+            if detector_config.model is None:
+                detector_config.model = config.model
+            else:
+                model = detector_config.model
+                schema = ModelConfig.schema()["properties"]
+                if (
+                    model.width != schema["width"]["default"]
+                    or model.height != schema["height"]["default"]
+                    or model.labelmap_path is not None
+                    or model.labelmap is not {}
+                    or model.input_tensor != schema["input_tensor"]["default"]
+                    or model.input_pixel_format
+                    != schema["input_pixel_format"]["default"]
+                ):
+                    logger.warning(
+                        "Customizing more than a detector model path is unsupported."
+                    )
+            merged_model = deep_merge(
+                detector_config.model.dict(exclude_unset=True),
+                config.model.dict(exclude_unset=True),
+            )
+            detector_config.model = ModelConfig.parse_obj(merged_model)
+            config.detectors[key] = detector_config
 
         return config
 
@@ -935,8 +1065,13 @@ class FrigateConfig(FrigateBaseModel):
             raw_config = f.read()
 
         if config_file.endswith(YAML_EXT):
-            config = yaml.safe_load(raw_config)
+            config = load_config_with_no_duplicates(raw_config)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 
+        return cls.parse_obj(config)
+
+    @classmethod
+    def parse_raw(cls, raw_config):
+        config = load_config_with_no_duplicates(raw_config)
         return cls.parse_obj(config)

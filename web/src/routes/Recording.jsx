@@ -9,13 +9,17 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
+  const { data: config } = useSWR('config');
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
   );
+  const timezone = useMemo(() => config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
 
   const apiHost = useApiHost();
-  const { data: recordingsSummary } = useSWR(`${camera}/recordings/summary`, { revalidateOnFocus: false });
+  const { data: recordingsSummary } = useSWR([`${camera}/recordings/summary`, { timezone }], {
+    revalidateOnFocus: false,
+  });
 
   const recordingParams = {
     before: getUnixTime(endOfHour(currentDate)),
@@ -66,14 +70,17 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
           description: `${camera} recording @ ${h.hour}:00.`,
           sources: [
             {
-              src: `${apiHost}/vod/${year}-${month}/${day}/${h.hour}/${camera}/master.m3u8`,
+              src: `${apiHost}vod/${year}-${month}/${day}/${h.hour}/${camera}/${timezone.replaceAll(
+                '/',
+                ','
+              )}/master.m3u8`,
               type: 'application/vnd.apple.mpegurl',
             },
           ],
         };
       })
       .reverse();
-  }, [apiHost, date, recordingsSummary, camera]);
+  }, [apiHost, date, recordingsSummary, camera, timezone]);
 
   const playlistIndex = useMemo(() => {
     const index = playlist.findIndex((item) => item.name === hour);
@@ -107,7 +114,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary || !recordings) {
+  if (!recordingsSummary || !recordings || !config) {
     return <ActivityIndicator />;
   }
 
@@ -126,8 +133,12 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>{camera.replaceAll('_', ' ')} Recordings</Heading>
+      <div className="text-xs">Dates and times are based on the timezone {timezone}</div>
 
       <VideoPlayer
+        options={{
+          preload: 'auto',
+        }}
         onReady={(player) => {
           player.on('ratechange', () => player.defaultPlaybackRate(player.playbackRate()));
           if (player.playlist) {

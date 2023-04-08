@@ -3,11 +3,11 @@ id: installation
 title: Installation
 ---
 
-Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](integrations/home-assistant) is required to integrate Frigate into Home Assistant.
+Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant.
 
 ## Dependencies
 
-**MQTT broker** - Frigate requires an MQTT broker. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
+**MQTT broker (optional)** - An MQTT broker is optional with Frigate, but is required for the Home Assistant integration. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
 
 ## Preparing your hardware
 
@@ -21,15 +21,9 @@ Windows is not officially supported, but some users have had success getting it 
 
 Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
 
-:::caution
-
-Note that Frigate does not currently support limiting recordings based on available disk space automatically. If using recordings, you must specify retention settings for a number of days that will fit within the available disk space of your drive or Frigate will crash.
-
-:::
-
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
-- `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
+- `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while Frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder.
 - `/dev/shm`: It is not recommended to modify this directory or map it with docker. This is the location for raw decoded frames in shared memory and it's size is impacted by the `shm-size` calculations below.
 - `/config/config.yml`: Default location of the config file.
@@ -44,7 +38,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -61,7 +55,7 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/network/storage:/media/frigate
       - /path/to/local/disk:/db
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
@@ -80,17 +74,29 @@ database:
 
 ### Calculating required shm-size
 
-Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is 64m.
+Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm-size of 64m is fine for setups with 2 or less 1080p cameras. If frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
+The default shm size of **64MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size.
 
-You can calculate the necessary shm-size for each camera with the following formula using the resolution specified for detect:
+The Frigate container also stores logs in shm, which can take up to **30MB**, so make sure to take this into account in your math as well.
 
+You can calculate the necessary shm size for each camera with the following formula using the resolution specified for detect:
+
+```console
+# Replace <width> and <height>
+$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 9 + 270480) / 1048576))'
+
+# Example for 1280x720
+$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 9 + 270480) / 1048576))'
+12.12MB
+
+# Example for eight cameras detecting at 1280x720, including logs
+$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576) * 8 + 30))'
+126.99MB
 ```
-(width * height * 1.5 * 9 + 270480)/1048576 = <shm size in mb>
-```
 
-The shm size cannot be set per container for Home Assistant Addons. You must set `default-shm-size` in `/etc/docker/daemon.json` to increase the default shm size. This will increase the shm size for all of your docker containers. This may or may not cause issues with your setup. https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
+
 
 ### Raspberry Pi 3/4
 
@@ -109,7 +115,7 @@ services:
     container_name: frigate
     privileged: true # this may not be necessary for all setups
     restart: unless-stopped
-    image: blakeblackshear/frigate:stable
+    image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
@@ -117,7 +123,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /path/to/your/config.yml:/config/config.yml:ro
+      - /path/to/your/config.yml:/config/config.yml
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -125,7 +131,9 @@ services:
           size: 1000000000
     ports:
       - "5000:5000"
-      - "1935:1935" # RTMP feeds
+      - "8554:8554" # RTSP feeds
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
@@ -141,19 +149,24 @@ docker run -d \
   --device /dev/dri/renderD128 \
   --shm-size=64m \
   -v /path/to/your/storage:/media/frigate \
-  -v /path/to/your/config.yml:/config/config.yml:ro \
+  -v /path/to/your/config.yml:/config/config.yml \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
-  -p 1935:1935 \
-  blakeblackshear/frigate:stable
+  -p 8554:8554 \
+  -p 8555:8555/tcp \
+  -p 8555:8555/udp \
+  ghcr.io/blakeblackshear/frigate:stable
 ```
 
 ## Home Assistant Operating System (HassOS)
 
 :::caution
 
-Due to limitations in Home Assistant Operating System, utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
+There are important limitations in Home Assistant Operating System to be aware of:
+- Utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
+- AMD GPUs are not supported because HA OS does not include the mesa driver.
+- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
 :::
 
@@ -183,6 +196,13 @@ There are several versions of the addon available:
 | Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
 
 ## Home Assistant Supervised
+
+:::caution
+
+There are important limitations in Home Assistant Supervised to be aware of:
+- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
+
+:::
 
 :::tip
 

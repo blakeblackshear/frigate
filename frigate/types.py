@@ -3,7 +3,7 @@ from multiprocessing.queues import Queue
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.context import Process
 
-from frigate.edgetpu import EdgeTPUProcess
+from frigate.object_detection import ObjectDetectProcess
 
 
 class CameraMetricsTypes(TypedDict):
@@ -26,6 +26,7 @@ class CameraMetricsTypes(TypedDict):
 
 class StatsTrackingTypes(TypedDict):
     camera_metrics: dict[str, CameraMetricsTypes]
-    detectors: dict[str, EdgeTPUProcess]
+    detectors: dict[str, ObjectDetectProcess]
     started: int
     latest_frigate_version: str
+    last_updated: int

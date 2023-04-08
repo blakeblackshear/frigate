@@ -26,7 +26,7 @@ You can access a higher resolution mjpeg stream by appending `h=height-in-pixels
 
 ### `GET /api/<camera_name>/latest.jpg[?h=300]`
 
-The most recent frame that frigate has finished processing. It is a full resolution image by default.
+The most recent frame that Frigate has finished processing. It is a full resolution image by default.
 
 Accepts the following query string parameters:
 
@@ -63,7 +63,7 @@ Sample response:
     "camera_fps": 5.0,
     /***************
      * Number of times detection is run per second. This can be higher than
-     * your camera FPS because frigate often looks at the same frame multiple times
+     * your camera FPS because Frigate often looks at the same frame multiple times
      * or in multiple locations
      ***************/
     "detection_fps": 1.5,
@@ -76,11 +76,11 @@ Sample response:
      ***************/
     "pid": 34,
     /***************
-     * Frames per second being processed by frigate.
+     * Frames per second being processed by Frigate.
      ***************/
     "process_fps": 5.1,
     /***************
-     * Frames per second skip for processing by frigate.
+     * Frames per second skip for processing by Frigate.
      ***************/
     "skipped_fps": 0.0
   },
@@ -159,13 +159,14 @@ Events from the database. Accepts the following query string parameters:
 | -------------------- | ---- | --------------------------------------------- |
 | `before`             | int  | Epoch time                                    |
 | `after`              | int  | Epoch time                                    |
-| `camera`             | str  | Camera name                                   |
-| `label`              | str  | Label name                                    |
-| `zone`               | str  | Zone name                                     |
+| `cameras`            | str  | , separated list of cameras                   |
+| `labels`             | str  | , separated list of labels                    |
+| `zones`              | str  | , separated list of zones                     |
 | `limit`              | int  | Limit the number of events returned           |
 | `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1) |
 | `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
+| `in_progress`        | int  | Limit to events in progress (0 or 1)          |
 
 ### `GET /api/events/summary`
 
@@ -244,10 +245,6 @@ HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can b
 
 HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
 
-### `GET /vod/event/<event-id>/index.m3u8`
-
-HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
-
 ### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
@@ -264,3 +261,11 @@ Get recording segment details for the given timestamp range.
 | -------- | ---- | ------------------------------------- |
 | `after`  | int  | Unix timestamp for beginning of range |
 | `before` | int  | Unix timestamp for end of range       |
+
+### `GET /api/ffprobe`
+
+Get ffprobe output for camera feed paths.
+
+| param   | Type   | Description                        |
+| ------- | ------ | ---------------------------------- |
+| `paths` | string | `,` separated list of camera paths |

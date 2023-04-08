@@ -15,6 +15,7 @@ import { UploadPlus } from '../icons/UploadPlus';
 import { Clip } from '../icons/Clip';
 import { Zone } from '../icons/Zone';
 import { Camera } from '../icons/Camera';
+import { Clock } from '../icons/Clock';
 import { Delete } from '../icons/Delete';
 import { Download } from '../icons/Download';
 import Menu, { MenuItem } from '../components/Menu';
@@ -22,6 +23,9 @@ import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
+import MultiSelect from '../components/MultiSelect';
+import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
+import TimeAgo from '../components/TimeAgo';
 
 const API_LIMIT = 25;
 
@@ -42,10 +46,11 @@ export default function Events({ path, ...props }) {
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
-    camera: props.camera ?? 'all',
-    label: props.label ?? 'all',
-    zone: props.zone ?? 'all',
-    sub_label: props.sub_label ?? 'all',
+    cameras: props.cameras ?? 'all',
+    labels: props.labels ?? 'all',
+    zones: props.zones ?? 'all',
+    sub_labels: props.sub_labels ?? 'all',
+    favorites: props.favorites ?? 0,
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -61,6 +66,7 @@ export default function Events({ path, ...props }) {
     has_clip: false,
     has_snapshot: false,
     plus_id: undefined,
+    end_time: null,
   });
   const [deleteFavoriteState, setDeleteFavoriteState] = useState({
     deletingFavoriteEventId: null,
@@ -89,24 +95,27 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
-  const { data: allSubLabels } = useSWR('sub_labels')
+  const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
 
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
-      zones: Object.values(config?.cameras || {})
-        .reduce((memo, camera) => {
-          memo = memo.concat(Object.keys(camera?.zones || {}));
-          return memo;
-        }, [])
-        .filter((value, i, self) => self.indexOf(value) === i),
+      zones: [
+        ...Object.values(config?.cameras || {})
+          .reduce((memo, camera) => {
+            memo = memo.concat(Object.keys(camera?.zones || {}));
+            return memo;
+          }, [])
+          .filter((value, i, self) => self.indexOf(value) === i),
+        'None',
+      ],
       labels: Object.values(config?.cameras || {})
         .reduce((memo, camera) => {
           memo = memo.concat(camera?.objects?.track || []);
           return memo;
         }, config?.objects?.track || [])
         .filter((value, i, self) => self.indexOf(value) === i),
-      sub_labels: Object.values(allSubLabels || []),
+      sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
     [config, allSubLabels]
   );
@@ -137,6 +146,40 @@ export default function Events({ path, ...props }) {
     }
   };
 
+  const onToggleNamedFilter = (name, item) => {
+    let items;
+
+    if (searchParams[name] == 'all') {
+      const currentItems = Array.from(filterValues[name]);
+
+      // don't remove all if only one option
+      if (currentItems.length > 1) {
+        currentItems.splice(currentItems.indexOf(item), 1);
+        items = currentItems.join(',');
+      } else {
+        items = ['all'];
+      }
+    } else {
+      let currentItems = searchParams[name].length > 0 ? searchParams[name].split(',') : [];
+
+      if (currentItems.includes(item)) {
+        // don't remove the last item in the filter list
+        if (currentItems.length > 1) {
+          currentItems.splice(currentItems.indexOf(item), 1);
+        }
+
+        items = currentItems.join(',');
+      } else if (currentItems.length + 1 == filterValues[name].length) {
+        items = ['all'];
+      } else {
+        currentItems.push(item);
+        items = currentItems.join(',');
+      }
+    }
+
+    onFilter(name, items);
+  };
+
   const datePicker = useRef();
 
   const downloadButton = useRef();
@@ -148,6 +191,7 @@ export default function Events({ path, ...props }) {
       has_clip: event.has_clip,
       has_snapshot: event.has_snapshot,
       plus_id: event.plus_id,
+      end_time: event.end_time,
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
@@ -249,58 +293,52 @@ export default function Events({ path, ...props }) {
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
       <div className="flex flex-wrap gap-2 items-center">
-        <select
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.camera}
-          onChange={(e) => onFilter('camera', e.target.value)}
-        >
-          <option value="all">all cameras</option>
-          {filterValues.cameras.map((item) => (
-            <option key={item} value={item}>
-              {item.replaceAll('_', ' ')}
-            </option>
-          ))}
-        </select>
-        <select
+          title="Cameras"
+          options={filterValues.cameras}
+          selection={searchParams.cameras}
+          onToggle={(item) => onToggleNamedFilter('cameras', item)}
+          onShowAll={() => onFilter('cameras', ['all'])}
+          onSelectSingle={(item) => onFilter('cameras', item)}
+        />
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.label}
-          onChange={(e) => onFilter('label', e.target.value)}
-        >
-          <option value="all">all labels</option>
-          {filterValues.labels.map((item) => (
-            <option key={item.replaceAll('_', ' ')} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-        <select
+          title="Labels"
+          options={filterValues.labels}
+          selection={searchParams.labels}
+          onToggle={(item) => onToggleNamedFilter('labels', item)}
+          onShowAll={() => onFilter('labels', ['all'])}
+          onSelectSingle={(item) => onFilter('labels', item)}
+        />
+        <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-          value={searchParams.zone}
-          onChange={(e) => onFilter('zone', e.target.value)}
-        >
-          <option value="all">all zones</option>
-          {filterValues.zones.map((item) => (
-            <option key={item} value={item}>
-              {item.replaceAll('_', ' ')}
-            </option>
-          ))}
-        </select>
-        {
-          filterValues.sub_labels.length > 0 && (
-            <select
-              className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
-              value={searchParams.sub_label}
-              onChange={(e) => onFilter('sub_label', e.target.value)}
-            >
-              <option value="all">all sub labels</option>
-              {filterValues.sub_labels.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          )}
-        <div ref={datePicker} className="ml-auto">
+          title="Zones"
+          options={filterValues.zones}
+          selection={searchParams.zones}
+          onToggle={(item) => onToggleNamedFilter('zones', item)}
+          onShowAll={() => onFilter('zones', ['all'])}
+          onSelectSingle={(item) => onFilter('zones', item)}
+        />
+        {filterValues.sub_labels.length > 0 && (
+          <MultiSelect
+            className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
+            title="Sub Labels"
+            options={filterValues.sub_labels}
+            selection={searchParams.sub_labels}
+            onToggle={(item) => onToggleNamedFilter('sub_labels', item)}
+            onShowAll={() => onFilter('sub_labels', ['all'])}
+            onSelectSingle={(item) => onFilter('sub_labels', item)}
+          />
+        )}
+
+        <StarRecording
+          className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
+          onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
+          fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
+        />
+
+        <div ref={datePicker} className="ml-right">
           <CalendarIcon
             className="h-8 w-8 cursor-pointer"
             onClick={() => setState({ ...state, showDatePicker: true })}
@@ -327,7 +365,7 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {downloadEvent.has_snapshot && !downloadEvent.plus_id && (
+          {(downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id) && (
             <MenuItem
               icon={UploadPlus}
               label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
@@ -415,7 +453,15 @@ export default function Events({ path, ...props }) {
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" color="red" onClick={(e) => { setDeleteFavoriteState({ ...state, showDeleteFavorite: false }); onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false) }} type="text">
+            <Button
+              className="ml-2"
+              color="red"
+              onClick={(e) => {
+                setDeleteFavoriteState({ ...state, showDeleteFavorite: false });
+                onDelete(e, deleteFavoriteState.deletingFavoriteEventId, false);
+              }}
+              type="text"
+            >
               Delete
             </Button>
           </div>
@@ -454,12 +500,21 @@ export default function Events({ path, ...props }) {
                     <div className="m-2 flex grow">
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
-                          {event.sub_label ? `${event.label}: ${event.sub_label}` : event.label} (
-                          {(event.top_score * 100).toFixed(0)}%)
+                          {event.sub_label
+                            ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
+                            : event.label.replaceAll('_', ' ')}
+                          ({(event.top_score * 100).toFixed(0)}%)
                         </div>
-                        <div className="text-sm">
-                          {new Date(event.start_time * 1000).toLocaleDateString()}{' '}
-                          {new Date(event.start_time * 1000).toLocaleTimeString()}
+                        <div className="text-sm flex">
+                          <Clock className="h-5 w-5 mr-2 inline" />
+                          {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
+                          <div className="hidden md:inline">
+                            <span className="m-1">-</span>
+                            <TimeAgo time={event.start_time * 1000} dense />
+                          </div>
+                          <div className="hidden md:inline">
+                            <span className="m-1" />( {getDurationFromTimestamps(event.start_time, event.end_time)} )
+                          </div>
                         </div>
                         <div className="capitalize text-sm flex align-center mt-1">
                           <Camera className="h-5 w-5 mr-2 inline" />
@@ -471,7 +526,7 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.has_snapshot && (
+                        {(event.end_time && event.has_snapshot) && (
                           <Fragment>
                             {event.plus_id ? (
                               <div className="uppercase text-xs">Sent to Frigate+</div>
@@ -488,7 +543,11 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <Delete className="h-6 w-6 cursor-pointer" stroke="#f87171" onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)} />
+                        <Delete
+                          className="h-6 w-6 cursor-pointer"
+                          stroke="#f87171"
+                          onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
+                        />
 
                         <Download
                           className="h-6 w-6 mt-auto"
@@ -501,22 +560,26 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
-                        <div className='flex justify-center w-full py-2'>
-                          <Tabs selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1} onChange={handleEventDetailTabChange} className='justify'>
-                            <TextTab text='Clip' disabled={!event.has_clip} />
+                        <div className="flex justify-center w-full py-2">
+                          <Tabs
+                            selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
+                            onChange={handleEventDetailTabChange}
+                            className="justify"
+                          >
+                            <TextTab text="Clip" disabled={!event.has_clip} />
                             <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
                           </Tabs>
                         </div>
 
                         <div>
-                          {((eventDetailType == 'clip') && event.has_clip) ? (
+                          {eventDetailType == 'clip' && event.has_clip ? (
                             <VideoPlayer
                               options={{
                                 preload: 'auto',
                                 autoplay: true,
                                 sources: [
                                   {
-                                    src: `${apiHost}/vod/event/${event.id}/master.m3u8`,
+                                    src: `${apiHost}vod/event/${event.id}/master.m3u8`,
                                     type: 'application/vnd.apple.mpegurl',
                                   },
                                 ],
@@ -524,9 +587,9 @@ export default function Events({ path, ...props }) {
                               seekOptions={{ forward: 10, back: 5 }}
                               onReady={() => {}}
                             />
-                          ) : null }
+                          ) : null}
 
-                          {((eventDetailType == 'image') || !event.has_clip) ? (
+                          {eventDetailType == 'image' || !event.has_clip ? (
                             <div className="flex justify-center">
                               <img
                                 className="flex-grow-0"
@@ -538,7 +601,7 @@ export default function Events({ path, ...props }) {
                                 alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
                               />
                             </div>
-                          ) : null }
+                          ) : null}
                         </div>
                       </div>
                     </div>

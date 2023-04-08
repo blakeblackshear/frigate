@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import TextField from '../TextField';
-import { render, screen, fireEvent } from 'testing-library';
+import { render, screen, fireEvent } from '@testing-library/preact';
 
 describe('TextField', () => {
   test('can render a leading icon', async () => {
@@ -21,7 +21,7 @@ describe('TextField', () => {
   });
 
   test('onChange updates the value', async () => {
-    const handleChangeText = jest.fn();
+    const handleChangeText = vi.fn();
     render(<TextField label="Tacos" onChangeText={handleChangeText} />);
 
     const input = screen.getByRole('textbox');

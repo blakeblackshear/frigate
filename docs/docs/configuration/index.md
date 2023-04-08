@@ -3,7 +3,7 @@ id: index
 title: Configuration File
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yml`.
+For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yml` or `frigate.yaml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -19,7 +19,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp
     detect:
       width: 1280
       height: 720
@@ -27,7 +26,7 @@ cameras:
 
 ### VSCode Configuration Schema
 
-VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema` to the top of the config file. `frigate_host` being the IP address of frigate or `ccab4aaf-frigate` if running in the addon.
+VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
 
 ### Full configuration reference:
 
@@ -37,8 +36,29 @@ It is not recommended to copy this full configuration file. Only specify values 
 
 :::
 
+**Note:** The following values will be replaced at runtime by using environment variables
+
+- `{FRIGATE_MQTT_USER}`
+- `{FRIGATE_MQTT_PASSWORD}`
+- `{FRIGATE_RTSP_USER}`
+- `{FRIGATE_RTSP_PASSWORD}`
+
+for example:
+
 ```yaml
 mqtt:
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+
+```yaml
+- path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
+```
+
+```yaml
+mqtt:
+  # Optional: Enable mqtt server (default: shown below)
+  enabled: True
   # Required: host name
   host: mqtt.server.com
   # Optional: port (default: shown below)
@@ -50,6 +70,8 @@ mqtt:
   # NOTE: must be unique if you are running multiple instances
   client_id: frigate
   # Optional: user
+  # NOTE: MQTT user can be specified with an environment variables that must begin with 'FRIGATE_'.
+  #       e.g. user: '{FRIGATE_MQTT_USER}'
   user: mqtt_user
   # Optional: password
   # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
@@ -72,15 +94,13 @@ mqtt:
 # Optional: Detectors configuration. Defaults to a single CPU detector
 detectors:
   # Required: name of the detector
-  coral:
+  detector_name:
     # Required: type of the detector
-    # Valid values are 'edgetpu' (requires device property below) and 'cpu'.
-    type: edgetpu
-    # Optional: device name as defined here: https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api
-    device: usb
-    # Optional: num_threads value passed to the tflite.Interpreter (default: shown below)
-    # This value is only used for CPU types
-    num_threads: 3
+    # Frigate provided types include 'cpu', 'edgetpu', and 'openvino' (default: shown below)
+    # Additional detector types can also be plugged in.
+    # Detectors may require additional configuration.
+    # Refer to the Detectors configuration page for more information.
+    type: cpu
 
 # Optional: Database configuration
 database:
@@ -97,6 +117,15 @@ model:
   width: 320
   # Required: Object detection model input height (default: shown below)
   height: 320
+  # Optional: Object detection model input colorspace
+  # Valid values are rgb, bgr, or yuv. (default: shown below)
+  input_pixel_format: rgb
+  # Optional: Object detection model input tensor format
+  # Valid values are nhwc or nchw (default: shown below)
+  input_tensor: nhwc
+  # Optional: Object detection model type, currently only used with the OpenVINO detector
+  # Valid values are ssd, yolox, yolov5, or yolov8 (default: shown below)
+  model_type: ssd
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
@@ -118,6 +147,9 @@ environment_vars:
 birdseye:
   # Optional: Enable birdseye view (default: shown below)
   enabled: True
+  # Optional: Restream birdseye via RTSP (default: shown below)
+  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
+  restream: False
   # Optional: Width of the output resolution (default: shown below)
   width: 1280
   # Optional: Height of the output resolution (default: shown below)
@@ -132,22 +164,23 @@ birdseye:
   mode: objects
 
 # Optional: ffmpeg configuration
+# More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel warning
+  global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
   # Optional: global input args (default: shown below)
-  input_args: -avoid_negative_ts make_zero -fflags +genpts+discardcorrupt -rtsp_transport tcp -timeout 5000000 -use_wallclock_as_timestamps 1
+  input_args: preset-rtsp-generic
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
-    detect: -f rawvideo -pix_fmt yuv420p
+    detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
-    record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an
+    record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
-    rtmp: -c copy -f flv
+    rtmp: preset-rtmp-generic
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
@@ -160,9 +193,8 @@ detect:
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
   # Optional: enables detection for the camera (default: True)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: True
-  # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+  # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
@@ -259,11 +291,6 @@ record:
   # Optional: Enable recording (default: shown below)
   # WARNING: If recording is disabled in the config, turning it on via
   #          the UI or MQTT later will have no effect.
-  # WARNING: Frigate does not currently support limiting recordings based
-  #          on available disk space automatically. If using recordings,
-  #          you must specify retention settings for a number of days that
-  #          will fit within the available disk space of your drive or Frigate
-  #          will crash.
   enabled: False
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
@@ -313,7 +340,6 @@ record:
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
   # Optional: save a clean PNG copy of the snapshot image (default: shown below)
   clean_copy: True
@@ -336,19 +362,26 @@ snapshots:
       person: 15
 
 # Optional: RTMP configuration
+# NOTE: RTMP is deprecated in favor of restream
 # NOTE: Can be overridden at the camera level
 rtmp:
-  # Optional: Enable the RTMP stream (default: True)
-  enabled: True
+  # Optional: Enable the RTMP stream (default: False)
+  enabled: False
 
-# Optional: Live stream configuration for WebUI
-# NOTE: Can be overridden at the camera level
+# Optional: Restream configuration
+# Uses https://github.com/AlexxIT/go2rtc (v1.2.0)
+go2rtc:
+
+# Optional: jsmpeg stream configuration for WebUI
 live:
-  # Optional: Set the height of the live stream. (default: 720)
+  # Optional: Set the name of the stream that should be used for live view
+  # in frigate WebUI. (default: name of camera)
+  stream_name: camera_name
+  # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
-  # reduce bandwidth required for viewing the live stream. Width is computed to match known aspect ratio.
+  # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
   height: 720
-  # Optional: Set the encode quality of the live stream (default: shown below)
+  # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
   # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
   quality: 8
 
@@ -380,6 +413,10 @@ timestamp_style:
 cameras:
   # Required: name of the camera
   back:
+    # Optional: Enable/Disable the camera (default: shown below).
+    # If disabled: config is used but no live stream and no capture etc.
+    # Events/Recordings are still viewable.
+    enabled: True
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.
@@ -388,10 +425,11 @@ cameras:
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           # Required: list of roles for this stream. valid values are: detect,record,rtmp
-          # NOTICE: In addition to assigning the record, and rtmp roles,
+          # NOTICE: In addition to assigning the record and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
+            - record
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
@@ -458,4 +496,42 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+# Optional
+ui:
+  # Optional: Set the default live mode for cameras in the UI (default: shown below)
+  live_mode: mse
+  # Optional: Set a timezone to use in the UI (default: use browser local time)
+  # timezone: America/Denver
+  # Optional: Use an experimental recordings / camera view UI (default: shown below)
+  use_experimental: False
+  # Optional: Set the time format used.
+  # Options are browser, 12hour, or 24hour (default: shown below)
+  time_format: browser
+  # Optional: Set the date style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 2/11/23
+  #    medium: Feb 11, 2023
+  #    full: Saturday, February 11, 2023
+  # (default: shown below).
+  date_style: short
+  # Optional: Set the time style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 8:14 PM
+  #    medium: 8:15:22 PM
+  #    full: 8:15:22 PM Mountain Standard Time
+  # (default: shown below).
+  time_style: medium
+  # Optional: Ability to manually override the date / time styling to use strftime format
+  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
+  # possible values are shown above (default: not set)
+  strftime_fmt: "%Y/%m/%d %H:%M"
+
+# Optional: Telemetry configuration
+telemetry:
+  # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  version_check: True
 ```

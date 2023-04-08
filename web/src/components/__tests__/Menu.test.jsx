@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Menu, { MenuItem } from '../Menu';
-import { fireEvent, render, screen } from 'testing-library';
+import { fireEvent, render, screen } from '@testing-library/preact';
 import { useRef } from 'preact/hooks';
 
 describe('Menu', () => {
@@ -27,7 +27,7 @@ describe('MenuItem', () => {
   });
 
   test('calls onSelect when clicked', async () => {
-    const handleSelect = jest.fn();
+    const handleSelect = vi.fn();
     render(<MenuItem label="Tacos" onSelect={handleSelect} value="tacos-value" />);
     fireEvent.click(screen.queryByRole('option'));
     expect(handleSelect).toHaveBeenCalledWith('tacos-value', 'Tacos');

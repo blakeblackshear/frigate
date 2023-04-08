@@ -1,11 +1,13 @@
 import unittest
 import numpy as np
 from pydantic import ValidationError
+
 from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
-    DetectorTypeEnum,
 )
+from frigate.detectors import DetectorTypeEnum
+from frigate.util import deep_merge, load_config_with_no_duplicates
 
 
 class TestConfig(unittest.TestCase):
@@ -35,6 +37,50 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert "cpu" in runtime_config.detectors.keys()
         assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
+        assert runtime_config.detectors["cpu"].model.width == 320
+
+    def test_detector_custom_model_path(self):
+        config = {
+            "detectors": {
+                "cpu": {
+                    "type": "cpu",
+                    "model": {"path": "/cpu_model.tflite"},
+                },
+                "edgetpu": {
+                    "type": "edgetpu",
+                    "model": {"path": "/edgetpu_model.tflite", "width": 160},
+                },
+                "openvino": {
+                    "type": "openvino",
+                },
+            },
+            "model": {"path": "/default.tflite", "width": 512},
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+        runtime_config = frigate_config.runtime_config
+
+        assert "cpu" in runtime_config.detectors.keys()
+        assert "edgetpu" in runtime_config.detectors.keys()
+        assert "openvino" in runtime_config.detectors.keys()
+
+        assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
+        assert runtime_config.detectors["edgetpu"].type == DetectorTypeEnum.edgetpu
+        assert runtime_config.detectors["openvino"].type == DetectorTypeEnum.openvino
+
+        assert runtime_config.detectors["cpu"].num_threads == 3
+        assert runtime_config.detectors["edgetpu"].device is None
+        assert runtime_config.detectors["openvino"].device is None
+
+        assert runtime_config.model.path == "/default.tflite"
+        assert runtime_config.detectors["cpu"].model.path == "/cpu_model.tflite"
+        assert runtime_config.detectors["edgetpu"].model.path == "/edgetpu_model.tflite"
+        assert runtime_config.detectors["openvino"].model.path == "/default.tflite"
+
+        assert runtime_config.model.width == 512
+        assert runtime_config.detectors["cpu"].model.width == 512
+        assert runtime_config.detectors["edgetpu"].model.width == 160
+        assert runtime_config.detectors["openvino"].model.width == 512
 
     def test_invalid_mqtt_config(self):
         config = {
@@ -837,7 +883,6 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": False},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1050,11 +1095,10 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
 
-    def test_global_rtmp(self):
+    def test_global_rtmp_disabled(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": True},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1072,9 +1116,9 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].rtmp.enabled
+        assert not runtime_config.cameras["back"].rtmp.enabled
 
-    def test_default_rtmp(self):
+    def test_default_not_rtmp(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
@@ -1095,7 +1139,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config
-        assert runtime_config.cameras["back"].rtmp.enabled
+        assert not runtime_config.cameras["back"].rtmp.enabled
 
     def test_global_rtmp_merge(self):
 
@@ -1108,7 +1152,7 @@ class TestConfig(unittest.TestCase):
                         "inputs": [
                             {
                                 "path": "rtsp://10.0.0.1:554/video",
-                                "roles": ["detect"],
+                                "roles": ["detect", "rtmp"],
                             },
                         ]
                     },
@@ -1128,7 +1172,6 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
-            "rtmp": {"enabled": False},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1152,7 +1195,7 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config
         assert not runtime_config.cameras["back"].rtmp.enabled
 
-    def test_global_live(self):
+    def test_global_jsmpeg(self):
 
         config = {
             "mqtt": {"host": "mqtt"},
@@ -1347,6 +1390,78 @@ class TestConfig(unittest.TestCase):
 
         self.assertRaises(
             ValidationError, lambda: frigate_config.runtime_config.cameras
+        )
+
+    def test_fails_on_bad_segment_time(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "record": {"enabled": True},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "output_args": {
+                            "record": "-f segment -segment_time 70 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c copy -an"
+                        },
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ],
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(
+            ValueError, lambda: frigate_config.runtime_config.ffmpeg.output_args.record
+        )
+
+    def test_fails_zone_defines_untracked_object(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "objects": {"track": ["person"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "zones": {
+                        "steps": {
+                            "coordinates": "0,0,0,0",
+                            "objects": ["car", "person"],
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+
+        self.assertRaises(ValueError, lambda: frigate_config.runtime_config.cameras)
+
+    def test_fails_duplicate_keys(self):
+        raw_config = """
+        cameras:
+          test:
+            ffmpeg:
+              inputs:
+                - one
+                - two
+              inputs:
+                - three
+                - four
+        """
+
+        self.assertRaises(
+            ValueError, lambda: load_config_with_no_duplicates(raw_config)
         )
 
     def test_object_filter_ratios_work(self):

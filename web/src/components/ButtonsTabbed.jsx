@@ -3,13 +3,14 @@ import { useCallback, useState } from 'preact/hooks';
 
 export default function ButtonsTabbed({
   viewModes = [''],
+  currentViewMode = '',
   setViewMode = null,
   setHeader = null,
   headers = [''],
   className = 'text-gray-600 py-0 px-4 block hover:text-gray-500',
   selectedClassName = `${className} focus:outline-none border-b-2 font-medium border-gray-500`,
 }) {
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(viewModes ? viewModes.indexOf(currentViewMode) : 0);
   const captitalize = (str) => {
     return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
   };

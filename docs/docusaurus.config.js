@@ -12,8 +12,14 @@ module.exports = {
   projectName: 'frigate',
   themeConfig: {
     algolia: {
+      appId: 'WIURGBNBPY',
       apiKey: '81ec882db78f7fed05c51daf973f0362',
       indexName: 'frigate',
+    },
+    docs: {
+      sidebar: {
+        hideable: true,
+      }
     },
     navbar: {
       title: 'Frigate',
@@ -46,8 +52,6 @@ module.exports = {
         },
       ],
     },
-    sidebarCollapsible: false,
-    hideableSidebar: true,
     footer: {
       style: 'dark',
       links: [
@@ -78,6 +82,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl: 'https://github.com/blakeblackshear/frigate/edit/master/docs/',
+          sidebarCollapsible: false
         },
 
         theme: {

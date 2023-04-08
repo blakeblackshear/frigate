@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Button from '../Button';
-import { render, screen } from 'testing-library';
+import { render, screen } from '@testing-library/preact';
 
 describe('Button', () => {
   test('renders children', async () => {

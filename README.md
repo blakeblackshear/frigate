@@ -16,7 +16,8 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 - Communicates over MQTT for easy integration into other systems
 - Records video with retention settings based on detected objects
 - 24/7 recording
-- Re-streaming via RTMP to reduce the number of connections to your camera
+- Re-streaming via RTSP to reduce the number of connections to your camera
+- WebRTC & MSE support for low-latency live view
 
 ## Documentation
 

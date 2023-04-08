@@ -469,7 +469,7 @@ function MaskValues({
         {Object.keys(points).map((mainkey) => {
           if (isMulti) {
             return (
-              <div>
+              <div key={mainkey}>
                 {`    ${mainkey}:\n      mask:\n`}
                 {onAdd && showButtons ? (
                   <Button className="absolute -mt-12 right-0 font-sans" data-key={mainkey} onClick={handleAdd}>

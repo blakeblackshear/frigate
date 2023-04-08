@@ -3,11 +3,11 @@ import glob
 import logging
 import math
 import multiprocessing as mp
+import os
 import queue
 import signal
 import subprocess as sp
 import threading
-from multiprocessing import shared_memory
 from wsgiref.simple_server import make_server
 
 import cv2
@@ -22,17 +22,50 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import BASE_DIR
+from frigate.const import BASE_DIR, BIRDSEYE_PIPE
 from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
 
 
 class FFMpegConverter:
-    def __init__(self, in_width, in_height, out_width, out_height, quality):
-        ffmpeg_cmd = f"ffmpeg -f rawvideo -pix_fmt yuv420p -video_size {in_width}x{in_height} -i pipe: -f mpegts -s {out_width}x{out_height} -codec:v mpeg1video -q {quality} -bf 0 pipe:".split(
-            " "
-        )
+    def __init__(
+        self,
+        in_width: int,
+        in_height: int,
+        out_width: int,
+        out_height: int,
+        quality: int,
+        birdseye_rtsp: bool = False,
+    ):
+        self.bd_pipe = None
+
+        if birdseye_rtsp:
+            self.recreate_birdseye_pipe()
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            "yuv420p",
+            "-video_size",
+            f"{in_width}x{in_height}",
+            "-i",
+            "pipe:",
+            "-f",
+            "mpegts",
+            "-s",
+            f"{out_width}x{out_height}",
+            "-codec:v",
+            "mpeg1video",
+            "-q",
+            f"{quality}",
+            "-bf",
+            "0",
+            "pipe:",
+        ]
+
         self.process = sp.Popen(
             ffmpeg_cmd,
             stdout=sp.PIPE,
@@ -41,8 +74,37 @@ class FFMpegConverter:
             start_new_session=True,
         )
 
-    def write(self, b):
+    def recreate_birdseye_pipe(self) -> None:
+        if self.bd_pipe:
+            os.close(self.bd_pipe)
+
+        if os.path.exists(BIRDSEYE_PIPE):
+            os.remove(BIRDSEYE_PIPE)
+
+        os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+        stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+        self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
+        os.close(stdin)
+        self.reading_birdseye = False
+
+    def write(self, b) -> None:
         self.process.stdin.write(b)
+
+        if self.bd_pipe:
+            try:
+                os.write(self.bd_pipe, b)
+                self.reading_birdseye = True
+            except BrokenPipeError:
+                if self.reading_birdseye:
+                    # we know the pipe was being read from and now it is not
+                    # so we should recreate the pipe to ensure no partially-read
+                    # frames exist
+                    logger.debug(
+                        "Recreating the birdseye pipe because it was read from and now is not"
+                    )
+                    self.recreate_birdseye_pipe()
+
+                return
 
     def read(self, length):
         try:
@@ -51,6 +113,9 @@ class FFMpegConverter:
             return False
 
     def exit(self):
+        if self.bd_pipe:
+            os.close(self.bd_pipe)
+
         self.process.terminate()
         try:
             self.process.communicate(timeout=30)
@@ -60,14 +125,15 @@ class FFMpegConverter:
 
 
 class BroadcastThread(threading.Thread):
-    def __init__(self, camera, converter, websocket_server):
+    def __init__(self, camera, converter, websocket_server, stop_event):
         super(BroadcastThread, self).__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
+        self.stop_event = stop_event
 
     def run(self):
-        while True:
+        while not self.stop_event.is_set():
             buf = self.converter.read(65536)
             if buf:
                 manager = self.websocket_server.manager
@@ -89,7 +155,7 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config, frame_manager: SharedMemoryFrameManager):
+    def __init__(self, config: FrigateConfig, frame_manager: SharedMemoryFrameManager):
         self.config = config
         self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
@@ -99,7 +165,7 @@ class BirdsEyeFrameManager:
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
 
-        # initialize the frame as black and with the frigate logo
+        # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
         self.blank_frame[:] = 128
         self.blank_frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]] = 16
@@ -113,7 +179,7 @@ class BirdsEyeFrameManager:
             birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is None:
-            logo_files = glob.glob("/opt/frigate/frigate/birdseye.png")
+            logo_files = glob.glob("/opt/frigate/frigate/images/birdseye.png")
 
             if len(logo_files) > 0:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
@@ -127,7 +193,7 @@ class BirdsEyeFrameManager:
                 x_offset : x_offset + transparent_layer.shape[0],
             ] = transparent_layer
         else:
-            logger.warning("Unable to read frigate logo")
+            logger.warning("Unable to read Frigate logo")
 
         self.frame[:] = self.blank_frame
 
@@ -377,7 +443,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             cam_config.live.quality,
         )
         broadcasters[camera] = BroadcastThread(
-            camera, converters[camera], websocket_server
+            camera, converters[camera], websocket_server, stop_event
         )
 
     if config.birdseye.enabled:
@@ -387,9 +453,10 @@ def output_frames(config: FrigateConfig, video_output_queue):
             config.birdseye.width,
             config.birdseye.height,
             config.birdseye.quality,
+            config.birdseye.restream,
         )
         broadcasters["birdseye"] = BroadcastThread(
-            "birdseye", converters["birdseye"], websocket_server
+            "birdseye", converters["birdseye"], websocket_server, stop_event
         )
 
     websocket_thread.start()
@@ -399,6 +466,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
 
     birdseye_manager = BirdsEyeFrameManager(config, frame_manager)
 
+    if config.birdseye.restream:
+        birdseye_buffer = frame_manager.create(
+            "birdseye",
+            birdseye_manager.yuv_shape[0] * birdseye_manager.yuv_shape[1],
+        )
+
     while not stop_event.is_set():
         try:
             (
@@ -407,7 +480,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 current_tracked_objects,
                 motion_boxes,
                 regions,
-            ) = video_output_queue.get(True, 10)
+            ) = video_output_queue.get(True, 1)
         except queue.Empty:
             continue
 
@@ -422,10 +495,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
             # write to the converter for the camera if clients are listening to the specific camera
             converters[camera].write(frame.tobytes())
 
-        # update birdseye if websockets are connected
-        if config.birdseye.enabled and any(
-            ws.environ["PATH_INFO"].endswith("birdseye")
-            for ws in websocket_server.manager
+        if config.birdseye.enabled and (
+            config.birdseye.restream
+            or any(
+                ws.environ["PATH_INFO"].endswith("birdseye")
+                for ws in websocket_server.manager
+            )
         ):
             if birdseye_manager.update(
                 camera,
@@ -434,7 +509,12 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 frame_time,
                 frame,
             ):
-                converters["birdseye"].write(birdseye_manager.frame.tobytes())
+                frame_bytes = birdseye_manager.frame.tobytes()
+
+                if config.birdseye.restream:
+                    birdseye_buffer[:] = frame_bytes
+
+                converters["birdseye"].write(frame_bytes)
 
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")

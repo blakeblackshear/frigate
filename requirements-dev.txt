@@ -1,2 +1,2 @@
-pylint == 2.13.*
-black == 22.3.*
+pylint == 2.15.*
+black == 22.12.*

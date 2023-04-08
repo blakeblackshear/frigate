@@ -1,16 +1,50 @@
 {
-  "name": "Frigate Dev",
+  "name": "Frigate Devcontainer",
   "dockerComposeFile": "../docker-compose.yml",
-  "service": "dev",
-  "workspaceFolder": "/lab/frigate",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace/frigate",
+  "initializeCommand": ".devcontainer/initialize.sh",
+  "postCreateCommand": ".devcontainer/post_create.sh",
+  "overrideCommand": false,
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:1": {}
+  },
+  "forwardPorts": [5000, 5001, 5173, 1935, 8554, 8555],
+  "portsAttributes": {
+    "5000": {
+      "label": "NGINX",
+      "onAutoForward": "silent"
+    },
+    "5001": {
+      "label": "Frigate API",
+      "onAutoForward": "silent"
+    },
+    "5173": {
+      "label": "Vite Server",
+      "onAutoForward": "silent"
+    },
+    "1935": {
+      "label": "RTMP",
+      "onAutoForward": "silent"
+    },
+    "8554": {
+      "label": "gortc RTSP",
+      "onAutoForward": "silent"
+    },
+    "8555": {
+      "label": "go2rtc WebRTC",
+      "onAutoForward": "silent"
+    }
+  },
   "extensions": [
+    "ms-python.vscode-pylance",
     "ms-python.python",
     "visualstudioexptteam.vscodeintellicode",
     "mhutchie.git-graph",
     "ms-azuretools.vscode-docker",
     "streetsidesoftware.code-spell-checker",
     "esbenp.prettier-vscode",
-    "ms-python.vscode-pylance",
     "dbaeumer.vscode-eslint",
     "mikestead.dotenv",
     "csstools.postcss",
@@ -18,6 +52,7 @@
     "bradlc.vscode-tailwindcss"
   ],
   "settings": {
+    "remote.autoForwardPorts": false,
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
@@ -25,6 +60,9 @@
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
     "files.trimTrailingWhitespace": true,
     "eslint.workingDirectories": ["./web"],
     "[json][jsonc]": {

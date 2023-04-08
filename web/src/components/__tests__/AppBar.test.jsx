@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { DrawerProvider } from '../../context';
 import AppBar from '../AppBar';
-import { fireEvent, render, screen } from 'testing-library';
+import { fireEvent, render, screen } from '@testing-library/preact';
 import { useRef } from 'preact/hooks';
 
 function Title() {
@@ -20,7 +20,7 @@ describe('AppBar', () => {
 
   describe('overflow menu', () => {
     test('is not rendered if a ref is not provided', async () => {
-      const handleOverflow = jest.fn();
+      const handleOverflow = vi.fn();
       render(
         <DrawerProvider>
           <AppBar title={Title} onOverflowClick={handleOverflow} />
@@ -44,7 +44,7 @@ describe('AppBar', () => {
     });
 
     test('is rendered with click handler and ref', async () => {
-      const handleOverflow = jest.fn();
+      const handleOverflow = vi.fn();
 
       function Wrapper() {
         const ref = useRef(null);
@@ -60,7 +60,7 @@ describe('AppBar', () => {
     });
 
     test('calls the handler when clicked', async () => {
-      const handleOverflow = jest.fn();
+      const handleOverflow = vi.fn();
 
       function Wrapper() {
         const ref = useRef(null);
@@ -94,7 +94,7 @@ describe('AppBar', () => {
     });
 
     test('hides when scrolled downward', async () => {
-      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
       render(
         <DrawerProvider>
           <AppBar title={Title} />
@@ -111,7 +111,7 @@ describe('AppBar', () => {
     });
 
     test('reappears when scrolled upward', async () => {
-      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => cb());
       render(
         <DrawerProvider>
           <AppBar title={Title} />

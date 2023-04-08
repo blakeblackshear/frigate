@@ -1,0 +1,18 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the Frigate service
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+# Tell S6-Overlay not to restart this service
+s6-svc -O .
+
+echo "[INFO] Starting Frigate..."
+
+cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frigate"
+
+# Replace the bash process with the Frigate process, redirecting stderr to stdout
+exec 2>&1
+exec python3 -u -m frigate

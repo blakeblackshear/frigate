@@ -1,10 +1,10 @@
 import { h, createRef } from 'preact';
 import Tooltip from '../Tooltip';
-import { render, screen } from 'testing-library';
+import { render, screen } from '@testing-library/preact';
 
 describe('Tooltip', () => {
   test('renders in a relative position', async () => {
-    jest
+    vi
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
       // relativeTo
       .mockReturnValueOnce({
@@ -32,7 +32,7 @@ describe('Tooltip', () => {
 
   test('if too far right, renders to the left', async () => {
     window.innerWidth = 1024;
-    jest
+    vi
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
       // relativeTo
       .mockReturnValueOnce({
@@ -59,7 +59,7 @@ describe('Tooltip', () => {
   });
 
   test('if too far left, renders to the right', async () => {
-    jest
+    vi
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
       // relativeTo
       .mockReturnValueOnce({
@@ -87,7 +87,7 @@ describe('Tooltip', () => {
 
   test('if too close to top, renders to the bottom', async () => {
     window.scrollY = 90;
-    jest
+    vi
       .spyOn(window.HTMLElement.prototype, 'getBoundingClientRect')
       // relativeTo
       .mockReturnValueOnce({

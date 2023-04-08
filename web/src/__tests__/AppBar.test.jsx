@@ -1,14 +1,14 @@
 import { h } from 'preact';
 import * as Context from '../context';
 import AppBar from '../AppBar';
-import { fireEvent, render, screen } from 'testing-library';
+import { fireEvent, render, screen } from '@testing-library/preact';
 
 describe('AppBar', () => {
   beforeEach(() => {
-    jest.spyOn(Context, 'useDarkMode').mockImplementation(() => ({
-      setDarkMode: jest.fn(),
+    vi.spyOn(Context, 'useDarkMode').mockImplementation(() => ({
+      setDarkMode: vi.fn(),
     }));
-    jest.spyOn(Context, 'DarkModeProvider').mockImplementation(({ children }) => {
+    vi.spyOn(Context, 'DarkModeProvider').mockImplementation(({ children }) => {
       return <div>{children}</div>;
     });
   });
@@ -30,8 +30,8 @@ describe('AppBar', () => {
   });
 
   test('sets dark mode on MenuItem select', async () => {
-    const setDarkModeSpy = jest.fn();
-    jest.spyOn(Context, 'useDarkMode').mockImplementation(() => ({
+    const setDarkModeSpy = vi.fn();
+    vi.spyOn(Context, 'useDarkMode').mockImplementation(() => ({
       setDarkMode: setDarkModeSpy,
     }));
     render(

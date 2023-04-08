@@ -1,11 +1,11 @@
 import { h } from 'preact';
-import * as Mqtt from '../mqtt';
+import * as WS from '../ws';
 import { ApiProvider, useApiHost } from '..';
 import { render, screen } from 'testing-library';
 
 describe('useApiHost', () => {
   beforeEach(() => {
-    jest.spyOn(Mqtt, 'MqttProvider').mockImplementation(({ children }) => children);
+    vi.spyOn(WS, 'WsProvider').mockImplementation(({ children }) => children);
   });
 
   test('is set from the baseUrl', async () => {

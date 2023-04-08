@@ -40,9 +40,11 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 
 ### Setup
 
-#### 1. Build the version information and docker container locally by running `make`
+#### 1. Open the repo with Visual Studio Code
 
-#### 2. Create a local config file for testing
+Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base Frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
+
+#### 2. Modify your local config file for testing
 
 Place the file at `config/config.yml` in the root of the repo.
 
@@ -60,7 +62,6 @@ cameras:
           input_args: -re -stream_loop -1 -fflags +genpts
           roles:
             - detect
-            - rtmp
     detect:
       height: 1080
       width: 1920
@@ -73,18 +74,14 @@ These input args tell ffmpeg to read the mp4 file in an infinite loop. You can u
 
 Create and place these files in a `debug` folder in the root of the repo. This is also where recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
 
-#### 4. Open the repo with Visual Studio Code
-
-Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
-
-#### 5. Run frigate from the command line
+#### 4. Run Frigate from the command line
 
 VSCode will start the docker compose file for you and open a terminal window connected to `frigate-dev`.
 
 - Run `python3 -m frigate` to start the backend.
 - In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm start` to start the frontend.
 
-#### 6. Teardown
+#### 5. Teardown
 
 After closing VSCode, you may still have containers running. To close everything down, just run `docker-compose down -v` to cleanup all containers.
 
@@ -126,7 +123,7 @@ ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/
 
 - [Frigate source code](#frigate-core-web-and-docs)
 - All [core](#core) prerequisites _or_ another running Frigate instance locally available
-- Node.js 14
+- Node.js 16
 
 ### Making changes
 
@@ -169,6 +166,7 @@ npm run lint
 ```
 
 - Add to unit tests and ensure they pass. As much as possible, you should strive to _increase_ test coverage whenever making changes. This will help ensure features do not accidentally become broken in the future.
+- If you run into error messages like "TypeError: Cannot read properties of undefined (reading 'context')" when running tests, this may be due to these issues (https://github.com/vitest-dev/vitest/issues/1910, https://github.com/vitest-dev/vitest/issues/1652) in vitest, but I haven't been able to resolve them.
 
 ```console
 npm run test
@@ -181,7 +179,7 @@ npm run test
 ### Prerequisites
 
 - [Frigate source code](#frigate-core-web-and-docs)
-- Node.js 14
+- Node.js 16
 
 ### Making changes
 
@@ -218,6 +216,5 @@ docker buildx stop builder && docker buildx rm builder # <---- if existing
 docker run --privileged --rm tonistiigi/binfmt --install all
 docker buildx create --name builder --driver docker-container --driver-opt network=host --use
 docker buildx inspect builder --bootstrap
-make build_web
 make push
 ```

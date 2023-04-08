@@ -1,0 +1,3 @@
+numpy == 1.19.*
+openvino == 2022.*
+openvino-dev[tensorflow2] == 2022.*

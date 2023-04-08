@@ -1,13 +1,18 @@
 import base64
-from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import copy
+import glob
 import logging
+import json
 import os
 import subprocess as sp
+import pytz
 import time
+import traceback
+
 from functools import reduce
 from pathlib import Path
+from tzlocal import get_localzone_name
 from urllib.parse import unquote
 
 import cv2
@@ -26,10 +31,19 @@ from flask import (
 from peewee import SqliteDatabase, operator, fn, DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CLIPS_DIR
+from frigate.config import FrigateConfig
+from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
-from frigate.object_processing import TrackedObject, TrackedObjectProcessor
+from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
+from frigate.util import (
+    clean_camera_user_pass,
+    ffprobe_stream,
+    restart_frigate,
+    vainfo_hwaccel,
+    get_tz_modifiers,
+)
+from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -42,6 +56,7 @@ def create_app(
     database: SqliteDatabase,
     stats_tracking,
     detected_frames_processor,
+    storage_maintainer: StorageMaintainer,
     plus_api,
 ):
     app = Flask(__name__)
@@ -59,7 +74,10 @@ def create_app(
     app.frigate_config = frigate_config
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
+    app.storage_maintainer = storage_maintainer
     app.plus_api = plus_api
+    app.camera_error_image = None
+    app.hwaccel_errors = []
 
     app.register_blueprint(bp)
 
@@ -73,6 +91,8 @@ def is_healthy():
 
 @bp.route("/events/summary")
 def events_summary():
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -91,8 +111,12 @@ def events_summary():
         Event.select(
             Event.camera,
             Event.label,
+            Event.sub_label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("day"),
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
@@ -101,8 +125,12 @@ def events_summary():
         .group_by(
             Event.camera,
             Event.label,
+            Event.sub_label,
             fn.strftime(
-                "%Y-%m-%d", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ),
             Event.zones,
         )
@@ -158,6 +186,18 @@ def send_to_plus(id):
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 404)
 
+    if event.end_time is None:
+        logger.error(f"Unable to load clean png for in-progress event: {event.id}")
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to load clean png for in-progress event",
+                }
+            ),
+            400,
+        )
+
     if event.plus_id:
         message = "Already submitted to plus"
         logger.error(message)
@@ -168,6 +208,15 @@ def send_to_plus(id):
         filename = f"{event.camera}-{event.id}-clean.png"
         image = cv2.imread(os.path.join(CLIPS_DIR, filename))
     except Exception:
+        logger.error(f"Unable to load clean png for event: {event.id}")
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for event"}
+            ),
+            400,
+        )
+
+    if image is None or image.size == 0:
         logger.error(f"Unable to load clean png for event: {event.id}")
         return make_response(
             jsonify(
@@ -260,6 +309,8 @@ def set_sub_label(id):
 
 @bp.route("/sub_labels")
 def get_sub_labels():
+    split_joined = request.args.get("split_joined", type=int)
+
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception as e:
@@ -272,6 +323,19 @@ def get_sub_labels():
     if None in sub_labels:
         sub_labels.remove(None)
 
+    if split_joined:
+        original_labels = sub_labels.copy()
+
+        for label in original_labels:
+            if "," in label:
+                sub_labels.remove(label)
+                parts = label.split(",")
+
+                for part in parts:
+                    if not (part.strip()) in sub_labels:
+                        sub_labels.append(part.strip())
+
+    sub_labels.sort()
     return jsonify(sub_labels)
 
 
@@ -501,16 +565,42 @@ def event_clip(id):
 
 @bp.route("/events")
 def events():
-    limit = request.args.get("limit", 100)
     camera = request.args.get("camera", "all")
+    cameras = request.args.get("cameras", "all")
+
+    # handle old camera arg
+    if cameras == "all" and camera != "all":
+        cameras = camera
+
     label = unquote(request.args.get("label", "all"))
+    labels = request.args.get("labels", "all")
+
+    # handle old label arg
+    if labels == "all" and label != "all":
+        labels = label
+
     sub_label = request.args.get("sub_label", "all")
+    sub_labels = request.args.get("sub_labels", "all")
+
+    # handle old sub_label arg
+    if sub_labels == "all" and sub_label != "all":
+        sub_labels = sub_label
+
     zone = request.args.get("zone", "all")
+    zones = request.args.get("zones", "all")
+
+    # handle old label arg
+    if zones == "all" and zone != "all":
+        zones = zone
+
+    limit = request.args.get("limit", 100)
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
+    in_progress = request.args.get("in_progress", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
+    favorites = request.args.get("favorites", type=int)
 
     clauses = []
     excluded_fields = []
@@ -533,14 +623,52 @@ def events():
     if camera != "all":
         clauses.append((Event.camera == camera))
 
-    if label != "all":
-        clauses.append((Event.label == label))
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Event.camera << camera_list))
 
-    if sub_label != "all":
-        clauses.append((Event.sub_label == sub_label))
+    if labels != "all":
+        label_list = labels.split(",")
+        clauses.append((Event.label << label_list))
 
-    if zone != "all":
-        clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+    if sub_labels != "all":
+        # use matching so joined sub labels are included
+        # for example a sub label 'bob' would get events
+        # with sub labels 'bob' and 'bob, john'
+        sub_label_clauses = []
+        filtered_sub_labels = sub_labels.split(",")
+
+        if "None" in filtered_sub_labels:
+            filtered_sub_labels.remove("None")
+            sub_label_clauses.append((Event.sub_label.is_null()))
+
+        for label in filtered_sub_labels:
+            sub_label_clauses.append(
+                (Event.sub_label.cast("text") == label)
+            )  # include exact matches
+
+            # include this label when part of a list
+            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
+            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+
+        sub_label_clause = reduce(operator.or_, sub_label_clauses)
+        clauses.append((sub_label_clause))
+
+    if zones != "all":
+        # use matching so events with multiple zones
+        # still match on a search where any zone matches
+        zone_clauses = []
+        filtered_zones = zones.split(",")
+
+        if "None" in filtered_zones:
+            filtered_zones.remove("None")
+            zone_clauses.append((Event.zones.length() == 0))
+
+        for zone in filtered_zones:
+            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+
+        zone_clause = reduce(operator.or_, zone_clauses)
+        clauses.append((zone_clause))
 
     if after:
         clauses.append((Event.start_time > after))
@@ -554,10 +682,16 @@ def events():
     if not has_snapshot is None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
+    if not in_progress is None:
+        clauses.append((Event.end_time.is_null(in_progress)))
+
     if not include_thumbnails:
         excluded_fields.append(Event.thumbnail)
     else:
         selected_columns.append(Event.thumbnail)
+
+    if favorites:
+        clauses.append((Event.retain_indefinitely == favorites))
 
     if len(clauses) == 0:
         clauses.append((True))
@@ -576,19 +710,106 @@ def events():
 def config():
     config = current_app.frigate_config.dict()
 
-    # add in the ffmpeg_cmds
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
+
+        # clean paths
+        for input in camera_dict.get("ffmpeg", {}).get("inputs", []):
+            input["path"] = clean_camera_user_pass(input["path"])
+
+        # add clean ffmpeg_cmds
         camera_dict["ffmpeg_cmds"] = copy.deepcopy(camera.ffmpeg_cmds)
         for cmd in camera_dict["ffmpeg_cmds"]:
-            cmd["cmd"] = " ".join(cmd["cmd"])
+            cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     return jsonify(config)
 
 
-@bp.route("/config/schema")
+@bp.route("/config/raw")
+def config_raw():
+    config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+    # Check if we can use .yaml instead of .yml
+    config_file_yaml = config_file.replace(".yml", ".yaml")
+
+    if os.path.isfile(config_file_yaml):
+        config_file = config_file_yaml
+
+    if not os.path.isfile(config_file):
+        return "Could not find file", 410
+
+    with open(config_file, "r") as f:
+        raw_config = f.read()
+        f.close()
+
+        return raw_config, 200
+
+
+@bp.route("/config/save", methods=["POST"])
+def config_save():
+    save_option = request.args.get("save_option")
+
+    new_config = request.get_data().decode()
+
+    if not new_config:
+        return "Config with body param is required", 400
+
+    # Validate the config schema
+    try:
+        new_yaml = FrigateConfig.parse_raw(new_config)
+    except Exception as e:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                }
+            ),
+            400,
+        )
+
+    # Save the config to file
+    try:
+        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
+
+        with open(config_file, "w") as f:
+            f.write(new_config)
+            f.close()
+    except Exception as e:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Could not write config file, be sure that Frigate has write permission on the config file.",
+                }
+            ),
+            400,
+        )
+
+    if save_option == "restart":
+        try:
+            restart_frigate()
+        except Exception as e:
+            logging.error(f"Error restarting Frigate: {e}")
+            return "Config successfully saved, unable to restart Frigate", 200
+
+        return (
+            "Config successfully saved, restarting (this can take up to one minute)...",
+            200,
+        )
+    else:
+        return "Config successfully saved.", 200
+
+
+@bp.route("/config/schema.json")
 def config_schema():
     return current_app.response_class(
         current_app.frigate_config.schema_json(), mimetype="application/json"
@@ -602,7 +823,11 @@ def version():
 
 @bp.route("/stats")
 def stats():
-    stats = stats_snapshot(current_app.stats_tracking)
+    stats = stats_snapshot(
+        current_app.frigate_config,
+        current_app.stats_tracking,
+        current_app.hwaccel_errors,
+    )
     return jsonify(stats)
 
 
@@ -650,8 +875,38 @@ def latest_frame(camera_name):
         frame = current_app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
-        if frame is None:
-            frame = np.zeros((720, 1280, 3), np.uint8)
+
+        if frame is None or datetime.now().timestamp() > (
+            current_app.detected_frames_processor.get_current_frame_time(camera_name)
+            + 10
+        ):
+            if current_app.camera_error_image is None:
+                error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
+
+                if len(error_image) > 0:
+                    current_app.camera_error_image = cv2.imread(
+                        error_image[0], cv2.IMREAD_UNCHANGED
+                    )
+
+            frame = current_app.camera_error_image
+
+        height = int(request.args.get("h", str(frame.shape[0])))
+        width = int(height * frame.shape[1] / frame.shape[0])
+
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+
+        ret, jpg = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        )
+        response = make_response(jpg.tobytes())
+        response.headers["Content-Type"] = "image/jpeg"
+        response.headers["Cache-Control"] = "no-store"
+        return response
+    elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
+        frame = cv2.cvtColor(
+            current_app.detected_frames_processor.get_current_frame(camera_name),
+            cv2.COLOR_YUV2BGR_I420,
+        )
 
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
@@ -669,14 +924,44 @@ def latest_frame(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+@bp.route("/recordings/storage", methods=["GET"])
+def get_recordings_storage_usage():
+    recording_stats = stats_snapshot(
+        current_app.frigate_config,
+        current_app.stats_tracking,
+        current_app.hwaccel_errors,
+    )["service"]["storage"][RECORD_DIR]
+
+    if not recording_stats:
+        return jsonify({})
+
+    total_mb = recording_stats["total"]
+
+    camera_usages: dict[
+        str, dict
+    ] = current_app.storage_maintainer.calculate_camera_usages()
+
+    for camera_name in camera_usages.keys():
+        if camera_usages.get(camera_name, {}).get("usage"):
+            camera_usages[camera_name]["usage_percent"] = (
+                camera_usages.get(camera_name, {}).get("usage", 0) / total_mb
+            ) * 100
+
+    return jsonify(camera_usages)
+
+
 # return hourly summary for recordings of camera
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
     recording_groups = (
         Recordings.select(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("hour"),
             fn.SUM(Recordings.duration).alias("duration"),
             fn.SUM(Recordings.motion).alias("motion"),
@@ -686,13 +971,17 @@ def recordings_summary(camera_name):
         .group_by(
             fn.strftime(
                 "%Y-%m-%d %H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             )
         )
         .order_by(
             fn.strftime(
                 "%Y-%m-%d H",
-                fn.datetime(Recordings.start_time, "unixepoch", "localtime"),
+                fn.datetime(
+                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).desc()
         )
     )
@@ -700,14 +989,20 @@ def recordings_summary(camera_name):
     event_groups = (
         Event.select(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ).alias("hour"),
             fn.COUNT(Event.id).alias("count"),
         )
         .where(Event.camera == camera_name, Event.has_clip)
         .group_by(
             fn.strftime(
-                "%Y-%m-%d %H", fn.datetime(Event.start_time, "unixepoch", "localtime")
+                "%Y-%m-%d %H",
+                fn.datetime(
+                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
+                ),
             ),
         )
         .objects()
@@ -751,6 +1046,7 @@ def recordings(camera_name):
             Recordings.id,
             Recordings.start_time,
             Recordings.end_time,
+            Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
         )
@@ -858,6 +1154,7 @@ def vod_ts(camera_name, start_ts, end_ts):
 
     clips = []
     durations = []
+    max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
     for recording in recordings:
@@ -868,7 +1165,7 @@ def vod_ts(camera_name, start_ts, end_ts):
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-        if duration > 0:
+        if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
@@ -884,15 +1181,29 @@ def vod_ts(camera_name, start_ts, end_ts):
         {
             "cache": hour_ago.timestamp() > start_ts,
             "discontinuity": False,
+            "consistentSequenceMediaInfo": True,
             "durations": durations,
+            "segment_duration": max(durations),
             "sequences": [{"clips": clips}],
         }
     )
 
 
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
-def vod_hour(year_month, day, hour, camera_name):
-    start_date = datetime.strptime(f"{year_month}-{day} {hour}", "%Y-%m-%d %H")
+def vod_hour_no_timezone(year_month, day, hour, camera_name):
+    return vod_hour(
+        year_month, day, hour, camera_name, get_localzone_name().replace("/", ",")
+    )
+
+
+# TODO make this nicer when vod module is removed
+@bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+def vod_hour(year_month, day, hour, camera_name, tz_name):
+    parts = year_month.split("-")
+    start_date = (
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+    )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
@@ -955,3 +1266,91 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + jpg.tobytes() + b"\r\n\r\n"
         )
+
+
+@bp.route("/ffprobe", methods=["GET"])
+def ffprobe():
+    path_param = request.args.get("paths", "")
+
+    if not path_param:
+        return jsonify(
+            {"success": False, "message": f"Path needs to be provided."}, "404"
+        )
+
+    if path_param.startswith("camera"):
+        camera = path_param[7:]
+
+        if camera not in current_app.frigate_config.cameras.keys():
+            return jsonify(
+                {"success": False, "message": f"{camera} is not a valid camera."}, "404"
+            )
+
+        if not current_app.frigate_config.cameras[camera].enabled:
+            return jsonify(
+                {"success": False, "message": f"{camera} is not enabled."}, "404"
+            )
+
+        paths = map(
+            lambda input: input.path,
+            current_app.frigate_config.cameras[camera].ffmpeg.inputs,
+        )
+    elif "," in clean_camera_user_pass(path_param):
+        paths = path_param.split(",")
+    else:
+        paths = [path_param]
+
+    # user has multiple streams
+    output = []
+
+    for path in paths:
+        ffprobe = ffprobe_stream(path.strip())
+        output.append(
+            {
+                "return_code": ffprobe.returncode,
+                "stderr": ffprobe.stderr.decode("unicode_escape").strip()
+                if ffprobe.returncode != 0
+                else "",
+                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                if ffprobe.returncode == 0
+                else "",
+            }
+        )
+
+    return jsonify(output)
+
+
+@bp.route("/vainfo", methods=["GET"])
+def vainfo():
+    vainfo = vainfo_hwaccel()
+    return jsonify(
+        {
+            "return_code": vainfo.returncode,
+            "stderr": vainfo.stderr.decode("unicode_escape").strip()
+            if vainfo.returncode != 0
+            else "",
+            "stdout": vainfo.stdout.decode("unicode_escape").strip()
+            if vainfo.returncode == 0
+            else "",
+        }
+    )
+
+
+@bp.route("/logs/<service>", methods=["GET"])
+def logs(service: str):
+    log_locations = {
+        "frigate": "/dev/shm/logs/frigate/current",
+        "go2rtc": "/dev/shm/logs/go2rtc/current",
+        "nginx": "/dev/shm/logs/nginx/current",
+    }
+    service_location = log_locations.get(service)
+
+    if not service:
+        return f"{service} is not a valid service", 404
+
+    try:
+        file = open(service_location, "r")
+        contents = file.read()
+        file.close()
+        return contents, 200
+    except FileNotFoundError as e:
+        return f"Could not find log file: {e}", 500

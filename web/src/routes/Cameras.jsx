@@ -5,7 +5,7 @@ import CameraImage from '../components/CameraImage';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
-import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/mqtt';
+import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
 import { useMemo } from 'preact/hooks';
 import useSWR from 'swr';
 
@@ -46,7 +46,7 @@ function Camera({ name }) {
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
     return [
-      { name: 'Events', href: `/events?camera=${name}` },
+      { name: 'Events', href: `/events?cameras=${name}` },
       { name: 'Recordings', href: `/recording/${name}` },
     ];
   }, [name]);

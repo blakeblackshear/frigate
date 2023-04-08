@@ -4,11 +4,17 @@ import threading
 import os
 import signal
 import queue
+import multiprocessing as mp
 from multiprocessing.queues import Queue
 from logging import handlers
+from typing import Optional
+from types import FrameType
 from setproctitle import setproctitle
-from typing import Deque
+from typing import Deque, Optional
+from types import FrameType
 from collections import deque
+
+from frigate.util import clean_camera_user_pass
 
 
 def listener_configurer() -> None:
@@ -33,10 +39,21 @@ def log_process(log_queue: Queue) -> None:
     threading.current_thread().name = f"logger"
     setproctitle("frigate.logger")
     listener_configurer()
+
+    stop_event = mp.Event()
+
+    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     while True:
         try:
-            record = log_queue.get(timeout=5)
+            record = log_queue.get(timeout=1)
         except (queue.Empty, KeyboardInterrupt):
+            if stop_event.is_set():
+                break
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
@@ -55,6 +72,11 @@ class LogPipe(threading.Thread):
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
 
+    def cleanup_log(self, log: str) -> str:
+        """Cleanup the log line to remove sensitive info and string tokens."""
+        log = clean_camera_user_pass(log).strip("\n")
+        return log
+
     def fileno(self) -> int:
         """Return the write file descriptor of the pipe"""
         return self.fdWrite
@@ -62,7 +84,7 @@ class LogPipe(threading.Thread):
     def run(self) -> None:
         """Run the thread, logging everything."""
         for line in iter(self.pipeReader.readline, ""):
-            self.deque.append(line.strip("\n"))
+            self.deque.append(self.cleanup_log(line))
 
         self.pipeReader.close()
 

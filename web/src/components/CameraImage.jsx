@@ -11,9 +11,18 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const [{ width: availableWidth }] = useResizeObserver(containerRef);
+  const [{ width: containerWidth }] = useResizeObserver(containerRef);
+
+  // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
+  // https://github.com/blakeblackshear/frigate/issues/1657
+  let scrollBarWidth = 0;
+  if (window.innerWidth && document.body.offsetWidth) {
+    scrollBarWidth = window.innerWidth - document.body.offsetWidth;
+  }
+  const availableWidth = scrollBarWidth ? containerWidth + scrollBarWidth : containerWidth;
 
   const { name } = config ? config.cameras[camera] : '';
+  const enabled = config ? config.cameras[camera].enabled : 'True';
   const { width, height } = config ? config.cameras[camera].detect : { width: 1, height: 1 };
   const aspectRatio = width / height;
 
@@ -21,7 +30,11 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
     const scaledHeight = Math.floor(availableWidth / aspectRatio);
     return stretch ? scaledHeight : Math.min(scaledHeight, height);
   }, [availableWidth, aspectRatio, height, stretch]);
-  const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio), [scaledHeight, aspectRatio]);
+  const scaledWidth = useMemo(() => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth), [
+    scaledHeight,
+    aspectRatio,
+    scrollBarWidth,
+  ]);
 
   const img = useMemo(() => new Image(), []);
   img.onload = useCallback(
@@ -45,12 +58,18 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} />
-      {!hasLoaded ? (
-        <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>
-          <ActivityIndicator />
-        </div>
-      ) : null}
-    </div>
+      {
+        (enabled) ?
+          <canvas data-testid="cameraimage-canvas" height={scaledHeight} ref={canvasRef} width={scaledWidth} />
+          : <div class="text-center pt-6">Camera is disabled in config, no stream or snapshot available!</div>
+      }
+      {
+        (!hasLoaded && enabled) ? (
+          <div className="absolute inset-0 flex justify-center" style={`height: ${scaledHeight}px`}>
+            <ActivityIndicator />
+          </div>
+        ) : null
+      }
+    </div >
   );
 }

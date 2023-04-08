@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import Prompt from '../Prompt';
-import { fireEvent, render, screen } from 'testing-library';
+import { fireEvent, render, screen } from '@testing-library/preact';
 
 describe('Prompt', () => {
   let portal;
@@ -22,7 +22,7 @@ describe('Prompt', () => {
   });
 
   test('renders action buttons', async () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     render(
       <Prompt
         actions={[

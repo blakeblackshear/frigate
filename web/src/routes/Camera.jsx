@@ -13,6 +13,8 @@ import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
+import WebRtcPlayer from '../components/WebRtcPlayer';
+import MsePlayer from '../components/MsePlayer';
 
 const emptyObject = Object.freeze({});
 
@@ -23,9 +25,16 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
-  const liveWidth = cameraConfig
+  const restreamEnabled =
+    cameraConfig && Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.live.stream_name);
+  const jsmpegWidth = cameraConfig
     ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
+    `${camera}-source`,
+    getDefaultLiveMode(config, cameraConfig, restreamEnabled)
+  );
+  const sourceValues = restreamEnabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -51,8 +60,12 @@ export default function Camera({ camera }) {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
 
-  if (!cameraConfig) {
+  if (!cameraConfig || !sourceIsLoaded) {
     return <ActivityIndicator />;
+  }
+
+  if (!restreamEnabled) {
+    setViewSource('jsmpeg');
   }
 
   const optionContent = showSettings ? (
@@ -72,7 +85,13 @@ export default function Camera({ camera }) {
         labelPosition="after"
       />
       <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch
+        checked={options['mask']}
+        id="mask"
+        onChange={handleSetOption}
+        label="Motion Masks"
+        labelPosition="after"
+      />
       <Switch
         checked={options['motion']}
         id="motion"
@@ -93,13 +112,41 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    player = (
-      <Fragment>
-        <div>
-          <JSMpegPlayer camera={camera} width={liveWidth} height={cameraConfig.live.height} />
-        </div>
-      </Fragment>
-    );
+    if (viewSource == 'mse' && restreamEnabled) {
+      if ('MediaSource' in window) {
+        player = (
+          <Fragment>
+            <div className="max-w-5xl">
+              <MsePlayer camera={cameraConfig.live.stream_name} />
+            </div>
+          </Fragment>
+        );
+      } else {
+        player = (
+          <Fragment>
+            <div className="w-5xl text-center text-sm">
+              MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+            </div>
+          </Fragment>
+        );
+      }
+    } else if (viewSource == 'webrtc' && restreamEnabled) {
+      player = (
+        <Fragment>
+          <div className="max-w-5xl">
+            <WebRtcPlayer camera={cameraConfig.live.stream_name} />
+          </div>
+        </Fragment>
+      );
+    } else {
+      player = (
+        <Fragment>
+          <div>
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.live.height} />
+          </div>
+        </Fragment>
+      );
+    }
   } else if (viewMode === 'debug') {
     player = (
       <Fragment>
@@ -120,8 +167,24 @@ export default function Camera({ camera }) {
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading size="2xl">{camera.replaceAll('_', ' ')}</Heading>
-      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
+      <div className="flex justify-between">
+        <Heading className="p-2" size="2xl">
+          {camera.replaceAll('_', ' ')}
+        </Heading>
+        <select
+          className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
+          value={viewSource}
+          onChange={(e) => setViewSource(e.target.value)}
+        >
+          {sourceValues.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <ButtonsTabbed viewModes={['live', 'debug']} currentViewMode={viewMode} setViewMode={setViewMode} />
 
       {player}
 
@@ -133,7 +196,7 @@ export default function Camera({ camera }) {
               className="mb-4 mr-4"
               key={objectType}
               header={objectType}
-              href={`/events?camera=${camera}&label=${encodeURIComponent(objectType)}`}
+              href={`/events?cameras=${camera}&labels=${encodeURIComponent(objectType)}`}
               media={<img src={`${apiHost}/api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
             />
           ))}
@@ -141,4 +204,16 @@ export default function Camera({ camera }) {
       </div>
     </div>
   );
+}
+
+function getDefaultLiveMode(config, cameraConfig, restreamEnabled) {
+  if (cameraConfig) {
+    if (restreamEnabled) {
+      return config.ui.live_mode;
+    }
+
+    return 'jsmpeg';
+  }
+
+  return undefined;
 }

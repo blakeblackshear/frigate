@@ -6,7 +6,7 @@ name: "Stalebot"
 on:
   schedule:
     - cron: "0 0 * * *" # run stalebot once a day
-    
+
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -14,12 +14,13 @@ jobs:
       - uses: actions/stale@main
         id: stale
         with:
-          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-          close-issue-message: ''
+          stale-issue-message: "This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions."
+          close-issue-message: ""
           days-before-stale: 30
           days-before-close: 3
           exempt-draft-pr: true
-          exempt-issue-labels: 'pinned,security'
-          exempt-pr-labels: 'pinned,security'
+          exempt-issue-labels: "pinned,security"
+          exempt-pr-labels: "pinned,security,dependencies"
+          operations-per-run: 120
       - name: Print outputs
         run: echo ${{ join(steps.stale.outputs.*, ',') }}

@@ -16,7 +16,7 @@ import cv2
 import numpy as np
 
 from frigate.config import FrigateConfig
-from frigate.edgetpu import LocalObjectDetector
+from frigate.object_detection import LocalObjectDetector
 from frigate.motion import MotionDetector
 from frigate.object_processing import CameraState
 from frigate.objects import ObjectTracker
@@ -117,13 +117,12 @@ class ProcessClip:
         detection_enabled = mp.Value("d", 1)
         motion_enabled = mp.Value("d", True)
         stop_event = mp.Event()
-        model_shape = (self.config.model.height, self.config.model.width)
 
         process_frames(
             self.camera_name,
             self.frame_queue,
             self.frame_shape,
-            model_shape,
+            self.config.model,
             self.camera_config.detect,
             self.frame_manager,
             motion_detector,

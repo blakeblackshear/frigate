@@ -2,7 +2,8 @@
 *.pyc
 *.swp
 debug
-.vscode
+.vscode/*
+!.vscode/launch.json
 config/config.yml
 models
 *.mp4
