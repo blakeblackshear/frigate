@@ -130,7 +130,18 @@ cameras:
 
 ### Unifi Protect Cameras
 
-Unifi protect cameras require the rtspx stream to be used with go2rtc https://github.com/AlexxIT/go2rtc/tree/v1.2.0#source-rtsp
+Unifi protect cameras require the rtspx stream to be used with go2rtc.
+To utilize a Unifi protect camera, modify the rtsps link to begin with rtspx.
+Additionally, remove the "?enableSrtp" from the end of the Unifi link.
+
+```yaml
+go2rtc:
+  streams:
+    front:
+      - rtspx://192.168.1.1:7441/abcdefghijk
+```
+
+[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#source-rtsp)
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp if used directly with unifi protect.
 
