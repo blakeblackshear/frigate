@@ -164,8 +164,6 @@ class RecordConfig(FrigateBaseModel):
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
-    # deprecated - to be removed in a future version
-    retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
@@ -785,16 +783,6 @@ def verify_valid_live_stream_name(
         )
 
 
-def verify_old_retain_config(camera_config: CameraConfig) -> None:
-    """Leave log if old retain_days is used."""
-    if not camera_config.record.retain_days is None:
-        logger.warning(
-            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
-        )
-        if camera_config.record.retain.days == 0:
-            camera_config.record.retain.days = camera_config.record.retain_days
-
-
 def verify_recording_retention(camera_config: CameraConfig) -> None:
     """Verify that recording retention modes are ranked correctly."""
     rank_map = {
@@ -1001,7 +989,6 @@ class FrigateConfig(FrigateBaseModel):
 
             verify_config_roles(camera_config)
             verify_valid_live_stream_name(config, camera_config)
-            verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
