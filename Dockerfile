@@ -16,8 +16,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /rootfs
 
-FROM base AS nginx
+FROM --platform=$BUILDPLATFORM debian:11 AS nginx
 ARG DEBIAN_FRONTEND
+ARG TARGETARCH
 
 # bind /var/cache/apt to tmpfs to speed up nginx build
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
