@@ -17,6 +17,8 @@ export default function MultiSelect({ className, title, options, selection, onTo
     return selection == 'all' || selection.split(',').indexOf(item) > -1;
   };
 
+  const menuHeight = Math.round(window.innerHeight * 0.55);
+
   return (
     <div className={`${className} p-2`} ref={popupRef}>
       <div className="flex justify-between min-w-[120px]" onClick={() => setState({ showMenu: true })}>
@@ -24,7 +26,11 @@ export default function MultiSelect({ className, title, options, selection, onTo
         <ArrowDropdown className="w-6" />
       </div>
       {state.showMenu ? (
-        <Menu className={`overflow-auto`} relativeTo={popupRef} onDismiss={() => setState({ showMenu: false })}>
+        <Menu
+          className={`max-h-[${menuHeight}px] overflow-auto`}
+          relativeTo={popupRef}
+          onDismiss={() => setState({ showMenu: false })}
+        >
           <div className="flex flex-wrap justify-between items-center">
             <Heading className="p-4 justify-center" size="md">
               {title}
