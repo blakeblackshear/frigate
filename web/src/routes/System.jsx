@@ -111,7 +111,7 @@ export default function System() {
 
       {state.showFfprobe && (
         <Dialog>
-          <div className="p-4 mb-2 max-h-96 whitespace-pre-line overflow-scroll">
+          <div className="p-4 mb-2 max-h-96 whitespace-pre-line overflow-auto">
             <Heading size="lg">Ffprobe Output</Heading>
             {state.ffprobe != '' ? (
               <div>
@@ -175,7 +175,7 @@ export default function System() {
 
       {state.showVainfo && (
         <Dialog>
-          <div className="p-4 overflow-scroll whitespace-pre-line">
+          <div className="p-4 overflow-auto whitespace-pre-line">
             <Heading size="lg">Vainfo Output</Heading>
             {state.vainfo != '' ? (
               <div className="mb-2 max-h-96 whitespace-pre-line">
