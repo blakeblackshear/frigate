@@ -89,7 +89,13 @@ export default function RelativeModal({
         newTop = WINDOW_PADDING;
       }
 
-      const maxHeight = windowHeight - WINDOW_PADDING * 2 > menuHeight ? null : windowHeight - WINDOW_PADDING * 2;
+      // This calculation checks if there's enough space to display the menu.
+      // If there is, it sets the maxHeight to null(meaning no height constraint). If not, it calculates the maxHeight based on the remaining space in the window
+      const maxHeight =
+        windowHeight - WINDOW_PADDING * 2 > menuHeight
+          ? null
+          : windowHeight - WINDOW_PADDING * 2 - top + window.scrollY;
+
       const newPosition = { left: newLeft, top: newTop, maxHeight };
       if (widthRelative) {
         newPosition.width = relativeToWidth;
