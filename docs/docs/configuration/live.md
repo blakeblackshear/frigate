@@ -99,7 +99,7 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 - `network: host`, in this mode you don't need to forward any ports. The services inside of the Frigate container will have full access to the network interfaces of your host machine as if they were running natively and not in a container. Any port conflicts will need to be resolved. This network mode is recommended by go2rtc, but we recommend you only use it if necessary.
 - `network: bridge` creates a virtual network interface for the container, and the container will have full access to it. You also don't need to forward any ports, however, the IP for accessing Frigate locally will differ from the IP of the host machine. Your router will see Frigate as if it was a new device connected in the network.
 
-You may also expose port 8555 for the container:
+If not running in host mode, port 8555 will need to be mapped for the container:
 
 docker-compose.yml
 ```
