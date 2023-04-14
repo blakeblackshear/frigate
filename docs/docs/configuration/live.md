@@ -106,7 +106,8 @@ docker-compose.yml
 services:
   frigate:
     ports:
-      - "8555:8555"
+      - "8555:8555/tcp" # WebRTC over tcp
+      - "8555:8555/udp" # WebRTC over udp
 ```
 
 :::
