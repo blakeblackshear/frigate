@@ -36,7 +36,7 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 - [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
-- Extra Coral device (optional, but very helpful to simulate real world performance)
+- Because a Coral device only be used by a single process, extra Coral device (optional, but very helpful to simulate real world performance)
 
 ### Setup
 
