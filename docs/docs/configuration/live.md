@@ -102,7 +102,7 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 If not running in host mode, port 8555 will need to be mapped for the container:
 
 docker-compose.yml
-```
+```yaml
 services:
   frigate:
     ports:
