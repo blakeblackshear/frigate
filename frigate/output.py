@@ -329,7 +329,6 @@ class BirdsEyeFrameManager:
 
         # update each position in the layout
         for position, camera in enumerate(self.camera_layout, start=0):
-
             # if this camera was removed, replace it or clear it
             if camera in removed_cameras:
                 # if replacing this camera with a newly added one

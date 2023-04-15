@@ -111,7 +111,6 @@ class RecordingMaintainer(threading.Thread):
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
         for camera, recordings in grouped_recordings.items():
-
             # clear out all the recording info for old frames
             while (
                 len(self.recordings_info[camera]) > 0
