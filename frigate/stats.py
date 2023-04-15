@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_latest_version(config: FrigateConfig) -> str:
-
     if not config.telemetry.version_check:
         return "disabled"
 
