@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 ZEROCONF_TYPE = "_frigate._tcp.local."
 
+
 # Taken from: http://stackoverflow.com/a/11735897
 def get_local_ip() -> bytes:
     """Try to determine the local IP address of the machine."""
