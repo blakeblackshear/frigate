@@ -759,6 +759,7 @@ def config_save():
     # Validate the config schema
     try:
         new_yaml = FrigateConfig.parse_raw(new_config)
+        check_runtime = new_yaml.runtime_config
     except Exception as e:
         return make_response(
             jsonify(
