@@ -391,7 +391,6 @@ class FrigateApp:
         self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
-        # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
             self.stop()
