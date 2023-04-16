@@ -20,8 +20,8 @@ class MotionDetector:
             config.frame_height,
             config.frame_height * frame_shape[1] // frame_shape[0],
         )
-        self.avg_frame = np.zeros(self.motion_frame_size, np.float)
-        self.avg_delta = np.zeros(self.motion_frame_size, np.float)
+        self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
+        self.avg_delta = np.zeros(self.motion_frame_size, np.float32)
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
