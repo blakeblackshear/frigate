@@ -3,11 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../../api';
 import { isNullOrUndefined } from '../../utils/objectUtils';
 
-import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
-import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
-import videojs, { VideoJsPlayer } from 'video.js';
+import videojs from 'video.js';
+import type Player from 'video.js/dist/types/player';
 
 interface OnTimeUpdateEvent {
   timestamp: number;
@@ -34,10 +33,10 @@ export const HistoryVideo = ({
   const apiHost = useApiHost();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [video, setVideo] = useState<VideoJsPlayer>();
+  const [video, setVideo] = useState<Player>();
 
   useEffect(() => {
-    let video: VideoJsPlayer
+    let video: Player
     if (videoRef.current) {
       video = videojs(videoRef.current, {})
       setVideo(video)
@@ -88,7 +87,8 @@ export const HistoryVideo = ({
   );
 
   useEffect(() => {
-    if (video && video.readyState() >= 1) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (video && (video as any).readyState() >= 1) {
       if (videoIsPlaying) {
         video.play()
       } else {
@@ -98,7 +98,8 @@ export const HistoryVideo = ({
   }, [video, videoIsPlaying])
 
   const onLoad = useCallback(() => {
-    if (video && video.readyState() >= 1 && videoIsPlaying) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (video && (video as any).readyState() >= 1 && videoIsPlaying) {
       video.play()
     }
   }, [video, videoIsPlaying])
