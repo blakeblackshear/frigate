@@ -2,24 +2,21 @@ import { h } from 'preact';
 import { useRef, useEffect } from 'preact/hooks';
 import videojs from 'video.js';
 import 'videojs-playlist';
-import 'videojs-seek-buttons';
 import 'video.js/dist/video-js.css';
-import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
-export default function VideoPlayer({ children, options, seekOptions = {}, onReady = () => {}, onDispose = () => {} }) {
+export default function VideoPlayer({ children, options, seekOptions = {forward:30, backward: 10}, onReady = () => {}, onDispose = () => {} }) {
   const playerRef = useRef();
 
   useEffect(() => {
     const defaultOptions = {
       controls: true,
+      controlBar: {
+        skipButtons: seekOptions,
+      },
       playbackRates: [0.5, 1, 2, 4, 8],
       fluid: true,
     };
 
-    const defaultSeekOptions = {
-      forward: 30,
-      back: 10,
-    };
 
     if (!videojs.browser.IS_FIREFOX) {
       defaultOptions.playbackRates.push(16);
@@ -27,10 +24,6 @@ export default function VideoPlayer({ children, options, seekOptions = {}, onRea
 
     const player = videojs(playerRef.current, { ...defaultOptions, ...options }, () => {
       onReady(player);
-    });
-    player.seekButtons({
-      ...defaultSeekOptions,
-      ...seekOptions,
     });
 
     // Allows player to continue on error

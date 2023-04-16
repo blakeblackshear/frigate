@@ -584,7 +584,7 @@ export default function Events({ path, ...props }) {
                                   },
                                 ],
                               }}
-                              seekOptions={{ forward: 10, back: 5 }}
+                              seekOptions={{ forward: 10, backward: 5 }}
                               onReady={() => {}}
                             />
                           ) : null}
