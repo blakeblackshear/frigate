@@ -261,10 +261,9 @@ you need to add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to y
 
 **Port Settings:**
 
-the network should be set to a "bridge" network. You need to map the default frigate container ports to your local synology NAS ports that you want to access Frigate using.
-> sometime the defaults container ports that frigate uses my not be available
-> on your NAS due to services you may be running, 
-> in that instance you can set the ports to auto or whatever ports you prefer
+The network mode should be set to `bridge`. You need to map the default frigate container ports to your local Synology NAS ports that you want to use to access Frigate.
+
+There may be other services running on your NAS that are using the same ports that frigate uses. In that instance you can set the ports to auto or a specific port.
 
 ![image](https://user-images.githubusercontent.com/4516296/232582642-773c0e37-7ef5-4373-8ce3-41401b1626e6.png)
 
