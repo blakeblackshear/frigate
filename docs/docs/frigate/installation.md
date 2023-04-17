@@ -243,6 +243,7 @@ you can run Frigate NVR on DSM 7.x. tested on DSM 7.1.1-42962 Update 4
 
 
 General:
+
 you need to tick the "Execute container using high privilage" checkbox in order to give the frigate container the elevated privilages it may need.
 if you want the container to automatically restart whenever it improperly shuts down then you can tick the "Enable auto-restart" checkbox.
 
@@ -255,6 +256,7 @@ you need to add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to y
 
 
 Port Settings:
+
 the network should be set to a "bridge" network. You need to map the default frigate container ports to your local synology NAS ports that you want to access Frigate using.
 > sometime the defaults container ports that frigate uses my not be available
 > on your NAS due to services you may be running, 
@@ -263,6 +265,7 @@ the network should be set to a "bridge" network. You need to map the default fri
 ![image](https://user-images.githubusercontent.com/4516296/232582642-773c0e37-7ef5-4373-8ce3-41401b1626e6.png)
 
 Volume Settings:
+
 under volumes you need to configure 2 paths
 - The location of your config file in yaml format, this needs to be file and you need to go to the location of where your config.yml is located, this will be different depending on your NAS folder structure e.g. /docker/frigate/config/config.yml will mount to /config/config.yml within the container
 - The location on your NAS where the recordings will be saved this needs to be a folder e.g. /docker/volumes/frigate-0-media (or where ever you would like the recordings to get saved on your NAS
