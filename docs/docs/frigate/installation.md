@@ -245,8 +245,9 @@ These settings were tested on DSM 7.1.1-42962 Update 4
 
 **General:**
 
-you need to tick the "Execute container using high privilage" checkbox in order to give the frigate container the elevated privilages it may need.
-if you want the container to automatically restart whenever it improperly shuts down then you can tick the "Enable auto-restart" checkbox.
+The `Execute container using high privilage` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
+
+The `Enable auto-restart` option can be enabled if you want the container to automatically restart whenever it improperly shuts down due to an error.	
 
 ![image](https://user-images.githubusercontent.com/4516296/232586790-0b659a82-561d-4bc5-899b-0f5b39c6b11d.png)
 
