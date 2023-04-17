@@ -239,7 +239,8 @@ It is recommended to run Frigate in LXC for maximum performance. See [this discu
 For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
 
 ## Synology NAS on DSM 7
-you can run Frigate NVR on DSM 7.x. tested on DSM 7.1.1-42962 Update 4
+
+These settings were tested on DSM 7.1.1-42962 Update 4
 
 
 **General:**
