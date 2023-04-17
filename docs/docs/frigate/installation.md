@@ -254,7 +254,7 @@ The `Enable auto-restart` option can be enabled if you want the container to aut
 
 **Advanced Settings:**
 
-you need to add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to your preferred password under advanced settings the rest of the environment variables you can leave as default
+If you want to use the password template feature, you should add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to your preferred password under advanced settings. The rest of the environment variables should be left as default for now.
 
 ![image](https://user-images.githubusercontent.com/4516296/232587163-0eb662d4-5e28-4914-852f-9db1ec4b9c3d.png)
 
