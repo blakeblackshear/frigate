@@ -237,3 +237,22 @@ It is recommended to run Frigate in LXC for maximum performance. See [this discu
 ## ESX
 
 For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
+
+## Synology NAS on DSM 7
+you can run Frigate NVR on DSM 7.x. tested on DSM 7.1.1-42962 Update 4
+
+these were the settings configured (no tpu device just using the cpu from the device which is not great but still works 100%):
+
+General:
+![image](https://user-images.githubusercontent.com/4516296/232573326-0114c001-f5f8-4c62-863b-95c0240920bd.png)
+
+Advanced Settings:
+![image](https://user-images.githubusercontent.com/4516296/232573502-9c0cdeee-b4e2-4c20-b5c3-d2ba3ebf0065.png)
+
+Port Settings (whatever ports you prefer):
+![image](https://user-images.githubusercontent.com/4516296/232573652-97c73788-4283-422a-bc60-7fdd2755d68e.png)
+
+Volume Settings:
+![image](https://user-images.githubusercontent.com/4516296/232573808-7462cb81-bfa6-48f4-834b-9f7820350e0e.png)
+
+details will be added for tpu device as soon as it has been tested
