@@ -245,7 +245,7 @@ These settings were tested on DSM 7.1.1-42962 Update 4
 
 **General:**
 
-The `Execute container using high privilage` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
+The `Execute container using high privilege` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
 
 The `Enable auto-restart` option can be enabled if you want the container to automatically restart whenever it improperly shuts down due to an error.	
 
