@@ -241,7 +241,6 @@ For details on running Frigate under ESX, see details [here](https://github.com/
 ## Synology NAS on DSM 7
 you can run Frigate NVR on DSM 7.x. tested on DSM 7.1.1-42962 Update 4
 
-these were the settings configured (no tpu device just using the cpu from the device which is not great but still works 100%):
 
 General:
 
