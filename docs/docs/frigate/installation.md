@@ -257,5 +257,3 @@ Port Settings (whatever ports you prefer):
 Volume Settings:
 
 ![image](https://user-images.githubusercontent.com/4516296/232573808-7462cb81-bfa6-48f4-834b-9f7820350e0e.png)
-
-details will be added for tpu device as soon as it has been tested
