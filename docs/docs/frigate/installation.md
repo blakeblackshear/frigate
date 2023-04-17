@@ -237,3 +237,43 @@ It is recommended to run Frigate in LXC for maximum performance. See [this discu
 ## ESX
 
 For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
+
+## Synology NAS on DSM 7
+
+These settings were tested on DSM 7.1.1-42962 Update 4
+
+
+**General:**
+
+The `Execute container using high privilege` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
+
+The `Enable auto-restart` option can be enabled if you want the container to automatically restart whenever it improperly shuts down due to an error.	
+
+![image](https://user-images.githubusercontent.com/4516296/232586790-0b659a82-561d-4bc5-899b-0f5b39c6b11d.png)
+
+
+**Advanced Settings:**
+
+If you want to use the password template feature, you should add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to your preferred password under advanced settings. The rest of the environment variables should be left as default for now.
+
+![image](https://user-images.githubusercontent.com/4516296/232587163-0eb662d4-5e28-4914-852f-9db1ec4b9c3d.png)
+
+
+**Port Settings:**
+
+The network mode should be set to `bridge`. You need to map the default frigate container ports to your local Synology NAS ports that you want to use to access Frigate.
+
+There may be other services running on your NAS that are using the same ports that frigate uses. In that instance you can set the ports to auto or a specific port.
+
+![image](https://user-images.githubusercontent.com/4516296/232582642-773c0e37-7ef5-4373-8ce3-41401b1626e6.png)
+
+
+**Volume Settings:**
+
+You need to configure 2 paths:
+
+- The location of your config file in yaml format, this needs to be file and you need to go to the location of where your config.yml is located, this will be different depending on your NAS folder structure e.g. `/docker/frigate/config/config.yml` will mount to `/config/config.yml` within the container.
+- The location on your NAS where the recordings will be saved this needs to be a folder e.g. `/docker/volumes/frigate-0-media`
+
+![image](https://user-images.githubusercontent.com/4516296/232585872-44431d15-55e0-4004-b78b-1e512702b911.png)
+
