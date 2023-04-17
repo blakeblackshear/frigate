@@ -17,7 +17,7 @@
     "copy-to-clipboard": "3.3.3",
     "date-fns": "^2.29.3",
     "idb-keyval": "^6.2.0",
-    "immer": "^9.0.21",
+    "immer": "^10.0.0",
     "monaco-yaml": "^4.0.4",
     "preact": "^10.13.2",
     "preact-async-route": "^2.2.1",
