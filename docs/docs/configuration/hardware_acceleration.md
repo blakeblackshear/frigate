@@ -17,7 +17,7 @@ ffmpeg:
 
 ### Intel-based CPUs
 
-#### Intel-based CPUs (<10th Generation) via VAAPI
+#### Via VAAPI
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
 
@@ -28,7 +28,7 @@ ffmpeg:
 
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
 
-#### Intel-based CPUs (>=10th Generation) via Quicksync
+####  Via Quicksync (>=10th Generation only)
 
 QSV must be set specifically based on the video encoding of the stream.
 
@@ -48,7 +48,10 @@ ffmpeg:
 
 #### Docker Configuration
 
-Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Two possible changes need to be made: 1) Adding the `CAP_PERFMON` capability and 2) Setting the `perf_event_paranoid` low enough to allow access to the perfomance event system.
+Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Three possible changes can be made:
+1. Run the container as privileged.
+2. Adding the `CAP_PERFMON` capability.
+3. Setting the `perf_event_paranoid` low enough to allow access to the perfomance event system.
 
 ##### CAP_PERFMON
 
