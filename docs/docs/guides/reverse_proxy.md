@@ -84,3 +84,49 @@ There are many ways to authenticate a website but a straightforward approach is 
     </Location>
 </VirtualHost>
 ```
+
+## Nginix Reverse Proxy
+
+Setting up a reverse proxy for Nginix is also possible.  This method shows a working example for subdomain type reverse proxy.  This example also shows SSL enabled. 
+
+```
+
+# ------------------------------------------------------------
+# frigate.domain.com
+# ------------------------------------------------------------
+
+
+server {
+  set $forward_scheme http;
+  set $server         "192.168.100.2"; # FRIGATE SERVER NAME
+  set $port           5000;
+
+  listen 80;
+
+  listen 443 ssl http2;
+
+
+  server_name frigate.domain.com;
+
+
+  # Let's Encrypt SSL
+  include conf.d/include/letsencrypt-acme-challenge.conf;
+  include conf.d/include/ssl-ciphers.conf;
+  ssl_certificate /etc/letsencrypt/live/npm-1/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/npm-1/privkey.pem;
+  
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection $http_connection;
+  proxy_http_version 1.1;
+
+  access_log /data/logs/proxy-host-40_access.log proxy;
+  error_log /data/logs/proxy-host-40_error.log warn;
+
+  location / {
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $http_connection;
+    proxy_http_version 1.1;
+  }
+
+}
+```
