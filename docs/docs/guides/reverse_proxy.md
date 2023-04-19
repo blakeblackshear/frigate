@@ -89,6 +89,10 @@ There are many ways to authenticate a website but a straightforward approach is 
 
 This method shows a working example for subdomain type reverse proxy with SSL enabled. 
 
+### Setup server and port to reverse proxy
+
+This is set in `$server` and `$port` this should match your ports you have exposed to your docker container.  Optionally you listen on port `443` and enable `SSL`
+
 ```
 
 # ------------------------------------------------------------
@@ -107,14 +111,30 @@ server {
 
 
   server_name frigate.domain.com;
+  }
+  
+  
 
+```
 
+### Setup SSL (optional)
+
+This section points to your SSL files, the example below shows locations to a default Lets Encrypt SSL certificate. 
+
+```
   # Let's Encrypt SSL
   include conf.d/include/letsencrypt-acme-challenge.conf;
   include conf.d/include/ssl-ciphers.conf;
   ssl_certificate /etc/letsencrypt/live/npm-1/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/npm-1/privkey.pem;
-  
+```
+
+
+### Setup reverse proxy settings 
+
+Thhe settings below enabled connection upgrade, sets up logging (optional) and proxies everything from the `/` context to the docker host and port specified earlier in the configuration
+
+```
   proxy_set_header Upgrade $http_upgrade;
   proxy_set_header Connection $http_connection;
   proxy_http_version 1.1;
@@ -128,5 +148,4 @@ server {
     proxy_http_version 1.1;
   }
 
-}
 ```
