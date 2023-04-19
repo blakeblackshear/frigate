@@ -87,7 +87,7 @@ There are many ways to authenticate a website but a straightforward approach is 
 
 ## Nginix Reverse Proxy
 
-Setting up a reverse proxy for Nginix is also possible.  This method shows a working example for subdomain type reverse proxy.  This example also shows SSL enabled. 
+This method shows a working example for subdomain type reverse proxy with SSL enabled. 
 
 ```
 
