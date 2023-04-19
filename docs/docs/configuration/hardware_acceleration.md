@@ -46,7 +46,7 @@ ffmpeg:
   hwaccel_args: preset-intel-qsv-h265
 ```
 
-#### Docker Configuration - intel_gpu_top
+#### Configuring Intel GPU Stats in Docker
 
 Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Three possible changes can be made:
 
@@ -130,7 +130,7 @@ A more complete list of cards and their compatible drivers is available in the [
 
 If your distribution does not offer NVIDIA driver packages, you can [download them here](https://www.nvidia.com/en-us/drivers/unix/).
 
-#### Docker Configuration - Nvidia GPU
+#### Configuring Nvidia GPUs in Docker
 
 Additional configuration is needed for the Docker container to be able to access the NVIDIA GPU. The supported method for this is to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) and specify the GPU to Docker. How you do this depends on how Docker is being run:
 
