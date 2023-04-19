@@ -98,7 +98,7 @@ This method shows a working example for subdomain type reverse proxy with SSL en
 
 server {
   set $forward_scheme http;
-  set $server         "192.168.100.2"; # FRIGATE SERVER NAME
+  set $server         "192.168.100.2"; # FRIGATE SERVER LOCATION
   set $port           5000;
 
   listen 80;
