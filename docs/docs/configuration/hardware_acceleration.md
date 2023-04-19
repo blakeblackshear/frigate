@@ -28,7 +28,7 @@ ffmpeg:
 
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
 
-####  Via Quicksync (>=10th Generation only)
+#### Via Quicksync (>=10th Generation only)
 
 QSV must be set specifically based on the video encoding of the stream.
 
@@ -46,32 +46,68 @@ ffmpeg:
   hwaccel_args: preset-intel-qsv-h265
 ```
 
-#### Docker Configuration
+#### Docker Configuration - intel_gpu_top
 
 Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Three possible changes can be made:
+
 1. Run the container as privileged.
 2. Adding the `CAP_PERFMON` capability.
-3. Setting the `perf_event_paranoid` low enough to allow access to the perfomance event system.
+3. Setting the `perf_event_paranoid` low enough to allow access to the performance event system.
 
-##### CAP_PERFMON
+##### Run as privileged
 
-Only recent versions of Docker support the `CAP_PERFMON` capability. You can test to see if yours supports it by running: `docker run --cap-add=CAP_PERFMON hello-world`
+This method works, but it gives more permissions to the container than are actually needed.
 
-Pass `cap-add=CAP_PERFMON` to the container. With docker compose, that looks like this:
+###### Docker Compose - Privileged
 
 ```yaml
 services:
   frigate:
     ...
-      cap_add:
-        - CAP_PERFMON
+    image: ghcr.io/blakeblackshear/frigate:stable
+    privileged: true
 ```
 
-With docker run, add `--cap-add=CAP_PERFMON` to the `docker run` command.
+###### Docker Run CLI - Privileged
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  --privileged \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+##### CAP_PERFMON
+
+Only recent versions of Docker support the `CAP_PERFMON` capability. You can test to see if yours supports it by running: `docker run --cap-add=CAP_PERFMON hello-world`
+
+###### Docker Compose - CAP_PERFMON
+
+```yaml
+services:
+  frigate:
+    ...
+    image: ghcr.io/blakeblackshear/frigate:stable
+    cap_add:
+      - CAP_PERFMON
+```
+
+###### Docker Run CLI - CAP_PERFMON
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  --cap-add=CAP_PERFMON \
+  ghcr.io/blakeblackshear/frigate:stable
+```
 
 ##### perf_event_paranoid
 
-_Note: This setting must be changed for the enitre system._
+_Note: This setting must be changed for the entire system._
+
+For more information on the various values across different distributions, see https://askubuntu.com/questions/1400874/what-does-perf-paranoia-level-four-do.
 
 Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=1 >> /etc/sysctl.d/local.conf'`
 
@@ -90,15 +126,15 @@ ffmpeg:
 
 While older GPUs may work, it is recommended to use modern, supported GPUs. NVIDIA provides a [matrix of supported GPUs and features](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new). If your card is on the list and supports CUVID/NVDEC, it will most likely work with Frigate for decoding. However, you must also use [a driver version that will work with FFmpeg](https://github.com/FFmpeg/nv-codec-headers/blob/master/README). Older driver versions may be missing symbols and fail to work, and older cards are not supported by newer driver versions. The only way around this is to [provide your own FFmpeg](/configuration/advanced#custom-ffmpeg-build) that will work with your driver version, but this is unsupported and may not work well if at all.
 
-A more complete list of cards and ther compatible drivers is available in the [driver release readme](https://download.nvidia.com/XFree86/Linux-x86_64/525.85.05/README/supportedchips.html).
+A more complete list of cards and their compatible drivers is available in the [driver release readme](https://download.nvidia.com/XFree86/Linux-x86_64/525.85.05/README/supportedchips.html).
 
 If your distribution does not offer NVIDIA driver packages, you can [download them here](https://www.nvidia.com/en-us/drivers/unix/).
 
-#### Docker Configuration
+#### Docker Configuration - Nvidia GPU
 
 Additional configuration is needed for the Docker container to be able to access the NVIDIA GPU. The supported method for this is to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker) and specify the GPU to Docker. How you do this depends on how Docker is being run:
 
-##### Docker Compose
+##### Docker Compose - Nvidia GPU
 
 ```yaml
 services:
@@ -115,7 +151,7 @@ services:
               capabilities: [gpu]
 ```
 
-##### Docker Run CLI
+##### Docker Run CLI - Nvidia GPU
 
 ```bash
 docker run -d \
