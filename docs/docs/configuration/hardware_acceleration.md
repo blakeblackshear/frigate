@@ -15,7 +15,9 @@ ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 ```
 
-### Intel-based CPUs (<10th Generation) via VAAPI
+### Intel-based CPUs
+
+#### Intel-based CPUs (<10th Generation) via VAAPI
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
 
@@ -26,23 +28,49 @@ ffmpeg:
 
 **NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
 
-### Intel-based CPUs (>=10th Generation) via Quicksync
+#### Intel-based CPUs (>=10th Generation) via Quicksync
 
 QSV must be set specifically based on the video encoding of the stream.
 
-#### H.264 streams
+##### H.264 streams
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-intel-qsv-h264
 ```
 
-#### H.265 streams
+##### H.265 streams
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-intel-qsv-h265
 ```
+
+#### Docker Configuration
+
+Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Two possible changes need to be made: 1) Adding the `CAP_PERFMON` capability and 2) Setting the `perf_event_paranoid` low enough to allow access to the perfomance event system.
+
+##### CAP_PERFMON
+
+Only recent versions of Docker support the `CAP_PERFMON` capability. You can test to see if yours supports it by running: `docker run --cap-add=CAP_PERFMON hello-world`
+
+Pass `cap-add=CAP_PERFMON` to the container. With docker compose, that looks like this:
+
+```yaml
+services:
+  frigate:
+    ...
+      cap_add:
+        - CAP_PERFMON
+```
+
+With docker run, add `--cap-add=CAP_PERFMON` to the `docker run` command.
+
+##### perf_event_paranoid
+
+_Note: This setting must be changed for the enitre system._
+
+Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=1 >> /etc/sysctl.d/local.conf'`
 
 ### AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
