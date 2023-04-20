@@ -26,6 +26,7 @@ import Dialog from '../components/Dialog';
 import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TimeAgo from '../components/TimeAgo';
+import TimelineSummary from '../components/TimelineSummary';
 
 const API_LIMIT = 25;
 
@@ -560,6 +561,9 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
+                        <div>
+                          <TimelineSummary event={event} />
+                        </div>
                         <div className="flex justify-center w-full py-2">
                           <Tabs
                             selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
