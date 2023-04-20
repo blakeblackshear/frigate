@@ -11,6 +11,7 @@ from peewee import fn
 from frigate.config import EventsConfig, FrigateConfig, RecordConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
+from frigate.timeline import InputTypeEnum
 from frigate.types import CameraMetricsTypes
 
 from multiprocessing.queues import Queue
@@ -48,6 +49,7 @@ class EventProcessor(threading.Thread):
         camera_processes: dict[str, CameraMetricsTypes],
         event_queue: Queue,
         event_processed_queue: Queue,
+        timeline_queue: Queue,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -56,6 +58,7 @@ class EventProcessor(threading.Thread):
         self.camera_processes = camera_processes
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
+        self.timeline_queue = timeline_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
 
@@ -72,6 +75,16 @@ class EventProcessor(threading.Thread):
                 continue
 
             logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
+
+            self.timeline_queue.put(
+                (
+                    camera,
+                    InputTypeEnum.tracked_object,
+                    event_type,
+                    self.events_in_process.get(event_data["id"]),
+                    event_data,
+                )
+            )
 
             event_config: EventsConfig = self.config.cameras[camera].record.events
 

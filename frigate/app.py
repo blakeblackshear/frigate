@@ -290,12 +290,17 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_timeline_processor(self) -> None:
+        self.timeline_processor = TimelineProcessor(self.timeline_queue, self.stop_event)
+        self.timeline_processor.start()
+
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
             self.camera_metrics,
             self.event_queue,
             self.event_processed_queue,
+            self.timeline_queue,
             self.stop_event,
         )
         self.event_processor.start()
@@ -317,10 +322,6 @@ class FrigateApp:
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
-
-    def start_timeline_processor(self) -> None:
-        self.timeline_processor = TimelineProcessor(self.timeline_queue, self.stop_event)
-        self.timeline_processor.start()
 
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
@@ -392,6 +393,7 @@ class FrigateApp:
         self.start_storage_maintainer()
         self.init_stats()
         self.init_web_server()
+        self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
