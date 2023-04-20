@@ -60,9 +60,9 @@ class TimelineProcessor(threading.Thread):
                 timestamp=event_data["frame_time"],
                 camera=camera,
                 source="tracked_object",
+                source_id=event_data["id"],
                 class_type="visible",
                 data={
-                    "event_id": event_data["id"],
                     "region": event_data["region"],
                     "box": event_data["box"],
                 },
@@ -75,9 +75,9 @@ class TimelineProcessor(threading.Thread):
                 timestamp=event_data["frame_time"],
                 camera=camera,
                 source="tracked_object",
+                source_id=event_data["id"],
                 class_type="entered_zone",
                 data={
-                    "event_id": event_data["id"],
                     "region": event_data["region"],
                     "box": event_data["box"],
                     "zones": event_data["current_zones"],
@@ -88,9 +88,9 @@ class TimelineProcessor(threading.Thread):
                 timestamp=event_data["frame_time"],
                 camera=camera,
                 source="tracked_object",
+                source_id=event_data["id"],
                 class_type="gone",
                 data={
-                    "event_id": event_data["id"],
                     "region": event_data["region"],
                     "box": event_data["box"],
                 },
