@@ -417,7 +417,7 @@ def event_thumbnail(id, max_cache_age=2592000):
 @bp.route("/timeline")
 def timeline():
     camera = request.args.get("camera", "all")
-
+    source_id = request.args.get("source_id", type=str)
     limit = request.args.get("limit", 100)
 
     clauses = []
@@ -431,8 +431,18 @@ def timeline():
         Timeline.data,
     ]
 
+    if camera != "all":
+        clauses.append((Timeline.camera == camera))
+
+    if source_id:
+        clauses.append((Timeline.source_id == source_id))
+
+    if len(clauses) == 0:
+        clauses.append((True))
+
     timeline = (
         Timeline.select(*selected_columns)
+        .where(reduce(operator.and_, clauses))
         .order_by(Timeline.timestamp.asc())
         .limit(limit)
     )

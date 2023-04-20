@@ -63,7 +63,7 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="visible",
                 data={
-                    "box": event_data["box"],
+                    "box": event_data["box"],  # TODO store as relative
                     "label": event_data["label"],
                     "region": event_data["region"],
                 },
@@ -79,7 +79,7 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="entered_zone",
                 data={
-                    "box": event_data["box"],
+                    "box": event_data["box"],  # TODO store as relative
                     "label": event_data["label"],
                     "region": event_data["region"],
                     "zones": event_data["current_zones"],
@@ -93,7 +93,7 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="gone",
                 data={
-                    "box": event_data["box"],
+                    "box": event_data["box"],  # TODO store as relative
                     "label": event_data["label"],
                     "region": event_data["region"],
                 },
