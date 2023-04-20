@@ -37,10 +37,10 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'CREATE TABLE IF NOT EXISTS "timeline" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, , "input_type" VARCHAR(20) NOT NULL, "detection_type" VARCHAR(50) NOT NULL, "timestamp" DATETIME NOT NULL, "event_id" VARCHAR(30))'
+        'CREATE TABLE IF NOT EXISTS "timeline" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, "input_type" VARCHAR(20) NOT NULL, "detection_type" VARCHAR(50) NOT NULL, "timestamp" DATETIME NOT NULL, "event_id" VARCHAR(30))'
     )
-    migrator.sql('CREATE INDEX IF NOT EXISTS "event_label" ON "event" ("camera")')
-    migrator.sql('CREATE INDEX IF NOT EXISTS "event_camera" ON "event" ("input_type")')
+    migrator.sql('CREATE INDEX IF NOT EXISTS "timeline_camera" ON "timeline" ("camera")')
+    migrator.sql('CREATE INDEX IF NOT EXISTS "timeline_input_type" ON "timeline" ("input_type")')
 
 
 def rollback(migrator, database, fake=False, **kwargs):
