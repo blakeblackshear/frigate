@@ -33,16 +33,11 @@ class Event(Model):  # type: ignore[misc]
 
 
 class Timeline(Model): # type: ignore[misc]
-    id = CharField(null=False, primary_key=True, max_length=30)
-    camera = CharField(index=True, max_length=20)
-    input_type = CharField(index=True, max_length=20) # ex: object, audio, external
-    detection_type = CharField(max_length=50) # ex: entered_front_yard, heard_dog_barking
     timestamp = DateTimeField()
-
-    # event-only fields
-    event_id = CharField()
-    region = JSONField()
-    box = JSONField()
+    camera = CharField(index=True, max_length=20)
+    source = CharField(index=True, max_length=20) # ex: tracked object, audio, external
+    class_type = CharField(max_length=50) # ex: entered_front_yard, heard_dog_barking
+    data = JSONField() # ex: tracked object id, region, box, etc.
 
 
 class Recordings(Model):  # type: ignore[misc]
