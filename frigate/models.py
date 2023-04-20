@@ -32,6 +32,15 @@ class Event(Model):  # type: ignore[misc]
     plus_id = CharField(max_length=30)
 
 
+class Timeline(Model): # type: ignore[misc]
+    id = CharField(null=False, primary_key=True, max_length=30)
+    camera = CharField(index=True, max_length=20)
+    input_type = CharField(index=True, max_length=20) # ex: object, audio, external
+    detection_type = CharField(max_length=50) # ex: entered_front_yard, heard_dog_barking
+    timestamp = DateTimeField()
+    event_id = CharField()
+
+
 class Recordings(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
