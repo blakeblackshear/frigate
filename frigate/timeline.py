@@ -42,7 +42,7 @@ class TimelineProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if input_type == TimelineSourceEnum.object:
+            if input_type == TimelineSourceEnum.tracked_object:
                 self.handle_object_detection(
                     camera, event_type, prev_event_data, event_data
                 )
@@ -69,7 +69,7 @@ class TimelineProcessor(threading.Thread):
             )
         elif (
             event_type == "update"
-            and prev_event_data["current_zones"] != event_type["current_zones"]
+            and prev_event_data["current_zones"] != event_data["current_zones"]
         ):
             Timeline.insert(
                 timestamp=event_data["frame_time"],
