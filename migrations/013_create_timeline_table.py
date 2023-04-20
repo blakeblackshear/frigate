@@ -37,7 +37,7 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'CREATE TABLE IF NOT EXISTS "timeline" ("timestamp" DATETIME NOT NULL, "camera" VARCHAR(20) NOT NULL, "source" VARCHAR(20) NOT NULL, "source_id" VARCHAR(30) NOT NULL, "class_type" VARCHAR(50) NOT NULL, "data" JSON)'
+        'CREATE TABLE IF NOT EXISTS "timeline" ("timestamp" DATETIME NOT NULL, "camera" VARCHAR(20) NOT NULL, "source" VARCHAR(20) NOT NULL, "source_id" VARCHAR(30), "class_type" VARCHAR(50) NOT NULL, "data" JSON)'
     )
     migrator.sql('CREATE INDEX IF NOT EXISTS "timeline_camera" ON "timeline" ("camera")')
     migrator.sql('CREATE INDEX IF NOT EXISTS "timeline_source" ON "timeline" ("source")')

@@ -3,15 +3,14 @@ import logging
 import os
 import queue
 import threading
-import time
 from pathlib import Path
 
 from peewee import fn
 
-from frigate.config import EventsConfig, FrigateConfig, RecordConfig
+from frigate.config import EventsConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
-from frigate.timeline import InputTypeEnum
+from frigate.timeline import TimelineSourceEnum
 from frigate.types import CameraMetricsTypes
 
 from multiprocessing.queues import Queue
@@ -79,7 +78,7 @@ class EventProcessor(threading.Thread):
             self.timeline_queue.put(
                 (
                     camera,
-                    InputTypeEnum.tracked_object,
+                    TimelineSourceEnum.tracked_object,
                     event_type,
                     self.events_in_process.get(event_data["id"]),
                     event_data,

@@ -14,9 +14,9 @@ from multiprocessing.synchronize import Event as MpEvent
 logger = logging.getLogger(__name__)
 
 
-class InputTypeEnum(str, Enum):
+class TimelineSourceEnum(str, Enum):
+    # api = "api"
     # audio = "audio"
-    # external = "external"
     tracked_object = "tracked_object"
 
 
@@ -42,7 +42,7 @@ class TimelineProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if input_type == InputTypeEnum.object:
+            if input_type == TimelineSourceEnum.object:
                 self.handle_object_detection(
                     camera, event_type, prev_event_data, event_data
                 )
