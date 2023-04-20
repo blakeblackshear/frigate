@@ -30,6 +30,7 @@ from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
+from frigate.timeline import TimelineProcessor
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -134,6 +135,9 @@ class FrigateApp:
 
         # Queue for recordings info
         self.recordings_info_queue: Queue = mp.Queue()
+
+        # Queue for timeline events
+        self.timeline_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
         # Migrate DB location
@@ -313,6 +317,10 @@ class FrigateApp:
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
+
+    def start_timeline_processor(self) -> None:
+        self.timeline_processor = TimelineProcessor(self.timeline_queue, self.stop_event)
+        self.timeline_processor.start()
 
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
