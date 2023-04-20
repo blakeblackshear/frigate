@@ -23,7 +23,7 @@ from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
@@ -154,7 +154,7 @@ class FrigateApp:
         migrate_db.close()
 
         self.db = SqliteQueueDatabase(self.config.database.path)
-        models = [Event, Recordings]
+        models = [Event, Recordings, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
