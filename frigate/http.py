@@ -33,7 +33,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
 from frigate.util import (
@@ -412,6 +412,32 @@ def event_thumbnail(id, max_cache_age=2592000):
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
+
+
+@bp.route("/timeline")
+def timeline():
+    camera = request.args.get("camera", "all")
+
+    limit = request.args.get("limit", 100)
+
+    clauses = []
+
+    selected_columns = [
+        Timeline.timestamp,
+        Timeline.camera,
+        Timeline.source,
+        Timeline.source_id,
+        Timeline.class_type,
+        Timeline.data,
+    ]
+
+    timeline = (
+        Timeline.select(*selected_columns)
+        .order_by(Timeline.timestamp.asc())
+        .limit(limit)
+    )
+
+    return jsonify([model_to_dict(t) for t in timeline])
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")

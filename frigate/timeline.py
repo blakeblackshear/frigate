@@ -63,10 +63,11 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="visible",
                 data={
-                    "region": event_data["region"],
                     "box": event_data["box"],
+                    "label": event_data["label"],
+                    "region": event_data["region"],
                 },
-            )
+            ).execute()
         elif (
             event_type == "update"
             and prev_event_data["current_zones"] != event_data["current_zones"]
@@ -78,11 +79,12 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="entered_zone",
                 data={
-                    "region": event_data["region"],
                     "box": event_data["box"],
+                    "label": event_data["label"],
+                    "region": event_data["region"],
                     "zones": event_data["current_zones"],
                 },
-            )
+            ).execute()
         elif event_type == "end":
             Timeline.insert(
                 timestamp=event_data["frame_time"],
@@ -91,7 +93,8 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="gone",
                 data={
-                    "region": event_data["region"],
                     "box": event_data["box"],
+                    "label": event_data["label"],
+                    "region": event_data["region"],
                 },
-            )
+            ).execute()
