@@ -291,7 +291,9 @@ class FrigateApp:
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def start_timeline_processor(self) -> None:
-        self.timeline_processor = TimelineProcessor(self.timeline_queue, self.stop_event)
+        self.timeline_processor = TimelineProcessor(
+            self.timeline_queue, self.stop_event
+        )
         self.timeline_processor.start()
 
     def start_event_processor(self) -> None:

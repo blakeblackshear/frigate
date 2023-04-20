@@ -32,13 +32,13 @@ class Event(Model):  # type: ignore[misc]
     plus_id = CharField(max_length=30)
 
 
-class Timeline(Model): # type: ignore[misc]
+class Timeline(Model):  # type: ignore[misc]
     timestamp = DateTimeField()
     camera = CharField(index=True, max_length=20)
-    source = CharField(index=True, max_length=20) # ex: tracked object, audio, external
+    source = CharField(index=True, max_length=20)  # ex: tracked object, audio, external
     source_id = CharField(index=True, max_length=30)
-    class_type = CharField(max_length=50) # ex: entered_zone, audio_heard
-    data = JSONField() # ex: tracked object id, region, box, etc.
+    class_type = CharField(max_length=50)  # ex: entered_zone, audio_heard
+    data = JSONField()  # ex: tracked object id, region, box, etc.
 
 
 class Recordings(Model):  # type: ignore[misc]
