@@ -3,8 +3,8 @@ import useSWR from 'swr';
 import Heading from './Heading';
 import ActivityIndicator from './ActivityIndicator';
 import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
-import MotionIcon from '../icons/Motion';
-import SnapshotIcon from '../icons/Snapshot';
+import PlayIcon from '../icons/Play';
+import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
 import { useState } from 'preact/hooks';
 import { useApiHost } from '../api';
@@ -40,7 +40,7 @@ export default function TimelineSummary({ event }) {
                 aria-label={getTimelineItemDescription(config, item, event)}
                 onClick={() => setTimeIndex(index)}
               >
-                <MotionIcon className="w-8" />
+                {item.class_type == 'visible' ? <PlayIcon className="w-8" /> : <ExitIcon className="w-8" />}
               </Button>
             ) : (
               <Button
