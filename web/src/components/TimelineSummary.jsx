@@ -9,9 +9,11 @@ import { Zone } from '../icons/Zone';
 import { useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import Button from './Button';
+import VideoPlayer from './VideoPlayer';
 
 export default function TimelineSummary({ event }) {
   const apiHost = useApiHost();
+  const eventDuration = event.end_time - event.start_time;
   const { data: eventTimeline } = useSWR([
     'timeline',
     {
@@ -22,6 +24,16 @@ export default function TimelineSummary({ event }) {
   const { data: config } = useSWR('config');
 
   const [timeIndex, setTimeIndex] = useState(0);
+
+  const onSelectMoment = async (index) => {
+    setTimeIndex(index);
+
+    if (this.player) {
+      const videoOffset = this.player.duration() - eventDuration;
+      const startTime = videoOffset + (eventTimeline[index].timestamp - event.start_time);
+      this.player.currentTime(startTime);
+    }
+  };
 
   if (!eventTimeline || !config) {
     return <ActivityIndicator />;
@@ -38,7 +50,7 @@ export default function TimelineSummary({ event }) {
                 type="text"
                 color={index == timeIndex ? 'blue' : 'gray'}
                 aria-label={getTimelineItemDescription(config, item, event)}
-                onClick={() => setTimeIndex(index)}
+                onClick={() => onSelectMoment(index)}
               >
                 {item.class_type == 'visible' ? <PlayIcon className="w-8" /> : <ExitIcon className="w-8" />}
               </Button>
@@ -48,7 +60,7 @@ export default function TimelineSummary({ event }) {
                 type="text"
                 color={index == timeIndex ? 'blue' : 'gray'}
                 aria-label={getTimelineItemDescription(config, item, event)}
-                onClick={() => setTimeIndex(index)}
+                onClick={() => onSelectMoment(index)}
               >
                 <Zone className="w-8" />
               </Button>
@@ -59,12 +71,25 @@ export default function TimelineSummary({ event }) {
 
       <div className="text-center">
         <Heading size="sm">{getTimelineItemDescription(config, eventTimeline[timeIndex], event)}</Heading>
-        <div className="flex justify-center p-2 py-4">
-          <img
-            className="flex-grow-0"
-            src={`${apiHost}/api/${event.camera}/recordings/${eventTimeline[timeIndex].timestamp}/snapshot.png`}
-          />
-        </div>
+        <VideoPlayer
+          options={{
+            preload: 'auto',
+            autoplay: false,
+            sources: [
+              {
+                src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                type: 'application/vnd.apple.mpegurl',
+              },
+            ],
+          }}
+          seekOptions={{ forward: 10, backward: 5 }}
+          onReady={(player) => {
+            this.player = player;
+          }}
+          onDispose={() => {
+            this.player = null;
+          }}
+        />
       </div>
     </div>
   );
