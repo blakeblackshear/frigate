@@ -174,8 +174,8 @@ Timeline of key moments of an event(s) from the database. Accepts the following 
 
 | param                | Type | Description                                   |
 | -------------------- | ---- | --------------------------------------------- |
-| `camera`             | int  | Epoch time                                    |
-| `source_id`          | str  | , separated list of cameras                   |
+| `camera`             | int  | Name of camera                                |
+| `source_id`          | str  | ID of tracked object                          |
 | `limit`              | int  | Limit the number of events returned           |
 
 ### `GET /api/events/summary`
