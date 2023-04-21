@@ -30,9 +30,9 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   }
 
   return (
-    <div>
+    <div className="flex flex-col">
       <div className="h-14 flex justify-center">
-        <div className="w-1/4 flex flex-row flex-nowrap justify-between">
+        <div className="w-1/4 flex flex-row flex-nowrap justify-between overflow-auto">
           {eventTimeline.map((item, index) =>
             item.class_type == 'visible' || item.class_type == 'gone' ? (
               <Button
@@ -58,6 +58,12 @@ export default function TimelineSummary({ event, onFrameSelected }) {
           )}
         </div>
       </div>
+      {timeIndex >= 0 ? (
+        <div className="bg-gray-500 p-4 m-2 max-w-md self-center">
+          Disclaimer: This data comes from the detect feed but is shown on the recordings, it is unlikely that the
+          streams are perfectly in sync so the bounding box and the footage will not line up perfectly.
+        </div>
+      ) : null}
     </div>
   );
 }
