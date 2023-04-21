@@ -71,6 +71,7 @@ class TimelineProcessor(threading.Thread):
         elif (
             event_type == "update"
             and prev_event_data["current_zones"] != event_data["current_zones"]
+            and len(event_data["current_zones"]) > 0
         ):
             Timeline.insert(
                 timestamp=event_data["frame_time"],

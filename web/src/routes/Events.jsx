@@ -283,7 +283,7 @@ export default function Events({ path, ...props }) {
   };
 
   const handleEventDetailTabChange = (index) => {
-    setEventDetailType(index == 0 ? 'clip' : 'image');
+    setEventDetailType(index == 0 ? 'clip' : index == 1 ? 'image' : 'timeline');
   };
 
   if (!config) {
@@ -366,7 +366,7 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {(downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id) && (
+          {downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
               label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
@@ -527,7 +527,7 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {(event.end_time && event.has_snapshot) && (
+                        {event.end_time && event.has_snapshot && (
                           <Fragment>
                             {event.plus_id ? (
                               <div className="uppercase text-xs">Sent to Frigate+</div>
@@ -561,17 +561,17 @@ export default function Events({ path, ...props }) {
                   {viewEvent !== event.id ? null : (
                     <div className="space-y-4">
                       <div className="mx-auto max-w-7xl">
-                        <div>
-                          <TimelineSummary event={event} />
-                        </div>
                         <div className="flex justify-center w-full py-2">
                           <Tabs
-                            selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
+                            selectedIndex={
+                              event.has_clip && eventDetailType == 'clip' ? 0 : eventDetailType == 'timeline' ? 2 : 1
+                            }
                             onChange={handleEventDetailTabChange}
                             className="justify"
                           >
                             <TextTab text="Clip" disabled={!event.has_clip} />
                             <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
+                            <TextTab text="Timeline" disabled={!event.has_clip} />
                           </Tabs>
                         </div>
 
@@ -606,6 +606,8 @@ export default function Events({ path, ...props }) {
                               />
                             </div>
                           ) : null}
+
+                          {eventDetailType == 'timeline' ? <TimelineSummary event={event} /> : null}
                         </div>
                       </div>
                     </div>
