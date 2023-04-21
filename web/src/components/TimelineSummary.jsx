@@ -1,19 +1,14 @@
 import { h } from 'preact';
 import useSWR from 'swr';
-import Heading from './Heading';
 import ActivityIndicator from './ActivityIndicator';
 import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
 import { useState } from 'preact/hooks';
-import { useApiHost } from '../api';
 import Button from './Button';
-import VideoPlayer from './VideoPlayer';
 
-export default function TimelineSummary({ event }) {
-  const apiHost = useApiHost();
-  const eventDuration = event.end_time - event.start_time;
+export default function TimelineSummary({ event, onFrameSelected }) {
   const { data: eventTimeline } = useSWR([
     'timeline',
     {
@@ -23,16 +18,11 @@ export default function TimelineSummary({ event }) {
 
   const { data: config } = useSWR('config');
 
-  const [timeIndex, setTimeIndex] = useState(0);
+  const [timeIndex, setTimeIndex] = useState(-1);
 
   const onSelectMoment = async (index) => {
     setTimeIndex(index);
-
-    if (this.player) {
-      const videoOffset = this.player.duration() - eventDuration;
-      const startTime = videoOffset + (eventTimeline[index].timestamp - event.start_time);
-      this.player.currentTime(startTime);
-    }
+    onFrameSelected(eventTimeline[index].timestamp);
   };
 
   if (!eventTimeline || !config) {
@@ -67,29 +57,6 @@ export default function TimelineSummary({ event }) {
             )
           )}
         </div>
-      </div>
-
-      <div className="text-center">
-        <Heading size="sm">{getTimelineItemDescription(config, eventTimeline[timeIndex], event)}</Heading>
-        <VideoPlayer
-          options={{
-            preload: 'auto',
-            autoplay: false,
-            sources: [
-              {
-                src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                type: 'application/vnd.apple.mpegurl',
-              },
-            ],
-          }}
-          seekOptions={{ forward: 10, backward: 5 }}
-          onReady={(player) => {
-            this.player = player;
-          }}
-          onDispose={() => {
-            this.player = null;
-          }}
-        />
       </div>
     </div>
   );

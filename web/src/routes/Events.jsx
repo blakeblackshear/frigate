@@ -181,6 +181,17 @@ export default function Events({ path, ...props }) {
     onFilter(name, items);
   };
 
+  const onEventFrameSelected = (event, frameTime) => {
+    const eventDuration = event.end_time - event.start_time;
+
+    if (this.player) {
+      this.player.pause();
+      const videoOffset = this.player.duration() - eventDuration;
+      const startTime = videoOffset + (frameTime - event.start_time);
+      this.player.currentTime(startTime);
+    }
+  };
+
   const datePicker = useRef();
 
   const downloadButton = useRef();
@@ -283,7 +294,7 @@ export default function Events({ path, ...props }) {
   };
 
   const handleEventDetailTabChange = (index) => {
-    setEventDetailType(index == 0 ? 'clip' : index == 1 ? 'image' : 'timeline');
+    setEventDetailType(index == 0 ? 'clip' : 'image');
   };
 
   if (!config) {
@@ -563,34 +574,42 @@ export default function Events({ path, ...props }) {
                       <div className="mx-auto max-w-7xl">
                         <div className="flex justify-center w-full py-2">
                           <Tabs
-                            selectedIndex={
-                              event.has_clip && eventDetailType == 'clip' ? 0 : eventDetailType == 'timeline' ? 2 : 1
-                            }
+                            selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
                             onChange={handleEventDetailTabChange}
                             className="justify"
                           >
                             <TextTab text="Clip" disabled={!event.has_clip} />
                             <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
-                            <TextTab text="Timeline" disabled={!event.has_clip} />
                           </Tabs>
                         </div>
 
                         <div>
                           {eventDetailType == 'clip' && event.has_clip ? (
-                            <VideoPlayer
-                              options={{
-                                preload: 'auto',
-                                autoplay: true,
-                                sources: [
-                                  {
-                                    src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                                    type: 'application/vnd.apple.mpegurl',
-                                  },
-                                ],
-                              }}
-                              seekOptions={{ forward: 10, backward: 5 }}
-                              onReady={() => {}}
-                            />
+                            <div>
+                              <TimelineSummary
+                                event={event}
+                                onFrameSelected={(frameTime) => onEventFrameSelected(event, frameTime)}
+                              />
+                              <VideoPlayer
+                                options={{
+                                  preload: 'auto',
+                                  autoplay: true,
+                                  sources: [
+                                    {
+                                      src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                                      type: 'application/vnd.apple.mpegurl',
+                                    },
+                                  ],
+                                }}
+                                seekOptions={{ forward: 10, backward: 5 }}
+                                onReady={(player) => {
+                                  this.player = player;
+                                }}
+                                onDispose={() => {
+                                  this.player = null;
+                                }}
+                              />
+                            </div>
                           ) : null}
 
                           {eventDetailType == 'image' || !event.has_clip ? (
@@ -606,8 +625,6 @@ export default function Events({ path, ...props }) {
                               />
                             </div>
                           ) : null}
-
-                          {eventDetailType == 'timeline' ? <TimelineSummary event={event} /> : null}
                         </div>
                       </div>
                     </div>
