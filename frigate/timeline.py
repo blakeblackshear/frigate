@@ -6,6 +6,7 @@ import queue
 
 from enum import Enum
 
+from frigate.config import FrigateConfig
 from frigate.models import Timeline
 
 from multiprocessing.queues import Queue
@@ -23,9 +24,15 @@ class TimelineSourceEnum(str, Enum):
 class TimelineProcessor(threading.Thread):
     """Handle timeline queue and update DB."""
 
-    def __init__(self, queue: Queue, stop_event: MpEvent) -> None:
+    def __init__(
+        self,
+        config: FrigateConfig,
+        queue: Queue,
+        stop_event: MpEvent,
+    ) -> None:
         threading.Thread.__init__(self)
         self.name = "timeline_processor"
+        self.config = config
         self.queue = queue
         self.stop_event = stop_event
 
@@ -55,6 +62,8 @@ class TimelineProcessor(threading.Thread):
         event_data: dict[any, any],
     ) -> None:
         """Handle object detection."""
+        camera_config = self.config.cameras[camera]
+
         if event_type == "start":
             Timeline.insert(
                 timestamp=event_data["frame_time"],
@@ -63,7 +72,12 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="visible",
                 data={
-                    "box": event_data["box"],  # TODO store as relative
+                    "box": [
+                        event_data["box"][0] / camera_config.detect.width,
+                        event_data["box"][1] / camera_config.detect.height,
+                        event_data["box"][2] / camera_config.detect.width,
+                        event_data["box"][3] / camera_config.detect.height,
+                    ],
                     "label": event_data["label"],
                     "region": event_data["region"],
                 },
@@ -80,7 +94,12 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="entered_zone",
                 data={
-                    "box": event_data["box"],  # TODO store as relative
+                    "box": [
+                        event_data["box"][0] / camera_config.detect.width,
+                        event_data["box"][1] / camera_config.detect.height,
+                        event_data["box"][2] / camera_config.detect.width,
+                        event_data["box"][3] / camera_config.detect.height,
+                    ],
                     "label": event_data["label"],
                     "region": event_data["region"],
                     "zones": event_data["current_zones"],
@@ -94,7 +113,12 @@ class TimelineProcessor(threading.Thread):
                 source_id=event_data["id"],
                 class_type="gone",
                 data={
-                    "box": event_data["box"],  # TODO store as relative
+                    "box": [
+                        event_data["box"][0] / camera_config.detect.width,
+                        event_data["box"][1] / camera_config.detect.height,
+                        event_data["box"][2] / camera_config.detect.width,
+                        event_data["box"][3] / camera_config.detect.height,
+                    ],
                     "label": event_data["label"],
                     "region": event_data["region"],
                 },
