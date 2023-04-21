@@ -33,11 +33,23 @@ export default function TimelineSummary({ event }) {
         <div className="w-1/4 flex flex-row flex-nowrap justify-between">
           {eventTimeline.map((item, index) =>
             item.class_type == 'visible' || item.class_type == 'gone' ? (
-              <Button className="rounded-full" type="text" onClick={() => setTimeIndex(index)}>
+              <Button
+                className="rounded-full"
+                type="text"
+                color={index == timeIndex ? 'blue' : 'gray'}
+                aria-label={getTimelineItemDescription(config, item, event)}
+                onClick={() => setTimeIndex(index)}
+              >
                 <MotionIcon className="w-8" />
               </Button>
             ) : (
-              <Button className="rounded-full" type="text" onClick={() => setTimeIndex(index)}>
+              <Button
+                className="rounded-full"
+                type="text"
+                color={index == timeIndex ? 'blue' : 'gray'}
+                aria-label={getTimelineItemDescription(config, item, event)}
+                onClick={() => setTimeIndex(index)}
+              >
                 <Zone className="w-8" />
               </Button>
             )
@@ -46,8 +58,8 @@ export default function TimelineSummary({ event }) {
       </div>
 
       <div className="text-center">
-        <Heading size="md">{getTimelineItemDescription(config, eventTimeline[timeIndex], event)}</Heading>
-        <div className="flex justify-center p-2">
+        <Heading size="sm">{getTimelineItemDescription(config, eventTimeline[timeIndex], event)}</Heading>
+        <div className="flex justify-center p-2 py-4">
           <img
             className="flex-grow-0"
             src={`${apiHost}/api/${event.camera}/recordings/${eventTimeline[timeIndex].timestamp}/snapshot.png`}
@@ -66,10 +78,13 @@ function getTimelineItemDescription(config, timelineItem, event) {
       time_format: config.ui.time_format,
     })}`;
   } else if (timelineItem.class_type == 'entered_zone') {
-    return `${event.label} entered ${timelineItem.data.zones} at ${formatUnixTimestampToDateTime(
-      timelineItem.timestamp,
-      { date_style: 'short', time_style: 'medium', time_format: config.ui.time_format }
-    )}`;
+    return `${event.label.replaceAll('_', ' ')} entered ${timelineItem.data.zones
+      .join(' and ')
+      .replaceAll('_', ' ')} at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+      date_style: 'short',
+      time_style: 'medium',
+      time_format: config.ui.time_format,
+    })}`;
   }
 
   return `${event.label} left at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
