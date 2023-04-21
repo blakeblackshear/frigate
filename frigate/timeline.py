@@ -79,7 +79,12 @@ class TimelineProcessor(threading.Thread):
                         event_data["box"][3] / camera_config.detect.height,
                     ],
                     "label": event_data["label"],
-                    "region": event_data["region"],
+                    "region": [
+                        event_data["region"][0] / camera_config.detect.width,
+                        event_data["region"][1] / camera_config.detect.height,
+                        event_data["region"][2] / camera_config.detect.width,
+                        event_data["region"][3] / camera_config.detect.height,
+                    ],
                 },
             ).execute()
         elif (
@@ -101,7 +106,12 @@ class TimelineProcessor(threading.Thread):
                         event_data["box"][3] / camera_config.detect.height,
                     ],
                     "label": event_data["label"],
-                    "region": event_data["region"],
+                    "region": [
+                        event_data["region"][0] / camera_config.detect.width,
+                        event_data["region"][1] / camera_config.detect.height,
+                        event_data["region"][2] / camera_config.detect.width,
+                        event_data["region"][3] / camera_config.detect.height,
+                    ],
                     "zones": event_data["current_zones"],
                 },
             ).execute()
@@ -120,6 +130,11 @@ class TimelineProcessor(threading.Thread):
                         event_data["box"][3] / camera_config.detect.height,
                     ],
                     "label": event_data["label"],
-                    "region": event_data["region"],
+                    "region": [
+                        event_data["region"][0] / camera_config.detect.width,
+                        event_data["region"][1] / camera_config.detect.height,
+                        event_data["region"][2] / camera_config.detect.width,
+                        event_data["region"][3] / camera_config.detect.height,
+                    ],
                 },
             ).execute()
