@@ -61,6 +61,7 @@ export default function Events({ path, ...props }) {
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
+  const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
     id: null,
@@ -181,14 +182,15 @@ export default function Events({ path, ...props }) {
     onFilter(name, items);
   };
 
-  const onEventFrameSelected = (event, frameTime) => {
+  const onEventFrameSelected = (event, frame) => {
     const eventDuration = event.end_time - event.start_time;
 
     if (this.player) {
       this.player.pause();
       const videoOffset = this.player.duration() - eventDuration;
-      const startTime = videoOffset + (frameTime - event.start_time);
+      const startTime = videoOffset + (frame.timestamp - event.start_time);
       this.player.currentTime(startTime);
+      setEventOverlay(frame);
     }
   };
 
@@ -588,27 +590,45 @@ export default function Events({ path, ...props }) {
                             <div>
                               <TimelineSummary
                                 event={event}
-                                onFrameSelected={(frameTime) => onEventFrameSelected(event, frameTime)}
+                                onFrameSelected={(frame) => onEventFrameSelected(event, frame)}
                               />
-                              <VideoPlayer
-                                options={{
-                                  preload: 'auto',
-                                  autoplay: true,
-                                  sources: [
-                                    {
-                                      src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                                      type: 'application/vnd.apple.mpegurl',
-                                    },
-                                  ],
-                                }}
-                                seekOptions={{ forward: 10, backward: 5 }}
-                                onReady={(player) => {
-                                  this.player = player;
-                                }}
-                                onDispose={() => {
-                                  this.player = null;
-                                }}
-                              />
+                              <div>
+                                <VideoPlayer
+                                  options={{
+                                    preload: 'auto',
+                                    autoplay: true,
+                                    sources: [
+                                      {
+                                        src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                                        type: 'application/vnd.apple.mpegurl',
+                                      },
+                                    ],
+                                  }}
+                                  seekOptions={{ forward: 10, backward: 5 }}
+                                  onReady={(player) => {
+                                    this.player = player;
+                                  }}
+                                  onDispose={() => {
+                                    this.player = null;
+                                  }}
+                                >
+
+                                  {eventOverlay ? (
+                                    <div
+                                      className="absolute border-4 border-red-600"
+                                      style={{left: `${Math.round(
+                                        eventOverlay.data.box[0] * 100
+                                      )}%`, top: `${Math.round(eventOverlay.data.box[1] * 100)}%`, right: `${Math.round(
+                                        (1 - eventOverlay.data.box[2]) * 100
+                                      )}%`, bottom: `${Math.round((1 - eventOverlay.data.box[3]) * 100)}%`}}
+                                    >
+                                      {eventOverlay.class_type == 'entered_zone' ? (
+                                        <div className="absolute w-2 h-2 bg-red-600 left-[50%] bottom-0" />
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                </VideoPlayer>
+                              </div>
                             </div>
                           ) : null}
 

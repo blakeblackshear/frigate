@@ -22,7 +22,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
 
   const onSelectMoment = async (index) => {
     setTimeIndex(index);
-    onFrameSelected(eventTimeline[index].timestamp);
+    onFrameSelected(eventTimeline[index]);
   };
 
   if (!eventTimeline || !config) {
