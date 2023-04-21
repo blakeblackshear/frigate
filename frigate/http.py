@@ -960,6 +960,53 @@ def latest_frame(camera_name):
         return "Camera named {} not found".format(camera_name), 404
 
 
+@bp.route("/<camera_name>/recordings/<frame_time>/snapshot.png")
+def get_snapshot_from_recording(camera_name: str, frame_time: str):
+    if camera_name not in current_app.frigate_config.cameras:
+        return "Camera named {} not found".format(camera_name), 404
+
+    frame_time = float(frame_time)
+    recording_query = (
+        Recordings.select()
+        .where(
+            ((frame_time > Recordings.start_time) & (frame_time < Recordings.end_time))
+        )
+        .where(Recordings.camera == camera_name)
+    )
+
+    try:
+        recording: Recordings = recording_query.get()
+        time_in_segment = frame_time - recording.start_time
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:00:{time_in_segment}",
+            "-i",
+            recording.path,
+            "-frames:v",
+            "1",
+            "-c:v",
+            "png",
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+        response = make_response(process.stdout)
+        response.headers["Content-Type"] = "image/png"
+        return response
+    except DoesNotExist:
+        return "Recording not found for {} at {}".format(camera_name, frame_time), 404
+
+
 @bp.route("/recordings/storage", methods=["GET"])
 def get_recordings_storage_usage():
     recording_stats = stats_snapshot(
