@@ -32,24 +32,26 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   return (
     <div className="flex flex-col">
       <div className="h-14 flex justify-center">
-        <div className="w-1/4 flex flex-row flex-nowrap justify-between overflow-auto">
+        <div className="sm:w-1 md:w-1/4 flex flex-row flex-nowrap justify-between overflow-auto">
           {eventTimeline.map((item, index) =>
             item.class_type == 'visible' || item.class_type == 'gone' ? (
               <Button
+                key={index}
                 className="rounded-full"
                 type="text"
                 color={index == timeIndex ? 'blue' : 'gray'}
-                aria-label={getTimelineItemDescription(config, item, event)}
+                aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
                 onClick={() => onSelectMoment(index)}
               >
                 {item.class_type == 'visible' ? <PlayIcon className="w-8" /> : <ExitIcon className="w-8" />}
               </Button>
             ) : (
               <Button
+                key={index}
                 className="rounded-full"
                 type="text"
                 color={index == timeIndex ? 'blue' : 'gray'}
-                aria-label={getTimelineItemDescription(config, item, event)}
+                aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
                 onClick={() => onSelectMoment(index)}
               >
                 <Zone className="w-8" />
