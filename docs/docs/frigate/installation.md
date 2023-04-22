@@ -321,7 +321,6 @@ docker run \
   --shm-size=256m \
   --restart=unless-stopped \
   --env=TZ=America/New_York \
-  --env=LIBVA_DRIVER_NAME=i965 \
   --volume=/share/Container/frigate/config:/config:rw \
   --volume=/share/share_vol2/frigate/media:/media/frigate:rw \
   --network=bridge \
