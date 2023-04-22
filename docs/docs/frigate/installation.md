@@ -277,3 +277,69 @@ You need to configure 2 paths:
 
 ![image](https://user-images.githubusercontent.com/4516296/232585872-44431d15-55e0-4004-b78b-1e512702b911.png)
 
+## QNAP NAS
+
+The instruction was tested on a QNAP with an Intel J3455 CPU and 16G RAM, running QTS 4.5.4.2117.
+
+QNAP has a graphic tool named Container Station to intall and manage docker containers.  However, there are two limitations on Container Station that make it unsuitable to install Frigate:
+
+1. Container Station does not incorporate GitHub Container Registry (ghcr), which hosts Frigate docker image version 0.12.0 and above.
+2. Container Station uses default 64 Mb shared memory size (shm-size), and does not have a mechanism to adjust it.  Frigate requires a larger shm-size to be able to work properly with more than two high resolution cameras.
+
+Because of above limitations, the installation has to be done from command line.  Here are the steps:
+
+**Preparation**
+1. Install Container Station from QNAP App Center if it is not installed.
+2. Enable ssh on your QNAP (please do an Internet search on how to do this).
+3. Prepare Frigate config file, name it `config.yml`.
+4. Calculate shared memory size according to [documentation](https://docs.frigate.video/frigate/installation).
+5. Find your time zone value from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+6. ssh to QNAP.
+
+**Installation**
+
+Run the following commands to install Frigate (using v0.12.0 as example):
+```bash
+# Download Frigate image
+docker pull ghcr.io/blakeblackshear/frigate:0.12.0
+# Create directory to host Frigate config file on QNAP file system.
+# E.g., you can choose to create it under /share/Container.
+# Copy the config file prepared in step 2 into the newly created directory.
+mkdir -p /share/Container/frigate/config
+cp path/to/your/config/file /share/Container/frigate/config
+# Create directory to host Frigate media files on QNAP file system.
+# (if you have a surveilliance disk, create media directory on the surveilliance disk.
+# Example command assumes share_vol2 is the surveilliance drive
+mkdir -p /share/share_vol2/frigate/media
+# Create Frigate docker container.  Replace shm-size value with the value from preparation step 3.
+# Also replace the time zone value for 'TZ' in the sample command.
+# Example command will create a docker container that uses at most 2 CPUs and 4G RAM.
+docker run \
+  --name=frigate \
+  --shm-size=256m \
+  --restart=unless-stopped \
+  --env=TZ=America/New_York \
+  --env=LIBVA_DRIVER_NAME=i965 \
+  --env=FRIGATE_RTSP_PASSWORD=frigate_password \
+  --volume=/share/Container/frigate/config:/config:rw \
+  --volume=/share/share_vol2/frigate/media:/media/frigate:rw \
+  --network=bridge \
+  --privileged \
+  --workdir=/opt/frigate \
+  -p 1935:1935 \
+  -p 5000:5000 \
+  -p 8554:8554 \
+  -p 8555:8555 \
+  -p 8555:8555/udp \
+  --label='com.qnap.qcs.network.mode=nat' \
+  --label='com.qnap.qcs.gpu=False' \
+  --memory="4g" \
+  --cpus="2" \
+  --detach=true \
+  -t \
+  ghcr.io/blakeblackshear/frigate:0.12.0
+```
+
+Log into QNAP, open Container Station.  Frigate docker container should be listed under 'Overview' and running.  Visit Frigate Web UI by clicking Frigate docker, and then clicking the URL shown at the top of the detail page.
+
+
