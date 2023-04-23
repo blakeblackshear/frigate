@@ -711,8 +711,12 @@ export default function Events({ path, ...props }) {
                                       style={{
                                         left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
                                         top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
-                                        right: `${Math.round((1 - eventOverlay.data.box[2]) * 100)}%`,
-                                        bottom: `${Math.round((1 - eventOverlay.data.box[3]) * 100)}%`,
+                                        right: `${Math.round(
+                                          (1 - eventOverlay.data.box[2] - eventOverlay.data.box[0]) * 100
+                                        )}%`,
+                                        bottom: `${Math.round(
+                                          (1 - eventOverlay.data.box[3] - eventOverlay.data.box[1]) * 100
+                                        )}%`,
                                       }}
                                     >
                                       {eventOverlay.class_type == 'entered_zone' ? (
