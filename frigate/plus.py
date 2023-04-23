@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+from typing import List
 import requests
 from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
 from requests.models import Response
@@ -133,7 +134,15 @@ class PlusApi:
         return str(presigned_urls.get("imageId"))
 
     def add_false_positive(
-        self, plus_id, region, bbox, score, label, model_hash, model_type, detector_type
+        self,
+        plus_id: str,
+        region: List[float],
+        bbox: List[float],
+        score: float,
+        label: str,
+        model_hash: str,
+        model_type: str,
+        detector_type: str,
     ) -> None:
         r = self._put(
             f"image/{plus_id}/false_positive",
@@ -157,7 +166,13 @@ class PlusApi:
         if not r.ok:
             raise Exception(r.text)
 
-    def add_annotation(self, plus_id, bbox, label, difficult=False) -> None:
+    def add_annotation(
+        self,
+        plus_id: str,
+        bbox: List[float],
+        label: str,
+        difficult: bool = False,
+    ) -> None:
         r = self._put(
             f"image/{plus_id}/annotation",
             {
