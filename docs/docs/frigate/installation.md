@@ -21,12 +21,11 @@ Windows is not officially supported, but some users have had success getting it 
 
 Frigate uses the following locations for read/write operations in the container. Docker volume mappings can be used to map these to any location on your host machine.
 
+- `/config`: Used to store the Frigate config file and sqlite database. You will also see a few files alongside the database file while Frigate is running.
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
-- `/media/frigate/frigate.db`: Default location for the sqlite database. You will also see several files alongside this file while Frigate is running. If moving the database location (often needed when using a network drive at `/media/frigate`), it is recommended to mount a volume with docker at `/db` and change the storage location of the database to `/db/frigate.db` in the config file.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder.
 - `/dev/shm`: It is not recommended to modify this directory or map it with docker. This is the location for raw decoded frames in shared memory and it's size is impacted by the `shm-size` calculations below.
-- `/config/config.yml`: Default location of the config file.
 
 #### Common docker compose storage configurations
 
@@ -38,38 +37,13 @@ services:
   frigate:
     ...
     volumes:
-      - /path/to/your/config.yml:/config/config.yml
+      - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
         tmpfs:
           size: 1000000000
     ...
-```
-
-Writing to a network drive with database on a local drive:
-
-```yaml
-version: "3.9"
-services:
-  frigate:
-    ...
-    volumes:
-      - /path/to/your/config.yml:/config/config.yml
-      - /path/to/network/storage:/media/frigate
-      - /path/to/local/disk:/db
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
-        target: /tmp/cache
-        tmpfs:
-          size: 1000000000
-    ...
-```
-
-frigate.yml
-
-```yaml
-database:
-  path: /db/frigate.db
 ```
 
 ### Calculating required shm-size
@@ -123,7 +97,7 @@ services:
       - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /path/to/your/config.yml:/config/config.yml
+      - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
       - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
         target: /tmp/cache
@@ -149,7 +123,7 @@ docker run -d \
   --device /dev/dri/renderD128 \
   --shm-size=64m \
   -v /path/to/your/storage:/media/frigate \
-  -v /path/to/your/config.yml:/config/config.yml \
+  -v /path/to/your/config:/config \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
   -p 5000:5000 \
@@ -182,7 +156,7 @@ HassOS users can install via the addon repository.
 2. Add https://github.com/blakeblackshear/frigate-hass-addons
 3. Install your desired Frigate NVR Addon and navigate to it's page
 4. Setup your network configuration in the `Configuration` tab
-5. (not for proxy addon) Create the file `frigate.yml` in your `config` directory with your detailed Frigate configuration
+5. (not for proxy addon) Create the file `frigate.yaml` in your `config` directory with your detailed Frigate configuration
 6. Start the addon container
 7. (not for proxy addon) If you are using hardware acceleration for ffmpeg, you may need to disable "Protection mode"
 

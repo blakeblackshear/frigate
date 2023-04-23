@@ -18,7 +18,7 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, CONFIG_DIR, DEFAULT_DB_PATH, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
@@ -55,7 +55,7 @@ class FrigateApp:
             os.environ[key] = value
 
     def ensure_dirs(self) -> None:
-        for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
+        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -141,7 +141,7 @@ class FrigateApp:
 
     def init_database(self) -> None:
         # Migrate DB location
-        old_db_path = os.path.join(CLIPS_DIR, "frigate.db")
+        old_db_path = DEFAULT_DB_PATH
         if not os.path.isfile(self.config.database.path) and os.path.isfile(
             old_db_path
         ):

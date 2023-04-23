@@ -27,7 +27,7 @@ services:
       - .:/workspace/frigate:cached
       - ./web/dist:/opt/frigate/web:cached
       - /etc/localtime:/etc/localtime:ro
-      - ./config/config.yml:/config/config.yml
+      - ./config:/config
       - ./debug:/media/frigate
       # Create the trt-models folder using the documented method of generating TRT models
       # - ./debug/trt-models:/trt-models

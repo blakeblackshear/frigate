@@ -9,6 +9,42 @@ set -o errexit -o nounset -o pipefail
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
+function migrate_db_path() {
+    # Find config file in yaml or yml, but prefer yaml
+    local config_file="${CONFIG_FILE:-"/config/config.yml"}"
+    local config_file_yaml="${config_file//.yaml/.yml}"
+    if [[ -f "${config_file_yaml}" ]]; then
+        config_file="${config_file_yaml}"
+    elif [[ ! -f "${config_file}" ]]; then
+        echo "[ERROR] Frigate config file not found"
+        return 1
+    fi
+    unset config_file_yaml
+
+    # Use yq to check if database.path is set
+    local user_db_path
+    user_db_path=$(yq eval '.database.path' "${config_file}")
+
+    if [[ "${user_db_path}" == "null" ]]; then
+        local previous_db_path="/media/frigate/frigate.db"
+        local new_db_dir="/config"
+        if [[ -f "${previous_db_path}" ]]; then
+            if mountpoint --quiet "${new_db_dir}"; then
+                # /config is a mount point, move the db
+                echo "[INFO] Moving db from '${previous_db_path}' to the '${new_db_dir}' dir..."
+                # Move all files that starts with frigate.db to the new directory
+                mv -vf "${previous_db_path}"* "${new_db_dir}"
+            else
+                echo "[ERROR] Trying to migrate the db path from '${previous_db_path}' to the '${new_db_dir}' dir, but '${new_db_dir}' is not a mountpoint, please mount the '${new_db_dir}' dir"
+                return 1
+            fi
+        fi
+    fi
+}
+
+echo "[INFO] Preparing Frigate..."
+migrate_db_path
+
 echo "[INFO] Starting Frigate..."
 
 cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frigate"
