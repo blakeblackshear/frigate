@@ -36,7 +36,13 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 - [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
-- Extra Coral device (optional, but very helpful to simulate real world performance)
+- An extra detector (Coral, OpenVINO, etc.) is optional but recommended to simulate real world performance.
+
+:::note
+
+A Coral device can only be used by a single process at a time, so an extra Coral device is recommended if using a coral for development purposes.
+
+:::
 
 ### Setup
 
