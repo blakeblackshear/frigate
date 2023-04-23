@@ -104,7 +104,7 @@ def create_tensor_input(frame, model_config, region):
     if cropped_frame.shape != (model_config.height, model_config.width, 3):
         cropped_frame = cv2.resize(
             cropped_frame,
-            dsize=(model_config.height, model_config.width),
+            dsize=(model_config.width, model_config.height),
             interpolation=cv2.INTER_LINEAR,
         )
 
