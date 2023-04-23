@@ -12,7 +12,7 @@ s6-svc -O .
 function migrate_db_path() {
     # Find config file in yaml or yml, but prefer yaml
     local config_file="${CONFIG_FILE:-"/config/config.yml"}"
-    local config_file_yaml="${config_file//.yaml/.yml}"
+    local config_file_yaml="${config_file//.yml/.yaml}"
     if [[ -f "${config_file_yaml}" ]]; then
         config_file="${config_file_yaml}"
     elif [[ ! -f "${config_file}" ]]; then
