@@ -27,7 +27,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.0.1/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.2.0/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
@@ -133,11 +133,6 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN if [ "${TARGETARCH}" = "arm" ]; \
-    then echo "[global]" > /etc/pip.conf \
-    && echo "extra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf; \
-    fi
-
 COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
@@ -206,6 +201,10 @@ FROM deps AS devcontainer
 # Do not start the actual Frigate service on devcontainer as it will be started by VSCode
 # But start a fake service for simulating the logs
 COPY docker/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
+
+# Create symbolic link to the frigate source code, as go2rtc's create_config.sh uses it
+RUN mkdir -p /opt/frigate \
+    && ln -svf /workspace/frigate/frigate /opt/frigate/frigate
 
 # Install Node 16
 RUN apt-get update \

@@ -4,11 +4,11 @@ module.exports = {
       "frigate/index",
       "frigate/hardware",
       "frigate/installation",
+      "frigate/camera_setup",
     ],
     Guides: [
-      "guides/camera_setup",
       "guides/getting_started",
-      "guides/events_setup",
+      "guides/configuring_go2rtc",
       "guides/false_positives",
       "guides/ha_notifications",
       "guides/stationary_objects",

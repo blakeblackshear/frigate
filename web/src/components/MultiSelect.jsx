@@ -13,9 +13,11 @@ export default function MultiSelect({ className, title, options, selection, onTo
   const [state, setState] = useState({
     showMenu: false,
   });
-  
+
   const isOptionSelected = (item) => { return selection == "all" || selection.split(',').indexOf(item) > -1; }
-  
+
+  const menuHeight = Math.round(window.innerHeight * 0.55);
+
   return (
     <div className={`${className} p-2`} ref={popupRef}>
       <div
@@ -26,7 +28,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
         <ArrowDropdown className="w-6" />
       </div>
       {state.showMenu ? (
-        <Menu relativeTo={popupRef} onDismiss={() => setState({ showMenu: false })}>
+        <Menu className={`max-h-[${menuHeight}px] overflow-scroll`} relativeTo={popupRef} onDismiss={() => setState({ showMenu: false })}>
           <div className="flex flex-wrap justify-between items-center">
             <Heading className="p-4 justify-center" size="md">{title}</Heading>
             <Button tabindex="false" className="mx-4" onClick={() => onShowAll() }>

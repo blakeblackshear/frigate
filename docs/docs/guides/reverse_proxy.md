@@ -1,6 +1,6 @@
 ---
 id: reverse_proxy
-title: Setting up a Reverse Proxy
+title: Setting up a reverse proxy
 ---
 
 This guide outlines the basic configuration steps needed to expose your Frigate UI to the internet.
@@ -8,6 +8,7 @@ A common way of accomplishing this is to use a reverse proxy webserver between y
 A reverse proxy accepts HTTP requests from the public internet and redirects them transparently to internal webserver(s) on your network.
 
 The suggested steps are:
+
 - **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/) or [NPM](https://github.com/NginxProxyManager/nginx-proxy-manager)) and only expose ports 80/443 from this webserver to the internet
 - **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
@@ -31,6 +32,7 @@ On Debian Apache2 the configuration file will be named along the lines of `/etc/
 
 Make life easier for yourself by presenting your Frigate interface as a DNS sub-domain rather than as a sub-folder of your main domain.
 Here we access Frigate via https://cctv.mydomain.co.uk
+
 ```xml
 <VirtualHost *:443>
     ServerName cctv.mydomain.co.uk
@@ -38,7 +40,7 @@ Here we access Frigate via https://cctv.mydomain.co.uk
     ProxyPreserveHost On
     ProxyPass "/"  "http://frigatepi.local:5000/"
     ProxyPassReverse "/"  "http://frigatepi.local:5000/"
-    
+
     ProxyPass /ws ws://frigatepi.local:5000/ws
     ProxyPassReverse /ws ws://frigatepi.local:5000/ws
 

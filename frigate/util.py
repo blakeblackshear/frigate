@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
-from typing import Any, AnyStr, Tuple
+from typing import Any, AnyStr, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -722,7 +722,7 @@ def load_labels(path, encoding="utf-8"):
 
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
-    if line.startswith("rtsp://"):
+    if "rtsp://" in line:
         return re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
     else:
         return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", line)
@@ -772,7 +772,6 @@ def get_docker_memlimit_bytes() -> int:
 
     # check running a supported cgroups version
     if get_cgroups_version() == "cgroup2":
-
         memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
 
         p = sp.run(
@@ -817,7 +816,6 @@ def get_cpu_stats() -> dict[str, dict]:
         for line in lines:
             stats = list(filter(lambda a: a != "", line.strip().split(" ")))
             try:
-
                 if docker_memlimit > 0:
                     mem_res = int(stats[5])
                     mem_pct = str(
@@ -926,6 +924,17 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
         "--format=csv",
     ]
 
+    if (
+        "CUDA_VISIBLE_DEVICES" in os.environ
+        and os.environ["CUDA_VISIBLE_DEVICES"].isdigit()
+    ):
+        nvidia_smi_command.extend(["--id", os.environ["CUDA_VISIBLE_DEVICES"]])
+    elif (
+        "NVIDIA_VISIBLE_DEVICES" in os.environ
+        and os.environ["NVIDIA_VISIBLE_DEVICES"].isdigit()
+    ):
+        nvidia_smi_command.extend(["--id", os.environ["NVIDIA_VISIBLE_DEVICES"]])
+
     p = sp.run(
         nvidia_smi_command,
         encoding="ascii",
@@ -965,9 +974,13 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def vainfo_hwaccel() -> sp.CompletedProcess:
+def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     """Run vainfo."""
-    ffprobe_cmd = ["vainfo"]
+    ffprobe_cmd = (
+        ["vainfo"]
+        if not device_name
+        else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
+    )
     return sp.run(ffprobe_cmd, capture_output=True)
 
 

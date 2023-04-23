@@ -4,7 +4,9 @@
 
 set -o errexit -o nounset -o pipefail
 
-echo "[INFO] Starting NGINX..." >&2
+# Logs should be sent to stdout so that s6 can collect them
+
+echo "[INFO] Starting NGINX..."
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1

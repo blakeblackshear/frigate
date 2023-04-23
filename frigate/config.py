@@ -66,12 +66,37 @@ class LiveModeEnum(str, Enum):
     webrtc = "webrtc"
 
 
+class TimeFormatEnum(str, Enum):
+    browser = "browser"
+    hours12 = "12hour"
+    hours24 = "24hour"
+
+
+class DateTimeStyleEnum(str, Enum):
+    full = "full"
+    long = "long"
+    medium = "medium"
+    short = "short"
+
+
 class UIConfig(FrigateBaseModel):
     live_mode: LiveModeEnum = Field(
         default=LiveModeEnum.mse, title="Default Live Mode."
     )
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
+    time_format: TimeFormatEnum = Field(
+        default=TimeFormatEnum.browser, title="Override UI time format."
+    )
+    date_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.short, title="Override UI dateStyle."
+    )
+    time_style: DateTimeStyleEnum = Field(
+        default=DateTimeStyleEnum.medium, title="Override UI timeStyle."
+    )
+    strftime_fmt: Optional[str] = Field(
+        default=None, title="Override date and time format using strftime syntax."
+    )
 
 
 class TelemetryConfig(FrigateBaseModel):
@@ -139,8 +164,6 @@ class RecordConfig(FrigateBaseModel):
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
-    # deprecated - to be removed in a future version
-    retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
@@ -370,9 +393,18 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning"]
+# Note: Setting threads to less than 2 caused several issues with recording segments
+# https://github.com/blakeblackshear/frigate/issues/5659
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "2"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
-DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = ["-f", "rawvideo", "-pix_fmt", "yuv420p"]
+DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
+    "-threads",
+    "2",
+    "-f",
+    "rawvideo",
+    "-pix_fmt",
+    "yuv420p",
+]
 RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
 RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
@@ -749,16 +781,6 @@ def verify_valid_live_stream_name(
         )
 
 
-def verify_old_retain_config(camera_config: CameraConfig) -> None:
-    """Leave log if old retain_days is used."""
-    if not camera_config.record.retain_days is None:
-        logger.warning(
-            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
-        )
-        if camera_config.record.retain.days == 0:
-            camera_config.record.retain.days = camera_config.record.retain_days
-
-
 def verify_recording_retention(camera_config: CameraConfig) -> None:
     """Verify that recording retention modes are ranked correctly."""
     rank_map = {
@@ -965,7 +987,6 @@ class FrigateConfig(FrigateBaseModel):
 
             verify_config_roles(camera_config)
             verify_valid_live_stream_name(config, camera_config)
-            verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)

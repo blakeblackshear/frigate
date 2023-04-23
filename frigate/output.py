@@ -38,16 +38,10 @@ class FFMpegConverter:
         quality: int,
         birdseye_rtsp: bool = False,
     ):
-        if birdseye_rtsp:
-            if os.path.exists(BIRDSEYE_PIPE):
-                os.remove(BIRDSEYE_PIPE)
+        self.bd_pipe = None
 
-            os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
-            stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
-            self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
-            os.close(stdin)
-        else:
-            self.bd_pipe = None
+        if birdseye_rtsp:
+            self.recreate_birdseye_pipe()
 
         ffmpeg_cmd = [
             "ffmpeg",
@@ -80,14 +74,36 @@ class FFMpegConverter:
             start_new_session=True,
         )
 
+    def recreate_birdseye_pipe(self) -> None:
+        if self.bd_pipe:
+            os.close(self.bd_pipe)
+
+        if os.path.exists(BIRDSEYE_PIPE):
+            os.remove(BIRDSEYE_PIPE)
+
+        os.mkfifo(BIRDSEYE_PIPE, mode=0o777)
+        stdin = os.open(BIRDSEYE_PIPE, os.O_RDONLY | os.O_NONBLOCK)
+        self.bd_pipe = os.open(BIRDSEYE_PIPE, os.O_WRONLY)
+        os.close(stdin)
+        self.reading_birdseye = False
+
     def write(self, b) -> None:
         self.process.stdin.write(b)
 
         if self.bd_pipe:
             try:
                 os.write(self.bd_pipe, b)
+                self.reading_birdseye = True
             except BrokenPipeError:
-                # catch error when no one is listening
+                if self.reading_birdseye:
+                    # we know the pipe was being read from and now it is not
+                    # so we should recreate the pipe to ensure no partially-read
+                    # frames exist
+                    logger.debug(
+                        "Recreating the birdseye pipe because it was read from and now is not"
+                    )
+                    self.recreate_birdseye_pipe()
+
                 return
 
     def read(self, length):
@@ -109,14 +125,15 @@ class FFMpegConverter:
 
 
 class BroadcastThread(threading.Thread):
-    def __init__(self, camera, converter, websocket_server):
+    def __init__(self, camera, converter, websocket_server, stop_event):
         super(BroadcastThread, self).__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
+        self.stop_event = stop_event
 
     def run(self):
-        while True:
+        while not self.stop_event.is_set():
             buf = self.converter.read(65536)
             if buf:
                 manager = self.websocket_server.manager
@@ -312,7 +329,6 @@ class BirdsEyeFrameManager:
 
         # update each position in the layout
         for position, camera in enumerate(self.camera_layout, start=0):
-
             # if this camera was removed, replace it or clear it
             if camera in removed_cameras:
                 # if replacing this camera with a newly added one
@@ -426,7 +442,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             cam_config.live.quality,
         )
         broadcasters[camera] = BroadcastThread(
-            camera, converters[camera], websocket_server
+            camera, converters[camera], websocket_server, stop_event
         )
 
     if config.birdseye.enabled:
@@ -439,7 +455,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
             config.birdseye.restream,
         )
         broadcasters["birdseye"] = BroadcastThread(
-            "birdseye", converters["birdseye"], websocket_server
+            "birdseye", converters["birdseye"], websocket_server, stop_event
         )
 
     websocket_thread.start()
@@ -463,7 +479,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 current_tracked_objects,
                 motion_boxes,
                 regions,
-            ) = video_output_queue.get(True, 10)
+            ) = video_output_queue.get(True, 1)
         except queue.Empty:
             continue
 

@@ -3,7 +3,7 @@ id: index
 title: Configuration File
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yaml`.
+For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -19,7 +19,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - restream
     detect:
       width: 1280
       height: 720
@@ -36,6 +35,25 @@ VSCode (and VSCode addon) supports the JSON schemas which will automatically val
 It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
 
 :::
+
+**Note:** The following values will be replaced at runtime by using environment variables
+
+- `{FRIGATE_MQTT_USER}`
+- `{FRIGATE_MQTT_PASSWORD}`
+- `{FRIGATE_RTSP_USER}`
+- `{FRIGATE_RTSP_PASSWORD}`
+
+for example:
+
+```yaml
+mqtt:
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+
+```yaml
+- path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
+```
 
 ```yaml
 mqtt:
@@ -105,6 +123,9 @@ model:
   # Optional: Object detection model input tensor format
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
+  # Optional: Object detection model type, currently only used with the OpenVINO detector
+  # Valid values are ssd, yolox, yolov5, or yolov8 (default: shown below)
+  model_type: ssd
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
@@ -146,7 +167,7 @@ birdseye:
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel warning
+  global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
@@ -155,7 +176,7 @@ ffmpeg:
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
-    detect: -f rawvideo -pix_fmt yuv420p
+    detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
@@ -172,7 +193,6 @@ detect:
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
   # Optional: enables detection for the camera (default: True)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: True
   # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
@@ -271,11 +291,6 @@ record:
   # Optional: Enable recording (default: shown below)
   # WARNING: If recording is disabled in the config, turning it on via
   #          the UI or MQTT later will have no effect.
-  # WARNING: Frigate does not currently support limiting recordings based
-  #          on available disk space automatically. If using recordings,
-  #          you must specify retention settings for a number of days that
-  #          will fit within the available disk space of your drive or Frigate
-  #          will crash.
   enabled: False
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
@@ -325,7 +340,6 @@ record:
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
   # Optional: save a clean PNG copy of the snapshot image (default: shown below)
   clean_copy: True
@@ -355,7 +369,7 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.0.1)
+# Uses https://github.com/AlexxIT/go2rtc (v1.2.0)
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
@@ -410,12 +424,12 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,restream,rtmp
-          # NOTICE: In addition to assigning the record, restream, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,rtmp
+          # NOTICE: In addition to assigning the record and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
-            - restream
+            - record
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
@@ -488,9 +502,32 @@ ui:
   # Optional: Set the default live mode for cameras in the UI (default: shown below)
   live_mode: mse
   # Optional: Set a timezone to use in the UI (default: use browser local time)
-  timezone: None
+  # timezone: America/Denver
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
-  experimental_ui: False
+  use_experimental: False
+  # Optional: Set the time format used.
+  # Options are browser, 12hour, or 24hour (default: shown below)
+  time_format: browser
+  # Optional: Set the date style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 2/11/23
+  #    medium: Feb 11, 2023
+  #    full: Saturday, February 11, 2023
+  # (default: shown below).
+  date_style: short
+  # Optional: Set the time style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 8:14 PM
+  #    medium: 8:15:22 PM
+  #    full: 8:15:22 PM Mountain Standard Time
+  # (default: shown below).
+  time_style: medium
+  # Optional: Ability to manually override the date / time styling to use strftime format
+  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
+  # possible values are shown above (default: not set)
+  strftime_fmt: "%Y/%m/%d %H:%M"
 
 # Optional: Telemetry configuration
 telemetry:

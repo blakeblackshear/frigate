@@ -88,6 +88,7 @@ def run_detector(
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
+        logger.info("Signal to exit detection process...")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -104,7 +105,7 @@ def run_detector(
 
     while not stop_event.is_set():
         try:
-            connection_id = detection_queue.get(timeout=5)
+            connection_id = detection_queue.get(timeout=1)
         except queue.Empty:
             continue
         input_frame = frame_manager.get(
@@ -125,6 +126,8 @@ def run_detector(
 
         avg_speed.value = (avg_speed.value * 9 + duration) / 10
 
+    logger.info("Exited detection process...")
+
 
 class ObjectDetectProcess:
     def __init__(
@@ -144,6 +147,9 @@ class ObjectDetectProcess:
         self.start_or_restart()
 
     def stop(self):
+        # if the process has already exited on its own, just return
+        if self.detect_process and self.detect_process.exitcode:
+            return
         self.detect_process.terminate()
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
@@ -151,6 +157,7 @@ class ObjectDetectProcess:
             logging.info("Detection process didnt exit. Force killing...")
             self.detect_process.kill()
             self.detect_process.join()
+        logging.info("Detection process has exited...")
 
     def start_or_restart(self):
         self.detection_start.value = 0.0
@@ -173,12 +180,13 @@ class ObjectDetectProcess:
 
 
 class RemoteObjectDetector:
-    def __init__(self, name, labels, detection_queue, event, model_config):
+    def __init__(self, name, labels, detection_queue, event, model_config, stop_event):
         self.labels = labels
         self.name = name
         self.fps = EventsPerSecond()
         self.detection_queue = detection_queue
         self.event = event
+        self.stop_event = stop_event
         self.shm = mp.shared_memory.SharedMemory(name=self.name, create=False)
         self.np_shm = np.ndarray(
             (1, model_config.height, model_config.width, 3),
@@ -193,11 +201,14 @@ class RemoteObjectDetector:
     def detect(self, tensor_input, threshold=0.4):
         detections = []
 
+        if self.stop_event.is_set():
+            return detections
+
         # copy input to shared memory
         self.np_shm[:] = tensor_input[:]
         self.event.clear()
         self.detection_queue.put(self.name)
-        result = self.event.wait(timeout=10.0)
+        result = self.event.wait(timeout=5.0)
 
         # if it timed out
         if result is None:

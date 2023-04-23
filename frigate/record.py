@@ -100,25 +100,17 @@ class RecordingMaintainer(threading.Thread):
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
             if segment_count > keep_count:
-                ####
-                # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
-                ####
-                # logger.warning(
-                #     f"Too many recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count}, discarding the rest..."
-                # )
+                logger.warning(
+                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
+                )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for f in to_remove:
                     cache_path = f["cache_path"]
-                    ####
-                    # Need to find a way to tell if these are aging out based on retention settings or if the system is overloaded.
-                    ####
-                    # logger.warning(f"Discarding a recording segment: {cache_path}")
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
         for camera, recordings in grouped_recordings.items():
-
             # clear out all the recording info for old frames
             while (
                 len(self.recordings_info[camera]) > 0
@@ -178,10 +170,12 @@ class RecordingMaintainer(threading.Thread):
                     else:
                         if duration == -1:
                             logger.warning(
-                                f"Failed to probe corrupt segment {f}: {p.returncode} - {p.stderr}"
+                                f"Failed to probe corrupt segment {cache_path}: {p.returncode} - {p.stderr}"
                             )
 
-                        logger.warning(f"Discarding a corrupt recording segment: {f}")
+                        logger.warning(
+                            f"Discarding a corrupt recording segment: {cache_path}"
+                        )
                         Path(cache_path).unlink(missing_ok=True)
                         continue
 
@@ -227,6 +221,19 @@ class RecordingMaintainer(threading.Thread):
                             cache_path,
                             record_mode,
                         )
+                    # if it doesn't overlap with an event, go ahead and drop the segment
+                    # if it ends more than the configured pre_capture for the camera
+                    else:
+                        pre_capture = self.config.cameras[
+                            camera
+                        ].record.events.pre_capture
+                        most_recently_processed_frame_time = self.recordings_info[
+                            camera
+                        ][-1][0]
+                        retain_cutoff = most_recently_processed_frame_time - pre_capture
+                        if end_time.timestamp() < retain_cutoff:
+                            Path(cache_path).unlink(missing_ok=True)
+                            self.end_time_cache.pop(cache_path, None)
                 # else retain days includes this segment
                 else:
                     record_mode = self.config.cameras[camera].record.retain.mode
@@ -411,6 +418,10 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
+
+                # empty contents of file before unlinking https://github.com/blakeblackshear/frigate/issues/4769
+                with open(p, "w"):
+                    pass
                 p.unlink(missing_ok=True)
 
     def expire_recordings(self):

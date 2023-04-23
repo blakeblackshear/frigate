@@ -3,17 +3,17 @@ id: live
 title: Live View
 ---
 
-Frigate has different live view options, some of which require [restream](restream.md) to be enabled.
+Frigate has different live view options, some of which require the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
 ## Live View Options
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires Restream | Other Limitations                            |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | ----------------- | -------------------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no                | none                                         |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes               | not supported on iOS, Firefox is h.264 only  |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes               | requires extra config, doesn't support h.265 |
+| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                            |
+| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | -------------------------------------------- |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                         |
+| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | not supported on iOS, Firefox is h.264 only  |
+| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265 |
 
 ### Audio Support
 
@@ -24,9 +24,10 @@ go2rtc:
   streams:
     rtsp_cam: # <- for RTSP streams
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio
-      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
+      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
     http_cam: # <- for http streams
-      - "ffmpeg:http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password#video=copy#audio=copy#audio=opus" # <- http streams must use ffmpeg to set all types
+      - http://192.168.50.155/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=user&password=password # <- stream which supports video & aac audio
+      - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
 ### Setting Stream For Live UI
@@ -36,12 +37,12 @@ There may be some cameras that you would prefer to use the sub stream for live v
 ```yaml
 go2rtc:
   streams:
-    rtsp_cam: 
-      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
-      - ffmpeg:rtsp_cam#audio=opus # <- copy of the stream which transcodes audio to opus
+    rtsp_cam:
+      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
+      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to opus
     rtsp_cam_sub:
-      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio. This is only supported for rtsp streams, http must use ffmpeg
-      - ffmpeg:rtsp_cam_sub#audio=opus # <- copy of the stream which transcodes audio to opus
+      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
+      - "ffmpeg:rtsp_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus
 
 cameras:
   test_cam:
@@ -49,16 +50,16 @@ cameras:
       output_args:
         record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/test_cam?video=copy&audio=aac # <--- the name here must match the name of the camera in restream
+        - path: rtsp://127.0.0.1:8554/test_cam # <--- the name here must match the name of the camera in restream
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/test_cam_sub?video=copy # <--- the name here must match the name of the camera_sub in restream
+        - path: rtsp://127.0.0.1:8554/test_cam_sub # <--- the name here must match the name of the camera_sub in restream
           input_args: preset-rtsp-restream
           roles:
             - detect
     live:
-      stream_name: test_cam_sub
+      stream_name: rtsp_cam_sub
 ```
 
 ### WebRTC extra configuration:
@@ -68,15 +69,15 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
 - For internal/local access, unless you are running through the add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
-     ```yaml title="/config/frigate.yaml"
-     go2rtc:
-       streams:
-         test_cam: ...
-       webrtc:
-         candidates:
-           - 192.168.1.10:8555
-           - stun:8555
-     ```
+  ```yaml title="/config/frigate.yaml"
+  go2rtc:
+    streams:
+      test_cam: ...
+    webrtc:
+      candidates:
+        - 192.168.1.10:8555
+        - stun:8555
+  ```
 
 :::tip
 
@@ -100,4 +101,4 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 
 :::
 
-See https://github.com/AlexxIT/go2rtc#module-webrtc for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#module-webrtc) for more information about this.

@@ -104,7 +104,7 @@ def create_tensor_input(frame, model_config, region):
     if cropped_frame.shape != (model_config.height, model_config.width, 3):
         cropped_frame = cv2.resize(
             cropped_frame,
-            dsize=(model_config.height, model_config.width),
+            dsize=(model_config.width, model_config.height),
             interpolation=cv2.INTER_LINEAR,
         )
 
@@ -160,8 +160,8 @@ def capture_frames(
     fps: mp.Value,
     skipped_fps: mp.Value,
     current_frame: mp.Value,
+    stop_event: mp.Event,
 ):
-
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
     frame_rate.start()
@@ -177,6 +177,9 @@ def capture_frames(
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except Exception as e:
+            # shutdown has been initiated
+            if stop_event.is_set():
+                break
             logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() != None:
@@ -269,7 +272,20 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info("Waiting for ffmpeg to exit gracefully...")
                     self.ffmpeg_detect_process.communicate(timeout=30)
                 except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg didnt exit. Force killing...")
+                    self.logger.info("FFmpeg did not exit. Force killing...")
+                    self.ffmpeg_detect_process.kill()
+                    self.ffmpeg_detect_process.communicate()
+            elif self.camera_fps.value >= (self.config.detect.fps + 10):
+                self.camera_fps.value = 0
+                self.logger.info(
+                    f"{self.camera_name} exceeded fps limit. Exiting ffmpeg..."
+                )
+                self.ffmpeg_detect_process.terminate()
+                try:
+                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
+                    self.ffmpeg_detect_process.communicate(timeout=30)
+                except sp.TimeoutExpired:
+                    self.logger.info("FFmpeg did not exit. Force killing...")
                     self.ffmpeg_detect_process.kill()
                     self.ffmpeg_detect_process.communicate()
 
@@ -327,6 +343,7 @@ class CameraWatchdog(threading.Thread):
             self.frame_shape,
             self.frame_queue,
             self.camera_fps,
+            self.stop_event,
         )
         self.capture_thread.start()
 
@@ -355,13 +372,16 @@ class CameraWatchdog(threading.Thread):
 
 
 class CameraCapture(threading.Thread):
-    def __init__(self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps):
+    def __init__(
+        self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps, stop_event
+    ):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
         self.camera_name = camera_name
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
+        self.stop_event = stop_event
         self.skipped_fps = EventsPerSecond()
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
@@ -379,6 +399,7 @@ class CameraCapture(threading.Thread):
             self.fps,
             self.skipped_fps,
             self.current_frame,
+            self.stop_event,
         )
 
 
@@ -390,6 +411,9 @@ def capture_camera(name, config: CameraConfig, process_info):
 
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
+
+    threading.current_thread().name = f"capture:{name}"
+    setproctitle(f"frigate.capture:{name}")
 
     frame_queue = process_info["frame_queue"]
     camera_watchdog = CameraWatchdog(
@@ -445,7 +469,7 @@ def track_camera(
         motion_contour_area,
     )
     object_detector = RemoteObjectDetector(
-        name, labelmap, detection_queue, result_connection, model_config
+        name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
     object_tracker = ObjectTracker(config.detect)
@@ -569,7 +593,6 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
-
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -585,7 +608,7 @@ def process_frames(
             break
 
         try:
-            frame_time = frame_queue.get(True, 10)
+            frame_time = frame_queue.get(True, 1)
         except queue.Empty:
             continue
 
@@ -723,7 +746,6 @@ def process_frames(
 
                 selected_objects = []
                 for group in detected_object_groups.values():
-
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                     # o[2] is the box of the object: xmin, ymin, xmax, ymax
                     # apply max/min to ensure values do not exceed the known frame size
@@ -771,6 +793,7 @@ def process_frames(
                             refining = True
                         else:
                             selected_objects.append(obj)
+
                 # set the detections list to only include top, complete objects
                 # and new detections
                 detections = selected_objects

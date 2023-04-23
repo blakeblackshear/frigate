@@ -1,14 +1,52 @@
 """Handles inserting and maintaining ffmpeg presets."""
 
+import logging
 import os
 
 from typing import Any
 
 from frigate.version import VERSION
 from frigate.const import BTBN_PATH
+from frigate.util import vainfo_hwaccel
+
+
+logger = logging.getLogger(__name__)
+
+
+class LibvaGpuSelector:
+    "Automatically selects the correct libva GPU."
+
+    _selected_gpu = None
+
+    def get_selected_gpu(self) -> str:
+        """Get selected libva GPU."""
+        if not os.path.exists("/dev/dri"):
+            return ""
+
+        if self._selected_gpu:
+            return self._selected_gpu
+
+        devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
+
+        if len(devices) < 2:
+            self._selected_gpu = "/dev/dri/renderD128"
+            return self._selected_gpu
+
+        for device in devices:
+            check = vainfo_hwaccel(device_name=device)
+
+            logger.debug(f"{device} return vainfo status code: {check.returncode}")
+
+            if check.returncode == 0:
+                self._selected_gpu = f"/dev/dri/{device}"
+                return self._selected_gpu
+
+        return ""
+
 
 TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
 
+_gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
     "-user_agent",
     f"FFmpeg Frigate/{VERSION}",
@@ -23,7 +61,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "vaapi",
         "-hwaccel_device",
-        "/dev/dri/renderD128",
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "vaapi",
     ],
@@ -31,7 +69,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        "/dev/dri/renderD128",
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
@@ -43,7 +81,7 @@ PRESETS_HW_ACCEL_DECODE = {
         "-hwaccel",
         "qsv",
         "-qsv_device",
-        "/dev/dri/renderD128",
+        _gpu_selector.get_selected_gpu(),
         "-hwaccel_output_format",
         "qsv",
         "-c:v",
@@ -54,47 +92,36 @@ PRESETS_HW_ACCEL_DECODE = {
         "cuda",
         "-hwaccel_output_format",
         "cuda",
-        "-extra_hw_frames",
-        "2",
-        "-c:v",
-        "h264_cuvid",
     ],
     "preset-nvidia-h265": [
         "-hwaccel",
         "cuda",
         "-hwaccel_output_format",
         "cuda",
-        "-extra_hw_frames",
-        "2",
-        "-c:v",
-        "hevc_cuvid",
     ],
     "preset-nvidia-mjpeg": [
         "-hwaccel",
         "cuda",
         "-hwaccel_output_format",
         "cuda",
-        "-extra_hw_frames",
-        "2",
-        "-c:v",
-        "mjpeg_cuvid",
     ],
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-rpi-32-h264": "-r {0} -s {1}x{2} -f rawvideo -pix_fmt yuv420p",
-    "preset-rpi-64-h264": "-r {0} -s {1}x{2} -f rawvideo -pix_fmt yuv420p",
-    "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=yuv420p -f rawvideo",
-    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
-    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
-    "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
-    "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p -f rawvideo",
+    "preset-rpi-32-h264": "-r {0} -s {1}x{2}",
+    "preset-rpi-64-h264": "-r {0} -s {1}x{2}",
+    "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=yuv420p",
+    "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "default": "-r {0} -s {1}x{2}",
 }
 
 PRESETS_HW_ACCEL_ENCODE = {
-    "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
-    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -g 50 -bf 0 {1}",
+    "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
+    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
+    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
@@ -127,7 +154,9 @@ def parse_preset_hardware_acceleration_scale(
     scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
 
     if scale:
-        return scale.format(fps, width, height).split(" ")
+        scale = scale.format(fps, width, height).split(" ")
+        scale.extend(detect_args)
+        return scale
     else:
         scale = scale.format(fps, width, height).split(" ")
         scale.extend(detect_args)
@@ -142,6 +171,7 @@ def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str)
     return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]).format(
         input,
         output,
+        _gpu_selector.get_selected_gpu(),
     )
 
 
@@ -231,6 +261,13 @@ PRESETS_INPUT = {
         "1",
     ],
     "preset-rtsp-restream": _user_agent_args
+    + [
+        "-rtsp_transport",
+        "tcp",
+        TIMEOUT_PARAM,
+        "5000000",
+    ],
+    "preset-rtsp-restream-low-latency": _user_agent_args
     + [
         "-rtsp_transport",
         "tcp",

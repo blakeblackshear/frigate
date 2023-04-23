@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
+import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
 
 const emptyObject = Object.freeze({});
@@ -48,14 +49,14 @@ export default function System() {
     });
 
     if (response.status === 200) {
-      setState({ ...state, showFfprobe: true, ffprobe: JSON.stringify(response.data, null, 2) });
+      setState({ ...state, showFfprobe: true, ffprobe: response.data });
     } else {
       setState({ ...state, showFfprobe: true, ffprobe: 'There was an error getting the ffprobe output.' });
     }
   };
 
   const onCopyFfprobe = async () => {
-    copy(JSON.stringify(state.ffprobe, null, 2));
+    copy(JSON.stringify(state.ffprobe).replace(/[\\\s]+/gi, ''));
     setState({ ...state, ffprobe: '', showFfprobe: false });
   };
 
@@ -67,28 +68,95 @@ export default function System() {
     const response = await axios.get('vainfo');
 
     if (response.status === 200) {
-      setState({ ...state, showVainfo: true, vainfo: JSON.stringify(response.data, null, 2) });
+      setState({
+        ...state,
+        showVainfo: true,
+        vainfo: response.data,
+      });
     } else {
       setState({ ...state, showVainfo: true, vainfo: 'There was an error getting the vainfo output.' });
     }
   };
 
   const onCopyVainfo = async () => {
-    copy(JSON.stringify(state.vainfo, null, 2));
+    copy(JSON.stringify(state.vainfo).replace(/[\\\s]+/gi, ''));
     setState({ ...state, vainfo: '', showVainfo: false });
   };
 
   return (
     <div className="space-y-4 p-2 px-4">
-      <Heading>
-        System <span className="text-sm">{service.version}</span>
-      </Heading>
+      <div className="flex justify-between">
+        <Heading>
+          System <span className="text-sm">{service.version}</span>
+        </Heading>
+        {config && (
+          <Link
+            className="p-1 text-blue-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="/live/webrtc/"
+          >
+            go2rtc dashboard
+          </Link>
+        )}
+      </div>
+
+      {service.last_updated && (
+        <p>
+          <span>
+            Last refreshed: <TimeAgo time={service.last_updated * 1000} dense />
+          </span>
+        </p>
+      )}
 
       {state.showFfprobe && (
         <Dialog>
-          <div className="p-4">
+          <div className="p-4 mb-2 max-h-96 whitespace-pre-line overflow-scroll">
             <Heading size="lg">Ffprobe Output</Heading>
-            {state.ffprobe != '' ? <p className="mb-2">{state.ffprobe}</p> : <ActivityIndicator />}
+            {state.ffprobe != '' ? (
+              <div>
+                {state.ffprobe.map((stream, idx) => (
+                  <div key={idx} className="mb-2 max-h-96 whitespace-pre-line">
+                    <div>Stream {idx}:</div>
+                    <div className="px-2">Return Code: {stream.return_code}</div>
+                    <br />
+                    {stream.return_code == 0 ? (
+                      <div>
+                        {stream.stdout.streams.map((codec, idx) => (
+                          <div className="px-2" key={idx}>
+                            {codec.width ? (
+                              <div>
+                                <div>Video:</div>
+                                <br />
+                                <div>Codec: {codec.codec_long_name}</div>
+                                <div>
+                                  Resolution: {codec.width}x{codec.height}
+                                </div>
+                                <div>FPS: {codec.avg_frame_rate == '0/0' ? 'Unknown' : codec.avg_frame_rate}</div>
+                                <br />
+                              </div>
+                            ) : (
+                              <div>
+                                <div>Audio:</div>
+                                <br />
+                                <div>Codec: {codec.codec_long_name}</div>
+                                <br />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-2">
+                        <div>Error: {stream.stderr}</div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ActivityIndicator />
+            )}
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button className="ml-2" onClick={() => onCopyFfprobe()} type="text">
@@ -107,10 +175,16 @@ export default function System() {
 
       {state.showVainfo && (
         <Dialog>
-          <div className="p-4">
+          <div className="p-4 overflow-scroll whitespace-pre-line">
             <Heading size="lg">Vainfo Output</Heading>
             {state.vainfo != '' ? (
-              <p className="mb-2 max-h-96 overflow-scroll">{state.vainfo}</p>
+              <div className="mb-2 max-h-96 whitespace-pre-line">
+                <div className="">Return Code: {state.vainfo.return_code}</div>
+                <br />
+                <div className="">Process {state.vainfo.return_code == 0 ? 'Output' : 'Error'}:</div>
+                <br />
+                <div>{state.vainfo.return_code == 0 ? state.vainfo.stdout : state.vainfo.stderr}</div>
+              </div>
             ) : (
               <ActivityIndicator />
             )}
@@ -180,8 +254,9 @@ export default function System() {
                   <div className="p-2">
                     {gpu_usages[gpu]['gpu'] == -1 ? (
                       <div className="p-4">
-                        There was an error getting usage stats. Either your GPU does not support this or Frigate does
-                        not have proper access.
+                        There was an error getting usage stats. This does not mean hardware acceleration is not working.
+                        Either your GPU does not support this or Frigate does not have proper access to get statistics.
+                        This is expected for the Home Assistant addon.
                       </div>
                     ) : (
                       <Table className="w-full">
@@ -247,12 +322,16 @@ export default function System() {
                           <Td>{cameras[camera]['pid'] || '- '}</Td>
 
                           {(() => {
-                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1) 
-                              return <Td>{cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)</Td>
-                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0) 
-                              return <Td>disabled</Td>
-                            
-                            return <Td>- </Td>
+                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
+                              return (
+                                <Td>
+                                  {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                                </Td>
+                              );
+                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
+                              return <Td>disabled</Td>;
+
+                            return <Td>- </Td>;
                           })()}
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>

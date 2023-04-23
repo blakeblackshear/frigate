@@ -95,3 +95,4 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
         self.websocket_server.manager.join()
         self.websocket_server.shutdown()
         self.websocket_thread.join()
+        logger.info("Exiting websocket client...")
