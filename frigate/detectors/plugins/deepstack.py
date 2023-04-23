@@ -74,10 +74,13 @@ class DeepStack(DetectionApi):
         detections = np.zeros((20, 6), np.float32)
        
         for i, detection in enumerate(response_json["predictions"]):
+            logger.debug(f"Response: {detection}")
             if detection["confidence"] < 0.4:
+                logger.debug(f"Break due to confidence < 0.4")
                 break
             label = self.get_label_index(detection["label"])
             if label < 0:
+                logger.debug(f"Break due to unknown label")
                 break
             detections[i] = [
                 label,
