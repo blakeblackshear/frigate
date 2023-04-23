@@ -85,7 +85,7 @@ There are many ways to authenticate a website but a straightforward approach is 
 </VirtualHost>
 ```
 
-## Nginix Reverse Proxy
+## Nginx Reverse Proxy
 
 This method shows a working example for subdomain type reverse proxy with SSL enabled. 
 
@@ -94,11 +94,9 @@ This method shows a working example for subdomain type reverse proxy with SSL en
 This is set in `$server` and `$port` this should match your ports you have exposed to your docker container.  Optionally you listen on port `443` and enable `SSL`
 
 ```
-
 # ------------------------------------------------------------
 # frigate.domain.com
 # ------------------------------------------------------------
-
 
 server {
   set $forward_scheme http;
@@ -106,15 +104,10 @@ server {
   set $port           5000;
 
   listen 80;
-
   listen 443 ssl http2;
 
-
   server_name frigate.domain.com;
-  }
-  
-  
-
+}
 ```
 
 ### Setup SSL (optional)
