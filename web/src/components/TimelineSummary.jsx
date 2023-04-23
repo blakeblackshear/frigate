@@ -5,9 +5,9 @@ import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
-import { useMemo, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import Button from './Button';
-import { endOfHour, getUnixTime } from 'date-fns';
+import { getUnixTime } from 'date-fns';
 
 export default function TimelineSummary({ event, onFrameSelected }) {
   const { data: eventTimeline } = useSWR([
