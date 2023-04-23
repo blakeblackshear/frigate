@@ -56,7 +56,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
 
     // use strftime_fmt if defined in config file
     if (strftime_fmt) {
-      const strftime_locale = strftime.timezone(getUTCOffset(date, timezone)).localizeByIdentifier(locale);
+      const strftime_locale = strftime.timezone(getUTCOffset(date, timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)).localizeByIdentifier(locale);
       return strftime_locale(strftime_fmt, date);
     }
 
