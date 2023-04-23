@@ -17,9 +17,12 @@ DETECTOR_KEY = "deepstack"
 
 class DeepstackDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    api_url: str = Field(default="http://localhost:80/v1/vision/detection", title="DeepStack API URL")
+    api_url: str = Field(
+        default="http://localhost:80/v1/vision/detection", title="DeepStack API URL"
+    )
     api_timeout: float = Field(default=0.1, title="DeepStack API timeout (in seconds)")
     api_key: str = Field(default="", title="DeepStack API key (if required)")
+
 
 class DeepStack(DetectionApi):
     type_key = DETECTOR_KEY
@@ -32,15 +35,15 @@ class DeepStack(DetectionApi):
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
-    
+
     def get_label_index(self, label_value):
-        if label_value.lower() == 'truck':
-            label_value = 'car'
+        if label_value.lower() == "truck":
+            label_value = "car"
         for index, value in self.labels.items():
             if value == label_value.lower():
                 return index
         return -1
-    
+
     def detect_raw(self, tensor_input):
         image_data = np.squeeze(tensor_input).astype(np.uint8)
         image = Image.fromarray(image_data)
@@ -48,10 +51,12 @@ class DeepStack(DetectionApi):
             image.save(output, format="JPEG")
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
-        response = requests.post(self.api_url, files={"image": image_bytes}, timeout=self.api_timeout)
+        response = requests.post(
+            self.api_url, files={"image": image_bytes}, timeout=self.api_timeout
+        )
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)
-       
+
         for i, detection in enumerate(response_json["predictions"]):
             logger.debug(f"Response: {detection}")
             if detection["confidence"] < 0.4:
