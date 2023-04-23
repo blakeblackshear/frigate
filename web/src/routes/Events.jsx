@@ -182,14 +182,10 @@ export default function Events({ path, ...props }) {
     onFilter(name, items);
   };
 
-  const onEventFrameSelected = (event, frame) => {
-    const eventDuration = event.end_time - event.start_time;
-
+  const onEventFrameSelected = (event, frame, seekSeconds) => {
     if (this.player) {
       this.player.pause();
-      const videoOffset = this.player.duration() - eventDuration;
-      const startTime = videoOffset + (frame.timestamp - event.start_time);
-      this.player.currentTime(startTime);
+      this.player.currentTime(seekSeconds);
       setEventOverlay(frame);
     }
   };
@@ -590,7 +586,7 @@ export default function Events({ path, ...props }) {
                             <div>
                               <TimelineSummary
                                 event={event}
-                                onFrameSelected={(frame) => onEventFrameSelected(event, frame)}
+                                onFrameSelected={(frame, seekSeconds) => onEventFrameSelected(event, frame, seekSeconds)}
                               />
                               <div>
                                 <VideoPlayer

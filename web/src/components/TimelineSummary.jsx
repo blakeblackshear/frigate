@@ -7,6 +7,7 @@ import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
 import { useState } from 'preact/hooks';
 import Button from './Button';
+import { getUnixTime } from 'date-fns';
 
 export default function TimelineSummary({ event, onFrameSelected }) {
   const { data: eventTimeline } = useSWR([
@@ -20,13 +21,48 @@ export default function TimelineSummary({ event, onFrameSelected }) {
 
   const [timeIndex, setTimeIndex] = useState(-1);
 
+  const recordingParams = {
+    before: event.end_time || getUnixTime(),
+    after: event.start_time,
+  };
+  const { data: recordings } = useSWR([`${event.camera}/recordings`, recordingParams], { revalidateOnFocus: false });
+
+  // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
+  const getSeekSeconds = (seekUnix) => {
+    if (!recordings) {
+      return 0;
+    }
+
+    let seekSeconds = 0;
+    recordings.every((segment) => {
+      // if the next segment is past the desired time, stop calculating
+      if (segment.start_time > seekUnix) {
+        return false;
+      }
+
+      if (segment.end_time < seekUnix) {
+        seekSeconds += segment.end_time - segment.start_time;
+        return true;
+      }
+
+      seekSeconds += segment.end_time - segment.start_time - (segment.end_time - seekUnix);
+      return true;
+    });
+
+    return seekSeconds;
+  };
+
   const onSelectMoment = async (index) => {
     setTimeIndex(index);
-    onFrameSelected(eventTimeline[index]);
+    onFrameSelected(eventTimeline[index], getSeekSeconds(eventTimeline[index].timestamp));
   };
 
   if (!eventTimeline || !config) {
     return <ActivityIndicator />;
+  }
+
+  if (eventTimeline.length == 0) {
+    return <div />;
   }
 
   return (
