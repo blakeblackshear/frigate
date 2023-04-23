@@ -28,31 +28,10 @@ class DeepStack(DetectionApi):
         self.api_url = detector_config.api_url
         self.api_timeout = detector_config.api_timeout
         self.api_key = detector_config.api_key
-        self.labels = self.load_labels("/labelmap.txt")
+        self.labels = detector_config.model.merged_labelmap
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
-
-    def load_labels(self, path, encoding="utf-8"):
-        """Loads labels from file (with or without index numbers).
-        Args:
-        path: path to label file.
-        encoding: label file encoding.
-        Returns:
-        Dictionary mapping indices to labels.
-        """
-        with open(path, "r", encoding=encoding) as f:
-            labels = {index: "unknown" for index in range(91)}
-            lines = f.readlines()
-            if not lines:
-                return {}
-
-            if lines[0].split(" ", maxsplit=1)[0].isdigit():
-                pairs = [line.split(" ", maxsplit=1) for line in lines]
-                labels.update({int(index): label.strip() for index, label in pairs})
-            else:
-                labels.update({index: line.strip() for index, line in enumerate(lines)})
-            return labels
     
     def get_label_index(self, label_value):
         if label_value.lower() == 'truck':
