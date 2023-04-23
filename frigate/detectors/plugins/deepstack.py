@@ -55,10 +55,12 @@ class DeepStack(DetectionApi):
             return labels
     
     def get_label_index(self, label_value):
+        if label_value.lower() == 'truck':
+            label_value = 'car'
         for index, value in self.labels.items():
-            if value == label_value:
+            if value == label_value.lower():
                 return index
-        return None
+        return -1
     
     def detect_raw(self, tensor_input):
         image_data = np.squeeze(tensor_input).astype(np.uint8)
@@ -74,8 +76,11 @@ class DeepStack(DetectionApi):
         for i, detection in enumerate(response_json["predictions"]):
             if detection["confidence"] < 0.4:
                 break
+            label = self.get_label_index(detection["label"])
+            if label < 0:
+                break
             detections[i] = [
-                int(self.get_label_index(detection["label"])),
+                label,
                 float(detection["confidence"]),
                 detection["y_min"] / self.h,
                 detection["x_min"] / self.w,
