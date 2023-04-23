@@ -33,7 +33,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.stats import stats_snapshot
 from frigate.util import (
@@ -412,6 +412,42 @@ def event_thumbnail(id, max_cache_age=2592000):
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
+
+
+@bp.route("/timeline")
+def timeline():
+    camera = request.args.get("camera", "all")
+    source_id = request.args.get("source_id", type=str)
+    limit = request.args.get("limit", 100)
+
+    clauses = []
+
+    selected_columns = [
+        Timeline.timestamp,
+        Timeline.camera,
+        Timeline.source,
+        Timeline.source_id,
+        Timeline.class_type,
+        Timeline.data,
+    ]
+
+    if camera != "all":
+        clauses.append((Timeline.camera == camera))
+
+    if source_id:
+        clauses.append((Timeline.source_id == source_id))
+
+    if len(clauses) == 0:
+        clauses.append((True))
+
+    timeline = (
+        Timeline.select(*selected_columns)
+        .where(reduce(operator.and_, clauses))
+        .order_by(Timeline.timestamp.asc())
+        .limit(limit)
+    )
+
+    return jsonify([model_to_dict(t) for t in timeline])
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")
@@ -922,6 +958,53 @@ def latest_frame(camera_name):
         return response
     else:
         return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/recordings/<frame_time>/snapshot.png")
+def get_snapshot_from_recording(camera_name: str, frame_time: str):
+    if camera_name not in current_app.frigate_config.cameras:
+        return "Camera named {} not found".format(camera_name), 404
+
+    frame_time = float(frame_time)
+    recording_query = (
+        Recordings.select()
+        .where(
+            ((frame_time > Recordings.start_time) & (frame_time < Recordings.end_time))
+        )
+        .where(Recordings.camera == camera_name)
+    )
+
+    try:
+        recording: Recordings = recording_query.get()
+        time_in_segment = frame_time - recording.start_time
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:00:{time_in_segment}",
+            "-i",
+            recording.path,
+            "-frames:v",
+            "1",
+            "-c:v",
+            "png",
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+        response = make_response(process.stdout)
+        response.headers["Content-Type"] = "image/png"
+        return response
+    except DoesNotExist:
+        return "Recording not found for {} at {}".format(camera_name, frame_time), 404
 
 
 @bp.route("/recordings/storage", methods=["GET"])

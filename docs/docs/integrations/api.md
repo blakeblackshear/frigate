@@ -168,6 +168,16 @@ Events from the database. Accepts the following query string parameters:
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
 | `in_progress`        | int  | Limit to events in progress (0 or 1)          |
 
+### `GET /api/timeline`
+
+Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
+
+| param                | Type | Description                                   |
+| -------------------- | ---- | --------------------------------------------- |
+| `camera`             | int  | Name of camera                                |
+| `source_id`          | str  | ID of tracked object                          |
+| `limit`              | int  | Limit the number of events returned           |
+
 ### `GET /api/events/summary`
 
 Returns summary data for events in the database. Used by the Home Assistant integration.
@@ -232,6 +242,10 @@ Accepts the following query string parameters, but they are only applied when an
 ### `GET /api/<camera_name>/<label>/snapshot.jpg`
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
+
+### `GET /api/<camera_name>/recording/<frame_time>/snapshot.png`
+
+Returns the snapshot image from the specific point in that cameras recordings.
 
 ### `GET /clips/<camera>-<id>.jpg`
 
