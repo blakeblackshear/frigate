@@ -26,6 +26,7 @@ import Dialog from '../components/Dialog';
 import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TimeAgo from '../components/TimeAgo';
+import TimelineSummary from '../components/TimelineSummary';
 
 const API_LIMIT = 25;
 
@@ -60,6 +61,7 @@ export default function Events({ path, ...props }) {
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
+  const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
     id: null,
@@ -178,6 +180,18 @@ export default function Events({ path, ...props }) {
     }
 
     onFilter(name, items);
+  };
+
+  const onEventFrameSelected = (event, frame) => {
+    const eventDuration = event.end_time - event.start_time;
+
+    if (this.player) {
+      this.player.pause();
+      const videoOffset = this.player.duration() - eventDuration;
+      const startTime = videoOffset + (frame.timestamp - event.start_time);
+      this.player.currentTime(startTime);
+      setEventOverlay(frame);
+    }
   };
 
   const datePicker = useRef();
@@ -526,7 +540,7 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {(event.end_time && event.has_snapshot) && (
+                        {event.end_time && event.has_snapshot && (
                           <Fragment>
                             {event.plus_id ? (
                               <div className="uppercase text-xs">Sent to Frigate+</div>
@@ -573,20 +587,52 @@ export default function Events({ path, ...props }) {
 
                         <div>
                           {eventDetailType == 'clip' && event.has_clip ? (
-                            <VideoPlayer
-                              options={{
-                                preload: 'auto',
-                                autoplay: true,
-                                sources: [
-                                  {
-                                    src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                                    type: 'application/vnd.apple.mpegurl',
-                                  },
-                                ],
-                              }}
-                              seekOptions={{ forward: 10, backward: 5 }}
-                              onReady={() => {}}
-                            />
+                            <div>
+                              <TimelineSummary
+                                event={event}
+                                onFrameSelected={(frame) => onEventFrameSelected(event, frame)}
+                              />
+                              <div>
+                                <VideoPlayer
+                                  options={{
+                                    preload: 'auto',
+                                    autoplay: true,
+                                    sources: [
+                                      {
+                                        src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                                        type: 'application/vnd.apple.mpegurl',
+                                      },
+                                    ],
+                                  }}
+                                  seekOptions={{ forward: 10, backward: 5 }}
+                                  onReady={(player) => {
+                                    this.player = player;
+                                    this.player.on('playing', () => {
+                                      setEventOverlay(undefined);
+                                    });
+                                  }}
+                                  onDispose={() => {
+                                    this.player = null;
+                                  }}
+                                >
+                                  {eventOverlay ? (
+                                    <div
+                                      className="absolute border-4 border-red-600"
+                                      style={{
+                                        left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
+                                        top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
+                                        right: `${Math.round((1 - eventOverlay.data.box[2]) * 100)}%`,
+                                        bottom: `${Math.round((1 - eventOverlay.data.box[3]) * 100)}%`,
+                                      }}
+                                    >
+                                      {eventOverlay.class_type == 'entered_zone' ? (
+                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] bottom-0" />
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                </VideoPlayer>
+                              </div>
+                            </div>
                           ) : null}
 
                           {eventDetailType == 'image' || !event.has_clip ? (
