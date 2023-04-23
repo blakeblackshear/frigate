@@ -615,18 +615,18 @@ export default function Events({ path, ...props }) {
                                     this.player = null;
                                   }}
                                 >
-
                                   {eventOverlay ? (
                                     <div
                                       className="absolute border-4 border-red-600"
-                                      style={{left: `${Math.round(
-                                        eventOverlay.data.box[0] * 100
-                                      )}%`, top: `${Math.round(eventOverlay.data.box[1] * 100)}%`, right: `${Math.round(
-                                        (1 - eventOverlay.data.box[2]) * 100
-                                      )}%`, bottom: `${Math.round((1 - eventOverlay.data.box[3]) * 100)}%`}}
+                                      style={{
+                                        left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
+                                        top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
+                                        right: `${Math.round((1 - eventOverlay.data.box[2]) * 100)}%`,
+                                        bottom: `${Math.round((1 - eventOverlay.data.box[3]) * 100)}%`,
+                                      }}
                                     >
                                       {eventOverlay.class_type == 'entered_zone' ? (
-                                        <div className="absolute w-2 h-2 bg-red-600 left-[50%] bottom-0" />
+                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] bottom-0" />
                                       ) : null}
                                     </div>
                                   ) : null}
