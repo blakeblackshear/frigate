@@ -30,7 +30,7 @@ push: build
 	docker buildx build --push --platform linux/amd64 --target=frigate-tensorrt --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt .
 
 run: local
-	docker run --rm --publish=5000:5000 --volume=${PWD}/config/config.yml:/config/config.yml frigate:latest
+	docker run --rm --publish=5000:5000 --volume=${PWD}/config:/config frigate:latest
 
 run_tests: local
 	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest python3 -u -m unittest

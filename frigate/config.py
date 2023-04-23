@@ -13,8 +13,8 @@ from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
-    BASE_DIR,
     CACHE_DIR,
+    DEFAULT_DB_PATH,
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
@@ -731,9 +731,7 @@ class CameraConfig(FrigateBaseModel):
 
 
 class DatabaseConfig(FrigateBaseModel):
-    path: str = Field(
-        default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
-    )
+    path: str = Field(default=DEFAULT_DB_PATH, title="Database path.")
 
 
 class LogLevelEnum(str, Enum):

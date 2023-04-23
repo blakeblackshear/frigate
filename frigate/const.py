@@ -1,3 +1,5 @@
+CONFIG_DIR = "/config"
+DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 RECORD_DIR = f"{BASE_DIR}/recordings"
