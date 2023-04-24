@@ -12,6 +12,8 @@ from frigate.models import Timeline
 from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
+from frigate.util import to_relative_box
+
 logger = logging.getLogger(__name__)
 
 
@@ -64,77 +66,36 @@ class TimelineProcessor(threading.Thread):
         """Handle object detection."""
         camera_config = self.config.cameras[camera]
 
+        timeline_entry = {
+            Timeline.timestamp: event_data["frame_time"],
+            Timeline.camera: camera,
+            Timeline.source: "tracked_object",
+            Timeline.source_id: event_data["id"],
+            Timeline.data: {
+                "box": to_relative_box(
+                    camera_config.detect.width,
+                    camera_config.detect.height,
+                    event_data["box"],
+                ),
+                "label": event_data["label"],
+                "region": to_relative_box(
+                    camera_config.detect.width,
+                    camera_config.detect.height,
+                    event_data["region"],
+                ),
+            },
+        }
         if event_type == "start":
-            Timeline.insert(
-                timestamp=event_data["frame_time"],
-                camera=camera,
-                source="tracked_object",
-                source_id=event_data["id"],
-                class_type="visible",
-                data={
-                    "box": [
-                        event_data["box"][0] / camera_config.detect.width,
-                        event_data["box"][1] / camera_config.detect.height,
-                        event_data["box"][2] / camera_config.detect.width,
-                        event_data["box"][3] / camera_config.detect.height,
-                    ],
-                    "label": event_data["label"],
-                    "region": [
-                        event_data["region"][0] / camera_config.detect.width,
-                        event_data["region"][1] / camera_config.detect.height,
-                        event_data["region"][2] / camera_config.detect.width,
-                        event_data["region"][3] / camera_config.detect.height,
-                    ],
-                },
-            ).execute()
+            timeline_entry[Timeline.class_type] = "visible"
+            Timeline.insert(timeline_entry).execute()
         elif (
             event_type == "update"
             and prev_event_data["current_zones"] != event_data["current_zones"]
             and len(event_data["current_zones"]) > 0
         ):
-            Timeline.insert(
-                timestamp=event_data["frame_time"],
-                camera=camera,
-                source="tracked_object",
-                source_id=event_data["id"],
-                class_type="entered_zone",
-                data={
-                    "box": [
-                        event_data["box"][0] / camera_config.detect.width,
-                        event_data["box"][1] / camera_config.detect.height,
-                        event_data["box"][2] / camera_config.detect.width,
-                        event_data["box"][3] / camera_config.detect.height,
-                    ],
-                    "label": event_data["label"],
-                    "region": [
-                        event_data["region"][0] / camera_config.detect.width,
-                        event_data["region"][1] / camera_config.detect.height,
-                        event_data["region"][2] / camera_config.detect.width,
-                        event_data["region"][3] / camera_config.detect.height,
-                    ],
-                    "zones": event_data["current_zones"],
-                },
-            ).execute()
+            timeline_entry[Timeline.class_type] = "entered_zone"
+            timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
+            Timeline.insert(timeline_entry).execute()
         elif event_type == "end":
-            Timeline.insert(
-                timestamp=event_data["frame_time"],
-                camera=camera,
-                source="tracked_object",
-                source_id=event_data["id"],
-                class_type="gone",
-                data={
-                    "box": [
-                        event_data["box"][0] / camera_config.detect.width,
-                        event_data["box"][1] / camera_config.detect.height,
-                        event_data["box"][2] / camera_config.detect.width,
-                        event_data["box"][3] / camera_config.detect.height,
-                    ],
-                    "label": event_data["label"],
-                    "region": [
-                        event_data["region"][0] / camera_config.detect.width,
-                        event_data["region"][1] / camera_config.detect.height,
-                        event_data["region"][2] / camera_config.detect.width,
-                        event_data["region"][3] / camera_config.detect.height,
-                    ],
-                },
-            ).execute()
+            timeline_entry[Timeline.class_type] = "gone"
+            Timeline.insert(timeline_entry).execute()

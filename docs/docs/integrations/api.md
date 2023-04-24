@@ -172,11 +172,11 @@ Events from the database. Accepts the following query string parameters:
 
 Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
 
-| param                | Type | Description                                   |
-| -------------------- | ---- | --------------------------------------------- |
-| `camera`             | int  | Name of camera                                |
-| `source_id`          | str  | ID of tracked object                          |
-| `limit`              | int  | Limit the number of events returned           |
+| param       | Type | Description                         |
+| ----------- | ---- | ----------------------------------- |
+| `camera`    | str  | Name of camera                      |
+| `source_id` | str  | ID of tracked object                |
+| `limit`     | int  | Limit the number of events returned |
 
 ### `GET /api/events/summary`
 
@@ -197,6 +197,14 @@ Sets retain to true for the event id.
 ### `POST /api/events/<id>/plus`
 
 Submits the snapshot of the event to Frigate+ for labeling.
+
+| param                | Type | Description                        |
+| -------------------- | ---- | ---------------------------------- |
+| `include_annotation` | int  | Submit annotation to Frigate+ too. |
+
+### `PUT /api/events/<id>/false_positive`
+
+Submits the snapshot of the event to Frigate+ for labeling and adds the detection as a false positive.
 
 ### `DELETE /api/events/<id>/retain`
 
