@@ -35,6 +35,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
+from frigate.plus import PlusApi
 from frigate.stats import stats_snapshot
 from frigate.util import (
     clean_camera_user_pass,
@@ -42,6 +43,7 @@ from frigate.util import (
     restart_frigate,
     vainfo_hwaccel,
     get_tz_modifiers,
+    to_relative_box,
 )
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -57,7 +59,7 @@ def create_app(
     stats_tracking,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
-    plus_api,
+    plus_api: PlusApi,
 ):
     app = Flask(__name__)
 
@@ -179,12 +181,20 @@ def send_to_plus(id):
             400,
         )
 
+    include_annotation = (
+        request.json.get("include_annotation") if request.is_json else None
+    )
+
     try:
         event = Event.get(Event.id == id)
     except DoesNotExist:
         message = f"Event {id} not found"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 404)
+
+    # events from before the conversion to relative dimensions cant include annotations
+    if any(d > 1 for d in event.box):
+        include_annotation = None
 
     if event.end_time is None:
         logger.error(f"Unable to load clean png for in-progress event: {event.id}")
@@ -238,7 +248,94 @@ def send_to_plus(id):
     event.plus_id = plus_id
     event.save()
 
+    if not include_annotation is None:
+        region = event.region
+        box = event.box
+
+        try:
+            current_app.plus_api.add_annotation(
+                event.plus_id,
+                box,
+                event.label,
+            )
+        except Exception as ex:
+            logger.exception(ex)
+            return make_response(
+                jsonify({"success": False, "message": str(ex)}),
+                400,
+            )
+
     return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
+
+
+@bp.route("/events/<id>/false_positive", methods=("PUT",))
+def false_positive(id):
+    if not current_app.plus_api.is_active():
+        message = "PLUS_API_KEY environment variable is not set"
+        logger.error(message)
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": message,
+                }
+            ),
+            400,
+        )
+
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        message = f"Event {id} not found"
+        logger.error(message)
+        return make_response(jsonify({"success": False, "message": message}), 404)
+
+    # events from before the conversion to relative dimensions cant include annotations
+    if any(d > 1 for d in event.box):
+        message = f"Events prior to 0.13 cannot be submitted as false positives"
+        logger.error(message)
+        return make_response(jsonify({"success": False, "message": message}), 400)
+
+    if event.false_positive:
+        message = f"False positive already submitted to Frigate+"
+        logger.error(message)
+        return make_response(jsonify({"success": False, "message": message}), 400)
+
+    if not event.plus_id:
+        plus_response = send_to_plus(id)
+        if plus_response.status_code != 200:
+            return plus_response
+        # need to refetch the event now that it has a plus_id
+        event = Event.get(Event.id == id)
+
+    region = event.region
+    box = event.box
+
+    # provide top score if score is unavailable
+    score = event.top_score if event.score is None else event.score
+
+    try:
+        current_app.plus_api.add_false_positive(
+            event.plus_id,
+            region,
+            box,
+            score,
+            event.label,
+            event.model_hash,
+            event.model_type,
+            event.detector_type,
+        )
+    except Exception as ex:
+        logger.exception(ex)
+        return make_response(
+            jsonify({"success": False, "message": str(ex)}),
+            400,
+        )
+
+    event.false_positive = True
+    event.save()
+
+    return make_response(jsonify({"success": True, "plus_id": event.plus_id}), 200)
 
 
 @bp.route("/events/<id>/retain", methods=("DELETE",))
@@ -654,6 +751,8 @@ def events():
         Event.retain_indefinitely,
         Event.sub_label,
         Event.top_score,
+        Event.false_positive,
+        Event.box,
     ]
 
     if camera != "all":
