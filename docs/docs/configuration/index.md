@@ -497,6 +497,12 @@ cameras:
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
 
+    # Optional: Configuration for how to sort the cameras in the Birdseye view.
+    birdseye:
+      # Optional: Adjust sort order of cameras in the Birdseye view. Larger numbers come later (default: shown below)
+      # By default the cameras are sorted alphabetically.
+      order: 0
+
 # Optional
 ui:
   # Optional: Set the default live mode for cameras in the UI (default: shown below)
