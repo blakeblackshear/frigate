@@ -135,24 +135,33 @@ class EventProcessor(threading.Thread):
                 if self.events_in_process[event_data["id"]]["has_snapshot"]:
                     event_data["has_snapshot"] = True
 
-                Event.replace(
-                    id=event_data["id"],
-                    label=event_data["label"],
-                    camera=camera,
-                    start_time=start_time,
-                    end_time=end_time,
-                    top_score=event_data["top_score"],
-                    score=score,
-                    zones=list(event_data["entered_zones"]),
-                    thumbnail=event_data["thumbnail"],
-                    region=region,
-                    box=box,
-                    has_clip=event_data["has_clip"],
-                    has_snapshot=event_data["has_snapshot"],
-                    model_hash=first_detector.model.model_hash,
-                    model_type=first_detector.model.model_type,
-                    detector_type=first_detector.type,
-                ).execute()
+                event = {
+                    Event.id: event_data["id"],
+                    Event.label: event_data["label"],
+                    Event.camera: camera,
+                    Event.start_time: start_time,
+                    Event.end_time: end_time,
+                    Event.top_score: event_data["top_score"],
+                    Event.score: score,
+                    Event.zones: list(event_data["entered_zones"]),
+                    Event.thumbnail: event_data["thumbnail"],
+                    Event.region: region,
+                    Event.box: box,
+                    Event.has_clip: event_data["has_clip"],
+                    Event.has_snapshot: event_data["has_snapshot"],
+                    Event.model_hash: first_detector.model.model_hash,
+                    Event.model_type: first_detector.model.model_type,
+                    Event.detector_type: first_detector.type,
+                }
+
+                (
+                    Event.insert(event)
+                    .on_conflict(
+                        conflict_target=[Event.id],
+                        update=event,
+                    )
+                    .execute()
+                )
 
                 # update the stored copy for comparison on future update messages
                 self.events_in_process[event_data["id"]] = event_data
