@@ -3,7 +3,7 @@ id: index
 title: Configuration File
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yml`.
+For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -35,6 +35,25 @@ VSCode (and VSCode addon) supports the JSON schemas which will automatically val
 It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
 
 :::
+
+**Note:** The following values will be replaced at runtime by using environment variables
+
+- `{FRIGATE_MQTT_USER}`
+- `{FRIGATE_MQTT_PASSWORD}`
+- `{FRIGATE_RTSP_USER}`
+- `{FRIGATE_RTSP_PASSWORD}`
+
+for example:
+
+```yaml
+mqtt:
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+
+```yaml
+- path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
+```
 
 ```yaml
 mqtt:
@@ -86,7 +105,7 @@ detectors:
 # Optional: Database configuration
 database:
   # The path to store the SQLite DB (default: shown below)
-  path: /media/frigate/frigate.db
+  path: /config/frigate.db
 
 # Optional: model modifications
 model:
@@ -148,7 +167,7 @@ birdseye:
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel warning -threads 1
+  global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
@@ -157,7 +176,7 @@ ffmpeg:
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
-    detect: -threads 1 -f rawvideo -pix_fmt yuv420p
+    detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
@@ -483,9 +502,32 @@ ui:
   # Optional: Set the default live mode for cameras in the UI (default: shown below)
   live_mode: mse
   # Optional: Set a timezone to use in the UI (default: use browser local time)
-  timezone: None
+  # timezone: America/Denver
   # Optional: Use an experimental recordings / camera view UI (default: shown below)
-  experimental_ui: False
+  use_experimental: False
+  # Optional: Set the time format used.
+  # Options are browser, 12hour, or 24hour (default: shown below)
+  time_format: browser
+  # Optional: Set the date style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 2/11/23
+  #    medium: Feb 11, 2023
+  #    full: Saturday, February 11, 2023
+  # (default: shown below).
+  date_style: short
+  # Optional: Set the time style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 8:14 PM
+  #    medium: 8:15:22 PM
+  #    full: 8:15:22 PM Mountain Standard Time
+  # (default: shown below).
+  time_style: medium
+  # Optional: Ability to manually override the date / time styling to use strftime format
+  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
+  # possible values are shown above (default: not set)
+  strftime_fmt: "%Y/%m/%d %H:%M"
 
 # Optional: Telemetry configuration
 telemetry:

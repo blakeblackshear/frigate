@@ -18,18 +18,19 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, CONFIG_DIR, DEFAULT_DB_PATH, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.monitoring.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
+from frigate.timeline import TimelineProcessor
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -54,7 +55,7 @@ class FrigateApp:
             os.environ[key] = value
 
     def ensure_dirs(self) -> None:
-        for d in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
+        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -135,9 +136,12 @@ class FrigateApp:
         # Queue for recordings info
         self.recordings_info_queue: Queue = mp.Queue()
 
+        # Queue for timeline events
+        self.timeline_queue: Queue = mp.Queue()
+
     def init_database(self) -> None:
         # Migrate DB location
-        old_db_path = os.path.join(CLIPS_DIR, "frigate.db")
+        old_db_path = DEFAULT_DB_PATH
         if not os.path.isfile(self.config.database.path) and os.path.isfile(
             old_db_path
         ):
@@ -154,7 +158,7 @@ class FrigateApp:
         migrate_db.close()
 
         self.db = SqliteQueueDatabase(self.config.database.path)
-        models = [Event, Recordings]
+        models = [Event, Recordings, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
@@ -286,12 +290,19 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_timeline_processor(self) -> None:
+        self.timeline_processor = TimelineProcessor(
+            self.config, self.timeline_queue, self.stop_event
+        )
+        self.timeline_processor.start()
+
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
             self.camera_metrics,
             self.event_queue,
             self.event_processed_queue,
+            self.timeline_queue,
             self.stop_event,
         )
         self.event_processor.start()
@@ -384,6 +395,7 @@ class FrigateApp:
         self.start_storage_maintainer()
         self.init_stats()
         self.init_web_server()
+        self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_recording_maintainer()
@@ -391,7 +403,6 @@ class FrigateApp:
         self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
-        # self.zeroconf = broadcast_zeroconf(self.config.mqtt.client_id)
 
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
             self.stop()

@@ -39,6 +39,12 @@ You cannot use the `environment_vars` section of your configuration file to set 
 
 Once your API key is configured, you can submit examples directly from the events page in Frigate using the `SEND TO FRIGATE+` button.
 
+:::note
+
+Snapshots must be enabled to be able to submit examples to Frigate+
+
+:::
+
 ![Send To Plus](/img/send-to-plus.png)
 
 ### Annotate and verify

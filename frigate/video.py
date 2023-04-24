@@ -104,7 +104,7 @@ def create_tensor_input(frame, model_config, region):
     if cropped_frame.shape != (model_config.height, model_config.width, 3):
         cropped_frame = cv2.resize(
             cropped_frame,
-            dsize=(model_config.height, model_config.width),
+            dsize=(model_config.width, model_config.height),
             interpolation=cv2.INTER_LINEAR,
         )
 
@@ -162,7 +162,6 @@ def capture_frames(
     current_frame: mp.Value,
     stop_event: mp.Event,
 ):
-
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
     frame_rate.start()
@@ -594,7 +593,6 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
-
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -748,7 +746,6 @@ def process_frames(
 
                 selected_objects = []
                 for group in detected_object_groups.values():
-
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                     # o[2] is the box of the object: xmin, ymin, xmax, ymax
                     # apply max/min to ensure values do not exceed the known frame size

@@ -37,15 +37,6 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
 
-# ffmpeg -> arm32
-if [[ "${TARGETARCH}" == "arm" ]]; then
-    # add raspberry pi repo
-    gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
-    echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
-    apt-get -qq update
-    apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
-fi
-
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     # add raspberry pi repo
@@ -75,17 +66,13 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
         libva-drm2 mesa-va-drivers
 fi
 
-# not sure why 32bit arm requires all these
-if [[ "${TARGETARCH}" == "arm" ]]; then
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        libgtk-3-dev \
-        libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-        libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
-        gfortran openexr libatlas-base-dev libtbb-dev libdc1394-22-dev libopenexr-dev \
-        libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
-fi
-
 apt-get purge gnupg apt-transport-https wget xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*
+
+# Install yq, for frigate-prepare and go2rtc echo source
+curl -fsSL \
+    "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_$(dpkg --print-architecture)" \
+    --output /usr/local/bin/yq
+chmod +x /usr/local/bin/yq

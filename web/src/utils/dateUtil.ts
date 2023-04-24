@@ -37,25 +37,26 @@ export const getNowYesterdayInLong = (): number => {
  */
 interface DateTimeStyle {
   timezone: string;
-  use12hour: boolean | undefined;
+  time_format: 'browser' | '12hour' | '24hour';
   date_style: 'full' | 'long' | 'medium' | 'short';
   time_style: 'full' | 'long' | 'medium' | 'short';
   strftime_fmt: string;
 }
 
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
-  const { timezone, use12hour, date_style, time_style, strftime_fmt } = config;
-  const locale = window.navigator?.language || 'en-US';
+  const { timezone, time_format, date_style, time_style, strftime_fmt } = config;
+  const locale = window.navigator?.language || 'en-us';
 
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
   }
+
   try {
     const date = new Date(unixTimestamp * 1000);
 
     // use strftime_fmt if defined in config file
     if (strftime_fmt) {
-      const strftime_locale = strftime.localizeByIdentifier(locale);
+      const strftime_locale = strftime.timezone(getUTCOffset(date, timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)).localizeByIdentifier(locale);
       return strftime_locale(strftime_fmt, date);
     }
 
@@ -64,7 +65,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
       dateStyle: date_style,
       timeStyle: time_style,
       timeZone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-      hour12: use12hour !== null ? use12hour : undefined,
+      hour12: time_format !== 'browser' ? time_format == '12hour' : undefined,
     });
     return formatter.format(date);
   } catch (error) {
@@ -113,3 +114,18 @@ export const getDurationFromTimestamps = (start_time: number, end_time: number |
   }
   return duration;
 };
+
+/**
+ * Adapted from https://stackoverflow.com/a/29268535 this takes a timezone string and
+ * returns the offset of that timezone from UTC in minutes.
+ * @param timezone string representation of the timezone the user is requesting
+ * @returns number of minutes offset from UTC
+ */
+const getUTCOffset = (date: Date, timezone: string): number => {
+  const utcDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000));
+  // locale of en-CA is required for proper locale format
+  let iso = utcDate.toLocaleString('en-CA', { timeZone: timezone, hour12: false }).replace(', ', 'T');
+  iso += `.${utcDate.getMilliseconds().toString().padStart(3, '0')}`;
+  const target = new Date(`${iso}Z`);
+  return  (target.getTime() - utcDate.getTime()) / 60 / 1000;
+}

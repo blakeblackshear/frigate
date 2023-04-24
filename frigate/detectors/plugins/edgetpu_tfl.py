@@ -5,8 +5,11 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 from typing import Literal
 from pydantic import Extra, Field
-import tflite_runtime.interpreter as tflite
-from tflite_runtime.interpreter import load_delegate
+
+try:
+    from tflite_runtime.interpreter import Interpreter, load_delegate
+except ModuleNotFoundError:
+    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +36,7 @@ class EdgeTpuTfl(DetectionApi):
             logger.info(f"Attempting to load TPU as {device_config['device']}")
             edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
             logger.info("TPU found")
-            self.interpreter = tflite.Interpreter(
+            self.interpreter = Interpreter(
                 model_path=detector_config.model.path or "/edgetpu_model.tflite",
                 experimental_delegates=[edge_tpu_delegate],
             )

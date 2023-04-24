@@ -13,8 +13,8 @@ from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
-    BASE_DIR,
     CACHE_DIR,
+    DEFAULT_DB_PATH,
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
@@ -66,6 +66,12 @@ class LiveModeEnum(str, Enum):
     webrtc = "webrtc"
 
 
+class TimeFormatEnum(str, Enum):
+    browser = "browser"
+    hours12 = "12hour"
+    hours24 = "24hour"
+
+
 class DateTimeStyleEnum(str, Enum):
     full = "full"
     long = "long"
@@ -79,7 +85,9 @@ class UIConfig(FrigateBaseModel):
     )
     timezone: Optional[str] = Field(title="Override UI timezone.")
     use_experimental: bool = Field(default=False, title="Experimental UI")
-    use12hour: Optional[bool] = Field(title="Override UI time format.")
+    time_format: TimeFormatEnum = Field(
+        default=TimeFormatEnum.browser, title="Override UI time format."
+    )
     date_style: DateTimeStyleEnum = Field(
         default=DateTimeStyleEnum.short, title="Override UI dateStyle."
     )
@@ -156,8 +164,6 @@ class RecordConfig(FrigateBaseModel):
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
-    # deprecated - to be removed in a future version
-    retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
@@ -387,11 +393,13 @@ class BirdseyeCameraConfig(BaseModel):
     )
 
 
-FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "1"]
+# Note: Setting threads to less than 2 caused several issues with recording segments
+# https://github.com/blakeblackshear/frigate/issues/5659
+FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "2"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-threads",
-    "1",
+    "2",
     "-f",
     "rawvideo",
     "-pix_fmt",
@@ -723,9 +731,7 @@ class CameraConfig(FrigateBaseModel):
 
 
 class DatabaseConfig(FrigateBaseModel):
-    path: str = Field(
-        default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
-    )
+    path: str = Field(default=DEFAULT_DB_PATH, title="Database path.")
 
 
 class LogLevelEnum(str, Enum):
@@ -773,16 +779,6 @@ def verify_valid_live_stream_name(
         return ValueError(
             f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
         )
-
-
-def verify_old_retain_config(camera_config: CameraConfig) -> None:
-    """Leave log if old retain_days is used."""
-    if not camera_config.record.retain_days is None:
-        logger.warning(
-            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
-        )
-        if camera_config.record.retain.days == 0:
-            camera_config.record.retain.days = camera_config.record.retain_days
 
 
 def verify_recording_retention(camera_config: CameraConfig) -> None:
@@ -991,7 +987,6 @@ class FrigateConfig(FrigateBaseModel):
 
             verify_config_roles(camera_config)
             verify_valid_live_stream_name(config, camera_config)
-            verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)

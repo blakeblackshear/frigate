@@ -722,7 +722,7 @@ def load_labels(path, encoding="utf-8"):
 
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
-    if line.startswith("rtsp://"):
+    if "rtsp://" in line:
         return re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
     else:
         return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", line)
@@ -772,7 +772,6 @@ def get_docker_memlimit_bytes() -> int:
 
     # check running a supported cgroups version
     if get_cgroups_version() == "cgroup2":
-
         memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
 
         p = sp.run(
@@ -817,7 +816,6 @@ def get_cpu_stats() -> dict[str, dict]:
         for line in lines:
             stats = list(filter(lambda a: a != "", line.strip().split(" ")))
             try:
-
                 if docker_memlimit > 0:
                     mem_res = int(stats[5])
                     mem_pct = str(
