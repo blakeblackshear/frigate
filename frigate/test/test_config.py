@@ -54,7 +54,8 @@ class TestConfig(unittest.TestCase):
                     "type": "openvino",
                 },
             },
-            "model": {"path": "/default.tflite", "width": 512},
+            # needs to be a file that will exist, doesnt matter what
+            "model": {"path": "/etc/hosts", "width": 512},
         }
 
         frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
@@ -72,10 +73,10 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.detectors["edgetpu"].device is None
         assert runtime_config.detectors["openvino"].device is None
 
-        assert runtime_config.model.path == "/default.tflite"
+        assert runtime_config.model.path == "/etc/hosts"
         assert runtime_config.detectors["cpu"].model.path == "/cpu_model.tflite"
         assert runtime_config.detectors["edgetpu"].model.path == "/edgetpu_model.tflite"
-        assert runtime_config.detectors["openvino"].model.path == "/default.tflite"
+        assert runtime_config.detectors["openvino"].model.path == "/etc/hosts"
 
         assert runtime_config.model.width == 512
         assert runtime_config.detectors["cpu"].model.width == 512
