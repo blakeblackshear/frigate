@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 DETECTOR_KEY = "meta_detector"
 
 DetectorConfig = Annotated[
-            Union[tuple(BaseDetectorConfig.__subclasses__())],
-            Field(discriminator="type"),
-        ]
+    Union[tuple(BaseDetectorConfig.__subclasses__())],
+    Field(discriminator="type"),
+]
+
 
 class MetaDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -68,8 +69,6 @@ class MetaDetector(DetectionApi):
             meta_detector_config.detectors[key] = detector_config
             self.detectors.append(self.create_detector(detector_config))
 
-        
-
     def merge_detections(self, detections_list: List[np.ndarray]) -> np.ndarray:
         all_detections = np.vstack(detections_list)
         sorted_indices = np.argsort(-all_detections[:, 1])
@@ -80,14 +79,17 @@ class MetaDetector(DetectionApi):
             detector.detect_raw(tensor_input) for detector in self.detectors
         ]
         return self.merge_detections(detections_list)
-    
-    def create_detector(self, detector_config):
 
+    def create_detector(self, detector_config):
         current_module_name = os.path.splitext(os.path.basename(__file__))[0]
         modules_folder = os.path.dirname(os.path.abspath(__file__))
         module_prefix = __package__ + "."
 
-        _included_modules = [module for module in pkgutil.iter_modules([modules_folder], module_prefix) if module.name != current_module_name]
+        _included_modules = [
+            module
+            for module in pkgutil.iter_modules([modules_folder], module_prefix)
+            if module.name != current_module_name
+        ]
 
         plugin_modules = []
 
@@ -98,8 +100,6 @@ class MetaDetector(DetectionApi):
                 plugin_modules.append(importlib.import_module(name))
             except ImportError as e:
                 logger.error(f"Error importing detector runtime: {e}")
-
-
 
         api_types = {det.type_key: det for det in DetectionApi.__subclasses__()}
         api = api_types.get(detector_config.type)
