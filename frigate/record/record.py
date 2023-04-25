@@ -6,6 +6,8 @@ import signal
 import threading
 
 from setproctitle import setproctitle
+from types import FrameType
+from typing import Optional
 
 from playhouse.sqliteq import SqliteQueueDatabase
 
@@ -21,10 +23,10 @@ logger = logging.getLogger(__name__)
 def manage_recordings(
     config: FrigateConfig,
     recordings_info_queue: mp.Queue,
-):
+) -> None:
     stop_event = mp.Event()
 
-    def receiveSignal(signalNumber, frame):
+    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
