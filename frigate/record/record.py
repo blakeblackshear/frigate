@@ -42,7 +42,9 @@ def manage_recordings(
     models = [Event, Recordings, Timeline]
     db.bind(models)
 
-    maintainer = RecordingMaintainer(config, recordings_info_queue, process_info, stop_event)
+    maintainer = RecordingMaintainer(
+        config, recordings_info_queue, process_info, stop_event
+    )
     maintainer.start()
 
     cleanup = RecordingCleanup(config, stop_event)
