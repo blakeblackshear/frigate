@@ -12,7 +12,13 @@ def setupRegistry() -> CollectorRegistry:
     return myregistry
 
 
-def add_metric(metric: GaugeMetricFamily, label: str, stats: Dict[str, Any], key: str, multiplier: float = 1.0) -> None:
+def add_metric(
+    metric: GaugeMetricFamily,
+    label: str,
+    stats: Dict[str, Any],
+    key: str,
+    multiplier: float = 1.0,
+) -> None:
     try:
         string = str(stats[key])
         value = float(re.findall(r"\d+", string)[0])
