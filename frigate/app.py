@@ -28,7 +28,7 @@ from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
-from frigate.record import RecordingCleanup, RecordingMaintainer
+from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
@@ -158,6 +158,20 @@ class FrigateApp:
 
         migrate_db.close()
 
+    def init_recording_manager(self) -> None:
+        recording_process = mp.Process(
+            target=manage_recordings,
+            name="recording_manager",
+            args=(self.config, self.recordings_info_queue),
+        )
+        recording_process.daemon = True
+        self.recording_process = recording_process
+        recording_process.start()
+        logger.info(f"Recording process started: {recording_process.pid}")
+
+    def bind_database(self) -> None:
+        """Bind db to the main process."""
+        # NOTE: all db accessing processes need to be created before the db can be bound to the main process
         self.db = SqliteQueueDatabase(self.config.database.path)
         models = [Event, Recordings, Timeline]
         self.db.bind(models)
@@ -318,16 +332,6 @@ class FrigateApp:
         self.event_cleanup = EventCleanup(self.config, self.stop_event)
         self.event_cleanup.start()
 
-    def start_recording_maintainer(self) -> None:
-        self.recording_maintainer = RecordingMaintainer(
-            self.config, self.recordings_info_queue, self.stop_event
-        )
-        self.recording_maintainer.start()
-
-    def start_recording_cleanup(self) -> None:
-        self.recording_cleanup = RecordingCleanup(self.config, self.stop_event)
-        self.recording_cleanup.start()
-
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
@@ -390,6 +394,8 @@ class FrigateApp:
             self.init_queues()
             self.init_database()
             self.init_onvif()
+            self.init_recording_manager()
+            self.bind_database()
             self.init_dispatcher()
         except Exception as e:
             print(e)
@@ -406,8 +412,6 @@ class FrigateApp:
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
-        self.start_recording_maintainer()
-        self.start_recording_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
