@@ -35,7 +35,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
-from frigate.types import CameraMetricsTypes
+from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
+        self.record_metrics: dict[str, RecordMetricsTypes] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -109,6 +110,11 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
+            self.record_metrics[camera_name] = {
+                "record_enabled": mp.Value(
+                    "i", self.config.cameras[camera_name].record.enabled
+                )
+            }
 
     def set_log_levels(self) -> None:
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
@@ -162,7 +168,7 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(self.config, self.recordings_info_queue),
+            args=(self.config, self.recordings_info_queue, self.record_metrics),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
@@ -203,7 +209,7 @@ class FrigateApp:
 
         comms.append(WebSocketClient(self.config))
         self.dispatcher = Dispatcher(
-            self.config, self.onvif_controller, self.camera_metrics, comms
+            self.config, self.onvif_controller, self.camera_metrics, self.record_metrics, comms
         )
 
     def start_detectors(self) -> None:

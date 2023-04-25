@@ -19,6 +19,7 @@ from typing import Any, Tuple
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.types import RecordMetricsTypes
 from frigate.util import area
 
 logger = logging.getLogger(__name__)
@@ -29,12 +30,14 @@ class RecordingMaintainer(threading.Thread):
         self,
         config: FrigateConfig,
         recordings_info_queue: mp.Queue,
+        process_info: dict[str, RecordMetricsTypes],
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
-        self.name = "recording_maint"
+        self.name = "recording_maintainer"
         self.config = config
         self.recordings_info_queue = recordings_info_queue
+        self.process_info = process_info
         self.stop_event = stop_event
         self.recordings_info: dict[str, Any] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
@@ -125,7 +128,7 @@ class RecordingMaintainer(threading.Thread):
                 # Just delete files if recordings are turned off
                 if (
                     not camera in self.config.cameras
-                    or not self.config.cameras[camera].record.enabled
+                    or not self.process_info[camera]["record_enabled"].value
                 ):
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
@@ -369,7 +372,7 @@ class RecordingMaintainer(threading.Thread):
                         regions,
                     ) = self.recordings_info_queue.get(False)
 
-                    if self.config.cameras[camera].record.enabled:
+                    if self.process_info[camera]["record_enabled"].value:
                         self.recordings_info[camera].append(
                             (
                                 frame_time,
