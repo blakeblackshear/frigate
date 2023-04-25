@@ -7,7 +7,6 @@ import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
 import { useState } from 'preact/hooks';
 import Button from './Button';
-import { getUnixTime } from 'date-fns';
 
 export default function TimelineSummary({ event, onFrameSelected }) {
   const { data: eventTimeline } = useSWR([
@@ -22,7 +21,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   const [timeIndex, setTimeIndex] = useState(-1);
 
   const recordingParams = {
-    before: event.end_time || getUnixTime(),
+    before: event.end_time || Date.now(),
     after: event.start_time,
   };
   const { data: recordings } = useSWR([`${event.camera}/recordings`, recordingParams], { revalidateOnFocus: false });

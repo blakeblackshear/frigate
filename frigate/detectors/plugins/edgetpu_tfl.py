@@ -37,7 +37,7 @@ class EdgeTpuTfl(DetectionApi):
             edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
             logger.info("TPU found")
             self.interpreter = Interpreter(
-                model_path=detector_config.model.path or "/edgetpu_model.tflite",
+                model_path=detector_config.model.path,
                 experimental_delegates=[edge_tpu_delegate],
             )
         except ValueError:

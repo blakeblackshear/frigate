@@ -27,7 +27,7 @@ class CpuTfl(DetectionApi):
 
     def __init__(self, detector_config: CpuDetectorConfig):
         self.interpreter = Interpreter(
-            model_path=detector_config.model.path or "/cpu_model.tflite",
+            model_path=detector_config.model.path,
             num_threads=detector_config.num_threads or 3,
         )
 

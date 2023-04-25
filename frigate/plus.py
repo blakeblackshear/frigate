@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+from typing import List
 import requests
 from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
 from requests.models import Response
@@ -79,6 +80,13 @@ class PlusApi:
             json=data,
         )
 
+    def _put(self, path: str, data: dict) -> Response:
+        return requests.put(
+            f"{self.host}/v1/{path}",
+            headers=self._get_authorization_header(),
+            json=data,
+        )
+
     def is_active(self) -> bool:
         return self._is_active
 
@@ -124,3 +132,58 @@ class PlusApi:
 
         # return image id
         return str(presigned_urls.get("imageId"))
+
+    def add_false_positive(
+        self,
+        plus_id: str,
+        region: List[float],
+        bbox: List[float],
+        score: float,
+        label: str,
+        model_hash: str,
+        model_type: str,
+        detector_type: str,
+    ) -> None:
+        r = self._put(
+            f"image/{plus_id}/false_positive",
+            {
+                "label": label,
+                "x": bbox[0],
+                "y": bbox[1],
+                "w": bbox[2],
+                "h": bbox[3],
+                "regionX": region[0],
+                "regionY": region[1],
+                "regionW": region[2],
+                "regionH": region[3],
+                "score": score,
+                "model_hash": model_hash,
+                "model_type": model_type,
+                "detector_type": detector_type,
+            },
+        )
+
+        if not r.ok:
+            raise Exception(r.text)
+
+    def add_annotation(
+        self,
+        plus_id: str,
+        bbox: List[float],
+        label: str,
+        difficult: bool = False,
+    ) -> None:
+        r = self._put(
+            f"image/{plus_id}/annotation",
+            {
+                "label": label,
+                "x": bbox[0],
+                "y": bbox[1],
+                "w": bbox[2],
+                "h": bbox[3],
+                "difficult": difficult,
+            },
+        )
+
+        if not r.ok:
+            raise Exception(r.text)
