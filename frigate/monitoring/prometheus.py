@@ -2,16 +2,17 @@ import json
 import re
 from urllib.request import urlopen
 from prometheus_client import CollectorRegistry
-from prometheus_client.metrics_core import GaugeMetricFamily, InfoMetricFamily
+from prometheus_client.metrics_core import GaugeMetricFamily, InfoMetricFamily, Metric
+from typing import Dict, Any, Generator
 
 
-def setupRegistry():
+def setupRegistry() -> CollectorRegistry:
     myregistry = CollectorRegistry()
     myregistry.register(CustomCollector())
     return myregistry
 
 
-def add_metric(metric, label, stats, key, multiplier=1.0):
+def add_metric(metric: GaugeMetricFamily, label: str, stats: Dict[str, Any], key: str, multiplier: float = 1.0) -> None:
     try:
         string = str(stats[key])
         value = float(re.findall(r"\d+", string)[0])
@@ -20,21 +21,21 @@ def add_metric(metric, label, stats, key, multiplier=1.0):
         pass
 
 
-class CustomCollector:
-    def __init__(self):
+class CustomCollector(CollectorRegistry):
+    def __init__(self) -> None:
         self.stats_url = "http://localhost:5000/api/stats"
-        self.process_stats = {}
+        self.process_stats: Dict[str, Dict[str, float]] = {}  # Add a type hint here
 
     def add_metric_process(
         self,
-        metric,
-        stats,
-        camera_name,
-        pid_name,
-        process_name,
-        cpu_or_memory,
-        process_type,
-    ):
+        metric: GaugeMetricFamily,
+        stats: Dict[str, Any],
+        camera_name: str,
+        pid_name: str,
+        process_name: str,
+        cpu_or_memory: str,
+        process_type: str,
+    ) -> None:
         try:
             pid = str(stats[camera_name][pid_name])
             label_values = [pid, camera_name, process_name, process_type]
@@ -43,7 +44,7 @@ class CustomCollector:
         except (KeyError, TypeError, IndexError):
             pass
 
-    def collect(self):
+    def collect(self) -> Generator[Metric, None, None]:
         stats = json.loads(urlopen(self.stats_url).read())
         self.process_stats = stats["cpu_usages"]
 
