@@ -73,7 +73,7 @@ go2rtc:
 
 :::caution
 
-To access the go2rtc stream externally when utilizing the Frigate Add-On, for instance, through a WebRTC card or VLC, you must first enable the RTSP Restream port. You can do this by visiting the Frigate Add-On configuration page within Home Assistant and revealing the hidden options under the "Show disabled ports" section.
+To access the go2rtc stream externally when utilizing the Frigate Add-On (for instance through VLC), you must first enable the RTSP Restream port. You can do this by visiting the Frigate Add-On configuration page within Home Assistant and revealing the hidden options under the "Show disabled ports" section.
 
 :::
 
