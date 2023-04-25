@@ -447,8 +447,6 @@ class FrigateApp:
         self.detected_frames_processor.join()
         self.event_processor.join()
         self.event_cleanup.join()
-        self.recording_maintainer.join()
-        self.recording_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
