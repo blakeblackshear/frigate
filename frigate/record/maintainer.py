@@ -9,10 +9,11 @@ import random
 import string
 import subprocess as sp
 import threading
-from collections import defaultdict
-from pathlib import Path
-
 import psutil
+
+from collections import defaultdict
+from multiprocessing.synchronize import Event as MpEvent
+from pathlib import Path
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
@@ -23,8 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class RecordingMaintainer(threading.Thread):
+
     def __init__(
-        self, config: FrigateConfig, recordings_info_queue: mp.Queue, stop_event
+        self,
+        config: FrigateConfig,
+        recordings_info_queue: mp.Queue,
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "recording_maint"

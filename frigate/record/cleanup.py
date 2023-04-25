@@ -8,6 +8,7 @@ import threading
 from pathlib import Path
 
 from peewee import DoesNotExist
+from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
@@ -18,13 +19,15 @@ logger = logging.getLogger(__name__)
 
 
 class RecordingCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event):
+    """Cleanup existing recordings based on retention config."""
+
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
         threading.Thread.__init__(self)
         self.name = "recording_cleanup"
         self.config = config
         self.stop_event = stop_event
 
-    def clean_tmp_clips(self):
+    def clean_tmp_clips(self) -> None:
         # delete any clips more than 5 minutes old
         for p in Path("/tmp/cache").rglob("clip_*.mp4"):
             logger.debug(f"Checking tmp clip {p}.")
@@ -36,7 +39,7 @@ class RecordingCleanup(threading.Thread):
                     pass
                 p.unlink(missing_ok=True)
 
-    def expire_recordings(self):
+    def expire_recordings(self) -> None:
         logger.debug("Start expire recordings (new).")
 
         logger.debug("Start deleted cameras.")
@@ -151,7 +154,7 @@ class RecordingCleanup(threading.Thread):
         logger.debug("End all cameras.")
         logger.debug("End expire recordings (new).")
 
-    def expire_files(self):
+    def expire_files(self) -> None:
         logger.debug("Start expire files (legacy).")
 
         default_expire = (
@@ -197,7 +200,7 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug("End expire files (legacy).")
 
-    def sync_recordings(self):
+    def sync_recordings(self) -> None:
         logger.debug("Start sync recordings.")
 
         # get all recordings in the db
@@ -228,7 +231,7 @@ class RecordingCleanup(threading.Thread):
 
         logger.debug("End sync recordings.")
 
-    def run(self):
+    def run(self) -> None:
         # on startup sync recordings with disk (disabled due to too much CPU usage)
         # self.sync_recordings()
 
