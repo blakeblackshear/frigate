@@ -47,11 +47,9 @@ birdseye:
 
 cameras:
   front:
-    # Only include the "front" camera in Birdseye view when objects are detected
     birdseye:
       order: 1
   back:
-    # Exclude the "back" camera from Birdseye view
     birdseye:
       order: 2
 ```
