@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 
 from frigate.config import FrigateConfig
 from frigate.ptz import OnvifController, OnvifCommandEnum
-from frigate.types import CameraMetricsTypes
+from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 from frigate.util import restart_frigate
 
 
@@ -42,11 +42,13 @@ class Dispatcher:
         config: FrigateConfig,
         onvif: OnvifController,
         camera_metrics: dict[str, CameraMetricsTypes],
+        record_metrics: dict[str, RecordMetricsTypes],
         communicators: list[Communicator],
     ) -> None:
         self.config = config
         self.onvif = onvif
         self.camera_metrics = camera_metrics
+        self.record_metrics = record_metrics
         self.comms = communicators
 
         for comm in self.comms:
@@ -192,13 +194,15 @@ class Dispatcher:
         record_settings = self.config.cameras[camera_name].record
 
         if payload == "ON":
-            if not record_settings.enabled:
+            if not self.record_metrics[camera_name]["record_enabled"].value:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
+                self.record_metrics[camera_name]["record_enabled"].value = True
         elif payload == "OFF":
-            if record_settings.enabled:
+            if self.record_metrics[camera_name]["record_enabled"].value:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
+                self.record_metrics[camera_name]["record_enabled"].value = False
 
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
