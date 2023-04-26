@@ -1,5 +1,5 @@
 click == 8.1.*
-Flask == 2.2.*
+Flask == 2.3.*
 imutils == 0.5.*
 matplotlib == 3.7.*
 mypy == 0.942
