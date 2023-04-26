@@ -7,12 +7,8 @@ from typing import Any, Callable
 from abc import ABC, abstractmethod
 
 from frigate.config import FrigateConfig
-<<<<<<< HEAD
 from frigate.ptz import OnvifController, OnvifCommandEnum
-from frigate.types import CameraMetricsTypes
-=======
 from frigate.types import CameraMetricsTypes, RecordMetricsTypes
->>>>>>> ab49f2f7 (Add support back for setting record via MQTT and WS)
 from frigate.util import restart_frigate
 
 

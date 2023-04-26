@@ -209,7 +209,11 @@ class FrigateApp:
 
         comms.append(WebSocketClient(self.config))
         self.dispatcher = Dispatcher(
-            self.config, self.onvif_controller, self.camera_metrics, self.record_metrics, comms
+            self.config,
+            self.onvif_controller,
+            self.camera_metrics,
+            self.record_metrics,
+            comms,
         )
 
     def start_detectors(self) -> None:
