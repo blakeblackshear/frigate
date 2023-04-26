@@ -1065,3 +1065,14 @@ def get_tz_modifiers(tz_name: str) -> Tuple[str, str]:
     hour_modifier = f"{hours_offset} hour"
     minute_modifier = f"{minutes_offset} minute"
     return hour_modifier, minute_modifier
+
+
+def to_relative_box(
+    width: int, height: int, box: Tuple[int, int, int, int]
+) -> Tuple[int, int, int, int]:
+    return (
+        box[0] / width,  # x
+        box[1] / height,  # y
+        (box[2] - box[0]) / width,  # w
+        (box[3] - box[1]) / height,  # h
+    )

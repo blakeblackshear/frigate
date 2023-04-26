@@ -185,7 +185,7 @@ class TrackedObject:
             "id": self.obj_data["id"],
             "camera": self.camera,
             "frame_time": self.obj_data["frame_time"],
-            "snapshot_time": snapshot_time,
+            "snapshot": self.thumbnail_data,
             "label": self.obj_data["label"],
             "sub_label": self.obj_data.get("sub_label"),
             "top_score": self.top_score,

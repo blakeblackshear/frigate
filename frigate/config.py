@@ -18,6 +18,7 @@ from frigate.const import (
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
+from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.util import (
     create_mask,
     deep_merge,
@@ -122,6 +123,13 @@ class MqttConfig(FrigateBaseModel):
         if (v is None) != (values["user"] is None):
             raise ValueError("Password must be provided with username.")
         return v
+
+
+class OnvifConfig(FrigateBaseModel):
+    host: str = Field(default="", title="Onvif Host")
+    port: int = Field(default=8000, title="Onvif Port")
+    user: Optional[str] = Field(title="Onvif Username")
+    password: Optional[str] = Field(title="Onvif Password")
 
 
 class RetainModeEnum(str, Enum):
@@ -607,6 +615,9 @@ class CameraConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
+    onvif: OnvifConfig = Field(
+        default_factory=OnvifConfig, title="Camera Onvif Configuration."
+    )
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )
@@ -771,7 +782,7 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
 
 def verify_valid_live_stream_name(
     frigate_config: FrigateConfig, camera_config: CameraConfig
-) -> None:
+) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
     if (
         camera_config.live.stream_name
@@ -849,7 +860,7 @@ class FrigateConfig(FrigateBaseModel):
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )
-    detectors: Dict[str, DetectorConfig] = Field(
+    detectors: Dict[str, BaseDetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
         title="Detector hardware configuration.",
     )
@@ -938,6 +949,15 @@ class FrigateConfig(FrigateBaseModel):
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
+
+            # ONVIF substitution
+            if camera_config.onvif.user or camera_config.onvif.password:
+                camera_config.onvif.user = camera_config.onvif.user.format(
+                    **FRIGATE_ENV_VARS
+                )
+                camera_config.onvif.password = camera_config.onvif.password.format(
+                    **FRIGATE_ENV_VARS
+                )
 
             # Add default filters
             object_keys = camera_config.objects.track
@@ -1032,7 +1052,15 @@ class FrigateConfig(FrigateBaseModel):
                 detector_config.model.dict(exclude_unset=True),
                 config.model.dict(exclude_unset=True),
             )
+
+            if not "path" in merged_model:
+                if detector_config.type == "cpu":
+                    merged_model["path"] = "/cpu_model.tflite"
+                elif detector_config.type == "edgetpu":
+                    merged_model["path"] = "/edgetpu_model.tflite"
+
             detector_config.model = ModelConfig.parse_obj(merged_model)
+            detector_config.model.compute_model_hash()
             config.detectors[key] = detector_config
 
         return config

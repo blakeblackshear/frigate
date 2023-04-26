@@ -114,7 +114,13 @@ class TestHttp(unittest.TestCase):
 
     def test_get_event_list(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
         id2 = "7890.random"
@@ -143,7 +149,13 @@ class TestHttp(unittest.TestCase):
 
     def test_get_good_event(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
 
@@ -157,7 +169,13 @@ class TestHttp(unittest.TestCase):
 
     def test_get_bad_event(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
         bad_id = "654321.other"
@@ -170,7 +188,13 @@ class TestHttp(unittest.TestCase):
 
     def test_delete_event(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
 
@@ -185,7 +209,13 @@ class TestHttp(unittest.TestCase):
 
     def test_event_retention(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
 
@@ -204,7 +234,13 @@ class TestHttp(unittest.TestCase):
 
     def test_set_delete_sub_label(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
         sub_label = "sub"
@@ -232,7 +268,13 @@ class TestHttp(unittest.TestCase):
 
     def test_sub_label_list(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None, PlusApi()
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         id = "123456.random"
         sub_label = "sub"
@@ -255,6 +297,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
 
@@ -267,6 +310,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config,
             self.db,
+            None,
             None,
             None,
             None,
@@ -285,6 +329,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config,
             self.db,
+            None,
             None,
             None,
             None,

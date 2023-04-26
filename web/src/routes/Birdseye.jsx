@@ -6,6 +6,8 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import MsePlayer from '../components/MsePlayer';
 import useSWR from 'swr';
+import { useMemo } from 'preact/hooks';
+import CameraControlPanel from '../components/CameraControlPanel';
 
 export default function Birdseye() {
   const { data: config } = useSWR('config');
@@ -16,6 +18,16 @@ export default function Birdseye() {
   );
   const sourceValues = ['mse', 'webrtc', 'jsmpeg'];
 
+  const ptzCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.cameras)
+      .filter(([_, conf]) => conf.onvif?.host)
+      .map(([_, camera]) => camera.name);
+  }, [config]);
+
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
@@ -25,7 +37,7 @@ export default function Birdseye() {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className="max-w-5xl">
+          <div className="max-w-5xl xl:w-1/2">
             <MsePlayer camera="birdseye" />
           </div>
         </Fragment>
@@ -42,7 +54,7 @@ export default function Birdseye() {
   } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
-        <div className="max-w-5xl">
+        <div className="max-w-5xl xl:w-1/2">
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -50,7 +62,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className="max-w-7xl">
+        <div className="max-w-7xl xl:w-1/2">
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -79,7 +91,21 @@ export default function Birdseye() {
         )}
       </div>
 
-      {player}
+      <div className="xl:flex justify-between">
+        {player}
+
+        {ptzCameras && (
+          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">
+            <Heading size="sm">Control Panel</Heading>
+            {ptzCameras.map((camera) => (
+              <div className="p-4" key={camera}>
+                <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
+                <CameraControlPanel camera={camera} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
