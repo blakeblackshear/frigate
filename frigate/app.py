@@ -27,6 +27,7 @@ from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
+from frigate.ptz import OnvifController
 from frigate.record import RecordingCleanup, RecordingMaintainer
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
@@ -173,8 +174,12 @@ class FrigateApp:
             self.stats_tracking,
             self.detected_frames_processor,
             self.storage_maintainer,
+            self.onvif_controller,
             self.plus_api,
         )
+
+    def init_onvif(self) -> None:
+        self.onvif_controller = OnvifController(self.config)
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -183,7 +188,9 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         comms.append(WebSocketClient(self.config))
-        self.dispatcher = Dispatcher(self.config, self.camera_metrics, comms)
+        self.dispatcher = Dispatcher(
+            self.config, self.onvif_controller, self.camera_metrics, comms
+        )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -382,6 +389,7 @@ class FrigateApp:
             self.set_log_levels()
             self.init_queues()
             self.init_database()
+            self.init_onvif()
             self.init_dispatcher()
         except Exception as e:
             print(e)

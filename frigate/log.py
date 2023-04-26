@@ -19,6 +19,10 @@ from frigate.util import clean_camera_user_pass
 
 def listener_configurer() -> None:
     root = logging.getLogger()
+
+    if root.hasHandlers():
+        root.handlers.clear()
+
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter(
         "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
@@ -31,6 +35,10 @@ def listener_configurer() -> None:
 def root_configurer(queue: Queue) -> None:
     h = handlers.QueueHandler(queue)
     root = logging.getLogger()
+
+    if root.hasHandlers():
+        root.handlers.clear()
+
     root.addHandler(h)
     root.setLevel(logging.INFO)
 

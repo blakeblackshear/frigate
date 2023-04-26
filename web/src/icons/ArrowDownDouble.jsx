@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-export function ArrowRightDouble({ className = '' }) {
+export function ArrowDownDouble({ className = '' }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -11,9 +11,9 @@ export function ArrowRightDouble({ className = '' }) {
       stroke="currentColor"
       className={`${className}`}
     >
-      <path d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
+      <path d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" />
     </svg>
   );
 }
 
-export default memo(ArrowRightDouble);
+export default memo(ArrowDownDouble);

@@ -125,6 +125,13 @@ class MqttConfig(FrigateBaseModel):
         return v
 
 
+class OnvifConfig(FrigateBaseModel):
+    host: str = Field(default="", title="Onvif Host")
+    port: int = Field(default=8000, title="Onvif Port")
+    user: Optional[str] = Field(title="Onvif Username")
+    password: Optional[str] = Field(title="Onvif Password")
+
+
 class RetainModeEnum(str, Enum):
     all = "all"
     motion = "motion"
@@ -607,6 +614,9 @@ class CameraConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
+    onvif: OnvifConfig = Field(
+        default_factory=OnvifConfig, title="Camera Onvif Configuration."
+    )
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )
@@ -938,6 +948,15 @@ class FrigateConfig(FrigateBaseModel):
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
+
+            # ONVIF substitution
+            if camera_config.onvif.user or camera_config.onvif.password:
+                camera_config.onvif.user = camera_config.onvif.user.format(
+                    **FRIGATE_ENV_VARS
+                )
+                camera_config.onvif.password = camera_config.onvif.password.format(
+                    **FRIGATE_ENV_VARS
+                )
 
             # Add default filters
             object_keys = camera_config.objects.track
