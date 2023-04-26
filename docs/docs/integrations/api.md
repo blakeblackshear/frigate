@@ -291,3 +291,7 @@ Get ffprobe output for camera feed paths.
 | param   | Type   | Description                        |
 | ------- | ------ | ---------------------------------- |
 | `paths` | string | `,` separated list of camera paths |
+
+### `GET /api/<camera_name>/ptz/info`
+
+Get PTZ info for the camera.

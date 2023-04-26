@@ -4,6 +4,7 @@ imutils == 0.5.*
 matplotlib == 3.6.*
 mypy == 0.942
 numpy == 1.23.*
+onvif_zeep == 0.2.12
 opencv-python-headless == 4.5.5.*
 paho-mqtt == 1.6.*
 peewee == 3.15.*

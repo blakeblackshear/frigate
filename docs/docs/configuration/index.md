@@ -56,6 +56,14 @@ mqtt:
 ```
 
 ```yaml
+onvif:
+  host: 10.0.10.10
+  port: 8000
+  user: "{FRIGATE_RTSP_USER}"
+  password: "{FRIGATE_RTSP_PASSWORD}"
+```
+
+```yaml
 mqtt:
   # Optional: Enable mqtt server (default: shown below)
   enabled: True
@@ -496,6 +504,19 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+    # Optional: connect to ONVIF camera
+    # to enable PTZ controls.
+    onvif:
+      # Required: host of the camera being connected to.
+      host: 0.0.0.0
+      # Optional: ONVIF port for device (default: shown below).
+      port: 8000
+      # Optional: username for login.
+      # NOTE: Some devices require admin to access ONVIF.
+      user: admin
+      # Optional: password for login.
+      password: admin
 
 # Optional
 ui:
