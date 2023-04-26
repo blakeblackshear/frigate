@@ -1,5 +1,6 @@
+"""Maintain recording segments in cache."""
+
 import datetime
-import itertools
 import logging
 import multiprocessing as mp
 import os
@@ -8,51 +9,40 @@ import random
 import string
 import subprocess as sp
 import threading
-from collections import defaultdict
-from pathlib import Path
-
 import psutil
-from peewee import JOIN, DoesNotExist
+
+from collections import defaultdict
+from multiprocessing.synchronize import Event as MpEvent
+from pathlib import Path
+from typing import Any, Tuple
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.types import RecordMetricsTypes
 from frigate.util import area
 
 logger = logging.getLogger(__name__)
 
-SECONDS_IN_DAY = 60 * 60 * 24
-
-
-def remove_empty_directories(directory):
-    # list all directories recursively and sort them by path,
-    # longest first
-    paths = sorted(
-        [x[0] for x in os.walk(RECORD_DIR)],
-        key=lambda p: len(str(p)),
-        reverse=True,
-    )
-    for path in paths:
-        # don't delete the parent
-        if path == RECORD_DIR:
-            continue
-        if len(os.listdir(path)) == 0:
-            os.rmdir(path)
-
 
 class RecordingMaintainer(threading.Thread):
     def __init__(
-        self, config: FrigateConfig, recordings_info_queue: mp.Queue, stop_event
+        self,
+        config: FrigateConfig,
+        recordings_info_queue: mp.Queue,
+        process_info: dict[str, RecordMetricsTypes],
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
-        self.name = "recording_maint"
+        self.name = "recording_maintainer"
         self.config = config
         self.recordings_info_queue = recordings_info_queue
+        self.process_info = process_info
         self.stop_event = stop_event
-        self.recordings_info = defaultdict(list)
-        self.end_time_cache = {}
+        self.recordings_info: dict[str, Any] = defaultdict(list)
+        self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
 
-    def move_files(self):
+    def move_files(self) -> None:
         cache_files = sorted(
             [
                 d
@@ -77,14 +67,14 @@ class RecordingMaintainer(threading.Thread):
                 continue
 
         # group recordings by camera
-        grouped_recordings = defaultdict(list)
-        for f in cache_files:
+        grouped_recordings: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+        for cache in cache_files:
             # Skip files currently in use
-            if f in files_in_use:
+            if cache in files_in_use:
                 continue
 
-            cache_path = os.path.join(CACHE_DIR, f)
-            basename = os.path.splitext(f)[0]
+            cache_path = os.path.join(CACHE_DIR, cache)
+            basename = os.path.splitext(cache)[0]
             camera, date = basename.rsplit("-", maxsplit=1)
             start_time = datetime.datetime.strptime(date, "%Y%m%d%H%M%S")
 
@@ -104,8 +94,8 @@ class RecordingMaintainer(threading.Thread):
                     f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
                 )
                 to_remove = grouped_recordings[camera][:-keep_count]
-                for f in to_remove:
-                    cache_path = f["cache_path"]
+                for rec in to_remove:
+                    cache_path = rec["cache_path"]
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
@@ -138,7 +128,7 @@ class RecordingMaintainer(threading.Thread):
                 # Just delete files if recordings are turned off
                 if (
                     not camera in self.config.cameras
-                    or not self.config.cameras[camera].record.enabled
+                    or not self.process_info[camera]["record_enabled"].value
                 ):
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
@@ -170,7 +160,7 @@ class RecordingMaintainer(threading.Thread):
                     else:
                         if duration == -1:
                             logger.warning(
-                                f"Failed to probe corrupt segment {cache_path}: {p.returncode} - {p.stderr}"
+                                f"Failed to probe corrupt segment {cache_path} : {p.returncode} - {str(p.stderr)}"
                             )
 
                         logger.warning(
@@ -241,7 +231,9 @@ class RecordingMaintainer(threading.Thread):
                         camera, start_time, end_time, duration, cache_path, record_mode
                     )
 
-    def segment_stats(self, camera, start_time, end_time):
+    def segment_stats(
+        self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
+    ) -> Tuple[int, int]:
         active_count = 0
         motion_count = 0
         for frame in self.recordings_info[camera]:
@@ -266,13 +258,13 @@ class RecordingMaintainer(threading.Thread):
 
     def store_segment(
         self,
-        camera,
+        camera: str,
         start_time: datetime.datetime,
         end_time: datetime.datetime,
-        duration,
-        cache_path,
+        duration: float,
+        cache_path: str,
         store_mode: RetainModeEnum,
-    ):
+    ) -> None:
         motion_count, active_count = self.segment_stats(camera, start_time, end_time)
 
         # check if the segment shouldn't be stored
@@ -363,9 +355,9 @@ class RecordingMaintainer(threading.Thread):
         # clear end_time cache
         self.end_time_cache.pop(cache_path, None)
 
-    def run(self):
+    def run(self) -> None:
         # Check for new files every 5 seconds
-        wait_time = 5
+        wait_time = 5.0
         while not self.stop_event.wait(wait_time):
             run_start = datetime.datetime.now().timestamp()
 
@@ -380,7 +372,7 @@ class RecordingMaintainer(threading.Thread):
                         regions,
                     ) = self.recordings_info_queue.get(False)
 
-                    if self.config.cameras[camera].record.enabled:
+                    if self.process_info[camera]["record_enabled"].value:
                         self.recordings_info[camera].append(
                             (
                                 frame_time,
@@ -403,231 +395,3 @@ class RecordingMaintainer(threading.Thread):
             wait_time = max(0, 5 - duration)
 
         logger.info(f"Exiting recording maintenance...")
-
-
-class RecordingCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event):
-        threading.Thread.__init__(self)
-        self.name = "recording_cleanup"
-        self.config = config
-        self.stop_event = stop_event
-
-    def clean_tmp_clips(self):
-        # delete any clips more than 5 minutes old
-        for p in Path("/tmp/cache").rglob("clip_*.mp4"):
-            logger.debug(f"Checking tmp clip {p}.")
-            if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
-                logger.debug("Deleting tmp clip.")
-
-                # empty contents of file before unlinking https://github.com/blakeblackshear/frigate/issues/4769
-                with open(p, "w"):
-                    pass
-                p.unlink(missing_ok=True)
-
-    def expire_recordings(self):
-        logger.debug("Start expire recordings (new).")
-
-        logger.debug("Start deleted cameras.")
-        # Handle deleted cameras
-        expire_days = self.config.record.retain.days
-        expire_before = (
-            datetime.datetime.now() - datetime.timedelta(days=expire_days)
-        ).timestamp()
-        no_camera_recordings: Recordings = Recordings.select().where(
-            Recordings.camera.not_in(list(self.config.cameras.keys())),
-            Recordings.end_time < expire_before,
-        )
-
-        deleted_recordings = set()
-        for recording in no_camera_recordings:
-            Path(recording.path).unlink(missing_ok=True)
-            deleted_recordings.add(recording.id)
-
-        logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-        Recordings.delete().where(Recordings.id << deleted_recordings).execute()
-        logger.debug("End deleted cameras.")
-
-        logger.debug("Start all cameras.")
-        for camera, config in self.config.cameras.items():
-            logger.debug(f"Start camera: {camera}.")
-            # Get the timestamp for cutoff of retained days
-            expire_days = config.record.retain.days
-            expire_date = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days)
-            ).timestamp()
-
-            # Get recordings to check for expiration
-            recordings: Recordings = (
-                Recordings.select()
-                .where(
-                    Recordings.camera == camera,
-                    Recordings.end_time < expire_date,
-                )
-                .order_by(Recordings.start_time)
-            )
-
-            # Get all the events to check against
-            events: Event = (
-                Event.select()
-                .where(
-                    Event.camera == camera,
-                    # need to ensure segments for all events starting
-                    # before the expire date are included
-                    Event.start_time < expire_date,
-                    Event.has_clip,
-                )
-                .order_by(Event.start_time)
-                .objects()
-            )
-
-            # loop over recordings and see if they overlap with any non-expired events
-            # TODO: expire segments based on segment stats according to config
-            event_start = 0
-            deleted_recordings = set()
-            for recording in recordings.objects().iterator():
-                keep = False
-                # Now look for a reason to keep this recording segment
-                for idx in range(event_start, len(events)):
-                    event = events[idx]
-
-                    # if the event starts in the future, stop checking events
-                    # and let this recording segment expire
-                    if event.start_time > recording.end_time:
-                        keep = False
-                        break
-
-                    # if the event is in progress or ends after the recording starts, keep it
-                    # and stop looking at events
-                    if event.end_time is None or event.end_time >= recording.start_time:
-                        keep = True
-                        break
-
-                    # if the event ends before this recording segment starts, skip
-                    # this event and check the next event for an overlap.
-                    # since the events and recordings are sorted, we can skip events
-                    # that end before the previous recording segment started on future segments
-                    if event.end_time < recording.start_time:
-                        event_start = idx
-
-                # Delete recordings outside of the retention window or based on the retention mode
-                if (
-                    not keep
-                    or (
-                        config.record.events.retain.mode == RetainModeEnum.motion
-                        and recording.motion == 0
-                    )
-                    or (
-                        config.record.events.retain.mode
-                        == RetainModeEnum.active_objects
-                        and recording.objects == 0
-                    )
-                ):
-                    Path(recording.path).unlink(missing_ok=True)
-                    deleted_recordings.add(recording.id)
-
-            logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-            # delete up to 100,000 at a time
-            max_deletes = 100000
-            deleted_recordings_list = list(deleted_recordings)
-            for i in range(0, len(deleted_recordings_list), max_deletes):
-                Recordings.delete().where(
-                    Recordings.id << deleted_recordings_list[i : i + max_deletes]
-                ).execute()
-
-            logger.debug(f"End camera: {camera}.")
-
-        logger.debug("End all cameras.")
-        logger.debug("End expire recordings (new).")
-
-    def expire_files(self):
-        logger.debug("Start expire files (legacy).")
-
-        default_expire = (
-            datetime.datetime.now().timestamp()
-            - SECONDS_IN_DAY * self.config.record.retain.days
-        )
-        delete_before = {}
-
-        for name, camera in self.config.cameras.items():
-            delete_before[name] = (
-                datetime.datetime.now().timestamp()
-                - SECONDS_IN_DAY * camera.record.retain.days
-            )
-
-        # find all the recordings older than the oldest recording in the db
-        try:
-            oldest_recording = Recordings.select().order_by(Recordings.start_time).get()
-
-            p = Path(oldest_recording.path)
-            oldest_timestamp = p.stat().st_mtime - 1
-        except DoesNotExist:
-            oldest_timestamp = datetime.datetime.now().timestamp()
-        except FileNotFoundError:
-            logger.warning(f"Unable to find file from recordings database: {p}")
-            Recordings.delete().where(Recordings.id == oldest_recording.id).execute()
-            return
-
-        logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
-        process = sp.run(
-            ["find", RECORD_DIR, "-type", "f", "!", "-newermt", f"@{oldest_timestamp}"],
-            capture_output=True,
-            text=True,
-        )
-        files_to_check = process.stdout.splitlines()
-
-        for f in files_to_check:
-            p = Path(f)
-            try:
-                if p.stat().st_mtime < delete_before.get(p.parent.name, default_expire):
-                    p.unlink(missing_ok=True)
-            except FileNotFoundError:
-                logger.warning(f"Attempted to expire missing file: {f}")
-
-        logger.debug("End expire files (legacy).")
-
-    def sync_recordings(self):
-        logger.debug("Start sync recordings.")
-
-        # get all recordings in the db
-        recordings: Recordings = Recordings.select()
-
-        # get all recordings files on disk
-        process = sp.run(
-            ["find", RECORD_DIR, "-type", "f"],
-            capture_output=True,
-            text=True,
-        )
-        files_on_disk = process.stdout.splitlines()
-
-        recordings_to_delete = []
-        for recording in recordings.objects().iterator():
-            if not recording.path in files_on_disk:
-                recordings_to_delete.append(recording.id)
-
-        logger.debug(
-            f"Deleting {len(recordings_to_delete)} recordings with missing files"
-        )
-        # delete up to 100,000 at a time
-        max_deletes = 100000
-        for i in range(0, len(recordings_to_delete), max_deletes):
-            Recordings.delete().where(
-                Recordings.id << recordings_to_delete[i : i + max_deletes]
-            ).execute()
-
-        logger.debug("End sync recordings.")
-
-    def run(self):
-        # on startup sync recordings with disk (disabled due to too much CPU usage)
-        # self.sync_recordings()
-
-        # Expire tmp clips every minute, recordings and clean directories every hour.
-        for counter in itertools.cycle(range(self.config.record.expire_interval)):
-            if self.stop_event.wait(60):
-                logger.info(f"Exiting recording cleanup...")
-                break
-            self.clean_tmp_clips()
-
-            if counter == 0:
-                self.expire_recordings()
-                self.expire_files()
-                remove_empty_directories(RECORD_DIR)
