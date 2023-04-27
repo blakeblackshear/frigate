@@ -41,6 +41,7 @@ from frigate.monitoring.prometheus import setupRegistry
 
 from frigate.monitoring.stats import stats_snapshot
 from frigate.plus import PlusApi
+from frigate.ptz import OnvifController
 from frigate.util import (
     clean_camera_user_pass,
     ffprobe_stream,
@@ -63,6 +64,7 @@ def create_app(
     stats_tracking,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
+    onvif: OnvifController,
     plus_api: PlusApi,
 ):
     app = Flask(__name__)
@@ -81,6 +83,7 @@ def create_app(
     app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
+    app.onvif = onvif
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
@@ -998,6 +1001,14 @@ def mjpeg_feed(camera_name):
             ),
             mimetype="multipart/x-mixed-replace; boundary=frame",
         )
+    else:
+        return "Camera named {} not found".format(camera_name), 404
+
+
+@bp.route("/<camera_name>/ptz/info")
+def camera_ptz_info(camera_name):
+    if camera_name in current_app.frigate_config.cameras:
+        return jsonify(current_app.onvif.get_camera_info(camera_name))
     else:
         return "Camera named {} not found".format(camera_name), 404
 

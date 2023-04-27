@@ -8,7 +8,6 @@ CACHE_DIR = "/tmp/cache"
 YAML_EXT = (".yaml", ".yml")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
-MAX_SEGMENT_DURATION = 600
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
 # Regex Consts
@@ -23,3 +22,8 @@ DRIVER_ENV_VAR = "LIBVA_DRIVER_NAME"
 DRIVER_AMD = "radeonsi"
 DRIVER_INTEL_i965 = "i965"
 DRIVER_INTEL_iHD = "iHD"
+
+# Record Values
+
+MAX_SEGMENT_DURATION = 600
+SECONDS_IN_DAY = 60 * 60 * 24

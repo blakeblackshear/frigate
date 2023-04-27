@@ -120,6 +120,15 @@ export function useSnapshotsState(camera) {
   return { payload, send, connected };
 }
 
+export function usePtzCommand(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useWs(`${camera}/ptz`, `${camera}/ptz`);
+  return { payload, send, connected };
+}
+
 export function useRestart() {
   const {
     value: { payload },
