@@ -396,6 +396,7 @@ class BirdseyeConfig(FrigateBaseModel):
 # uses BaseModel because some global attributes are not available at the camera level
 class BirdseyeCameraConfig(BaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
+    order: int = Field(default=0, title="Position of the camera in the birdseye view.")
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode for camera."
     )
