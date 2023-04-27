@@ -744,21 +744,24 @@ def get_cgroups_version() -> str:
     """Determine what version of cgroups is enabled."""
 
     cgroup_path = "/sys/fs/cgroup"
-    
+
     try:
         stat_info = os.stat(cgroup_path)
         value = os.statvfs(cgroup_path).f_type
-        
-        if value == os.fsencode('cgroup2fs'):
+
+        if value == os.fsencode("cgroup2fs"):
             return "cgroup2"
-        elif value == os.fsencode('tmpfs'):
+        elif value == os.fsencode("tmpfs"):
             return "cgroup"
         else:
-            logger.debug(f"Could not determine cgroups version: unhandled filesystem {value}")
+            logger.debug(
+                f"Could not determine cgroups version: unhandled filesystem {value}"
+            )
     except Exception as e:
         logger.debug(f"Could not determine cgroups version: {e}")
 
     return "unknown"
+
 
 def get_docker_memlimit_bytes() -> int:
     """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected."""
@@ -768,7 +771,7 @@ def get_docker_memlimit_bytes() -> int:
         memlimit_path = "/sys/fs/cgroup/memory.max"
 
         try:
-            with open(memlimit_path, 'r') as f:
+            with open(memlimit_path, "r") as f:
                 value = f.read().strip()
 
             if value.isnumeric():
@@ -780,18 +783,19 @@ def get_docker_memlimit_bytes() -> int:
 
     return -1
 
+
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id."""
     usages = {}
     docker_memlimit = get_docker_memlimit_bytes() / 1024
 
-    for pid in os.listdir('/proc'):
+    for pid in os.listdir("/proc"):
         if pid.isdigit():
             try:
-                with open(f'/proc/{pid}/stat', 'r') as f:
+                with open(f"/proc/{pid}/stat", "r") as f:
                     stat_info = f.read().split()
 
-                with open('/proc/meminfo', 'r') as f:
+                with open("/proc/meminfo", "r") as f:
                     mem_info = f.readlines()
                     total_mem = int(mem_info[0].split()[1])
 
