@@ -345,6 +345,33 @@ export default function System() {
             </div>
           )}
 
+          <Heading size="lg">Other Processes</Heading>
+          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+            {['go2rtc', 'recording'].map((process) => (
+              <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                <div className="capitalize text-lg flex justify-between p-4">
+                  <div className="text-lg flex justify-between">{process}</div>
+                </div>
+                <div className="p-2">
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
+                        <Th>CPU %</Th>
+                        <Th>Memory %</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr key="ffmpeg" index="0">
+                        <Td>{cpu_usages[process]?.['cpu'] || '- '}%</Td>
+                        <Td>{cpu_usages[process]?.['mem'] || '- '}%</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <p>System stats update automatically every {config.mqtt.stats_interval} seconds.</p>
         </Fragment>
       )}
