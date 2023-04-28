@@ -745,18 +745,27 @@ def get_cgroups_version() -> str:
 
     cgroup_path = "/sys/fs/cgroup"
 
-    try:
-        stat_info = os.stat(cgroup_path)
-        value = os.statvfs(cgroup_path).f_type
+    if not os.path.ismount(cgroup_path):
+        logger.debug(f"{cgroup_path} is not a mount point.")
+        return "unknown"
 
-        if value == os.fsencode("cgroup2fs"):
-            return "cgroup2"
-        elif value == os.fsencode("tmpfs"):
-            return "cgroup"
-        else:
-            logger.debug(
-                f"Could not determine cgroups version: unhandled filesystem {value}"
-            )
+    try:
+        with open("/proc/mounts", "r") as f:
+            mounts = f.readlines()
+
+        for mount in mounts:
+            mount_info = mount.split()
+            if mount_info[1] == cgroup_path:
+                fs_type = mount_info[2]
+                if fs_type == "cgroup2fs" or fs_type == "cgroup2":
+                    return "cgroup2"
+                elif fs_type == "tmpfs":
+                    return "cgroup"
+                else:
+                    logger.debug(
+                        f"Could not determine cgroups version: unhandled filesystem {fs_type}"
+                    )
+                break
     except Exception as e:
         logger.debug(f"Could not determine cgroups version: {e}")
 
@@ -785,32 +794,32 @@ def get_docker_memlimit_bytes() -> int:
 
 
 def get_cpu_stats() -> dict[str, dict]:
-    """Get cpu usages for each process id."""
+    """Get cpu usages for each process id"""
     usages = {}
     docker_memlimit = get_docker_memlimit_bytes() / 1024
+    total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
     for pid in os.listdir("/proc"):
         if pid.isdigit():
             try:
                 with open(f"/proc/{pid}/stat", "r") as f:
-                    stat_info = f.read().split()
+                    stats = f.readline().split()
+                utime = int(stats[13])
+                stime = int(stats[14])
+                cpu_usage = round((utime + stime) / os.sysconf("SC_CLK_TCK"))
 
-                with open("/proc/meminfo", "r") as f:
-                    mem_info = f.readlines()
-                    total_mem = int(mem_info[0].split()[1])
+                with open(f"/proc/{pid}/statm", "r") as f:
+                    mem_stats = f.readline().split()
+                mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
 
-                mem_res = int(stat_info[23]) / 1024
                 if docker_memlimit > 0:
-                    mem_pct = round((float(mem_res) / float(docker_memlimit)) * 100, 1)
+                    mem_pct = round((mem_res / docker_memlimit) * 100, 1)
                 else:
-                    mem_pct = round((float(mem_res) / float(total_mem)) * 100, 1)
-
-                cpu_total_time = sum(int(x) for x in stat_info[13:17])
-                cpu_usage = round(cpu_total_time / os.sysconf("SC_CLK_TCK"), 1)
+                    mem_pct = round((mem_res / total_mem) * 100, 1)
 
                 usages[pid] = {
-                    "cpu": cpu_usage,
-                    "mem": mem_pct,
+                    "cpu": str(round(cpu_usage, 2)),
+                    "mem": f"{mem_pct}",
                 }
             except:
                 continue
