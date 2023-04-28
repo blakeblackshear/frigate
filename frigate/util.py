@@ -824,7 +824,14 @@ def get_cpu_stats() -> dict[str, dict]:
                 else:
                     mem_pct = stats[9]
 
-                usages[stats[0]] = {
+                idx = stats[0]
+
+                if stats[-1] == "go2rtc":
+                    idx = "go2rtc"
+                elif stats[-1] == "frigate.r+":
+                    idx = "recording"
+
+                usages[idx] = {
                     "cpu": stats[8],
                     "mem": mem_pct,
                 }
