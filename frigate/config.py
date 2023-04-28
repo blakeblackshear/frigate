@@ -272,6 +272,9 @@ class DetectConfig(FrigateBaseModel):
         default_factory=StationaryConfig,
         title="Stationary objects config.",
     )
+    annotation_offset: int = Field(
+        default=0, title="Milliseconds to offset detect annotations by."
+    )
 
 
 class FilterConfig(FrigateBaseModel):

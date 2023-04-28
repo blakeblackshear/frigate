@@ -5,7 +5,7 @@ import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import Button from './Button';
 
 export default function TimelineSummary({ event, onFrameSelected }) {
@@ -17,6 +17,14 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   ]);
 
   const { data: config } = useSWR('config');
+
+  const annotationOffset = useMemo(() => {
+    if (!config) {
+      return 0;
+    }
+
+    return (config.cameras[event.camera]?.detect?.annotation_offset || 0) / 1000;
+  }, [config, event]);
 
   const [timeIndex, setTimeIndex] = useState(-1);
 
@@ -53,7 +61,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
 
   const onSelectMoment = async (index) => {
     setTimeIndex(index);
-    onFrameSelected(eventTimeline[index], getSeekSeconds(eventTimeline[index].timestamp));
+    onFrameSelected(eventTimeline[index], getSeekSeconds(eventTimeline[index].timestamp + annotationOffset));
   };
 
   if (!eventTimeline || !config) {
