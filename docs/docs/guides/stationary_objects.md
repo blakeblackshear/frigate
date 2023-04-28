@@ -17,7 +17,7 @@ Frigate is designed to track objects as they move and over-masking can prevent i
 
 :::info
 
-Once a vehicle crosses the entrance into the parking area, that event will stay `In Progress` until it is no longer seen in the frame. Frigate is designed to have an event last as long as an object is visible in the frame, an event being `in progress` does not mean the event is being constantly recorded. You can define the recording behavior by adjusting the [recording retention settings](../configuration/record.md).
+Once a vehicle crosses the entrance into the parking area, that event will stay `In Progress` until it is no longer seen in the frame. Frigate is designed to have an event last as long as an object is visible in the frame, an event being `In Progress` does not mean the event is being constantly recorded. You can define the recording behavior by adjusting the [recording retention settings](../configuration/record.md).
 
 :::
 
