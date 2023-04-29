@@ -21,6 +21,7 @@ from frigate.config import (
     FrigateConfig,
 )
 from frigate.const import CLIPS_DIR
+from frigate.timeline import TimelineSourceEnum
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
@@ -656,7 +657,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
-            self.event_queue.put(("start", camera, obj.to_dict()))
+            self.event_queue.put((TimelineSourceEnum.tracked_object, "start", camera, obj.to_dict()))
 
         def update(camera, obj: TrackedObject, current_frame_time):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
@@ -670,7 +671,7 @@ class TrackedObjectProcessor(threading.Thread):
             self.dispatcher.publish("events", json.dumps(message), retain=False)
             obj.previous = after
             self.event_queue.put(
-                ("update", camera, obj.to_dict(include_thumbnail=True))
+                (TimelineSourceEnum.tracked_object, "update", camera, obj.to_dict(include_thumbnail=True))
             )
 
         def end(camera, obj: TrackedObject, current_frame_time):
@@ -722,7 +723,7 @@ class TrackedObjectProcessor(threading.Thread):
                 }
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
 
-            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
+            self.event_queue.put((TimelineSourceEnum.tracked_object, "end", camera, obj.to_dict(include_thumbnail=True)))
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
