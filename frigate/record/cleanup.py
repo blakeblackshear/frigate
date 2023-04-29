@@ -142,7 +142,9 @@ class RecordingCleanup(threading.Thread):
 
                     # delete timeline entries relevant to this recording segment
                     Timeline.delete(
-                        Timeline.timestamp.between(recording.start_time, recording.end_time),
+                        Timeline.timestamp.between(
+                            recording.start_time, recording.end_time
+                        ),
                         Timeline.timestamp < expire_date,
                         Timeline.camera == camera,
                     ).execute()
