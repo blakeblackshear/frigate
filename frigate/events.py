@@ -4,7 +4,7 @@ import os
 import queue
 import threading
 
-
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +13,6 @@ from peewee import fn
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
-from frigate.timeline import TimelineSourceEnum
 from frigate.types import CameraMetricsTypes
 from frigate.util import to_relative_box
 
@@ -22,6 +21,12 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 logger = logging.getLogger(__name__)
+
+
+class DetectionTypeEnum(str, Enum):
+    # api = "api"
+    # audio = "audio"
+    tracked_object = "tracked_object"
 
 
 def should_update_db(prev_event: Event, current_event: Event) -> bool:
@@ -60,6 +65,45 @@ class EventProcessor(threading.Thread):
         self.timeline_queue = timeline_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
+
+    def run(self) -> None:
+        # set an end_time on events without an end_time on startup
+        Event.update(end_time=Event.start_time + 30).where(
+            Event.end_time == None
+        ).execute()
+
+        while not self.stop_event.is_set():
+            try:
+                source_type, event_type, camera, event_data = self.event_queue.get(
+                    timeout=1
+                )
+            except queue.Empty:
+                continue
+
+            logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
+
+            self.timeline_queue.put(
+                (
+                    camera,
+                    source_type,
+                    event_type,
+                    self.events_in_process.get(event_data["id"]),
+                    event_data,
+                )
+            )
+
+            if source_type == DetectionTypeEnum.tracked_object:
+                if event_type == "start":
+                    self.events_in_process[event_data["id"]] = event_data
+                    continue
+
+                self.handle_object_detection(event_type, camera, event_data)
+
+        # set an end_time on events without an end_time before exiting
+        Event.update(end_time=datetime.datetime.now().timestamp()).where(
+            Event.end_time == None
+        ).execute()
+        logger.info(f"Exiting event processor...")
 
     def handle_object_detection(
         self, event_type: str, camera: str, event_data: dict[str, Any]
@@ -152,45 +196,6 @@ class EventProcessor(threading.Thread):
         if event_type == "end":
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
-
-    def run(self) -> None:
-        # set an end_time on events without an end_time on startup
-        Event.update(end_time=Event.start_time + 30).where(
-            Event.end_time == None
-        ).execute()
-
-        while not self.stop_event.is_set():
-            try:
-                source_type, event_type, camera, event_data = self.event_queue.get(
-                    timeout=1
-                )
-            except queue.Empty:
-                continue
-
-            logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
-
-            self.timeline_queue.put(
-                (
-                    camera,
-                    source_type,
-                    event_type,
-                    self.events_in_process.get(event_data["id"]),
-                    event_data,
-                )
-            )
-
-            if source_type == TimelineSourceEnum.tracked_object:
-                if event_type == "start":
-                    self.events_in_process[event_data["id"]] = event_data
-                    continue
-
-                self.handle_object_detection(event_type, camera, event_data)
-
-        # set an end_time on events without an end_time before exiting
-        Event.update(end_time=datetime.datetime.now().timestamp()).where(
-            Event.end_time == None
-        ).execute()
-        logger.info(f"Exiting event processor...")
 
 
 class EventCleanup(threading.Thread):
