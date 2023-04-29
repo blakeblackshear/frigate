@@ -41,7 +41,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     )
     migrator.add_fields(
         Event,
-        data=pw_pext.JSONField(),
+        data=JSONField(default={}),
     )
 
 

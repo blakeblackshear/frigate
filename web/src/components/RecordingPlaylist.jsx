@@ -163,7 +163,9 @@ export function EventCard({ camera, event }) {
                 <div className="text-xs md:text-normal text-gray-300">Start: {format(start, 'HH:mm:ss')}</div>
                 <div className="text-xs md:text-normal text-gray-300">Duration: {duration}</div>
               </div>
-              <div className="text-lg text-white text-right leading-tight">{(event.top_score * 100).toFixed(1)}%</div>
+              <div className="text-lg text-white text-right leading-tight">
+                {((event?.data?.top_score || event.top_score) * 100).toFixed(1)}%
+              </div>
             </div>
           </div>
         </div>
