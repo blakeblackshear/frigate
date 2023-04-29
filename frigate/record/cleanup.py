@@ -95,14 +95,6 @@ class RecordingCleanup(threading.Thread):
                 .objects()
             )
 
-            timeline: Timeline = (
-                Timeline.select(Timeline.timestamp)
-                .where(Timeline.camera == camera, Timeline.timestamp < expire_date)
-                .order_by(Timeline.timestamp)
-                .objects()
-                .iterator()
-            )
-
             # loop over recordings and see if they overlap with any non-expired events
             # TODO: expire segments based on segment stats according to config
             event_start = 0
@@ -149,12 +141,11 @@ class RecordingCleanup(threading.Thread):
                     deleted_recordings.add(recording.id)
 
                     # delete timeline entries relevant to this recording segment
-                    for time in [
-                        t
-                        for t in timeline
-                        if recording.start_time < t.timestamp < recording.end_time
-                    ]:
-                        Timeline.delete().where(Timeline.timestamp == time.timestamp)
+                    Timeline.delete(
+                        Timeline.timestamp.between(recording.start_time, recording.end_time),
+                        Timeline.timestamp < expire_date,
+                        Timeline.camera == camera,
+                    ).execute()
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
             # delete up to 100,000 at a time
