@@ -6,7 +6,6 @@ import threading
 
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 from peewee import fn
 
@@ -106,7 +105,10 @@ class EventProcessor(threading.Thread):
         logger.info(f"Exiting event processor...")
 
     def handle_object_detection(
-        self, event_type: str, camera: str, event_data: dict[str, Any]
+        self,
+        event_type: str,
+        camera: str,
+        event_data: Event,
     ) -> None:
         """handle tracked object event updates."""
         # if this is the first message, just store it and continue, its not time to insert it in the db
