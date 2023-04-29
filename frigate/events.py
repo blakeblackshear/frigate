@@ -172,9 +172,7 @@ class EventProcessor(threading.Thread):
                 Event.model_type: first_detector.model.model_type,
                 Event.detector_type: first_detector.type,
                 Event.data: {
-                    "area": event_data.get("area", 0),
                     "box": box,
-                    "ratio": event_data.get("ratio", width / height),
                     "region": region,
                     "score": score,
                     "top_score": event_data["top_score"],
