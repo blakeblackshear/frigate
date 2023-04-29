@@ -141,17 +141,21 @@ class EventProcessor(threading.Thread):
                     Event.camera: camera,
                     Event.start_time: start_time,
                     Event.end_time: end_time,
-                    Event.top_score: event_data["top_score"],
-                    Event.score: score,
                     Event.zones: list(event_data["entered_zones"]),
                     Event.thumbnail: event_data["thumbnail"],
-                    Event.region: region,
-                    Event.box: box,
                     Event.has_clip: event_data["has_clip"],
                     Event.has_snapshot: event_data["has_snapshot"],
                     Event.model_hash: first_detector.model.model_hash,
                     Event.model_type: first_detector.model.model_type,
                     Event.detector_type: first_detector.type,
+                    Event.data: {
+                        "area": event_data.get("area", 0),
+                        "box": box,
+                        "ratio": event_data.get("ratio", width / height),
+                        "region": region,
+                        "score": score,
+                        "top_score": event_data["top_score"],
+                    }
                 }
 
                 (
