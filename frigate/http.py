@@ -44,7 +44,6 @@ from frigate.util import (
     restart_frigate,
     vainfo_hwaccel,
     get_tz_modifiers,
-    to_relative_box,
 )
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -196,7 +195,7 @@ def send_to_plus(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.box):
+    if any(d > 1 for d in event.data["box"]):
         include_annotation = None
 
     if event.end_time is None:
@@ -252,8 +251,8 @@ def send_to_plus(id):
     event.save()
 
     if not include_annotation is None:
-        region = event.region
-        box = event.box
+        region = event.data["region"]
+        box = event.data["box"]
 
         try:
             current_app.plus_api.add_annotation(
@@ -294,7 +293,7 @@ def false_positive(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.box):
+    if any(d > 1 for d in event.data["box"]):
         message = f"Events prior to 0.13 cannot be submitted as false positives"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 400)
@@ -311,11 +310,15 @@ def false_positive(id):
         # need to refetch the event now that it has a plus_id
         event = Event.get(Event.id == id)
 
-    region = event.region
-    box = event.box
+    region = event.data["region"]
+    box = event.data["box"]
 
     # provide top score if score is unavailable
-    score = event.top_score if event.score is None else event.score
+    score = (
+        (event.data["top_score"] if event.data["top_score"] else event.top_score)
+        if event.data["score"] is None
+        else event.data["score"]
+    )
 
     try:
         current_app.plus_api.add_false_positive(
@@ -756,6 +759,7 @@ def events():
         Event.top_score,
         Event.false_positive,
         Event.box,
+        Event.data,
     ]
 
     if camera != "all":

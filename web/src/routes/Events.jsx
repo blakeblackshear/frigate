@@ -206,7 +206,7 @@ export default function Events({ path, ...props }) {
     e.stopPropagation();
     setDownloadEvent((_prev) => ({
       id: event.id,
-      box: event.box,
+      box: event?.data?.box || event.box,
       label: event.label,
       has_clip: event.has_clip,
       has_snapshot: event.has_snapshot,
@@ -599,7 +599,7 @@ export default function Events({ path, ...props }) {
                           {event.sub_label
                             ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
                             : event.label.replaceAll('_', ' ')}
-                          ({(event.top_score * 100).toFixed(0)}%)
+                          ({((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%)
                         </div>
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />
@@ -638,7 +638,9 @@ export default function Events({ path, ...props }) {
                               <Button
                                 color="gray"
                                 disabled={uploading.includes(event.id)}
-                                onClick={(e) => showSubmitToPlus(event.id, event.label, event.box, e)}
+                                onClick={(e) =>
+                                  showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)
+                                }
                               >
                                 {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
                               </Button>
@@ -680,7 +682,9 @@ export default function Events({ path, ...props }) {
                             <div>
                               <TimelineSummary
                                 event={event}
-                                onFrameSelected={(frame, seekSeconds) => onEventFrameSelected(event, frame, seekSeconds)}
+                                onFrameSelected={(frame, seekSeconds) =>
+                                  onEventFrameSelected(event, frame, seekSeconds)
+                                }
                               />
                               <div>
                                 <VideoPlayer
@@ -738,7 +742,9 @@ export default function Events({ path, ...props }) {
                                     ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
                                     : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
-                                alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
+                                alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
+                                  0
+                                )}% confidence`}
                               />
                             </div>
                           ) : null}
