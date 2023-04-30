@@ -12,7 +12,7 @@ from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.record.util import remove_empty_directories
 
 logger = logging.getLogger(__name__)
@@ -139,6 +139,15 @@ class RecordingCleanup(threading.Thread):
                 ):
                     Path(recording.path).unlink(missing_ok=True)
                     deleted_recordings.add(recording.id)
+
+                    # delete timeline entries relevant to this recording segment
+                    Timeline.delete(
+                        Timeline.timestamp.between(
+                            recording.start_time, recording.end_time
+                        ),
+                        Timeline.timestamp < expire_date,
+                        Timeline.camera == camera,
+                    ).execute()
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
             # delete up to 100,000 at a time
