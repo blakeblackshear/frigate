@@ -141,7 +141,7 @@ class RecordingCleanup(threading.Thread):
                     deleted_recordings.add(recording.id)
 
                     # delete timeline entries relevant to this recording segment
-                    Timeline.delete(
+                    Timeline.delete().where(
                         Timeline.timestamp.between(
                             recording.start_time, recording.end_time
                         ),
