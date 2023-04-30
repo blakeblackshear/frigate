@@ -1,3 +1,4 @@
+import json
 import unittest
 import numpy as np
 from pydantic import ValidationError
@@ -7,6 +8,7 @@ from frigate.config import (
     FrigateConfig,
 )
 from frigate.detectors import DetectorTypeEnum
+from frigate.plus import PlusApi
 from frigate.util import deep_merge, load_config_with_no_duplicates
 
 
@@ -27,6 +29,32 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                 }
+            },
+        }
+
+        self.plus_model_info = {
+            "id": "e63b7345cc83a84ed79dedfc99c16616",
+            "name": "SSDLite Mobiledet",
+            "description": "Fine tuned model",
+            "trainDate": "2023-04-28T23:22:01.262Z",
+            "type": "ssd",
+            "supportedDetectors": ["edgetpu"],
+            "width": 320,
+            "height": 320,
+            "inputShape": "nhwc",
+            "pixelFormat": "rgb",
+            "labelMap": {
+                "0": "amazon",
+                "1": "car",
+                "2": "cat",
+                "3": "deer",
+                "4": "dog",
+                "5": "face",
+                "6": "fedex",
+                "7": "license_plate",
+                "8": "package",
+                "9": "person",
+                "10": "ups",
             },
         }
 
@@ -814,6 +842,40 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config()
         assert runtime_config.model.merged_labelmap[0] == "person"
+
+    def test_plus_labelmap(self):
+        with open("/config/model_cache/test", "w") as f:
+            json.dump(self.plus_model_info, f)
+        with open("/config/model_cache/test.json", "w") as f:
+            json.dump(self.plus_model_info, f)
+
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "model": {"path": "plus://test"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert config == frigate_config.dict(exclude_unset=True)
+
+        runtime_config = frigate_config.runtime_config(PlusApi())
+        assert runtime_config.model.merged_labelmap[0] == "amazon"
 
     def test_fails_on_invalid_role(self):
         config = {
