@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 import numpy as np
 from pydantic import ValidationError
@@ -7,6 +8,7 @@ from frigate.config import (
     BirdseyeModeEnum,
     FrigateConfig,
 )
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.plus import PlusApi
 from frigate.util import deep_merge, load_config_with_no_duplicates
@@ -57,6 +59,9 @@ class TestConfig(unittest.TestCase):
                 "10": "ups",
             },
         }
+
+        if not os.path.exists(MODEL_CACHE_DIR) and not os.path.islink(MODEL_CACHE_DIR):
+            os.makedirs(MODEL_CACHE_DIR)
 
     def test_config_class(self):
         frigate_config = FrigateConfig(**self.minimal)
