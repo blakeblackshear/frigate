@@ -118,4 +118,4 @@ To do this:
 1. Download the go2rtc build to the /config folder.
 2. Rename the build to `go2rtc`.
 3. Give `go2rtc` execute permission.
-3. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
+4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
