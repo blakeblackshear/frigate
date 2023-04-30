@@ -22,7 +22,7 @@ from typing import Dict
 logger = logging.getLogger(__name__)
 
 
-class DetectionTypeEnum(str, Enum):
+class EventTypeEnum(str, Enum):
     # api = "api"
     # audio = "audio"
     tracked_object = "tracked_object"
@@ -91,7 +91,7 @@ class EventProcessor(threading.Thread):
                 )
             )
 
-            if source_type == DetectionTypeEnum.tracked_object:
+            if source_type == EventTypeEnum.tracked_object:
                 if event_type == "start":
                     self.events_in_process[event_data["id"]] = event_data
                     continue

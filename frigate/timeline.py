@@ -5,7 +5,7 @@ import threading
 import queue
 
 from frigate.config import FrigateConfig
-from frigate.events import DetectionTypeEnum
+from frigate.events import EventTypeEnum
 from frigate.models import Timeline
 
 from multiprocessing.queues import Queue
@@ -44,7 +44,7 @@ class TimelineProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if input_type == DetectionTypeEnum.tracked_object:
+            if input_type == EventTypeEnum.tracked_object:
                 self.handle_object_detection(
                     camera, event_type, prev_event_data, event_data
                 )

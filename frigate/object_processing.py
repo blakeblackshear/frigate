@@ -21,7 +21,7 @@ from frigate.config import (
     FrigateConfig,
 )
 from frigate.const import CLIPS_DIR
-from frigate.events import DetectionTypeEnum
+from frigate.events import EventTypeEnum
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
@@ -658,7 +658,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(
-                (DetectionTypeEnum.tracked_object, "start", camera, obj.to_dict())
+                (EventTypeEnum.tracked_object, "start", camera, obj.to_dict())
             )
 
         def update(camera, obj: TrackedObject, current_frame_time):
@@ -674,7 +674,7 @@ class TrackedObjectProcessor(threading.Thread):
             obj.previous = after
             self.event_queue.put(
                 (
-                    DetectionTypeEnum.tracked_object,
+                    EventTypeEnum.tracked_object,
                     "update",
                     camera,
                     obj.to_dict(include_thumbnail=True),
@@ -732,7 +732,7 @@ class TrackedObjectProcessor(threading.Thread):
 
             self.event_queue.put(
                 (
-                    DetectionTypeEnum.tracked_object,
+                    EventTypeEnum.tracked_object,
                     "end",
                     camera,
                     obj.to_dict(include_thumbnail=True),
