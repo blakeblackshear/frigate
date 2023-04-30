@@ -108,3 +108,14 @@ To do this:
 3. Restart Frigate and the custom version will be used if the mapping was done correctly.
 
 NOTE: The folder that is mapped from the host needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then `/home/appdata/frigate/custom-ffmpeg` needs to be mapped to `/usr/lib/btbn-ffmpeg`.
+
+## Custom go2rtc version
+
+Frigate currently includes go2rtc v1.2.0, there may be certain cases where you want to run a different version of go2rtc.
+
+To do this:
+
+1. Download the go2rtc build to the /config folder.
+2. Rename the build to `go2rtc`.
+3. Give `go2rtc` execute permission.
+4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
