@@ -18,7 +18,14 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, CONFIG_DIR, DEFAULT_DB_PATH, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    CONFIG_DIR,
+    DEFAULT_DB_PATH,
+    MODEL_CACHE_DIR,
+    RECORD_DIR,
+)
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
@@ -57,7 +64,7 @@ class FrigateApp:
             os.environ[key] = value
 
     def ensure_dirs(self) -> None:
-        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
+        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR, MODEL_CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -81,7 +88,7 @@ class FrigateApp:
             config_file = config_file_yaml
 
         user_config = FrigateConfig.parse_file(config_file)
-        self.config = user_config.runtime_config
+        self.config = user_config.runtime_config(self.plus_api)
 
         for camera_name in self.config.cameras.keys():
             # create camera_metrics
@@ -379,6 +386,7 @@ class FrigateApp:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
         try:
+            self.ensure_dirs()
             try:
                 self.init_config()
             except Exception as e:
@@ -399,7 +407,6 @@ class FrigateApp:
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
-            self.ensure_dirs()
             self.set_log_levels()
             self.init_queues()
             self.init_database()
