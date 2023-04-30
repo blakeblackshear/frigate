@@ -13,6 +13,15 @@ mkdir -p ${OUTPUT_FOLDER}
 # Install packages
 pip install --upgrade pip && pip install onnx==1.9.0 protobuf==3.20.3
 
+#test if arch is aarch64 (tested on Jetson Orin Nano and nvcr.io/nvidia/l4t-tensorrt:r8.5.2.2-devel )
+if [[ $(uname -m) == "aarch64" ]]; then
+    echo "This system has a 64-bit ARM processor."
+    pip3 install -U onnx
+    apt-get update && apt-get install -y wget
+else
+    echo "This system does not have a 64-bit ARM processor."
+fi
+
 # Clone tensorrt_demos repo
 git clone --depth 1 https://github.com/yeahme49/tensorrt_demos.git /tensorrt_demos
 
