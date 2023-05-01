@@ -15,7 +15,7 @@
     "@cycjimmy/jsmpeg-player": "^6.0.5",
     "axios": "^1.3.6",
     "copy-to-clipboard": "3.3.3",
-    "date-fns": "^2.29.3",
+    "date-fns": "^2.30.0",
     "idb-keyval": "^6.2.0",
     "immer": "^9.0.21",
     "monaco-yaml": "^4.0.4",
