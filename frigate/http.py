@@ -859,16 +859,21 @@ def create_event(camera_name, label):
     json: dict[str, any] = request.get_json(silent=True) or {}
 
     try:
+        frame = current_app.detected_frames_processor.get_current_frame(camera_name)
+
         event_id = current_app.external_processor.create_manual_event(
             camera_name,
             label,
             json.get("sub_label", None),
             json.get("duration", 30),
             json.get("include_recording", True),
+            frame,
         )
     except Exception as e:
         logger.error(f"The error is {e}")
-        return jsonify({"success": False, "message": f"An unknown error occurred: {e}"}, 404)
+        return jsonify(
+            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        )
 
     return jsonify(
         {
