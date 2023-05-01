@@ -28,7 +28,8 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.object_detection import ObjectDetectProcess
-from frigate.events import EventCleanup, EventProcessor
+from frigate.events.cleanup import EventCleanup
+from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings, Timeline

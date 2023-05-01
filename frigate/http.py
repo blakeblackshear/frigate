@@ -1,8 +1,8 @@
 import base64
 from datetime import datetime, timedelta, timezone
 import copy
-import glob
 import logging
+import glob
 import json
 import os
 import subprocess as sp
@@ -34,6 +34,7 @@ from playhouse.shortcuts import model_to_dict
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings, Timeline
+from frigate.events_manual import create_manual_event, finish_manual_event
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
@@ -44,6 +45,7 @@ from frigate.util import (
     restart_frigate,
     vainfo_hwaccel,
     get_tz_modifiers,
+    to_relative_box,
 )
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -195,7 +197,7 @@ def send_to_plus(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.data["box"]):
+    if any(d > 1 for d in event.box):
         include_annotation = None
 
     if event.end_time is None:
@@ -251,8 +253,8 @@ def send_to_plus(id):
     event.save()
 
     if not include_annotation is None:
-        region = event.data["region"]
-        box = event.data["box"]
+        region = event.region
+        box = event.box
 
         try:
             current_app.plus_api.add_annotation(
@@ -293,7 +295,7 @@ def false_positive(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.data["box"]):
+    if any(d > 1 for d in event.box):
         message = f"Events prior to 0.13 cannot be submitted as false positives"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 400)
@@ -310,15 +312,11 @@ def false_positive(id):
         # need to refetch the event now that it has a plus_id
         event = Event.get(Event.id == id)
 
-    region = event.data["region"]
-    box = event.data["box"]
+    region = event.region
+    box = event.box
 
     # provide top score if score is unavailable
-    score = (
-        (event.data["top_score"] if event.data["top_score"] else event.top_score)
-        if event.data["score"] is None
-        else event.data["score"]
-    )
+    score = event.top_score if event.score is None else event.score
 
     try:
         current_app.plus_api.add_false_positive(
@@ -759,7 +757,6 @@ def events():
         Event.top_score,
         Event.false_positive,
         Event.box,
-        Event.data,
     ]
 
     if camera != "all":
@@ -848,6 +845,47 @@ def events():
     return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
 
 
+@bp.route("/events/manual/<camera_name>/<label>/create", methods=("POST",))
+def create_event(camera_name, label):
+    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
+        return jsonify(
+            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        )
+
+    camera_config = current_app.frigate_config.cameras.get(camera_name)
+
+    if not label:
+        return jsonify({"success": False, "message": f"{label} must be set."}, 404)
+
+    event_id = create_manual_event(
+        current_app.detected_frames_processor,
+        camera_config,
+        camera_name,
+        label,
+    )
+
+    return jsonify(
+        {
+            "success": True,
+            "message": f"Event successfully created.",
+            "event_id": event_id,
+        },
+        200,
+    )
+
+
+@bp.route("/events/manual/<event_id>/end", methods=("POST",))
+def end_event(event_id):
+    try:
+        finish_manual_event(current_app.detected_frames_processor, event_id)
+    except:
+        return jsonify(
+            {"success": False, "message": f"{event_id} must be set and valid."}, 404
+        )
+
+    return jsonify({"success": True, "message": f"Event successfully ended."}, 200)
+
+
 @bp.route("/config")
 def config():
     config = current_app.frigate_config.dict()
@@ -865,11 +903,6 @@ def config():
             cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
-
-    for detector, detector_config in config["detectors"].items():
-        detector_config["model"][
-            "labelmap"
-        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 

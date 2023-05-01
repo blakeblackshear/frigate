@@ -295,3 +295,12 @@ Get ffprobe output for camera feed paths.
 ### `GET /api/<camera_name>/ptz/info`
 
 Get PTZ info for the camera.
+
+### `POST /api/events/manual/<camera_name>/<label>/create`
+
+Create a manual API with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+NOTE: This call will return the unique ID for the event which will be required to `end` the event.
+
+### `POST /api/events/manual/<event_id>/end`
+
+End a specific manual event.
