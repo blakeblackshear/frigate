@@ -60,4 +60,6 @@ class ExternalEventProcessor:
     def finish_manual_event(self, event_id: str):
         """Finish external event with indeterminate duration."""
         now = datetime.datetime.now().timestamp()
-        self.queue.put((EventTypeEnum.api, "end", None, {"end_time": now}))
+        self.queue.put(
+            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": now})
+        )

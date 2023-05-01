@@ -1,11 +1,9 @@
 import datetime
 import logging
-import os
 import queue
 import threading
 
 from enum import Enum
-from pathlib import Path
 
 from peewee import fn
 
@@ -96,6 +94,8 @@ class EventProcessor(threading.Thread):
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
+            elif source_type == EventTypeEnum.api:
+                self.handle_external_detection(event_type, event_data)
 
         # set an end_time on events without an end_time before exiting
         Event.update(end_time=datetime.datetime.now().timestamp()).where(
@@ -195,3 +195,31 @@ class EventProcessor(threading.Thread):
         if event_type == "end":
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
+
+    def handle_external_detection(self, type: str, event_data: Event):
+        if type == "new":
+            event = {
+                Event.id: event_data["id"],
+                Event.label: event_data["label"],
+                Event.sub_label: event_data["sub_label"],
+                Event.camera: event_data["camera"],
+                Event.start_time: event_data["start_time"],
+                Event.end_time: event_data["end_time"],
+                Event.thumbnail: event_data["thumbnail"],
+                Event.has_clip: event_data["has_clip"],
+                Event.has_snapshot: event_data["has_snapshot"],
+            }
+        elif type == "end":
+            event = {
+                Event.id: event_data["id"],
+                Event.end_time: event_data["end_time"],
+            }
+
+        (
+            Event.insert(event)
+            .on_conflict(
+                conflict_target=[Event.id],
+                update=event,
+            )
+            .execute()
+        )
