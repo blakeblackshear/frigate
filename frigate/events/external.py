@@ -1,7 +1,9 @@
 """Handle external events created by the user."""
 
+import base64
 import cv2
 import datetime
+import glob
 import logging
 import os
 import random
@@ -22,6 +24,7 @@ class ExternalEventProcessor:
     def __init__(self, config: FrigateConfig, queue: Queue) -> None:
         self.config = config
         self.queue = queue
+        self.default_thumbnail = None
 
     def create_manual_event(
         self,
@@ -40,6 +43,10 @@ class ExternalEventProcessor:
         event_id = f"{now}-{rand_id}"
 
         self._write_snapshots(camera_config, event_id, snapshot_frame)
+
+        if not self.default_thumbnail:
+            self._calculate_thumbnail_bytes()
+
         self.queue.put(
             (
                 EventTypeEnum.api,
@@ -52,7 +59,7 @@ class ExternalEventProcessor:
                     "camera": camera,
                     "start_time": now,
                     "end_time": now + duration if duration is not None else None,
-                    "thumbnail": "",  # TODO create thumbnail icon
+                    "thumbnail": self.default_thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
                 },
@@ -67,6 +74,14 @@ class ExternalEventProcessor:
         self.queue.put(
             (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": now})
         )
+
+    def _calculate_thumbnail_bytes(self) -> None:
+        error_image = glob.glob("/opt/frigate/frigate/images/external-event.png")
+
+        if len(error_image) > 0:
+            with open("/opt/frigate/frigate/images/external-event.png", 'rb') as img:
+                img_bytes = img.read()
+                self.default_thumbnail = base64.b64encode(img_bytes).decode("utf-8")
 
     def _write_snapshots(
         self, camera_config: CameraConfig, event_id: str, img_bytes: any
