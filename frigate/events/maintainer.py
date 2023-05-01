@@ -208,6 +208,8 @@ class EventProcessor(threading.Thread):
                 Event.thumbnail: event_data["thumbnail"],
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
+                Event.zones: [],
+                Event.data: {},
             }
         elif type == "end":
             event = {

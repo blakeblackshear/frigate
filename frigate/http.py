@@ -45,7 +45,6 @@ from frigate.util import (
     restart_frigate,
     vainfo_hwaccel,
     get_tz_modifiers,
-    to_relative_box,
 )
 from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
@@ -847,7 +846,7 @@ def events():
     return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
 
 
-@bp.route("/events/manual/<camera_name>/<label>/create", methods=("POST",))
+@bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
 def create_event(camera_name, label):
     if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
         return jsonify(
@@ -857,13 +856,19 @@ def create_event(camera_name, label):
     if not label:
         return jsonify({"success": False, "message": f"{label} must be set."}, 404)
 
-    event_id = current_app.external_processor.create_manual_event(
-        camera_name,
-        label,
-        request.json.get("sub_label"),
-        request.json.get("duration"),
-        request.json.get("include_recording") or True,
-    )
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
+    try:
+        event_id = current_app.external_processor.create_manual_event(
+            camera_name,
+            label,
+            json.get("sub_label", None),
+            json.get("duration", 30),
+            json.get("include_recording", True),
+        )
+    except Exception as e:
+        logger.error(f"The error is {e}")
+        return jsonify({"success": False, "message": f"An unknown error occurred: {e}"}, 404)
 
     return jsonify(
         {
@@ -875,7 +880,7 @@ def create_event(camera_name, label):
     )
 
 
-@bp.route("/events/manual/<event_id>/end", methods=("POST",))
+@bp.route("/events/<event_id>/end", methods=["POST"])
 def end_event(event_id):
     try:
         current_app.external_processor.finish_manual_event(event_id)
