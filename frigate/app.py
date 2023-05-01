@@ -207,7 +207,9 @@ class FrigateApp:
         )
 
     def init_external_event_processor(self) -> None:
-        self.external_event_processor = ExternalEventProcessor(self.config, self.event_queue)
+        self.external_event_processor = ExternalEventProcessor(
+            self.config, self.event_queue
+        )
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(
