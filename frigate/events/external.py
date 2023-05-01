@@ -79,7 +79,7 @@ class ExternalEventProcessor:
         error_image = glob.glob("/opt/frigate/frigate/images/external-event.png")
 
         if len(error_image) > 0:
-            with open("/opt/frigate/frigate/images/external-event.png", 'rb') as img:
+            with open("/opt/frigate/frigate/images/external-event.png", "rb") as img:
                 img_bytes = img.read()
                 self.default_thumbnail = base64.b64encode(img_bytes).decode("utf-8")
 

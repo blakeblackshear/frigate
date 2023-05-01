@@ -9,13 +9,14 @@ from pathlib import Path
 
 from peewee import fn
 
-from frigate.config import  FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
 
 from multiprocessing.synchronize import Event as MpEvent
 
 logger = logging.getLogger(__name__)
+
 
 class EventCleanup(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
