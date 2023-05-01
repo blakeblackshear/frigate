@@ -889,7 +889,6 @@ def create_event(camera_name, label):
 def end_event(event_id):
     try:
         current_app.external_processor.finish_manual_event(event_id)
-        # TODO we need some way to verify that the event id is valid, just check in the db?
     except:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404

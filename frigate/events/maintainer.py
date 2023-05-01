@@ -217,11 +217,14 @@ class EventProcessor(threading.Thread):
                 Event.end_time: event_data["end_time"],
             }
 
-        (
-            Event.insert(event)
-            .on_conflict(
-                conflict_target=[Event.id],
-                update=event,
+        try:
+            (
+                Event.insert(event)
+                .on_conflict(
+                    conflict_target=[Event.id],
+                    update=event,
+                )
+                .execute()
             )
-            .execute()
-        )
+        except Exception:
+            logger.warning(f"Failed to update manual event: {event_data['id']}")
