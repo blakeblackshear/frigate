@@ -82,6 +82,7 @@ def create_app(
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
     app.onvif = onvif
+    app.external_processor = external_processor
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
@@ -853,22 +854,21 @@ def create_event(camera_name, label):
             {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
         )
 
-    camera_config = current_app.frigate_config.cameras.get(camera_name)
-
     if not label:
         return jsonify({"success": False, "message": f"{label} must be set."}, 404)
 
-    event_id = create_manual_event(
-        current_app.detected_frames_processor,
-        camera_config,
+    event_id = current_app.external_processor.create_manual_event(
         camera_name,
         label,
+        request.json.get("sub_label"),
+        request.json.get("duration"),
+        request.json.get("include_recording") or True,
     )
 
     return jsonify(
         {
             "success": True,
-            "message": f"Event successfully created.",
+            "message": "Successfully created event.",
             "event_id": event_id,
         },
         200,
@@ -878,7 +878,8 @@ def create_event(camera_name, label):
 @bp.route("/events/manual/<event_id>/end", methods=("POST",))
 def end_event(event_id):
     try:
-        finish_manual_event(current_app.detected_frames_processor, event_id)
+        current_app.external_processor.finish_manual_event(event_id)
+        # TODO we need some way to verify that the event id is valid, just check in the db?
     except:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404

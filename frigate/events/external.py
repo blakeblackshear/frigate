@@ -25,7 +25,7 @@ class ExternalEventProcessor:
         self,
         camera: str,
         label: str,
-        sub_label: str,
+        sub_label: Optional[str],
         duration: Optional[int],
         include_recording: bool,
     ) -> str:
