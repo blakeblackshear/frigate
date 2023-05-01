@@ -34,7 +34,7 @@ from playhouse.shortcuts import model_to_dict
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings, Timeline
-from frigate.events_manual import create_manual_event, finish_manual_event
+from frigate.events.external import ExternalEventProcessor
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
@@ -62,6 +62,7 @@ def create_app(
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
+    external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
 ):
     app = Flask(__name__)
