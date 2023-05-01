@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventTypeEnum(str, Enum):
-    # api = "api"
+    api = "api"
     # audio = "audio"
     tracked_object = "tracked_object"
 
