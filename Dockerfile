@@ -260,6 +260,11 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
     ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
     ldconfig
 
+# NVIDIA Jetson platforms have their own codecs too
+FROM frigate-tensorrt AS frigate-jetson
+RUN --mount=type=bind,source=docker/install_jetson_ffmpeg.sh,target=/deps/install_jetson_ffmpeg.sh \
+    /deps/install_jetson_ffmpeg.sh
+
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
