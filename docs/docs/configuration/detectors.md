@@ -257,14 +257,15 @@ model:
   height: 416
 ```
 
+## Deepstack / CodeProject.AI Server Detector
 
-## Deepstack / CodeProject AI.Server Detector
-The Deepstack/CodeProject AI.Server detector plugin for Frigate allows you to integrate Deeppstack or CodeProject.AI object detection capabilities into Frigate video surveillance system. CodeProject.AI and DeepStack is an open-source AI platforms that can be run on various devices, such as Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
+The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
 
 ### Setup
-To get started with CodeProject.AI, visit their official website at [www.codeproject.com](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) and follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
 
-To integrate CodeProject.AI with Frigate, you'll need to make the following changes to your Frigate configuration file:
+To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
+
+To integrate CodeProject.AI into Frigate, you'll need to make the following changes to your Frigate configuration file:
 
 ```yaml
 detectors:
