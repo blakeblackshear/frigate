@@ -59,7 +59,7 @@ class FrigateApp:
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.record_metrics: dict[str, RecordMetricsTypes] = {}
-        self.processes: dict[str, int]
+        self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -176,6 +176,7 @@ class FrigateApp:
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(['pid', 'name']):
             if proc.info['name'] == 'go2rtc':
+                logger.info(f"go2rtc process pid: {proc.info['pid']}")
                 self.processes["go2rtc"] = proc.info['pid']
 
 
@@ -187,8 +188,8 @@ class FrigateApp:
         )
         recording_process.daemon = True
         self.recording_process = recording_process
-        self.processes["recording"] = recording_process.pid
         recording_process.start()
+        self.processes["recording"] = recording_process.pid
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def bind_database(self) -> None:
