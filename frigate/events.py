@@ -3,6 +3,8 @@ import logging
 import os
 import queue
 import threading
+
+from enum import Enum
 from pathlib import Path
 
 from peewee import fn
@@ -10,7 +12,6 @@ from peewee import fn
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
-from frigate.timeline import TimelineSourceEnum
 from frigate.types import CameraMetricsTypes
 from frigate.util import to_relative_box
 
@@ -19,6 +20,12 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 logger = logging.getLogger(__name__)
+
+
+class EventTypeEnum(str, Enum):
+    # api = "api"
+    # audio = "audio"
+    tracked_object = "tracked_object"
 
 
 def should_update_db(prev_event: Event, current_event: Event) -> bool:
@@ -66,7 +73,9 @@ class EventProcessor(threading.Thread):
 
         while not self.stop_event.is_set():
             try:
-                event_type, camera, event_data = self.event_queue.get(timeout=1)
+                source_type, event_type, camera, event_data = self.event_queue.get(
+                    timeout=1
+                )
             except queue.Empty:
                 continue
 
@@ -75,106 +84,118 @@ class EventProcessor(threading.Thread):
             self.timeline_queue.put(
                 (
                     camera,
-                    TimelineSourceEnum.tracked_object,
+                    source_type,
                     event_type,
                     self.events_in_process.get(event_data["id"]),
                     event_data,
                 )
             )
 
-            # if this is the first message, just store it and continue, its not time to insert it in the db
-            if event_type == "start":
-                self.events_in_process[event_data["id"]] = event_data
-                continue
+            if source_type == EventTypeEnum.tracked_object:
+                if event_type == "start":
+                    self.events_in_process[event_data["id"]] = event_data
+                    continue
 
-            if should_update_db(self.events_in_process[event_data["id"]], event_data):
-                camera_config = self.config.cameras[camera]
-                event_config: EventsConfig = camera_config.record.events
-                width = camera_config.detect.width
-                height = camera_config.detect.height
-                first_detector = list(self.config.detectors.values())[0]
-
-                start_time = event_data["start_time"] - event_config.pre_capture
-                end_time = (
-                    None
-                    if event_data["end_time"] is None
-                    else event_data["end_time"] + event_config.post_capture
-                )
-                # score of the snapshot
-                score = (
-                    None
-                    if event_data["snapshot"] is None
-                    else event_data["snapshot"]["score"]
-                )
-                # detection region in the snapshot
-                region = (
-                    None
-                    if event_data["snapshot"] is None
-                    else to_relative_box(
-                        width,
-                        height,
-                        event_data["snapshot"]["region"],
-                    )
-                )
-                # bounding box for the snapshot
-                box = (
-                    None
-                    if event_data["snapshot"] is None
-                    else to_relative_box(
-                        width,
-                        height,
-                        event_data["snapshot"]["box"],
-                    )
-                )
-
-                # keep these from being set back to false because the event
-                # may have started while recordings and snapshots were enabled
-                # this would be an issue for long running events
-                if self.events_in_process[event_data["id"]]["has_clip"]:
-                    event_data["has_clip"] = True
-                if self.events_in_process[event_data["id"]]["has_snapshot"]:
-                    event_data["has_snapshot"] = True
-
-                event = {
-                    Event.id: event_data["id"],
-                    Event.label: event_data["label"],
-                    Event.camera: camera,
-                    Event.start_time: start_time,
-                    Event.end_time: end_time,
-                    Event.top_score: event_data["top_score"],
-                    Event.score: score,
-                    Event.zones: list(event_data["entered_zones"]),
-                    Event.thumbnail: event_data["thumbnail"],
-                    Event.region: region,
-                    Event.box: box,
-                    Event.has_clip: event_data["has_clip"],
-                    Event.has_snapshot: event_data["has_snapshot"],
-                    Event.model_hash: first_detector.model.model_hash,
-                    Event.model_type: first_detector.model.model_type,
-                    Event.detector_type: first_detector.type,
-                }
-
-                (
-                    Event.insert(event)
-                    .on_conflict(
-                        conflict_target=[Event.id],
-                        update=event,
-                    )
-                    .execute()
-                )
-
-                # update the stored copy for comparison on future update messages
-                self.events_in_process[event_data["id"]] = event_data
-
-            if event_type == "end":
-                del self.events_in_process[event_data["id"]]
-                self.event_processed_queue.put((event_data["id"], camera))
+                self.handle_object_detection(event_type, camera, event_data)
 
         # set an end_time on events without an end_time before exiting
         Event.update(end_time=datetime.datetime.now().timestamp()).where(
             Event.end_time == None
         ).execute()
         logger.info(f"Exiting event processor...")
+
+    def handle_object_detection(
+        self,
+        event_type: str,
+        camera: str,
+        event_data: Event,
+    ) -> None:
+        """handle tracked object event updates."""
+        # if this is the first message, just store it and continue, its not time to insert it in the db
+        if should_update_db(self.events_in_process[event_data["id"]], event_data):
+            camera_config = self.config.cameras[camera]
+            event_config: EventsConfig = camera_config.record.events
+            width = camera_config.detect.width
+            height = camera_config.detect.height
+            first_detector = list(self.config.detectors.values())[0]
+
+            start_time = event_data["start_time"] - event_config.pre_capture
+            end_time = (
+                None
+                if event_data["end_time"] is None
+                else event_data["end_time"] + event_config.post_capture
+            )
+            # score of the snapshot
+            score = (
+                None
+                if event_data["snapshot"] is None
+                else event_data["snapshot"]["score"]
+            )
+            # detection region in the snapshot
+            region = (
+                None
+                if event_data["snapshot"] is None
+                else to_relative_box(
+                    width,
+                    height,
+                    event_data["snapshot"]["region"],
+                )
+            )
+            # bounding box for the snapshot
+            box = (
+                None
+                if event_data["snapshot"] is None
+                else to_relative_box(
+                    width,
+                    height,
+                    event_data["snapshot"]["box"],
+                )
+            )
+
+            # keep these from being set back to false because the event
+            # may have started while recordings and snapshots were enabled
+            # this would be an issue for long running events
+            if self.events_in_process[event_data["id"]]["has_clip"]:
+                event_data["has_clip"] = True
+            if self.events_in_process[event_data["id"]]["has_snapshot"]:
+                event_data["has_snapshot"] = True
+
+            event = {
+                Event.id: event_data["id"],
+                Event.label: event_data["label"],
+                Event.camera: camera,
+                Event.start_time: start_time,
+                Event.end_time: end_time,
+                Event.zones: list(event_data["entered_zones"]),
+                Event.thumbnail: event_data["thumbnail"],
+                Event.has_clip: event_data["has_clip"],
+                Event.has_snapshot: event_data["has_snapshot"],
+                Event.model_hash: first_detector.model.model_hash,
+                Event.model_type: first_detector.model.model_type,
+                Event.detector_type: first_detector.type,
+                Event.data: {
+                    "box": box,
+                    "region": region,
+                    "score": score,
+                    "top_score": event_data["top_score"],
+                },
+            }
+
+            (
+                Event.insert(event)
+                .on_conflict(
+                    conflict_target=[Event.id],
+                    update=event,
+                )
+                .execute()
+            )
+
+            # update the stored copy for comparison on future update messages
+            self.events_in_process[event_data["id"]] = event_data
+
+        if event_type == "end":
+            del self.events_in_process[event_data["id"]]
+            self.event_processed_queue.put((event_data["id"], camera))
 
 
 class EventCleanup(threading.Thread):

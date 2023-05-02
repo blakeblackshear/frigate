@@ -4,9 +4,8 @@ import logging
 import threading
 import queue
 
-from enum import Enum
-
 from frigate.config import FrigateConfig
+from frigate.events import EventTypeEnum
 from frigate.models import Timeline
 
 from multiprocessing.queues import Queue
@@ -15,12 +14,6 @@ from multiprocessing.synchronize import Event as MpEvent
 from frigate.util import to_relative_box
 
 logger = logging.getLogger(__name__)
-
-
-class TimelineSourceEnum(str, Enum):
-    # api = "api"
-    # audio = "audio"
-    tracked_object = "tracked_object"
 
 
 class TimelineProcessor(threading.Thread):
@@ -51,7 +44,7 @@ class TimelineProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            if input_type == TimelineSourceEnum.tracked_object:
+            if input_type == EventTypeEnum.tracked_object:
                 self.handle_object_detection(
                     camera, event_type, prev_event_data, event_data
                 )
