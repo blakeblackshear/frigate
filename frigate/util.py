@@ -820,7 +820,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 idx = pid
                 if stats[1] == "(go2rtc)":
                     idx = "go2rtc"
-                if stats[1] == "(frigate.r+)":
+                if stats[1].startswith("(frigate.r"):
                     idx = "recording"
 
                 usages[idx] = {
