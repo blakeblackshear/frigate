@@ -126,9 +126,9 @@ class VideoRTC extends HTMLElement {
   set src(value) {
     if (typeof value !== 'string') value = value.toString();
     if (value.startsWith('http')) {
-      value = 'ws' + value.substring(4);
+      value = `ws${value.substring(4)}`;
     } else if (value.startsWith('/')) {
-      value = 'ws' + location.origin.substring(4) + value;
+      value = `ws${location.origin.substring(4)}${value}`;
     }
 
     this.wsURL = value;
@@ -144,7 +144,7 @@ class VideoRTC extends HTMLElement {
     this.video.play().catch((er) => {
       if (er.name === 'NotAllowedError' && !this.video.muted) {
         this.video.muted = true;
-        this.video.play().catch(() => console.debug);
+        this.video.play().catch(() => { });
       }
     });
   }
@@ -469,13 +469,13 @@ class VideoRTC extends HTMLElement {
           pc.addIceCandidate({
             candidate: msg.value,
             sdpMid: '0',
-          }).catch(() => console.debug);
+          }).catch(() => { });
           break;
         case 'webrtc/answer':
           pc.setRemoteDescription({
             type: 'answer',
             sdp: msg.value,
-          }).catch(() => console.debug);
+          }).catch(() => { });
           break;
         case 'error':
           if (msg.value.indexOf('webrtc/offer') < 0) return;
@@ -544,7 +544,7 @@ class VideoRTC extends HTMLElement {
   onmjpeg() {
     this.ondata = (data) => {
       this.video.controls = false;
-      this.video.poster = 'data:image/jpeg;base64,' + VideoRTC.btoa(data);
+      this.video.poster = `data:image/jpeg;base64,${VideoRTC.btoa(data)}`;
     };
 
     this.send({ type: 'mjpeg' });
@@ -600,26 +600,22 @@ class VideoStream extends VideoRTC {
    * Custom GUI
    */
   oninit() {
-    console.debug('stream.oninit');
     super.oninit();
     const info = this.querySelector('.info');
     this.insertBefore(this.video, info);
   }
 
   onconnect() {
-    console.debug('stream.onconnect');
     const result = super.onconnect();
     if (result) this.divMode = 'loading';
     return result;
   }
 
-  ondisconnect() {
-    console.debug('stream.ondisconnect');
+  ondisconnect() {;
     super.ondisconnect();
   }
 
   onopen() {
-    console.debug('stream.onopen');
     const result = super.onopen();
 
     this.onmessage['stream'] = (_) => {
@@ -629,12 +625,10 @@ class VideoStream extends VideoRTC {
   }
 
   onclose() {
-    console.debug('stream.onclose');
     return super.onclose();
   }
 
   onpcvideo(ev) {
-    console.debug('stream.onpcvideo');
     super.onpcvideo(ev);
 
     if (this.pcState !== WebSocket.CLOSED) {
