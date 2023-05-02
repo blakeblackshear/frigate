@@ -24,7 +24,7 @@ export default function Birdseye() {
     }
 
     return Object.entries(config.cameras)
-      .filter(([_, conf]) => conf.onvif?.host)
+      .filter(([_, conf]) => conf.onvif?.host && conf.onvif?.host !== '')
       .map(([_, camera]) => camera.name);
   }, [config]);
 
