@@ -34,3 +34,4 @@ class StatsTrackingTypes(TypedDict):
     started: int
     latest_frigate_version: str
     last_updated: int
+    processes: dict[str, int]
