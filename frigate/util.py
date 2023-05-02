@@ -807,12 +807,11 @@ def get_cpu_stats() -> dict[str, dict]:
                 utime = int(stats[13])
                 stime = int(stats[14])
                 starttime = int(stats[21])
-                
 
-                with open('/proc/uptime') as f:
+                with open("/proc/uptime") as f:
                     system_uptime_sec = int(float(f.read().split()[0]))
 
-                clk_tck = os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+                clk_tck = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
 
                 process_utime_sec = utime // clk_tck
                 process_stime_sec = stime // clk_tck

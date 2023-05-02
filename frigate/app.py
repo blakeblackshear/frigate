@@ -174,11 +174,10 @@ class FrigateApp:
         migrate_db.close()
 
     def init_go2rtc(self) -> None:
-        for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] == 'go2rtc':
+        for proc in psutil.process_iter(["pid", "name"]):
+            if proc.info["name"] == "go2rtc":
                 logger.info(f"go2rtc process pid: {proc.info['pid']}")
-                self.processes["go2rtc"] = proc.info['pid']
-
+                self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
         recording_process = mp.Process(
