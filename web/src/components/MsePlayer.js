@@ -562,7 +562,7 @@ class VideoRTC extends HTMLElement {
     video2.playsInline = true;
     video2.muted = true;
 
-    video2.addEventListener('loadeddata', (ev) => {
+    video2.addEventListener('loadeddata', (_) => {
       if (!context) {
         canvas.width = video2.videoWidth;
         canvas.height = video2.videoHeight;
@@ -576,7 +576,7 @@ class VideoRTC extends HTMLElement {
     });
 
     this.ondata = (data) => {
-      video2.src = 'data:video/mp4;base64,' + VideoRTC.btoa(data);
+      video2.src = `data:video/mp4;base64,${VideoRTC.btoa(data)}`;
     };
 
     this.send({ type: 'mp4', value: this.codecs('mp4') });
