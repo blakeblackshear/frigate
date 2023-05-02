@@ -16,6 +16,7 @@ from multiprocessing.queues import Queue
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
+from frigate.util import draw_box_with_label
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class ExternalEventProcessor:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         event_id = f"{now}-{rand_id}"
 
-        self._write_snapshots(camera_config, event_id, snapshot_frame)
+        self._write_snapshots(camera_config, label, event_id, snapshot_frame)
 
         if not self.default_thumbnail:
             self._calculate_thumbnail_bytes()
@@ -76,24 +77,21 @@ class ExternalEventProcessor:
         )
 
     def _calculate_thumbnail_bytes(self) -> None:
-        error_image = glob.glob("/opt/frigate/frigate/images/external-event.png")
+        thumbnail = glob.glob("/opt/frigate/frigate/images/external-event.png")
 
-        if len(error_image) > 0:
+        if len(thumbnail) > 0:
             with open("/opt/frigate/frigate/images/external-event.png", "rb") as img:
                 img_bytes = img.read()
                 self.default_thumbnail = base64.b64encode(img_bytes).decode("utf-8")
 
     def _write_snapshots(
-        self, camera_config: CameraConfig, event_id: str, img_bytes: any
+        self,
+        camera_config: CameraConfig,
+        label: str,
+        event_id: str,
+        draw: dict[str, any],
+        img_bytes: any,
     ) -> None:
-        # write jpg snapshot
-        ret, jpg = cv2.imencode(".jpg", img_bytes)
-        with open(
-            os.path.join(CLIPS_DIR, f"{camera_config.name}-{event_id}.jpg"),
-            "wb",
-        ) as j:
-            j.write(jpg.tobytes())
-
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_bytes)
@@ -107,3 +105,29 @@ class ExternalEventProcessor:
                     "wb",
                 ) as p:
                     p.write(png.tobytes())
+
+        # write jpg snapshot with optional annotations
+        if draw.get("box"):
+            x = draw["box"][0] * camera_config.detect.width
+            y = draw["box"][1] * camera_config.detect.height
+            width = draw["box"][2] * camera_config.detect.width
+            height = draw["box"][3] * camera_config.detect.height
+
+            draw_box_with_label(
+                img_bytes,
+                x,
+                y,
+                x + width,
+                y + height,
+                label,
+                f"{draw.get('score', '-')}% {int(width * height)}",
+                thickness=2,
+                color=draw.get("color", (255, 0, 0)),
+            )
+
+        ret, jpg = cv2.imencode(".jpg", img_bytes)
+        with open(
+            os.path.join(CLIPS_DIR, f"{camera_config.name}-{event_id}.jpg"),
+            "wb",
+        ) as j:
+            j.write(jpg.tobytes())

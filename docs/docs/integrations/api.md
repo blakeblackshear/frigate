@@ -306,7 +306,12 @@ Create a manual API with a given `label` (ex: doorbell press) to capture a speci
 {
   "subLabel": "some_string", // add sub label to event
   "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
-  "include_recording": true // whether the event should save recordings along with the snapshot that is taken
+  "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
+  "draw": { // optional bounding box that will be drawn on the snapshot
+    "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, 1, width, height which are on a scale between 0 - 1
+    "color": [255, 0, 0], // color of the box, default is red
+    "score": 100, // optional score of the object
+  },
 }
 ```
 
