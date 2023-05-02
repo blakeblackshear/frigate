@@ -300,6 +300,8 @@ Get PTZ info for the camera.
 
 Create a manual API with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
 
+**Optional Body:**
+
 ```json
 {
   "subLabel": "some_string", // add sub label to event
@@ -308,6 +310,19 @@ Create a manual API with a given `label` (ex: doorbell press) to capture a speci
 }
 ```
 
-### `POST /api/events/<event_id>/end`
+**Success Response:**
+
+```json
+[
+  {
+    "event_id": "1682970645.13116-1ug7ns",
+    "message": "Successfully created event.",
+    "success": true
+  },
+  200
+]
+```
+
+### `PUT /api/events/<event_id>/end`
 
 End a specific manual event without a predetermined length.

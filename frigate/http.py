@@ -885,7 +885,7 @@ def create_event(camera_name, label):
     )
 
 
-@bp.route("/events/<event_id>/end", methods=["POST"])
+@bp.route("/events/<event_id>/end", methods=["PUT"])
 def end_event(event_id):
     try:
         current_app.external_processor.finish_manual_event(event_id)
