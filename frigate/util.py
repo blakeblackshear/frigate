@@ -9,6 +9,7 @@ import signal
 import traceback
 import urllib.parse
 import yaml
+import os
 
 from abc import ABC, abstractmethod
 from collections import Counter
@@ -740,55 +741,54 @@ def escape_special_characters(path: str) -> str:
 
 
 def get_cgroups_version() -> str:
-    """Determine what version of cgroups is enabled"""
+    """Determine what version of cgroups is enabled."""
 
-    stat_command = ["stat", "-fc", "%T", "/sys/fs/cgroup"]
+    cgroup_path = "/sys/fs/cgroup"
 
-    p = sp.run(
-        stat_command,
-        encoding="ascii",
-        capture_output=True,
-    )
+    if not os.path.ismount(cgroup_path):
+        logger.debug(f"{cgroup_path} is not a mount point.")
+        return "unknown"
 
-    if p.returncode == 0:
-        value: str = p.stdout.strip().lower()
+    try:
+        with open("/proc/mounts", "r") as f:
+            mounts = f.readlines()
 
-        if value == "cgroup2fs":
-            return "cgroup2"
-        elif value == "tmpfs":
-            return "cgroup"
-        else:
-            logger.debug(
-                f"Could not determine cgroups version: unhandled filesystem {value}"
-            )
-    else:
-        logger.debug(f"Could not determine cgroups version:  {p.stderr}")
+        for mount in mounts:
+            mount_info = mount.split()
+            if mount_info[1] == cgroup_path:
+                fs_type = mount_info[2]
+                if fs_type == "cgroup2fs" or fs_type == "cgroup2":
+                    return "cgroup2"
+                elif fs_type == "tmpfs":
+                    return "cgroup"
+                else:
+                    logger.debug(
+                        f"Could not determine cgroups version: unhandled filesystem {fs_type}"
+                    )
+                break
+    except Exception as e:
+        logger.debug(f"Could not determine cgroups version: {e}")
 
     return "unknown"
 
 
 def get_docker_memlimit_bytes() -> int:
-    """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected"""
+    """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected."""
 
     # check running a supported cgroups version
     if get_cgroups_version() == "cgroup2":
-        memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
+        memlimit_path = "/sys/fs/cgroup/memory.max"
 
-        p = sp.run(
-            memlimit_command,
-            encoding="ascii",
-            capture_output=True,
-        )
-
-        if p.returncode == 0:
-            value: str = p.stdout.strip()
+        try:
+            with open(memlimit_path, "r") as f:
+                value = f.read().strip()
 
             if value.isnumeric():
                 return int(value)
             elif value.lower() == "max":
                 return -1
-        else:
-            logger.debug(f"Unable to get docker memlimit: {p.stderr}")
+        except Exception as e:
+            logger.debug(f"Unable to get docker memlimit: {e}")
 
     return -1
 
@@ -796,49 +796,41 @@ def get_docker_memlimit_bytes() -> int:
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
     usages = {}
-    # -n=2 runs to ensure extraneous values are not included
-    top_command = ["top", "-b", "-n", "2"]
-
     docker_memlimit = get_docker_memlimit_bytes() / 1024
+    total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
-    p = sp.run(
-        top_command,
-        encoding="ascii",
-        capture_output=True,
-    )
-
-    if p.returncode != 0:
-        logger.error(p.stderr)
-        return usages
-    else:
-        lines = p.stdout.split("\n")
-
-        for line in lines:
-            stats = list(filter(lambda a: a != "", line.strip().split(" ")))
+    for pid in os.listdir("/proc"):
+        if pid.isdigit():
             try:
+                with open(f"/proc/{pid}/stat", "r") as f:
+                    stats = f.readline().split()
+                utime = int(stats[13])
+                stime = int(stats[14])
+                cpu_usage = round((utime + stime) / os.sysconf("SC_CLK_TCK"))
+
+                with open(f"/proc/{pid}/statm", "r") as f:
+                    mem_stats = f.readline().split()
+                mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
+
                 if docker_memlimit > 0:
-                    mem_res = int(stats[5])
-                    mem_pct = str(
-                        round((float(mem_res) / float(docker_memlimit)) * 100, 1)
-                    )
+                    mem_pct = round((mem_res / docker_memlimit) * 100, 1)
                 else:
-                    mem_pct = stats[9]
+                    mem_pct = round((mem_res / total_mem) * 100, 1)
 
-                idx = stats[0]
-
-                if stats[-1] == "go2rtc":
+                idx = pid
+                if stats[1] == "(go2rtc)":
                     idx = "go2rtc"
-                elif stats[-1] == "frigate.r+":
+                if stats[1].startswith("(frigate.r"):
                     idx = "recording"
 
                 usages[idx] = {
-                    "cpu": stats[8],
-                    "mem": mem_pct,
+                    "cpu": str(round(cpu_usage, 2)),
+                    "mem": f"{mem_pct}",
                 }
             except:
                 continue
 
-        return usages
+    return usages
 
 
 def get_amd_gpu_stats() -> dict[str, str]:
