@@ -46,6 +46,7 @@ def stats_init(
     config: FrigateConfig,
     camera_metrics: dict[str, CameraMetricsTypes],
     detectors: dict[str, ObjectDetectProcess],
+    processes: dict[str, int],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
@@ -53,6 +54,7 @@ def stats_init(
         "started": int(time.time()),
         "latest_frigate_version": get_latest_version(config),
         "last_updated": int(time.time()),
+        "processes": processes,
     }
     return stats_tracking
 
@@ -258,6 +260,12 @@ def stats_snapshot(
             "used": round(storage_stats.used / 1000000, 1),
             "free": round(storage_stats.free / 1000000, 1),
             "mount_type": get_fs_type(path),
+        }
+
+    stats["processes"] = {}
+    for name, pid in stats_tracking["processes"].items():
+        stats["processes"][name] = {
+            "pid": pid,
         }
 
     return stats

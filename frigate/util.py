@@ -817,13 +817,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 else:
                     mem_pct = round((mem_res / total_mem) * 100, 1)
 
-                idx = pid
-                if stats[1] == "(go2rtc)":
-                    idx = "go2rtc"
-                if stats[1].startswith("(frigate.r"):
-                    idx = "recording"
-
-                usages[idx] = {
+                usages[pid] = {
                     "cpu": str(round(cpu_usage, 2)),
                     "mem": f"{mem_pct}",
                 }
