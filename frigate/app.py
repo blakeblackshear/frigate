@@ -188,7 +188,7 @@ class FrigateApp:
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
-        self.processes["recording"] = recording_process.pid
+        self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def bind_database(self) -> None:
