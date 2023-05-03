@@ -268,8 +268,8 @@ export default function System() {
                         </Thead>
                         <Tbody>
                           <Tr>
-                            <Td>{gpu_usages[gpu]['gpu']}%</Td>
-                            <Td>{gpu_usages[gpu]['mem']}%</Td>
+                            <Td>{gpu_usages[gpu]['gpu']}</Td>
+                            <Td>{gpu_usages[gpu]['mem']}</Td>
                           </Tr>
                         </Tbody>
                       </Table>

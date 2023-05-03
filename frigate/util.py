@@ -950,6 +950,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             }
     except:
         return results
+
     return results
 
 
