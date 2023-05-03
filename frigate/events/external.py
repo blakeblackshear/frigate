@@ -107,23 +107,24 @@ class ExternalEventProcessor:
                     p.write(png.tobytes())
 
         # write jpg snapshot with optional annotations
-        if draw.get("box"):
-            x = draw["box"][0] * camera_config.detect.width
-            y = draw["box"][1] * camera_config.detect.height
-            width = draw["box"][2] * camera_config.detect.width
-            height = draw["box"][3] * camera_config.detect.height
+        if draw.get("boxes") and isinstance(draw.get("boxes"), list):
+            for box in draw.get("boxes"):
+                x = box["box"][0] * camera_config.detect.width
+                y = box["box"][1] * camera_config.detect.height
+                width = box["box"][2] * camera_config.detect.width
+                height = box["box"][3] * camera_config.detect.height
 
-            draw_box_with_label(
-                img_bytes,
-                x,
-                y,
-                x + width,
-                y + height,
-                label,
-                f"{draw.get('score', '-')}% {int(width * height)}",
-                thickness=2,
-                color=draw.get("color", (255, 0, 0)),
-            )
+                draw_box_with_label(
+                    img_bytes,
+                    x,
+                    y,
+                    x + width,
+                    y + height,
+                    label,
+                    f"{box.get('score', '-')}% {int(width * height)}",
+                    thickness=2,
+                    color=box.get("color", (255, 0, 0)),
+                )
 
         ret, jpg = cv2.imencode(".jpg", img_bytes)
         with open(
