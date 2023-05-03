@@ -360,7 +360,7 @@ export default function System() {
                     <Thead>
                       <Tr>
                         <Th>CPU %</Th>
-                        <Th>AvgCPU %</Th>
+                        <Th>Avg CPU %</Th>
                         <Th>Memory %</Th>
                       </Tr>
                     </Thead>
