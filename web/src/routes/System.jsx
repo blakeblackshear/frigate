@@ -215,7 +215,7 @@ export default function System() {
               className="rounded-full"
               type="text"
               color="gray"
-              aria-label="Momentary resource usage of each process that is controlling the object detector. "
+              aria-label="Momentary resource usage of each process that is controlling the object detector. CPU % is for a single core."
             >
               <About className="w-5" />
             </Button>
@@ -313,7 +313,7 @@ export default function System() {
               className="rounded-full"
               type="text"
               color="gray"
-              aria-label="Momentary resource usage of each process interacting with the camera stream."
+              aria-label="Momentary resource usage of each process interacting with the camera stream. CPU % is for a single core."
             >
               <About className="w-5" />
             </Button>
@@ -390,7 +390,7 @@ export default function System() {
               className="rounded-full"
               type="text"
               color="gray"
-              aria-label="Momentary resource usage for other important processes."
+              aria-label="Momentary resource usage for other important processes. CPU % is for a single core."
             >
               <About className="w-5" />
             </Button>
