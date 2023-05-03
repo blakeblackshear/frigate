@@ -799,11 +799,10 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
-    for process in psutil.process_iter(['pid', 'name', 'cpu_percent']):
-        pid = process.info['pid']
+    for process in psutil.process_iter(["pid", "name", "cpu_percent"]):
+        pid = process.info["pid"]
         try:
-            
-            cpu_percent = process.info['cpu_percent']
+            cpu_percent = process.info["cpu_percent"]
             with open(f"/proc/{pid}/statm", "r") as f:
                 mem_stats = f.readline().split()
             mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
