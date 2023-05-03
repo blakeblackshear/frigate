@@ -925,30 +925,32 @@ def try_get_info(f, h, default="N/A"):
 
 
 def get_nvidia_gpu_stats() -> dict[int, dict]:
-    nvml.nvmlInit()
-    deviceCount = nvml.nvmlDeviceGetCount()
     results = {}
-    for i in range(deviceCount):
-        handle = nvml.nvmlDeviceGetHandleByIndex(i)
-        meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
-        util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
-        if util != "N/A":
-            gpu_util = util.gpu
-        else:
-            gpu_util = 0
+    try:
+        nvml.nvmlInit()
+        deviceCount = nvml.nvmlDeviceGetCount()
+        for i in range(deviceCount):
+            handle = nvml.nvmlDeviceGetHandleByIndex(i)
+            meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
+            util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
+            if util != "N/A":
+                gpu_util = util.gpu
+            else:
+                gpu_util = 0
 
-        if meminfo != "N/A":
-            gpu_mem_util = meminfo.used / meminfo.total * 100
-        else:
-            gpu_mem_util = -1
+            if meminfo != "N/A":
+                gpu_mem_util = meminfo.used / meminfo.total * 100
+            else:
+                gpu_mem_util = -1
 
-        results[i] = {
-            "name": nvml.nvmlDeviceGetName(handle),
-            "gpu": gpu_util,
-            "mem": gpu_mem_util,
-        }
-
+            results[i] = {
+                "name": nvml.nvmlDeviceGetName(handle),
+                "gpu": gpu_util,
+                "mem": gpu_mem_util,
+            }
+    except:
         return results
+    return results
 
 
 def ffprobe_stream(path: str) -> sp.CompletedProcess:
