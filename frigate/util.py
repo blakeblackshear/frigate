@@ -16,6 +16,7 @@ from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import Any, AnyStr, Optional, Tuple
+import py3nvml.py3nvml as nvml
 
 import cv2
 import numpy as np
@@ -915,44 +916,35 @@ def get_intel_gpu_stats() -> dict[str, str]:
         return results
 
 
+def try_get_info(f, h, default='N/A'):
+    try:
+        v = f(h)
+    except nvml.NVMLError_NotSupported:
+        v = default
+    return v
+
+
+
 def get_nvidia_gpu_stats() -> dict[str, str]:
-    """Get stats using nvidia-smi."""
-    nvidia_smi_command = [
-        "nvidia-smi",
-        "--query-gpu=gpu_name,utilization.gpu,memory.used,memory.total",
-        "--format=csv",
-    ]
-
-    if (
-        "CUDA_VISIBLE_DEVICES" in os.environ
-        and os.environ["CUDA_VISIBLE_DEVICES"].isdigit()
-    ):
-        nvidia_smi_command.extend(["--id", os.environ["CUDA_VISIBLE_DEVICES"]])
-    elif (
-        "NVIDIA_VISIBLE_DEVICES" in os.environ
-        and os.environ["NVIDIA_VISIBLE_DEVICES"].isdigit()
-    ):
-        nvidia_smi_command.extend(["--id", os.environ["NVIDIA_VISIBLE_DEVICES"]])
-
-    p = sp.run(
-        nvidia_smi_command,
-        encoding="ascii",
-        capture_output=True,
-    )
-
-    if p.returncode != 0:
-        logger.error(f"Unable to poll nvidia GPU stats: {p.stderr}")
-        return None
-    else:
-        usages = p.stdout.split("\n")[1].strip().split(",")
-        memory_percent = f"{round(float(usages[2].replace(' MiB', '').strip()) / float(usages[3].replace(' MiB', '').strip()) * 100, 1)} %"
-        results: dict[str, str] = {
-            "name": usages[0],
-            "gpu": usages[1].strip(),
-            "mem": memory_percent,
+    nvml.nvmlInit()
+    deviceCount = nvml.nvmlDeviceGetCount()
+    results = {}
+    for i in range(deviceCount):
+        handle = nvml.nvmlDeviceGetHandleByIndex(i)
+        meminfo = nvml.nvmlDeviceGetMemoryInfo(handle)
+        util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
+        if util != 'N/A':
+            gpu_util = util.gpu
+        else:
+            gpu_util = 0
+        results[i] = {
+            "name": nvml.nvmlDeviceGetName(handle),
+            "gpu": gpu_util,
+            "mem": meminfo.used / meminfo.total * 100
         }
 
         return results
+
 
 
 def ffprobe_stream(path: str) -> sp.CompletedProcess:
