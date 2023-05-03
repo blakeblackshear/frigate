@@ -924,7 +924,7 @@ def try_get_info(f, h, default="N/A"):
     return v
 
 
-def get_nvidia_gpu_stats() -> dict[str, str]:
+def get_nvidia_gpu_stats() -> dict[int, dict]:
     nvml.nvmlInit()
     deviceCount = nvml.nvmlDeviceGetCount()
     results = {}

@@ -151,11 +151,12 @@ async def set_gpu_stats(
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
-                for i in nvidia_usage:
+                for i in range(len(nvidia_usage)):
                     stats[nvidia_usage[i]["name"]] = {
-                        "gpu": round(nvidia_usage[i]["gpu"], 2),
-                        "mem": round(nvidia_usage[i]["mem"], 2),
+                        "gpu": round(float(nvidia_usage[i]["gpu"]), 2),
+                        "mem": round(float(nvidia_usage[i]["mem"]), 2),
                     }
+
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
