@@ -153,8 +153,8 @@ async def set_gpu_stats(
             if nvidia_usage:
                 for i in nvidia_usage:
                     stats[nvidia_usage[i]["name"]] = {
-                        "gpu": round(nvidia_usage[i]["gpu"],2),
-                        "mem": round(nvidia_usage[i]["mem"],2),
+                        "gpu": round(nvidia_usage[i]["gpu"], 2),
+                        "mem": round(nvidia_usage[i]["mem"], 2),
                     }
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
