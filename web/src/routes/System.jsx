@@ -353,19 +353,20 @@ export default function System() {
               <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
                 <div className="capitalize text-lg flex justify-between p-4">
                   <div className="text-lg flex justify-between">{process}</div>
-                  <p>P-ID: {processes[process]['pid'] || '- '}</p>
                 </div>
                 <div className="p-2">
                   <Table className="w-full">
                     <Thead>
                       <Tr>
+                        <Th>P-ID</Th>
                         <Th>CPU %</Th>
                         <Th>AvgCPU %</Th>
                         <Th>Memory %</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
-                      <Tr key="ffmpeg" index="0">
+                      <Tr key="other" index="0">
+                        <Td>{processes[process]['pid'] || '- '}</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
