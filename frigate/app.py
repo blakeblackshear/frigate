@@ -79,6 +79,7 @@ class FrigateApp:
         )
         self.log_process.daemon = True
         self.log_process.start()
+        self.processes["logger"] = self.log_process.pid or 0
         root_configurer(self.log_queue)
 
     def init_config(self) -> None:
