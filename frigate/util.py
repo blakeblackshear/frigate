@@ -799,43 +799,26 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
-    for pid in os.listdir("/proc"):
-        if pid.isdigit():
-            try:
-                with open(f"/proc/{pid}/stat", "r") as f:
-                    stats = f.readline().split()
-                utime = int(stats[13])
-                stime = int(stats[14])
-                starttime = int(stats[21])
+    for process in psutil.process_iter(['pid', 'name', 'cpu_percent']):
+        pid = process.info['pid']
+        try:
+            
+            cpu_percent = process.info['cpu_percent']
+            with open(f"/proc/{pid}/statm", "r") as f:
+                mem_stats = f.readline().split()
+            mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
 
-                with open("/proc/uptime") as f:
-                    system_uptime_sec = int(float(f.read().split()[0]))
+            if docker_memlimit > 0:
+                mem_pct = round((mem_res / docker_memlimit) * 100, 1)
+            else:
+                mem_pct = round((mem_res / total_mem) * 100, 1)
 
-                clk_tck = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
-
-                process_utime_sec = utime // clk_tck
-                process_stime_sec = stime // clk_tck
-                process_starttime_sec = starttime // clk_tck
-
-                process_elapsed_sec = system_uptime_sec - process_starttime_sec
-                process_usage_sec = process_utime_sec + process_stime_sec
-                cpu_usage = process_usage_sec * 100 // process_elapsed_sec
-
-                with open(f"/proc/{pid}/statm", "r") as f:
-                    mem_stats = f.readline().split()
-                mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
-
-                if docker_memlimit > 0:
-                    mem_pct = round((mem_res / docker_memlimit) * 100, 1)
-                else:
-                    mem_pct = round((mem_res / total_mem) * 100, 1)
-
-                usages[pid] = {
-                    "cpu": str(round(cpu_usage, 2)),
-                    "mem": f"{mem_pct}",
-                }
-            except:
-                continue
+            usages[pid] = {
+                "cpu": str(cpu_percent),
+                "mem": f"{mem_pct}",
+            }
+        except:
+            continue
 
     return usages
 
