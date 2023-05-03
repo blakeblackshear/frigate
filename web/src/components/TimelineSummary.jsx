@@ -107,7 +107,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
       {timeIndex >= 0 ? (
         <div className="m-2 max-w-md self-center">
           <div className="flex justify-start">
-            <div className="text-lg flex justify-between py-4">Disclaimer</div>
+            <div className="text-lg flex justify-between py-4">Bounding boxes may not align</div>
             <Button
               className="rounded-full"
               type="text"
