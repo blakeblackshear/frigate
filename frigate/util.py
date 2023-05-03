@@ -853,9 +853,9 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
         for hw in usages:
             if "gpu" in hw:
-                results["gpu"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+                results["gpu"] = f"{hw.strip().split(' ')[1].replace('%', '')}%"
             elif "vram" in hw:
-                results["mem"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+                results["mem"] = f"{hw.strip().split(' ')[1].replace('%', '')}%"
 
         return results
 
@@ -911,8 +911,8 @@ def get_intel_gpu_stats() -> dict[str, str]:
         else:
             video_avg = 1
 
-        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)} %"
-        results["mem"] = "- %"
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
+        results["mem"] = "-%"
         return results
 
 
