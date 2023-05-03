@@ -353,6 +353,7 @@ export default function System() {
               <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
                 <div className="capitalize text-lg flex justify-between p-4">
                   <div className="text-lg flex justify-between">{process}</div>
+                  <p>P-ID: {processes[process]['pid'] || '- '}</p>
                 </div>
                 <div className="p-2">
                   <Table className="w-full">
