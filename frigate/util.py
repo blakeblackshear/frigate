@@ -930,16 +930,22 @@ def get_nvidia_gpu_stats() -> dict[str, str]:
     results = {}
     for i in range(deviceCount):
         handle = nvml.nvmlDeviceGetHandleByIndex(i)
-        meminfo = nvml.nvmlDeviceGetMemoryInfo(handle)
+        meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
         util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
         if util != "N/A":
             gpu_util = util.gpu
         else:
             gpu_util = 0
+
+        if meminfo != "N/A":
+            gpu_mem_util = meminfo.used / meminfo.total * 100
+        else:
+            gpu_mem_util = -1
+
         results[i] = {
             "name": nvml.nvmlDeviceGetName(handle),
             "gpu": gpu_util,
-            "mem": meminfo.used / meminfo.total * 100,
+            "mem": gpu_mem_util,
         }
 
         return results
