@@ -2,6 +2,7 @@ import { h } from 'preact';
 import useSWR from 'swr';
 import ActivityIndicator from './ActivityIndicator';
 import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
+import About from '../icons/About';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import { Zone } from '../icons/Zone';
@@ -104,9 +105,19 @@ export default function TimelineSummary({ event, onFrameSelected }) {
         </div>
       </div>
       {timeIndex >= 0 ? (
-        <div className="bg-gray-500 p-4 m-2 max-w-md self-center">
-          Disclaimer: This data comes from the detect feed but is shown on the recordings, it is unlikely that the
-          streams are perfectly in sync so the bounding box and the footage will not line up perfectly.
+        <div className="m-2 max-w-md self-center">
+          <div className="flex justify-start">
+            <div className="text-lg flex justify-between py-4">Disclaimer</div>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label=" Disclaimer: This data comes from the detect feed but is shown on the recordings, it is unlikely that the
+                      streams are perfectly in sync so the bounding box and the footage will not line up perfectly. The annotation_offset field can be used to adjust this."
+            >
+              <About className="w-4" />
+            </Button>
+          </div>
         </div>
       ) : null}
     </div>
