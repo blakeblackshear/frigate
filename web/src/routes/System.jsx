@@ -359,12 +359,14 @@ export default function System() {
                     <Thead>
                       <Tr>
                         <Th>CPU %</Th>
+                        <Th>AvgCPU %</Th>
                         <Th>Memory %</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       <Tr key="ffmpeg" index="0">
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
                       </Tr>
                     </Tbody>
