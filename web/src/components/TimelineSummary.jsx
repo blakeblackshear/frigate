@@ -81,7 +81,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
               <Button
                 key={index}
                 className="rounded-full"
-                type="text"
+                type="iconOnly"
                 color={index == timeIndex ? 'blue' : 'gray'}
                 aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
                 onClick={() => onSelectMoment(index)}
@@ -92,7 +92,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
               <Button
                 key={index}
                 className="rounded-full"
-                type="text"
+                type="iconOnly"
                 color={index == timeIndex ? 'blue' : 'gray'}
                 aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
                 onClick={() => onSelectMoment(index)}
