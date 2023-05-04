@@ -24,7 +24,7 @@ export default function Birdseye() {
     }
 
     return Object.entries(config.cameras)
-      .filter(([_, conf]) => conf.onvif?.host)
+      .filter(([_, conf]) => conf.onvif?.host && conf.onvif.host != '')
       .map(([_, camera]) => camera.name);
   }, [config]);
 
@@ -37,7 +37,7 @@ export default function Birdseye() {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className="max-w-5xl xl:w-1/2">
+          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
             <MsePlayer camera="birdseye" />
           </div>
         </Fragment>
@@ -54,7 +54,7 @@ export default function Birdseye() {
   } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
-        <div className="max-w-5xl xl:w-1/2">
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -62,7 +62,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className="max-w-7xl xl:w-1/2">
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -94,7 +94,7 @@ export default function Birdseye() {
       <div className="xl:flex justify-between">
         {player}
 
-        {ptzCameras && (
+        {ptzCameras.length ? (
           <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">
             <Heading size="sm">Control Panel</Heading>
             {ptzCameras.map((camera) => (
@@ -104,7 +104,7 @@ export default function Birdseye() {
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
