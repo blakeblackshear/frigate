@@ -53,8 +53,8 @@ _user_agent_args = [
 ]
 
 PRESETS_HW_ACCEL_DECODE = {
-    "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
-    "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
+    "preset-rpi-32-h264": ["-c:v:1", "h264_v4l2m2m"],
+    "preset-rpi-64-h264": ["-c:v:1", "h264_v4l2m2m"],
     "preset-vaapi": [
         "-hwaccel_flags",
         "allow_profile_mismatch",
