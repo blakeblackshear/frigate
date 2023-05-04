@@ -724,7 +724,7 @@ export default function Events({ path, ...props }) {
                                       }}
                                     >
                                       {eventOverlay.class_type == 'entered_zone' ? (
-                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] bottom-0" />
+                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] -translate-x-1/2 translate-y-3/4 bottom-0" />
                                       ) : null}
                                     </div>
                                   ) : null}

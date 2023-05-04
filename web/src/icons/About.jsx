@@ -17,4 +17,3 @@ export function About({ className = '' }) {
 }
 
 export default memo(About);
-
