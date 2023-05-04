@@ -256,3 +256,25 @@ model:
   width: 416
   height: 416
 ```
+
+## Deepstack / CodeProject.AI Server Detector
+
+The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
+
+### Setup
+
+To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
+
+To integrate CodeProject.AI into Frigate, you'll need to make the following changes to your Frigate configuration file:
+
+```yaml
+detectors:
+  deepstack:
+    api_url: http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
+    type: deepstack
+    api_timeout: 0.1 # seconds
+```
+
+Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server. 
+
+To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.

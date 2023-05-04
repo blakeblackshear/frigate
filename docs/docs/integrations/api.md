@@ -213,7 +213,7 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 ### `POST /api/events/<id>/sub_label`
 
 Set a sub label for an event. For example to update `person` -> `person's name` if they were recognized with facial recognition.
-Sub labels must be 20 characters or shorter.
+Sub labels must be 100 characters or shorter.
 
 ```json
 {

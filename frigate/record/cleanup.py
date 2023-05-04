@@ -3,7 +3,7 @@
 import datetime
 import itertools
 import logging
-import subprocess as sp
+import os
 import threading
 from pathlib import Path
 
@@ -192,12 +192,14 @@ class RecordingCleanup(threading.Thread):
             return
 
         logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
-        process = sp.run(
-            ["find", RECORD_DIR, "-type", "f", "!", "-newermt", f"@{oldest_timestamp}"],
-            capture_output=True,
-            text=True,
-        )
-        files_to_check = process.stdout.splitlines()
+
+        files_to_check = []
+
+        for root, _, files in os.walk(RECORD_DIR):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if os.path.getmtime(file_path) < oldest_timestamp:
+                    files_to_check.append(file_path)
 
         for f in files_to_check:
             p = Path(f)
@@ -216,12 +218,10 @@ class RecordingCleanup(threading.Thread):
         recordings: Recordings = Recordings.select()
 
         # get all recordings files on disk
-        process = sp.run(
-            ["find", RECORD_DIR, "-type", "f"],
-            capture_output=True,
-            text=True,
-        )
-        files_on_disk = process.stdout.splitlines()
+        files_on_disk = []
+        for root, _, files in os.walk(RECORD_DIR):
+            for file in files:
+                files_on_disk.append(os.path.join(root, file))
 
         recordings_to_delete = []
         for recording in recordings.objects().iterator():
