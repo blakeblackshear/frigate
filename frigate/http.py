@@ -375,13 +375,13 @@ def set_sub_label(id):
     else:
         new_sub_label = None
 
-    if new_sub_label and len(new_sub_label) > 20:
+    if new_sub_label and len(new_sub_label) > 100:
         return make_response(
             jsonify(
                 {
                     "success": False,
                     "message": new_sub_label
-                    + " exceeds the 20 character limit for sub_label",
+                    + " exceeds the 100 character limit for sub_label",
                 }
             ),
             400,
