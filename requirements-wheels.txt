@@ -11,6 +11,7 @@ peewee == 3.15.*
 peewee_migrate == 1.7.*
 psutil == 5.9.*
 pydantic == 1.10.*
+git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 PyYAML == 6.0
 pytz == 2023.3
 tzlocal == 4.3
