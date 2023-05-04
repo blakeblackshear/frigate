@@ -11,6 +11,7 @@ import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
 import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
+import { About } from '../icons/About';
 
 const emptyObject = Object.freeze({});
 
@@ -208,7 +209,19 @@ export default function System() {
         </div>
       ) : (
         <Fragment>
-          <Heading size="lg">Detectors</Heading>
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Detectors
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage of each process that is controlling the object detector. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
           <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {detectorNames.map((detector) => (
               <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
@@ -237,8 +250,20 @@ export default function System() {
             ))}
           </div>
 
-          <div className="text-lg flex justify-between p-4">
-            <Heading size="lg">GPUs</Heading>
+          <div className="text-lg flex justify-between">
+            <div className="flex justify-start">
+              <Heading className="self-center" size="lg">
+                GPUs
+              </Heading>
+              <Button
+                className="rounded-full"
+                type="text"
+                color="gray"
+                aria-label="Momentary resource usage of each GPU. Intel GPUs do not support memory stats."
+              >
+                <About className="w-5" />
+              </Button>
+            </div>
             <Button onClick={(e) => onHandleVainfo(e)}>vainfo</Button>
           </div>
 
@@ -282,7 +307,19 @@ export default function System() {
             </div>
           )}
 
-          <Heading size="lg">Cameras</Heading>
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Cameras
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage of each process interacting with the camera stream. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
           {!cameras ? (
             <ActivityIndicator />
           ) : (
@@ -347,7 +384,19 @@ export default function System() {
             </div>
           )}
 
-          <Heading size="lg">Other Processes</Heading>
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Other Processes
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage for other important processes. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
           <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {processesNames.map((process) => (
               <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
