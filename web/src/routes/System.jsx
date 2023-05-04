@@ -29,12 +29,14 @@ export default function System() {
     detectors,
     service = {},
     detection_fps: _,
+    processes,
     ...cameras
   } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
   const gpuNames = Object.keys(gpu_usages || emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
+  const processesNames = Object.keys(processes || emptyObject);
 
   const onHandleFfprobe = async (camera, e) => {
     if (e) {
@@ -347,7 +349,7 @@ export default function System() {
 
           <Heading size="lg">Other Processes</Heading>
           <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
-            {['go2rtc', 'recording'].map((process) => (
+            {processesNames.map((process) => (
               <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
                 <div className="capitalize text-lg flex justify-between p-4">
                   <div className="text-lg flex justify-between">{process}</div>
@@ -356,14 +358,18 @@ export default function System() {
                   <Table className="w-full">
                     <Thead>
                       <Tr>
+                        <Th>P-ID</Th>
                         <Th>CPU %</Th>
+                        <Th>Avg CPU %</Th>
                         <Th>Memory %</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
-                      <Tr key="ffmpeg" index="0">
-                        <Td>{cpu_usages[process]?.['cpu'] || '- '}%</Td>
-                        <Td>{cpu_usages[process]?.['mem'] || '- '}%</Td>
+                      <Tr key="other" index="0">
+                        <Td>{processes[process]['pid'] || '- '}</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
                       </Tr>
                     </Tbody>
                   </Table>

@@ -8,6 +8,7 @@ import signal
 import sys
 from typing import Optional
 from types import FrameType
+import psutil
 
 import traceback
 from peewee_migrate import Router
@@ -58,6 +59,7 @@ class FrigateApp:
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.record_metrics: dict[str, RecordMetricsTypes] = {}
+        self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -77,6 +79,7 @@ class FrigateApp:
         )
         self.log_process.daemon = True
         self.log_process.start()
+        self.processes["logger"] = self.log_process.pid or 0
         root_configurer(self.log_queue)
 
     def init_config(self) -> None:
@@ -171,6 +174,12 @@ class FrigateApp:
 
         migrate_db.close()
 
+    def init_go2rtc(self) -> None:
+        for proc in psutil.process_iter(["pid", "name"]):
+            if proc.info["name"] == "go2rtc":
+                logger.info(f"go2rtc process pid: {proc.info['pid']}")
+                self.processes["go2rtc"] = proc.info["pid"]
+
     def init_recording_manager(self) -> None:
         recording_process = mp.Process(
             target=manage_recordings,
@@ -180,6 +189,7 @@ class FrigateApp:
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
+        self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def bind_database(self) -> None:
@@ -191,7 +201,7 @@ class FrigateApp:
 
     def init_stats(self) -> None:
         self.stats_tracking = stats_init(
-            self.config, self.camera_metrics, self.detectors
+            self.config, self.camera_metrics, self.detectors, self.processes
         )
 
     def init_web_server(self) -> None:
@@ -412,6 +422,7 @@ class FrigateApp:
             self.init_database()
             self.init_onvif()
             self.init_recording_manager()
+            self.init_go2rtc()
             self.bind_database()
             self.init_dispatcher()
         except Exception as e:
