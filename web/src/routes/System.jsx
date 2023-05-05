@@ -39,6 +39,8 @@ export default function System() {
   const cameraNames = Object.keys(cameras || emptyObject);
   const processesNames = Object.keys(processes || emptyObject);
 
+  const { data: go2rtc } = useSWR('go2rtc');
+
   const onHandleFfprobe = async (camera, e) => {
     if (e) {
       e.stopPropagation();
@@ -93,14 +95,16 @@ export default function System() {
           System <span className="text-sm">{service.version}</span>
         </Heading>
         {config && (
-          <Link
-            className="p-1 text-blue-500 hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-            href="/live/webrtc/"
-          >
-            go2rtc dashboard
-          </Link>
+          <span class="p-1">go2rtc {go2rtc && ( `${go2rtc.version} ` ) }
+            <Link
+              className="text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="/live/webrtc/"
+            >
+              dashboard
+            </Link>
+          </span>
         )}
       </div>
 
