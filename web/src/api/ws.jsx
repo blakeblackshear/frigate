@@ -1,6 +1,6 @@
 import { h, createContext } from 'preact';
 import { baseUrl } from './baseUrl';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useCallback, useContext, useEffect, useRef, useReducer } from 'preact/hooks';
 
 const initialState = Object.freeze({ __connected: false });
