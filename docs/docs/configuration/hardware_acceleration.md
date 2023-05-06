@@ -15,20 +15,20 @@ ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 ```
 
-### Intel-based CPUs (<10th Generation) via VAAPI
+### VA-API
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
+VA-API (Open Source Video Acceleration API) supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VA-API is recommended for all generations of Intel CPUs. Dedicated Quick Sync Video hardware for hardware-accelerated video encoding and decoding is supported with VA-API where available.
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-vaapi
 ```
 
-**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
+**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars). You can use ```ls /dev/dri``` to check available drivers.
 
 ### Intel-based CPUs (>=10th Generation) via Quicksync
 
-QSV must be set specifically based on the video encoding of the stream.
+QSV must be set specifically based on the video encoding of the stream. If you are experiencing any errors please try using VA-API.
 
 #### H.264 streams
 
