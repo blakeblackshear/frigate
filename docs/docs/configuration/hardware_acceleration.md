@@ -14,23 +14,29 @@ Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 ```
+##### H.264 and H.265 support
+**NOTICE**: Raspberry Pi 3 does not support hardware acceleration of H.265. H.265 can use a large amount of compute resources on the Raspberry Pi 3 and 4, in some cases it might be better to use H.264 streams.
+```yaml
+ffmpeg:
+  hwaccel_args: -hwaccel drm
+```
 
 ### Intel-based CPUs
 
-#### Via VAAPI
+#### Via VA-API
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
+VA-API (Open Source Video Acceleration API) supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VA-API is recommended for all generations of Intel CPUs. Dedicated Quick Sync Video hardware for hardware-accelerated video encoding and decoding is supported with VA-API where available.
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-vaapi
 ```
 
-**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).
+**NOTICE**: With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the frigate.yml for HA OS users](advanced.md#environment_vars).  You can use ```ls /dev/dri``` to check available drivers.
 
 #### Via Quicksync (>=10th Generation only)
 
-QSV must be set specifically based on the video encoding of the stream.
+QSV must be set specifically based on the video encoding of the stream. If you are experiencing any errors please try using VA-API instead.
 
 ##### H.264 streams
 
