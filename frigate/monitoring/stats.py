@@ -46,6 +46,7 @@ def stats_init(
     config: FrigateConfig,
     camera_metrics: dict[str, CameraMetricsTypes],
     detectors: dict[str, ObjectDetectProcess],
+    processes: dict[str, int],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
@@ -53,6 +54,7 @@ def stats_init(
         "started": int(time.time()),
         "latest_frigate_version": get_latest_version(config),
         "last_updated": int(time.time()),
+        "processes": processes,
     }
     return stats_tracking
 
@@ -151,9 +153,12 @@ async def set_gpu_stats(
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
-                name = nvidia_usage["name"]
-                del nvidia_usage["name"]
-                stats[name] = nvidia_usage
+                for i in range(len(nvidia_usage)):
+                    stats[nvidia_usage[i]["name"]] = {
+                        "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
+                        "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                    }
+
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
@@ -258,6 +263,12 @@ def stats_snapshot(
             "used": round(storage_stats.used / 1000000, 1),
             "free": round(storage_stats.free / 1000000, 1),
             "mount_type": get_fs_type(path),
+        }
+
+    stats["processes"] = {}
+    for name, pid in stats_tracking["processes"].items():
+        stats["processes"][name] = {
+            "pid": pid,
         }
 
     return stats

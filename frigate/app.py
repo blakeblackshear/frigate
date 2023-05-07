@@ -8,6 +8,7 @@ import signal
 import sys
 from typing import Optional
 from types import FrameType
+import psutil
 
 import traceback
 from peewee_migrate import Router
@@ -18,7 +19,14 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, CONFIG_DIR, DEFAULT_DB_PATH, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    CONFIG_DIR,
+    DEFAULT_DB_PATH,
+    MODEL_CACHE_DIR,
+    RECORD_DIR,
+)
 from frigate.object_detection import ObjectDetectProcess
 from frigate.events import EventCleanup, EventProcessor
 from frigate.http import create_app
@@ -51,13 +59,14 @@ class FrigateApp:
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.record_metrics: dict[str, RecordMetricsTypes] = {}
+        self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
             os.environ[key] = value
 
     def ensure_dirs(self) -> None:
-        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
+        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR, MODEL_CACHE_DIR]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)
@@ -70,6 +79,7 @@ class FrigateApp:
         )
         self.log_process.daemon = True
         self.log_process.start()
+        self.processes["logger"] = self.log_process.pid or 0
         root_configurer(self.log_queue)
 
     def init_config(self) -> None:
@@ -81,7 +91,7 @@ class FrigateApp:
             config_file = config_file_yaml
 
         user_config = FrigateConfig.parse_file(config_file)
-        self.config = user_config.runtime_config
+        self.config = user_config.runtime_config(self.plus_api)
 
         for camera_name in self.config.cameras.keys():
             # create camera_metrics
@@ -164,6 +174,12 @@ class FrigateApp:
 
         migrate_db.close()
 
+    def init_go2rtc(self) -> None:
+        for proc in psutil.process_iter(["pid", "name"]):
+            if proc.info["name"] == "go2rtc":
+                logger.info(f"go2rtc process pid: {proc.info['pid']}")
+                self.processes["go2rtc"] = proc.info["pid"]
+
     def init_recording_manager(self) -> None:
         recording_process = mp.Process(
             target=manage_recordings,
@@ -173,6 +189,7 @@ class FrigateApp:
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
+        self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def bind_database(self) -> None:
@@ -184,7 +201,7 @@ class FrigateApp:
 
     def init_stats(self) -> None:
         self.stats_tracking = stats_init(
-            self.config, self.camera_metrics, self.detectors
+            self.config, self.camera_metrics, self.detectors, self.processes
         )
 
     def init_web_server(self) -> None:
@@ -379,6 +396,7 @@ class FrigateApp:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
         try:
+            self.ensure_dirs()
             try:
                 self.init_config()
             except Exception as e:
@@ -399,12 +417,12 @@ class FrigateApp:
                 self.log_process.terminate()
                 sys.exit(1)
             self.set_environment_vars()
-            self.ensure_dirs()
             self.set_log_levels()
             self.init_queues()
             self.init_database()
             self.init_onvif()
             self.init_recording_manager()
+            self.init_go2rtc()
             self.bind_database()
             self.init_dispatcher()
         except Exception as e:

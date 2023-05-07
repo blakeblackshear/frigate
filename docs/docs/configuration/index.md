@@ -518,6 +518,12 @@ cameras:
       # Optional: password for login.
       password: admin
 
+    # Optional: Configuration for how to sort the cameras in the Birdseye view.
+    birdseye:
+      # Optional: Adjust sort order of cameras in the Birdseye view. Larger numbers come later (default: shown below)
+      # By default the cameras are sorted alphabetically.
+      order: 0
+
 # Optional
 ui:
   # Optional: Set the default live mode for cameras in the UI (default: shown below)

@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import re
-from typing import List
+from typing import Any, Dict, List
 import requests
 from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
 from requests.models import Response
@@ -187,3 +187,24 @@ class PlusApi:
 
         if not r.ok:
             raise Exception(r.text)
+
+    def get_model_download_url(
+        self,
+        model_id: str,
+    ) -> str:
+        r = self._get(f"model/{model_id}/signed_url")
+
+        if not r.ok:
+            raise Exception(r.text)
+
+        presigned_url = r.json()
+
+        return str(presigned_url.get("url"))
+
+    def get_model_info(self, model_id: str) -> Any:
+        r = self._get(f"model/{model_id}")
+
+        if not r.ok:
+            raise Exception(r.text)
+
+        return r.json()
