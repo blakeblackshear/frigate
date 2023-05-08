@@ -33,9 +33,6 @@ class DeepStack(DetectionApi):
         self.api_key = detector_config.api_key
         self.labels = detector_config.model.merged_labelmap
 
-        self.h = detector_config.model.height
-        self.w = detector_config.model.width
-
     def get_label_index(self, label_value):
         if label_value.lower() == "truck":
             label_value = "car"
@@ -47,6 +44,7 @@ class DeepStack(DetectionApi):
     def detect_raw(self, tensor_input):
         image_data = np.squeeze(tensor_input).astype(np.uint8)
         image = Image.fromarray(image_data)
+        self.w, self.h = image.size
         with io.BytesIO() as output:
             image.save(output, format="JPEG")
             image_bytes = output.getvalue()
