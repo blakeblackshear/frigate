@@ -16,7 +16,7 @@
     "axios": "^1.4.0",
     "copy-to-clipboard": "3.3.3",
     "date-fns": "^2.30.0",
-    "idb-keyval": "^6.2.0",
+    "idb-keyval": "^6.2.1",
     "immer": "^10.0.1",
     "monaco-yaml": "^4.0.4",
     "preact": "^10.13.2",
