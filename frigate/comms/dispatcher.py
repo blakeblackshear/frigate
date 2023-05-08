@@ -186,7 +186,6 @@ class Dispatcher:
                 )
                 return
 
-
             if not record_settings.enabled:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
