@@ -88,6 +88,7 @@ FROM wget AS models
 # Get model and labels
 RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
 RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
+RUN wget -qO efficientdet_lite2_fp32.tflite https://storage.googleapis.com/mediapipe-tasks/object_detector/efficientdet_lite2_fp32.tflite
 COPY labelmap.txt .
 # Copy OpenVino model
 COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
@@ -126,6 +127,7 @@ RUN apt-get -qq update \
     gfortran openexr libatlas-base-dev libssl-dev\
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+    libgl1 libgl1-dev \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
