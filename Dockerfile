@@ -127,7 +127,7 @@ RUN apt-get -qq update \
     gfortran openexr libatlas-base-dev libssl-dev\
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
-    libgl1 libgl1-dev \
+    libgl1 \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
