@@ -79,6 +79,10 @@ jobs:
   python_tests:
     runs-on: ubuntu-latest
     name: Python Tests
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [amd64,arm64]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -90,13 +94,22 @@ jobs:
       - name: Build web
         run: npm run build
         working-directory: ./web
+      - run: make version
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Build
-        run: make
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          load: true
+          platforms: linux/${{ matrix.platform }}
+          tags: |
+            frigate:${{ matrix.platform }}
+          target: frigate
       - name: Run mypy
-        run: docker run --rm --entrypoint=python3 frigate:latest -u -m mypy --config-file frigate/mypy.ini frigate
+        run: docker run --platform linux/${{ matrix.platform }} --rm --entrypoint=python3 frigate:${{ matrix.platform }} -u -m mypy --config-file frigate/mypy.ini frigate
       - name: Run tests
-        run: docker run --rm --entrypoint=python3 frigate:latest -u -m unittest
+        run: docker run --platform linux/${{ matrix.platform }} --rm --entrypoint=python3 frigate:${{ matrix.platform }} -u -m unittest
