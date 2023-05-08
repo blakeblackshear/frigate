@@ -180,7 +180,17 @@ class Dispatcher:
         record_settings = self.config.cameras[camera_name].record
 
         if payload == "ON":
+<<<<<<< Updated upstream
             if not record_settings.enabled:
+=======
+            if not self.config.cameras[camera_name].record.enabled_in_config:
+                logger.error(
+                    f"Recordings are not enabled in the config, they can not be enabled after startup."
+                )
+                return
+
+            if not self.record_metrics[camera_name]["record_enabled"].value:
+>>>>>>> Stashed changes
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
         elif payload == "OFF":

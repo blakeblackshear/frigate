@@ -172,6 +172,9 @@ class RecordConfig(FrigateBaseModel):
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
     )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of recording."
+    )
 
 
 class MotionConfig(FrigateBaseModel):
@@ -952,6 +955,21 @@ class FrigateConfig(FrigateBaseModel):
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
 
+<<<<<<< Updated upstream
+=======
+            # ONVIF substitution
+            if camera_config.onvif.user or camera_config.onvif.password:
+                camera_config.onvif.user = camera_config.onvif.user.format(
+                    **FRIGATE_ENV_VARS
+                )
+                camera_config.onvif.password = camera_config.onvif.password.format(
+                    **FRIGATE_ENV_VARS
+                )
+
+            # set config recording value
+            camera_config.record.enabled_in_config = camera_config.record.enabled
+
+>>>>>>> Stashed changes
             # Add default filters
             object_keys = camera_config.objects.track
             if camera_config.objects.filters is None:
