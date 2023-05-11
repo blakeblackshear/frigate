@@ -56,8 +56,11 @@ class DeepStack(DetectionApi):
         )
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)
+        if response_json.get("predictions") is None:
+            logger.debug(f"Error in parsing response json: {response_json}")
+            return detections
 
-        for i, detection in enumerate(response_json["predictions"]):
+        for i, detection in enumerate(response_json.get("predictions")):
             logger.debug(f"Response: {detection}")
             if detection["confidence"] < 0.4:
                 logger.debug(f"Break due to confidence < 0.4")
