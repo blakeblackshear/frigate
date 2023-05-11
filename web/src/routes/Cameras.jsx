@@ -65,7 +65,7 @@ function Camera({ name, config }) {
         },
       },
       {
-        name: config.record.enabled_in_config ? `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}` : 'Recordings can not be enabled, please enable in config.',
+        name: config.record.enabled_in_config ? `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}` : 'Recordings must be enabled in the config to be turned on in the UI.',
         icon: ClipIcon,
         color: config.record.enabled_in_config ? (recordValue === 'ON' ? 'blue' : 'gray') : 'red',
         onClick: () => {
