@@ -278,3 +278,18 @@ detectors:
 Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server. 
 
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
+
+## ARMGPU Khadas VIM4 SBC
+
+The ARMGPU detector type runs a TensorFlow Lite model utilizing the MALI GPU hardware acceleration. 
+
+A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+
+```yaml
+detectors:
+  armgpu:
+    type: armgpu
+
+```
+
+
