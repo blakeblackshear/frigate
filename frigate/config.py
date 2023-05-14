@@ -1063,7 +1063,7 @@ class FrigateConfig(FrigateBaseModel):
                 elif detector_config.type == "edgetpu":
                     merged_model["path"] = "/edgetpu_model.tflite"
                 elif detector_config.type == "armgpu":
-+                    merged_model["path"] = "/cpu_model.tflite"
+                    merged_model["path"] = "/cpu_model.tflite"
 
 
             detector_config.model = ModelConfig.parse_obj(merged_model)
