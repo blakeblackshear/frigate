@@ -19,7 +19,8 @@ from frigate.const import CACHE_DIR
 from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
-from frigate.objects import ObjectTracker
+from frigate.track import ObjectTracker
+from frigate.track.centroid_tracker import CentroidTracker
 from frigate.util import (
     EventsPerSecond,
     FrameManager,
@@ -472,7 +473,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = ObjectTracker(config.detect)
+    object_tracker = CentroidTracker(config.detect)
 
     frame_manager = SharedMemoryFrameManager()
 
