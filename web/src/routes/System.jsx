@@ -347,7 +347,15 @@ export default function System() {
                       </Thead>
                       <Tbody>
                         <Tr key="ffmpeg" index="0">
-                          <Td>ffmpeg</Td>
+                          <Td>ffmpeg
+                            <Button
+                              className="rounded-full"
+                              type="text"
+                              color="gray"
+                              aria-label={cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline']}
+                              onClick={() => copy(cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline'])}
+                            ><About className="w-3" /></Button>
+                          </Td>
                           <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
                           <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
