@@ -172,6 +172,9 @@ class RecordConfig(FrigateBaseModel):
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
     )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of recording."
+    )
 
 
 class MotionConfig(FrigateBaseModel):
@@ -951,6 +954,9 @@ class FrigateConfig(FrigateBaseModel):
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
+
+            # set config recording value
+            camera_config.record.enabled_in_config = camera_config.record.enabled
 
             # Add default filters
             object_keys = camera_config.objects.track

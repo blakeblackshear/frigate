@@ -180,6 +180,12 @@ class Dispatcher:
         record_settings = self.config.cameras[camera_name].record
 
         if payload == "ON":
+            if not self.config.cameras[camera_name].record.enabled_in_config:
+                logger.error(
+                    f"Recordings must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
             if not record_settings.enabled:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
