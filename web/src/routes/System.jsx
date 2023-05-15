@@ -27,6 +27,7 @@ export default function System() {
   const {
     cpu_usages,
     gpu_usages,
+    bandwidth_usages,
     detectors,
     service = {},
     detection_fps: _,

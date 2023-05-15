@@ -119,7 +119,7 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
         all_stats["cpu_usages"] = cpu_stats
 
 async def set_bandwidth_stats(all_stats: dict[str, Any]) -> None:
-    """Set cpu usage from top."""
+    """Set bandwidth from nethogs."""
     bandwidth_stats = get_bandwidth_stats()
 
     if bandwidth_stats:
