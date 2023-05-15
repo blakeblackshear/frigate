@@ -344,7 +344,7 @@ export default function System() {
                           <Th>FPS</Th>
                           <Th>CPU %</Th>
                           <Th>Memory %</Th>
-                          <Th>Bandwidth KB/s</Th>
+                          <Th>Network Bandwidth</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
