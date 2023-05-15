@@ -12,7 +12,8 @@ apt-get -qq install --no-install-recommends -y \
     unzip locales tzdata libxml2 xz-utils \
     python3-pip \
     curl \
-    jq
+    jq \
+    nethogs
 
 mkdir -p -m 600 /root/.gnupg
 

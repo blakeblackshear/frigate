@@ -343,6 +343,7 @@ export default function System() {
                           <Th>FPS</Th>
                           <Th>CPU %</Th>
                           <Th>Memory %</Th>
+                          <Th>Bandwidth KB/s</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -352,6 +353,7 @@ export default function System() {
                           <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
+                          <Td>{bandwidth_usages[cameras[camera]['ffmpeg_pid']]?.['bandwidth'] || '- '}KB/s</Td>
                         </Tr>
                         <Tr key="capture" index="1">
                           <Td>Capture</Td>
@@ -359,6 +361,7 @@ export default function System() {
                           <Td>{cameras[camera]['process_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
+                          <Td>-</Td>
                         </Tr>
                         <Tr key="detect" index="2">
                           <Td>Detect</Td>
@@ -379,6 +382,7 @@ export default function System() {
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
+                          <Td>-</Td>
                         </Tr>
                       </Tbody>
                     </Table>
