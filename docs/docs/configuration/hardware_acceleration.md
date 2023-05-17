@@ -15,6 +15,20 @@ ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 ```
 
+:::note
+
+If running Frigate in docker, you either need to run in priviliged mode or be sure to map the /dev/video1x devices to Frigate
+
+```yaml
+docker run -d \
+  --name frigate \
+  ...
+  --device /dev/video10 \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+:::
+
 ### Intel-based CPUs
 
 #### Via VAAPI
