@@ -1,26 +1,37 @@
+from collections import defaultdict
 import random
 import string
-from collections import defaultdict
 
 import numpy as np
-from scipy.spatial import distance as dist
 from frigate.config import DetectConfig
-
 from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
+from similari import Sort, BoundingBox, SpatioTemporalConstraints, PositionalMetricType
 
 
-class CentroidTracker(ObjectTracker):
+class SortTracker(ObjectTracker):
     def __init__(self, config: DetectConfig):
         self.tracked_objects = {}
         self.disappeared = {}
         self.positions = {}
         self.max_disappeared = config.max_disappeared
         self.detect_config = config
+        self.track_id_map = {}
+        self.scene_map = {}
+        constraints = SpatioTemporalConstraints()
+        constraints.add_constraints([(1, 1.0)])
+        self.sort = Sort(
+            shards=1,
+            bbox_history=10,
+            max_idle_epochs=config.max_disappeared,
+            method=PositionalMetricType.iou(threshold=0.1),
+            spatio_temporal_constraints=constraints,
+        )
 
-    def register(self, index, obj):
+    def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         id = f"{obj['frame_time']}-{rand_id}"
+        self.track_id_map[track_id] = id
         obj["id"] = id
         obj["start_time"] = obj["frame_time"]
         obj["motionless_count"] = 0
@@ -107,10 +118,11 @@ class CentroidTracker(ObjectTracker):
 
         return False
 
-    def update(self, id, new_obj):
+    def update(self, track_id, obj):
+        id = self.track_id_map[track_id]
         self.disappeared[id] = 0
         # update the motionless count if the object has not moved to a new position
-        if self.update_position(id, new_obj["box"]):
+        if self.update_position(id, obj["box"]):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
                 self.deregister(id)
@@ -126,7 +138,7 @@ class CentroidTracker(ObjectTracker):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
 
-        self.tracked_objects[id].update(new_obj)
+        self.tracked_objects[id].update(obj)
 
     def update_frame_times(self, frame_time):
         for id in list(self.tracked_objects.keys()):
@@ -136,10 +148,26 @@ class CentroidTracker(ObjectTracker):
                 self.deregister(id)
 
     def match_and_update(self, frame_time, detections):
-        # group by name
-        detection_groups = defaultdict(lambda: [])
+        # create a dict to hold all the detections grouped by scene_id
+        scene_detections = {s_id: [] for s_id in set(self.scene_map.values())}
+
+        # populate objects for scene
         for obj in detections:
-            detection_groups[obj[0]].append(
+            # get the scene_id for this label or create a new one
+            # TODO: consider grouping frequently swapped objects in
+            #       in the same scene
+            if not obj[0] in self.scene_map:
+                scene_id = len(self.scene_map.keys())
+                self.scene_map[obj[0]] = scene_id
+                scene_detections[scene_id] = []
+            else:
+                scene_id = self.scene_map[obj[0]]
+
+            # centroid is used for other things downstream
+            centroid_x = int((obj[2][0] + obj[2][2]) / 2.0)
+            centroid_y = int((obj[2][1] + obj[2][3]) / 2.0)
+
+            scene_detections[scene_id].append(
                 {
                     "label": obj[0],
                     "score": obj[1],
@@ -148,93 +176,37 @@ class CentroidTracker(ObjectTracker):
                     "ratio": obj[4],
                     "region": obj[5],
                     "frame_time": frame_time,
+                    "centroid": (centroid_x, centroid_y),
                 }
             )
 
-        # update any tracked objects with labels that are not
-        # seen in the current objects and deregister if needed
-        for obj in list(self.tracked_objects.values()):
-            if obj["label"] not in detection_groups:
-                if self.disappeared[obj["id"]] >= self.max_disappeared:
-                    self.deregister(obj["id"])
+        # loop over scenes
+        for scene_id, objs in scene_detections.items():
+            # convert objects to tracker objects
+            boxes_to_predict = []
+            for idx, obj in enumerate(objs):
+                obj_box = obj["box"]
+                box = BoundingBox(
+                    obj_box[0],
+                    obj_box[1],
+                    obj_box[2] - obj_box[0],
+                    obj_box[3] - obj_box[1],
+                ).as_xyaah()
+                custom_object_id = idx
+                boxes_to_predict.append((box, custom_object_id))
+
+            # run tracker prediction
+            tracks = self.sort.predict_with_scene(scene_id, boxes_to_predict)
+
+            # update or create new tracks
+            for t in tracks:
+                if not t.id in self.track_id_map:
+                    self.register(t.id, objs[t.custom_object_id])
                 else:
-                    self.disappeared[obj["id"]] += 1
+                    self.update(t.id, objs[t.custom_object_id])
 
-        if len(detections) == 0:
-            return
-
-        # track objects for each label type
-        for label, group in detection_groups.items():
-            current_objects = [
-                o for o in self.tracked_objects.values() if o["label"] == label
-            ]
-            current_ids = [o["id"] for o in current_objects]
-            current_centroids = np.array([o["centroid"] for o in current_objects])
-
-            # compute centroids of new objects
-            for obj in group:
-                centroid_x = int((obj["box"][0] + obj["box"][2]) / 2.0)
-                centroid_y = int((obj["box"][1] + obj["box"][3]) / 2.0)
-                obj["centroid"] = (centroid_x, centroid_y)
-
-            if len(current_objects) == 0:
-                for index, obj in enumerate(group):
-                    self.register(index, obj)
-                continue
-
-            new_centroids = np.array([o["centroid"] for o in group])
-
-            # compute the distance between each pair of tracked
-            # centroids and new centroids, respectively -- our
-            # goal will be to match each current centroid to a new
-            # object centroid
-            D = dist.cdist(current_centroids, new_centroids)
-
-            # in order to perform this matching we must (1) find the smallest
-            # value in each row (i.e. the distance from each current object to
-            # the closest new object) and then (2) sort the row indexes based
-            # on their minimum values so that the row with the smallest
-            # distance (the best match) is at the *front* of the index list
-            rows = D.min(axis=1).argsort()
-
-            # next, we determine which new object each existing object matched
-            # against, and apply the same sorting as was applied previously
-            cols = D.argmin(axis=1)[rows]
-
-            # many current objects may register with each new object, so only
-            # match the closest ones.  unique returns the indices of the first
-            # occurrences of each value, and because the rows are sorted by
-            # distance, this will be index of the closest match
-            _, index = np.unique(cols, return_index=True)
-            rows = rows[index]
-            cols = cols[index]
-
-            # loop over the combination of the (row, column) index tuples
-            for row, col in zip(rows, cols):
-                # grab the object ID for the current row, set its new centroid,
-                # and reset the disappeared counter
-                objectID = current_ids[row]
-                self.update(objectID, group[col])
-
-            # compute the row and column indices we have NOT yet examined
-            unusedRows = set(range(D.shape[0])).difference(rows)
-            unusedCols = set(range(D.shape[1])).difference(cols)
-
-            # in the event that the number of object centroids is
-            # equal or greater than the number of input centroids
-            # we need to check and see if some of these objects have
-            # potentially disappeared
-            if D.shape[0] >= D.shape[1]:
-                for row in unusedRows:
-                    id = current_ids[row]
-
-                    if self.disappeared[id] >= self.max_disappeared:
-                        self.deregister(id)
-                    else:
-                        self.disappeared[id] += 1
-            # if the number of input centroids is greater
-            # than the number of existing object centroids we need to
-            # register each new input centroid as a trackable object
-            else:
-                for col in unusedCols:
-                    self.register(col, group[col])
+            # clear expired tracks
+            wasted = self.sort.wasted()
+            for t in wasted:
+                self.deregister(self.track_id_map[t.id])
+                del self.track_id_map[t.id]
