@@ -311,9 +311,9 @@ Create a manual API with a given `label` (ex: doorbell press) to capture a speci
     // optional annotations that will be drawn on the snapshot
     "boxes": [
       {
-        "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, 1, width, height which are on a scale between 0 - 1
+        "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, y, width, height which are on a scale between 0 - 1
         "color": [255, 0, 0], // color of the box, default is red
-        "score": 100 // optional score of the object
+        "score": 100 // optional score associated with the box
       }
     ]
   }
