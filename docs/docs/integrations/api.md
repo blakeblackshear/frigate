@@ -323,14 +323,11 @@ Create a manual API with a given `label` (ex: doorbell press) to capture a speci
 **Success Response:**
 
 ```json
-[
-  {
-    "event_id": "1682970645.13116-1ug7ns",
-    "message": "Successfully created event.",
-    "success": true
-  },
-  200
-]
+{
+  "event_id": "1682970645.13116-1ug7ns",
+  "message": "Successfully created event.",
+  "success": true
+}
 ```
 
 ### `PUT /api/events/<event_id>/end`
