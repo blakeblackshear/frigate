@@ -44,7 +44,9 @@ class ExternalEventProcessor:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         event_id = f"{now}-{rand_id}"
 
-        thumbnail = self._write_images(camera_config, label, event_id, draw, snapshot_frame)
+        thumbnail = self._write_images(
+            camera_config, label, event_id, draw, snapshot_frame
+        )
 
         self.queue.put(
             (
