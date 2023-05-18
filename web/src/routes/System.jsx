@@ -27,6 +27,7 @@ export default function System() {
   const {
     cpu_usages,
     gpu_usages,
+    bandwidth_usages,
     detectors,
     service = {},
     detection_fps: _,
@@ -343,15 +344,25 @@ export default function System() {
                           <Th>FPS</Th>
                           <Th>CPU %</Th>
                           <Th>Memory %</Th>
+                          <Th>Network Bandwidth</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         <Tr key="ffmpeg" index="0">
-                          <Td>ffmpeg</Td>
+                          <Td>ffmpeg
+                            <Button
+                              className="rounded-full"
+                              type="text"
+                              color="gray"
+                              aria-label={cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline']}
+                              onClick={() => copy(cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline'])}
+                            ><About className="w-3" /></Button>
+                          </Td>
                           <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
                           <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
+                          <Td>{bandwidth_usages[cameras[camera]['ffmpeg_pid']]?.['bandwidth'] || '- '}KB/s</Td>
                         </Tr>
                         <Tr key="capture" index="1">
                           <Td>Capture</Td>
@@ -359,6 +370,7 @@ export default function System() {
                           <Td>{cameras[camera]['process_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
+                          <Td>-</Td>
                         </Tr>
                         <Tr key="detect" index="2">
                           <Td>Detect</Td>
@@ -379,6 +391,7 @@ export default function System() {
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
+                          <Td>-</Td>
                         </Tr>
                       </Tbody>
                     </Table>

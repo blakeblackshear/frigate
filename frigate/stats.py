@@ -16,7 +16,7 @@ from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CAC
 from frigate.types import StatsTrackingTypes, CameraMetricsTypes
 from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_stats
 from frigate.version import VERSION
-from frigate.util import get_cpu_stats
+from frigate.util import get_cpu_stats, get_bandwidth_stats
 from frigate.object_detection import ObjectDetectProcess
 
 logger = logging.getLogger(__name__)
@@ -101,6 +101,7 @@ def get_processing_stats(
             [
                 asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
                 asyncio.create_task(set_cpu_stats(stats)),
+                asyncio.create_task(set_bandwidth_stats(stats)),
             ]
         )
 
@@ -116,6 +117,14 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
 
     if cpu_stats:
         all_stats["cpu_usages"] = cpu_stats
+
+
+async def set_bandwidth_stats(all_stats: dict[str, Any]) -> None:
+    """Set bandwidth from nethogs."""
+    bandwidth_stats = get_bandwidth_stats()
+
+    if bandwidth_stats:
+        all_stats["bandwidth_usages"] = bandwidth_stats
 
 
 async def set_gpu_stats(

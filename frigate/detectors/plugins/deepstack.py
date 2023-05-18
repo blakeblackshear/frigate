@@ -33,9 +33,6 @@ class DeepStack(DetectionApi):
         self.api_key = detector_config.api_key
         self.labels = detector_config.model.merged_labelmap
 
-        self.h = detector_config.model.height
-        self.w = detector_config.model.width
-
     def get_label_index(self, label_value):
         if label_value.lower() == "truck":
             label_value = "car"
@@ -47,6 +44,7 @@ class DeepStack(DetectionApi):
     def detect_raw(self, tensor_input):
         image_data = np.squeeze(tensor_input).astype(np.uint8)
         image = Image.fromarray(image_data)
+        self.w, self.h = image.size
         with io.BytesIO() as output:
             image.save(output, format="JPEG")
             image_bytes = output.getvalue()
@@ -56,8 +54,11 @@ class DeepStack(DetectionApi):
         )
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)
+        if response_json.get("predictions") is None:
+            logger.debug(f"Error in parsing response json: {response_json}")
+            return detections
 
-        for i, detection in enumerate(response_json["predictions"]):
+        for i, detection in enumerate(response_json.get("predictions")):
             logger.debug(f"Response: {detection}")
             if detection["confidence"] < 0.4:
                 logger.debug(f"Break due to confidence < 0.4")

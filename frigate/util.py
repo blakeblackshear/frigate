@@ -800,10 +800,11 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
-    for process in psutil.process_iter(["pid", "name", "cpu_percent"]):
+    for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
         pid = process.info["pid"]
         try:
             cpu_percent = process.info["cpu_percent"]
+            cmdline = process.info["cmdline"]
 
             with open(f"/proc/{pid}/stat", "r") as f:
                 stats = f.readline().split()
@@ -837,9 +838,39 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
+                "cmdline": " ".join(cmdline),
             }
         except:
             continue
+
+    return usages
+
+
+def get_bandwidth_stats() -> dict[str, dict]:
+    """Get bandwidth usages for each ffmpeg process id"""
+    usages = {}
+    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split("\t")))
+            try:
+                if re.search("^ffmpeg/([0-9]+)/", stats[0]):
+                    process = stats[0].split("/")
+                    usages[process[1]] = {
+                        "bandwidth": round(float(stats[2]), 1),
+                    }
+            except:
+                continue
 
     return usages
 
