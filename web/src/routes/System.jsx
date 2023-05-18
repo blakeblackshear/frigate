@@ -428,6 +428,7 @@ export default function System() {
                         <Th>CPU %</Th>
                         <Th>Avg CPU %</Th>
                         <Th>Memory %</Th>
+                        <Th>Network Bandwidth</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -436,6 +437,7 @@ export default function System() {
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
+                        <Td>{bandwidth_usages[processes[process]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
                       </Tr>
                     </Tbody>
                   </Table>
