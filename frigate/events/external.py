@@ -127,8 +127,6 @@ class ExternalEventProcessor:
 
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])
-        thumb = cv2.resize(
-            img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA
-        )
+        thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
         ret, jpg = cv2.imencode(".jpg", thumb)
         return base64.b64encode(jpg.tobytes()).decode("utf-8")
