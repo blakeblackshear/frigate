@@ -869,7 +869,7 @@ def get_bandwidth_stats() -> dict[str, dict]:
                 ):
                     process = stats[0].split("/")
                     usages[process[len(process) - 2]] = {
-                        "bandwidth": round(float(stats[1])+float(stats[2]), 1),
+                        "bandwidth": round(float(stats[1]) + float(stats[2]), 1),
                     }
             except:
                 continue
