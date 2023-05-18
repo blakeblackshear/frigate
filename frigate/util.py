@@ -866,7 +866,7 @@ def get_bandwidth_stats() -> dict[str, dict]:
             try:
                 if re.search("(^ffmpeg|\/go2rtc)/([0-9]+)/", stats[0]):
                     process = stats[0].split("/")
-                    usages[process[len(process)-2]] = {
+                    usages[process[len(process) - 2]] = {
                         "bandwidth": round(float(stats[2]), 1),
                     }
             except:
