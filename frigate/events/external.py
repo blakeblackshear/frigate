@@ -34,6 +34,7 @@ class ExternalEventProcessor:
         sub_label: Optional[str],
         duration: Optional[int],
         include_recording: bool,
+        draw: dict[str, any],
         snapshot_frame: any,
     ) -> str:
         now = datetime.datetime.now().timestamp()
@@ -43,10 +44,7 @@ class ExternalEventProcessor:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         event_id = f"{now}-{rand_id}"
 
-        self._write_snapshots(camera_config, label, event_id, snapshot_frame)
-
-        if not self.default_thumbnail:
-            self._calculate_thumbnail_bytes()
+        thumbnail = self._write_images(camera_config, label, event_id, draw, snapshot_frame)
 
         self.queue.put(
             (
@@ -60,7 +58,7 @@ class ExternalEventProcessor:
                     "camera": camera,
                     "start_time": now,
                     "end_time": now + duration if duration is not None else None,
-                    "thumbnail": self.default_thumbnail,
+                    "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
                 },
@@ -76,22 +74,14 @@ class ExternalEventProcessor:
             (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": now})
         )
 
-    def _calculate_thumbnail_bytes(self) -> None:
-        thumbnail = glob.glob("/opt/frigate/frigate/images/external-event.png")
-
-        if len(thumbnail) > 0:
-            with open("/opt/frigate/frigate/images/external-event.png", "rb") as img:
-                img_bytes = img.read()
-                self.default_thumbnail = base64.b64encode(img_bytes).decode("utf-8")
-
-    def _write_snapshots(
+    def _write_images(
         self,
         camera_config: CameraConfig,
         label: str,
         event_id: str,
         draw: dict[str, any],
         img_bytes: any,
-    ) -> None:
+    ) -> str:
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_bytes)
@@ -132,3 +122,5 @@ class ExternalEventProcessor:
             "wb",
         ) as j:
             j.write(jpg.tobytes())
+
+        return base64.b64encode(jpg.tobytes()).decode("utf-8")
