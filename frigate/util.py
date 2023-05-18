@@ -846,6 +846,35 @@ def get_cpu_stats() -> dict[str, dict]:
     return usages
 
 
+def get_bandwidth_stats() -> dict[str, dict]:
+    """Get bandwidth usages for each ffmpeg process id"""
+    usages = {}
+    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split("\t")))
+            try:
+                if re.search("^ffmpeg/([0-9]+)/", stats[0]):
+                    process = stats[0].split("/")
+                    usages[process[1]] = {
+                        "bandwidth": round(float(stats[2]), 1),
+                    }
+            except:
+                continue
+
+    return usages
+
+
 def get_amd_gpu_stats() -> dict[str, str]:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
