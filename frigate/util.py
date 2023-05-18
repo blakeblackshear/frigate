@@ -864,7 +864,7 @@ def get_bandwidth_stats() -> dict[str, dict]:
         for line in lines:
             stats = list(filter(lambda a: a != "", line.strip().split("\t")))
             try:
-                if re.search("(^ffmpeg|\/go2rtc)/([0-9]+)/", stats[0]):
+                if re.search("(^ffmpeg|\/go2rtc|frigate\.detector\.[a-z]+)/([0-9]+)/", stats[0]):
                     process = stats[0].split("/")
                     usages[process[len(process) - 2]] = {
                         "bandwidth": round(float(stats[2]), 1),

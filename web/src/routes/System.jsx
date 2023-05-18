@@ -239,6 +239,7 @@ export default function System() {
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
                         <Th>Memory %</Th>
+                        <Th>Network Bandwidth</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -247,6 +248,7 @@ export default function System() {
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['mem'] || '- '}%</Td>
+                        <Td>{bandwidth_usages[detectors[detector]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
                       </Tr>
                     </Tbody>
                   </Table>
