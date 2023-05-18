@@ -118,12 +118,14 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
     if cpu_stats:
         all_stats["cpu_usages"] = cpu_stats
 
+
 async def set_bandwidth_stats(all_stats: dict[str, Any]) -> None:
     """Set bandwidth from nethogs."""
     bandwidth_stats = get_bandwidth_stats()
 
     if bandwidth_stats:
         all_stats["bandwidth_usages"] = bandwidth_stats
+
 
 async def set_gpu_stats(
     config: FrigateConfig, all_stats: dict[str, Any], hwaccel_errors: list[str]
