@@ -198,7 +198,7 @@ def send_to_plus(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.data["box"]):
+    if event.data.get("box") is None:
         include_annotation = None
 
     if event.end_time is None:
@@ -254,8 +254,7 @@ def send_to_plus(id):
     event.save()
 
     if not include_annotation is None:
-        region = event.region
-        box = event.box
+        box = event.data["box"]
 
         try:
             current_app.plus_api.add_annotation(
