@@ -198,7 +198,7 @@ def send_to_plus(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.box):
+    if event.data.get("box") is None:
         include_annotation = None
 
     if event.end_time is None:
@@ -254,8 +254,7 @@ def send_to_plus(id):
     event.save()
 
     if not include_annotation is None:
-        region = event.region
-        box = event.box
+        box = event.data["box"]
 
         try:
             current_app.plus_api.add_annotation(
@@ -313,11 +312,15 @@ def false_positive(id):
         # need to refetch the event now that it has a plus_id
         event = Event.get(Event.id == id)
 
-    region = event.region
-    box = event.box
+    region = event.data["region"]
+    box = event.data["box"]
 
     # provide top score if score is unavailable
-    score = event.top_score if event.score is None else event.score
+    score = (
+        (event.data["top_score"] if event.data["top_score"] else event.top_score)
+        if event.data["score"] is None
+        else event.data["score"]
+    )
 
     try:
         current_app.plus_api.add_false_positive(
@@ -758,6 +761,7 @@ def events():
         Event.top_score,
         Event.false_positive,
         Event.box,
+        Event.data,
     ]
 
     if camera != "all":
@@ -915,6 +919,11 @@ def config():
             cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
+
+    for detector, detector_config in config["detectors"].items():
+        detector_config["model"][
+            "labelmap"
+        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 
