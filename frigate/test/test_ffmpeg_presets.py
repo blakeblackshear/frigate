@@ -52,7 +52,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-rpi-64-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-c:v h264_v4l2m2m" in (
+        assert "-c:v:1 h264_v4l2m2m" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 

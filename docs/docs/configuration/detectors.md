@@ -198,7 +198,7 @@ To generate model files, create a new folder to save the models, download the sc
 
 ```bash
 mkdir trt-models
-wget https://raw.githubusercontent.com/blakeblackshear/frigate/docker/tensorrt_models.sh
+wget https://github.com/blakeblackshear/frigate/raw/master/docker/tensorrt_models.sh
 chmod +x tensorrt_models.sh
 docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
 ```
