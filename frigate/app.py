@@ -28,7 +28,9 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.object_detection import ObjectDetectProcess
-from frigate.events import EventCleanup, EventProcessor
+from frigate.events.cleanup import EventCleanup
+from frigate.events.external import ExternalEventProcessor
+from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings, Timeline
@@ -204,6 +206,11 @@ class FrigateApp:
             self.config, self.camera_metrics, self.detectors, self.processes
         )
 
+    def init_external_event_processor(self) -> None:
+        self.external_event_processor = ExternalEventProcessor(
+            self.config, self.event_queue
+        )
+
     def init_web_server(self) -> None:
         self.flask_app = create_app(
             self.config,
@@ -212,6 +219,7 @@ class FrigateApp:
             self.detected_frames_processor,
             self.storage_maintainer,
             self.onvif_controller,
+            self.external_event_processor,
             self.plus_api,
         )
 
@@ -436,6 +444,7 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.start_storage_maintainer()
         self.init_stats()
+        self.init_external_event_processor()
         self.init_web_server()
         self.start_timeline_processor()
         self.start_event_processor()

@@ -1,16 +1,13 @@
 import datetime
 import logging
-import os
 import queue
 import threading
 
 from enum import Enum
-from pathlib import Path
 
 from peewee import fn
 
 from frigate.config import EventsConfig, FrigateConfig
-from frigate.const import CLIPS_DIR
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
 from frigate.util import to_relative_box
@@ -23,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventTypeEnum(str, Enum):
-    # api = "api"
+    api = "api"
     # audio = "audio"
     tracked_object = "tracked_object"
 
@@ -97,6 +94,8 @@ class EventProcessor(threading.Thread):
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
+            elif source_type == EventTypeEnum.api:
+                self.handle_external_detection(event_type, event_data)
 
         # set an end_time on events without an end_time before exiting
         Event.update(end_time=datetime.datetime.now().timestamp()).where(
@@ -197,160 +196,35 @@ class EventProcessor(threading.Thread):
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
 
+    def handle_external_detection(self, type: str, event_data: Event):
+        if type == "new":
+            event = {
+                Event.id: event_data["id"],
+                Event.label: event_data["label"],
+                Event.sub_label: event_data["sub_label"],
+                Event.camera: event_data["camera"],
+                Event.start_time: event_data["start_time"],
+                Event.end_time: event_data["end_time"],
+                Event.thumbnail: event_data["thumbnail"],
+                Event.has_clip: event_data["has_clip"],
+                Event.has_snapshot: event_data["has_snapshot"],
+                Event.zones: [],
+                Event.data: {},
+            }
+        elif type == "end":
+            event = {
+                Event.id: event_data["id"],
+                Event.end_time: event_data["end_time"],
+            }
 
-class EventCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event: MpEvent):
-        threading.Thread.__init__(self)
-        self.name = "event_cleanup"
-        self.config = config
-        self.stop_event = stop_event
-        self.camera_keys = list(self.config.cameras.keys())
-
-    def expire(self, media_type: str) -> None:
-        # TODO: Refactor media_type to enum
-        ## Expire events from unlisted cameras based on the global config
-        if media_type == "clips":
-            retain_config = self.config.record.events.retain
-            file_extension = "mp4"
-            update_params = {"has_clip": False}
-        else:
-            retain_config = self.config.snapshots.retain
-            file_extension = "jpg"
-            update_params = {"has_snapshot": False}
-
-        distinct_labels = (
-            Event.select(Event.label)
-            .where(Event.camera.not_in(self.camera_keys))
-            .distinct()
-        )
-
-        # loop over object types in db
-        for l in distinct_labels:
-            # get expiration time for this label
-            expire_days = retain_config.objects.get(l.label, retain_config.default)
-            expire_after = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days)
-            ).timestamp()
-            # grab all events after specific time
-            expired_events = Event.select().where(
-                Event.camera.not_in(self.camera_keys),
-                Event.start_time < expire_after,
-                Event.label == l.label,
-                Event.retain_indefinitely == False,
-            )
-            # delete the media from disk
-            for event in expired_events:
-                media_name = f"{event.camera}-{event.id}"
-                media_path = Path(
-                    f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+        try:
+            (
+                Event.insert(event)
+                .on_conflict(
+                    conflict_target=[Event.id],
+                    update=event,
                 )
-                media_path.unlink(missing_ok=True)
-                if file_extension == "jpg":
-                    media_path = Path(
-                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                    )
-                    media_path.unlink(missing_ok=True)
-
-            # update the clips attribute for the db entry
-            update_query = Event.update(update_params).where(
-                Event.camera.not_in(self.camera_keys),
-                Event.start_time < expire_after,
-                Event.label == l.label,
-                Event.retain_indefinitely == False,
+                .execute()
             )
-            update_query.execute()
-
-        ## Expire events from cameras based on the camera config
-        for name, camera in self.config.cameras.items():
-            if media_type == "clips":
-                retain_config = camera.record.events.retain
-            else:
-                retain_config = camera.snapshots.retain
-            # get distinct objects in database for this camera
-            distinct_labels = (
-                Event.select(Event.label).where(Event.camera == name).distinct()
-            )
-
-            # loop over object types in db
-            for l in distinct_labels:
-                # get expiration time for this label
-                expire_days = retain_config.objects.get(l.label, retain_config.default)
-                expire_after = (
-                    datetime.datetime.now() - datetime.timedelta(days=expire_days)
-                ).timestamp()
-                # grab all events after specific time
-                expired_events = Event.select().where(
-                    Event.camera == name,
-                    Event.start_time < expire_after,
-                    Event.label == l.label,
-                    Event.retain_indefinitely == False,
-                )
-                # delete the grabbed clips from disk
-                for event in expired_events:
-                    media_name = f"{event.camera}-{event.id}"
-                    media_path = Path(
-                        f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
-                    )
-                    media_path.unlink(missing_ok=True)
-                    if file_extension == "jpg":
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                        )
-                        media_path.unlink(missing_ok=True)
-                # update the clips attribute for the db entry
-                update_query = Event.update(update_params).where(
-                    Event.camera == name,
-                    Event.start_time < expire_after,
-                    Event.label == l.label,
-                    Event.retain_indefinitely == False,
-                )
-                update_query.execute()
-
-    def purge_duplicates(self) -> None:
-        duplicate_query = """with grouped_events as (
-          select id,
-            label,
-            camera,
-          	has_snapshot,
-          	has_clip,
-          	row_number() over (
-              partition by label, camera, round(start_time/5,0)*5
-              order by end_time-start_time desc
-            ) as copy_number
-          from event
-        )
-
-        select distinct id, camera, has_snapshot, has_clip from grouped_events
-        where copy_number > 1;"""
-
-        duplicate_events = Event.raw(duplicate_query)
-        for event in duplicate_events:
-            logger.debug(f"Removing duplicate: {event.id}")
-            media_name = f"{event.camera}-{event.id}"
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-            media_path.unlink(missing_ok=True)
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-            media_path.unlink(missing_ok=True)
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
-            media_path.unlink(missing_ok=True)
-
-        (
-            Event.delete()
-            .where(Event.id << [event.id for event in duplicate_events])
-            .execute()
-        )
-
-    def run(self) -> None:
-        # only expire events every 5 minutes
-        while not self.stop_event.wait(300):
-            self.expire("clips")
-            self.expire("snapshots")
-            self.purge_duplicates()
-
-            # drop events from db where has_clip and has_snapshot are false
-            delete_query = Event.delete().where(
-                Event.has_clip == False, Event.has_snapshot == False
-            )
-            delete_query.execute()
-
-        logger.info(f"Exiting event cleanup...")
+        except Exception:
+            logger.warning(f"Failed to update manual event: {event_data['id']}")
