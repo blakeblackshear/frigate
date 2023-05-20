@@ -1505,7 +1505,7 @@ def vod_event(id):
     )
 
 
-@bp.route("/export/<camera_name>/start/<start_time>/end/<end_time>")
+@bp.route("/export/<camera_name>/start/<start_time>/end/<end_time>", methods=["POST"])
 def export_recording(camera_name: str, start_time: int, end_time: int):
     playback_factor = request.args.get("playback", type=str, default="realtime")
     exporter = RecordingExporter(

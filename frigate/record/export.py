@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class PlaybackFactorEnum(str, Enum):
-    real_time = "real_time"
+    realtime = "realtime"
     timelapse_5x = "timelapse_5x"
 
 
@@ -80,14 +80,14 @@ class RecordingExporter(threading.Thread):
                 "/dev/stdin",
             ]
 
-        if self.playback_factor == PlaybackFactorEnum.real_time:
+        if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd.extend(["-c", "copy", file_name])
         elif self.playback_factor == PlaybackFactorEnum.timelapse_5x:
             ffmpeg_cmd.extend(["-vf", "setpts=0.25*PTS", "-r", "5", "-an", file_name])
 
         p = sp.run(
             ffmpeg_cmd,
-            input="\n".join(playlist_lines)
+            input="\n".join(playlist_lines),
             encoding="ascii",
             capture_output=True,
         )
