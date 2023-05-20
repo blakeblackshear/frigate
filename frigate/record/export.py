@@ -87,6 +87,7 @@ class RecordingExporter(threading.Thread):
         )
 
         if p.returncode != 0:
+            logger.error(f"Failed to export recording for command {ffmpeg_cmd}")
             logger.error(p.stderr)
             return
 
