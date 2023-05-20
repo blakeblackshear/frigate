@@ -40,3 +40,7 @@ If you see repeated "On connect called" messages in your logs, check for another
 ### Error: Database Is Locked
 
 SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced.md#database) should be used to move the database to a location on the internal drive.
+
+### MQTT isn't working and has logged errors: `Unable to publish to <mqtt message here>: client is not connected`
+
+If MQTT isn't working in docker on a platform like TrueNAS Scale try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
