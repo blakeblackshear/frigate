@@ -83,7 +83,7 @@ class RecordingExporter(threading.Thread):
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd.extend(["-c", "copy", file_name])
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
-            ffmpeg_cmd.extend(["-vf", "setpts=0.25*PTS", "-r", "5", "-an", file_name])
+            ffmpeg_cmd.extend(["-vf", "setpts=0.04*PTS", "-r", "30", "-an", file_name])
 
         p = sp.run(
             ffmpeg_cmd,
