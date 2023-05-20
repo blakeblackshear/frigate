@@ -88,8 +88,6 @@ class RecordingExporter(threading.Thread):
         p = sp.run(
             ffmpeg_cmd,
             input="\n".join(playlist_lines)
-            if len(playlist_lines) > 1
-            else playlist_lines,
             encoding="ascii",
             capture_output=True,
         )
