@@ -35,6 +35,7 @@ from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
+from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
 from frigate.util import (
@@ -1502,6 +1503,21 @@ def vod_event(id):
             "sequences": [{"clips": [{"type": "source", "path": clip_path}]}],
         }
     )
+
+
+@bp.route("/export/<camera_name>/start/<start_time>/end/<end_time>")
+def export_recording(camera_name: str, start_time: int, end_time: int):
+    playback_factor = request.args.get("playback", type=str, default="realtime")
+    exporter = RecordingExporter(
+        camera_name,
+        int(start_time),
+        int(end_time),
+        PlaybackFactorEnum[playback_factor]
+        if playback_factor in PlaybackFactorEnum.__members__.values()
+        else PlaybackFactorEnum.real_time,
+    )
+    exporter.start()
+    return "Starting export of recording", 200
 
 
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
