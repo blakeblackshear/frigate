@@ -1507,14 +1507,17 @@ def vod_event(id):
 
 @bp.route("/export/<camera_name>/start/<start_time>/end/<end_time>", methods=["POST"])
 def export_recording(camera_name: str, start_time: int, end_time: int):
-    playback_factor = request.args.get("playback", type=str, default="realtime")
+    playback_factor = request.get_json(silent=True).get("playback", "realtime")
+    logger.error(
+        f"The playback is {playback_factor} and found { PlaybackFactorEnum[playback_factor] if playback_factor in PlaybackFactorEnum.__members__.values() else PlaybackFactorEnum.realtime}"
+    )
     exporter = RecordingExporter(
         camera_name,
         int(start_time),
         int(end_time),
         PlaybackFactorEnum[playback_factor]
         if playback_factor in PlaybackFactorEnum.__members__.values()
-        else PlaybackFactorEnum.real_time,
+        else PlaybackFactorEnum.realtime,
     )
     exporter.start()
     return "Starting export of recording", 200
