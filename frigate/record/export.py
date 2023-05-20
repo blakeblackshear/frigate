@@ -8,7 +8,9 @@ import threading
 from enum import Enum
 import subprocess as sp
 
+from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
+from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +25,14 @@ class RecordingExporter(threading.Thread):
 
     def __init__(
         self,
+        config: FrigateConfig,
         camera: str,
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
     ) -> None:
         threading.Thread.__init__(self)
+        self.config = config
         self.camera = camera
         self.start_time = start_time
         self.end_time = end_time
@@ -47,15 +51,9 @@ class RecordingExporter(threading.Thread):
 
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-hide_banner",
-                "-y",
-                "-protocol_whitelist",
-                "pipe,file,http,tcp",
-                "-i",
-                playlist_lines,
-            ]
+            ffmpeg_input = (
+                f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_lines}"
+            )
         else:
             playlist_lines = []
             playlist_start = self.start_time
@@ -66,24 +64,20 @@ class RecordingExporter(threading.Thread):
                 )
                 playlist_start += MAX_PLAYLIST_SECONDS
 
-            ffmpeg_cmd = [
-                "ffmpeg",
-                "-hide_banner",
-                "-y",
-                "-protocol_whitelist",
-                "pipe,file,http,tcp",
-                "-f",
-                "concat",
-                "-safe",
-                "0",
-                "-i",
-                "/dev/stdin",
-            ]
+            ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
-            ffmpeg_cmd.extend(["-c", "copy", file_name])
+            ffmpeg_cmd = (
+                f"ffmpeg -hide_banner {ffmpeg_input} -c copy {file_name}"
+            ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
-            ffmpeg_cmd.extend(["-vf", "setpts=0.04*PTS", "-r", "30", "-an", file_name])
+            ffmpeg_cmd = (
+                parse_preset_hardware_acceleration_encode(
+                    self.config.ffmpeg.hwaccel_args,
+                    ffmpeg_input,
+                    f"-vf setpts=0.04*PTS -r 30 -an {file_name}",
+                )
+            ).split(" ")
 
         p = sp.run(
             ffmpeg_cmd,
