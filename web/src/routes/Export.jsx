@@ -63,7 +63,7 @@ export default function Export() {
         >
           <option value="select">Select A Playback Factor</option>
           <option value="realtime">Realtime</option>
-          <option value="timelapse_5x">Timelapse</option>
+          <option value="timelapse_25x">Timelapse</option>
         </select>
       </div>
 

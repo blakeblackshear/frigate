@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class PlaybackFactorEnum(str, Enum):
     realtime = "realtime"
-    timelapse_5x = "timelapse_5x"
+    timelapse_25x = "timelapse_25x"
 
 
 class RecordingExporter(threading.Thread):
@@ -82,7 +82,7 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd.extend(["-c", "copy", file_name])
-        elif self.playback_factor == PlaybackFactorEnum.timelapse_5x:
+        elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd.extend(["-vf", "setpts=0.25*PTS", "-r", "5", "-an", file_name])
 
         p = sp.run(
@@ -96,6 +96,6 @@ class RecordingExporter(threading.Thread):
             logger.error(p.stderr)
             return
 
-        logger.error(f"Updating finalized export {file_name}")
+        logger.debug(f"Updating finalized export {file_name}")
         os.rename(file_name, final_file_name)
-        logger.error(f"Finished exporting {file_name}")
+        logger.debug(f"Finished exporting {file_name}")
