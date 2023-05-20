@@ -10,7 +10,10 @@ import subprocess as sp
 
 from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.ffmpeg_presets import (
+    EncodeTypeEnum,
+    parse_preset_hardware_acceleration_encode,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +79,7 @@ class RecordingExporter(threading.Thread):
                     self.config.ffmpeg.hwaccel_args,
                     ffmpeg_input,
                     f"-vf setpts=0.04*PTS -r 30 -an {file_name}",
+                    EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
 
@@ -87,7 +91,9 @@ class RecordingExporter(threading.Thread):
         )
 
         if p.returncode != 0:
-            logger.error(f"Failed to export recording for command {' '.join(ffmpeg_cmd)}")
+            logger.error(
+                f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
+            )
             logger.error(p.stderr)
             return
 
