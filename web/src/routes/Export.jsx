@@ -1,13 +1,11 @@
-import { h, Fragment } from 'preact';
-import { useApiHost } from '../api';
+import { h } from 'preact';
 import Heading from '../components/Heading';
-import { useCallback, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import useSWR from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
 
 export default function Export() {
-  const apiHost = useApiHost();
   const { data: config } = useSWR('config');
 
   const [camera, setCamera] = useState('select');
