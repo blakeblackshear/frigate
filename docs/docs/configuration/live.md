@@ -115,4 +115,4 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.5.0#module-webrtc) for more information about this.
