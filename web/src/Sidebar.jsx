@@ -6,6 +6,7 @@ import { ENV } from './env';
 import { useMemo } from 'preact/hooks'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
+import { baseUrl } from './api/baseUrl';
 
 export default function Sidebar() {
   const { data: config } = useSWR('config');
@@ -57,7 +58,7 @@ export default function Sidebar() {
           <Separator />
         </Fragment>
       ) : null}
-      <Destination className="self-end" href="https://docs.frigate.video" text="Documentation" />
+      <Destination className="self-end" href={baseUrl+"/docs"} text="Documentation" />
       <Destination className="self-end" href="https://github.com/blakeblackshear/frigate" text="GitHub" />
     </NavigationDrawer>
   );

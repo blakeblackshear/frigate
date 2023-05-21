@@ -30,6 +30,13 @@ WORKDIR /rootfs/usr/local/go2rtc/bin
 RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
+FROM --platform=$BUILDPLATFORM node:16 AS docs-build
+ADD ./docs /docs
+ADD labelmap.txt /
+WORKDIR /docs
+RUN sed -i'' "s/baseUrl: '\/',/baseUrl: '\/docs\/',/" ./docusaurus.config.js
+RUN npm install
+RUN npm run build
 
 ####
 #
@@ -246,6 +253,7 @@ WORKDIR /opt/frigate/
 COPY frigate frigate/
 COPY migrations migrations/
 COPY --from=web-build /work/dist/ web/
+COPY --from=docs-build /docs/build/ web/docs/
 
 # Frigate final container
 FROM deps AS frigate

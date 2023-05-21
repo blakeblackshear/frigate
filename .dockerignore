@@ -1,5 +1,6 @@
 README.md
-docs/
+docs/node_modules
+docs/build
 .gitignore
 debug
 config/
