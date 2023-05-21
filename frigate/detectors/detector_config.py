@@ -118,11 +118,14 @@ class ModelConfig(BaseModel):
         }
 
     def compute_model_hash(self) -> None:
-        with open(self.path, "rb") as f:
-            file_hash = hashlib.md5()
-            while chunk := f.read(8192):
-                file_hash.update(chunk)
-        self._model_hash = file_hash.hexdigest()
+        if not self.path or not os.path.exists(self.path):
+            self._model_hash = hashlib.md5(b"unknown").hexdigest()
+        else:
+            with open(self.path, "rb") as f:
+                file_hash = hashlib.md5()
+                while chunk := f.read(8192):
+                    file_hash.update(chunk)
+            self._model_hash = file_hash.hexdigest()
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
         """Get a list of colors for enabled labels."""
