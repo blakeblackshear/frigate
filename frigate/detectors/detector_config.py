@@ -119,7 +119,6 @@ class ModelConfig(BaseModel):
 
     def compute_model_hash(self) -> None:
         if not self.path or not os.path.exists(self.path):
-            print("File does not exist or path is empty.")
             self._model_hash = hashlib.md5(b"unknown").hexdigest()
         else:
             with open(self.path, "rb") as f:
