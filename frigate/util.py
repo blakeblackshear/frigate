@@ -863,7 +863,7 @@ def get_bandwidth_stats() -> dict[str, dict]:
             stats = list(filter(lambda a: a != "", line.strip().split("\t")))
             try:
                 if re.search(
-                    "(^ffmpeg|\/go2rtc|frigate\.detector\.[a-z]+)/([0-9]+)/", stats[0]
+                    r"(^ffmpeg|\/go2rtc|frigate\.detector\.[a-z]+)/([0-9]+)/", stats[0]
                 ):
                     process = stats[0].split("/")
                     usages[process[len(process) - 2]] = {
@@ -930,7 +930,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
         # render is used for qsv
         render = []
-        for result in re.findall('"Render/3D/0":{[a-z":\d.,%]+}', reading):
+        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[14:])
             single = packet.get("busy", 0.0)
             render.append(float(single))
