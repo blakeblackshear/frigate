@@ -530,7 +530,7 @@ class StorageS3Config(FrigateBaseModel):
     secret_access_key: str = Field(default="", title="AWS_SECRET_ACCESS_KEY")
     bucket_name: str = Field(default="", title="Bucket name")
     endpoint_url: str = Field(default="", title="Endpoint URL")
-    path: str = Field(default="", title="Base Path")
+    path: str = Field(default="/", title="Base Path")
 
 
 class StorageConfig(FrigateBaseModel):

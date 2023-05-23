@@ -115,6 +115,24 @@ database:
   # The path to store the SQLite DB (default: shown below)
   path: /config/frigate.db
 
+# Optional: S3 Storage configuration
+storage:
+  s3: 
+    # Write records to s3 instead of local storage (default: shown below)
+    enabled: false
+    # Upload expired records to s3 before delete from local storage (default: shown below)
+    archive: false
+    # Required: S3 Access Key ID
+    access_key_id: 
+    # Required: S3 Secret Access Key
+    secret_access_key:
+    # Required: S3 bucket name
+    bucket_name:
+    # Required: S3 Endpoint address
+    endpoint_url: http://hostname:port
+    # Optional: S3 Endpoint Path (default: shown below)
+    path: "/"
+
 # Optional: model modifications
 model:
   # Optional: path to the model (default: automatic based on detector)
