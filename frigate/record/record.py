@@ -12,7 +12,7 @@ from typing import Optional
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.maintainer import RecordingMaintainer
 from frigate.types import RecordMetricsTypes
@@ -39,7 +39,7 @@ def manage_recordings(
     listen()
 
     db = SqliteQueueDatabase(config.database.path)
-    models = [Event, Recordings, Timeline]
+    models = [Event, Recordings, Timeline, RecordingsToDelete]
     db.bind(models)
 
     maintainer = RecordingMaintainer(

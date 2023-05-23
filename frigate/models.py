@@ -71,3 +71,6 @@ class Recordings(Model):  # type: ignore[misc]
 # Used for temporary table in record/cleanup.py
 class RecordingsToDelete(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=False, max_length=30)
+
+    class Meta:
+        temporary = True
