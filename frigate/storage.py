@@ -43,7 +43,7 @@ class StorageS3:
                         aws_access_key_id=self.config.storage.s3.access_key_id,
                         aws_secret_access_key=self.config.storage.s3.secret_access_key,
                         endpoint_url=self.config.storage.s3.endpoint_url,
-                        config=Config(signature_version=UNSIGNED),
+                        config=Config(),
                     )
                 except (BotoCoreError, ClientError) as error:
                     logger.error(f"Failed to create S3 client: {error}")
@@ -97,6 +97,23 @@ class StorageS3:
                 return None
         else:
             return False
+
+    def get_bucket_stats(self):
+        try:
+            total_size = 0
+            total_files = 0
+            for obj in self.s3_client.list_objects(Bucket=self.s3_bucket).get(
+                "Contents", []
+            ):
+                total_size += obj["Size"]
+                total_files += 1
+
+            total_size_gb = total_size / (1024**3)  # Convert bytes to gigabytes
+            return {"total_files": total_files, "total_size_gb": total_size_gb}
+
+        except ClientError as e:
+            print(f"Error getting bucket stats: {e}")
+            return None
 
 
 class StorageMaintainer(threading.Thread):

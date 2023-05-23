@@ -18,6 +18,7 @@ from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_
 from frigate.version import VERSION
 from frigate.util import get_cpu_stats, get_bandwidth_stats
 from frigate.object_detection import ObjectDetectProcess
+from frigate.storage import StorageS3
 
 logger = logging.getLogger(__name__)
 
@@ -273,6 +274,10 @@ def stats_snapshot(
             "free": round(storage_stats.free / 1000000, 1),
             "mount_type": get_fs_type(path),
         }
+
+    if config.storage.s3.enabled or config.storage.s3.archive:
+        s3 = StorageS3(config)
+        stats["service"]["storage"]["s3"] = s3.get_bucket_stats()
 
     stats["processes"] = {}
     for name, pid in stats_tracking["processes"].items():

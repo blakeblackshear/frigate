@@ -48,6 +48,12 @@ export default function Storage() {
           <Td>{getUnitSize(service['storage']['/media/frigate/clips']['used'])}</Td>
           <Td>{getUnitSize(service['storage']['/media/frigate/clips']['total'])}</Td>
         </Tr>
+        {service['storage']['s3'] ? (
+          <Tr>
+            <Td>S3</Td>
+            <Td>{getUnitSize(service['storage']['s3']['total_size_gb'])}</Td>
+            <Td>{service['storage']['s3']['total_files']} files</Td>
+          </Tr> ) : null}
       </Fragment>
     );
   } else {
@@ -58,6 +64,12 @@ export default function Storage() {
           <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['used'])}</Td>
           <Td>{getUnitSize(service['storage']['/media/frigate/recordings']['total'])}</Td>
         </Tr>
+        {service['storage']['s3'] ? (
+          <Tr>
+            <Td>S3</Td>
+            <Td>{getUnitSize(service['storage']['s3']['total_size_gb'])}</Td>
+            <Td>{service['storage']['s3']['total_files']} files</Td>
+          </Tr> ) : null}
       </Fragment>
     );
   }
