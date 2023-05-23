@@ -2,8 +2,6 @@ import datetime
 import logging
 import threading
 import time
-import os
-import signal
 
 from frigate.object_detection import ObjectDetectProcess
 from frigate.util import restart_frigate
@@ -39,4 +37,4 @@ class FrigateWatchdog(threading.Thread):
                     logger.info("Detection appears to have stopped. Exiting Frigate...")
                     restart_frigate()
 
-        logger.info(f"Exiting watchdog...")
+        logger.info("Exiting watchdog...")

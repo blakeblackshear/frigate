@@ -3,7 +3,6 @@
 import base64
 import cv2
 import datetime
-import glob
 import logging
 import os
 import random

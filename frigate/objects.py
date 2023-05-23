@@ -1,14 +1,7 @@
-import copy
-import datetime
-import itertools
-import multiprocessing as mp
 import random
 import string
-import threading
-import time
 from collections import defaultdict
 
-import cv2
 import numpy as np
 from scipy.spatial import distance as dist
 
@@ -160,7 +153,7 @@ class ObjectTracker:
         # update any tracked objects with labels that are not
         # seen in the current objects and deregister if needed
         for obj in list(self.tracked_objects.values()):
-            if not obj["label"] in new_object_groups:
+            if obj["label"] not in new_object_groups:
                 if self.disappeared[obj["id"]] >= self.max_disappeared:
                     self.deregister(obj["id"])
                 else:

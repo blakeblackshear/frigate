@@ -20,7 +20,6 @@ import py3nvml.py3nvml as nvml
 
 import cv2
 import numpy as np
-import os
 import psutil
 import pytz
 
@@ -457,7 +456,7 @@ def copy_yuv_to_position(
     # clear v2
     destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
 
-    if not source_frame is None:
+    if source_frame is not None:
         # calculate the resized frame, maintaining the aspect ratio
         source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
         dest_aspect_ratio = destination_shape[1] / destination_shape[0]

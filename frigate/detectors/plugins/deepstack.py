@@ -6,7 +6,7 @@ import io
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 from typing_extensions import Literal
-from pydantic import Extra, Field
+from pydantic import Field
 from PIL import Image
 
 
@@ -64,11 +64,11 @@ class DeepStack(DetectionApi):
         for i, detection in enumerate(response_json.get("predictions")):
             logger.debug(f"Response: {detection}")
             if detection["confidence"] < 0.4:
-                logger.debug(f"Break due to confidence < 0.4")
+                logger.debug("Break due to confidence < 0.4")
                 break
             label = self.get_label_index(detection["label"])
             if label < 0:
-                logger.debug(f"Break due to unknown label")
+                logger.debug("Break due to unknown label")
                 break
             detections[i] = [
                 label,

@@ -45,7 +45,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
                         "topic": json_message.get("topic"),
                         "payload": json_message.get("payload"),
                     }
-                except Exception as e:
+                except Exception:
                     logger.warning(
                         f"Unable to parse websocket message as valid json: {message.data.decode('utf-8')}"
                     )
@@ -82,7 +82,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
                     "payload": payload,
                 }
             )
-        except Exception as e:
+        except Exception:
             # if the payload can't be decoded don't relay to clients
             logger.debug(f"payload for {topic} wasn't text. Skipping...")
             return

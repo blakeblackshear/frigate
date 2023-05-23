@@ -10,8 +10,7 @@ from logging import handlers
 from typing import Optional
 from types import FrameType
 from setproctitle import setproctitle
-from typing import Deque, Optional
-from types import FrameType
+from typing import Deque
 from collections import deque
 
 from frigate.util import clean_camera_user_pass
@@ -44,7 +43,7 @@ def root_configurer(queue: Queue) -> None:
 
 
 def log_process(log_queue: Queue) -> None:
-    threading.current_thread().name = f"logger"
+    threading.current_thread().name = "logger"
     setproctitle("frigate.logger")
     listener_configurer()
 

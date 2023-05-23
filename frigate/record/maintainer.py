@@ -115,7 +115,7 @@ class RecordingMaintainer(threading.Thread):
                 Event.select()
                 .where(
                     Event.camera == camera,
-                    (Event.end_time == None)
+                    (Event.end_time is None)
                     | (Event.end_time >= recordings[0]["start_time"].timestamp()),
                     Event.has_clip,
                 )
@@ -127,7 +127,7 @@ class RecordingMaintainer(threading.Thread):
 
                 # Just delete files if recordings are turned off
                 if (
-                    not camera in self.config.cameras
+                    camera not in self.config.cameras
                     or not self.process_info[camera]["record_enabled"].value
                 ):
                     Path(cache_path).unlink(missing_ok=True)
@@ -394,4 +394,4 @@ class RecordingMaintainer(threading.Thread):
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
 
-        logger.info(f"Exiting recording maintenance...")
+        logger.info("Exiting recording maintenance...")

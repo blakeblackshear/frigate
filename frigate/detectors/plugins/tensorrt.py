@@ -8,7 +8,7 @@ try:
     from cuda import cuda
 
     TRT_SUPPORT = True
-except ModuleNotFoundError as e:
+except ModuleNotFoundError:
     TRT_SUPPORT = False
 
 from frigate.detectors.detection_api import DetectionApi
@@ -172,7 +172,7 @@ class TensorRtDetector(DetectionApi):
         if not self.context.execute_async_v2(
             bindings=self.bindings, stream_handle=self.stream
         ):
-            logger.warn(f"Execute returned false")
+            logger.warn("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [

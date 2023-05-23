@@ -1,4 +1,3 @@
-from numpy import unique
 from peewee import (
     Model,
     CharField,

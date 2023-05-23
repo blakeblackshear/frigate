@@ -133,10 +133,10 @@ class FrigateApp:
         for log, level in self.config.logger.logs.items():
             logging.getLogger(log).setLevel(level.value.upper())
 
-        if not "werkzeug" in self.config.logger.logs:
+        if "werkzeug" not in self.config.logger.logs:
             logging.getLogger("werkzeug").setLevel("ERROR")
 
-        if not "ws4py" in self.config.logger.logs:
+        if "ws4py" not in self.config.logger.logs:
             logging.getLogger("ws4py").setLevel("ERROR")
 
     def init_queues(self) -> None:
@@ -294,7 +294,7 @@ class FrigateApp:
     def start_video_output_processor(self) -> None:
         output_processor = mp.Process(
             target=output_frames,
-            name=f"output_processor",
+            name="output_processor",
             args=(
                 self.config,
                 self.video_output_queue,
@@ -467,7 +467,7 @@ class FrigateApp:
         self.stop()
 
     def stop(self) -> None:
-        logger.info(f"Stopping...")
+        logger.info("Stopping...")
         self.stop_event.set()
 
         for detector in self.detectors.values():

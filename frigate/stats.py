@@ -308,4 +308,4 @@ class StatsEmitter(threading.Thread):
             )
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
             logger.debug("Finished stats collection")
-        logger.info(f"Exiting stats emitter...")
+        logger.info("Exiting stats emitter...")

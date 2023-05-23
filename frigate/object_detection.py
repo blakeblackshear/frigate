@@ -161,7 +161,7 @@ class ObjectDetectProcess:
 
     def start_or_restart(self):
         self.detection_start.value = 0.0
-        if (not self.detect_process is None) and self.detect_process.is_alive():
+        if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
         self.detect_process = mp.Process(
             target=run_detector,

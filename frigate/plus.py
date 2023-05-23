@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any, List
 import requests
 from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
 from requests.models import Response

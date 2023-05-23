@@ -3,12 +3,12 @@ import json
 import logging
 from enum import Enum
 import os
-from typing import Dict, List, Optional, Tuple, Union, Literal
+from typing import Dict, Optional, Tuple
 
 
 import requests
 import matplotlib.pyplot as plt
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, Extra, Field
 from pydantic.fields import PrivateAttr
 from frigate.plus import PlusApi
 

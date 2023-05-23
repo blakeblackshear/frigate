@@ -1,11 +1,5 @@
 import logging
 
-from .detection_api import DetectionApi
-from .detector_config import (
-    PixelFormatEnum,
-    InputTensorEnum,
-    ModelConfig,
-)
 from .detector_types import DetectorTypeEnum, api_types, DetectorConfig
 
 
