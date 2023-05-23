@@ -1323,7 +1323,10 @@ def recordings(camera_name):
 def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
-    if current_app.frigate_config.storage.s3.enabled or current_app.frigate_config.storage.s3.archive:
+    if (
+        current_app.frigate_config.storage.s3.enabled
+        or current_app.frigate_config.storage.s3.archive
+    ):
         s3 = StorageS3(current_app.frigate_config)
 
     recordings = (
@@ -1342,7 +1345,7 @@ def recording_clip(camera_name, start_ts, end_ts):
     for clip in recordings:
         if recordings.storage == "s3":
             clip.path = s3.download_file_from_s3(clip.path)
-            
+
         playlist_lines.append(f"file '{clip.path}'")
         # if this is the starting clip, add an inpoint
         if clip.start_time < start_ts:

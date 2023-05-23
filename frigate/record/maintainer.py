@@ -347,7 +347,9 @@ class RecordingMaintainer(threading.Thread):
                         file_path = s3path
                         storage = "s3"
                     else:
-                        logger.error(f"Unable to upload recording segment {file_path} to s3, fallback to local")
+                        logger.error(
+                            f"Unable to upload recording segment {file_path} to s3, fallback to local"
+                        )
                         logger.error(e)
 
                 Recordings.create(

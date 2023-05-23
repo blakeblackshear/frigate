@@ -8,6 +8,7 @@ from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
 
+
 def remove_empty_directories(directory: str) -> None:
     # list all directories recursively and sort them by path,
     # longest first
@@ -22,4 +23,3 @@ def remove_empty_directories(directory: str) -> None:
             continue
         if len(os.listdir(path)) == 0:
             os.rmdir(path)
-

@@ -28,21 +28,22 @@ class StorageS3:
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         if self.config.storage.s3.enabled or self.config.storage.s3.archive:
-            if self.config.storage.s3.endpoint_url.startswith('http://'):
+            if self.config.storage.s3.endpoint_url.startswith("http://"):
                 try:
                     session = boto_session()
-                    session.set_config_variable('s3', 
+                    session.set_config_variable(
+                        "s3",
                         {
-                            'use_ssl': False,
-                            'verify': False,
-                        }
+                            "use_ssl": False,
+                            "verify": False,
+                        },
                     )
                     self.s3_client = session.create_client(
                         "s3",
                         aws_access_key_id=self.config.storage.s3.access_key_id,
                         aws_secret_access_key=self.config.storage.s3.secret_access_key,
                         endpoint_url=self.config.storage.s3.endpoint_url,
-                        config=Config(signature_version=UNSIGNED)
+                        config=Config(signature_version=UNSIGNED),
                     )
                 except (BotoCoreError, ClientError) as error:
                     logger.error(f"Failed to create S3 client: {error}")
@@ -58,7 +59,7 @@ class StorageS3:
                 except (BotoCoreError, ClientError) as error:
                     logger.error(f"Failed to create S3 client: {error}")
                     return None
-            
+
             self.s3_bucket = self.config.storage.s3.bucket_name
             self.s3_path = self.config.storage.s3.path
 
@@ -66,9 +67,7 @@ class StorageS3:
         try:
             s3_filename = self.s3_path + "/" + os.path.relpath(file_path, RECORD_DIR)
             self.s3_client.upload_file(file_path, self.s3_bucket, s3_filename)
-            logger.debug(
-                f"Uploading {file_path} to S3 {s3_filename}"
-            )
+            logger.debug(f"Uploading {file_path} to S3 {s3_filename}")
         except Exception as e:
             logger.error(
                 f"Error occurred while uploading {file_path} to S3 {s3_filename}: {e}"

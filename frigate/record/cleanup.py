@@ -153,7 +153,6 @@ class RecordingCleanup(threading.Thread):
                     else:
                         Path(recording.path).unlink(missing_ok=True)
                         deleted_recordings.add(recording.id)
-                    
 
                     # delete timeline entries relevant to this recording segment
                     Timeline.delete().where(
@@ -174,9 +173,9 @@ class RecordingCleanup(threading.Thread):
                 ).execute()
 
             for recording in moved_recordings:
-                Recordings.update({Recordings.storage: "s3", Recordings.path: recording["path"]}).where(
-                    Recordings.id == recording["id"]
-                ).execute()
+                Recordings.update(
+                    {Recordings.storage: "s3", Recordings.path: recording["path"]}
+                ).where(Recordings.id == recording["id"]).execute()
 
             logger.debug(f"End camera: {camera}.")
 
