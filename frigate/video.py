@@ -21,6 +21,7 @@ from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.track import ObjectTracker
 from frigate.track.centroid_tracker import CentroidTracker
+from frigate.track.norfair_tracker import NorfairTracker
 from frigate.track.sort_tracker import SortTracker
 from frigate.util import (
     EventsPerSecond,
@@ -474,7 +475,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = SortTracker(config.detect)
+    object_tracker = NorfairTracker(config.detect)
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -848,6 +849,17 @@ def process_frames(
             # else, just update the frame times for the stationary objects
             else:
                 object_tracker.update_frame_times(frame_time)
+
+        # debug tracking by writing frames
+        if False:
+            bgr_frame = cv2.cvtColor(
+                frame,
+                cv2.COLOR_YUV2BGR_I420,
+            )
+            object_tracker.debug_draw(bgr_frame, frame_time)
+            cv2.imwrite(
+                f"debug/frames/track-{'{:.6f}'.format(frame_time)}.jpg", bgr_frame
+            )
 
         # add to the queue if not full
         if detected_objects_queue.full():
