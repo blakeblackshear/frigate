@@ -5,7 +5,6 @@ from flask import cli
 
 from frigate.app import FrigateApp
 
-
 faulthandler.enable()
 
 threading.current_thread().name = "frigate"

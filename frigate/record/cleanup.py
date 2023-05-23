@@ -5,12 +5,12 @@ import itertools
 import logging
 import os
 import threading
+from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
 from peewee import DoesNotExist
-from multiprocessing.synchronize import Event as MpEvent
 
-from frigate.config import RetainModeEnum, FrigateConfig
+from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
 from frigate.models import Event, Recordings, Timeline
 from frigate.record.util import remove_empty_directories

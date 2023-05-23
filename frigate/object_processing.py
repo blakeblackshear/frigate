@@ -15,10 +15,10 @@ import numpy as np
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
     CameraConfig,
-    MqttConfig,
-    SnapshotsConfig,
-    RecordConfig,
     FrigateConfig,
+    MqttConfig,
+    RecordConfig,
+    SnapshotsConfig,
 )
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum

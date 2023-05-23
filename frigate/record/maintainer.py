@@ -9,14 +9,14 @@ import random
 import string
 import subprocess as sp
 import threading
-import psutil
-
 from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any, Tuple
 
-from frigate.config import RetainModeEnum, FrigateConfig
+import psutil
+
+from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.types import RecordMetricsTypes

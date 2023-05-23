@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+
 from frigate.video import box_overlaps, reduce_boxes
 
 

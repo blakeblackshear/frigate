@@ -1,11 +1,11 @@
-import os
-from statistics import mean
-import multiprocessing as mp
-import numpy as np
 import datetime
+import multiprocessing as mp
+from statistics import mean
+
+import numpy as np
+
 from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
-    LocalObjectDetector,
     ObjectDetectProcess,
     RemoteObjectDetector,
     load_labels,

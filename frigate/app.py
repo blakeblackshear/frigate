@@ -1,16 +1,16 @@
 import logging
 import multiprocessing as mp
-from multiprocessing.queues import Queue
-from multiprocessing.synchronize import Event as MpEvent
 import os
 import shutil
 import signal
 import sys
-from typing import Optional
-from types import FrameType
-import psutil
-
 import traceback
+from multiprocessing.queues import Queue
+from multiprocessing.synchronize import Event as MpEvent
+from types import FrameType
+from typing import Optional
+
+import psutil
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -27,13 +27,13 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
-from frigate.object_detection import ObjectDetectProcess
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings, Timeline
+from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
@@ -42,10 +42,10 @@ from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
+from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
-from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 
 logger = logging.getLogger(__name__)
 

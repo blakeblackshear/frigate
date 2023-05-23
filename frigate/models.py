@@ -1,11 +1,11 @@
 from peewee import (
-    Model,
+    BooleanField,
     CharField,
     DateTimeField,
     FloatField,
-    BooleanField,
-    TextField,
     IntegerField,
+    Model,
+    TextField,
 )
 from playhouse.sqlite_ext import JSONField
 

@@ -1,16 +1,15 @@
 """Handle external events created by the user."""
 
 import base64
-import cv2
 import datetime
 import logging
 import os
 import random
 import string
-
+from multiprocessing.queues import Queue
 from typing import Optional
 
-from multiprocessing.queues import Queue
+import cv2
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR

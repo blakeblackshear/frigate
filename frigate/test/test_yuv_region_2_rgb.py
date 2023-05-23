@@ -1,6 +1,8 @@
+from unittest import TestCase, main
+
 import cv2
 import numpy as np
-from unittest import TestCase, main
+
 from frigate.util import yuv_region_2_rgb
 
 

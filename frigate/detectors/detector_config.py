@@ -1,19 +1,17 @@
 import hashlib
 import json
 import logging
-from enum import Enum
 import os
+from enum import Enum
 from typing import Dict, Optional, Tuple
 
-
-import requests
 import matplotlib.pyplot as plt
+import requests
 from pydantic import BaseModel, Extra, Field
 from pydantic.fields import PrivateAttr
+
 from frigate.plus import PlusApi
-
 from frigate.util import load_labels
-
 
 logger = logging.getLogger(__name__)
 

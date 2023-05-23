@@ -6,15 +6,14 @@ import unittest
 from unittest.mock import patch
 
 from peewee_migrate import Router
+from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
-from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.http import create_app
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
-
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 

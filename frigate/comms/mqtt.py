@@ -1,13 +1,11 @@
 import logging
 import threading
-
 from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 

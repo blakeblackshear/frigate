@@ -1,6 +1,5 @@
 import peewee as pw
-from playhouse.migrate import *
-from playhouse.sqlite_ext import *
+
 from frigate.models import Event
 
 

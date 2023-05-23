@@ -1,12 +1,12 @@
 import logging
+
 import numpy as np
 import openvino.runtime as ov
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from typing_extensions import Literal
-from pydantic import Field
-
 
 logger = logging.getLogger(__name__)
 

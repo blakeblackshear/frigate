@@ -1,23 +1,20 @@
 import base64
-from datetime import datetime, timedelta, timezone
 import copy
-import logging
 import glob
 import json
+import logging
 import os
 import subprocess as sp
-import pytz
 import time
 import traceback
-
+from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
-from tzlocal import get_localzone_name
 from urllib.parse import unquote
 
 import cv2
-
 import numpy as np
+import pytz
 from flask import (
     Blueprint,
     Flask,
@@ -27,26 +24,26 @@ from flask import (
     make_response,
     request,
 )
-
-from peewee import SqliteDatabase, operator, fn, DoesNotExist
+from peewee import DoesNotExist, SqliteDatabase, fn, operator
 from playhouse.shortcuts import model_to_dict
+from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
-from frigate.models import Event, Recordings, Timeline
 from frigate.events.external import ExternalEventProcessor
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
 from frigate.stats import stats_snapshot
+from frigate.storage import StorageMaintainer
 from frigate.util import (
     clean_camera_user_pass,
     ffprobe_stream,
+    get_tz_modifiers,
     restart_frigate,
     vainfo_hwaccel,
-    get_tz_modifiers,
 )
-from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)

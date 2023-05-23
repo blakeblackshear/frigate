@@ -1,16 +1,13 @@
 """Handle communication between Frigate and other applications."""
 
 import logging
-
+from abc import ABC, abstractmethod
 from typing import Any, Callable
 
-from abc import ABC, abstractmethod
-
 from frigate.config import FrigateConfig
-from frigate.ptz import OnvifController, OnvifCommandEnum
+from frigate.ptz import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 from frigate.util import restart_frigate
-
 
 logger = logging.getLogger(__name__)
 

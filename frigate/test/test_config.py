@@ -1,13 +1,11 @@
 import json
 import os
 import unittest
+
 import numpy as np
 from pydantic import ValidationError
 
-from frigate.config import (
-    BirdseyeModeEnum,
-    FrigateConfig,
-)
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.plus import PlusApi

@@ -1,27 +1,26 @@
 import copy
 import datetime
-import logging
-import shlex
-import subprocess as sp
 import json
+import logging
+import os
 import re
+import shlex
 import signal
+import subprocess as sp
 import traceback
 import urllib.parse
-import yaml
-import os
-
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import Any, AnyStr, Optional, Tuple
-import py3nvml.py3nvml as nvml
 
 import cv2
 import numpy as np
 import psutil
+import py3nvml.py3nvml as nvml
 import pytz
+import yaml
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 

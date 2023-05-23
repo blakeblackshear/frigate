@@ -12,7 +12,6 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
 from frigate.storage import StorageMaintainer
-
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 

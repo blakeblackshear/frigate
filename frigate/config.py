@@ -8,24 +8,14 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
+from pydantic import BaseModel, Extra, Field, parse_obj_as, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import (
-    CACHE_DIR,
-    DEFAULT_DB_PATH,
-    REGEX_CAMERA_NAME,
-    YAML_EXT,
-)
+from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
+from frigate.detectors import DetectorConfig, ModelConfig
+from frigate.detectors.detector_config import InputTensorEnum  # noqa: F401
+from frigate.detectors.detector_config import PixelFormatEnum  # noqa: F401
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.plus import PlusApi
-from frigate.util import (
-    create_mask,
-    deep_merge,
-    get_ffmpeg_arg_list,
-    escape_special_characters,
-    load_config_with_no_duplicates,
-)
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -33,11 +23,14 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_record,
     parse_preset_output_rtmp,
 )
-from frigate.detectors import (
-    ModelConfig,
-    DetectorConfig,
+from frigate.plus import PlusApi
+from frigate.util import (
+    create_mask,
+    deep_merge,
+    escape_special_characters,
+    get_ffmpeg_arg_list,
+    load_config_with_no_duplicates,
 )
-
 
 logger = logging.getLogger(__name__)
 

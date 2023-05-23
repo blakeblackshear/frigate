@@ -2,10 +2,10 @@ import datetime
 import logging
 import threading
 import time
+from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.object_detection import ObjectDetectProcess
 from frigate.util import restart_frigate
-from multiprocessing.synchronize import Event as MpEvent
 
 logger = logging.getLogger(__name__)
 

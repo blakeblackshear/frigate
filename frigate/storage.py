@@ -1,9 +1,9 @@
 """Handle storage retention and usage."""
 
 import logging
-from pathlib import Path
 import shutil
 import threading
+from pathlib import Path
 
 from peewee import fn
 

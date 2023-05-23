@@ -1,6 +1,6 @@
+import ctypes
 import logging
 
-import ctypes
 import numpy as np
 
 try:
@@ -11,10 +11,11 @@ try:
 except ModuleNotFoundError:
     TRT_SUPPORT = False
 
+from pydantic import Field
+from typing_extensions import Literal
+
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing_extensions import Literal
-from pydantic import Field
 
 logger = logging.getLogger(__name__)
 

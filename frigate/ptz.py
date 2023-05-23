@@ -2,12 +2,11 @@
 
 import logging
 import site
-
 from enum import Enum
+
 from onvif import ONVIFCamera, ONVIFError
 
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 

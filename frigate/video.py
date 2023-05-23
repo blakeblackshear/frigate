@@ -10,15 +10,15 @@ import threading
 import time
 from collections import defaultdict
 
-import numpy as np
 import cv2
+import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
 from frigate.const import CACHE_DIR
-from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
+from frigate.object_detection import RemoteObjectDetector
 from frigate.objects import ObjectTracker
 from frigate.util import (
     EventsPerSecond,
@@ -30,8 +30,8 @@ from frigate.util import (
     intersection,
     intersection_over_union,
     listen,
-    yuv_region_2_rgb,
     yuv_region_2_bgr,
+    yuv_region_2_rgb,
     yuv_region_2_yuv,
 )
 

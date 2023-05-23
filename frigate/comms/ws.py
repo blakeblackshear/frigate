@@ -3,10 +3,9 @@
 import json
 import logging
 import threading
-
 from typing import Callable
-
 from wsgiref.simple_server import make_server
+
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -17,7 +16,6 @@ from ws4py.websocket import WebSocket
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 

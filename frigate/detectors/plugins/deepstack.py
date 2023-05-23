@@ -1,14 +1,14 @@
+import io
 import logging
+
 import numpy as np
 import requests
-import io
+from PIL import Image
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing_extensions import Literal
-from pydantic import Field
-from PIL import Image
-
 
 logger = logging.getLogger(__name__)
 

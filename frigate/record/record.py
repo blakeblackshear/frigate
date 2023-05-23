@@ -4,12 +4,11 @@ import logging
 import multiprocessing as mp
 import signal
 import threading
-
-from setproctitle import setproctitle
 from types import FrameType
 from typing import Optional
 
 from playhouse.sqliteq import SqliteQueueDatabase
+from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings, Timeline

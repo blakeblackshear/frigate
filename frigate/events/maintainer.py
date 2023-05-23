@@ -2,18 +2,15 @@ import datetime
 import logging
 import queue
 import threading
-
 from enum import Enum
-
+from multiprocessing.queues import Queue
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Dict
 
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
 from frigate.util import to_relative_box
-
-from multiprocessing.queues import Queue
-from multiprocessing.synchronize import Event as MpEvent
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 

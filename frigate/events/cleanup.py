@@ -4,15 +4,12 @@ import datetime
 import logging
 import os
 import threading
-
+from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
-
-from multiprocessing.synchronize import Event as MpEvent
 
 logger = logging.getLogger(__name__)
 
