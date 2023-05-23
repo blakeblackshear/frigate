@@ -7,19 +7,15 @@ import os
 import threading
 from pathlib import Path
 
-from peewee import chunked, DoesNotExist, DatabaseError, Model, CharField
+from peewee import chunked, DoesNotExist, DatabaseError
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Recordings, Timeline, RecordingsToDelete
 from frigate.record.util import remove_empty_directories
 
 logger = logging.getLogger(__name__)
-
-
-class RecordingsToDelete(Model):
-    id = CharField(null=False, primary_key=False, max_length=30)
 
 
 class RecordingCleanup(threading.Thread):
