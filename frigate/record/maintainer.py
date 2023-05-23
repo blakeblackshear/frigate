@@ -63,7 +63,7 @@ class RecordingMaintainer(threading.Thread):
                     for nt in flist:
                         if nt.path.startswith(CACHE_DIR):
                             files_in_use.append(nt.path.split("/")[-1])
-            except:
+            except psutil.Error:
                 continue
 
         # group recordings by camera

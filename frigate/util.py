@@ -839,7 +839,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 "mem": f"{mem_pct}",
                 "cmdline": " ".join(cmdline),
             }
-        except:
+        except Exception:
             continue
 
     return usages
@@ -870,7 +870,7 @@ def get_bandwidth_stats() -> dict[str, dict]:
                     usages[process[len(process) - 2]] = {
                         "bandwidth": round(float(stats[1]) + float(stats[2]), 1),
                     }
-            except:
+            except (IndexError, ValueError):
                 continue
 
     return usages
@@ -990,10 +990,10 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 "gpu": gpu_util,
                 "mem": gpu_mem_util,
             }
-    except:
+    except Exception:
+        pass
+    finally:
         return results
-
-    return results
 
 
 def ffprobe_stream(path: str) -> sp.CompletedProcess:

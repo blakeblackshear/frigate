@@ -488,7 +488,7 @@ def event_thumbnail(id, max_cache_age=2592000):
                     tracked_obj = camera_state.tracked_objects.get(id)
                     if tracked_obj is not None:
                         thumbnail_bytes = tracked_obj.get_thumbnail()
-        except:
+        except Exception:
             return "Event not found", 404
 
     if thumbnail_bytes is None:
@@ -617,9 +617,9 @@ def event_snapshot(id):
                             height=request.args.get("h", type=int),
                             quality=request.args.get("quality", default=70, type=int),
                         )
-        except:
+        except Exception:
             return "Event not found", 404
-    except:
+    except Exception:
         return "Event not found", 404
 
     if jpg_bytes is None:
@@ -894,7 +894,7 @@ def create_event(camera_name, label):
 def end_event(event_id):
     try:
         current_app.external_processor.finish_manual_event(event_id)
-    except:
+    except Exception:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404
         )

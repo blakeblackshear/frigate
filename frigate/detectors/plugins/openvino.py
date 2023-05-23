@@ -41,7 +41,7 @@ class OvDetector(DetectionApi):
                 tensor_shape = self.interpreter.output(self.output_indexes).shape
                 logger.info(f"Model Output-{self.output_indexes} Shape: {tensor_shape}")
                 self.output_indexes += 1
-            except:
+            except Exception:
                 logger.info(f"Model has {self.output_indexes} Output Tensors")
                 break
         if self.ov_model_type == ModelTypeEnum.yolox:

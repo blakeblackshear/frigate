@@ -9,6 +9,7 @@ import os
 import requests
 from typing import Optional, Any
 from multiprocessing.synchronize import Event as MpEvent
+from requests.exceptions import RequestException
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
@@ -31,7 +32,7 @@ def get_latest_version(config: FrigateConfig) -> str:
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
             timeout=10,
         )
-    except:
+    except RequestException:
         return "unknown"
 
     response = request.json()

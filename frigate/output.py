@@ -148,7 +148,7 @@ class BroadcastThread(threading.Thread):
                     ):
                         try:
                             ws.send(buf, binary=True)
-                        except:
+                        except ValueError:
                             pass
             elif self.converter.process.poll() is not None:
                 break
