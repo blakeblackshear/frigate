@@ -29,7 +29,7 @@ class RecordingCleanup(threading.Thread):
         self.config = config
         self.stop_event = stop_event
 
-        if self.config.storage.s3.enabled:
+        if self.config.storage.s3.enabled or self.config.storage.s3.archive:
             self.s3 = StorageS3(config)
 
     def clean_tmp_clips(self) -> None:
@@ -144,7 +144,7 @@ class RecordingCleanup(threading.Thread):
                         and recording.objects == 0
                     )
                 ):
-                    if self.config.storage.s3.enabled:
+                    if self.config.storage.s3.archive:
                         s3path = self.s3.upload_file_to_s3(recording.path)
                         if s3path != "":
                             moved_recordings.add({"id": recording.id, "path": s3path})

@@ -21,6 +21,7 @@ from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.types import RecordMetricsTypes
 from frigate.util import area
+from frigate.storage import StorageS3
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,9 @@ class RecordingMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.recordings_info: dict[str, Any] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
+
+        if self.config.storage.s3.enabled:
+            self.s3 = StorageS3(config)
 
     def move_files(self) -> None:
         cache_files = sorted(
@@ -335,6 +339,17 @@ class RecordingMaintainer(threading.Thread):
                 rand_id = "".join(
                     random.choices(string.ascii_lowercase + string.digits, k=6)
                 )
+                storage = "local"
+                if self.config.storage.s3.enabled:
+                    s3path = self.s3.upload_file_to_s3(file_path)
+                    if s3path != "":
+                        Path(file_path).unlink(missing_ok=True)
+                        file_path = s3path
+                        storage = "s3"
+                    else:
+                        logger.error(f"Unable to upload recording segment {file_path} to s3, fallback to local")
+                        logger.error(e)
+
                 Recordings.create(
                     id=f"{start_time.timestamp()}-{rand_id}",
                     camera=camera,
@@ -346,6 +361,7 @@ class RecordingMaintainer(threading.Thread):
                     # TODO: update this to store list of active objects at some point
                     objects=active_count,
                     segment_size=segment_size,
+                    storage=storage,
                 )
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")

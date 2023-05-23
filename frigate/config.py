@@ -523,6 +523,7 @@ class SnapshotsConfig(FrigateBaseModel):
 
 class StorageS3Config(FrigateBaseModel):
     enabled: bool = Field(default=False, title="S3 enabled.")
+    archive: bool = Field(default=False, title="Archive expired records to S3 instead of delete")
     access_key_id: str = Field(default="", title="AWS_ACCESS_KEY_ID")
     secret_access_key: str = Field(default="", title="AWS_SECRET_ACCESS_KEY")
     bucket_name: str = Field(default="", title="Bucket name")
