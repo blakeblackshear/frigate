@@ -5,6 +5,9 @@ from pathlib import Path
 import shutil
 import threading
 import boto3
+from botocore import UNSIGNED
+from botocore.config import Config
+from botocore.session import Session as boto_session
 from peewee import fn
 import os
 import tempfile
@@ -24,12 +27,29 @@ class StorageS3:
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         if self.config.storage.s3.enabled:
-            self.s3_client = boto3.client(
-                "s3",
-                aws_access_key_id=self.config.storage.s3.access_key_id,
-                aws_secret_access_key=self.config.storage.s3.secret_access_key,
-                endpoint_url=self.config.storage.s3.endpoint_url,
-            )
+            if self.config.storage.s3.endpoint_url.startswith('http://'):
+                session = boto_session()
+                session.set_config_variable('s3', 
+                    {
+                        'use_ssl': False,
+                        'verify': False,
+                    }
+                )
+                self.s3_client = session.create_client(
+                    "s3",
+                    aws_access_key_id=self.config.storage.s3.access_key_id,
+                    aws_secret_access_key=self.config.storage.s3.secret_access_key,
+                    endpoint_url=self.config.storage.s3.endpoint_url,
+                    config=Config(signature_version=UNSIGNED)
+                )
+            else:
+                self.s3_client = boto3.client(
+                    "s3",
+                    aws_access_key_id=self.config.storage.s3.access_key_id,
+                    aws_secret_access_key=self.config.storage.s3.secret_access_key,
+                    endpoint_url=self.config.storage.s3.endpoint_url,
+                )
+            
             self.s3_bucket = self.config.storage.s3.bucket_name
             self.s3_path = self.config.storage.s3.path
 
