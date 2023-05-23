@@ -234,9 +234,9 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more information.
 
-## ESX
+## ESXi
 
-For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
+For details on running Frigate using ESXi, please see the instructions [here](https://williamlam.com/2023/05/frigate-nvr-with-coral-tpu-igpu-passthrough-using-esxi-on-intel-nuc.html).
 
 ## Synology NAS on DSM 7
 
