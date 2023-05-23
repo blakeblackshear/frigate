@@ -8,6 +8,7 @@ import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.session import Session as boto_session
+from botocore.exceptions import BotoCoreError, ClientError
 from peewee import fn
 import os
 import tempfile
@@ -28,27 +29,35 @@ class StorageS3:
         self.config = config
         if self.config.storage.s3.enabled or self.config.storage.s3.archive:
             if self.config.storage.s3.endpoint_url.startswith('http://'):
-                session = boto_session()
-                session.set_config_variable('s3', 
-                    {
-                        'use_ssl': False,
-                        'verify': False,
-                    }
-                )
-                self.s3_client = session.create_client(
-                    "s3",
-                    aws_access_key_id=self.config.storage.s3.access_key_id,
-                    aws_secret_access_key=self.config.storage.s3.secret_access_key,
-                    endpoint_url=self.config.storage.s3.endpoint_url,
-                    config=Config(signature_version=UNSIGNED)
-                )
+                try:
+                    session = boto_session()
+                    session.set_config_variable('s3', 
+                        {
+                            'use_ssl': False,
+                            'verify': False,
+                        }
+                    )
+                    self.s3_client = session.create_client(
+                        "s3",
+                        aws_access_key_id=self.config.storage.s3.access_key_id,
+                        aws_secret_access_key=self.config.storage.s3.secret_access_key,
+                        endpoint_url=self.config.storage.s3.endpoint_url,
+                        config=Config(signature_version=UNSIGNED)
+                    )
+                except (BotoCoreError, ClientError) as error:
+                    logger.error(f"Failed to create S3 client: {error}")
+                    return None
             else:
-                self.s3_client = boto3.client(
-                    "s3",
-                    aws_access_key_id=self.config.storage.s3.access_key_id,
-                    aws_secret_access_key=self.config.storage.s3.secret_access_key,
-                    endpoint_url=self.config.storage.s3.endpoint_url,
-                )
+                try:
+                    self.s3_client = boto3.client(
+                        "s3",
+                        aws_access_key_id=self.config.storage.s3.access_key_id,
+                        aws_secret_access_key=self.config.storage.s3.secret_access_key,
+                        endpoint_url=self.config.storage.s3.endpoint_url,
+                    )
+                except (BotoCoreError, ClientError) as error:
+                    logger.error(f"Failed to create S3 client: {error}")
+                    return None
             
             self.s3_bucket = self.config.storage.s3.bucket_name
             self.s3_path = self.config.storage.s3.path
@@ -57,8 +66,11 @@ class StorageS3:
         try:
             s3_filename = self.s3_path + "/" + os.path.relpath(file_path, RECORD_DIR)
             self.s3_client.upload_file(file_path, self.s3_bucket, s3_filename)
-        except Exception as e:
             logger.debug(
+                f"Uploading {file_path} to S3 {s3_filename}"
+            )
+        except Exception as e:
+            logger.error(
                 f"Error occurred while uploading {file_path} to S3 {s3_filename}: {e}"
             )
             return ""
@@ -80,7 +92,7 @@ class StorageS3:
                 logger.debug(f"Downloaded {s3_file_name} to {local_file_path}")
                 return local_file_path
             except Exception as e:
-                logger.debug(
+                logger.error(
                     f"Error occurred while downloading {s3_file_name} from S3: {e}"
                 )
                 return None
