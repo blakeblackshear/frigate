@@ -90,7 +90,9 @@ class EventCleanup(threading.Thread):
             # loop over object types in db
             for event in distinct_labels:
                 # get expiration time for this label
-                expire_days = retain_config.objects.get(event.label, retain_config.default)
+                expire_days = retain_config.objects.get(
+                    event.label, retain_config.default
+                )
                 expire_after = (
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()

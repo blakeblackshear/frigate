@@ -311,7 +311,6 @@ def process(path, label, output, debug_path):
 
         for result in results:
             if count == 0:
-
                 # Writing headers of CSV file
                 header = ["file"] + list(result[1].keys())
                 csv_writer.writerow(header)
