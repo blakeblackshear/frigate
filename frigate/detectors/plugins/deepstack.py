@@ -50,7 +50,10 @@ class DeepStack(DetectionApi):
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
         response = requests.post(
-            self.api_url, files={"image": image_bytes}, timeout=self.api_timeout
+            self.api_url,
+            data=data,
+            files={"image": image_bytes},
+            timeout=self.api_timeout,
         )
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)
