@@ -8,12 +8,14 @@ import threading
 from pathlib import Path
 
 from peewee import DoesNotExist
+import boto3
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import RetainModeEnum, FrigateConfig
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
 from frigate.models import Event, Recordings, Timeline
 from frigate.record.util import remove_empty_directories
+from frigate.storage import StorageS3
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,9 @@ class RecordingCleanup(threading.Thread):
         self.name = "recording_cleanup"
         self.config = config
         self.stop_event = stop_event
+
+        if self.config.storage.s3.enabled:
+            self.s3 = StorageS3(config)
 
     def clean_tmp_clips(self) -> None:
         # delete any clips more than 5 minutes old
@@ -54,6 +59,7 @@ class RecordingCleanup(threading.Thread):
         )
 
         deleted_recordings = set()
+        moved_recordings = set()
         for recording in no_camera_recordings:
             Path(recording.path).unlink(missing_ok=True)
             deleted_recordings.add(recording.id)
@@ -99,6 +105,7 @@ class RecordingCleanup(threading.Thread):
             # TODO: expire segments based on segment stats according to config
             event_start = 0
             deleted_recordings = set()
+            moved_recordings = set()
             for recording in recordings.objects().iterator():
                 keep = False
                 # Now look for a reason to keep this recording segment
@@ -137,8 +144,16 @@ class RecordingCleanup(threading.Thread):
                         and recording.objects == 0
                     )
                 ):
-                    Path(recording.path).unlink(missing_ok=True)
-                    deleted_recordings.add(recording.id)
+                    if self.config.storage.s3.enabled:
+                        s3path = self.s3.upload_file_to_s3(recording.path)
+                        if s3path != "":
+                            moved_recordings.add({"id": recording.id, "path": s3path})
+                        else:
+                            Path(recording.path).unlink(missing_ok=True)
+                    else:
+                        Path(recording.path).unlink(missing_ok=True)
+                        deleted_recordings.add(recording.id)
+                    
 
                     # delete timeline entries relevant to this recording segment
                     Timeline.delete().where(
@@ -156,6 +171,11 @@ class RecordingCleanup(threading.Thread):
             for i in range(0, len(deleted_recordings_list), max_deletes):
                 Recordings.delete().where(
                     Recordings.id << deleted_recordings_list[i : i + max_deletes]
+                ).execute()
+
+            for recording in moved_recordings:
+                Recordings.update({Recordings.storage: "s3", Recordings.path: recording["path"]}).where(
+                    Recordings.id == recording["id"]
                 ).execute()
 
             logger.debug(f"End camera: {camera}.")

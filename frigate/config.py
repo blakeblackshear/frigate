@@ -521,6 +521,21 @@ class SnapshotsConfig(FrigateBaseModel):
     )
 
 
+class StorageS3Config(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="S3 enabled.")
+    access_key_id: str = Field(default="", title="AWS_ACCESS_KEY_ID")
+    secret_access_key: str = Field(default="", title="AWS_SECRET_ACCESS_KEY")
+    bucket_name: str = Field(default="", title="Bucket name")
+    endpoint_url: str = Field(default="", title="Endpoint URL")
+    path: str = Field(default="", title="Base Path")
+
+
+class StorageConfig(FrigateBaseModel):
+    s3: StorageS3Config = Field(
+        default_factory=StorageS3Config, title="S3 configuration"
+    )
+
+
 class ColorConfig(FrigateBaseModel):
     red: int = Field(default=255, ge=0, le=255, title="Red")
     green: int = Field(default=255, ge=0, le=255, title="Green")
@@ -879,6 +894,9 @@ class FrigateConfig(FrigateBaseModel):
     )
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
+    )
+    storage: StorageConfig = Field(
+        default_factory=StorageConfig, title="Global storage configuration."
     )
     rtmp: RtmpConfig = Field(
         default_factory=RtmpConfig, title="Global RTMP restreaming configuration."

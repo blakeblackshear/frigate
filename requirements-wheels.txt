@@ -1,3 +1,4 @@
+boto3 == 1.26.*
 click == 8.1.*
 Flask == 2.3.*
 imutils == 0.5.*

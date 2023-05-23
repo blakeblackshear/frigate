@@ -46,7 +46,7 @@ from frigate.util import (
     vainfo_hwaccel,
     get_tz_modifiers,
 )
-from frigate.storage import StorageMaintainer
+from frigate.storage import StorageMaintainer, StorageS3
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -1323,6 +1323,9 @@ def recordings(camera_name):
 def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
+    if current_app.frigate_config.storage.s3.enabled:
+        s3 = StorageS3(current_app.frigate_config)
+
     recordings = (
         Recordings.select()
         .where(
@@ -1337,6 +1340,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     playlist_lines = []
     clip: Recordings
     for clip in recordings:
+        if recordings.storage == "s3":
+            clip.path = s3.download_file_from_s3(clip.path)
+            
         playlist_lines.append(f"file '{clip.path}'")
         # if this is the starting clip, add an inpoint
         if clip.start_time < start_ts:

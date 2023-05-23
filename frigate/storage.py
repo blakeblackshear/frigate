@@ -4,8 +4,11 @@ import logging
 from pathlib import Path
 import shutil
 import threading
-
+import boto3
 from peewee import fn
+import os
+import tempfile
+
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR
@@ -15,6 +18,54 @@ logger = logging.getLogger(__name__)
 bandwidth_equation = Recordings.segment_size / (
     Recordings.end_time - Recordings.start_time
 )
+
+
+class StorageS3:
+    def __init__(self, config: FrigateConfig) -> None:
+        self.config = config
+        if self.config.storage.s3.enabled:
+            self.s3_client = boto3.client(
+                "s3",
+                aws_access_key_id=self.config.storage.s3.access_key_id,
+                aws_secret_access_key=self.config.storage.s3.secret_access_key,
+                endpoint_url=self.config.storage.s3.endpoint_url,
+            )
+            self.s3_bucket = self.config.storage.s3.bucket_name
+            self.s3_path = self.config.storage.s3.path
+
+    def upload_file_to_s3(self, file_path) -> str:
+        try:
+            s3_filename = self.s3_path + "/" + os.path.relpath(file_path, RECORD_DIR)
+            self.s3_client.upload_file(file_path, self.s3_bucket, s3_filename)
+        except Exception as e:
+            logger.debug(
+                f"Error occurred while uploading {file_path} to S3 {s3_filename}: {e}"
+            )
+            return ""
+        return s3_filename
+
+    def download_file_from_s3(self, s3_file_name) -> str:
+        if self.config.storage.s3.enabled:
+            # Create a temporary directory
+            temp_dir = tempfile.gettempdir()
+
+            # Create a temporary file name with the same name as the original S3 file
+            local_file_path = os.path.join(temp_dir, os.path.basename(s3_file_name))
+
+            try:
+                # Download the file from S3
+                self.s3_client.download_file(
+                    self.s3_bucket, s3_file_name, local_file_path
+                )
+                logger.debug(f"Downloaded {s3_file_name} to {local_file_path}")
+                return local_file_path
+            except Exception as e:
+                logger.debug(
+                    f"Error occurred while downloading {s3_file_name} from S3: {e}"
+                )
+                return None
+        else:
+            return False
 
 
 class StorageMaintainer(threading.Thread):
