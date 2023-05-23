@@ -26,7 +26,7 @@ bandwidth_equation = Recordings.segment_size / (
 class StorageS3:
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        if self.config.storage.s3.enabled:
+        if self.config.storage.s3.enabled or self.config.storage.s3.archive:
             if self.config.storage.s3.endpoint_url.startswith('http://'):
                 session = boto_session()
                 session.set_config_variable('s3', 
@@ -65,7 +65,7 @@ class StorageS3:
         return s3_filename
 
     def download_file_from_s3(self, s3_file_name) -> str:
-        if self.config.storage.s3.enabled:
+        if self.config.storage.s3.enabled or self.config.storage.s3.archive:
             # Create a temporary directory
             temp_dir = tempfile.gettempdir()
 

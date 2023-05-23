@@ -1323,7 +1323,7 @@ def recordings(camera_name):
 def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
-    if current_app.frigate_config.storage.s3.enabled:
+    if current_app.frigate_config.storage.s3.enabled or current_app.frigate_config.storage.s3.archive:
         s3 = StorageS3(current_app.frigate_config)
 
     recordings = (
