@@ -27,13 +27,17 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
 
     # calculate euclidean distance and average
     distance = np.linalg.norm(difference, axis=1).mean()
-    
-    detected_area = (detection.points[1][0] - detection.points[0][0]) * (detection.points[1][1] - detection.points[0][1])
-    estimated_area = (tracked_object.estimate[1][0] - tracked_object.estimate[0][0]) * (tracked_object.estimate[1][1] - tracked_object.estimate[0][1])
-    
+
+    detected_area = (detection.points[1][0] - detection.points[0][0]) * (
+        detection.points[1][1] - detection.points[0][1]
+    )
+    estimated_area = (tracked_object.estimate[1][0] - tracked_object.estimate[0][0]) * (
+        tracked_object.estimate[1][1] - tracked_object.estimate[0][1]
+    )
+
     # calculate the factor of area increase / decrease between detected and estimated bbox
     area_factor = detected_area / estimated_area
-    
+
     # account for cases where object is smaller than estimated
     if area_factor < 1:
         area_factor = 1 / area_factor
