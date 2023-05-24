@@ -19,14 +19,26 @@ from norfair.drawing.drawer import Drawer
 def frigate_distance(detection: Detection, tracked_object) -> float:
     # calculate distances and normalize it by width and height of previous detection
     ld = tracked_object.last_detection
-    width = ld.points[1][0] - ld.points[0][0]
-    height = ld.points[1][1] - ld.points[0][1]
+    last_width = ld.points[1][0] - ld.points[0][0]
+    last_height = ld.points[1][1] - ld.points[0][1]
     difference = (detection.points - tracked_object.estimate).astype(float)
-    difference[:, 0] /= width
-    difference[:, 1] /= height
+    difference[:, 0] /= last_width
+    difference[:, 1] /= last_height
 
     # calculate euclidean distance and average
-    return np.linalg.norm(difference, axis=1).mean()
+    distance = np.linalg.norm(difference, axis=1).mean()
+    
+    detected_area = (detection.points[1][0] - detection.points[0][0]) * (detection.points[1][1] - detection.points[0][1])
+    estimated_area = (tracked_object.estimate[1][0] - tracked_object.estimate[0][0]) * (tracked_object.estimate[1][1] - tracked_object.estimate[0][1])
+    
+    # calculate the factor of area increase / decrease between detected and estimated bbox
+    area_factor = detected_area / estimated_area
+    
+    # account for cases where object is smaller than estimated
+    if area_factor < 1:
+        area_factor = 1 / area_factor
+
+    return distance * factor
 
 
 class NorfairTracker(ObjectTracker):
