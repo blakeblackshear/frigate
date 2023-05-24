@@ -296,6 +296,7 @@ class RecordingMaintainer(threading.Thread):
                 # add faststart to kept segments to improve metadata reading
                 ffmpeg_cmd = [
                     "ffmpeg",
+                    "-hide_banner",
                     "-y",
                     "-i",
                     cache_path,
