@@ -55,7 +55,7 @@ class NorfairTracker(ObjectTracker):
             distance_function=frigate_distance,
             # distance is relative to the size of the last
             # detection
-            distance_threshold=4.0,
+            distance_threshold=3.0,
             initialization_delay=0,
             hit_counter_max=self.max_disappeared,
         )
