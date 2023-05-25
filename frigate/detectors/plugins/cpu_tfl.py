@@ -3,7 +3,7 @@ import numpy as np
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
+from typing_extensions import Literal
 from pydantic import Extra, Field
 
 try:

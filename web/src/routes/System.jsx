@@ -119,7 +119,7 @@ export default function System() {
 
       {state.showFfprobe && (
         <Dialog>
-          <div className="p-4 mb-2 max-h-96 whitespace-pre-line overflow-scroll">
+          <div className="p-4 mb-2 max-h-96 whitespace-pre-line overflow-auto">
             <Heading size="lg">Ffprobe Output</Heading>
             {state.ffprobe != '' ? (
               <div>
@@ -183,7 +183,7 @@ export default function System() {
 
       {state.showVainfo && (
         <Dialog>
-          <div className="p-4 overflow-scroll whitespace-pre-line">
+          <div className="p-4 overflow-auto whitespace-pre-line">
             <Heading size="lg">Vainfo Output</Heading>
             {state.vainfo != '' ? (
               <div className="mb-2 max-h-96 whitespace-pre-line">
@@ -239,6 +239,7 @@ export default function System() {
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
                         <Th>Memory %</Th>
+                        <Th>Network Bandwidth</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -247,6 +248,7 @@ export default function System() {
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['mem'] || '- '}%</Td>
+                        <Td>{bandwidth_usages[detectors[detector]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
                       </Tr>
                     </Tbody>
                   </Table>
@@ -428,6 +430,7 @@ export default function System() {
                         <Th>CPU %</Th>
                         <Th>Avg CPU %</Th>
                         <Th>Memory %</Th>
+                        <Th>Network Bandwidth</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -436,6 +439,7 @@ export default function System() {
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
+                        <Td>{bandwidth_usages[processes[process]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
                       </Tr>
                     </Tbody>
                   </Table>

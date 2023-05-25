@@ -5,7 +5,7 @@ import io
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
+from typing_extensions import Literal
 from pydantic import Extra, Field
 from PIL import Image
 
@@ -50,7 +50,10 @@ class DeepStack(DetectionApi):
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
         response = requests.post(
-            self.api_url, files={"image": image_bytes}, timeout=self.api_timeout
+            self.api_url,
+            data=data,
+            files={"image": image_bytes},
+            timeout=self.api_timeout,
         )
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)

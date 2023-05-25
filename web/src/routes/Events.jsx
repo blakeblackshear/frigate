@@ -599,7 +599,9 @@ export default function Events({ path, ...props }) {
                           {event.sub_label
                             ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
                             : event.label.replaceAll('_', ' ')}
-                          ({((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%)
+                          {(event?.data?.top_score || event.top_score || 0) == 0
+                            ? null
+                            : ` (${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%)`}
                         </div>
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />

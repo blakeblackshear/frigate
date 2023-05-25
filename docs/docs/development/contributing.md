@@ -36,7 +36,13 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 - [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
-- Extra Coral device (optional, but very helpful to simulate real world performance)
+- An extra detector (Coral, OpenVINO, etc.) is optional but recommended to simulate real world performance.
+
+:::note
+
+A Coral device can only be used by a single process at a time, so an extra Coral device is recommended if using a coral for development purposes.
+
+:::
 
 ### Setup
 
@@ -79,7 +85,7 @@ Create and place these files in a `debug` folder in the root of the repo. This i
 VSCode will start the docker compose file for you and open a terminal window connected to `frigate-dev`.
 
 - Run `python3 -m frigate` to start the backend.
-- In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm start` to start the frontend.
+- In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm run dev` to start the frontend.
 
 #### 5. Teardown
 

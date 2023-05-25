@@ -1,8 +1,8 @@
 import base64
 from datetime import datetime, timedelta, timezone
 import copy
-import glob
 import logging
+import glob
 import json
 import os
 import subprocess as sp
@@ -34,6 +34,7 @@ from playhouse.shortcuts import model_to_dict
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings, Timeline
+from frigate.events.external import ExternalEventProcessor
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
@@ -60,6 +61,7 @@ def create_app(
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
+    external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
 ):
     app = Flask(__name__)
@@ -79,6 +81,7 @@ def create_app(
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
     app.onvif = onvif
+    app.external_processor = external_processor
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
@@ -195,7 +198,7 @@ def send_to_plus(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.data["box"]):
+    if event.data.get("box") is None:
         include_annotation = None
 
     if event.end_time is None:
@@ -251,7 +254,6 @@ def send_to_plus(id):
     event.save()
 
     if not include_annotation is None:
-        region = event.data["region"]
         box = event.data["box"]
 
         try:
@@ -293,7 +295,7 @@ def false_positive(id):
         return make_response(jsonify({"success": False, "message": message}), 404)
 
     # events from before the conversion to relative dimensions cant include annotations
-    if any(d > 1 for d in event.data["box"]):
+    if event.data.get("box") is None:
         message = f"Events prior to 0.13 cannot be submitted as false positives"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 400)
@@ -848,6 +850,58 @@ def events():
     return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
 
 
+@bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
+def create_event(camera_name, label):
+    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
+        return jsonify(
+            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        )
+
+    if not label:
+        return jsonify({"success": False, "message": f"{label} must be set."}, 404)
+
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
+    try:
+        frame = current_app.detected_frames_processor.get_current_frame(camera_name)
+
+        event_id = current_app.external_processor.create_manual_event(
+            camera_name,
+            label,
+            json.get("sub_label", None),
+            json.get("duration", 30),
+            json.get("include_recording", True),
+            json.get("draw", {}),
+            frame,
+        )
+    except Exception as e:
+        logger.error(f"The error is {e}")
+        return jsonify(
+            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        )
+
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully created event.",
+            "event_id": event_id,
+        },
+        200,
+    )
+
+
+@bp.route("/events/<event_id>/end", methods=["PUT"])
+def end_event(event_id):
+    try:
+        current_app.external_processor.finish_manual_event(event_id)
+    except:
+        return jsonify(
+            {"success": False, "message": f"{event_id} must be set and valid."}, 404
+        )
+
+    return jsonify({"success": True, "message": f"Event successfully ended."}, 200)
+
+
 @bp.route("/config")
 def config():
     config = current_app.frigate_config.dict()
@@ -906,6 +960,7 @@ def config_save():
     # Validate the config schema
     try:
         new_yaml = FrigateConfig.parse_raw(new_config)
+        check_runtime = new_yaml.runtime_config
     except Exception as e:
         return make_response(
             jsonify(
