@@ -380,7 +380,7 @@ export default function System() {
                           <Td>{cameras[camera]['process_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
-                          <Td>-</Td>
+                          {config.telemetry.network_bandwidth && <Td>-</Td>}
                         </Tr>
                         <Tr key="detect" index="2">
                           <Td>Detect</Td>
@@ -401,7 +401,7 @@ export default function System() {
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
-                          <Td>-</Td>
+                          {config.telemetry.network_bandwidth && <Td>-</Td>}
                         </Tr>
                       </Tbody>
                     </Table>
