@@ -11,7 +11,7 @@ from peewee import DoesNotExist
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import RetainModeEnum, FrigateConfig
-from frigate.const import RECORD_DIR, SECONDS_IN_DAY
+from frigate.const import CACHE_DIR, RECORD_DIR, SECONDS_IN_DAY
 from frigate.models import Event, Recordings, Timeline
 from frigate.record.util import remove_empty_directories
 
@@ -29,7 +29,7 @@ class RecordingCleanup(threading.Thread):
 
     def clean_tmp_clips(self) -> None:
         # delete any clips more than 5 minutes old
-        for p in Path("/tmp/cache").rglob("clip_*.mp4"):
+        for p in Path(CACHE_DIR).rglob("clip_*.mp4"):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
