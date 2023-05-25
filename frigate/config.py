@@ -94,6 +94,7 @@ class TelemetryConfig(FrigateBaseModel):
         default=["eth", "enp", "eno", "ens", "wl", "lo"],
         title="Enabled network interfaces for bandwidth calculation.",
     )
+    network_bandwidth: bool = Field(default=False, title="Enable network bandwidth for ffmpeg processes.")
     version_check: bool = Field(default=True, title="Enable latest version check.")
 
 

@@ -104,13 +104,15 @@ def get_processing_stats(
     """Get stats for cpu / gpu."""
 
     async def run_tasks() -> None:
-        await asyncio.wait(
-            [
-                asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
-                asyncio.create_task(set_cpu_stats(stats)),
-                asyncio.create_task(set_bandwidth_stats(config, stats)),
-            ]
-        )
+        stats_tasks = [
+            asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
+            asyncio.create_task(set_cpu_stats(stats)),
+        ]
+
+        if config.telemetry.network_bandwidth:
+            stats_tasks.append(asyncio.create_task(set_bandwidth_stats(config, stats)))
+
+        await asyncio.wait(stats_tasks)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
