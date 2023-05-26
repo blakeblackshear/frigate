@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 NGINX_VERSION="1.22.1"
-VOD_MODULE_VERSION="1.30"
+VOD_MODULE_VERSION="1.43"
 SECURE_TOKEN_MODULE_VERSION="1.4"
 RTMP_MODULE_VERSION="1.2.1"
 
@@ -20,7 +20,7 @@ wget -nv https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 tar -zxf nginx-${NGINX_VERSION}.tar.gz -C /tmp/nginx --strip-components=1
 rm nginx-${NGINX_VERSION}.tar.gz
 mkdir /tmp/nginx-vod-module
-wget -nv https://github.com/kaltura/nginx-vod-module/archive/refs/tags/${VOD_MODULE_VERSION}.tar.gz
+wget -nv https://github.com/comrat/nginx-vod-module/archive/refs/tags/${VOD_MODULE_VERSION}.tar.gz
 tar -zxf ${VOD_MODULE_VERSION}.tar.gz -C /tmp/nginx-vod-module --strip-components=1
 rm ${VOD_MODULE_VERSION}.tar.gz
     # Patch MAX_CLIPS to allow more clips to be added than the default 128
