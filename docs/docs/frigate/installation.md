@@ -24,6 +24,7 @@ Frigate uses the following locations for read/write operations in the container.
 - `/config`: Used to store the Frigate config file and sqlite database. You will also see a few files alongside the database file while Frigate is running.
 - `/media/frigate/clips`: Used for snapshot storage. In the future, it will likely be renamed from `clips` to `snapshots`. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
 - `/media/frigate/recordings`: Internal system storage for recording segments. The file structure here cannot be modified and isn't intended to be browsed or managed manually.
+- `/media/frigate/exports`: Storage for clips and timelapses that have been exported via the WebUI or API.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder.
 - `/dev/shm`: It is not recommended to modify this directory or map it with docker. This is the location for raw decoded frames in shared memory and it's size is impacted by the `shm-size` calculations below.
 
@@ -221,7 +222,7 @@ These settings were tested on DSM 7.1.1-42962 Update 4
 
 The `Execute container using high privilege` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
 
-The `Enable auto-restart` option can be enabled if you want the container to automatically restart whenever it improperly shuts down due to an error.	
+The `Enable auto-restart` option can be enabled if you want the container to automatically restart whenever it improperly shuts down due to an error.
 
 ![image](https://user-images.githubusercontent.com/4516296/232586790-0b659a82-561d-4bc5-899b-0f5b39c6b11d.png)
 
