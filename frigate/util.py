@@ -846,10 +846,24 @@ def get_cpu_stats() -> dict[str, dict]:
     return usages
 
 
+def get_physical_interfaces():
+    with open("/proc/net/dev", "r") as file:
+        lines = file.readlines()
+
+    physical_interfaces = []
+    for line in lines:
+        if ":" in line:
+            interface = line.split(":")[0].strip()
+            if interface.startswith(("eth", "enp", "eno", "ens", "wl", "lo")):
+                physical_interfaces.append(interface)
+
+    return physical_interfaces
+
+
 def get_bandwidth_stats() -> dict[str, dict]:
     """Get bandwidth usages for each ffmpeg process id"""
     usages = {}
-    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"]
+    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"] + get_physical_interfaces()
 
     p = sp.run(
         top_command,
