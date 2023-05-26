@@ -63,7 +63,7 @@ class RecordingExporter(threading.Thread):
 
             while playlist_start < self.end_time:
                 playlist_lines.append(
-                    f"file http://127.0.0.1:5000/vod/{self.camera}/start/{playlist_start}/end/{min(playlist_start + MAX_PLAYLIST_SECONDS, self.end_time)}/index.m3u8"
+                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{playlist_start}/end/{min(playlist_start + MAX_PLAYLIST_SECONDS, self.end_time)}/index.m3u8'"
                 )
                 playlist_start += MAX_PLAYLIST_SECONDS
 
