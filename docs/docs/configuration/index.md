@@ -558,6 +558,14 @@ ui:
 
 # Optional: Telemetry configuration
 telemetry:
+  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: shown below)
+  network_interfaces:
+    - eth
+    - enp
+    - eno
+    - ens
+    - wl
+    - lo
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
   version_check: True
