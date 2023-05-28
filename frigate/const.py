@@ -29,4 +29,4 @@ DRIVER_INTEL_iHD = "iHD"
 
 MAX_SEGMENT_DURATION = 600
 SECONDS_IN_DAY = 60 * 60 * 24
-MAX_PLAYLIST_SECONDS = 10800  # only support 3 hours per HLS playlist
+MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to account for cameras with inconsistent segment times
