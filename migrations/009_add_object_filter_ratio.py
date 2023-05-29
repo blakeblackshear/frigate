@@ -22,6 +22,7 @@ Some examples (model - class or model name)::
 """
 
 import peewee as pw
+
 from frigate.models import Event
 
 SQL = pw.SQL

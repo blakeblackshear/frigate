@@ -3,11 +3,14 @@
 import json
 import os
 import sys
+
 import yaml
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.const import BIRDSEYE_PIPE, BTBN_PATH
-from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.const import BIRDSEYE_PIPE, BTBN_PATH  # noqa: E402
+from frigate.ffmpeg_presets import (  # noqa: E402
+    parse_preset_hardware_acceleration_encode,
+)
 
 sys.path.remove("/opt/frigate")
 

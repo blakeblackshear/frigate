@@ -13,9 +13,9 @@ BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
 # Regex Consts
 
-REGEX_CAMERA_NAME = "^[a-zA-Z0-9_-]+$"
-REGEX_RTSP_CAMERA_USER_PASS = ":\/\/[a-zA-Z0-9_-]+:[\S]+@"
-REGEX_HTTP_CAMERA_USER_PASS = "user=[a-zA-Z0-9_-]+&password=[\S]+"
+REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
+REGEX_RTSP_CAMERA_USER_PASS = r":\/\/[a-zA-Z0-9_-]+:[\S]+@"
+REGEX_HTTP_CAMERA_USER_PASS = r"user=[a-zA-Z0-9_-]+&password=[\S]+"
 
 # Known Driver Names
 

@@ -70,11 +70,17 @@ jobs:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
         run: |
-          pip install pip
-          pip install -r requirements-dev.txt
-      - name: Lint
+          python3 -m pip install -U pip
+          python3 -m pip install -r requirements-dev.txt
+      - name: Check black
         run: |
-          python3 -m black frigate --check
+          black --check --diff frigate migrations docker *.py
+      - name: Check isort
+        run: |
+          isort --check --diff frigate migrations docker *.py
+      - name: Check ruff
+        run: |
+          ruff check frigate migrations docker *.py
 
   python_tests:
     runs-on: ubuntu-latest

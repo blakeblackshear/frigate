@@ -4,16 +4,12 @@ import datetime
 import logging
 import os
 import threading
-
+from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-
-from peewee import fn
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event
-
-from multiprocessing.synchronize import Event as MpEvent
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +41,9 @@ class EventCleanup(threading.Thread):
         )
 
         # loop over object types in db
-        for l in distinct_labels:
+        for event in distinct_labels:
             # get expiration time for this label
-            expire_days = retain_config.objects.get(l.label, retain_config.default)
+            expire_days = retain_config.objects.get(event.label, retain_config.default)
             expire_after = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
@@ -55,8 +51,8 @@ class EventCleanup(threading.Thread):
             expired_events = Event.select().where(
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
-                Event.label == l.label,
-                Event.retain_indefinitely == False,
+                Event.label == event.label,
+                Event.retain_indefinitely is False,
             )
             # delete the media from disk
             for event in expired_events:
@@ -75,8 +71,8 @@ class EventCleanup(threading.Thread):
             update_query = Event.update(update_params).where(
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
-                Event.label == l.label,
-                Event.retain_indefinitely == False,
+                Event.label == event.label,
+                Event.retain_indefinitely is False,
             )
             update_query.execute()
 
@@ -92,9 +88,11 @@ class EventCleanup(threading.Thread):
             )
 
             # loop over object types in db
-            for l in distinct_labels:
+            for event in distinct_labels:
                 # get expiration time for this label
-                expire_days = retain_config.objects.get(l.label, retain_config.default)
+                expire_days = retain_config.objects.get(
+                    event.label, retain_config.default
+                )
                 expire_after = (
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()
@@ -102,8 +100,8 @@ class EventCleanup(threading.Thread):
                 expired_events = Event.select().where(
                     Event.camera == name,
                     Event.start_time < expire_after,
-                    Event.label == l.label,
-                    Event.retain_indefinitely == False,
+                    Event.label == event.label,
+                    Event.retain_indefinitely is False,
                 )
                 # delete the grabbed clips from disk
                 for event in expired_events:
@@ -121,8 +119,8 @@ class EventCleanup(threading.Thread):
                 update_query = Event.update(update_params).where(
                     Event.camera == name,
                     Event.start_time < expire_after,
-                    Event.label == l.label,
-                    Event.retain_indefinitely == False,
+                    Event.label == event.label,
+                    Event.retain_indefinitely is False,
                 )
                 update_query.execute()
 
@@ -131,9 +129,9 @@ class EventCleanup(threading.Thread):
           select id,
             label,
             camera,
-          	has_snapshot,
-          	has_clip,
-          	row_number() over (
+            has_snapshot,
+            has_clip,
+            row_number() over (
               partition by label, camera, round(start_time/5,0)*5
               order by end_time-start_time desc
             ) as copy_number
@@ -169,8 +167,8 @@ class EventCleanup(threading.Thread):
 
             # drop events from db where has_clip and has_snapshot are false
             delete_query = Event.delete().where(
-                Event.has_clip == False, Event.has_snapshot == False
+                Event.has_clip is False, Event.has_snapshot is False
             )
             delete_query.execute()
 
-        logger.info(f"Exiting event cleanup...")
+        logger.info("Exiting event cleanup...")

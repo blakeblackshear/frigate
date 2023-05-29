@@ -2,19 +2,15 @@ import datetime
 import logging
 import queue
 import threading
-
 from enum import Enum
-
-from peewee import fn
+from multiprocessing.queues import Queue
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Dict
 
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
 from frigate.util import to_relative_box
-
-from multiprocessing.queues import Queue
-from multiprocessing.synchronize import Event as MpEvent
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +61,7 @@ class EventProcessor(threading.Thread):
     def run(self) -> None:
         # set an end_time on events without an end_time on startup
         Event.update(end_time=Event.start_time + 30).where(
-            Event.end_time == None
+            Event.end_time is None
         ).execute()
 
         while not self.stop_event.is_set():
@@ -99,9 +95,9 @@ class EventProcessor(threading.Thread):
 
         # set an end_time on events without an end_time before exiting
         Event.update(end_time=datetime.datetime.now().timestamp()).where(
-            Event.end_time == None
+            Event.end_time is None
         ).execute()
-        logger.info(f"Exiting event processor...")
+        logger.info("Exiting event processor...")
 
     def handle_object_detection(
         self,

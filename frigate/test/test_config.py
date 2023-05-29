@@ -1,13 +1,11 @@
 import json
 import os
 import unittest
+
 import numpy as np
 from pydantic import ValidationError
 
-from frigate.config import (
-    BirdseyeModeEnum,
-    FrigateConfig,
-)
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.plus import PlusApi
@@ -675,7 +673,7 @@ class TestConfig(unittest.TestCase):
         runtime_config = frigate_config.runtime_config()
         ffmpeg_cmds = runtime_config.cameras["back"].ffmpeg_cmds
         assert len(ffmpeg_cmds) == 1
-        assert not "clips" in ffmpeg_cmds[0]["roles"]
+        assert "clips" not in ffmpeg_cmds[0]["roles"]
 
     def test_max_disappeared_default(self):
         config = {
@@ -986,7 +984,7 @@ class TestConfig(unittest.TestCase):
         }
 
         frigate_config = FrigateConfig(**config)
-        runtime_config = frigate_config.runtime_config()
+        frigate_config.runtime_config()
 
     def test_global_detect(self):
         config = {
@@ -1145,7 +1143,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config()
-        assert runtime_config.cameras["back"].snapshots.bounding_box == False
+        assert runtime_config.cameras["back"].snapshots.bounding_box is False
         assert runtime_config.cameras["back"].snapshots.height == 150
         assert runtime_config.cameras["back"].snapshots.enabled
 

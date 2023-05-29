@@ -1,16 +1,13 @@
 """Handle communication between Frigate and other applications."""
 
 import logging
-
+from abc import ABC, abstractmethod
 from typing import Any, Callable
 
-from abc import ABC, abstractmethod
-
 from frigate.config import FrigateConfig
-from frigate.ptz import OnvifController, OnvifCommandEnum
+from frigate.ptz import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, RecordMetricsTypes
 from frigate.util import restart_frigate
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +69,7 @@ class Dispatcher:
                 camera_name = topic.split("/")[-3]
                 command = topic.split("/")[-2]
                 self._camera_settings_handlers[command](camera_name, payload)
-            except IndexError as e:
+            except IndexError:
                 logger.error(f"Received invalid set command: {topic}")
                 return
         elif topic.endswith("ptz"):
@@ -80,7 +77,7 @@ class Dispatcher:
                 # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
                 camera_name = topic.split("/")[-2]
                 self._on_ptz_command(camera_name, payload)
-            except IndexError as e:
+            except IndexError:
                 logger.error(f"Received invalid ptz command: {topic}")
                 return
         elif topic == "restart":
@@ -128,7 +125,7 @@ class Dispatcher:
         elif payload == "OFF":
             if self.camera_metrics[camera_name]["detection_enabled"].value:
                 logger.error(
-                    f"Turning off motion is not allowed when detection is enabled."
+                    "Turning off motion is not allowed when detection is enabled."
                 )
                 return
 
@@ -196,7 +193,7 @@ class Dispatcher:
         if payload == "ON":
             if not self.config.cameras[camera_name].record.enabled_in_config:
                 logger.error(
-                    f"Recordings must be enabled in the config to be turned on via MQTT."
+                    "Recordings must be enabled in the config to be turned on via MQTT."
                 )
                 return
 

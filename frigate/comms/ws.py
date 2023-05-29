@@ -3,10 +3,9 @@
 import json
 import logging
 import threading
-
 from typing import Callable
-
 from wsgiref.simple_server import make_server
+
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -17,7 +16,6 @@ from ws4py.websocket import WebSocket
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +43,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
                         "topic": json_message.get("topic"),
                         "payload": json_message.get("payload"),
                     }
-                except Exception as e:
+                except Exception:
                     logger.warning(
                         f"Unable to parse websocket message as valid json: {message.data.decode('utf-8')}"
                     )
@@ -82,7 +80,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
                     "payload": payload,
                 }
             )
-        except Exception as e:
+        except Exception:
             # if the payload can't be decoded don't relay to clients
             logger.debug(f"payload for {topic} wasn't text. Skipping...")
             return

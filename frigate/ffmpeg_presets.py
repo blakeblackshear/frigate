@@ -2,13 +2,11 @@
 
 import logging
 import os
-
 from typing import Any
 
-from frigate.version import VERSION
 from frigate.const import BTBN_PATH
 from frigate.util import vainfo_hwaccel
-
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 

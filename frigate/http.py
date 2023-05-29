@@ -1,23 +1,20 @@
 import base64
-from datetime import datetime, timedelta, timezone
 import copy
-import logging
 import glob
 import json
+import logging
 import os
 import subprocess as sp
-import pytz
 import time
 import traceback
-
+from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
-from tzlocal import get_localzone_name
 from urllib.parse import unquote
 
 import cv2
-
 import numpy as np
+import pytz
 from flask import (
     Blueprint,
     Flask,
@@ -27,26 +24,26 @@ from flask import (
     make_response,
     request,
 )
-
-from peewee import SqliteDatabase, operator, fn, DoesNotExist
+from peewee import DoesNotExist, SqliteDatabase, fn, operator
 from playhouse.shortcuts import model_to_dict
+from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
-from frigate.models import Event, Recordings, Timeline
 from frigate.events.external import ExternalEventProcessor
+from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
 from frigate.stats import stats_snapshot
+from frigate.storage import StorageMaintainer
 from frigate.util import (
     clean_camera_user_pass,
     ffprobe_stream,
+    get_tz_modifiers,
     restart_frigate,
     vainfo_hwaccel,
-    get_tz_modifiers,
 )
-from frigate.storage import StorageMaintainer
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -105,10 +102,10 @@ def events_summary():
 
     clauses = []
 
-    if not has_clip is None:
+    if has_clip is not None:
         clauses.append((Event.has_clip == has_clip))
 
-    if not has_snapshot is None:
+    if has_snapshot is not None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
     if len(clauses) == 0:
@@ -253,7 +250,7 @@ def send_to_plus(id):
     event.plus_id = plus_id
     event.save()
 
-    if not include_annotation is None:
+    if include_annotation is not None:
         box = event.data["box"]
 
         try:
@@ -296,12 +293,12 @@ def false_positive(id):
 
     # events from before the conversion to relative dimensions cant include annotations
     if event.data.get("box") is None:
-        message = f"Events prior to 0.13 cannot be submitted as false positives"
+        message = "Events prior to 0.13 cannot be submitted as false positives"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 400)
 
     if event.false_positive:
-        message = f"False positive already submitted to Frigate+"
+        message = "False positive already submitted to Frigate+"
         logger.error(message)
         return make_response(jsonify({"success": False, "message": message}), 400)
 
@@ -437,7 +434,7 @@ def get_sub_labels():
                 parts = label.split(",")
 
                 for part in parts:
-                    if not (part.strip()) in sub_labels:
+                    if part.strip() not in sub_labels:
                         sub_labels.append(part.strip())
 
     sub_labels.sort()
@@ -476,7 +473,7 @@ def event_thumbnail(id, max_cache_age=2592000):
     event_complete = False
     try:
         event = Event.get(Event.id == id)
-        if not event.end_time is None:
+        if event.end_time is not None:
             event_complete = True
         thumbnail_bytes = base64.b64decode(event.thumbnail)
     except DoesNotExist:
@@ -486,9 +483,9 @@ def event_thumbnail(id, max_cache_age=2592000):
             for camera_state in camera_states:
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
-                    if not tracked_obj is None:
+                    if tracked_obj is not None:
                         thumbnail_bytes = tracked_obj.get_thumbnail()
-        except:
+        except Exception:
             return "Event not found", 404
 
     if thumbnail_bytes is None:
@@ -593,7 +590,7 @@ def event_snapshot(id):
     event_complete = False
     jpg_bytes = None
     try:
-        event = Event.get(Event.id == id, Event.end_time != None)
+        event = Event.get(Event.id == id, Event.end_time is not None)
         event_complete = True
         if not event.has_snapshot:
             return "Snapshot not available", 404
@@ -609,7 +606,7 @@ def event_snapshot(id):
             for camera_state in camera_states:
                 if id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(id)
-                    if not tracked_obj is None:
+                    if tracked_obj is not None:
                         jpg_bytes = tracked_obj.get_jpg_bytes(
                             timestamp=request.args.get("timestamp", type=int),
                             bounding_box=request.args.get("bbox", type=int),
@@ -617,9 +614,9 @@ def event_snapshot(id):
                             height=request.args.get("h", type=int),
                             quality=request.args.get("quality", default=70, type=int),
                         )
-        except:
+        except Exception:
             return "Event not found", 404
-    except:
+    except Exception:
         return "Event not found", 404
 
     if jpg_bytes is None:
@@ -645,7 +642,7 @@ def label_snapshot(camera_name, label):
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.has_snapshot == True)
+            .where(Event.has_snapshot is True)
             .order_by(Event.start_time.desc())
         )
     else:
@@ -653,7 +650,7 @@ def label_snapshot(camera_name, label):
             Event.select()
             .where(Event.camera == camera_name)
             .where(Event.label == label)
-            .where(Event.has_snapshot == True)
+            .where(Event.has_snapshot is True)
             .order_by(Event.start_time.desc())
         )
 
@@ -820,13 +817,13 @@ def events():
     if before:
         clauses.append((Event.start_time < before))
 
-    if not has_clip is None:
+    if has_clip is not None:
         clauses.append((Event.has_clip == has_clip))
 
-    if not has_snapshot is None:
+    if has_snapshot is not None:
         clauses.append((Event.has_snapshot == has_snapshot))
 
-    if not in_progress is None:
+    if in_progress is not None:
         clauses.append((Event.end_time.is_null(in_progress)))
 
     if not include_thumbnails:
@@ -894,12 +891,12 @@ def create_event(camera_name, label):
 def end_event(event_id):
     try:
         current_app.external_processor.finish_manual_event(event_id)
-    except:
+    except Exception:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404
         )
 
-    return jsonify({"success": True, "message": f"Event successfully ended."}, 200)
+    return jsonify({"success": True, "message": "Event successfully ended."}, 200)
 
 
 @bp.route("/config")
@@ -959,9 +956,8 @@ def config_save():
 
     # Validate the config schema
     try:
-        new_yaml = FrigateConfig.parse_raw(new_config)
-        check_runtime = new_yaml.runtime_config
-    except Exception as e:
+        FrigateConfig.parse_raw(new_config)
+    except Exception:
         return make_response(
             jsonify(
                 {
@@ -985,12 +981,12 @@ def config_save():
         with open(config_file, "w") as f:
             f.write(new_config)
             f.close()
-    except Exception as e:
+    except Exception:
         return make_response(
             jsonify(
                 {
                     "success": False,
-                    "message": f"Could not write config file, be sure that Frigate has write permission on the config file.",
+                    "message": "Could not write config file, be sure that Frigate has write permission on the config file.",
                 }
             ),
             400,
@@ -1531,7 +1527,7 @@ def ffprobe():
 
     if not path_param:
         return jsonify(
-            {"success": False, "message": f"Path needs to be provided."}, "404"
+            {"success": False, "message": "Path needs to be provided."}, "404"
         )
 
     if path_param.startswith("camera"):

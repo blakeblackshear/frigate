@@ -1,23 +1,30 @@
 import asyncio
 import json
 import logging
+import os
+import shutil
 import threading
 import time
-import psutil
-import shutil
-import os
-import requests
-from typing import Optional, Any
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any, Optional
+
+import psutil
+import requests
+from requests.exceptions import RequestException
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
-from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
-from frigate.types import StatsTrackingTypes, CameraMetricsTypes
-from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_stats
-from frigate.version import VERSION
-from frigate.util import get_cpu_stats, get_bandwidth_stats
+from frigate.const import CACHE_DIR, CLIPS_DIR, DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
+from frigate.types import CameraMetricsTypes, StatsTrackingTypes
+from frigate.util import (
+    get_amd_gpu_stats,
+    get_bandwidth_stats,
+    get_cpu_stats,
+    get_intel_gpu_stats,
+    get_nvidia_gpu_stats,
+)
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +38,7 @@ def get_latest_version(config: FrigateConfig) -> str:
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
             timeout=10,
         )
-    except:
+    except RequestException:
         return "unknown"
 
     response = request.json()
@@ -308,4 +315,4 @@ class StatsEmitter(threading.Thread):
             )
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
             logger.debug("Finished stats collection")
-        logger.info(f"Exiting stats emitter...")
+        logger.info("Exiting stats emitter...")

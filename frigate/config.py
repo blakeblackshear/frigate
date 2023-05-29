@@ -8,26 +8,14 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
-from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
+from pydantic import BaseModel, Extra, Field, parse_obj_as, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import (
-    CACHE_DIR,
-    DEFAULT_DB_PATH,
-    REGEX_CAMERA_NAME,
-    YAML_EXT,
-)
+from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
+from frigate.detectors import DetectorConfig, ModelConfig
+from frigate.detectors.detector_config import InputTensorEnum  # noqa: F401
+from frigate.detectors.detector_config import PixelFormatEnum  # noqa: F401
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.plus import PlusApi
-from frigate.util import (
-    create_mask,
-    deep_merge,
-    get_ffmpeg_arg_list,
-    escape_special_characters,
-    load_config_with_no_duplicates,
-    load_labels,
-)
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -35,14 +23,14 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_record,
     parse_preset_output_rtmp,
 )
-from frigate.detectors import (
-    PixelFormatEnum,
-    InputTensorEnum,
-    ModelConfig,
-    DetectorConfig,
+from frigate.plus import PlusApi
+from frigate.util import (
+    create_mask,
+    deep_merge,
+    escape_special_characters,
+    get_ffmpeg_arg_list,
+    load_config_with_no_duplicates,
 )
-from frigate.version import VERSION
-
 
 logger = logging.getLogger(__name__)
 
@@ -487,7 +475,7 @@ class CameraFfmpegConfig(FfmpegConfig):
         if len(roles) > len(roles_set):
             raise ValueError("Each input role may only be used once.")
 
-        if not "detect" in roles:
+        if "detect" not in roles:
             raise ValueError("The detect role is required.")
 
         return v
@@ -776,12 +764,12 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
     )
 
-    if camera_config.record.enabled and not "record" in assigned_roles:
+    if camera_config.record.enabled and "record" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
         )
 
-    if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+    if camera_config.rtmp.enabled and "rtmp" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
         )
@@ -1062,7 +1050,7 @@ class FrigateConfig(FrigateBaseModel):
                 config.model.dict(exclude_unset=True),
             )
 
-            if not "path" in merged_model:
+            if "path" not in merged_model:
                 if detector_config.type == "cpu":
                     merged_model["path"] = "/cpu_model.tflite"
                 elif detector_config.type == "edgetpu":

@@ -52,7 +52,8 @@
         "mikestead.dotenv",
         "csstools.postcss",
         "blanu.vscode-styled-jsx",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "ms-python.isort"
       ],
       "settings": {
         "remote.autoForwardPorts": false,
@@ -68,6 +69,9 @@
         "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
         "files.trimTrailingWhitespace": true,
         "eslint.workingDirectories": ["./web"],
+        "isort.args": [
+            "--settings-path=./pyproject.toml"
+        ],
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.formatOnSave": true

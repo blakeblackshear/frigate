@@ -9,14 +9,14 @@ import random
 import string
 import subprocess as sp
 import threading
-import psutil
-
 from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any, Tuple
 
-from frigate.config import RetainModeEnum, FrigateConfig
+import psutil
+
+from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.types import RecordMetricsTypes
@@ -63,7 +63,7 @@ class RecordingMaintainer(threading.Thread):
                     for nt in flist:
                         if nt.path.startswith(CACHE_DIR):
                             files_in_use.append(nt.path.split("/")[-1])
-            except:
+            except psutil.Error:
                 continue
 
         # group recordings by camera
@@ -115,7 +115,7 @@ class RecordingMaintainer(threading.Thread):
                 Event.select()
                 .where(
                     Event.camera == camera,
-                    (Event.end_time == None)
+                    (Event.end_time is None)
                     | (Event.end_time >= recordings[0]["start_time"].timestamp()),
                     Event.has_clip,
                 )
@@ -127,7 +127,7 @@ class RecordingMaintainer(threading.Thread):
 
                 # Just delete files if recordings are turned off
                 if (
-                    not camera in self.config.cameras
+                    camera not in self.config.cameras
                     or not self.process_info[camera]["record_enabled"].value
                 ):
                     Path(cache_path).unlink(missing_ok=True)
@@ -394,4 +394,4 @@ class RecordingMaintainer(threading.Thread):
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
 
-        logger.info(f"Exiting recording maintenance...")
+        logger.info("Exiting recording maintenance...")
