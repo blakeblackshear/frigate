@@ -21,7 +21,7 @@ from frigate.config import (
     FrigateConfig,
 )
 from frigate.const import CLIPS_DIR
-from frigate.events import EventTypeEnum
+from frigate.events.maintainer import EventTypeEnum
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,

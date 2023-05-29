@@ -57,7 +57,7 @@ export default function RelativeModal({
         x: relativeToX,
         y: relativeToY,
         width: relativeToWidth,
-        // height: relativeToHeight,
+        height: relativeToHeight,
       } = relativeTo.current.getBoundingClientRect();
 
       const _width = widthRelative ? relativeToWidth : menuWidth;
@@ -78,10 +78,13 @@ export default function RelativeModal({
         newLeft = windowWidth - width - WINDOW_PADDING;
       }
 
-      // too close to bottom
-      if (top + menuHeight > windowHeight - WINDOW_PADDING + window.scrollY) {
-        // If the pop-up modal would extend beyond the bottom of the visible window,
-        // reposition the modal to appear above the clicked icon instead
+      // This condition checks if the menu overflows the bottom of the page and
+      // if there's enough space to position the menu above the clicked icon.
+      // If both conditions are met, the menu will be positioned above the clicked icon
+      if (
+        top + menuHeight > windowHeight - WINDOW_PADDING + window.scrollY &&
+        top - menuHeight - relativeToHeight >= WINDOW_PADDING
+      ) {
         newTop = top - menuHeight;
       }
 
@@ -89,7 +92,13 @@ export default function RelativeModal({
         newTop = WINDOW_PADDING;
       }
 
-      const maxHeight = windowHeight - WINDOW_PADDING * 2 > menuHeight ? null : windowHeight - WINDOW_PADDING * 2;
+      // This calculation checks if there's enough space below the clicked icon for the menu to fit.
+      // If there is, it sets the maxHeight to null(meaning no height constraint). If not, it calculates the maxHeight based on the remaining space in the window
+      const maxHeight =
+        windowHeight - WINDOW_PADDING * 2 - top > menuHeight
+          ? null
+          : windowHeight - WINDOW_PADDING * 2 - top + window.scrollY;
+
       const newPosition = { left: newLeft, top: newTop, maxHeight };
       if (widthRelative) {
         newPosition.width = relativeToWidth;
@@ -115,7 +124,7 @@ export default function RelativeModal({
       <div data-testid="scrim" key="scrim" className="fixed inset-0 z-10" onClick={handleDismiss} />
       <div
         key="menu"
-        className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto h-auto transition-transform transition-opacity duration-75 transform scale-90 opacity-0 overflow-x-hidden overflow-y-auto ${
+        className={`z-10 bg-white dark:bg-gray-700 dark:text-white absolute shadow-lg rounded w-auto h-auto transition-transform duration-75 transform scale-90 opacity-0 overflow-x-hidden overflow-y-auto ${
           show ? 'scale-100 opacity-100' : ''
         } ${className}`}
         onKeyDown={handleKeydown}

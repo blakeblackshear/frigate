@@ -53,8 +53,8 @@ _user_agent_args = [
 ]
 
 PRESETS_HW_ACCEL_DECODE = {
-    "preset-rpi-32-h264": ["-c:v", "h264_v4l2m2m"],
-    "preset-rpi-64-h264": ["-c:v", "h264_v4l2m2m"],
+    "preset-rpi-32-h264": ["-c:v:1", "h264_v4l2m2m"],
+    "preset-rpi-64-h264": ["-c:v:1", "h264_v4l2m2m"],
     "preset-vaapi": [
         "-hwaccel_flags",
         "allow_profile_mismatch",
@@ -320,7 +320,7 @@ def parse_preset_input(arg: Any, detect_fps: int) -> list[str]:
 
     if arg == "preset-http-jpeg-generic":
         input = PRESETS_INPUT[arg].copy()
-        input[1] = str(detect_fps)
+        input[len(_user_agent_args) + 1] = str(detect_fps)
         return input
 
     return PRESETS_INPUT.get(arg, None)

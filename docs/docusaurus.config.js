@@ -13,7 +13,7 @@ module.exports = {
   themeConfig: {
     algolia: {
       appId: 'WIURGBNBPY',
-      apiKey: '81ec882db78f7fed05c51daf973f0362',
+      apiKey: 'd02cc0a6a61178b25da550212925226b',
       indexName: 'frigate',
     },
     docs: {

@@ -5,7 +5,7 @@ import threading
 import queue
 
 from frigate.config import FrigateConfig
-from frigate.events import EventTypeEnum
+from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Timeline
 
 from multiprocessing.queues import Queue

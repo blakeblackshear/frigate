@@ -120,6 +120,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -155,6 +156,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -175,6 +177,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -190,6 +193,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -215,6 +219,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -236,6 +241,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -274,6 +280,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -298,6 +305,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
 
@@ -310,6 +318,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
@@ -329,6 +338,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,

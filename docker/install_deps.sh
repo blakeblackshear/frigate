@@ -12,13 +12,15 @@ apt-get -qq install --no-install-recommends -y \
     unzip locales tzdata libxml2 xz-utils \
     python3-pip \
     curl \
-    jq
+    jq \
+    nethogs
 
 mkdir -p -m 600 /root/.gnupg
 
 # add coral repo
-wget --quiet -O /usr/share/keyrings/google-edgetpu.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/google-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
+curl -fsSLo - https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/google-cloud-packages-archive-keyring.gpg
+echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
 echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
 
 # enable non-free repo
