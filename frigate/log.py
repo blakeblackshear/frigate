@@ -62,6 +62,8 @@ def log_process(log_queue: Queue) -> None:
             if stop_event.is_set():
                 break
             continue
+        if record.msg.startswith("You are using a scalar distance function"):
+            continue
         logger = logging.getLogger(record.name)
         logger.handle(record)
 
