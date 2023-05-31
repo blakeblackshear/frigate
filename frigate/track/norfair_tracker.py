@@ -23,7 +23,7 @@ def distance(detection: np.array, estimate: np.array) -> float:
     estimate_dim = np.diff(estimate, axis=0).flatten()
     detection_dim = np.diff(detection, axis=0).flatten()
 
-    # get centroid positions
+    # get bottom center positions
     detection_position = np.array(
         [np.average(detection[:, 0]), np.max(detection[:, 1])]
     )
