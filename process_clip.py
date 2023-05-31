@@ -10,13 +10,13 @@ import click
 import cv2
 import numpy as np
 
-sys.path.append("/lab/frigate")
+sys.path.append("/workspace/frigate")
 
 from frigate.config import FrigateConfig  # noqa: E402
 from frigate.motion import MotionDetector  # noqa: E402
 from frigate.object_detection import LocalObjectDetector  # noqa: E402
 from frigate.object_processing import CameraState  # noqa: E402
-from frigate.objects import ObjectTracker  # noqa: E402
+from frigate.track.centroid_tracker import CentroidTracker  # noqa: E402
 from frigate.util import (  # noqa: E402
     EventsPerSecond,
     SharedMemoryFrameManager,
@@ -108,7 +108,7 @@ class ProcessClip:
         motion_detector = MotionDetector(self.frame_shape, self.camera_config.motion)
         motion_detector.save_images = False
 
-        object_tracker = ObjectTracker(self.camera_config.detect)
+        object_tracker = CentroidTracker(self.camera_config.detect)
         process_info = {
             "process_fps": mp.Value("d", 0.0),
             "detection_fps": mp.Value("d", 0.0),
@@ -248,7 +248,7 @@ def process(path, label, output, debug_path):
         clips.append(path)
 
     json_config = {
-        "mqtt": {"host": "mqtt"},
+        "mqtt": {"enabled": False},
         "detectors": {"coral": {"type": "edgetpu", "device": "usb"}},
         "cameras": {
             "camera": {
@@ -282,7 +282,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config
+        runtime_config = frigate_config.runtime_config()
         runtime_config.cameras["camera"].create_ffmpeg_cmds()
 
         process_clip = ProcessClip(c, frame_shape, runtime_config)

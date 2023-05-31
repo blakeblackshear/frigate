@@ -6,10 +6,11 @@ import numpy as np
 from scipy.spatial import distance as dist
 
 from frigate.config import DetectConfig
+from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
 
 
-class ObjectTracker:
+class CentroidTracker(ObjectTracker):
     def __init__(self, config: DetectConfig):
         self.tracked_objects = {}
         self.disappeared = {}
@@ -134,11 +135,11 @@ class ObjectTracker:
             if self.is_expired(id):
                 self.deregister(id)
 
-    def match_and_update(self, frame_time, new_objects):
+    def match_and_update(self, frame_time, detections):
         # group by name
-        new_object_groups = defaultdict(lambda: [])
-        for obj in new_objects:
-            new_object_groups[obj[0]].append(
+        detection_groups = defaultdict(lambda: [])
+        for obj in detections:
+            detection_groups[obj[0]].append(
                 {
                     "label": obj[0],
                     "score": obj[1],
@@ -153,17 +154,17 @@ class ObjectTracker:
         # update any tracked objects with labels that are not
         # seen in the current objects and deregister if needed
         for obj in list(self.tracked_objects.values()):
-            if obj["label"] not in new_object_groups:
+            if obj["label"] not in detection_groups:
                 if self.disappeared[obj["id"]] >= self.max_disappeared:
                     self.deregister(obj["id"])
                 else:
                     self.disappeared[obj["id"]] += 1
 
-        if len(new_objects) == 0:
+        if len(detections) == 0:
             return
 
         # track objects for each label type
-        for label, group in new_object_groups.items():
+        for label, group in detection_groups.items():
             current_objects = [
                 o for o in self.tracked_objects.values() if o["label"] == label
             ]
