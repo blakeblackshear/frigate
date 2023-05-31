@@ -53,7 +53,8 @@
         "csstools.postcss",
         "blanu.vscode-styled-jsx",
         "bradlc.vscode-tailwindcss",
-        "ms-python.isort"
+        "ms-python.isort",
+        "charliermarsh.ruff"
       ],
       "settings": {
         "remote.autoForwardPorts": false,
@@ -69,9 +70,7 @@
         "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
         "files.trimTrailingWhitespace": true,
         "eslint.workingDirectories": ["./web"],
-        "isort.args": [
-            "--settings-path=./pyproject.toml"
-        ],
+        "isort.args": ["--settings-path=./pyproject.toml"],
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
           "editor.formatOnSave": true

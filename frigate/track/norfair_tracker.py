@@ -1,13 +1,13 @@
-from collections import defaultdict
 import random
 import string
 
 import numpy as np
+from norfair import Detection, Drawable, Tracker, draw_boxes
+from norfair.drawing.drawer import Drawer
+
 from frigate.config import DetectConfig
 from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
-from norfair import Detection, Tracker, Drawable, draw_boxes
-from norfair.drawing.drawer import Drawer
 
 
 # Normalizes distance from estimate relative to object size
@@ -16,17 +16,41 @@ from norfair.drawing.drawer import Drawer
 # - could be variable based on time since last_detection
 # - include estimated velocity in the distance (car driving by of a parked car)
 # - include some visual similarity factor in the distance for occlusions
-def frigate_distance(detection: Detection, tracked_object) -> float:
-    # calculate distances and normalize it by width and height of previous detection
-    ld = tracked_object.last_detection
-    width = ld.points[1][0] - ld.points[0][0]
-    height = ld.points[1][1] - ld.points[0][1]
-    difference = (detection.points - tracked_object.estimate).astype(float)
-    difference[:, 0] /= width
-    difference[:, 1] /= height
+def distance(detection: np.array, estimate: np.array) -> float:
+    # ultimately, this should try and estimate distance in 3-dimensional space
+    # consider change in location, width, and height
 
-    # calculate euclidean distance and average
-    return np.linalg.norm(difference, axis=1).mean()
+    estimate_dim = np.diff(estimate, axis=0).flatten()
+    detection_dim = np.diff(detection, axis=0).flatten()
+
+    # get centroid positions
+    detection_position = np.array(
+        [np.average(detection[:, 0]), np.max(detection[:, 1])]
+    )
+    estimate_position = np.array([np.average(estimate[:, 0]), np.max(estimate[:, 1])])
+
+    distance = (detection_position - estimate_position).astype(float)
+    # change in x relative to w
+    distance[0] /= estimate_dim[0]
+    # change in y relative to h
+    distance[1] /= estimate_dim[1]
+
+    # get ratio of widths and heights
+    # normalize to 1
+    widths = np.sort([estimate_dim[0], detection_dim[0]])
+    heights = np.sort([estimate_dim[1], detection_dim[1]])
+    width_ratio = widths[1] / widths[0] - 1.0
+    height_ratio = heights[1] / heights[0] - 1.0
+
+    # change vector is relative x,y change and w,h ratio
+    change = np.append(distance, np.array([width_ratio, height_ratio]))
+
+    # calculate euclidean distance of the change vector
+    return np.linalg.norm(change)
+
+
+def frigate_distance(detection: Detection, tracked_object) -> float:
+    return distance(detection.points, tracked_object.estimate)
 
 
 class NorfairTracker(ObjectTracker):
@@ -41,9 +65,7 @@ class NorfairTracker(ObjectTracker):
         #       was a good reason to have different distance calculations
         self.tracker = Tracker(
             distance_function=frigate_distance,
-            # distance is relative to the size of the last
-            # detection
-            distance_threshold=4.0,
+            distance_threshold=2.5,
             initialization_delay=0,
             hit_counter_max=self.max_disappeared,
         )
@@ -210,7 +232,7 @@ class NorfairTracker(ObjectTracker):
         active_ids = []
         for t in tracked_objects:
             active_ids.append(t.global_id)
-            if not t.global_id in self.track_id_map:
+            if t.global_id not in self.track_id_map:
                 self.register(t.global_id, t.last_detection.data)
             # if there wasn't a detection in this frame, increment disappeared
             elif t.last_detection.data["frame_time"] != frame_time:

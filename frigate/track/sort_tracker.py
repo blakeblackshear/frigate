@@ -1,12 +1,12 @@
-from collections import defaultdict
 import random
 import string
 
 import numpy as np
+from similari import BoundingBox, PositionalMetricType, Sort, SpatioTemporalConstraints
+
 from frigate.config import DetectConfig
 from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
-from similari import Sort, BoundingBox, SpatioTemporalConstraints, PositionalMetricType
 
 
 class SortTracker(ObjectTracker):
@@ -156,7 +156,7 @@ class SortTracker(ObjectTracker):
             # get the scene_id for this label or create a new one
             # TODO: consider grouping frequently swapped objects in
             #       in the same scene
-            if not obj[0] in self.scene_map:
+            if obj[0] not in self.scene_map:
                 scene_id = len(self.scene_map.keys())
                 self.scene_map[obj[0]] = scene_id
                 scene_detections[scene_id] = []
@@ -200,7 +200,7 @@ class SortTracker(ObjectTracker):
 
             # update or create new tracks
             for t in tracks:
-                if not t.id in self.track_id_map:
+                if t.id not in self.track_id_map:
                     self.register(t.id, objs[t.custom_object_id])
                 else:
                     self.update(t.id, objs[t.custom_object_id])

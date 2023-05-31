@@ -20,9 +20,7 @@ from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.object_detection import RemoteObjectDetector
 from frigate.track import ObjectTracker
-from frigate.track.centroid_tracker import CentroidTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.track.sort_tracker import SortTracker
 from frigate.util import (
     EventsPerSecond,
     FrameManager,

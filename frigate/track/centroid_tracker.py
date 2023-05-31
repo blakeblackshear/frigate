@@ -4,8 +4,8 @@ from collections import defaultdict
 
 import numpy as np
 from scipy.spatial import distance as dist
-from frigate.config import DetectConfig
 
+from frigate.config import DetectConfig
 from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
 
