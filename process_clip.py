@@ -1,11 +1,4 @@
 import csv
-import sys
-from typing_extensions import runtime
-
-from frigate.track.centroid_tracker import CentroidTracker
-
-sys.path.append("/workspace/frigate")
-
 import json
 import logging
 import multiprocessing as mp
@@ -17,14 +10,13 @@ import click
 import cv2
 import numpy as np
 
+sys.path.append("/workspace/frigate")
+
 from frigate.config import FrigateConfig  # noqa: E402
 from frigate.motion import MotionDetector  # noqa: E402
 from frigate.object_detection import LocalObjectDetector  # noqa: E402
 from frigate.object_processing import CameraState  # noqa: E402
-from frigate.config import FrigateConfig
-from frigate.object_detection import LocalObjectDetector
-from frigate.motion import MotionDetector
-from frigate.object_processing import CameraState
+from frigate.track.centroid_tracker import CentroidTracker  # noqa: E402
 from frigate.util import (  # noqa: E402
     EventsPerSecond,
     SharedMemoryFrameManager,
