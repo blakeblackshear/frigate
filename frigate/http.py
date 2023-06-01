@@ -1347,6 +1347,7 @@ def recording_clip(camera_name, start_ts, end_ts):
     if not os.path.exists(path):
         ffmpeg_cmd = [
             "ffmpeg",
+            "-hide_banner",
             "-y",
             "-protocol_whitelist",
             "pipe,file",
