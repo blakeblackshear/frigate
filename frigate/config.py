@@ -326,6 +326,12 @@ class ZoneConfig(BaseModel):
     coordinates: Union[str, List[str]] = Field(
         title="Coordinates polygon for the defined zone."
     )
+    inertia: int = Field(
+        default_factory=3,
+        title="Number of frames required for object to be considered present in the zone.",
+        gt=0,
+        le=10,
+    )
     objects: List[str] = Field(
         default_factory=list,
         title="List of objects that can trigger the zone.",

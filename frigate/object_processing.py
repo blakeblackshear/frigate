@@ -151,7 +151,7 @@ class TrackedObject:
                 self.zone_presence[name] = zone_score + 1
 
                 # an object is only considered present in a zone if it has a zone inertia of 3+
-                if zone_score >= 3:
+                if zone_score >= zone.inertia:
                     # if the object passed the filters once, dont apply again
                     if name in self.current_zones or not zone_filtered(self, zone.filters):
                         current_zones.append(name)
@@ -159,7 +159,7 @@ class TrackedObject:
                             self.entered_zones.append(name)
             else:
                 # once an object has a zone inertia of 3+ it is not checked anymore
-                if 0 < zone_score < 3:
+                if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
 
         if not self.false_positive:
