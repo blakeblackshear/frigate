@@ -175,6 +175,9 @@ class FrigateApp:
         router.run()
 
         migrate_db.close()
+        self.db = SqliteQueueDatabase(self.config.database.path)
+        models = [Event, Recordings, Timeline]
+        self.db.bind(models)
 
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
@@ -186,20 +189,13 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(self.config, self.recordings_info_queue, self.record_metrics),
+            args=(self.config, self.db, self.recordings_info_queue, self.record_metrics),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
-
-    def bind_database(self) -> None:
-        """Bind db to the main process."""
-        # NOTE: all db accessing processes need to be created before the db can be bound to the main process
-        self.db = SqliteQueueDatabase(self.config.database.path)
-        models = [Event, Recordings, Timeline]
-        self.db.bind(models)
 
     def init_stats(self) -> None:
         self.stats_tracking = stats_init(
@@ -431,7 +427,6 @@ class FrigateApp:
             self.init_onvif()
             self.init_recording_manager()
             self.init_go2rtc()
-            self.bind_database()
             self.init_dispatcher()
         except Exception as e:
             print(e)

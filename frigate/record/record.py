@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def manage_recordings(
     config: FrigateConfig,
+    db: SqliteQueueDatabase,
     recordings_info_queue: mp.Queue,
     process_info: dict[str, RecordMetricsTypes],
 ) -> None:
@@ -37,7 +38,6 @@ def manage_recordings(
     setproctitle("frigate.recording_manager")
     listen()
 
-    db = SqliteQueueDatabase(config.database.path)
     models = [Event, Recordings, Timeline]
     db.bind(models)
 
