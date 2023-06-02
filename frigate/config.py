@@ -327,7 +327,7 @@ class ZoneConfig(BaseModel):
         title="Coordinates polygon for the defined zone."
     )
     inertia: int = Field(
-        default_factory=3,
+        default=3,
         title="Number of frames required for object to be considered present in the zone.",
         gt=0,
         le=10,
