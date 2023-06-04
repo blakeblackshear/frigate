@@ -10,6 +10,7 @@ class MotionDetector(ABC):
         self,
         frame_shape: Tuple[int, int, int],
         config: MotionConfig,
+        fps: int,
         improve_contrast,
         threshold,
         contour_area,

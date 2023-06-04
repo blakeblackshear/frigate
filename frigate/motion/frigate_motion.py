@@ -11,6 +11,7 @@ class FrigateMotionDetector(MotionDetector):
         self,
         frame_shape,
         config: MotionConfig,
+        fps: int,
         improve_contrast_enabled,
         motion_threshold,
         motion_contour_area,

@@ -466,6 +466,7 @@ def track_camera(
     motion_detector = CNTMotionDetector(
         frame_shape,
         config.motion,
+        config.detect.fps,
         improve_contrast_enabled,
         motion_threshold,
         motion_contour_area,

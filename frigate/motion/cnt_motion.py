@@ -13,6 +13,7 @@ class CNTMotionDetector(MotionDetector):
         self,
         frame_shape: Tuple[int, int, int],
         config: MotionConfig,
+        fps: int,
         improve_contrast,
         threshold,
         contour_area,
@@ -41,7 +42,9 @@ class CNTMotionDetector(MotionDetector):
         #                       bool useHistory = true,
         #                       int maxPixelStability = 15*60,
         #                       bool isParallel = true);
-        self.bg_subtractor = cv2.bgsegm.createBackgroundSubtractorCNT()
+        self.bg_subtractor = cv2.bgsegm.createBackgroundSubtractorCNT(
+            fps, True, fps * 60, True
+        )
         self.save_images = False
         self.frame_counter = 0
 
