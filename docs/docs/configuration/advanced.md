@@ -119,3 +119,11 @@ To do this:
 2. Rename the build to `go2rtc`.
 3. Give `go2rtc` execute permission.
 4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
+
+NOTE: if using the docker/docker-compose [instructions](https://docs.frigate.video/frigate/installation) you will also need to mount/map go2rtc to  `/config/go2etc`, by default instrcutions for docker only map specific files 
+
+eg: (docker-compose)
+```
+        - /path/to/go2rtc:/config/go2rtc
+```
+
