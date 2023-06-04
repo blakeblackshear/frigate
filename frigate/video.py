@@ -18,7 +18,7 @@ from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
 from frigate.const import CACHE_DIR
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
-from frigate.motion.frigate_motion import FrigateMotionDetector
+from frigate.motion.cnt_motion import CNTMotionDetector
 from frigate.object_detection import RemoteObjectDetector
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
@@ -463,7 +463,7 @@ def track_camera(
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
 
-    motion_detector = FrigateMotionDetector(
+    motion_detector = CNTMotionDetector(
         frame_shape,
         config.motion,
         improve_contrast_enabled,
