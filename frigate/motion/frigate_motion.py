@@ -3,9 +3,10 @@ import imutils
 import numpy as np
 
 from frigate.config import MotionConfig
+from frigate.motion import MotionDetector
 
 
-class MotionDetector:
+class FrigateMotionDetector(MotionDetector):
     def __init__(
         self,
         frame_shape,
