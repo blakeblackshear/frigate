@@ -1,13 +1,11 @@
 import logging
 import threading
-
 from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +32,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self.client.publish(
             f"{self.mqtt_config.topic_prefix}/{topic}", payload, retain=retain
         )
+
+    def stop(self) -> None:
+        self.client.disconnect()
 
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
@@ -139,44 +140,45 @@ class MqttClient(Communicator):  # type: ignore[misc]
         )
 
         # register callbacks
+        callback_types = [
+            "recordings",
+            "snapshots",
+            "detect",
+            "motion",
+            "improve_contrast",
+            "motion_threshold",
+            "motion_contour_area",
+        ]
+
         for name in self.config.cameras.keys():
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/recordings/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/snapshots/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/detect/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/improve_contrast/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_threshold/set",
-                self.on_mqtt_command,
-            )
-            self.client.message_callback_add(
-                f"{self.mqtt_config.topic_prefix}/{name}/motion_contour_area/set",
-                self.on_mqtt_command,
-            )
+            for callback in callback_types:
+                # We need to pre-clear existing set topics because in previous
+                # versions the webUI retained on the /set topic but this is
+                # no longer the case.
+                self.client.publish(
+                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
+                    None,
+                    retain=True,
+                )
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
+                    self.on_mqtt_command,
+                )
+
+            if self.config.cameras[name].onvif.host:
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/ptz",
+                    self.on_mqtt_command,
+                )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
-        if not self.mqtt_config.tls_ca_certs is None:
+        if self.mqtt_config.tls_ca_certs is not None:
             if (
-                not self.mqtt_config.tls_client_cert is None
-                and not self.mqtt_config.tls_client_key is None
+                self.mqtt_config.tls_client_cert is not None
+                and self.mqtt_config.tls_client_key is not None
             ):
                 self.client.tls_set(
                     self.mqtt_config.tls_ca_certs,
@@ -185,9 +187,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 )
             else:
                 self.client.tls_set(self.mqtt_config.tls_ca_certs)
-        if not self.mqtt_config.tls_insecure is None:
+        if self.mqtt_config.tls_insecure is not None:
             self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
-        if not self.mqtt_config.user is None:
+        if self.mqtt_config.user is not None:
             self.client.username_pw_set(
                 self.mqtt_config.user, password=self.mqtt_config.password
             )

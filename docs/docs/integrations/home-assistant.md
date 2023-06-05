@@ -16,6 +16,8 @@ See the [MQTT integration
 documentation](https://www.home-assistant.io/integrations/mqtt/) for more
 details.
 
+In addition, MQTT must be enabled in your Frigate configuration file and Frigate must be connected to the same MQTT server as Home Assistant for many of the entities created by the integration to function.
+
 ### Integration installation
 
 Available via HACS as a default repository. To install:
@@ -30,7 +32,7 @@ Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
 - Then add/configure the integration:
 
 ```
-Home Assistant > Configuration > Integrations > Add Integration > Frigate
+Home Assistant > Settings > Devices & Services > Add Integration > Frigate
 ```
 
 Note: You will also need
@@ -64,13 +66,13 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 | Option            | Description                                                                                                                                                                                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTMP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#streams) below. |
+| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTSP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#streams) below. |
 
 ## Entities Provided
 
 | Platform        | Description                                                                       |
 | --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTMP), camera for image of the last detected object. |
+| `camera`        | Live camera stream (requires RTSP), camera for image of the last detected object. |
 | `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
 | `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
 | `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |

@@ -4,10 +4,10 @@ from unittest.mock import Mock, patch
 import numpy as np
 from pydantic import parse_obj_as
 
-from frigate.config import DetectorConfig, InputTensorEnum, ModelConfig
-from frigate.detectors import DetectorTypeEnum
 import frigate.detectors as detectors
 import frigate.object_detection
+from frigate.config import DetectorConfig, InputTensorEnum, ModelConfig
+from frigate.detectors import DetectorTypeEnum
 
 
 class TestLocalObjectDetector(unittest.TestCase):

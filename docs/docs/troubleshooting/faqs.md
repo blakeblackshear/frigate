@@ -11,21 +11,23 @@ This error message is due to a shm-size that is too small. Try updating your shm
 
 By default, Frigate removes audio from recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to set a [FFmpeg preset](/configuration/ffmpeg_presets) that supports audio:
 
-```yaml title="frigate.yml"
+```yaml
 ffmpeg:
   output_args:
-    record: preset-record-generic-audio
+    record: preset-record-generic-audio-aac
 ```
+
+### I can't view events or recordings in the Web UI.
+
+Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md).
+
+You can open `chrome://media-internals/` in another tab and then try to playback, the media internals page will give information about why playback is failing.
 
 ### My mjpeg stream or snapshots look green and crazy
 
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with VLC or another player. Also make sure you don't have the width and height values backwards.
 
 ![mismatched-resolution](/img/mismatched-resolution-min.jpg)
-
-### I can't view events or recordings in the Web UI.
-
-Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md#changing-restream-codec).
 
 ### "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5639eeb6e140] moov atom not found"
 

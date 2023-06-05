@@ -168,6 +168,16 @@ Events from the database. Accepts the following query string parameters:
 | `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
 | `in_progress`        | int  | Limit to events in progress (0 or 1)          |
 
+### `GET /api/timeline`
+
+Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
+
+| param       | Type | Description                         |
+| ----------- | ---- | ----------------------------------- |
+| `camera`    | str  | Name of camera                      |
+| `source_id` | str  | ID of tracked object                |
+| `limit`     | int  | Limit the number of events returned |
+
 ### `GET /api/events/summary`
 
 Returns summary data for events in the database. Used by the Home Assistant integration.
@@ -188,6 +198,14 @@ Sets retain to true for the event id.
 
 Submits the snapshot of the event to Frigate+ for labeling.
 
+| param                | Type | Description                        |
+| -------------------- | ---- | ---------------------------------- |
+| `include_annotation` | int  | Submit annotation to Frigate+ too. |
+
+### `PUT /api/events/<id>/false_positive`
+
+Submits the snapshot of the event to Frigate+ for labeling and adds the detection as a false positive.
+
 ### `DELETE /api/events/<id>/retain`
 
 Sets retain to false for the event id (event may be deleted quickly after removing).
@@ -195,7 +213,7 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 ### `POST /api/events/<id>/sub_label`
 
 Set a sub label for an event. For example to update `person` -> `person's name` if they were recognized with facial recognition.
-Sub labels must be 20 characters or shorter.
+Sub labels must be 100 characters or shorter.
 
 ```json
 {
@@ -233,6 +251,10 @@ Accepts the following query string parameters, but they are only applied when an
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
+### `GET /api/<camera_name>/recording/<frame_time>/snapshot.png`
+
+Returns the snapshot image from the specific point in that cameras recordings.
+
 ### `GET /clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
@@ -269,3 +291,45 @@ Get ffprobe output for camera feed paths.
 | param   | Type   | Description                        |
 | ------- | ------ | ---------------------------------- |
 | `paths` | string | `,` separated list of camera paths |
+
+### `GET /api/<camera_name>/ptz/info`
+
+Get PTZ info for the camera.
+
+### `POST /api/events/<camera_name>/<label>/create`
+
+Create a manual API with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+
+**Optional Body:**
+
+```json
+{
+  "subLabel": "some_string", // add sub label to event
+  "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
+  "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
+  "draw": {
+    // optional annotations that will be drawn on the snapshot
+    "boxes": [
+      {
+        "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, y, width, height which are on a scale between 0 - 1
+        "color": [255, 0, 0], // color of the box, default is red
+        "score": 100 // optional score associated with the box
+      }
+    ]
+  }
+}
+```
+
+**Success Response:**
+
+```json
+{
+  "event_id": "1682970645.13116-1ug7ns",
+  "message": "Successfully created event.",
+  "success": true
+}
+```
+
+### `PUT /api/events/<event_id>/end`
+
+End a specific manual event without a predetermined length.

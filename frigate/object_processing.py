@@ -15,12 +15,13 @@ import numpy as np
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
     CameraConfig,
-    MqttConfig,
-    SnapshotsConfig,
-    RecordConfig,
     FrigateConfig,
+    MqttConfig,
+    RecordConfig,
+    SnapshotsConfig,
 )
 from frigate.const import CLIPS_DIR
+from frigate.events.maintainer import EventTypeEnum
 from frigate.util import (
     SharedMemoryFrameManager,
     calculate_region,
@@ -140,7 +141,7 @@ class TrackedObject:
         # check each zone
         for name, zone in self.camera_config.zones.items():
             # if the zone is not for this object type, skip
-            if len(zone.objects) > 0 and not obj_data["label"] in zone.objects:
+            if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
             contour = zone.contour
             # check if the object is in the zone
@@ -176,16 +177,12 @@ class TrackedObject:
         return (thumb_update, significant_change)
 
     def to_dict(self, include_thumbnail: bool = False):
-        snapshot_time = (
-            self.thumbnail_data["frame_time"]
-            if not self.thumbnail_data is None
-            else 0.0
-        )
+        (self.thumbnail_data["frame_time"] if self.thumbnail_data is not None else 0.0)
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera,
             "frame_time": self.obj_data["frame_time"],
-            "snapshot_time": snapshot_time,
+            "snapshot": self.thumbnail_data,
             "label": self.obj_data["label"],
             "sub_label": self.obj_data.get("sub_label"),
             "top_score": self.top_score,
@@ -525,7 +522,7 @@ class CameraState:
         for id in removed_ids:
             # publish events to mqtt
             removed_obj = tracked_objects[id]
-            if not "end_time" in removed_obj.obj_data:
+            if "end_time" not in removed_obj.obj_data:
                 removed_obj.obj_data["end_time"] = frame_time
                 for c in self.callbacks["end"]:
                     c(self.name, removed_obj, frame_time)
@@ -656,7 +653,9 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
-            self.event_queue.put(("start", camera, obj.to_dict()))
+            self.event_queue.put(
+                (EventTypeEnum.tracked_object, "start", camera, obj.to_dict())
+            )
 
         def update(camera, obj: TrackedObject, current_frame_time):
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
@@ -670,7 +669,12 @@ class TrackedObjectProcessor(threading.Thread):
             self.dispatcher.publish("events", json.dumps(message), retain=False)
             obj.previous = after
             self.event_queue.put(
-                ("update", camera, obj.to_dict(include_thumbnail=True))
+                (
+                    EventTypeEnum.tracked_object,
+                    "update",
+                    camera,
+                    obj.to_dict(include_thumbnail=True),
+                )
             )
 
         def end(camera, obj: TrackedObject, current_frame_time):
@@ -722,7 +726,14 @@ class TrackedObjectProcessor(threading.Thread):
                 }
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
 
-            self.event_queue.put(("end", camera, obj.to_dict(include_thumbnail=True)))
+            self.event_queue.put(
+                (
+                    EventTypeEnum.tracked_object,
+                    "end",
+                    camera,
+                    obj.to_dict(include_thumbnail=True),
+                )
+            )
 
         def snapshot(camera, obj: TrackedObject, current_frame_time):
             mqtt_config: MqttConfig = self.config.cameras[camera].mqtt
@@ -901,7 +912,7 @@ class TrackedObjectProcessor(threading.Thread):
                     current_tracked_objects,
                     motion_boxes,
                     regions,
-                ) = self.tracked_objects_queue.get(True, 10)
+                ) = self.tracked_objects_queue.get(True, 1)
             except queue.Empty:
                 continue
 
@@ -1013,4 +1024,4 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
 
-        logger.info(f"Exiting object processor...")
+        logger.info("Exiting object processor...")

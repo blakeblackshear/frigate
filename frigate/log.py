@@ -1,19 +1,27 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
-import threading
+import multiprocessing as mp
 import os
 import queue
-from multiprocessing.queues import Queue
-from logging import handlers
-from setproctitle import setproctitle
-from typing import Deque
+import signal
+import threading
 from collections import deque
+from logging import handlers
+from multiprocessing.queues import Queue
+from types import FrameType
+from typing import Deque, Optional
+
+from setproctitle import setproctitle
 
 from frigate.util import clean_camera_user_pass
 
 
 def listener_configurer() -> None:
     root = logging.getLogger()
+
+    if root.hasHandlers():
+        root.handlers.clear()
+
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter(
         "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
@@ -26,18 +34,35 @@ def listener_configurer() -> None:
 def root_configurer(queue: Queue) -> None:
     h = handlers.QueueHandler(queue)
     root = logging.getLogger()
+
+    if root.hasHandlers():
+        root.handlers.clear()
+
     root.addHandler(h)
     root.setLevel(logging.INFO)
 
 
 def log_process(log_queue: Queue) -> None:
-    threading.current_thread().name = f"logger"
+    threading.current_thread().name = "logger"
     setproctitle("frigate.logger")
     listener_configurer()
+
+    stop_event = mp.Event()
+
+    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
+
     while True:
         try:
-            record = log_queue.get(timeout=5)
+            record = log_queue.get(timeout=1)
         except (queue.Empty, KeyboardInterrupt):
+            if stop_event.is_set():
+                break
+            continue
+        if record.msg.startswith("You are using a scalar distance function"):
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)

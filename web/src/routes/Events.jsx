@@ -3,6 +3,7 @@ import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
 import { Tabs, TextTab } from '../components/Tabs';
+import Link from '../components/Link';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
@@ -27,6 +28,7 @@ import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
+import TimelineSummary from '../components/TimelineSummary';
 
 const API_LIMIT = 25;
 
@@ -57,16 +59,25 @@ export default function Events({ path, ...props }) {
     showDownloadMenu: false,
     showDatePicker: false,
     showCalendar: false,
-    showPlusConfig: false,
+    showPlusSubmit: false,
+  });
+  const [plusSubmitEvent, setPlusSubmitEvent] = useState({
+    id: null,
+    label: null,
+    validBox: null,
   });
   const [uploading, setUploading] = useState([]);
   const [viewEvent, setViewEvent] = useState();
+  const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
     id: null,
+    label: null,
+    box: null,
     has_clip: false,
     has_snapshot: false,
     plus_id: undefined,
+    end_time: null,
   });
   const [deleteFavoriteState, setDeleteFavoriteState] = useState({
     deletingFavoriteEventId: null,
@@ -180,6 +191,14 @@ export default function Events({ path, ...props }) {
     onFilter(name, items);
   };
 
+  const onEventFrameSelected = (event, frame, seekSeconds) => {
+    if (this.player) {
+      this.player.pause();
+      this.player.currentTime(seekSeconds);
+      setEventOverlay(frame);
+    }
+  };
+
   const datePicker = useRef();
 
   const downloadButton = useRef();
@@ -188,12 +207,25 @@ export default function Events({ path, ...props }) {
     e.stopPropagation();
     setDownloadEvent((_prev) => ({
       id: event.id,
+      box: event?.data?.box || event.box,
+      label: event.label,
       has_clip: event.has_clip,
       has_snapshot: event.has_snapshot,
       plus_id: event.plus_id,
+      end_time: event.end_time,
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
+  };
+
+  const showSubmitToPlus = (event_id, label, box, e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    // if any of the box coordinates are > 1, then the box data is from an older version
+    // and not valid to submit to plus with the snapshot image
+    setPlusSubmitEvent({ id: event_id, label, validBox: !box.some((d) => d > 1) });
+    setState({ ...state, showDownloadMenu: false, showPlusSubmit: true });
   };
 
   const handleSelectDateRange = useCallback(
@@ -240,23 +272,16 @@ export default function Events({ path, ...props }) {
     [size, setSize, isValidating, isDone]
   );
 
-  const onSendToPlus = async (id, e) => {
-    if (e) {
-      e.stopPropagation();
-    }
-
+  const onSendToPlus = async (id, false_positive, validBox) => {
     if (uploading.includes(id)) {
-      return;
-    }
-
-    if (!config.plus.enabled) {
-      setState({ ...state, showDownloadMenu: false, showPlusConfig: true });
       return;
     }
 
     setUploading((prev) => [...prev, id]);
 
-    const response = await axios.post(`events/${id}/plus`);
+    const response = false_positive
+      ? await axios.put(`events/${id}/false_positive`)
+      : await axios.post(`events/${id}/plus`, validBox ? { include_annotation: 1 } : {});
 
     if (response.status === 200) {
       mutate(
@@ -278,6 +303,8 @@ export default function Events({ path, ...props }) {
     if (state.showDownloadMenu && downloadEvent.id === id) {
       setState({ ...state, showDownloadMenu: false });
     }
+
+    setState({ ...state, showPlusSubmit: false });
   };
 
   const handleEventDetailTabChange = (index) => {
@@ -287,9 +314,6 @@ export default function Events({ path, ...props }) {
   if (!config) {
     return <ActivityIndicator />;
   }
-
-  const timezone = config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const locale = window.navigator?.language || 'en-US';
 
   return (
     <div className="space-y-4 p-2 px-4 w-full">
@@ -367,12 +391,12 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {downloadEvent.has_snapshot && !downloadEvent.plus_id && (
+          {downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
               label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
               value="plus"
-              onSelect={() => onSendToPlus(downloadEvent.id)}
+              onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
             />
           )}
           {downloadEvent.plus_id && (
@@ -435,25 +459,96 @@ export default function Events({ path, ...props }) {
           </Menu>
         </span>
       )}
-      {state.showPlusConfig && (
+      {state.showPlusSubmit && (
         <Dialog>
-          <div className="p-4">
-            <Heading size="lg">Setup a Frigate+ Account</Heading>
-            <p className="mb-2">In order to submit images to Frigate+, you first need to setup an account.</p>
-            <a
-              className="text-blue-500 hover:underline"
-              href="https://plus.frigate.video"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://plus.frigate.video
-            </a>
-          </div>
-          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" onClick={() => setState({ ...state, showPlusConfig: false })} type="text">
-              Close
-            </Button>
-          </div>
+          {config.plus.enabled ? (
+            <>
+              <div className="p-4">
+                <Heading size="lg">Submit to Frigate+</Heading>
+
+                <img
+                  className="flex-grow-0"
+                  src={`${apiHost}/api/events/${plusSubmitEvent.id}/snapshot.jpg`}
+                  alt={`${plusSubmitEvent.label}`}
+                />
+
+                {plusSubmitEvent.validBox ? (
+                  <p className="mb-2">
+                    Objects in locations you want to avoid are not false positives. Submitting them as false positives
+                    will confuse the model.
+                  </p>
+                ) : (
+                  <p className="mb-2">
+                    Events prior to version 0.13 can only be submitted to Frigate+ without annotations.
+                  </p>
+                )}
+              </div>
+              {plusSubmitEvent.validBox ? (
+                <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+                  <Button className="ml-2" onClick={() => setState({ ...state, showPlusSubmit: false })} type="text">
+                    {uploading.includes(plusSubmitEvent.id) ? 'Close' : 'Cancel'}
+                  </Button>
+                  <Button
+                    className="ml-2"
+                    color="red"
+                    onClick={() => onSendToPlus(plusSubmitEvent.id, true, plusSubmitEvent.validBox)}
+                    disabled={uploading.includes(plusSubmitEvent.id)}
+                    type="text"
+                  >
+                    This is not a {plusSubmitEvent.label}
+                  </Button>
+                  <Button
+                    className="ml-2"
+                    color="green"
+                    onClick={() => onSendToPlus(plusSubmitEvent.id, false, plusSubmitEvent.validBox)}
+                    disabled={uploading.includes(plusSubmitEvent.id)}
+                    type="text"
+                  >
+                    This is a {plusSubmitEvent.label}
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+                  <Button
+                    className="ml-2"
+                    onClick={() => setState({ ...state, showPlusSubmit: false })}
+                    disabled={uploading.includes(plusSubmitEvent.id)}
+                    type="text"
+                  >
+                    {uploading.includes(plusSubmitEvent.id) ? 'Close' : 'Cancel'}
+                  </Button>
+                  <Button
+                    className="ml-2"
+                    onClick={() => onSendToPlus(plusSubmitEvent.id, false, plusSubmitEvent.validBox)}
+                    disabled={uploading.includes(plusSubmitEvent.id)}
+                    type="text"
+                  >
+                    Submit to Frigate+
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="p-4">
+                <Heading size="lg">Setup a Frigate+ Account</Heading>
+                <p className="mb-2">In order to submit images to Frigate+, you first need to setup an account.</p>
+                <a
+                  className="text-blue-500 hover:underline"
+                  href="https://plus.frigate.video"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  https://plus.frigate.video
+                </a>
+              </div>
+              <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+                <Button className="ml-2" onClick={() => setState({ ...state, showPlusSubmit: false })} type="text">
+                  Close
+                </Button>
+              </div>
+            </>
+          )}
         </Dialog>
       )}
       {deleteFavoriteState.showDeleteFavorite && (
@@ -513,11 +608,13 @@ export default function Events({ path, ...props }) {
                           {event.sub_label
                             ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
                             : event.label.replaceAll('_', ' ')}
-                          ({(event.top_score * 100).toFixed(0)}%)
+                          {(event?.data?.top_score || event.top_score || 0) == 0
+                            ? null
+                            : ` (${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%)`}
                         </div>
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />
-                          {formatUnixTimestampToDateTime(event.start_time, locale, timezone)}
+                          {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
                           <div className="hidden md:inline">
                             <span className="m-1">-</span>
                             <TimeAgo time={event.start_time * 1000} dense />
@@ -536,15 +633,25 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.has_snapshot && (
+                        {event.end_time && event.has_snapshot && (
                           <Fragment>
                             {event.plus_id ? (
-                              <div className="uppercase text-xs">Sent to Frigate+</div>
+                              <div className="uppercase text-xs underline">
+                                <Link
+                                  href={`https://plus.frigate.video/dashboard/edit-image/?id=${event.plus_id}`}
+                                  target="_blank"
+                                  rel="nofollow"
+                                >
+                                  Edit in Frigate+
+                                </Link>
+                              </div>
                             ) : (
                               <Button
                                 color="gray"
                                 disabled={uploading.includes(event.id)}
-                                onClick={(e) => onSendToPlus(event.id, e)}
+                                onClick={(e) =>
+                                  showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)
+                                }
                               >
                                 {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
                               </Button>
@@ -583,20 +690,58 @@ export default function Events({ path, ...props }) {
 
                         <div>
                           {eventDetailType == 'clip' && event.has_clip ? (
-                            <VideoPlayer
-                              options={{
-                                preload: 'auto',
-                                autoplay: true,
-                                sources: [
-                                  {
-                                    src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                                    type: 'application/vnd.apple.mpegurl',
-                                  },
-                                ],
-                              }}
-                              seekOptions={{ forward: 10, back: 5 }}
-                              onReady={() => {}}
-                            />
+                            <div>
+                              <TimelineSummary
+                                event={event}
+                                onFrameSelected={(frame, seekSeconds) =>
+                                  onEventFrameSelected(event, frame, seekSeconds)
+                                }
+                              />
+                              <div>
+                                <VideoPlayer
+                                  options={{
+                                    preload: 'auto',
+                                    autoplay: true,
+                                    sources: [
+                                      {
+                                        src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                                        type: 'application/vnd.apple.mpegurl',
+                                      },
+                                    ],
+                                  }}
+                                  seekOptions={{ forward: 10, backward: 5 }}
+                                  onReady={(player) => {
+                                    this.player = player;
+                                    this.player.on('playing', () => {
+                                      setEventOverlay(undefined);
+                                    });
+                                  }}
+                                  onDispose={() => {
+                                    this.player = null;
+                                  }}
+                                >
+                                  {eventOverlay ? (
+                                    <div
+                                      className="absolute border-4 border-red-600"
+                                      style={{
+                                        left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
+                                        top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
+                                        right: `${Math.round(
+                                          (1 - eventOverlay.data.box[2] - eventOverlay.data.box[0]) * 100
+                                        )}%`,
+                                        bottom: `${Math.round(
+                                          (1 - eventOverlay.data.box[3] - eventOverlay.data.box[1]) * 100
+                                        )}%`,
+                                      }}
+                                    >
+                                      {eventOverlay.class_type == 'entered_zone' ? (
+                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] -translate-x-1/2 translate-y-3/4 bottom-0" />
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                </VideoPlayer>
+                              </div>
+                            </div>
                           ) : null}
 
                           {eventDetailType == 'image' || !event.has_clip ? (
@@ -608,7 +753,9 @@ export default function Events({ path, ...props }) {
                                     ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
                                     : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
-                                alt={`${event.label} at ${(event.top_score * 100).toFixed(0)}% confidence`}
+                                alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
+                                  0
+                                )}% confidence`}
                               />
                             </div>
                           ) : null}

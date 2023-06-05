@@ -14,7 +14,9 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import WebRtcPlayer from '../components/WebRtcPlayer';
-import MsePlayer from '../components/MsePlayer';
+import '../components/MsePlayer';
+import CameraControlPanel from '../components/CameraControlPanel';
+import { baseUrl } from '../api/baseUrl';
 
 const emptyObject = Object.freeze({});
 
@@ -25,14 +27,16 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
+  const restreamEnabled =
+    cameraConfig && Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.live.stream_name);
   const jsmpegWidth = cameraConfig
-    ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
     `${camera}-source`,
-    getDefaultLiveMode(config, cameraConfig)
+    getDefaultLiveMode(config, cameraConfig, restreamEnabled)
   );
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
+  const sourceValues = restreamEnabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -60,6 +64,10 @@ export default function Camera({ camera }) {
 
   if (!cameraConfig || !sourceIsLoaded) {
     return <ActivityIndicator />;
+  }
+
+  if (!restreamEnabled) {
+    setViewSource('jsmpeg');
   }
 
   const optionContent = showSettings ? (
@@ -106,12 +114,15 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (viewSource == 'mse' && cameraConfig.restream.enabled) {
+    if (viewSource == 'mse' && restreamEnabled) {
       if ('MediaSource' in window) {
         player = (
           <Fragment>
             <div className="max-w-5xl">
-              <MsePlayer camera={camera} />
+              <video-stream
+                mode="mse"
+                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`)}
+              />
             </div>
           </Fragment>
         );
@@ -124,11 +135,11 @@ export default function Camera({ camera }) {
           </Fragment>
         );
       }
-    } else if (viewSource == 'webrtc' && cameraConfig.restream.enabled) {
+    } else if (viewSource == 'webrtc' && restreamEnabled) {
       player = (
         <Fragment>
           <div className="max-w-5xl">
-            <WebRtcPlayer camera={camera} />
+            <WebRtcPlayer camera={cameraConfig.live.stream_name} />
           </div>
         </Fragment>
       );
@@ -136,7 +147,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.live.height} />
           </div>
         </Fragment>
       );
@@ -182,6 +193,13 @@ export default function Camera({ camera }) {
 
       {player}
 
+      {cameraConfig?.onvif?.host && (
+        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min">
+          <Heading size="sm">Control Panel</Heading>
+          <CameraControlPanel camera={camera} />
+        </div>
+      )}
+
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
         <div className="flex flex-wrap justify-start">
@@ -200,9 +218,9 @@ export default function Camera({ camera }) {
   );
 }
 
-function getDefaultLiveMode(config, cameraConfig) {
+function getDefaultLiveMode(config, cameraConfig, restreamEnabled) {
   if (cameraConfig) {
-    if (cameraConfig.restream.enabled) {
+    if (restreamEnabled) {
       return config.ui.live_mode;
     }
 

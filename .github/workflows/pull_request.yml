@@ -65,16 +65,22 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-        uses: actions/setup-python@v4.5.0
+        uses: actions/setup-python@v4.6.1
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
         run: |
-          pip install pip
-          pip install -r requirements-dev.txt
-      - name: Lint
+          python3 -m pip install -U pip
+          python3 -m pip install -r requirements-dev.txt
+      - name: Check black
         run: |
-          python3 -m black frigate --check
+          black --check --diff frigate migrations docker *.py
+      - name: Check isort
+        run: |
+          isort --check --diff frigate migrations docker *.py
+      - name: Check ruff
+        run: |
+          ruff check frigate migrations docker *.py
 
   python_tests:
     runs-on: ubuntu-latest

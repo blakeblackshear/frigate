@@ -1,25 +1,26 @@
 import copy
 import datetime
-import logging
-import shlex
-import subprocess as sp
 import json
+import logging
+import os
 import re
+import shlex
 import signal
+import subprocess as sp
 import traceback
 import urllib.parse
-import yaml
-
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
-from typing import Any, AnyStr
+from typing import Any, AnyStr, Optional, Tuple
 
 import cv2
 import numpy as np
-import os
 import psutil
+import py3nvml.py3nvml as nvml
+import pytz
+import yaml
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -454,7 +455,7 @@ def copy_yuv_to_position(
     # clear v2
     destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
 
-    if not source_frame is None:
+    if source_frame is not None:
         # calculate the resized frame, maintaining the aspect ratio
         source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
         dest_aspect_ratio = destination_shape[1] / destination_shape[0]
@@ -721,7 +722,7 @@ def load_labels(path, encoding="utf-8"):
 
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
-    if line.startswith("rtsp://"):
+    if "rtsp://" in line:
         return re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
     else:
         return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", line)
@@ -739,56 +740,54 @@ def escape_special_characters(path: str) -> str:
 
 
 def get_cgroups_version() -> str:
-    """Determine what version of cgroups is enabled"""
+    """Determine what version of cgroups is enabled."""
 
-    stat_command = ["stat", "-fc", "%T", "/sys/fs/cgroup"]
+    cgroup_path = "/sys/fs/cgroup"
 
-    p = sp.run(
-        stat_command,
-        encoding="ascii",
-        capture_output=True,
-    )
+    if not os.path.ismount(cgroup_path):
+        logger.debug(f"{cgroup_path} is not a mount point.")
+        return "unknown"
 
-    if p.returncode == 0:
-        value: str = p.stdout.strip().lower()
+    try:
+        with open("/proc/mounts", "r") as f:
+            mounts = f.readlines()
 
-        if value == "cgroup2fs":
-            return "cgroup2"
-        elif value == "tmpfs":
-            return "cgroup"
-        else:
-            logger.debug(
-                f"Could not determine cgroups version: unhandled filesystem {value}"
-            )
-    else:
-        logger.debug(f"Could not determine cgroups version:  {p.stderr}")
+        for mount in mounts:
+            mount_info = mount.split()
+            if mount_info[1] == cgroup_path:
+                fs_type = mount_info[2]
+                if fs_type == "cgroup2fs" or fs_type == "cgroup2":
+                    return "cgroup2"
+                elif fs_type == "tmpfs":
+                    return "cgroup"
+                else:
+                    logger.debug(
+                        f"Could not determine cgroups version: unhandled filesystem {fs_type}"
+                    )
+                break
+    except Exception as e:
+        logger.debug(f"Could not determine cgroups version: {e}")
 
     return "unknown"
 
 
 def get_docker_memlimit_bytes() -> int:
-    """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected"""
+    """Get mem limit in bytes set in docker if present. Returns -1 if no limit detected."""
 
     # check running a supported cgroups version
     if get_cgroups_version() == "cgroup2":
+        memlimit_path = "/sys/fs/cgroup/memory.max"
 
-        memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
-
-        p = sp.run(
-            memlimit_command,
-            encoding="ascii",
-            capture_output=True,
-        )
-
-        if p.returncode == 0:
-            value: str = p.stdout.strip()
+        try:
+            with open(memlimit_path, "r") as f:
+                value = f.read().strip()
 
             if value.isnumeric():
                 return int(value)
             elif value.lower() == "max":
                 return -1
-        else:
-            logger.debug(f"Unable to get docker memlimit: {p.stderr}")
+        except Exception as e:
+            logger.debug(f"Unable to get docker memlimit: {e}")
 
     return -1
 
@@ -796,10 +795,59 @@ def get_docker_memlimit_bytes() -> int:
 def get_cpu_stats() -> dict[str, dict]:
     """Get cpu usages for each process id"""
     usages = {}
-    # -n=2 runs to ensure extraneous values are not included
-    top_command = ["top", "-b", "-n", "2"]
-
     docker_memlimit = get_docker_memlimit_bytes() / 1024
+    total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
+
+    for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
+        pid = process.info["pid"]
+        try:
+            cpu_percent = process.info["cpu_percent"]
+            cmdline = process.info["cmdline"]
+
+            with open(f"/proc/{pid}/stat", "r") as f:
+                stats = f.readline().split()
+            utime = int(stats[13])
+            stime = int(stats[14])
+            starttime = int(stats[21])
+
+            with open("/proc/uptime") as f:
+                system_uptime_sec = int(float(f.read().split()[0]))
+
+            clk_tck = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
+
+            process_utime_sec = utime // clk_tck
+            process_stime_sec = stime // clk_tck
+            process_starttime_sec = starttime // clk_tck
+
+            process_elapsed_sec = system_uptime_sec - process_starttime_sec
+            process_usage_sec = process_utime_sec + process_stime_sec
+            cpu_average_usage = process_usage_sec * 100 // process_elapsed_sec
+
+            with open(f"/proc/{pid}/statm", "r") as f:
+                mem_stats = f.readline().split()
+            mem_res = int(mem_stats[1]) * os.sysconf("SC_PAGE_SIZE") / 1024
+
+            if docker_memlimit > 0:
+                mem_pct = round((mem_res / docker_memlimit) * 100, 1)
+            else:
+                mem_pct = round((mem_res / total_mem) * 100, 1)
+
+            usages[pid] = {
+                "cpu": str(cpu_percent),
+                "cpu_average": str(round(cpu_average_usage, 2)),
+                "mem": f"{mem_pct}",
+                "cmdline": " ".join(cmdline),
+            }
+        except Exception:
+            continue
+
+    return usages
+
+
+def get_bandwidth_stats() -> dict[str, dict]:
+    """Get bandwidth usages for each ffmpeg process id"""
+    usages = {}
+    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"]
 
     p = sp.run(
         top_command,
@@ -808,31 +856,23 @@ def get_cpu_stats() -> dict[str, dict]:
     )
 
     if p.returncode != 0:
-        logger.error(p.stderr)
         return usages
     else:
         lines = p.stdout.split("\n")
-
         for line in lines:
-            stats = list(filter(lambda a: a != "", line.strip().split(" ")))
+            stats = list(filter(lambda a: a != "", line.strip().split("\t")))
             try:
-
-                if docker_memlimit > 0:
-                    mem_res = int(stats[5])
-                    mem_pct = str(
-                        round((float(mem_res) / float(docker_memlimit)) * 100, 1)
-                    )
-                else:
-                    mem_pct = stats[9]
-
-                usages[stats[0]] = {
-                    "cpu": stats[8],
-                    "mem": mem_pct,
-                }
-            except:
+                if re.search(
+                    r"(^ffmpeg|\/go2rtc|frigate\.detector\.[a-z]+)/([0-9]+)/", stats[0]
+                ):
+                    process = stats[0].split("/")
+                    usages[process[len(process) - 2]] = {
+                        "bandwidth": round(float(stats[1]) + float(stats[2]), 1),
+                    }
+            except (IndexError, ValueError):
                 continue
 
-        return usages
+    return usages
 
 
 def get_amd_gpu_stats() -> dict[str, str]:
@@ -854,9 +894,9 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
         for hw in usages:
             if "gpu" in hw:
-                results["gpu"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+                results["gpu"] = f"{hw.strip().split(' ')[1].replace('%', '')}%"
             elif "vram" in hw:
-                results["mem"] = f"{hw.strip().split(' ')[1].replace('%', '')} %"
+                results["mem"] = f"{hw.strip().split(' ')[1].replace('%', '')}%"
 
         return results
 
@@ -890,7 +930,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
         # render is used for qsv
         render = []
-        for result in re.findall('"Render/3D/0":{[a-z":\d.,%]+}', reading):
+        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[14:])
             single = packet.get("busy", 0.0)
             render.append(float(single))
@@ -912,37 +952,46 @@ def get_intel_gpu_stats() -> dict[str, str]:
         else:
             video_avg = 1
 
-        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)} %"
-        results["mem"] = "- %"
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
+        results["mem"] = "-%"
         return results
 
 
-def get_nvidia_gpu_stats() -> dict[str, str]:
-    """Get stats using nvidia-smi."""
-    nvidia_smi_command = [
-        "nvidia-smi",
-        "--query-gpu=gpu_name,utilization.gpu,memory.used,memory.total",
-        "--format=csv",
-    ]
+def try_get_info(f, h, default="N/A"):
+    try:
+        v = f(h)
+    except nvml.NVMLError_NotSupported:
+        v = default
+    return v
 
-    p = sp.run(
-        nvidia_smi_command,
-        encoding="ascii",
-        capture_output=True,
-    )
 
-    if p.returncode != 0:
-        logger.error(f"Unable to poll nvidia GPU stats: {p.stderr}")
-        return None
-    else:
-        usages = p.stdout.split("\n")[1].strip().split(",")
-        memory_percent = f"{round(float(usages[2].replace(' MiB', '').strip()) / float(usages[3].replace(' MiB', '').strip()) * 100, 1)} %"
-        results: dict[str, str] = {
-            "name": usages[0],
-            "gpu": usages[1].strip(),
-            "mem": memory_percent,
-        }
+def get_nvidia_gpu_stats() -> dict[int, dict]:
+    results = {}
+    try:
+        nvml.nvmlInit()
+        deviceCount = nvml.nvmlDeviceGetCount()
+        for i in range(deviceCount):
+            handle = nvml.nvmlDeviceGetHandleByIndex(i)
+            meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
+            util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
+            if util != "N/A":
+                gpu_util = util.gpu
+            else:
+                gpu_util = 0
 
+            if meminfo != "N/A":
+                gpu_mem_util = meminfo.used / meminfo.total * 100
+            else:
+                gpu_mem_util = -1
+
+            results[i] = {
+                "name": nvml.nvmlDeviceGetName(handle),
+                "gpu": gpu_util,
+                "mem": gpu_mem_util,
+            }
+    except Exception:
+        pass
+    finally:
         return results
 
 
@@ -964,9 +1013,13 @@ def ffprobe_stream(path: str) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def vainfo_hwaccel() -> sp.CompletedProcess:
+def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     """Run vainfo."""
-    ffprobe_cmd = ["vainfo"]
+    ffprobe_cmd = (
+        ["vainfo"]
+        if not device_name
+        else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
+    )
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
@@ -1040,3 +1093,25 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]
+
+
+def get_tz_modifiers(tz_name: str) -> Tuple[str, str]:
+    seconds_offset = (
+        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
+    )
+    hours_offset = int(seconds_offset / 60 / 60)
+    minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
+    hour_modifier = f"{hours_offset} hour"
+    minute_modifier = f"{minutes_offset} minute"
+    return hour_modifier, minute_modifier
+
+
+def to_relative_box(
+    width: int, height: int, box: Tuple[int, int, int, int]
+) -> Tuple[int, int, int, int]:
+    return (
+        box[0] / width,  # x
+        box[1] / height,  # y
+        (box[2] - box[0]) / width,  # w
+        (box[3] - box[1]) / height,  # h
+    )

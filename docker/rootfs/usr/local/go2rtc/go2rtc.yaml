@@ -1,6 +1,0 @@
-log:
-  format: text
-
-webrtc:
-  candidates:
-    - stun:8555

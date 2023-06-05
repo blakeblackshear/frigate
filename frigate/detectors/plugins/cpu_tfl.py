@@ -1,11 +1,16 @@
 import logging
+
 import numpy as np
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
-from pydantic import Extra, Field
-import tflite_runtime.interpreter as tflite
+
+try:
+    from tflite_runtime.interpreter import Interpreter
+except ModuleNotFoundError:
+    from tensorflow.lite.python.interpreter import Interpreter
 
 
 logger = logging.getLogger(__name__)
@@ -22,8 +27,8 @@ class CpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: CpuDetectorConfig):
-        self.interpreter = tflite.Interpreter(
-            model_path=detector_config.model.path or "/cpu_model.tflite",
+        self.interpreter = Interpreter(
+            model_path=detector_config.model.path,
             num_threads=detector_config.num_threads or 3,
         )
 
