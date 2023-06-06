@@ -1,2 +1,3 @@
-pylint == 2.17.*
 black == 23.3.*
+isort
+ruff

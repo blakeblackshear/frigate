@@ -1,19 +1,17 @@
 import hashlib
 import json
 import logging
-from enum import Enum
 import os
-from typing import Dict, List, Optional, Tuple, Union, Literal
+from enum import Enum
+from typing import Dict, Optional, Tuple
 
-
-import requests
 import matplotlib.pyplot as plt
-from pydantic import BaseModel, Extra, Field, validator
+import requests
+from pydantic import BaseModel, Extra, Field
 from pydantic.fields import PrivateAttr
+
 from frigate.plus import PlusApi
-
 from frigate.util import load_labels
-
 
 logger = logging.getLogger(__name__)
 
@@ -118,11 +116,14 @@ class ModelConfig(BaseModel):
         }
 
     def compute_model_hash(self) -> None:
-        with open(self.path, "rb") as f:
-            file_hash = hashlib.md5()
-            while chunk := f.read(8192):
-                file_hash.update(chunk)
-        self._model_hash = file_hash.hexdigest()
+        if not self.path or not os.path.exists(self.path):
+            self._model_hash = hashlib.md5(b"unknown").hexdigest()
+        else:
+            with open(self.path, "rb") as f:
+                file_hash = hashlib.md5()
+                while chunk := f.read(8192):
+                    file_hash.update(chunk)
+            self._model_hash = file_hash.hexdigest()
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
         """Get a list of colors for enabled labels."""

@@ -6,15 +6,14 @@ import unittest
 from unittest.mock import patch
 
 from peewee_migrate import Router
+from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
-from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.http import create_app
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
-
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
@@ -120,6 +119,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -127,22 +127,22 @@ class TestHttp(unittest.TestCase):
 
         with app.test_client() as client:
             _insert_mock_event(id)
-            events = client.get(f"/events").json
+            events = client.get("/events").json
             assert events
             assert len(events) == 1
             assert events[0]["id"] == id
             _insert_mock_event(id2)
-            events = client.get(f"/events").json
+            events = client.get("/events").json
             assert events
             assert len(events) == 2
             events = client.get(
-                f"/events",
+                "/events",
                 query_string={"limit": 1},
             ).json
             assert events
             assert len(events) == 1
             events = client.get(
-                f"/events",
+                "/events",
                 query_string={"has_clip": 0},
             ).json
             assert not events
@@ -151,6 +151,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -175,6 +176,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -190,6 +192,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -215,6 +218,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -225,17 +229,18 @@ class TestHttp(unittest.TestCase):
             event = client.get(f"/events/{id}").json
             assert event
             assert event["id"] == id
-            assert event["retain_indefinitely"] == True
+            assert event["retain_indefinitely"] is True
             client.delete(f"/events/{id}/retain")
             event = client.get(f"/events/{id}").json
             assert event
             assert event["id"] == id
-            assert event["retain_indefinitely"] == False
+            assert event["retain_indefinitely"] is False
 
     def test_set_delete_sub_label(self):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -274,6 +279,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
         id = "123456.random"
@@ -298,6 +304,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
         )
 
@@ -310,6 +317,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
@@ -329,6 +337,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,

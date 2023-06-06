@@ -1,9 +1,9 @@
 """Handle storage retention and usage."""
 
 import logging
-from pathlib import Path
 import shutil
 import threading
+from pathlib import Path
 
 from peewee import fn
 
@@ -107,7 +107,7 @@ class StorageMaintainer(threading.Thread):
         retained_events: Event = (
             Event.select()
             .where(
-                Event.retain_indefinitely == True,
+                Event.retain_indefinitely is True,
                 Event.has_clip,
             )
             .order_by(Event.start_time.asc())
@@ -188,4 +188,4 @@ class StorageMaintainer(threading.Thread):
             if self.check_storage_needs_cleanup():
                 self.reduce_storage_consumption()
 
-        logger.info(f"Exiting storage maintainer...")
+        logger.info("Exiting storage maintainer...")

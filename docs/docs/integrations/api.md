@@ -295,3 +295,41 @@ Get ffprobe output for camera feed paths.
 ### `GET /api/<camera_name>/ptz/info`
 
 Get PTZ info for the camera.
+
+### `POST /api/events/<camera_name>/<label>/create`
+
+Create a manual API with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+
+**Optional Body:**
+
+```json
+{
+  "subLabel": "some_string", // add sub label to event
+  "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
+  "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
+  "draw": {
+    // optional annotations that will be drawn on the snapshot
+    "boxes": [
+      {
+        "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, y, width, height which are on a scale between 0 - 1
+        "color": [255, 0, 0], // color of the box, default is red
+        "score": 100 // optional score associated with the box
+      }
+    ]
+  }
+}
+```
+
+**Success Response:**
+
+```json
+{
+  "event_id": "1682970645.13116-1ug7ns",
+  "message": "Successfully created event.",
+  "success": true
+}
+```
+
+### `PUT /api/events/<event_id>/end`
+
+End a specific manual event without a predetermined length.

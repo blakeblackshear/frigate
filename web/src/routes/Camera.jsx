@@ -14,8 +14,9 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import WebRtcPlayer from '../components/WebRtcPlayer';
-import MsePlayer from '../components/MsePlayer';
+import '../components/MsePlayer';
 import CameraControlPanel from '../components/CameraControlPanel';
+import { baseUrl } from '../api/baseUrl';
 
 const emptyObject = Object.freeze({});
 
@@ -118,7 +119,10 @@ export default function Camera({ camera }) {
         player = (
           <Fragment>
             <div className="max-w-5xl">
-              <MsePlayer camera={cameraConfig.live.stream_name} />
+              <video-stream
+                mode="mse"
+                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`)}
+              />
             </div>
           </Fragment>
         );

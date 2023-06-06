@@ -4,18 +4,16 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
-import MsePlayer from '../components/MsePlayer';
+import '../components/MsePlayer';
 import useSWR from 'swr';
 import { useMemo } from 'preact/hooks';
 import CameraControlPanel from '../components/CameraControlPanel';
+import { baseUrl } from '../api/baseUrl';
 
 export default function Birdseye() {
   const { data: config } = useSWR('config');
 
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
-    'birdseye-source', 
-    getDefaultLiveMode(config)
-  );
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence('birdseye-source', getDefaultLiveMode(config));
   const sourceValues = ['mse', 'webrtc', 'jsmpeg'];
 
   const ptzCameras = useMemo(() => {
@@ -38,7 +36,10 @@ export default function Birdseye() {
       player = (
         <Fragment>
           <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
-            <MsePlayer camera="birdseye" />
+            <video-stream
+              mode="mse"
+              src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=birdseye`)}
+            />
           </div>
         </Fragment>
       );
@@ -109,7 +110,6 @@ export default function Birdseye() {
     </div>
   );
 }
-
 
 function getDefaultLiveMode(config) {
   if (config) {

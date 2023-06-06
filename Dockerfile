@@ -27,7 +27,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.2.0/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
@@ -227,8 +227,8 @@ CMD ["sleep", "infinity"]
 
 
 # Frigate web build
-# force this to run on amd64 because QEMU is painfully slow
-FROM --platform=linux/amd64 node:16 AS web-build
+# This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
+FROM --platform=$BUILDPLATFORM node:16 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./

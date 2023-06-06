@@ -1,13 +1,11 @@
 import logging
 import threading
-
 from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -177,10 +175,10 @@ class MqttClient(Communicator):  # type: ignore[misc]
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
-        if not self.mqtt_config.tls_ca_certs is None:
+        if self.mqtt_config.tls_ca_certs is not None:
             if (
-                not self.mqtt_config.tls_client_cert is None
-                and not self.mqtt_config.tls_client_key is None
+                self.mqtt_config.tls_client_cert is not None
+                and self.mqtt_config.tls_client_key is not None
             ):
                 self.client.tls_set(
                     self.mqtt_config.tls_ca_certs,
@@ -189,9 +187,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 )
             else:
                 self.client.tls_set(self.mqtt_config.tls_ca_certs)
-        if not self.mqtt_config.tls_insecure is None:
+        if self.mqtt_config.tls_insecure is not None:
             self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
-        if not self.mqtt_config.user is None:
+        if self.mqtt_config.user is not None:
             self.client.username_pw_set(
                 self.mqtt_config.user, password=self.mqtt_config.password
             )

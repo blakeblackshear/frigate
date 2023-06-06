@@ -1,28 +1,26 @@
 import copy
 import datetime
-import logging
-import shlex
-import subprocess as sp
 import json
+import logging
+import os
 import re
+import shlex
 import signal
+import subprocess as sp
 import traceback
 import urllib.parse
-import yaml
-import os
-
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import Any, AnyStr, Optional, Tuple
-import py3nvml.py3nvml as nvml
 
 import cv2
 import numpy as np
-import os
 import psutil
+import py3nvml.py3nvml as nvml
 import pytz
+import yaml
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -457,7 +455,7 @@ def copy_yuv_to_position(
     # clear v2
     destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
 
-    if not source_frame is None:
+    if source_frame is not None:
         # calculate the resized frame, maintaining the aspect ratio
         source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
         dest_aspect_ratio = destination_shape[1] / destination_shape[0]
@@ -800,10 +798,11 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
-    for process in psutil.process_iter(["pid", "name", "cpu_percent"]):
+    for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
         pid = process.info["pid"]
         try:
             cpu_percent = process.info["cpu_percent"]
+            cmdline = process.info["cmdline"]
 
             with open(f"/proc/{pid}/stat", "r") as f:
                 stats = f.readline().split()
@@ -837,9 +836,41 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
+                "cmdline": " ".join(cmdline),
             }
-        except:
+        except Exception:
             continue
+
+    return usages
+
+
+def get_bandwidth_stats() -> dict[str, dict]:
+    """Get bandwidth usages for each ffmpeg process id"""
+    usages = {}
+    top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"]
+
+    p = sp.run(
+        top_command,
+        encoding="ascii",
+        capture_output=True,
+    )
+
+    if p.returncode != 0:
+        return usages
+    else:
+        lines = p.stdout.split("\n")
+        for line in lines:
+            stats = list(filter(lambda a: a != "", line.strip().split("\t")))
+            try:
+                if re.search(
+                    r"(^ffmpeg|\/go2rtc|frigate\.detector\.[a-z]+)/([0-9]+)/", stats[0]
+                ):
+                    process = stats[0].split("/")
+                    usages[process[len(process) - 2]] = {
+                        "bandwidth": round(float(stats[1]) + float(stats[2]), 1),
+                    }
+            except (IndexError, ValueError):
+                continue
 
     return usages
 
@@ -899,7 +930,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
         # render is used for qsv
         render = []
-        for result in re.findall('"Render/3D/0":{[a-z":\d.,%]+}', reading):
+        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[14:])
             single = packet.get("busy", 0.0)
             render.append(float(single))
@@ -958,10 +989,10 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 "gpu": gpu_util,
                 "mem": gpu_mem_util,
             }
-    except:
+    except Exception:
+        pass
+    finally:
         return results
-
-    return results
 
 
 def ffprobe_stream(path: str) -> sp.CompletedProcess:

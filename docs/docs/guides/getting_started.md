@@ -14,7 +14,7 @@ mqtt:
   enabled: False
 
 cameras:
-  camera_1: # <------ Name the camera
+  name_of_your_camera: # <------ Name the camera
     ffmpeg:
       inputs:
         - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
@@ -44,7 +44,7 @@ Here is an example configuration with hardware acceleration configured for Intel
 mqtt: ...
 
 cameras:
-  camera_1:
+  name_of_your_camera:
     ffmpeg:
       inputs: ...
       hwaccel_args: preset-vaapi
@@ -64,7 +64,7 @@ detectors: # <---- add detectors
     device: usb
 
 cameras:
-  camera_1:
+  name_of_your_camera:
     ffmpeg: ...
     detect:
       enabled: True # <---- turn on detection
@@ -99,7 +99,7 @@ detectors:
     device: usb
 
 cameras:
-  camera_1:
+  name_of_your_camera:
     ffmpeg:
       inputs:
         - path: rtsp://10.0.10.10:554/rtsp
@@ -127,7 +127,7 @@ mqtt: ...
 detectors: ...
 
 cameras:
-  camera_1:
+  name_of_your_camera:
     ffmpeg:
       inputs:
         - path: rtsp://10.0.10.10:554/rtsp
@@ -156,7 +156,7 @@ mqtt: ...
 detectors: ...
 
 cameras:
-  camera_1: ...
+  name_of_your_camera: ...
     detect: ...
     record: ...
     snapshots: # <----- Enable snapshots

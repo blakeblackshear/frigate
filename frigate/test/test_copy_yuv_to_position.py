@@ -1,7 +1,9 @@
+from unittest import TestCase, main
+
 import cv2
 import numpy as np
-from unittest import TestCase, main
-from frigate.util import get_yuv_crop, copy_yuv_to_position
+
+from frigate.util import copy_yuv_to_position, get_yuv_crop
 
 
 class TestCopyYuvToPosition(TestCase):

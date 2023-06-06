@@ -1,16 +1,14 @@
 """Record events for object, audio, etc. detections."""
 
 import logging
-import threading
 import queue
-
-from frigate.config import FrigateConfig
-from frigate.events import EventTypeEnum
-from frigate.models import Timeline
-
+import threading
 from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
+from frigate.config import FrigateConfig
+from frigate.events.maintainer import EventTypeEnum
+from frigate.models import Timeline
 from frigate.util import to_relative_box
 
 logger = logging.getLogger(__name__)

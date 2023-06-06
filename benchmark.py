@@ -1,11 +1,11 @@
-import os
-from statistics import mean
-import multiprocessing as mp
-import numpy as np
 import datetime
+import multiprocessing as mp
+from statistics import mean
+
+import numpy as np
+
 from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
-    LocalObjectDetector,
     ObjectDetectProcess,
     RemoteObjectDetector,
     load_labels,
@@ -53,7 +53,7 @@ def start(id, num_detections, detection_queue, event):
     frame_times = []
     for x in range(0, num_detections):
         start_frame = datetime.datetime.now().timestamp()
-        detections = object_detector.detect(my_frame)
+        object_detector.detect(my_frame)
         frame_times.append(datetime.datetime.now().timestamp() - start_frame)
 
     duration = datetime.datetime.now().timestamp() - start
