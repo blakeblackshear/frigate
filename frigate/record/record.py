@@ -40,9 +40,9 @@ def manage_recordings(
     db = SqliteQueueDatabase(
         config.database.path,
         pragmas={
-            "auto_vacuum": "FULL", # Does not defragment database
-            "cache_size": -512 * 1000, # 512MB of cache
-            'synchronous': 'NORMAL', # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
+            "auto_vacuum": "FULL",  # Does not defragment database
+            "cache_size": -512 * 1000,  # 512MB of cache
+            "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
         },
         timeout=60,
     )
