@@ -39,7 +39,11 @@ def manage_recordings(
 
     db = SqliteQueueDatabase(
         config.database.path,
-        pragmas={"auto_vacuum": "FULL"},  # Does not defragment database
+        pragmas={
+            "auto_vacuum": "FULL", # Does not defragment database
+            "cache_size": -512 * 1000, # 512MB of cache
+        },
+        timeout=60,
     )
     models = [Event, Recordings, Timeline]
     db.bind(models)
