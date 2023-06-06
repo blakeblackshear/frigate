@@ -566,8 +566,14 @@ telemetry:
     - ens
     - wl
     - lo
-  # Optional: Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
-  network_bandwidth: False
+  # Optional: Configure system stats
+  stats:
+    # Enable AMD GPU stats (default: shown below)
+    amd_gpu_stats: true
+    # Enable Intel GPU stats (default: shown below)
+    intel_gpu_stats: true
+    # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
   version_check: True
