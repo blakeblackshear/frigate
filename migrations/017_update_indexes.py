@@ -27,7 +27,7 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'CREATE INDEX "recordings_segment_size" ON "recordings" ("camera", "segment_size")'
+        'CREATE INDEX "recordings_camera_segment_size" ON "recordings" ("camera", "segment_size")'
     )
 
 
