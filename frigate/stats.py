@@ -109,7 +109,7 @@ def get_processing_stats(
             asyncio.create_task(set_cpu_stats(stats)),
         ]
 
-        if config.telemetry.network_bandwidth:
+        if config.telemetry.stats.network_bandwidth:
             stats_tasks.append(asyncio.create_task(set_bandwidth_stats(config, stats)))
 
         await asyncio.wait(stats_tasks)
