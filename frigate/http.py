@@ -40,7 +40,7 @@ from frigate.monitoring.prometheus import setupRegistry
 from frigate.monitoring.stats import stats_snapshot
 from frigate.plus import PlusApi
 from frigate.ptz import OnvifController
-from frigate.stats import stats_snapshot
+from frigate.monitoring.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
 from frigate.util import (
     clean_camera_user_pass,
