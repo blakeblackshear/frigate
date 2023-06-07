@@ -18,8 +18,6 @@ jobs:
   multi_arch_build:
     runs-on: ubuntu-latest
     name: Image Build
-    permissions:
-      packages: write
     steps:
       - name: Remove unnecessary files
         run: |
