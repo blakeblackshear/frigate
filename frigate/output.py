@@ -7,6 +7,7 @@ import os
 import queue
 import signal
 import subprocess as sp
+import sys
 import threading
 import traceback
 from wsgiref.simple_server import make_server
@@ -287,25 +288,26 @@ class BirdsEyeFrameManager:
                     camera_layout[y_i].append(
                         (
                             camera,
-                            (x, y, detect_config.width, detect_config.height),
+                            (x, y, int(detect_config.width * coefficient), int(detect_config.height * coefficient)),
                         )
                     )
-                    x += detect_config.width
-                    max_height = max(max_height, detect_config.height)
+                    x += int(detect_config.width * coefficient)
+                    max_height = max(max_height, int(detect_config.height * coefficient))
                 else:
                     # move on to the next row and insert
-                    y = max_height
+                    y += max_height
                     y_i += 1
                     camera_layout.append([])
                     x = 0
                     camera_layout[y_i].append(
                         (
                             camera,
-                            (x, y, detect_config.width, detect_config.height),
+                            (x, y, int(detect_config.width * coefficient), int(detect_config.height * coefficient)),
                         )
                     )
-                    x += detect_config.width
+                    x += int(detect_config.width * coefficient)
 
+            logger.error(f"Calc total height {y + max_height}")
             return (camera_layout, y + max_height)
 
         # determine how many cameras are tracking objects within the last 30 seconds
@@ -385,30 +387,30 @@ class BirdsEyeFrameManager:
                 self.config.cameras[active_camera].birdseye.order,
                 active_camera,
             ),
-            # we're popping out elements from the end, so this needs to be reverse
-            # as we want the last element to be the first
-            reverse=True,
         )
 
         canvas_width = self.config.birdseye.width
         canvas_height = self.config.birdseye.height
-        coefficient = 1
+        coefficient = 1.0
 
-        layout_candidate, total_height = calculate_layout(
-            (canvas_width, canvas_height), active_cameras_to_add, coefficient
-        )
-
-        if total_height > canvas_height:
-            coefficient = canvas_height / total_height
+        while True:
             layout_candidate, total_height = calculate_layout(
                 (canvas_width, canvas_height), active_cameras_to_add, coefficient
             )
 
+            logger.error(f"With a coefficient of {coefficient} the total height is {total_height}")
+
+            if total_height <= canvas_height:
+                break
+
+            coefficient -= 0.1
+
         self.camera_layout = layout_candidate
+
+        logger.error(f"The final layout is {self.camera_layout}")
 
         for row in self.camera_layout:
             for position in row:
-                logger.error(f"Position is {position}")
                 self.copy_to_position(
                     position[1], position[0], self.cameras[position[0]]["current_frame"]
                 )
