@@ -53,6 +53,7 @@ jobs:
           target: frigate
           tags: |
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push TensorRT
@@ -64,4 +65,5 @@ jobs:
           target: frigate-tensorrt
           tags: |
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-tensorrt
           cache-from: type=gha
