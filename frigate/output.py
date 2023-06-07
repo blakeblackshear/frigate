@@ -211,7 +211,7 @@ class BirdsEyeFrameManager:
                 ),
             )
             self.cameras[camera] = {
-                "dimensions": (settings.detect.width, settings.detect.height),
+                "dimensions": [settings.detect.width, settings.detect.height],
                 "last_active_frame": 0.0,
                 "current_frame": 0.0,
                 "layout_frame": 0.0,
@@ -276,12 +276,21 @@ class BirdsEyeFrameManager:
             """Calculate the optimal layout for cameras."""
             camera_layout: list[list[any]] = []
             camera_layout.append([])
+            canvas_aspect = canvas[0] / canvas[1]
             x = 0
             y = 0
             y_i = 0
             max_height = 0
             for camera in cameras_to_add:
-                if (x + self.cameras[camera]["settings"][0] * coefficient) <= canvas[0]:
+                camera_dims = self.cameras[camera]["dimensions"]
+                camera_aspect = camera_dims[0] / camera_dims[1]
+
+                # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
+                if camera_aspect < canvas_aspect:
+                    camera_dims[0] *= camera_aspect / canvas_aspect
+                    camera_dims[1] *= camera_aspect / canvas_aspect
+
+                if (x + camera_dims[0] * coefficient) <= canvas[0]:
                     # insert if camera can fit on current row
                     camera_layout[y_i].append(
                         (
@@ -289,15 +298,15 @@ class BirdsEyeFrameManager:
                             (
                                 x,
                                 y,
-                                int(self.cameras[camera]["settings"][0] * coefficient),
-                                int(self.cameras[camera]["settings"][1] * coefficient),
+                                int(camera_dims[0] * coefficient),
+                                int(camera_dims[1] * coefficient),
                             ),
                         )
                     )
-                    x += int(self.cameras[camera]["settings"][0] * coefficient)
+                    x += int(camera_dims[0] * coefficient)
                     max_height = max(
                         max_height,
-                        int(self.cameras[camera]["settings"][1] * coefficient),
+                        int(camera_dims[1] * coefficient),
                     )
                 else:
                     # move on to the next row and insert
@@ -311,12 +320,12 @@ class BirdsEyeFrameManager:
                             (
                                 x,
                                 y,
-                                int(self.cameras[camera]["settings"][0] * coefficient),
-                                int(self.cameras[camera]["settings"][1] * coefficient),
+                                int(camera_dims[0] * coefficient),
+                                int(camera_dims[1] * coefficient),
                             ),
                         )
                     )
-                    x += int(self.cameras[camera]["settings"][0] * coefficient)
+                    x += int(camera_dims[0] * coefficient)
 
             return (camera_layout, y + max_height)
 
