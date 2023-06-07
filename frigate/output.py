@@ -7,7 +7,6 @@ import queue
 import signal
 import subprocess as sp
 import threading
-import traceback
 from wsgiref.simple_server import make_server
 
 import cv2
@@ -523,23 +522,19 @@ def output_frames(config: FrigateConfig, video_output_queue):
                 for ws in websocket_server.manager
             )
         ):
-            try:
-                if birdseye_manager.update(
-                    camera,
-                    len([o for o in current_tracked_objects if not o["stationary"]]),
-                    len(motion_boxes),
-                    frame_time,
-                    frame,
-                ):
-                    frame_bytes = birdseye_manager.frame.tobytes()
+            if birdseye_manager.update(
+                camera,
+                len([o for o in current_tracked_objects if not o["stationary"]]),
+                len(motion_boxes),
+                frame_time,
+                frame,
+            ):
+                frame_bytes = birdseye_manager.frame.tobytes()
 
-                    if config.birdseye.restream:
-                        birdseye_buffer[:] = frame_bytes
+                if config.birdseye.restream:
+                    birdseye_buffer[:] = frame_bytes
 
-                    converters["birdseye"].write(frame_bytes)
-            except Exception as e:
-                logger.error(f"Crash happened :: {e}")
-                logger.error(traceback.format_exc())
+                converters["birdseye"].write(frame_bytes)
 
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")
