@@ -249,6 +249,8 @@ class BirdsEyeFrameManager:
                 return
             channel_dims = self.cameras[camera]["channel_dims"]
 
+        logger.error(f"Copy to yuv {position}")
+
         copy_yuv_to_position(
             self.frame,
             [position[1], position[0]],
@@ -274,14 +276,13 @@ class BirdsEyeFrameManager:
             camera_layout: list[list[any]] = []
             camera_layout.append([])
             x = 0
-            x_i = 0
             y = 0
             y_i = 0
             max_height = 0
             for camera in cameras_to_add:
                 detect_config = self.config.cameras[camera].detect
 
-                if self.config.cameras[camera].detect.width * coefficient <= canvas[0]:
+                if (x + self.config.cameras[camera].detect.width * coefficient) <= canvas[0]:
                     # insert if camera can fit on current row
                     camera_layout[y_i].append(
                         (
@@ -297,7 +298,6 @@ class BirdsEyeFrameManager:
                     y_i += 1
                     camera_layout.append([])
                     x = 0
-                    x_i = 0
                     camera_layout[y_i].append(
                         (
                             camera,
@@ -390,8 +390,8 @@ class BirdsEyeFrameManager:
             reverse=True,
         )
 
-        canvas_width = self.frame_shape[1]
-        canvas_height = self.frame_shape[0]
+        canvas_width = self.config.birdseye.width
+        canvas_height = self.config.birdseye.height
         coefficient = 1
 
         layout_candidate, total_height = calculate_layout(
@@ -400,7 +400,7 @@ class BirdsEyeFrameManager:
 
         if total_height > canvas_height:
             coefficient = canvas_height / total_height
-            layout_candidate = calculate_layout(
+            layout_candidate, total_height = calculate_layout(
                 (canvas_width, canvas_height), active_cameras_to_add, coefficient
             )
 
@@ -408,6 +408,7 @@ class BirdsEyeFrameManager:
 
         for row in self.camera_layout:
             for position in row:
+                logger.error(f"Position is {position}")
                 self.copy_to_position(
                     position[1], position[0], self.cameras[position[0]]["current_frame"]
                 )
