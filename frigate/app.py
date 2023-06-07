@@ -175,7 +175,7 @@ class FrigateApp:
                 with open("/config/.vacuum", "w") as f:
                     f.write(datetime.datetime.now().timestamp())
             except PermissionError:
-                logger.error(f"Unable to write to /config to save DB state")
+                logger.error("Unable to write to /config to save DB state")
 
         # Migrate DB location
         old_db_path = DEFAULT_DB_PATH
