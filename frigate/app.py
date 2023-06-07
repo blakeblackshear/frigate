@@ -173,7 +173,7 @@ class FrigateApp:
 
             try:
                 with open("/config/.vacuum", "w") as f:
-                    f.write(datetime.datetime.now().timestamp())
+                    f.write(str(datetime.datetime.now().timestamp()))
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
 
