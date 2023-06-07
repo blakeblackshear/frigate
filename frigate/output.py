@@ -282,7 +282,7 @@ class BirdsEyeFrameManager:
             y_i = 0
             max_height = 0
             for camera in cameras_to_add:
-                camera_dims = self.cameras[camera]["dimensions"]
+                camera_dims = self.cameras[camera]["dimensions"].copy()
                 camera_aspect = camera_dims[0] / camera_dims[1]
 
                 # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
