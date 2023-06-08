@@ -373,20 +373,72 @@ class BirdsEyeFrameManager:
 
             canvas_width = self.config.birdseye.width
             canvas_height = self.config.birdseye.height
-            coefficient = 1.0
 
-            # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
-            while True:
-                layout_candidate, total_height = calculate_layout(
-                    (canvas_width, canvas_height), active_cameras_to_add, coefficient
+            if len(active_cameras) == 1:
+                # show single camera as fullscreen
+                camera = active_cameras_to_add[0]
+                camera_dims = self.cameras[camera]["dimensions"].copy()
+                scaled_width = int(canvas_height * camera_dims[0] / camera_dims[1])
+                coefficient = (
+                    1 if scaled_width <= canvas_width else canvas_width / scaled_width
                 )
+                self.camera_layout = [
+                    [
+                        (
+                            camera,
+                            (
+                                0,
+                                0,
+                                int(scaled_width * coefficient),
+                                int(canvas_height * coefficient),
+                            ),
+                        )
+                    ]
+                ]
+            elif len(active_cameras) == 2:
+                # split canvas in half for 2 cameras
+                top_camera = active_cameras_to_add[0]
+                top_camera_dims = self.cameras[top_camera]["dimensions"].copy()
+                bottom_camera = active_cameras_to_add[1]
+                bottom_camera_dims = self.cameras[bottom_camera]["dimensions"].copy()
+                top_scaled_width = int(
+                    (canvas_height / 2) * top_camera_dims[0] / top_camera_dims[1]
+                )
+                bottom_scaled_width = int(
+                    (canvas_height / 2) * bottom_camera_dims[0] / bottom_camera_dims[1]
+                )
+                self.camera_layout = [
+                    [(top_camera, (0, 0, top_scaled_width, int(canvas_height / 2)))],
+                    [
+                        (
+                            bottom_camera,
+                            (
+                                0,
+                                int(canvas_height / 2),
+                                bottom_scaled_width,
+                                int(canvas_height / 2),
+                            ),
+                        )
+                    ],
+                ]
+            else:
+                # calculate optimal layout
+                coefficient = 1.0
 
-                if total_height <= canvas_height:
-                    break
+                # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
+                while True:
+                    layout_candidate, total_height = calculate_layout(
+                        (canvas_width, canvas_height),
+                        active_cameras_to_add,
+                        coefficient,
+                    )
 
-                coefficient -= 0.1
+                    if total_height <= canvas_height:
+                        break
 
-            self.camera_layout = layout_candidate
+                    coefficient -= 0.1
+
+                self.camera_layout = layout_candidate
 
         for row in self.camera_layout:
             for position in row:
