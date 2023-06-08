@@ -61,7 +61,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
             self.publish(
                 f"{camera_name}/capture/state",
-                "ON",
+                "ON" if camera.capture_enabled else "OFF",
                 retain=True,
             )
             self.publish(
