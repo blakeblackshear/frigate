@@ -241,7 +241,7 @@ class RecordingCleanup(threading.Thread):
 
         if len(recordings_to_delete) / recordings.count() > 0.5:
             logger.debug(
-                f"Deleting {(len(recordings_to_delete) / recordings.count()):2f}% of recordings looks like as bug. Do nothing"
+                f"Deleting {(len(recordings_to_delete) / recordings.count()):2f}% of recordings could be due to configuration error. Aborting..."
             )
             return
 
