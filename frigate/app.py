@@ -24,6 +24,7 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
+    EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
@@ -68,7 +69,14 @@ class FrigateApp:
             os.environ[key] = value
 
     def ensure_dirs(self) -> None:
-        for d in [CONFIG_DIR, RECORD_DIR, CLIPS_DIR, CACHE_DIR, MODEL_CACHE_DIR]:
+        for d in [
+            CONFIG_DIR,
+            RECORD_DIR,
+            CLIPS_DIR,
+            CACHE_DIR,
+            MODEL_CACHE_DIR,
+            EXPORT_DIR,
+        ]:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d)

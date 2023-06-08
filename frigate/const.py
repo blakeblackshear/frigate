@@ -4,6 +4,7 @@ MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 RECORD_DIR = f"{BASE_DIR}/recordings"
+EXPORT_DIR = f"{BASE_DIR}/exports"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 YAML_EXT = (".yaml", ".yml")
@@ -28,3 +29,4 @@ DRIVER_INTEL_iHD = "iHD"
 
 MAX_SEGMENT_DURATION = 600
 SECONDS_IN_DAY = 60 * 60 * 24
+MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to account for cameras with inconsistent segment times

@@ -2,6 +2,7 @@
 
 import logging
 import os
+from enum import Enum
 from typing import Any
 
 from frigate.const import BTBN_PATH
@@ -116,7 +117,7 @@ PRESETS_HW_ACCEL_SCALE = {
     "default": "-r {0} -s {1}x{2}",
 }
 
-PRESETS_HW_ACCEL_ENCODE = {
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
@@ -125,6 +126,17 @@ PRESETS_HW_ACCEL_ENCODE = {
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "preset-nvidia-h265": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
+}
+
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
+    "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
+    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
+    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
+    "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-nvidia-h264": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v h264_nvenc {1}",
+    "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
+    "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
 
 
@@ -161,12 +173,24 @@ def parse_preset_hardware_acceleration_scale(
         return scale
 
 
-def parse_preset_hardware_acceleration_encode(arg: Any, input: str, output: str) -> str:
-    """Return the correct scaling preset or default preset if none is set."""
-    if not isinstance(arg, str):
-        return PRESETS_HW_ACCEL_ENCODE["default"].format(input, output)
+class EncodeTypeEnum(str, Enum):
+    birdseye = "birdseye"
+    timelapse = "timelapse"
 
-    return PRESETS_HW_ACCEL_ENCODE.get(arg, PRESETS_HW_ACCEL_ENCODE["default"]).format(
+
+def parse_preset_hardware_acceleration_encode(
+    arg: Any, input: str, output: str, type: EncodeTypeEnum = EncodeTypeEnum.birdseye
+) -> str:
+    """Return the correct scaling preset or default preset if none is set."""
+    if type == EncodeTypeEnum.birdseye:
+        arg_map = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE
+    elif type == EncodeTypeEnum.timelapse:
+        arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
+
+    if not isinstance(arg, str):
+        return arg_map["default"].format(input, output)
+
+    return arg_map.get(arg, arg_map["default"]).format(
         input,
         output,
         _gpu_selector.get_selected_gpu(),
