@@ -13,7 +13,7 @@ from frigate.motion.improved_motion import ImprovedMotionDetector
 # get info on the video
 # cap = cv2.VideoCapture("debug/front_cam_2023_05_23_08_41__2023_05_23_08_43.mp4")
 # cap = cv2.VideoCapture("debug/motion_test_clips/rain_1.mp4")
-cap = cv2.VideoCapture("debug/motion_test_clips/low_contrast_ir.mp4")
+cap = cv2.VideoCapture("debug/motion_test_clips/ir_off.mp4")
 # cap = cv2.VideoCapture("airport.mp4")
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))

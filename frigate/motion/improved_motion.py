@@ -34,6 +34,7 @@ class ImprovedMotionDetector(MotionDetector):
         )
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
+        self.calibrating = True
         self.improve_contrast = improve_contrast
         self.threshold = threshold
         self.contour_area = contour_area
@@ -59,7 +60,7 @@ class ImprovedMotionDetector(MotionDetector):
         # mask frame
         resized_frame[self.mask] = [255]
 
-        if self.save_images:
+        if self.save_images or self.calibrating:
             self.frame_counter += 1
         # compare to average
         frameDelta = cv2.absdiff(resized_frame, cv2.convertScaleAbs(self.avg_frame))
@@ -78,9 +79,11 @@ class ImprovedMotionDetector(MotionDetector):
         cnts = imutils.grab_contours(cnts)
 
         # loop over the contours
+        total_contour_area = 0
         for c in cnts:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
+            total_contour_area += contour_area
             if contour_area > self.contour_area.value:
                 x, y, w, h = cv2.boundingRect(c)
                 motion_boxes.append(
@@ -92,19 +95,29 @@ class ImprovedMotionDetector(MotionDetector):
                     )
                 )
 
+        pct_motion = total_contour_area / (
+            self.motion_frame_size[0] * self.motion_frame_size[1]
+        )
+
+        # once the motion drops to less than 1% for the first time, assume its calibrated
+        if pct_motion < 0.01:
+            self.calibrating = False
+
+        # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
+        if self.calibrating or pct_motion > self.config.lightning_threshold:
+            motion_boxes = []
+            self.calibrating = True
+
         if self.save_images:
             thresh_dilated = cv2.cvtColor(thresh_dilated, cv2.COLOR_GRAY2BGR)
-            for c in cnts:
-                contour_area = cv2.contourArea(c)
-                if contour_area > self.contour_area.value:
-                    x, y, w, h = cv2.boundingRect(c)
-                    cv2.rectangle(
-                        thresh_dilated,
-                        (x, y),
-                        (x + w, y + h),
-                        (0, 0, 255),
-                        2,
-                    )
+            for b in motion_boxes:
+                cv2.rectangle(
+                    thresh_dilated,
+                    (int(b[0] / self.resize_factor), int(b[1] / self.resize_factor)),
+                    (int(b[2] / self.resize_factor), int(b[3] / self.resize_factor)),
+                    (0, 0, 255),
+                    2,
+                )
             cv2.imwrite(
                 f"debug/frames/improved-{self.frame_counter}.jpg", thresh_dilated
             )

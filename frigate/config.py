@@ -13,9 +13,11 @@ from pydantic.fields import PrivateAttr
 
 from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
 from frigate.detectors import DetectorConfig, ModelConfig
-from frigate.detectors.detector_config import InputTensorEnum  # noqa: F401
-from frigate.detectors.detector_config import PixelFormatEnum  # noqa: F401
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.detector_config import (
+    BaseDetectorConfig,
+    InputTensorEnum,  # noqa: F401
+    PixelFormatEnum,  # noqa: F401
+)
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -193,6 +195,9 @@ class MotionConfig(FrigateBaseModel):
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
+    )
+    lightning_threshold: float = Field(
+        default=0.8, title="Lightning detection threshold (0.3-1.0).", ge=0.3, le=1.0
     )
     improve_contrast: bool = Field(default=False, title="Improve Contrast")
     contour_area: Optional[int] = Field(default=30, title="Contour Area")

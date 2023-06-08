@@ -262,6 +262,12 @@ motion:
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
   threshold: 25
+  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
+  #           needs to recalibrate. (default: shown below)
+  # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
+  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
+  # a doorbell camera.
+  lightning_threshold: 0.8
   # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: 30)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.
