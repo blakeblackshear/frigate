@@ -433,10 +433,12 @@ class BirdsEyeFrameManager:
                         coefficient,
                     )
 
-                    if total_height <= canvas_height:
+                    if (canvas_height * 0.9) < total_height <= canvas_height:
                         break
-
-                    coefficient -= 0.1
+                    elif total_height < canvas_height * 0.8:
+                        coefficient += 0.1
+                    else:
+                        coefficient -= 0.1
 
                 self.camera_layout = layout_candidate
 
