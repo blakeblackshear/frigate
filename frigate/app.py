@@ -172,7 +172,7 @@ class FrigateApp:
             db.execute_sql("VACUUM;")
 
             try:
-                with open("/config/.vacuum", "w") as f:
+                with open(f"{CONFIG_DIR}/.vacuum", "w") as f:
                     f.write(str(datetime.datetime.now().timestamp()))
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
@@ -193,8 +193,8 @@ class FrigateApp:
         router.run()
 
         # check if vacuum needs to be run
-        if os.path.exists("/config/.vacuum"):
-            with open("/config/.vacuum") as f:
+        if os.path.exists(f"{CONFIG_DIR}/.vacuum"):
+            with open(f"{CONFIG_DIR}/.vacuum") as f:
                 try:
                     timestamp = int(f.readline())
                 except Exception:
