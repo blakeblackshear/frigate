@@ -400,8 +400,8 @@ def capture_camera(name, config: CameraConfig, process_info):
     def run_capture():
         frame_queue = process_info["frame_queue"]
         prev_sig = None
-        logger.info(f"{name}: capture starting")
         while prev_sig not in stop_sigs:
+            logger.info(f"{name}: capture starting")
             camera_watchdog = CameraWatchdog(
                 name,
                 config,
@@ -425,8 +425,6 @@ def capture_camera(name, config: CameraConfig, process_info):
                 # Abort on a STOP signal
                 if( prev_sig := sig_queue.get() ) in stop_sigs:
                     break
-
-            logger.info(f"{name}: capture resuming")
 
     # Run a background thread to prevent deadlock in signal handlers
     capture_thread = threading.Thread(target=run_capture)
