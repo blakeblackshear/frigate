@@ -397,10 +397,19 @@ def capture_camera(name, config: CameraConfig, process_info):
 
     setproctitle(f"frigate.capture:{name}")
 
+    # Set initial paused or resumed state
+    init_sig = resume_sigs[0] if config.capture_enabled else pause_sigs[0]
+
     def run_capture():
         frame_queue = process_info["frame_queue"]
-        prev_sig = None
+        prev_sig = init_sig
         while prev_sig not in stop_sigs:
+            # Pause here until stopped or resumed
+            while not sig_queue.empty() or prev_sig not in resume_sigs:
+                # Abort on a STOP signal
+                if( prev_sig := sig_queue.get() ) in stop_sigs:
+                    break
+
             logger.info(f"{name}: capture starting")
             camera_watchdog = CameraWatchdog(
                 name,
@@ -418,13 +427,6 @@ def capture_camera(name, config: CameraConfig, process_info):
                 logger.warning(f"{name}: capture stopped without signal")
             else:
                 logger.info(f"{name}: capture stopped")
-
-            # Go through the queued signals, aborting on any STOP or
-            # otherwise using the last state when the queue is emptied
-            while not sig_queue.empty() or prev_sig not in resume_sigs:
-                # Abort on a STOP signal
-                if( prev_sig := sig_queue.get() ) in stop_sigs:
-                    break
 
     # Run a background thread to prevent deadlock in signal handlers
     capture_thread = threading.Thread(target=run_capture)
