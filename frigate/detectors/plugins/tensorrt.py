@@ -1,6 +1,6 @@
+import ctypes
 import logging
 
-import ctypes
 import numpy as np
 
 try:
@@ -8,13 +8,14 @@ try:
     from cuda import cuda
 
     TRT_SUPPORT = True
-except ModuleNotFoundError as e:
+except ModuleNotFoundError:
     TRT_SUPPORT = False
+
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing_extensions import Literal
-from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +173,7 @@ class TensorRtDetector(DetectionApi):
         if not self.context.execute_async_v2(
             bindings=self.bindings, stream_handle=self.stream
         ):
-            logger.warn(f"Execute returned false")
+            logger.warn("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [

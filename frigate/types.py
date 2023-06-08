@@ -1,7 +1,7 @@
-from typing import Optional, TypedDict
+from multiprocessing.context import Process
 from multiprocessing.queues import Queue
 from multiprocessing.sharedctypes import Synchronized
-from multiprocessing.context import Process
+from typing import Optional, TypedDict
 
 from frigate.object_detection import ObjectDetectProcess
 

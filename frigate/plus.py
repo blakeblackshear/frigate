@@ -3,12 +3,14 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, List
-import requests
-from frigate.const import PLUS_ENV_VAR, PLUS_API_HOST
-from requests.models import Response
+from typing import Any, List
+
 import cv2
+import requests
 from numpy import ndarray
+from requests.models import Response
+
+from frigate.const import PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
 

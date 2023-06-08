@@ -1,18 +1,17 @@
 # adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
 import logging
-import threading
-import os
-import signal
-import queue
 import multiprocessing as mp
-from multiprocessing.queues import Queue
-from logging import handlers
-from typing import Optional
-from types import FrameType
-from setproctitle import setproctitle
-from typing import Deque, Optional
-from types import FrameType
+import os
+import queue
+import signal
+import threading
 from collections import deque
+from logging import handlers
+from multiprocessing.queues import Queue
+from types import FrameType
+from typing import Deque, Optional
+
+from setproctitle import setproctitle
 
 from frigate.util import clean_camera_user_pass
 
@@ -44,7 +43,7 @@ def root_configurer(queue: Queue) -> None:
 
 
 def log_process(log_queue: Queue) -> None:
-    threading.current_thread().name = f"logger"
+    threading.current_thread().name = "logger"
     setproctitle("frigate.logger")
     listener_configurer()
 
@@ -62,6 +61,8 @@ def log_process(log_queue: Queue) -> None:
         except (queue.Empty, KeyboardInterrupt):
             if stop_event.is_set():
                 break
+            continue
+        if record.msg.startswith("You are using a scalar distance function"):
             continue
         logger = logging.getLogger(record.name)
         logger.handle(record)

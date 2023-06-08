@@ -275,7 +275,7 @@ class RecordingCleanup(threading.Thread):
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
             if self.stop_event.wait(60):
-                logger.info(f"Exiting recording cleanup...")
+                logger.info("Exiting recording cleanup...")
                 break
             self.clean_tmp_clips()
 

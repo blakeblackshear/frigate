@@ -10,16 +10,17 @@ import threading
 import time
 from collections import defaultdict
 
-import numpy as np
 import cv2
+import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
 from frigate.const import CACHE_DIR
-from frigate.object_detection import RemoteObjectDetector
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
-from frigate.objects import ObjectTracker
+from frigate.object_detection import RemoteObjectDetector
+from frigate.track import ObjectTracker
+from frigate.track.norfair_tracker import NorfairTracker
 from frigate.util import (
     EventsPerSecond,
     FrameManager,
@@ -30,8 +31,8 @@ from frigate.util import (
     intersection,
     intersection_over_union,
     listen,
-    yuv_region_2_rgb,
     yuv_region_2_bgr,
+    yuv_region_2_rgb,
     yuv_region_2_yuv,
 )
 
@@ -45,7 +46,7 @@ def filtered(obj, objects_to_track, object_filters):
     object_area = obj[3]
     object_ratio = obj[4]
 
-    if not object_name in objects_to_track:
+    if object_name not in objects_to_track:
         return True
 
     if object_name in object_filters:
@@ -73,7 +74,7 @@ def filtered(obj, objects_to_track, object_filters):
         if obj_settings.max_ratio < object_ratio:
             return True
 
-        if not obj_settings.mask is None:
+        if obj_settings.mask is not None:
             # compute the coordinates of the object and make sure
             # the location isn't outside the bounds of the image (can happen from rounding)
             object_xmin = object_box[0]
@@ -169,20 +170,20 @@ def capture_frames(
     skipped_eps.start()
     while True:
         fps.value = frame_rate.eps()
-        skipped_fps = skipped_eps.eps()
+        skipped_eps.eps()
 
         current_frame.value = datetime.datetime.now().timestamp()
         frame_name = f"{camera_name}{current_frame.value}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
-        except Exception as e:
+        except Exception:
             # shutdown has been initiated
             if stop_event.is_set():
                 break
             logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
 
-            if ffmpeg_process.poll() != None:
+            if ffmpeg_process.poll() is not None:
                 logger.error(
                     f"{camera_name}: ffmpeg process is not running. exiting capture thread..."
                 )
@@ -472,7 +473,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = ObjectTracker(config.detect)
+    object_tracker = NorfairTracker(config.detect)
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -604,7 +605,7 @@ def process_frames(
 
     while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
-            logger.info(f"Exiting track_objects...")
+            logger.info("Exiting track_objects...")
             break
 
         try:
@@ -655,7 +656,7 @@ def process_frames(
             tracked_object_boxes = [
                 obj["box"]
                 for obj in object_tracker.tracked_objects.values()
-                if not obj["id"] in stationary_object_ids
+                if obj["id"] not in stationary_object_ids
             ]
 
             # combine motion boxes with known locations of existing objects
@@ -846,6 +847,17 @@ def process_frames(
             # else, just update the frame times for the stationary objects
             else:
                 object_tracker.update_frame_times(frame_time)
+
+        # debug tracking by writing frames
+        if False:
+            bgr_frame = cv2.cvtColor(
+                frame,
+                cv2.COLOR_YUV2BGR_I420,
+            )
+            object_tracker.debug_draw(bgr_frame, frame_time)
+            cv2.imwrite(
+                f"debug/frames/track-{'{:.6f}'.format(frame_time)}.jpg", bgr_frame
+            )
 
         # add to the queue if not full
         if detected_objects_queue.full():

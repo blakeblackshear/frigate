@@ -1,13 +1,7 @@
 import logging
 
-from .detection_api import DetectionApi
-from .detector_config import (
-    PixelFormatEnum,
-    InputTensorEnum,
-    ModelConfig,
-)
-from .detector_types import DetectorTypeEnum, api_types, DetectorConfig
-
+from .detector_config import InputTensorEnum, ModelConfig, PixelFormatEnum  # noqa: F401
+from .detector_types import DetectorConfig, DetectorTypeEnum, api_types  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

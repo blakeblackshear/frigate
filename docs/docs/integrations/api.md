@@ -271,6 +271,20 @@ HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed i
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
 
+### `POST /api/export/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
+
+It is also possible to export this recording as a timelapse.
+
+**Optional Body:**
+
+```json
+{
+  "playback": "realtime", // playback factor: realtime or timelapse_25x
+}
+```
+
 ### `GET /api/<camera_name>/recordings/summary`
 
 Hourly summary of recordings data for a camera.

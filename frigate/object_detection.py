@@ -12,7 +12,6 @@ from setproctitle import setproctitle
 
 from frigate.config import InputTensorEnum
 from frigate.detectors import create_detector
-
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
 logger = logging.getLogger(__name__)
@@ -161,7 +160,7 @@ class ObjectDetectProcess:
 
     def start_or_restart(self):
         self.detection_start.value = 0.0
-        if (not self.detect_process is None) and self.detect_process.is_alive():
+        if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
         self.detect_process = mp.Process(
             target=run_detector,

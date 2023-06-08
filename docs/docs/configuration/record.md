@@ -80,3 +80,7 @@ record:
         dog: 2
         car: 7
 ```
+
+## How do I export recordings?
+
+The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a timelapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.

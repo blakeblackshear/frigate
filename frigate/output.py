@@ -4,7 +4,6 @@ import logging
 import math
 import multiprocessing as mp
 import os
-import operator
 import queue
 import signal
 import subprocess as sp
@@ -149,7 +148,7 @@ class BroadcastThread(threading.Thread):
                     ):
                         try:
                             ws.send(buf, binary=True)
-                        except:
+                        except ValueError:
                             pass
             elif self.converter.process.poll() is not None:
                 break
@@ -185,7 +184,7 @@ class BirdsEyeFrameManager:
             if len(logo_files) > 0:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
 
-        if not birdseye_logo is None:
+        if birdseye_logo is not None:
             transparent_layer = birdseye_logo[:, :, 3]
             y_offset = height // 2 - transparent_layer.shape[0] // 2
             x_offset = width // 2 - transparent_layer.shape[1] // 2
@@ -229,7 +228,7 @@ class BirdsEyeFrameManager:
         self.last_output_time = 0.0
 
     def clear_frame(self):
-        logger.debug(f"Clearing the birdseye frame")
+        logger.debug("Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
 
     def copy_to_position(self, position, camera=None, frame_time=None):
@@ -301,7 +300,7 @@ class BirdsEyeFrameManager:
         # reset the layout if it needs to be different
         if layout_dim != self.layout_dim or reset_layout:
             if reset_layout:
-                logger.debug(f"Added new cameras, resetting layout...")
+                logger.debug("Added new cameras, resetting layout...")
 
             logger.debug(f"Changing layout size from {self.layout_dim} to {layout_dim}")
             self.layout_dim = layout_dim
@@ -385,7 +384,7 @@ class BirdsEyeFrameManager:
                 ]
             # if not an empty spot and the camera has a newer frame, copy it
             elif (
-                not camera is None
+                camera is not None
                 and self.cameras[camera]["current_frame"]
                 != self.cameras[camera]["layout_frame"]
             ):
@@ -423,8 +422,8 @@ class BirdsEyeFrameManager:
 
 
 def output_frames(config: FrigateConfig, video_output_queue):
-    threading.current_thread().name = f"output"
-    setproctitle(f"frigate.output")
+    threading.current_thread().name = "output"
+    setproctitle("frigate.output")
 
     stop_event = mp.Event()
 

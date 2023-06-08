@@ -23,6 +23,11 @@ export async function getEvents(_url, _cb, _props) {
   return module.default;
 }
 
+export async function getExports(_url, _cb, _props) {
+  const module = await import('./Export.jsx');
+  return module.default;
+}
+
 export async function getRecording(_url, _cb, _props) {
   const module = await import('./Recording.jsx');
   return module.default;

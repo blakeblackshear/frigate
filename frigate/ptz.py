@@ -2,12 +2,11 @@
 
 import logging
 import site
-
 from enum import Enum
+
 from onvif import ONVIFCamera, ONVIFError
 
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +144,7 @@ class OnvifController:
         onvif.get_service("ptz").ContinuousMove(move_request)
 
     def _move_to_preset(self, camera_name: str, preset: str) -> None:
-        if not preset in self.cams[camera_name]["presets"]:
+        if preset not in self.cams[camera_name]["presets"]:
             logger.error(f"{preset} is not a valid preset for {camera_name}")
             return
 
