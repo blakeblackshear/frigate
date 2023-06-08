@@ -5,14 +5,14 @@ import itertools
 import logging
 import os
 import threading
+from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import chunked, DoesNotExist, DatabaseError
-from multiprocessing.synchronize import Event as MpEvent
+from peewee import DatabaseError, DoesNotExist, chunked
 
-from frigate.config import RetainModeEnum, FrigateConfig
+from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import RECORD_DIR, SECONDS_IN_DAY
-from frigate.models import Event, Recordings, Timeline, RecordingsToDelete
+from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.record.util import remove_empty_directories
 
 logger = logging.getLogger(__name__)
@@ -238,6 +238,12 @@ class RecordingCleanup(threading.Thread):
         recordings_to_delete = [
             {"id": recording_id} for recording_id in recordings_to_delete
         ]
+
+        if len(recordings_to_delete) / recordings.count() > 0.5:
+            logger.debug(
+                f"Deleting {(len(recordings_to_delete) / recordings.count()):2f}% of recordings looks like as bug. Do nothing"
+            )
+            return
 
         logger.debug(
             f"Deleting {len(recordings_to_delete)} recordings with missing files"
