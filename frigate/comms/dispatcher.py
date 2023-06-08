@@ -98,14 +98,14 @@ class Dispatcher:
     def _on_capture_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""
         logger.info(f"Received capture command [{payload}] for [{camera_name}]")
-        capture_proc = self.camera_metrics[camera_name]['capture_process']
+        capture_proc = self.camera_metrics[camera_name]["capture_process"]
 
         # Send SIGUSR1 to resume, SIGUSR2 to pause
         new_state = True if payload == "ON" else False if payload == "OFF" else None
         if new_state is not None:
             sig = signal.SIGUSR1 if new_state else signal.SIGUSR2
             self.config.cameras[camera_name].capture_enabled = new_state
-            os.kill( capture_proc.pid, sig )
+            os.kill(capture_proc.pid, sig)
             self.publish(f"{camera_name}/capture/state", payload, retain=True)
 
     def _on_detect_command(self, camera_name: str, payload: str) -> None:

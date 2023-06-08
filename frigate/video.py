@@ -113,10 +113,11 @@ def create_tensor_input(frame, model_config, region):
     # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
+
 def start_or_restart_ffmpeg(
     ffmpeg_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None
 ):
-    terminate_process( ffmpeg_process, logger_inst=logger )
+    terminate_process(ffmpeg_process, logger_inst=logger)
 
     if frame_size is None:
         process = sp.Popen(
@@ -386,12 +387,12 @@ def capture_camera(name, config: CameraConfig, process_info):
 
     def receiveSignal(signalNumber, frame):
         logger.info(f"{name} Received signal {signalNumber}")
-        sig_queue.put( signalNumber )
+        sig_queue.put(signalNumber)
         if signalNumber in (stop_sigs + pause_sigs):
             stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT,  receiveSignal)
+    signal.signal(signal.SIGINT, receiveSignal)
     signal.signal(signal.SIGUSR1, receiveSignal)
     signal.signal(signal.SIGUSR2, receiveSignal)
 
@@ -407,7 +408,7 @@ def capture_camera(name, config: CameraConfig, process_info):
             # Pause here until stopped or resumed
             while not sig_queue.empty() or prev_sig not in resume_sigs:
                 # Abort on a STOP signal
-                if( prev_sig := sig_queue.get() ) in stop_sigs:
+                if (prev_sig := sig_queue.get()) in stop_sigs:
                     break
 
             logger.info(f"{name}: capture starting")

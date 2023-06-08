@@ -641,7 +641,7 @@ def terminate_process(
     proc: sp.Popen, logger_inst: logging.Logger = None, timeout: float = 30.0
 ):
     logger_inst = logger_inst or logger
-    if proc is not None and proc.poll() == None:
+    if proc is not None and proc.poll() is None:
         proc_name: str = proc.args[0]
         logger_inst.info(f"Terminating the existing {proc_name} process...")
         proc.terminate()
