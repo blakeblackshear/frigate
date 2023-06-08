@@ -112,6 +112,14 @@ Topic to turn recordings for a camera on and off. Expected values are `ON` and `
 
 Topic with current state of recordings for a camera. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/capture/set`
+
+Topic to turn capture for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/capture/state`
+
+Topic with current state of capture for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/snapshots/set`
 
 Topic to turn snapshots for a camera on and off. Expected values are `ON` and `OFF`.

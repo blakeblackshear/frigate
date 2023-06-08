@@ -31,6 +31,7 @@ from frigate.util import (
     intersection,
     intersection_over_union,
     listen,
+    terminate_process,
     yuv_region_2_bgr,
     yuv_region_2_rgb,
     yuv_region_2_yuv,
@@ -112,25 +113,10 @@ def create_tensor_input(frame, model_config, region):
     # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
     return np.expand_dims(cropped_frame, axis=0)
 
-
-def stop_ffmpeg(ffmpeg_process, logger):
-    logger.info("Terminating the existing ffmpeg process...")
-    ffmpeg_process.terminate()
-    try:
-        logger.info("Waiting for ffmpeg to exit gracefully...")
-        ffmpeg_process.communicate(timeout=30)
-    except sp.TimeoutExpired:
-        logger.info("FFmpeg didnt exit. Force killing...")
-        ffmpeg_process.kill()
-        ffmpeg_process.communicate()
-    ffmpeg_process = None
-
-
 def start_or_restart_ffmpeg(
     ffmpeg_cmd, logger, logpipe: LogPipe, frame_size=None, ffmpeg_process=None
 ):
-    if ffmpeg_process is not None:
-        stop_ffmpeg(ffmpeg_process, logger)
+    terminate_process( ffmpeg_process, logger_inst=logger )
 
     if frame_size is None:
         process = sp.Popen(
@@ -268,27 +254,12 @@ class CameraWatchdog(threading.Thread):
                 self.logger.info(
                     f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg..."
                 )
-                self.ffmpeg_detect_process.terminate()
-                try:
-                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                    self.ffmpeg_detect_process.communicate(timeout=30)
-                except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg did not exit. Force killing...")
-                    self.ffmpeg_detect_process.kill()
-                    self.ffmpeg_detect_process.communicate()
+                terminate_process(self.ffmpeg_detect_process, logger_inst=self.logger)
+                self.ffmpeg_detect_process = None
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
                 self.camera_fps.value = 0
-                self.logger.info(
-                    f"{self.camera_name} exceeded fps limit. Exiting ffmpeg..."
-                )
-                self.ffmpeg_detect_process.terminate()
-                try:
-                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                    self.ffmpeg_detect_process.communicate(timeout=30)
-                except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg did not exit. Force killing...")
-                    self.ffmpeg_detect_process.kill()
-                    self.ffmpeg_detect_process.communicate()
+                terminate_process(self.ffmpeg_detect_process, logger_inst=self.logger)
+                self.ffmpeg_detect_process = None
 
             for p in self.ffmpeg_other_processes:
                 poll = p["process"].poll()
@@ -324,9 +295,11 @@ class CameraWatchdog(threading.Thread):
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )
 
-        stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
+        terminate_process(self.ffmpeg_detect_process, logger_inst=self.logger)
+        self.ffmpeg_detect_process = None
         for p in self.ffmpeg_other_processes:
-            stop_ffmpeg(p["process"], self.logger)
+            terminate_process(p["process"], logger_inst=self.logger)
+            p["process"] = None
             p["logpipe"].close()
         self.logpipe.close()
 
@@ -405,28 +378,60 @@ class CameraCapture(threading.Thread):
 
 
 def capture_camera(name, config: CameraConfig, process_info):
+    stop_sigs = [signal.SIGTERM, signal.SIGINT]
+    pause_sigs = [signal.SIGUSR2]
+    resume_sigs = [signal.SIGUSR1]
     stop_event = mp.Event()
+    sig_queue: mp.Queue[signal.Signals] = mp.Queue()
 
     def receiveSignal(signalNumber, frame):
-        stop_event.set()
+        logger.info(f"{name} Received signal {signalNumber}")
+        sig_queue.put( signalNumber )
+        if signalNumber in (stop_sigs + pause_sigs):
+            stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
+    signal.signal(signal.SIGINT,  receiveSignal)
+    signal.signal(signal.SIGUSR1, receiveSignal)
+    signal.signal(signal.SIGUSR2, receiveSignal)
 
-    threading.current_thread().name = f"capture:{name}"
     setproctitle(f"frigate.capture:{name}")
 
-    frame_queue = process_info["frame_queue"]
-    camera_watchdog = CameraWatchdog(
-        name,
-        config,
-        frame_queue,
-        process_info["camera_fps"],
-        process_info["ffmpeg_pid"],
-        stop_event,
-    )
-    camera_watchdog.start()
-    camera_watchdog.join()
+    def run_capture():
+        frame_queue = process_info["frame_queue"]
+        prev_sig = None
+        logger.info(f"{name}: capture starting")
+        while prev_sig not in stop_sigs:
+            camera_watchdog = CameraWatchdog(
+                name,
+                config,
+                frame_queue,
+                process_info["camera_fps"],
+                process_info["ffmpeg_pid"],
+                stop_event,
+            )
+            camera_watchdog.start()
+            camera_watchdog.join()
+            stop_event.clear()
+
+            if sig_queue.empty():
+                logger.warning(f"{name}: capture stopped without signal")
+            else:
+                logger.info(f"{name}: capture stopped")
+
+            # Go through the queued signals, aborting on any STOP or
+            # otherwise using the last state when the queue is emptied
+            while not sig_queue.empty() or prev_sig not in resume_sigs:
+                # Abort on a STOP signal
+                if( prev_sig := sig_queue.get() ) in stop_sigs:
+                    break
+
+            logger.info(f"{name}: capture resuming")
+
+    # Run a background thread to prevent deadlock in signal handlers
+    capture_thread = threading.Thread(target=run_capture)
+    capture_thread.start()
+    capture_thread.join()
 
 
 def track_camera(

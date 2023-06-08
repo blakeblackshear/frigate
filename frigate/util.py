@@ -636,6 +636,21 @@ def restart_frigate():
     else:
         os.kill(os.getpid(), signal.SIGTERM)
 
+def terminate_process(proc: sp.Popen, logger_inst: logging.Logger = None, timeout: float = 30.0):
+    logger_inst = logger_inst or logger
+    if proc is not None and proc.poll() == None:
+        proc_name: str = proc.args[0]
+        logger_inst.info(f"Terminating the existing {proc_name} process...")
+        proc.terminate()
+        try:
+            logger_inst.info(f"Waiting for {proc_name} to exit gracefully...")
+            proc.communicate(timeout=timeout)
+        except sp.TimeoutExpired:
+            logger_inst.info(f"{proc_name}didn't exit. Force killing...")
+            proc.kill()
+            proc.communicate()
+
+
 
 class EventsPerSecond:
     def __init__(self, max_events=1000):

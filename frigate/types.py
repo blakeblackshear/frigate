@@ -8,6 +8,7 @@ from frigate.object_detection import ObjectDetectProcess
 
 class CameraMetricsTypes(TypedDict):
     camera_fps: Synchronized
+    capture_enabled: Synchronized
     capture_process: Optional[Process]
     detection_enabled: Synchronized
     detection_fps: Synchronized

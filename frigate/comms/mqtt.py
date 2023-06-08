@@ -60,6 +60,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 retain=True,
             )
             self.publish(
+                f"{camera_name}/capture/state",
+                "ON",
+                retain=True,
+            )
+            self.publish(
                 f"{camera_name}/improve_contrast/state",
                 "ON" if camera.motion.improve_contrast else "OFF",  # type: ignore[union-attr]
                 retain=True,
@@ -141,6 +146,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         # register callbacks
         callback_types = [
+            "capture",
             "recordings",
             "snapshots",
             "detect",
