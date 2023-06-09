@@ -115,7 +115,7 @@ class RecordingMaintainer(threading.Thread):
                 Event.select()
                 .where(
                     Event.camera == camera,
-                    (Event.end_time is None)
+                    (Event.end_time == None)
                     | (Event.end_time >= recordings[0]["start_time"].timestamp()),
                     Event.has_clip,
                 )
