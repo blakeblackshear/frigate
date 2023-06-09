@@ -107,7 +107,7 @@ class StorageMaintainer(threading.Thread):
         retained_events: Event = (
             Event.select()
             .where(
-                Event.retain_indefinitely is True,
+                Event.retain_indefinitely == True,
                 Event.has_clip,
             )
             .order_by(Event.start_time.asc())
