@@ -758,7 +758,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.dict(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config()
-        assert round(runtime_config.cameras["back"].motion.contour_area) == 30
+        assert round(runtime_config.cameras["back"].motion.contour_area) == 15
 
     def test_merge_labelmap(self):
         config = {
