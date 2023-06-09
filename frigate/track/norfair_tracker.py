@@ -231,16 +231,21 @@ class NorfairTracker(ObjectTracker):
         # update or create new tracks
         active_ids = []
         for t in tracked_objects:
+            obj = {
+                **t.last_detection.data,
+                "estimate": tuple(t.estimate.flatten().astype(int)),
+            }
             active_ids.append(t.global_id)
             if t.global_id not in self.track_id_map:
-                self.register(t.global_id, t.last_detection.data)
+                self.register(t.global_id, obj)
             # if there wasn't a detection in this frame, increment disappeared
             elif t.last_detection.data["frame_time"] != frame_time:
                 id = self.track_id_map[t.global_id]
                 self.disappeared[id] += 1
+                self.tracked_objects[id]["estimate"] = obj["estimate"]
             # else update it
             else:
-                self.update(t.global_id, t.last_detection.data)
+                self.update(t.global_id, obj)
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
