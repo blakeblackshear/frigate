@@ -1,5 +1,6 @@
 import datetime
 import logging
+import math
 import multiprocessing as mp
 import os
 import queue
@@ -507,6 +508,13 @@ def box_overlaps(b1, b2):
     return True
 
 
+def box_inside(b1, b2):
+    # check if b2 is inside b1
+    if b2[0] >= b1[0] and b2[1] >= b1[1] and b2[2] <= b1[2] and b2[3] <= b1[3]:
+        return True
+    return False
+
+
 def reduce_boxes(boxes, iou_threshold=0.0):
     clusters = []
 
@@ -577,6 +585,102 @@ def detect(
     return detections
 
 
+def get_cluster_boundary(box):
+    # compute the max region size for the current box (box is 20% of region)
+    box_width = box[2] - box[0]
+    box_height = box[3] - box[1]
+    max_region_area = abs(box_width * box_height) / 0.2
+    max_region_size = max(160, int(math.sqrt(max_region_area)))
+
+    centroid = (box_width / 2 + box[0], box_height / 2 + box[1])
+
+    max_x_dist = int(max_region_size - box_width / 2 * 1.1)
+    max_y_dist = int(max_region_size - box_height / 2 * 1.1)
+
+    return [
+        int(centroid[0] - max_x_dist),
+        int(centroid[1] - max_y_dist),
+        int(centroid[0] + max_x_dist),
+        int(centroid[1] + max_y_dist),
+    ]
+
+
+def get_cluster_candidates(frame_shape, min_region, boxes):
+    # and create a cluster of other boxes using it's max region size
+    # only include boxes where the region is an appropriate(except the region could possibly be smaller?)
+    # size in the cluster. in order to be in the cluster, the furthest corner needs to be within x,y offset
+    # determined by the max_region size minus half the box + 20%
+    # TODO: see if we can do this with numpy
+    cluster_candidates = []
+    used_boxes = []
+    # loop over each box
+    for current_index, b in enumerate(boxes):
+        if current_index in used_boxes:
+            continue
+        cluster = [current_index]
+        used_boxes.append(current_index)
+        cluster_boundary = get_cluster_boundary(b)
+        # find all other boxes that fit inside the boundary
+        for compare_index, compare_box in enumerate(boxes):
+            if compare_index in used_boxes:
+                continue
+
+            # get the region if you were to add this box to the cluster
+            cluster_regions = get_cluster_regions(
+                frame_shape, min_region, [cluster + [compare_index]], boxes
+            )
+            # if adding the box would result in multiple regions, dont cluster
+            if len(cluster_regions) > 1:
+                continue
+
+            # if the box is inside the potential cluster area, cluster them
+            if box_inside(cluster_boundary, compare_box):
+                cluster.append(compare_index)
+                used_boxes.append(compare_index)
+        cluster_candidates.append(cluster)
+
+    # return the unique clusters only
+    unique = {tuple(sorted(c)) for c in cluster_candidates}
+    return [list(tup) for tup in unique]
+
+
+def get_cluster_regions(frame_shape, min_region, clusters, boxes):
+    regions = []
+    for c in clusters:
+        min_x = frame_shape[1]
+        min_y = frame_shape[0]
+        max_x = 0
+        max_y = 0
+        for b in c:
+            min_x = min(boxes[b][0], min_x)
+            min_y = min(boxes[b][1], min_y)
+            max_x = max(boxes[b][2], max_x)
+            max_y = max(boxes[b][3], max_y)
+        region = calculate_region(
+            frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
+        )
+        regions.append(region)
+        # TODO: move this to a dedicated check function so it doesnt run again
+        # now check each box in the region to ensure it's not too small
+        # if it is, create a dedicated region for it
+        if len(c) > 1 and (region[2] - region[0]) > min_region:
+            for b in c:
+                box = boxes[b]
+                if area(box) / area(region) < 0.05:
+                    regions.append(
+                        calculate_region(
+                            frame_shape,
+                            box[0],
+                            box[1],
+                            box[2],
+                            box[3],
+                            min_region,
+                            multiplier=1.35,
+                        )
+                    )
+    return regions
+
+
 def process_frames(
     camera_name: str,
     frame_queue: mp.Queue,
@@ -604,6 +708,8 @@ def process_frames(
     fps_tracker.start()
 
     startup_scan_counter = 0
+
+    region_min_size = int(max(model_config.height, model_config.width) / 2)
 
     while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
@@ -661,31 +767,15 @@ def process_frames(
                 if obj["id"] not in stationary_object_ids
             ]
 
-            # combine motion boxes with known locations of existing objects
-            combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
+            combined_boxes = motion_boxes + tracked_object_boxes
 
-            region_min_size = max(model_config.height, model_config.width)
-            # compute regions
-            regions = [
-                calculate_region(
-                    frame_shape,
-                    a[0],
-                    a[1],
-                    a[2],
-                    a[3],
-                    region_min_size,
-                    multiplier=random.uniform(1.2, 1.5),
-                )
-                for a in combined_boxes
-            ]
+            cluster_candidates = get_cluster_candidates(
+                frame_shape, region_min_size, combined_boxes
+            )
 
-            # consolidate regions with heavy overlap
-            regions = [
-                calculate_region(
-                    frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.0
-                )
-                for a in reduce_boxes(regions, 0.4)
-            ]
+            regions = get_cluster_regions(
+                frame_shape, region_min_size, cluster_candidates, combined_boxes
+            )
 
             # if starting up, get the next startup scan region
             if startup_scan_counter < 9:
