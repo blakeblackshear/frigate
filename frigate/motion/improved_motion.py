@@ -127,12 +127,16 @@ class ImprovedMotionDetector(MotionDetector):
             if self.motion_frame_count >= 10:
                 # only average in the current frame if the difference persists for a bit
                 cv2.accumulateWeighted(
-                    resized_frame, self.avg_frame, self.config.frame_alpha
+                    resized_frame,
+                    self.avg_frame,
+                    0.2 if self.calibrating else self.config.frame_alpha,
                 )
         else:
             # when no motion, just keep averaging the frames together
             cv2.accumulateWeighted(
-                resized_frame, self.avg_frame, self.config.frame_alpha
+                resized_frame,
+                self.avg_frame,
+                0.2 if self.calibrating else self.config.frame_alpha,
             )
             self.motion_frame_count = 0
 
