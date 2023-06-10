@@ -379,16 +379,26 @@ class CameraCapture(threading.Thread):
 
 
 def capture_camera(name, config: CameraConfig, process_info):
-    stop_sigs = [signal.SIGTERM, signal.SIGINT]
+    exit_sigs = [signal.SIGTERM, signal.SIGINT]
     pause_sigs = [signal.SIGUSR2]
-    resume_sigs = [signal.SIGUSR1]
+    # add exit signals to resumes so that it wakes thread to exit if paused
+    resume_sigs = [signal.SIGUSR1] + exit_sigs
+    stop_sigs = pause_sigs + exit_sigs
+
+    exit_event = mp.Event()
     stop_event = mp.Event()
-    sig_queue: mp.Queue[signal.Signals] = mp.Queue()
+    run_ffmpeg_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.info(f"{name} Received signal {signalNumber}")
-        sig_queue.put(signalNumber)
-        if signalNumber in (stop_sigs + pause_sigs):
+        if signalNumber in pause_sigs:
+            run_ffmpeg_event.clear()
+        elif signalNumber in resume_sigs:
+            run_ffmpeg_event.set()
+
+        if signalNumber in exit_sigs:
+            exit_event.set()
+
+        if signalNumber in stop_sigs:
             stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -399,18 +409,13 @@ def capture_camera(name, config: CameraConfig, process_info):
     setproctitle(f"frigate.capture:{name}")
 
     # Set initial paused or resumed state
-    init_sig = resume_sigs[0] if config.capture_enabled else pause_sigs[0]
+    if config.capture_enabled:
+        run_ffmpeg_event.set()
 
     def run_capture():
         frame_queue = process_info["frame_queue"]
-        prev_sig = init_sig
-        while prev_sig not in stop_sigs:
-            # Pause here until stopped or resumed
-            while not sig_queue.empty() or prev_sig not in resume_sigs:
-                # Abort on a STOP signal
-                if (prev_sig := sig_queue.get()) in stop_sigs:
-                    break
-
+        # Wait if paused and quit on exit event, otherwise run the camera
+        while run_ffmpeg_event.wait() and not exit_event.is_set():
             logger.info(f"{name}: capture starting")
             camera_watchdog = CameraWatchdog(
                 name,
@@ -422,14 +427,14 @@ def capture_camera(name, config: CameraConfig, process_info):
             )
             camera_watchdog.start()
             camera_watchdog.join()
-            stop_event.clear()
 
-            if sig_queue.empty():
-                logger.warning(f"{name}: capture stopped without signal")
-            else:
+            if stop_event.is_set():
+                stop_event.clear()
                 logger.info(f"{name}: capture stopped")
+            else:
+                logger.warning(f"{name}: capture stopped without signal")
 
-    # Run a background thread to prevent deadlock in signal handlers
+    # Run a background thread to prevent deadlocks in signal handler
     capture_thread = threading.Thread(target=run_capture)
     capture_thread.start()
     capture_thread.join()
