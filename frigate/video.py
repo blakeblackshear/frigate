@@ -4,7 +4,6 @@ import math
 import multiprocessing as mp
 import os
 import queue
-import random
 import signal
 import subprocess as sp
 import threading
@@ -29,7 +28,6 @@ from frigate.util import (
     SharedMemoryFrameManager,
     area,
     calculate_region,
-    clipped,
     intersection,
     intersection_over_union,
     listen,
@@ -825,74 +823,38 @@ def process_frames(
                 )
 
             #########
-            # merge objects, check for clipped objects and look again up to 4 times
+            # merge objects
             #########
-            refining = len(regions) > 0
-            refine_count = 0
-            while refining and refine_count < 4:
-                refining = False
+            # group by name
+            detected_object_groups = defaultdict(lambda: [])
+            for detection in detections:
+                detected_object_groups[detection[0]].append(detection)
 
-                # group by name
-                detected_object_groups = defaultdict(lambda: [])
-                for detection in detections:
-                    detected_object_groups[detection[0]].append(detection)
+            selected_objects = []
+            for group in detected_object_groups.values():
+                # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                # o[2] is the box of the object: xmin, ymin, xmax, ymax
+                # apply max/min to ensure values do not exceed the known frame size
+                boxes = [
+                    (
+                        o[2][0],
+                        o[2][1],
+                        o[2][2] - o[2][0],
+                        o[2][3] - o[2][1],
+                    )
+                    for o in group
+                ]
+                confidences = [o[1] for o in group]
+                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
-                selected_objects = []
-                for group in detected_object_groups.values():
-                    # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-                    # o[2] is the box of the object: xmin, ymin, xmax, ymax
-                    # apply max/min to ensure values do not exceed the known frame size
-                    boxes = [
-                        (
-                            o[2][0],
-                            o[2][1],
-                            o[2][2] - o[2][0],
-                            o[2][3] - o[2][1],
-                        )
-                        for o in group
-                    ]
-                    confidences = [o[1] for o in group]
-                    idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+                # add objects
+                for index in idxs:
+                    index = index if isinstance(index, np.int32) else index[0]
+                    obj = group[index]
+                    selected_objects.append(obj)
 
-                    for index in idxs:
-                        index = index if isinstance(index, np.int32) else index[0]
-                        obj = group[index]
-                        if clipped(obj, frame_shape):
-                            box = obj[2]
-                            # calculate a new region that will hopefully get the entire object
-                            region = calculate_region(
-                                frame_shape,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3],
-                                region_min_size,
-                            )
-
-                            regions.append(region)
-
-                            selected_objects.extend(
-                                detect(
-                                    detect_config,
-                                    object_detector,
-                                    frame,
-                                    model_config,
-                                    region,
-                                    objects_to_track,
-                                    object_filters,
-                                )
-                            )
-
-                            refining = True
-                        else:
-                            selected_objects.append(obj)
-
-                # set the detections list to only include top, complete objects
-                # and new detections
-                detections = selected_objects
-
-                if refining:
-                    refine_count += 1
+            # set the detections list to only include top objects
+            detections = selected_objects
 
             ## drop detections that overlap too much
             consolidated_detections = []
