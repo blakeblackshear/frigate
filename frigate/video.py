@@ -635,8 +635,8 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
             )
             # if region could be smaller and either box would be too small
             # for the resulting region, dont cluster
+            should_cluster = True
             if (cluster_region[2] - cluster_region[0]) > min_region:
-                should_cluster = True
                 for b in potential_cluster:
                     box = boxes[b]
                     # boxes should be more than 5% of the area of the region
