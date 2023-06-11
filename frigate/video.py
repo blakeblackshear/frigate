@@ -623,16 +623,27 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
             if compare_index in used_boxes:
                 continue
 
-            # get the region if you were to add this box to the cluster
-            cluster_regions = get_cluster_regions(
-                frame_shape, min_region, [cluster + [compare_index]], boxes
-            )
-            # if adding the box would result in multiple regions, dont cluster
-            if len(cluster_regions) > 1:
+            # if the box is not inside the potential cluster area, cluster them
+            if not box_inside(cluster_boundary, compare_box):
                 continue
 
-            # if the box is inside the potential cluster area, cluster them
-            if box_inside(cluster_boundary, compare_box):
+            # get the region if you were to add this box to the cluster
+            potential_cluster = cluster + [compare_index]
+            cluster_region = get_cluster_region(
+                frame_shape, min_region, potential_cluster, boxes
+            )
+            # if region could be smaller and either box would be too small
+            # for the resulting region, dont cluster
+            if (cluster_region[2] - cluster_region[0]) > min_region:
+                should_cluster = True
+                for b in potential_cluster:
+                    box = boxes[b]
+                    # boxes should be more than 5% of the area of the region
+                    if area(box) / area(cluster_region) < 0.05:
+                        should_cluster = False
+                        break
+
+            if should_cluster:
                 cluster.append(compare_index)
                 used_boxes.append(compare_index)
         cluster_candidates.append(cluster)
@@ -642,41 +653,19 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
     return [list(tup) for tup in unique]
 
 
-def get_cluster_regions(frame_shape, min_region, clusters, boxes):
-    regions = []
-    for c in clusters:
-        min_x = frame_shape[1]
-        min_y = frame_shape[0]
-        max_x = 0
-        max_y = 0
-        for b in c:
-            min_x = min(boxes[b][0], min_x)
-            min_y = min(boxes[b][1], min_y)
-            max_x = max(boxes[b][2], max_x)
-            max_y = max(boxes[b][3], max_y)
-        region = calculate_region(
-            frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
-        )
-        regions.append(region)
-        # TODO: move this to a dedicated check function so it doesnt run again
-        # now check each box in the region to ensure it's not too small
-        # if it is, create a dedicated region for it
-        if len(c) > 1 and (region[2] - region[0]) > min_region:
-            for b in c:
-                box = boxes[b]
-                if area(box) / area(region) < 0.05:
-                    regions.append(
-                        calculate_region(
-                            frame_shape,
-                            box[0],
-                            box[1],
-                            box[2],
-                            box[3],
-                            min_region,
-                            multiplier=1.35,
-                        )
-                    )
-    return regions
+def get_cluster_region(frame_shape, min_region, cluster, boxes):
+    min_x = frame_shape[1]
+    min_y = frame_shape[0]
+    max_x = 0
+    max_y = 0
+    for b in cluster:
+        min_x = min(boxes[b][0], min_x)
+        min_y = min(boxes[b][1], min_y)
+        max_x = max(boxes[b][2], max_x)
+        max_y = max(boxes[b][3], max_y)
+    return calculate_region(
+        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
+    )
 
 
 def process_frames(
@@ -771,9 +760,12 @@ def process_frames(
                 frame_shape, region_min_size, combined_boxes
             )
 
-            regions = get_cluster_regions(
-                frame_shape, region_min_size, cluster_candidates, combined_boxes
-            )
+            regions = [
+                get_cluster_region(
+                    frame_shape, region_min_size, candidate, combined_boxes
+                )
+                for candidate in cluster_candidates
+            ]
 
             # if starting up, get the next startup scan region
             if startup_scan_counter < 9:

@@ -8,7 +8,7 @@ from norfair.drawing.drawer import Drawer
 from frigate.video import (
     get_cluster_boundary,
     get_cluster_candidates,
-    get_cluster_regions,
+    get_cluster_region,
 )
 
 
@@ -95,9 +95,10 @@ class TestConfig(unittest.TestCase):
             self.frame_shape, self.min_region_size, boxes
         )
 
-        regions = get_cluster_regions(
-            self.frame_shape, self.min_region_size, cluster_candidates, boxes
-        )
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
 
         # save_clusters_image("regions", boxes, cluster_candidates, regions)
         assert len(regions) == 2
@@ -109,11 +110,12 @@ class TestConfig(unittest.TestCase):
             self.frame_shape, self.min_region_size, boxes
         )
 
-        regions = get_cluster_regions(
-            self.frame_shape, self.min_region_size, cluster_candidates, boxes
-        )
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
 
-        # save_clusters_image("too_small", boxes, cluster_candidates, regions)
+        save_clusters_image("too_small", boxes, cluster_candidates, regions)
 
         assert len(cluster_candidates) == 2
         assert len(regions) == 2
@@ -125,9 +127,10 @@ class TestConfig(unittest.TestCase):
             self.frame_shape, self.min_region_size, boxes
         )
 
-        regions = get_cluster_regions(
-            self.frame_shape, self.min_region_size, cluster_candidates, boxes
-        )
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
 
         # save_clusters_image("redundant", boxes, cluster_candidates, regions)
 
@@ -148,9 +151,10 @@ class TestConfig(unittest.TestCase):
             self.frame_shape, self.min_region_size, boxes
         )
 
-        regions = get_cluster_regions(
-            self.frame_shape, self.min_region_size, cluster_candidates, boxes
-        )
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
 
         # save_clusters_image("combine", boxes, cluster_candidates, regions)
         assert len(regions) == 1
@@ -165,9 +169,10 @@ class TestConfig(unittest.TestCase):
             self.frame_shape, self.min_region_size, boxes
         )
 
-        regions = get_cluster_regions(
-            self.frame_shape, self.min_region_size, cluster_candidates, boxes
-        )
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
 
         # save_clusters_image("dont_combine", boxes, cluster_candidates, regions)
         assert len(regions) == 2
