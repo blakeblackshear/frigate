@@ -1,7 +1,6 @@
 import datetime
 import glob
 import logging
-import math
 import multiprocessing as mp
 import os
 import queue
@@ -210,6 +209,7 @@ class BirdsEyeFrameManager:
                 ),
             )
             self.cameras[camera] = {
+                "dimensions": [settings.detect.width, settings.detect.height],
                 "last_active_frame": 0.0,
                 "current_frame": 0.0,
                 "layout_frame": 0.0,
@@ -224,7 +224,6 @@ class BirdsEyeFrameManager:
 
         self.camera_layout = []
         self.active_cameras = set()
-        self.layout_dim = 0
         self.last_output_time = 0.0
 
     def clear_frame(self):
@@ -250,8 +249,8 @@ class BirdsEyeFrameManager:
 
         copy_yuv_to_position(
             self.frame,
-            self.layout_offsets[position],
-            self.layout_frame_shape,
+            [position[1], position[0]],
+            [position[3], position[2]],
             frame,
             channel_dims,
         )
@@ -267,6 +266,67 @@ class BirdsEyeFrameManager:
             return True
 
     def update_frame(self):
+        """Update to a new frame for birdseye."""
+
+        def calculate_layout(
+            canvas, cameras_to_add: list[str], coefficient
+        ) -> tuple[any]:
+            """Calculate the optimal layout for cameras."""
+            camera_layout: list[list[any]] = []
+            camera_layout.append([])
+            canvas_aspect = canvas[0] / canvas[1]
+            x = 0
+            y = 0
+            y_i = 0
+            max_height = 0
+            for camera in cameras_to_add:
+                camera_dims = self.cameras[camera]["dimensions"].copy()
+                camera_aspect = camera_dims[0] / camera_dims[1]
+
+                # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
+                if camera_aspect < canvas_aspect:
+                    camera_dims[0] *= camera_aspect / canvas_aspect
+                    camera_dims[1] *= camera_aspect / canvas_aspect
+
+                if (x + camera_dims[0] * coefficient) <= canvas[0]:
+                    # insert if camera can fit on current row
+                    camera_layout[y_i].append(
+                        (
+                            camera,
+                            (
+                                x,
+                                y,
+                                int(camera_dims[0] * coefficient),
+                                int(camera_dims[1] * coefficient),
+                            ),
+                        )
+                    )
+                    x += int(camera_dims[0] * coefficient)
+                    max_height = max(
+                        max_height,
+                        int(camera_dims[1] * coefficient),
+                    )
+                else:
+                    # move on to the next row and insert
+                    y += max_height
+                    y_i += 1
+                    camera_layout.append([])
+                    x = 0
+                    camera_layout[y_i].append(
+                        (
+                            camera,
+                            (
+                                x,
+                                y,
+                                int(camera_dims[0] * coefficient),
+                                int(camera_dims[1] * coefficient),
+                            ),
+                        )
+                    )
+                    x += int(camera_dims[0] * coefficient)
+
+            return (camera_layout, y + max_height)
+
         # determine how many cameras are tracking objects within the last 30 seconds
         active_cameras = set(
             [
@@ -285,12 +345,9 @@ class BirdsEyeFrameManager:
             # if the layout needs to be cleared
             else:
                 self.camera_layout = []
-                self.layout_dim = 0
+                self.active_cameras = set()
                 self.clear_frame()
                 return True
-
-        # calculate layout dimensions
-        layout_dim = math.ceil(math.sqrt(len(active_cameras)))
 
         # check if we need to reset the layout because there are new cameras to add
         reset_layout = (
@@ -298,102 +355,98 @@ class BirdsEyeFrameManager:
         )
 
         # reset the layout if it needs to be different
-        if layout_dim != self.layout_dim or reset_layout:
-            if reset_layout:
-                logger.debug("Added new cameras, resetting layout...")
+        if reset_layout:
+            logger.debug("Added new cameras, resetting layout...")
+            self.clear_frame()
+            self.active_cameras = active_cameras
 
-            logger.debug(f"Changing layout size from {self.layout_dim} to {layout_dim}")
-            self.layout_dim = layout_dim
-
-            self.camera_layout = [None] * layout_dim * layout_dim
-
-            # calculate resolution of each position in the layout
-            self.layout_frame_shape = (
-                self.frame_shape[0] // layout_dim,  # height
-                self.frame_shape[1] // layout_dim,  # width
+            # this also converts added_cameras from a set to a list since we need
+            # to pop elements in order
+            active_cameras_to_add = sorted(
+                active_cameras,
+                # sort cameras by order and by name if the order is the same
+                key=lambda active_camera: (
+                    self.config.cameras[active_camera].birdseye.order,
+                    active_camera,
+                ),
             )
 
-            self.clear_frame()
+            canvas_width = self.config.birdseye.width
+            canvas_height = self.config.birdseye.height
 
-            for cam_data in self.cameras.values():
-                cam_data["layout_frame"] = 0.0
-
-            self.active_cameras = set()
-
-            self.layout_offsets = []
-
-            # calculate the x and y offset for each position in the layout
-            for position in range(0, len(self.camera_layout)):
-                y_offset = self.layout_frame_shape[0] * math.floor(
-                    position / self.layout_dim
+            if len(active_cameras) == 1:
+                # show single camera as fullscreen
+                camera = active_cameras_to_add[0]
+                camera_dims = self.cameras[camera]["dimensions"].copy()
+                scaled_width = int(canvas_height * camera_dims[0] / camera_dims[1])
+                coefficient = (
+                    1 if scaled_width <= canvas_width else canvas_width / scaled_width
                 )
-                x_offset = self.layout_frame_shape[1] * (position % self.layout_dim)
-                self.layout_offsets.append((y_offset, x_offset))
+                self.camera_layout = [
+                    [
+                        (
+                            camera,
+                            (
+                                0,
+                                0,
+                                int(scaled_width * coefficient),
+                                int(canvas_height * coefficient),
+                            ),
+                        )
+                    ]
+                ]
+            elif len(active_cameras) == 2:
+                # split canvas in half for 2 cameras
+                top_camera = active_cameras_to_add[0]
+                top_camera_dims = self.cameras[top_camera]["dimensions"].copy()
+                bottom_camera = active_cameras_to_add[1]
+                bottom_camera_dims = self.cameras[bottom_camera]["dimensions"].copy()
+                top_scaled_width = int(
+                    (canvas_height / 2) * top_camera_dims[0] / top_camera_dims[1]
+                )
+                bottom_scaled_width = int(
+                    (canvas_height / 2) * bottom_camera_dims[0] / bottom_camera_dims[1]
+                )
+                self.camera_layout = [
+                    [(top_camera, (0, 0, top_scaled_width, int(canvas_height / 2)))],
+                    [
+                        (
+                            bottom_camera,
+                            (
+                                0,
+                                int(canvas_height / 2),
+                                bottom_scaled_width,
+                                int(canvas_height / 2),
+                            ),
+                        )
+                    ],
+                ]
+            else:
+                # calculate optimal layout
+                coefficient = 1.0
 
-        removed_cameras = self.active_cameras.difference(active_cameras)
-        added_cameras = active_cameras.difference(self.active_cameras)
-
-        self.active_cameras = active_cameras
-
-        # this also converts added_cameras from a set to a list since we need
-        # to pop elements in order
-        added_cameras = sorted(
-            added_cameras,
-            # sort cameras by order and by name if the order is the same
-            key=lambda added_camera: (
-                self.config.cameras[added_camera].birdseye.order,
-                added_camera,
-            ),
-            # we're popping out elements from the end, so this needs to be reverse
-            # as we want the last element to be the first
-            reverse=True,
-        )
-
-        # update each position in the layout
-        for position, camera in enumerate(self.camera_layout, start=0):
-            # if this camera was removed, replace it or clear it
-            if camera in removed_cameras:
-                # if replacing this camera with a newly added one
-                if len(added_cameras) > 0:
-                    added_camera = added_cameras.pop()
-                    self.camera_layout[position] = added_camera
-                    self.copy_to_position(
-                        position,
-                        added_camera,
-                        self.cameras[added_camera]["current_frame"],
+                # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
+                while True:
+                    layout_candidate, total_height = calculate_layout(
+                        (canvas_width, canvas_height),
+                        active_cameras_to_add,
+                        coefficient,
                     )
-                    self.cameras[added_camera]["layout_frame"] = self.cameras[
-                        added_camera
-                    ]["current_frame"]
-                # if removing this camera with no replacement
-                else:
-                    self.camera_layout[position] = None
-                    self.copy_to_position(position)
-                removed_cameras.remove(camera)
-            # if an empty spot and there are cameras to add
-            elif camera is None and len(added_cameras) > 0:
-                added_camera = added_cameras.pop()
-                self.camera_layout[position] = added_camera
+
+                    if (canvas_height * 0.9) < total_height <= canvas_height:
+                        break
+                    elif total_height < canvas_height * 0.8:
+                        coefficient += 0.1
+                    else:
+                        coefficient -= 0.1
+
+                self.camera_layout = layout_candidate
+
+        for row in self.camera_layout:
+            for position in row:
                 self.copy_to_position(
-                    position,
-                    added_camera,
-                    self.cameras[added_camera]["current_frame"],
+                    position[1], position[0], self.cameras[position[0]]["current_frame"]
                 )
-                self.cameras[added_camera]["layout_frame"] = self.cameras[added_camera][
-                    "current_frame"
-                ]
-            # if not an empty spot and the camera has a newer frame, copy it
-            elif (
-                camera is not None
-                and self.cameras[camera]["current_frame"]
-                != self.cameras[camera]["layout_frame"]
-            ):
-                self.copy_to_position(
-                    position, camera, self.cameras[camera]["current_frame"]
-                )
-                self.cameras[camera]["layout_frame"] = self.cameras[camera][
-                    "current_frame"
-                ]
 
         return True
 
