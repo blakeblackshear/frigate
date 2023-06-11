@@ -36,9 +36,7 @@ class StorageMaintainer(threading.Thread):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
                         Recordings.select(fn.COUNT(Recordings.id))
-                        .where(
-                            Recordings.camera == camera, Recordings.segment_size != 0
-                        )
+                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
                         .scalar()
                         < 50
                     )
@@ -48,7 +46,7 @@ class StorageMaintainer(threading.Thread):
             try:
                 bandwidth = round(
                     Recordings.select(fn.AVG(bandwidth_equation))
-                    .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                    .where(Recordings.camera == camera, Recordings.segment_size > 0)
                     .limit(100)
                     .scalar()
                     * 3600,
@@ -178,6 +176,7 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
+        self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
             if not self.camera_storage_stats or True in [
                 r["needs_refresh"] for r in self.camera_storage_stats.values()

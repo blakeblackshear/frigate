@@ -180,7 +180,9 @@ class RecordingCleanup(threading.Thread):
 
         # find all the recordings older than the oldest recording in the db
         try:
-            oldest_recording = Recordings.select().order_by(Recordings.start_time).get()
+            oldest_recording = (
+                Recordings.select().order_by(Recordings.start_time).limit(1).get()
+            )
 
             p = Path(oldest_recording.path)
             oldest_timestamp = p.stat().st_mtime - 1
