@@ -56,7 +56,7 @@ class StorageMaintainer(threading.Thread):
                 bandwidth = 0
 
             self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-            logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr.")
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
@@ -85,7 +85,7 @@ class StorageMaintainer(threading.Thread):
         hourly_bandwidth = sum(
             [b["bandwidth"] for b in self.camera_storage_stats.values()]
         )
-        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
+        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
         logger.debug(
             f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
         )

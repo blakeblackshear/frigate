@@ -429,7 +429,7 @@ class FrigateApp:
         self.frigate_watchdog.start()
 
     def check_shm(self) -> None:
-        available_shm = round(shutil.disk_usage("/dev/shm").total / 1000000, 1)
+        available_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
         min_req_shm = 30
 
         for _, camera in self.config.cameras.items():

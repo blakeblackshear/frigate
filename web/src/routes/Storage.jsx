@@ -26,9 +26,9 @@ export default function Storage() {
 
   const getUnitSize = (MB) => {
     if (isNaN(MB) || MB < 0) return 'Invalid number';
-    if (MB < 1024) return `${MB} MB`;
+    if (MB < 1024) return `${MB} MiB`;
 
-    return `${(MB / 1024).toFixed(2)} GB`;
+    return `${(MB / 1024).toFixed(2)} GiB`;
   };
 
   let storage_usage;

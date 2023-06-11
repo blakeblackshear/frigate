@@ -286,9 +286,9 @@ def stats_snapshot(
             stats["service"]["storage"][path] = {}
 
         stats["service"]["storage"][path] = {
-            "total": round(storage_stats.total / 1000000, 1),
-            "used": round(storage_stats.used / 1000000, 1),
-            "free": round(storage_stats.free / 1000000, 1),
+            "total": round(storage_stats.total / pow(2, 20), 1),
+            "used": round(storage_stats.used / pow(2, 20), 1),
+            "free": round(storage_stats.free / pow(2, 20), 1),
             "mount_type": get_fs_type(path),
         }
 
