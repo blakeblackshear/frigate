@@ -56,7 +56,7 @@ class StorageMaintainer(threading.Thread):
                 bandwidth = 0
 
             self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-            logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr.")
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
