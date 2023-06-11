@@ -27,6 +27,7 @@ import Dialog from '../components/Dialog';
 import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TimeAgo from '../components/TimeAgo';
+import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
 
 const API_LIMIT = 25;
@@ -437,18 +438,26 @@ export default function Events({ path, ...props }) {
           />
         </Menu>
       )}
+
       {state.showCalendar && (
-        <Menu
-          className="rounded-t-none"
-          onDismiss={() => setState({ ...state, showCalendar: false })}
-          relativeTo={datePicker}
-        >
-          <Calendar
-            onChange={handleSelectDateRange}
-            dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
-            close={() => setState({ ...state, showCalendar: false })}
-          />
-        </Menu>
+        <span>
+          <Menu
+            className="rounded-t-none"
+            onDismiss={() => setState({ ...state, showCalendar: false })}
+            relativeTo={datePicker}
+          >
+            <Calendar
+              onChange={handleSelectDateRange}
+              dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
+              close={() => setState({ ...state, showCalendar: false })}
+            >
+              <Timepicker
+                dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
+                onChange={handleSelectDateRange}
+              />
+            </Calendar>
+          </Menu>
+        </span>
       )}
       {state.showPlusSubmit && (
         <Dialog>
