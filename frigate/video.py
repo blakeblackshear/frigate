@@ -583,12 +583,12 @@ def detect(
     return detections
 
 
-def get_cluster_boundary(box):
-    # compute the max region size for the current box (box is 20% of region)
+def get_cluster_boundary(box, min_region):
+    # compute the max region size for the current box (box is 10% of region)
     box_width = box[2] - box[0]
     box_height = box[3] - box[1]
-    max_region_area = abs(box_width * box_height) / 0.2
-    max_region_size = max(160, int(math.sqrt(max_region_area)))
+    max_region_area = abs(box_width * box_height) / 0.1
+    max_region_size = max(min_region, int(math.sqrt(max_region_area)))
 
     centroid = (box_width / 2 + box[0], box_height / 2 + box[1])
 
@@ -617,7 +617,7 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
             continue
         cluster = [current_index]
         used_boxes.append(current_index)
-        cluster_boundary = get_cluster_boundary(b)
+        cluster_boundary = get_cluster_boundary(b, min_region)
         # find all other boxes that fit inside the boundary
         for compare_index, compare_box in enumerate(boxes):
             if compare_index in used_boxes:

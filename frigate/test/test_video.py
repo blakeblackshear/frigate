@@ -81,7 +81,9 @@ class TestConfig(unittest.TestCase):
 
     def test_cluster_boundary(self):
         boxes = [(100, 100, 200, 200), (215, 215, 325, 325)]
-        boundary_boxes = [get_cluster_boundary(box) for box in boxes]
+        boundary_boxes = [
+            get_cluster_boundary(box, self.min_region_size) for box in boxes
+        ]
 
         # save_cluster_boundary_image("bound", boxes, boundary_boxes)
         assert len(boundary_boxes) == 2
@@ -117,7 +119,7 @@ class TestConfig(unittest.TestCase):
         assert len(regions) == 2
 
     def test_redundant_clusters(self):
-        boxes = [(100, 100, 200, 200), (215, 215, 325, 325)]
+        boxes = [(100, 100, 200, 200), (305, 305, 415, 415)]
 
         cluster_candidates = get_cluster_candidates(
             self.frame_shape, self.min_region_size, boxes
