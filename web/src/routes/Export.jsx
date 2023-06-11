@@ -1,6 +1,5 @@
-import { h } from 'preact';
 import Heading from '../components/Heading';
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import useSWR from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
@@ -11,6 +10,21 @@ export default function Export() {
   const [camera, setCamera] = useState('select');
   const [playback, setPlayback] = useState('select');
   const [message, setMessage] = useState({ text: '', error: false });
+  const [startDate, setStartDate] = useState('input');
+  const [startTime, setStartTime] = useState('input');
+  const [endDate, setEndDate] = useState('input');
+  const [endTime, setEndTime] = useState('input');
+
+  useEffect(() => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const offsetMs = currentDate.getTimezoneOffset() * 60 * 1000;
+    const localISOTime = (new Date(currentDate.getTime() - offsetMs)).toISOString().slice(0,16);
+    setStartDate(localISOTime);
+    setStartTime("00:00");
+    setEndDate(localISOTime);
+    setEndTime("23:59");
+  }, []);
 
   const onHandleExport = () => {
     if (camera == 'select') {
@@ -23,11 +37,18 @@ export default function Export() {
       return;
     }
 
-    const start = new Date(document.getElementById('start').value).getTime() / 1000;
-    const end = new Date(document.getElementById('end').value).getTime() / 1000;
+    
 
-    if (!start || !end) {
+    if (!startDate || !startTime || !endDate || !endTime) {
       setMessage({ text: 'A start and end time needs to be selected', error: true });
+      return;
+    }
+
+    const start = new Date(`${startDate}T${startTime}`).getTime() / 1000;
+    const end = new Date(`${endDate}T${endTime}`).getTime() / 1000;
+
+    if (end <= start) {
+      setMessage({ text: 'The end time must be after the start time.', error: true });
       return;
     }
 
@@ -71,11 +92,13 @@ export default function Export() {
         <Heading className="py-2" size="sm">
           From:
         </Heading>
-        <input className="dark:bg-slate-800" id="start" type="datetime-local" />
+        <input className="dark:bg-slate-800" id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}/>
+        <input className="dark:bg-slate-800" id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}/>
         <Heading className="py-2" size="sm">
           To:
         </Heading>
-        <input className="dark:bg-slate-800" id="end" type="datetime-local" />
+        <input className="dark:bg-slate-800" id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}/>
+        <input className="dark:bg-slate-800" id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}/>
       </div>
       <Button onClick={() => onHandleExport()}>Submit</Button>
     </div>
