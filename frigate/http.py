@@ -591,7 +591,7 @@ def event_snapshot(id):
     event_complete = False
     jpg_bytes = None
     try:
-        event = Event.get(Event.id == id, Event.end_time is not None)
+        event = Event.get(Event.id == id, Event.end_time != None)
         event_complete = True
         if not event.has_snapshot:
             return "Snapshot not available", 404
@@ -643,7 +643,7 @@ def label_snapshot(camera_name, label):
         event_query = (
             Event.select()
             .where(Event.camera == camera_name)
-            .where(Event.has_snapshot is True)
+            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
     else:
@@ -651,7 +651,7 @@ def label_snapshot(camera_name, label):
             Event.select()
             .where(Event.camera == camera_name)
             .where(Event.label == label)
-            .where(Event.has_snapshot is True)
+            .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
 
