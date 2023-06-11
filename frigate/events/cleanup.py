@@ -52,7 +52,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == event.label,
-                Event.retain_indefinitely is False,
+                Event.retain_indefinitely == False,
             )
             # delete the media from disk
             for event in expired_events:
@@ -72,7 +72,7 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == event.label,
-                Event.retain_indefinitely is False,
+                Event.retain_indefinitely == False,
             )
             update_query.execute()
 
@@ -101,7 +101,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == event.label,
-                    Event.retain_indefinitely is False,
+                    Event.retain_indefinitely == False,
                 )
                 # delete the grabbed clips from disk
                 for event in expired_events:
@@ -120,7 +120,7 @@ class EventCleanup(threading.Thread):
                     Event.camera == name,
                     Event.start_time < expire_after,
                     Event.label == event.label,
-                    Event.retain_indefinitely is False,
+                    Event.retain_indefinitely == False,
                 )
                 update_query.execute()
 
@@ -167,7 +167,7 @@ class EventCleanup(threading.Thread):
 
             # drop events from db where has_clip and has_snapshot are false
             delete_query = Event.delete().where(
-                Event.has_clip is False, Event.has_snapshot is False
+                Event.has_clip == False, Event.has_snapshot == False
             )
             delete_query.execute()
 

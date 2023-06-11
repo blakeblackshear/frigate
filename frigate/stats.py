@@ -108,7 +108,7 @@ def get_processing_stats(
             [
                 asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
                 asyncio.create_task(set_cpu_stats(stats)),
-                asyncio.create_task(set_bandwidth_stats(stats)),
+                asyncio.create_task(set_bandwidth_stats(config, stats)),
             ]
         )
 
@@ -126,9 +126,9 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
         all_stats["cpu_usages"] = cpu_stats
 
 
-async def set_bandwidth_stats(all_stats: dict[str, Any]) -> None:
+async def set_bandwidth_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
     """Set bandwidth from nethogs."""
-    bandwidth_stats = get_bandwidth_stats()
+    bandwidth_stats = get_bandwidth_stats(config)
 
     if bandwidth_stats:
         all_stats["bandwidth_usages"] = bandwidth_stats
