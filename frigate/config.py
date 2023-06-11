@@ -89,10 +89,21 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class StatsConfig(FrigateBaseModel):
+    amd_gpu_stats: bool = Field(default=True, title="Enable AMD GPU stats.")
+    intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
+    network_bandwidth: bool = Field(
+        default=False, title="Enable network bandwidth for ffmpeg processes."
+    )
+
+
 class TelemetryConfig(FrigateBaseModel):
     network_interfaces: List[str] = Field(
         default=["eth", "enp", "eno", "ens", "wl", "lo"],
         title="Enabled network interfaces for bandwidth calculation.",
+    )
+    stats: StatsConfig = Field(
+        default_factory=StatsConfig, title="System Stats Configuration"
     )
     version_check: bool = Field(default=True, title="Enable latest version check.")
 

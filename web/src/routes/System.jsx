@@ -96,7 +96,8 @@ export default function System() {
           System <span className="text-sm">{service.version}</span>
         </Heading>
         {config && (
-          <span class="p-1">go2rtc {go2rtc && ( `${go2rtc.version} ` ) }
+          <span class="p-1">
+            go2rtc {go2rtc && `${go2rtc.version} `}
             <Link
               className="text-blue-500 hover:underline"
               target="_blank"
@@ -239,7 +240,7 @@ export default function System() {
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
                         <Th>Memory %</Th>
-                        <Th>Network Bandwidth</Th>
+                        {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -248,7 +249,9 @@ export default function System() {
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['mem'] || '- '}%</Td>
-                        <Td>{bandwidth_usages[detectors[detector]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        {config.telemetry.network_bandwidth && (
+                          <Td>{bandwidth_usages[detectors[detector]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        )}
                       </Tr>
                     </Tbody>
                   </Table>
@@ -346,25 +349,30 @@ export default function System() {
                           <Th>FPS</Th>
                           <Th>CPU %</Th>
                           <Th>Memory %</Th>
-                          <Th>Network Bandwidth</Th>
+                          {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
                         </Tr>
                       </Thead>
                       <Tbody>
                         <Tr key="ffmpeg" index="0">
-                          <Td>ffmpeg
+                          <Td>
+                            ffmpeg
                             <Button
                               className="rounded-full"
                               type="text"
                               color="gray"
                               aria-label={cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline']}
                               onClick={() => copy(cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline'])}
-                            ><About className="w-3" /></Button>
+                            >
+                              <About className="w-3" />
+                            </Button>
                           </Td>
                           <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
                           <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
-                          <Td>{bandwidth_usages[cameras[camera]['ffmpeg_pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                          {config.telemetry.network_bandwidth && (
+                            <Td>{bandwidth_usages[cameras[camera]['ffmpeg_pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                          )}
                         </Tr>
                         <Tr key="capture" index="1">
                           <Td>Capture</Td>
@@ -372,7 +380,7 @@ export default function System() {
                           <Td>{cameras[camera]['process_fps'] || '- '}</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
-                          <Td>-</Td>
+                          {config.telemetry.network_bandwidth && <Td>-</Td>}
                         </Tr>
                         <Tr key="detect" index="2">
                           <Td>Detect</Td>
@@ -393,7 +401,7 @@ export default function System() {
 
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
                           <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
-                          <Td>-</Td>
+                          {config.telemetry.network_bandwidth && <Td>-</Td>}
                         </Tr>
                       </Tbody>
                     </Table>
@@ -430,7 +438,7 @@ export default function System() {
                         <Th>CPU %</Th>
                         <Th>Avg CPU %</Th>
                         <Th>Memory %</Th>
-                        <Th>Network Bandwidth</Th>
+                        {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -439,7 +447,9 @@ export default function System() {
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
                         <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
-                        <Td>{bandwidth_usages[processes[process]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        {config.telemetry.network_bandwidth && (
+                          <Td>{bandwidth_usages[processes[process]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        )}
                       </Tr>
                     </Tbody>
                   </Table>

@@ -104,13 +104,15 @@ def get_processing_stats(
     """Get stats for cpu / gpu."""
 
     async def run_tasks() -> None:
-        await asyncio.wait(
-            [
-                asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
-                asyncio.create_task(set_cpu_stats(stats)),
-                asyncio.create_task(set_bandwidth_stats(config, stats)),
-            ]
-        )
+        stats_tasks = [
+            asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
+            asyncio.create_task(set_cpu_stats(stats)),
+        ]
+
+        if config.telemetry.stats.network_bandwidth:
+            stats_tasks.append(asyncio.create_task(set_bandwidth_stats(config, stats)))
+
+        await asyncio.wait(stats_tasks)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -179,6 +181,9 @@ async def set_gpu_stats(
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
         elif "qsv" in args:
+            if not config.telemetry.stats.intel_gpu_stats:
+                continue
+
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
 
@@ -191,6 +196,9 @@ async def set_gpu_stats(
             driver = os.environ.get(DRIVER_ENV_VAR)
 
             if driver == DRIVER_AMD:
+                if not config.telemetry.stats.amd_gpu_stats:
+                    continue
+
                 # AMD VAAPI GPU
                 amd_usage = get_amd_gpu_stats()
 
@@ -200,6 +208,9 @@ async def set_gpu_stats(
                     stats["amd-vaapi"] = {"gpu": -1, "mem": -1}
                     hwaccel_errors.append(args)
             else:
+                if not config.telemetry.stats.intel_gpu_stats:
+                    continue
+
                 # intel VAAPI GPU
                 intel_usage = get_intel_gpu_stats()
 
