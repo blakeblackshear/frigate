@@ -90,6 +90,10 @@ class UIConfig(FrigateBaseModel):
 
 
 class TelemetryConfig(FrigateBaseModel):
+    network_interfaces: List[str] = Field(
+        default=["eth", "enp", "eno", "ens", "wl", "lo"],
+        title="Enabled network interfaces for bandwidth calculation.",
+    )
     version_check: bool = Field(default=True, title="Enable latest version check.")
 
 
