@@ -73,6 +73,7 @@ class TrackedObject:
         self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
+        self.zone_presence = {}
         self.current_zones = []
         self.entered_zones = []
         self.false_positive = True
@@ -144,13 +145,24 @@ class TrackedObject:
             if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
             contour = zone.contour
+            zone_score = self.zone_presence.get(name, 0)
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
-                # if the object passed the filters once, dont apply again
-                if name in self.current_zones or not zone_filtered(self, zone.filters):
-                    current_zones.append(name)
-                    if name not in self.entered_zones:
-                        self.entered_zones.append(name)
+                self.zone_presence[name] = zone_score + 1
+
+                # an object is only considered present in a zone if it has a zone inertia of 3+
+                if zone_score >= zone.inertia:
+                    # if the object passed the filters once, dont apply again
+                    if name in self.current_zones or not zone_filtered(
+                        self, zone.filters
+                    ):
+                        current_zones.append(name)
+                        if name not in self.entered_zones:
+                            self.entered_zones.append(name)
+            else:
+                # once an object has a zone inertia of 3+ it is not checked anymore
+                if 0 < zone_score < zone.inertia:
+                    self.zone_presence[name] = zone_score - 1
 
         if not self.false_positive:
             # if the zones changed, signal an update
