@@ -312,18 +312,24 @@ class BirdsEyeFrameManager:
                     y_i += 1
                     camera_layout.append([])
                     x = 0
+
+                    if camera_dims[0] * coefficient > canvas_width:
+                        safe_coefficient = 1
+                    else:
+                        safe_coefficient = coefficient
+
                     camera_layout[y_i].append(
                         (
                             camera,
                             (
                                 x,
                                 y,
-                                int(camera_dims[0] * coefficient),
-                                int(camera_dims[1] * coefficient),
+                                int(camera_dims[0] * safe_coefficient),
+                                int(camera_dims[1] * safe_coefficient),
                             ),
                         )
                     )
-                    x += int(camera_dims[0] * coefficient)
+                    x += int(camera_dims[0] * safe_coefficient)
 
             return (camera_layout, y + max_height)
 
@@ -433,9 +439,9 @@ class BirdsEyeFrameManager:
                         coefficient,
                     )
 
-                    if (canvas_height * 0.9) < total_height <= canvas_height:
+                    if (canvas_height * 0.75) < total_height <= canvas_height:
                         break
-                    elif total_height < canvas_height * 0.8:
+                    elif total_height < canvas_height * 0.75:
                         coefficient += 0.1
                     else:
                         coefficient -= 0.1
