@@ -328,7 +328,7 @@ class ZoneConfig(BaseModel):
     )
     inertia: int = Field(
         default=3,
-        title="Number of frames required for object to be considered present in the zone.",
+        title="Number of consecutive frames required for object to be considered present in the zone.",
         gt=0,
         le=10,
     )
