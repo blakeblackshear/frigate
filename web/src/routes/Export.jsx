@@ -48,7 +48,7 @@ export default function Export() {
     const end = new Date(`${endDate}T${endTime}`).getTime() / 1000;
 
     if (end <= start) {
-      setMessage({ text: 'The end time must be larger than the start time.', error: true });
+      setMessage({ text: 'The end time must be after the start time.', error: true });
       return;
     }
 
