@@ -40,3 +40,9 @@ If you see repeated "On connect called" messages in your logs, check for another
 ### Error: Database Is Locked
 
 SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced.md#database) should be used to move the database to a location on the internal drive.
+
+### Unable to publish to MQTT: client is not connected
+
+If MQTT isn't working in docker try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
+
+This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network. 
