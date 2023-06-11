@@ -1,9 +1,9 @@
 import datetime
 import logging
+import math
 import multiprocessing as mp
 import os
 import queue
-import random
 import signal
 import subprocess as sp
 import threading
@@ -18,6 +18,7 @@ from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
 from frigate.const import CACHE_DIR
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
+from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.object_detection import RemoteObjectDetector
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
@@ -27,7 +28,7 @@ from frigate.util import (
     SharedMemoryFrameManager,
     area,
     calculate_region,
-    clipped,
+    draw_box_with_label,
     intersection,
     intersection_over_union,
     listen,
@@ -462,9 +463,10 @@ def track_camera(
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
 
-    motion_detector = MotionDetector(
+    motion_detector = ImprovedMotionDetector(
         frame_shape,
         config.motion,
+        config.detect.fps,
         improve_contrast_enabled,
         motion_threshold,
         motion_contour_area,
@@ -503,6 +505,13 @@ def box_overlaps(b1, b2):
     if b1[2] < b2[0] or b1[0] > b2[2] or b1[1] > b2[3] or b1[3] < b2[1]:
         return False
     return True
+
+
+def box_inside(b1, b2):
+    # check if b2 is inside b1
+    if b2[0] >= b1[0] and b2[1] >= b1[1] and b2[2] <= b1[2] and b2[3] <= b1[3]:
+        return True
+    return False
 
 
 def reduce_boxes(boxes, iou_threshold=0.0):
@@ -575,6 +584,91 @@ def detect(
     return detections
 
 
+def get_cluster_boundary(box, min_region):
+    # compute the max region size for the current box (box is 10% of region)
+    box_width = box[2] - box[0]
+    box_height = box[3] - box[1]
+    max_region_area = abs(box_width * box_height) / 0.1
+    max_region_size = max(min_region, int(math.sqrt(max_region_area)))
+
+    centroid = (box_width / 2 + box[0], box_height / 2 + box[1])
+
+    max_x_dist = int(max_region_size - box_width / 2 * 1.1)
+    max_y_dist = int(max_region_size - box_height / 2 * 1.1)
+
+    return [
+        int(centroid[0] - max_x_dist),
+        int(centroid[1] - max_y_dist),
+        int(centroid[0] + max_x_dist),
+        int(centroid[1] + max_y_dist),
+    ]
+
+
+def get_cluster_candidates(frame_shape, min_region, boxes):
+    # and create a cluster of other boxes using it's max region size
+    # only include boxes where the region is an appropriate(except the region could possibly be smaller?)
+    # size in the cluster. in order to be in the cluster, the furthest corner needs to be within x,y offset
+    # determined by the max_region size minus half the box + 20%
+    # TODO: see if we can do this with numpy
+    cluster_candidates = []
+    used_boxes = []
+    # loop over each box
+    for current_index, b in enumerate(boxes):
+        if current_index in used_boxes:
+            continue
+        cluster = [current_index]
+        used_boxes.append(current_index)
+        cluster_boundary = get_cluster_boundary(b, min_region)
+        # find all other boxes that fit inside the boundary
+        for compare_index, compare_box in enumerate(boxes):
+            if compare_index in used_boxes:
+                continue
+
+            # if the box is not inside the potential cluster area, cluster them
+            if not box_inside(cluster_boundary, compare_box):
+                continue
+
+            # get the region if you were to add this box to the cluster
+            potential_cluster = cluster + [compare_index]
+            cluster_region = get_cluster_region(
+                frame_shape, min_region, potential_cluster, boxes
+            )
+            # if region could be smaller and either box would be too small
+            # for the resulting region, dont cluster
+            should_cluster = True
+            if (cluster_region[2] - cluster_region[0]) > min_region:
+                for b in potential_cluster:
+                    box = boxes[b]
+                    # boxes should be more than 5% of the area of the region
+                    if area(box) / area(cluster_region) < 0.05:
+                        should_cluster = False
+                        break
+
+            if should_cluster:
+                cluster.append(compare_index)
+                used_boxes.append(compare_index)
+        cluster_candidates.append(cluster)
+
+    # return the unique clusters only
+    unique = {tuple(sorted(c)) for c in cluster_candidates}
+    return [list(tup) for tup in unique]
+
+
+def get_cluster_region(frame_shape, min_region, cluster, boxes):
+    min_x = frame_shape[1]
+    min_y = frame_shape[0]
+    max_x = 0
+    max_y = 0
+    for b in cluster:
+        min_x = min(boxes[b][0], min_x)
+        min_y = min(boxes[b][1], min_y)
+        max_x = max(boxes[b][2], max_x)
+        max_y = max(boxes[b][3], max_y)
+    return calculate_region(
+        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
+    )
+
+
 def process_frames(
     camera_name: str,
     frame_queue: mp.Queue,
@@ -602,6 +696,8 @@ def process_frames(
     fps_tracker.start()
 
     startup_scan_counter = 0
+
+    region_min_size = int(max(model_config.height, model_config.width) / 2)
 
     while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
@@ -654,35 +750,22 @@ def process_frames(
 
             # get tracked object boxes that aren't stationary
             tracked_object_boxes = [
-                obj["box"]
+                obj["estimate"]
                 for obj in object_tracker.tracked_objects.values()
                 if obj["id"] not in stationary_object_ids
             ]
 
-            # combine motion boxes with known locations of existing objects
-            combined_boxes = reduce_boxes(motion_boxes + tracked_object_boxes)
+            combined_boxes = motion_boxes + tracked_object_boxes
 
-            region_min_size = max(model_config.height, model_config.width)
-            # compute regions
-            regions = [
-                calculate_region(
-                    frame_shape,
-                    a[0],
-                    a[1],
-                    a[2],
-                    a[3],
-                    region_min_size,
-                    multiplier=random.uniform(1.2, 1.5),
-                )
-                for a in combined_boxes
-            ]
+            cluster_candidates = get_cluster_candidates(
+                frame_shape, region_min_size, combined_boxes
+            )
 
-            # consolidate regions with heavy overlap
             regions = [
-                calculate_region(
-                    frame_shape, a[0], a[1], a[2], a[3], region_min_size, multiplier=1.0
+                get_cluster_region(
+                    frame_shape, region_min_size, candidate, combined_boxes
                 )
-                for a in reduce_boxes(regions, 0.4)
+                for candidate in cluster_candidates
             ]
 
             # if starting up, get the next startup scan region
@@ -733,74 +816,38 @@ def process_frames(
                 )
 
             #########
-            # merge objects, check for clipped objects and look again up to 4 times
+            # merge objects
             #########
-            refining = len(regions) > 0
-            refine_count = 0
-            while refining and refine_count < 4:
-                refining = False
+            # group by name
+            detected_object_groups = defaultdict(lambda: [])
+            for detection in detections:
+                detected_object_groups[detection[0]].append(detection)
 
-                # group by name
-                detected_object_groups = defaultdict(lambda: [])
-                for detection in detections:
-                    detected_object_groups[detection[0]].append(detection)
+            selected_objects = []
+            for group in detected_object_groups.values():
+                # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+                # o[2] is the box of the object: xmin, ymin, xmax, ymax
+                # apply max/min to ensure values do not exceed the known frame size
+                boxes = [
+                    (
+                        o[2][0],
+                        o[2][1],
+                        o[2][2] - o[2][0],
+                        o[2][3] - o[2][1],
+                    )
+                    for o in group
+                ]
+                confidences = [o[1] for o in group]
+                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
-                selected_objects = []
-                for group in detected_object_groups.values():
-                    # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-                    # o[2] is the box of the object: xmin, ymin, xmax, ymax
-                    # apply max/min to ensure values do not exceed the known frame size
-                    boxes = [
-                        (
-                            o[2][0],
-                            o[2][1],
-                            o[2][2] - o[2][0],
-                            o[2][3] - o[2][1],
-                        )
-                        for o in group
-                    ]
-                    confidences = [o[1] for o in group]
-                    idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+                # add objects
+                for index in idxs:
+                    index = index if isinstance(index, np.int32) else index[0]
+                    obj = group[index]
+                    selected_objects.append(obj)
 
-                    for index in idxs:
-                        index = index if isinstance(index, np.int32) else index[0]
-                        obj = group[index]
-                        if clipped(obj, frame_shape):
-                            box = obj[2]
-                            # calculate a new region that will hopefully get the entire object
-                            region = calculate_region(
-                                frame_shape,
-                                box[0],
-                                box[1],
-                                box[2],
-                                box[3],
-                                region_min_size,
-                            )
-
-                            regions.append(region)
-
-                            selected_objects.extend(
-                                detect(
-                                    detect_config,
-                                    object_detector,
-                                    frame,
-                                    model_config,
-                                    region,
-                                    objects_to_track,
-                                    object_filters,
-                                )
-                            )
-
-                            refining = True
-                        else:
-                            selected_objects.append(obj)
-
-                # set the detections list to only include top, complete objects
-                # and new detections
-                detections = selected_objects
-
-                if refining:
-                    refine_count += 1
+            # set the detections list to only include top objects
+            detections = selected_objects
 
             ## drop detections that overlap too much
             consolidated_detections = []
@@ -848,7 +895,7 @@ def process_frames(
             else:
                 object_tracker.update_frame_times(frame_time)
 
-        # debug tracking by writing frames
+        # debug object tracking
         if False:
             bgr_frame = cv2.cvtColor(
                 frame,
@@ -858,7 +905,67 @@ def process_frames(
             cv2.imwrite(
                 f"debug/frames/track-{'{:.6f}'.format(frame_time)}.jpg", bgr_frame
             )
+        # debug
+        if False:
+            bgr_frame = cv2.cvtColor(
+                frame,
+                cv2.COLOR_YUV2BGR_I420,
+            )
 
+            for m_box in motion_boxes:
+                cv2.rectangle(
+                    bgr_frame,
+                    (m_box[0], m_box[1]),
+                    (m_box[2], m_box[3]),
+                    (0, 0, 255),
+                    2,
+                )
+
+            for b in tracked_object_boxes:
+                cv2.rectangle(
+                    bgr_frame,
+                    (b[0], b[1]),
+                    (b[2], b[3]),
+                    (255, 0, 0),
+                    2,
+                )
+
+            for obj in object_tracker.tracked_objects.values():
+                if obj["frame_time"] == frame_time:
+                    thickness = 2
+                    color = model_config.colormap[obj["label"]]
+                else:
+                    thickness = 1
+                    color = (255, 0, 0)
+
+                # draw the bounding boxes on the frame
+                box = obj["box"]
+
+                draw_box_with_label(
+                    bgr_frame,
+                    box[0],
+                    box[1],
+                    box[2],
+                    box[3],
+                    obj["label"],
+                    obj["id"],
+                    thickness=thickness,
+                    color=color,
+                )
+
+            for region in regions:
+                cv2.rectangle(
+                    bgr_frame,
+                    (region[0], region[1]),
+                    (region[2], region[3]),
+                    (0, 255, 0),
+                    2,
+                )
+
+            cv2.imwrite(
+                f"debug/frames/{camera_name}-{'{:.6f}'.format(frame_time)}.jpg",
+                bgr_frame,
+            )
         # add to the queue if not full
         if detected_objects_queue.full():
             frame_manager.delete(f"{camera_name}{frame_time}")

@@ -261,27 +261,29 @@ motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
-  threshold: 25
-  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: 30)
+  threshold: 40
+  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
+  #           needs to recalibrate. (default: shown below)
+  # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
+  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
+  # a doorbell camera.
+  lightning_threshold: 0.8
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.
   # As a rule of thumb:
   #  - 15 - high sensitivity
   #  - 30 - medium sensitivity
   #  - 50 - low sensitivity
-  contour_area: 30
-  # Optional: Alpha value passed to cv2.accumulateWeighted when averaging the motion delta across multiple frames (default: shown below)
-  # Higher values mean the current frame impacts the delta a lot, and a single raindrop may register as motion.
-  # Too low and a fast moving person wont be detected as motion.
-  delta_alpha: 0.2
+  contour_area: 15
   # Optional: Alpha value passed to cv2.accumulateWeighted when averaging frames to determine the background (default: shown below)
   # Higher values mean the current frame impacts the average a lot, and a new object will be averaged into the background faster.
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
-  frame_alpha: 0.2
+  frame_alpha: 0.02
   # Optional: Height of the resized motion frame  (default: 50)
-  # This operates as an efficient blur alternative. Higher values will result in more granular motion detection at the expense
-  # of higher CPU usage. Lower values result in less CPU, but small changes may not register as motion.
+  # Higher values will result in more granular motion detection at the expense of higher CPU usage.
+  # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 50
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
@@ -289,7 +291,7 @@ motion:
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
-  improve_contrast: False
+  improve_contrast: True
   # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
   mqtt_off_delay: 30
 
