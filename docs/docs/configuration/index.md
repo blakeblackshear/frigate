@@ -569,9 +569,9 @@ telemetry:
   # Optional: Configure system stats
   stats:
     # Enable AMD GPU stats (default: shown below)
-    amd_gpu_stats: true
+    amd_gpu_stats: True
     # Enable Intel GPU stats (default: shown below)
-    intel_gpu_stats: true
+    intel_gpu_stats: True
     # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
