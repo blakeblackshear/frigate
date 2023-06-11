@@ -28,6 +28,7 @@ from frigate.util import (
     SharedMemoryFrameManager,
     area,
     calculate_region,
+    draw_box_with_label,
     intersection,
     intersection_over_union,
     listen,
@@ -894,7 +895,7 @@ def process_frames(
             else:
                 object_tracker.update_frame_times(frame_time)
 
-        # debug tracking by writing frames
+        # debug object tracking
         if False:
             bgr_frame = cv2.cvtColor(
                 frame,
@@ -904,7 +905,67 @@ def process_frames(
             cv2.imwrite(
                 f"debug/frames/track-{'{:.6f}'.format(frame_time)}.jpg", bgr_frame
             )
+        # debug
+        if False:
+            bgr_frame = cv2.cvtColor(
+                frame,
+                cv2.COLOR_YUV2BGR_I420,
+            )
 
+            for m_box in motion_boxes:
+                cv2.rectangle(
+                    bgr_frame,
+                    (m_box[0], m_box[1]),
+                    (m_box[2], m_box[3]),
+                    (0, 0, 255),
+                    2,
+                )
+
+            for b in tracked_object_boxes:
+                cv2.rectangle(
+                    bgr_frame,
+                    (b[0], b[1]),
+                    (b[2], b[3]),
+                    (255, 0, 0),
+                    2,
+                )
+
+            for obj in object_tracker.tracked_objects.values():
+                if obj["frame_time"] == frame_time:
+                    thickness = 2
+                    color = model_config.colormap[obj["label"]]
+                else:
+                    thickness = 1
+                    color = (255, 0, 0)
+
+                # draw the bounding boxes on the frame
+                box = obj["box"]
+
+                draw_box_with_label(
+                    bgr_frame,
+                    box[0],
+                    box[1],
+                    box[2],
+                    box[3],
+                    obj["label"],
+                    obj["id"],
+                    thickness=thickness,
+                    color=color,
+                )
+
+            for region in regions:
+                cv2.rectangle(
+                    bgr_frame,
+                    (region[0], region[1]),
+                    (region[2], region[3]),
+                    (0, 255, 0),
+                    2,
+                )
+
+            cv2.imwrite(
+                f"debug/frames/{camera_name}-{'{:.6f}'.format(frame_time)}.jpg",
+                bgr_frame,
+            )
         # add to the queue if not full
         if detected_objects_queue.full():
             frame_manager.delete(f"{camera_name}{frame_time}")
