@@ -231,9 +231,17 @@ class NorfairTracker(ObjectTracker):
         # update or create new tracks
         active_ids = []
         for t in tracked_objects:
+            estimate = tuple(t.estimate.flatten().astype(int))
+            # keep the estimate within the bounds of the image
+            estimate = (
+                max(0, estimate[0]),
+                max(0, estimate[1]),
+                min(self.detect_config.width - 1, estimate[2]),
+                min(self.detect_config.height - 1, estimate[3]),
+            )
             obj = {
                 **t.last_detection.data,
-                "estimate": tuple(t.estimate.flatten().astype(int)),
+                "estimate": estimate,
             }
             active_ids.append(t.global_id)
             if t.global_id not in self.track_id_map:
@@ -242,7 +250,10 @@ class NorfairTracker(ObjectTracker):
             elif t.last_detection.data["frame_time"] != frame_time:
                 id = self.track_id_map[t.global_id]
                 self.disappeared[id] += 1
-                self.tracked_objects[id]["estimate"] = obj["estimate"]
+                # sometimes the estimate gets way off
+                # only update if the upper left corner is actually upper left
+                if estimate[0] < estimate[2] and estimate[1] < estimate[3]:
+                    self.tracked_objects[id]["estimate"] = obj["estimate"]
             # else update it
             else:
                 self.update(t.global_id, obj)
