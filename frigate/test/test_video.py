@@ -10,6 +10,7 @@ from frigate.video import (
     get_cluster_candidates,
     get_cluster_region,
 )
+from frigate.util import intersection
 
 
 def draw_box(frame, box, color=(255, 0, 0), thickness=2):
@@ -63,7 +64,7 @@ def save_cluster_boundary_image(name, boxes, bounding_boxes):
     )
 
 
-class TestConfig(unittest.TestCase):
+class TestRegion(unittest.TestCase):
     def setUp(self):
         self.frame_shape = (1000, 2000)
         self.min_region_size = 160
@@ -176,3 +177,79 @@ class TestConfig(unittest.TestCase):
 
         # save_clusters_image("dont_combine", boxes, cluster_candidates, regions)
         assert len(regions) == 2
+
+
+class TestObjectBoundingBoxes(unittest.TestCase):
+    def setUp(self) -> None:
+        pass
+
+    def test_box_intersection(self):
+        box_a = [2012, 191, 2031, 205]
+        box_b = [887, 92, 985, 151]
+        box_c = [899, 128, 1080, 175]
+
+        assert intersection(box_a, box_b) == None
+        assert intersection(box_b, box_c) == [899, 128, 985, 151]
+
+    def test_consolidate_objects(self):
+        selected_objects = [
+            (
+                "car",  # valid detection, should not be consolidated
+                0.82421875,
+                (2044, 240, 2134, 297),
+                5130,
+                1.5789473684210527,
+                (2008, 188, 2168, 348),
+            ),
+            (
+                "car",  # valid detection, should not be consolidated
+                0.76953125,
+                (124, 239, 967, 719),
+                404640,
+                1.75625,
+                (0, 0, 2968, 2968),
+            ),
+            (
+                "car",  # valid detection, should not be consolidated
+                0.71484375,
+                (890, 93, 976, 150),
+                4902,
+                1.5087719298245614,
+                (854, 40, 1014, 200),
+            ),
+            (
+                "car",  # valid detection, should not be consolidated
+                0.6640625,
+                (1959, 188, 2005, 222),
+                1564,
+                1.3529411764705883,
+                (1768, 0, 2560, 792),
+            ),
+            (
+                "car",  # invalid detection, should be consolidated
+                0.65234375,
+                (2033, 193, 2048, 203),
+                150,
+                1.5,
+                (2008, 188, 2168, 348),
+            ),
+        ]
+
+        [
+            (
+                "car",
+                0.82421875,
+                (2044, 240, 2134, 297),
+                5130,
+                1.5789473684210527,
+                (2008, 188, 2168, 348),
+            ),
+            (
+                "car",
+                0.76953125,
+                (124, 239, 967, 719),
+                404640,
+                1.75625,
+                (0, 0, 2968, 2968),
+            ),
+        ]

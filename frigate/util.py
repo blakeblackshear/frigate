@@ -572,7 +572,16 @@ def yuv_region_2_bgr(frame, region):
         raise
 
 
-def intersection(box_a, box_b):
+def intersection(box_a, box_b) -> Optional[list[int]]:
+    """Return intersection box or None if boxes do not intersect."""
+    if (
+        box_a[2] < box_b[0]
+        or box_a[0] > box_b[2]
+        or box_a[1] > box_b[3]
+        or box_a[3] < box_b[1]
+    ):
+        return None
+
     return (
         max(box_a[0], box_b[0]),
         max(box_a[1], box_b[1]),
@@ -588,6 +597,9 @@ def area(box):
 def intersection_over_union(box_a, box_b):
     # determine the (x, y)-coordinates of the intersection rectangle
     intersect = intersection(box_a, box_b)
+
+    if intersect is None:
+        return 0.0
 
     # compute the area of intersection rectangle
     inter_area = max(0, intersect[2] - intersect[0] + 1) * max(

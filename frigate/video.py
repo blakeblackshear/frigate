@@ -669,6 +669,40 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
     )
 
 
+def get_consolidated_object_detections(detected_object_groups):
+    """Drop detections that overlap too much"""
+    consolidated_detections = []
+    for group in detected_object_groups.values():
+        # if the group only has 1 item, skip
+        if len(group) == 1:
+            consolidated_detections.append(group[0])
+            continue
+
+        # sort smallest to largest by area
+        sorted_by_area = sorted(group, key=lambda g: g[3])
+
+        for current_detection_idx in range(0, len(sorted_by_area)):
+            current_detection = sorted_by_area[current_detection_idx][2]
+            overlap = 0
+            for to_check_idx in range(
+                min(current_detection_idx + 1, len(sorted_by_area)),
+                len(sorted_by_area),
+            ):
+                to_check = sorted_by_area[to_check_idx][2]
+                intersect_box = intersection(current_detection, to_check)
+                # if 90% of smaller detection is inside of another detection, consolidate
+                if (
+                    intersect_box is not None
+                    and area(intersect_box) / area(current_detection) > 0.9
+                ):
+                    overlap = 1
+                    break
+            if overlap == 0:
+                consolidated_detections.append(sorted_by_area[current_detection_idx])
+
+    return consolidated_detections
+
+
 def process_frames(
     camera_name: str,
     frame_queue: mp.Queue,
@@ -849,9 +883,6 @@ def process_frames(
             # set the detections list to only include top objects
             detections = selected_objects
 
-            ## drop detections that overlap too much
-            consolidated_detections = []
-
             # if detection was run on this frame, consolidate
             if len(regions) > 0:
                 # group by name
@@ -859,36 +890,9 @@ def process_frames(
                 for detection in detections:
                     detected_object_groups[detection[0]].append(detection)
 
-                # loop over detections grouped by label
-                for group in detected_object_groups.values():
-                    # if the group only has 1 item, skip
-                    if len(group) == 1:
-                        consolidated_detections.append(group[0])
-                        continue
-
-                    # sort smallest to largest by area
-                    sorted_by_area = sorted(group, key=lambda g: g[3])
-
-                    for current_detection_idx in range(0, len(sorted_by_area)):
-                        current_detection = sorted_by_area[current_detection_idx][2]
-                        overlap = 0
-                        for to_check_idx in range(
-                            min(current_detection_idx + 1, len(sorted_by_area)),
-                            len(sorted_by_area),
-                        ):
-                            to_check = sorted_by_area[to_check_idx][2]
-                            # if 90% of smaller detection is inside of another detection, consolidate
-                            if (
-                                area(intersection(current_detection, to_check))
-                                / area(current_detection)
-                                > 0.9
-                            ):
-                                overlap = 1
-                                break
-                        if overlap == 0:
-                            consolidated_detections.append(
-                                sorted_by_area[current_detection_idx]
-                            )
+                consolidated_detections = get_consolidated_object_detections(
+                    detected_object_groups
+                )
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(frame_time, consolidated_detections)
             # else, just update the frame times for the stationary objects
