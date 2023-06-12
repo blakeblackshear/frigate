@@ -7,6 +7,7 @@ import queue
 import signal
 import subprocess as sp
 import threading
+import traceback
 from wsgiref.simple_server import make_server
 
 import cv2
@@ -430,9 +431,10 @@ class BirdsEyeFrameManager:
             else:
                 # calculate optimal layout
                 coefficient = 1.0
+                calculating = True
 
                 # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
-                while True:
+                while calculating:
                     layout_candidate, total_height = calculate_layout(
                         (canvas_width, canvas_height),
                         active_cameras_to_add,
@@ -440,9 +442,13 @@ class BirdsEyeFrameManager:
                     )
 
                     if (canvas_height * 0.75) < total_height <= canvas_height:
-                        break
+                        calculating = False
                     elif total_height < canvas_height * 0.75:
+                        logger.error(
+                            f"Canvas ratio is {canvas_height * 0.75} > {total_height} :: {canvas_height / total_height}"
+                        )
                         coefficient += 0.1
+                        calculating = False
                     else:
                         coefficient -= 0.1
 
@@ -473,8 +479,16 @@ class BirdsEyeFrameManager:
         if (now - self.last_output_time) < 1 / 10:
             return False
 
+        try:
+            updated_frame = self.update_frame()
+        except Exception:
+            updated_frame = False
+            self.active_cameras = []
+            self.camera_layout = 0
+            print(traceback.format_exc())
+
         # if the frame was updated or the fps is too low, send frame
-        if self.update_frame() or (now - self.last_output_time) > 1:
+        if updated_frame or (now - self.last_output_time) > 1:
             self.last_output_time = now
             return True
         return False
