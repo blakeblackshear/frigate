@@ -5,6 +5,7 @@ import numpy as np
 from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 
+from frigate.util import intersection
 from frigate.video import (
     get_cluster_boundary,
     get_cluster_candidates,
@@ -63,7 +64,7 @@ def save_cluster_boundary_image(name, boxes, bounding_boxes):
     )
 
 
-class TestConfig(unittest.TestCase):
+class TestRegion(unittest.TestCase):
     def setUp(self):
         self.frame_shape = (1000, 2000)
         self.min_region_size = 160
@@ -176,3 +177,16 @@ class TestConfig(unittest.TestCase):
 
         # save_clusters_image("dont_combine", boxes, cluster_candidates, regions)
         assert len(regions) == 2
+
+
+class TestObjectBoundingBoxes(unittest.TestCase):
+    def setUp(self) -> None:
+        pass
+
+    def test_box_intersection(self):
+        box_a = [2012, 191, 2031, 205]
+        box_b = [887, 92, 985, 151]
+        box_c = [899, 128, 1080, 175]
+
+        assert intersection(box_a, box_b) == None
+        assert intersection(box_b, box_c) == (899, 128, 985, 151)
