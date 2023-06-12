@@ -189,4 +189,4 @@ class TestObjectBoundingBoxes(unittest.TestCase):
         box_c = [899, 128, 1080, 175]
 
         assert intersection(box_a, box_b) == None
-        assert intersection(box_b, box_c) == [899, 128, 985, 151]
+        assert intersection(box_b, box_c) == (899, 128, 985, 151)
