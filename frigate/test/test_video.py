@@ -5,12 +5,12 @@ import numpy as np
 from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 
+from frigate.util import intersection
 from frigate.video import (
     get_cluster_boundary,
     get_cluster_candidates,
     get_cluster_region,
 )
-from frigate.util import intersection
 
 
 def draw_box(frame, box, color=(255, 0, 0), thickness=2):
