@@ -513,9 +513,6 @@ class BirdsEyeFrameManager:
                     if (canvas_height * 0.75) < total_height <= canvas_height:
                         calculating = False
                     elif total_height < canvas_height * 0.75:
-                        logger.error(
-                            f"Canvas ratio is {canvas_height * 0.75} > {total_height} :: {canvas_height / total_height}"
-                        )
                         coefficient += 0.1
                         calculating = False
                     else:
