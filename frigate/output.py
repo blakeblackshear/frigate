@@ -321,7 +321,7 @@ class BirdsEyeFrameManager:
                         ),
                     ],
                 ]
-            elif first_camera_dims[1] + second_camera_dims[1] < canvas_height:
+            else:
                 # place cameras vertically
                 top_scaled_width = int(
                     (canvas_height / 2) * first_camera_dims[0] / first_camera_dims[1]
@@ -356,7 +356,8 @@ class BirdsEyeFrameManager:
             camera_layout: list[list[any]] = []
             camera_layout.append([])
             canvas_aspect = canvas[0] / canvas[1]
-            x = 0
+            starting_x = 0
+            x = starting_x
             y = 0
             y_i = 0
             max_height = 0
@@ -364,35 +365,45 @@ class BirdsEyeFrameManager:
                 camera_dims = self.cameras[camera]["dimensions"].copy()
                 camera_aspect = camera_dims[0] / camera_dims[1]
 
-                # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
-                if camera_aspect < canvas_aspect:
+                if camera_dims[1] > camera_dims[0]:
+                    portrait = True
+                elif camera_aspect < canvas_aspect:
+                    # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
                     camera_dims[0] *= camera_aspect / canvas_aspect
                     camera_dims[1] *= camera_aspect / canvas_aspect
+                    portrait = False
+                else:
+                    portrait = False
 
                 if (x + camera_dims[0] * coefficient) <= canvas[0]:
                     # insert if camera can fit on current row
+                    scaled_width = int(camera_dims[0] * coefficient)
                     camera_layout[y_i].append(
                         (
                             camera,
                             (
                                 x,
                                 y,
-                                int(camera_dims[0] * coefficient),
+                                scaled_width,
                                 int(camera_dims[1] * coefficient),
                             ),
                         )
                     )
-                    x += int(camera_dims[0] * coefficient)
-                    max_height = max(
-                        max_height,
-                        int(camera_dims[1] * coefficient),
-                    )
+                    x += scaled_width
+
+                    if portrait:
+                        starting_x = scaled_width
+                    else:
+                        max_height = max(
+                            max_height,
+                            int(camera_dims[1] * coefficient),
+                        )
                 else:
                     # move on to the next row and insert
                     y += max_height
                     y_i += 1
                     camera_layout.append([])
-                    x = 0
+                    x = starting_x
 
                     if camera_dims[0] * coefficient > canvas_width:
                         safe_coefficient = 1
