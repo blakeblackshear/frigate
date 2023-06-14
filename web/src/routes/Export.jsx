@@ -1,5 +1,5 @@
 import Heading from '../components/Heading';
-import { useState, useEffect } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import useSWR from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
@@ -10,21 +10,17 @@ export default function Export() {
   const [camera, setCamera] = useState('select');
   const [playback, setPlayback] = useState('select');
   const [message, setMessage] = useState({ text: '', error: false });
-  const [startDate, setStartDate] = useState('input');
-  const [startTime, setStartTime] = useState('input');
-  const [endDate, setEndDate] = useState('input');
-  const [endTime, setEndTime] = useState('input');
 
-  useEffect(() => {
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    const offsetMs = currentDate.getTimezoneOffset() * 60 * 1000;
-    const localISOTime = (new Date(currentDate.getTime() - offsetMs)).toISOString().slice(0,16);
-    setStartDate(localISOTime);
-    setStartTime("00:00");
-    setEndDate(localISOTime);
-    setEndTime("23:59");
-  }, []);
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+  const offsetMs = currentDate.getTimezoneOffset() * 60 * 1000;
+  const localDate = new Date(currentDate.getTime() - offsetMs);
+  const localISODate = localDate.toISOString().split('T')[0];
+
+  const [startDate, setStartDate] = useState(localISODate);
+  const [startTime, setStartTime] = useState("00:00");
+  const [endDate, setEndDate] = useState(localISODate);
+  const [endTime, setEndTime] = useState("23:59");
 
   const onHandleExport = () => {
     if (camera == 'select') {
@@ -52,8 +48,13 @@ export default function Export() {
       return;
     }
 
-    setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
-    axios.post(`export/${camera}/start/${start}/end/${end}`, { playback });
+    axios.post(`export/${camera}/start/${start}/end/${end}`, { playback })
+      .then(() => {
+        setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
+      })
+      .catch((error) => {
+        setMessage({ text: 'Failed to start export: '+error.response.data.message, error: true });
+      });
   };
 
   return (
