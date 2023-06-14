@@ -14,7 +14,6 @@ from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any, Tuple
-import traceback
 
 import psutil
 
@@ -390,7 +389,6 @@ class RecordingMaintainer(threading.Thread):
                     "Error occurred when attempting to maintain recording cache"
                 )
                 logger.error(e)
-                logger.error(str(traceback.print_exc()))
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
 
