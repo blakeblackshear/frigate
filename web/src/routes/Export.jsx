@@ -1,5 +1,5 @@
 import Heading from '../components/Heading';
-import { useState, useEffect } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import useSWR from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
@@ -53,7 +53,7 @@ export default function Export() {
         setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
       })
       .catch((error) => {
-        setMessage({ text: 'Failed to start export.', error: true });
+        setMessage({ text: 'Failed to start export: '+error.response.data.message, error: true });
       });
   };
 
