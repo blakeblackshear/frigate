@@ -30,6 +30,7 @@ from frigate.util import (
     escape_special_characters,
     get_ffmpeg_arg_list,
     load_config_with_no_duplicates,
+    get_video_properties,
 )
 
 logger = logging.getLogger(__name__)
@@ -266,6 +267,7 @@ class StationaryConfig(FrigateBaseModel):
 
 
 class DetectConfig(FrigateBaseModel):
+    autoconf: bool = Field(default=False, title="Auto detect height, width and fps.")
     height: int = Field(default=720, title="Height of the stream for the detect role.")
     width: int = Field(default=1280, title="Width of the stream for the detect role.")
     fps: int = Field(
@@ -967,6 +969,13 @@ class FrigateConfig(FrigateBaseModel):
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
+
+                if camera_config.detect.autoconf and ("detect" in input.roles):
+                    (
+                        camera_config.detect.width,
+                        camera_config.detect.height,
+                        camera_config.detect.fps,
+                    ) = get_video_properties(input.path)
 
             # ONVIF substitution
             if camera_config.onvif.user or camera_config.onvif.password:
