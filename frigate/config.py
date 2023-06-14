@@ -267,7 +267,7 @@ class StationaryConfig(FrigateBaseModel):
 
 
 class DetectConfig(FrigateBaseModel):
-    autoconf: bool = Field(default=False, title="Auto detect height, width and fps.")
+    autoconf: bool = Field(default=True, title="Auto detect height, width and fps.")
     height: int = Field(default=720, title="Height of the stream for the detect role.")
     width: int = Field(default=1280, title="Width of the stream for the detect role.")
     fps: int = Field(
@@ -671,6 +671,21 @@ class CameraConfig(FrigateBaseModel):
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
+        for input in config["ffmpeg"]["inputs"]:
+            if config["detect"].get("autoconf") and (
+                "detect" in input.get("roles", [])
+            ):
+                try:
+                    (
+                        config["detect"]["width"],
+                        config["detect"]["height"],
+                        # config["detect"]["fps"],
+                    ) = get_video_properties(input.get("path"))
+                    break
+                except Exception:
+                    logger.debug("Error autoconf url " + input.get("path"))
+                    continue
+
         super().__init__(**config)
 
     @property
@@ -969,13 +984,6 @@ class FrigateConfig(FrigateBaseModel):
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
-
-                if camera_config.detect.autoconf and ("detect" in input.roles):
-                    (
-                        camera_config.detect.width,
-                        camera_config.detect.height,
-                        camera_config.detect.fps,
-                    ) = get_video_properties(input.path)
 
             # ONVIF substitution
             if camera_config.onvif.user or camera_config.onvif.password:

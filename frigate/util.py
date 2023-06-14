@@ -1147,12 +1147,13 @@ def to_relative_box(
 
 
 def get_video_properties(url):
+    width = height = 0
     # Open the video stream
     video = cv2.VideoCapture(url)
 
     # Check if the video stream was opened successfully
     if not video.isOpened():
-        print("Error opening video stream")
+        logger.debug(f"Error opening video stream {url}.")
         return None
 
     # Get the width of frames in the video stream
@@ -1162,9 +1163,9 @@ def get_video_properties(url):
     height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
     # Get the frames per second (fps) of the video stream
-    fps = video.get(cv2.CAP_PROP_FPS)
+    # fps = min(24.0, video.get(cv2.CAP_PROP_FPS))
 
     # Release the video stream
     video.release()
 
-    return width, height, fps
+    return width, height  # , fps
