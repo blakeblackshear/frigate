@@ -121,7 +121,7 @@ export default function Camera({ camera }) {
             <div className="max-w-5xl">
               <video-stream
                 mode="mse"
-                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`)}
+                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${cameraConfig.live.stream_name}`)}
               />
             </div>
           </Fragment>
