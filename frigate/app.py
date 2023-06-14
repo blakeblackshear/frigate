@@ -196,7 +196,7 @@ class FrigateApp:
         if os.path.exists(f"{CONFIG_DIR}/.vacuum"):
             with open(f"{CONFIG_DIR}/.vacuum") as f:
                 try:
-                    timestamp = int(f.readline())
+                    timestamp = round(float(f.readline()))
                 except Exception:
                     timestamp = 0
 
