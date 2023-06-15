@@ -1132,3 +1132,34 @@ def to_relative_box(
         (box[2] - box[0]) / width,  # w
         (box[3] - box[1]) / height,  # h
     )
+
+
+def get_video_properties(url, get_duration=False):
+    width = height = 0
+    # Open the video stream
+    video = cv2.VideoCapture(url)
+
+    # Check if the video stream was opened successfully
+    if not video.isOpened():
+        logger.debug(f"Error opening video stream {url}.")
+        return None
+
+    # Get the width of frames in the video stream
+    width = video.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+    # Get the height of frames in the video stream
+    height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+    # Release the video stream
+    video.release()
+
+    result = {"width": round(width), "height": round(height)}
+    if get_duration:
+        # Get the frames per second (fps) of the video stream
+        fps = video.get(cv2.CAP_PROP_FPS)
+        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        duration = total_frames / fps
+
+        result["duration"] = duration
+
+    return result

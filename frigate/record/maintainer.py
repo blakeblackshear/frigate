@@ -21,7 +21,7 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.types import RecordMetricsTypes
-from frigate.util import area
+from frigate.util import area, get_video_properties
 
 logger = logging.getLogger(__name__)
 
@@ -145,19 +145,10 @@ class RecordingMaintainer(threading.Thread):
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
         else:
-            ffprobe_cmd = [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                f"{cache_path}",
-            ]
-            p = sp.run(ffprobe_cmd, capture_output=True)
-            if p.returncode == 0 and p.stdout.decode():
-                duration = float(p.stdout.decode().strip())
+            segment_info = get_video_properties(cache_path, duration=True)
+
+            if segment_info["duration"]:
+                duration = float(segment_info["duration"])
             else:
                 duration = -1
 
