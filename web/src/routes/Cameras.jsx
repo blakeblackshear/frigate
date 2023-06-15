@@ -1,12 +1,13 @@
 import { h, Fragment } from 'preact';
+import { useState, useMemo } from 'preact/hooks';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Card from '../components/Card';
 import CameraImage from '../components/CameraImage';
+import CameraLiveView from '../components/CameraLiveView';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
-import { useMemo } from 'preact/hooks';
 import useSWR from 'swr';
 
 export default function Cameras() {
@@ -86,7 +87,25 @@ function Camera({ name, config }) {
     [config, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <Card buttons={buttons} href={href} header={cleanName} icons={icons} media={<CameraImage camera={name} stretch />} />
+    <Card 
+      buttons={buttons} 
+      href={href} 
+      header={cleanName} 
+      icons={icons} 
+      media={
+        <div 
+          onMouseEnter={() => setIsHovered(true)} 
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {isHovered 
+            ? <CameraLiveView camera={name} stretch /> // Show the live view when the mouse is over the snapshot
+            : <CameraImage camera={name} stretch /> // Show the snapshot when the mouse is not over it
+          }
+        </div>
+      } 
+    />
   );
 }
