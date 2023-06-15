@@ -33,8 +33,8 @@ cameras:
           roles:
             - record
     detect:
-      width: 1280 # <- optional, by default Frigate try to automatically detect resolution 
-      height: 720 # <- optional, by default Frigate try to automatically detect resolution 
+      width: 1280 # <- optional, by default Frigate tries to automatically detect resolution 
+      height: 720 # <- optional, by default Frigate tries to automatically detect resolution 
 ```
 
 Additional cameras are simply added to the config under the `cameras` entry.
