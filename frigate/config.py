@@ -676,11 +676,10 @@ class CameraConfig(FrigateBaseModel):
                 "detect" in input.get("roles", [])
             ):
                 try:
-                    (
-                        config["detect"]["width"],
-                        config["detect"]["height"],
-                        # config["detect"]["fps"],
-                    ) = get_video_properties(input.get("path"))
+                    
+                    streamInfo = get_video_properties(input.get("path"))
+                    config["detect"]["width"]  = streamInfo["width"]
+                    config["detect"]["height"] = streamInfo["height"]
                     break
                 except Exception:
                     logger.debug("Error autoconf url " + input.get("path"))
