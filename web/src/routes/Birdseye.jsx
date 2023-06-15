@@ -64,7 +64,7 @@ export default function Birdseye() {
     player = (
       <Fragment>
         <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
-          <JSMpegPlayer camera="birdseye" />
+          <JSMpegPlayer camera="birdseye" height={config.birdseye.height} width={config.birdseye.width} />
         </div>
       </Fragment>
     );
