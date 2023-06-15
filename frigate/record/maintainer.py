@@ -123,9 +123,11 @@ class RecordingMaintainer(threading.Thread):
                 .order_by(Event.start_time)
             )
 
+            start = datetime.datetime.now().timestamp()
             await asyncio.gather(
                 *(self.validate_segment(camera, events, r) for r in recordings)
             )
+            logger.error(f"The time took {datetime.datetime.now().timestamp() - start} seconds")
 
     async def validate_segment(
         self, camera: str, events: Event, recording: dict[str, any]
@@ -145,7 +147,7 @@ class RecordingMaintainer(threading.Thread):
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
         else:
-            segment_info = get_video_properties(cache_path, duration=True)
+            segment_info = get_video_properties(cache_path, get_duration=True)
 
             if segment_info["duration"]:
                 duration = float(segment_info["duration"])
