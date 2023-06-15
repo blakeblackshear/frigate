@@ -370,9 +370,13 @@ class BirdsEyeFrameManager:
                 camera_aspect_x = camera_dims[0] / camera_gcd
                 camera_aspect_y = camera_dims[1] / camera_gcd
 
-                # account for slightly off 16:9 cameras
-                if round(camera_aspect_x / camera_aspect_y, 2) == 1.77:
+                if round(camera_aspect_x / camera_aspect_y, 1) == 1.8:
+                    # account for slightly off 16:9 cameras
                     camera_aspect_x = 16
+                    camera_aspect_y = 9
+                elif round(camera_aspect_x / camera_aspect_y, 1) == 1.3:
+                    # make 4:3 cameras the same relative size as 16:9
+                    camera_aspect_x = 12
                     camera_aspect_y = 9
 
                 if camera_dims[1] > camera_dims[0]:
@@ -423,7 +427,7 @@ class BirdsEyeFrameManager:
                 return None
 
             row_count = len(camera_layout)
-            row_height = int(canvas_height / row_count)
+            row_height = int(canvas_height / coefficient)
 
             final_camera_layout = []
             starting_x = 0
@@ -447,11 +451,18 @@ class BirdsEyeFrameManager:
                             scaled_height * camera_dims[0] / camera_dims[1]
                         )
 
+                    if (
+                        x + scaled_width > canvas_width
+                        or y + scaled_height > canvas_height
+                    ):
+                        return None
+
                     final_row.append((cameras[0], (x, y, scaled_width, scaled_height)))
                     x += scaled_width
                 y += row_height
                 final_camera_layout.append(final_row)
 
+            logger.error(f"Final layout {camera_layout} :: {final_camera_layout}")
             return final_camera_layout
 
         # determine how many cameras are tracking objects within the last 30 seconds
@@ -528,7 +539,7 @@ class BirdsEyeFrameManager:
                 )
             else:
                 # calculate optimal layout
-                coefficient = 2.0
+                coefficient = 2
                 calculating = True
 
                 # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
@@ -543,6 +554,9 @@ class BirdsEyeFrameManager:
                         if coefficient < 10:
                             coefficient += 1
                             continue
+                        else:
+                            logger.error(f"Error finding appropriate birdseye layout")
+                            return
 
                     calculating = False
 
