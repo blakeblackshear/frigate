@@ -277,7 +277,34 @@ class BirdsEyeFrameManager:
             second_camera_dims = self.cameras[second_camera]["dimensions"].copy()
 
             # check for optimal layout
-            if first_camera_dims[0] + second_camera_dims[0] < canvas_width:
+            if first_camera_dims[0] + second_camera_dims[0] > canvas_width:
+                # place cameras vertically
+                top_scaled_width = int(
+                    (canvas_height / 2) * first_camera_dims[0] / first_camera_dims[1]
+                )
+                bottom_scaled_width = int(
+                    (canvas_height / 2) * second_camera_dims[0] / second_camera_dims[1]
+                )
+                return [
+                    [
+                        (
+                            first_camera,
+                            (0, 0, top_scaled_width, int(canvas_height / 2)),
+                        )
+                    ],
+                    [
+                        (
+                            second_camera,
+                            (
+                                0,
+                                int(canvas_height / 2),
+                                bottom_scaled_width,
+                                int(canvas_height / 2),
+                            ),
+                        )
+                    ],
+                ]
+            else:
                 # place cameras horizontally
                 first_scaled_width = int(
                     canvas_height * first_camera_dims[0] / first_camera_dims[1]
@@ -319,33 +346,6 @@ class BirdsEyeFrameManager:
                                 second_height,
                             ),
                         ),
-                    ],
-                ]
-            else:
-                # place cameras vertically
-                top_scaled_width = int(
-                    (canvas_height / 2) * first_camera_dims[0] / first_camera_dims[1]
-                )
-                bottom_scaled_width = int(
-                    (canvas_height / 2) * second_camera_dims[0] / second_camera_dims[1]
-                )
-                return [
-                    [
-                        (
-                            first_camera,
-                            (0, 0, top_scaled_width, int(canvas_height / 2)),
-                        )
-                    ],
-                    [
-                        (
-                            second_camera,
-                            (
-                                0,
-                                int(canvas_height / 2),
-                                bottom_scaled_width,
-                                int(canvas_height / 2),
-                            ),
-                        )
                     ],
                 ]
 
