@@ -29,8 +29,8 @@ from frigate.util import (
     deep_merge,
     escape_special_characters,
     get_ffmpeg_arg_list,
-    load_config_with_no_duplicates,
     get_video_properties,
+    load_config_with_no_duplicates,
 )
 
 logger = logging.getLogger(__name__)
@@ -676,9 +676,8 @@ class CameraConfig(FrigateBaseModel):
                 "detect" in input.get("roles", [])
             ):
                 try:
-                    
                     streamInfo = get_video_properties(input.get("path"))
-                    config["detect"]["width"]  = streamInfo["width"]
+                    config["detect"]["width"] = streamInfo["width"]
                     config["detect"]["height"] = streamInfo["height"]
                     break
                 except Exception:
