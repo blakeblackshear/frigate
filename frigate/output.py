@@ -1,6 +1,7 @@
 import datetime
 import glob
 import logging
+import math
 import multiprocessing as mp
 import os
 import queue
@@ -355,75 +356,103 @@ class BirdsEyeFrameManager:
             """Calculate the optimal layout for 3+ cameras."""
             camera_layout: list[list[any]] = []
             camera_layout.append([])
-            canvas_aspect = canvas[0] / canvas[1]
+            canvas_gcd = math.gcd(canvas[0], canvas[1])
+            canvas_aspect_x = (canvas[0] / canvas_gcd) * coefficient
+            canvas_aspect_y = (canvas[0] / canvas_gcd) * coefficient
             starting_x = 0
             x = starting_x
             y = 0
             y_i = 0
-            max_height = 0
+            max_y = 0
             for camera in cameras_to_add:
                 camera_dims = self.cameras[camera]["dimensions"].copy()
-                camera_aspect = camera_dims[0] / camera_dims[1]
+                camera_gcd = math.gcd(camera_dims[0], camera_dims[1])
+                camera_aspect_x = camera_dims[0] / camera_gcd
+                camera_aspect_y = camera_dims[1] / camera_gcd
+
+                # account for slightly off 16:9 cameras
+                if round(camera_aspect_x / camera_aspect_y, 2) == 1.77:
+                    camera_aspect_x = 16
+                    camera_aspect_y = 9
 
                 if camera_dims[1] > camera_dims[0]:
                     portrait = True
-                elif camera_aspect < canvas_aspect:
-                    # if the camera aspect ratio is less than canvas aspect ratio, it needs to be scaled down to fit
-                    camera_dims[0] *= camera_aspect / canvas_aspect
-                    camera_dims[1] *= camera_aspect / canvas_aspect
-                    portrait = False
                 else:
                     portrait = False
 
-                if (x + camera_dims[0] * coefficient) <= canvas[0]:
+                if (x + camera_aspect_x) <= canvas_aspect_x:
                     # insert if camera can fit on current row
-                    scaled_width = int(camera_dims[0] * coefficient)
                     camera_layout[y_i].append(
                         (
                             camera,
                             (
-                                x,
-                                y,
-                                scaled_width,
-                                int(camera_dims[1] * coefficient),
+                                camera_aspect_x,
+                                camera_aspect_y,
                             ),
                         )
                     )
-                    x += scaled_width
 
                     if portrait:
-                        starting_x = scaled_width
+                        starting_x = camera_aspect_x
                     else:
-                        max_height = max(
-                            max_height,
-                            int(camera_dims[1] * coefficient),
+                        max_y = max(
+                            max_y,
+                            camera_aspect_y,
                         )
+
+                    x += camera_aspect_x
                 else:
                     # move on to the next row and insert
-                    y += max_height
+                    y += max_y
                     y_i += 1
                     camera_layout.append([])
                     x = starting_x
 
-                    if camera_dims[0] * coefficient > canvas_width:
-                        safe_coefficient = 1
-                    else:
-                        safe_coefficient = coefficient
+                    if x + camera_aspect_x > canvas_aspect_x:
+                        return None
 
                     camera_layout[y_i].append(
                         (
                             camera,
-                            (
-                                x,
-                                y,
-                                int(camera_dims[0] * safe_coefficient),
-                                int(camera_dims[1] * safe_coefficient),
-                            ),
+                            (camera_aspect_x, camera_aspect_y),
                         )
                     )
-                    x += int(camera_dims[0] * safe_coefficient)
+                    x += camera_aspect_x
 
-            return (camera_layout, y + max_height)
+            if y + max_y > canvas_aspect_y:
+                return None
+
+            row_count = len(camera_layout)
+            row_height = int(canvas_height / row_count)
+
+            final_camera_layout = []
+            starting_x = 0
+            y = 0
+
+            for row in camera_layout:
+                final_row = []
+                x = starting_x
+                for cameras in row:
+                    camera_dims = self.cameras[cameras[0]]["dimensions"].copy()
+
+                    if camera_dims[1] > camera_dims[0]:
+                        scaled_height = int(row_height * coefficient)
+                        scaled_width = int(
+                            scaled_height * camera_dims[0] / camera_dims[1]
+                        )
+                        starting_x = scaled_width
+                    else:
+                        scaled_height = row_height
+                        scaled_width = int(
+                            scaled_height * camera_dims[0] / camera_dims[1]
+                        )
+
+                    final_row.append((cameras[0], (x, y, scaled_width, scaled_height)))
+                    x += scaled_width
+                y += row_height
+                final_camera_layout.append(final_row)
+
+            return final_camera_layout
 
         # determine how many cameras are tracking objects within the last 30 seconds
         active_cameras = set(
@@ -499,24 +528,23 @@ class BirdsEyeFrameManager:
                 )
             else:
                 # calculate optimal layout
-                coefficient = 1.0
+                coefficient = 2.0
                 calculating = True
 
                 # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
                 while calculating:
-                    layout_candidate, total_height = calculate_layout(
+                    layout_candidate = calculate_layout(
                         (canvas_width, canvas_height),
                         active_cameras_to_add,
                         coefficient,
                     )
 
-                    if (canvas_height * 0.75) < total_height <= canvas_height:
-                        calculating = False
-                    elif total_height < canvas_height * 0.75:
-                        coefficient += 0.1
-                        calculating = False
-                    else:
-                        coefficient -= 0.1
+                    if not layout_candidate:
+                        if coefficient < 10:
+                            coefficient += 1
+                            continue
+
+                    calculating = False
 
                 self.camera_layout = layout_candidate
 
