@@ -381,7 +381,6 @@ class BirdsEyeFrameManager:
                 y += row_height
                 final_camera_layout.append(final_row)
 
-            logger.error(f"Final layout {camera_layout} :: {final_camera_layout}")
             return final_camera_layout
 
         # determine how many cameras are tracking objects within the last 30 seconds
