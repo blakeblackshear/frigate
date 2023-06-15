@@ -346,7 +346,6 @@ class BirdsEyeFrameManager:
             if y + max_y > canvas_aspect_y:
                 return None
 
-            row_count = len(camera_layout)
             row_height = int(canvas_height / coefficient)
 
             final_camera_layout = []
@@ -471,7 +470,7 @@ class BirdsEyeFrameManager:
                             coefficient += 1
                             continue
                         else:
-                            logger.error(f"Error finding appropriate birdseye layout")
+                            logger.error("Error finding appropriate birdseye layout")
                             return
 
                     calculating = False
