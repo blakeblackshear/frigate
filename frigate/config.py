@@ -671,25 +671,6 @@ class CameraConfig(FrigateBaseModel):
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
-        if (
-            config["detect"].get("height") is None
-            or config["detect"].get("width") is None
-        ):
-            for input in config["ffmpeg"]["inputs"]:
-                if "detect" in input.get("roles", []):
-                    try:
-                        streamInfo = get_video_properties(input.get("path"))
-                        config["detect"]["width"] = streamInfo["width"]
-                        config["detect"]["height"] = streamInfo["height"]
-                        break
-                    except Exception:
-                        config["detect"]["width"] = DEFAULT_DETECT_DIMENSIONS["width"]
-                        config["detect"]["height"] = DEFAULT_DETECT_DIMENSIONS["height"]
-                        logger.warn(
-                            f"Error detecting stream resolution automatically for {input.get('path')} Applying default values."
-                        )
-                        continue
-
         super().__init__(**config)
 
     @property
@@ -974,6 +955,29 @@ class FrigateConfig(FrigateBaseModel):
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
             )
+
+            if (
+                camera_config.detect.height is None
+                or camera_config.detect.width is None
+            ):
+                for input in camera_config.ffmpeg.inputs:
+                    if "detect" in input.roles:
+                        try:
+                            streamInfo = get_video_properties(input.path)
+                            camera_config.detect.width = streamInfo["width"]
+                            camera_config.detect.height = streamInfo["height"]
+                            break
+                        except Exception:
+                            camera_config.detect.width = DEFAULT_DETECT_DIMENSIONS[
+                                "width"
+                            ]
+                            camera_config.detect.height = DEFAULT_DETECT_DIMENSIONS[
+                                "height"
+                            ]
+                            logger.warn(
+                                f"Error detecting stream resolution automatically for {input.path} Applying default values."
+                            )
+                            continue
 
             # Default max_disappeared configuration
             max_disappeared = camera_config.detect.fps * 5

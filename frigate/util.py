@@ -1165,7 +1165,7 @@ def get_video_properties(url, get_duration=False):
     # Release the video stream
     video.release()
 
-    result = {"width": width, "height": height}
+    result = {"width": round(width), "height": round(height)}
     if get_duration:
         # Get the frames per second (fps) of the video stream
         fps = video.get(cv2.CAP_PROP_FPS)
