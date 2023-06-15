@@ -20,8 +20,8 @@ cameras:
           roles:
             - detect
     detect:
-      width: 1280
-      height: 720
+      width: # <- optional, by default Frigate try to automatically detect resolution 
+      height: # <- optional, by default Frigate try to automatically detect resolution 
 ```
 
 ### VSCode Configuration Schema

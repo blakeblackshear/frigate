@@ -69,8 +69,8 @@ cameras:
           roles:
             - detect
     detect:
-      height: 1080
-      width: 1920
+      height: 1080 # <- optional, by default Frigate try to automatically detect resolution 
+      width: 1920 # <- optional, by default Frigate try to automatically detect resolution 
       fps: 5
 ```
 
