@@ -686,9 +686,7 @@ class CameraConfig(FrigateBaseModel):
                         config["detect"]["width"] = DEFAULT_DETECT_DIMENSIONS["width"]
                         config["detect"]["height"] = DEFAULT_DETECT_DIMENSIONS["height"]
                         logger.warn(
-                            "Error autoconfiguration url "
-                            + input.get("path")
-                            + ". Appliing default values."
+                            f"Error detecting stream resolution automatically for {input.get('path')} Applying default values."
                         )
                         continue
 
