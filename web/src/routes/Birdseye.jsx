@@ -35,7 +35,7 @@ export default function Birdseye() {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
             <video-stream
               mode="mse"
               src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=birdseye`)}
@@ -55,7 +55,7 @@ export default function Birdseye() {
   } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -63,7 +63,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
