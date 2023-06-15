@@ -123,11 +123,9 @@ class RecordingMaintainer(threading.Thread):
                 .order_by(Event.start_time)
             )
 
-            start = datetime.datetime.now().timestamp()
             await asyncio.gather(
                 *(self.validate_segment(camera, events, r) for r in recordings)
             )
-            logger.error(f"The time took {datetime.datetime.now().timestamp() - start} seconds")
 
     async def validate_segment(
         self, camera: str, events: Event, recording: dict[str, any]

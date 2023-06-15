@@ -1159,7 +1159,6 @@ def get_video_properties(url, get_duration=False):
         # Get the frames per second (fps) of the video stream
         fps = video.get(cv2.CAP_PROP_FPS)
         total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        logger.error(f"Got values {total_frames} / {fps} == {total_frames / max(fps, 1)}")
 
         if fps and total_frames:
             duration = total_frames / fps
