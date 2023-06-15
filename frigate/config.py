@@ -44,7 +44,6 @@ FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
-DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 
 
 class FrigateBaseModel(BaseModel):
@@ -269,14 +268,8 @@ class StationaryConfig(FrigateBaseModel):
 
 class DetectConfig(FrigateBaseModel):
     autoconf: bool = Field(default=True, title="Auto detect height, width and fps.")
-    height: int = Field(
-        default=DEFAULT_DETECT_DIMENSIONS["height"],
-        title="Height of the stream for the detect role.",
-    )
-    width: int = Field(
-        default=DEFAULT_DETECT_DIMENSIONS["width"],
-        title="Width of the stream for the detect role.",
-    )
+    height: int = Field(default=720, title="Height of the stream for the detect role.")
+    width: int = Field(default=1280, title="Width of the stream for the detect role.")
     fps: int = Field(
         default=5, title="Number of frames per second to process through detection."
     )
@@ -679,20 +672,8 @@ class CameraConfig(FrigateBaseModel):
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
         for input in config["ffmpeg"]["inputs"]:
-            if (
-                "detect" in config
-                and config["detect"].get("autoconf")
-                and ("detect" in input.get("roles", []))
-                and (
-                    config["detect"].get("height") is None
-                    or config["detect"].get("width") is None
-                    or (
-                        config["detect"].get("height")
-                        == DEFAULT_DETECT_DIMENSIONS["height"]
-                        and config["detect"].get("width")
-                        == DEFAULT_DETECT_DIMENSIONS["width"]
-                    )
-                )
+            if config["detect"].get("autoconf") and (
+                "detect" in input.get("roles", [])
             ):
                 try:
                     streamInfo = get_video_properties(input.get("path"))
