@@ -73,7 +73,11 @@
         "isort.args": ["--settings-path=./pyproject.toml"],
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter",
-          "editor.formatOnSave": true
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+          }
         },
         "[json][jsonc]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -86,7 +90,7 @@
           "editor.tabSize": 2
         },
         "cSpell.ignoreWords": ["rtmp"],
-        "cSpell.words": ["preact"]
+        "cSpell.words": ["preact", "astype", "hwaccel", "mqtt"]
       }
     }
   }

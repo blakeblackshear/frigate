@@ -14,8 +14,9 @@ import cv2
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.config import CameraConfig, DetectConfig
 from frigate.const import CACHE_DIR
+from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
