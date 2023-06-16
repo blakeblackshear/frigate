@@ -225,6 +225,12 @@ detect:
       # Optional: Object specific values
       objects:
         person: 1000
+  # Optional: Milliseconds to offset detect annotations by.
+  # There can often be latency between a recording and the detect process,
+  # especially when using separate streams for detect and record.
+  # Use this setting to make the timeline bounding boxes more closely align
+  # with the recording.
+  annotation_offset: 0
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
