@@ -124,7 +124,7 @@ class RecordingMaintainer(threading.Thread):
             )
 
             await asyncio.gather(
-                *(self.validate_segment(camera, events, r) for r in recordings)
+                *(self.validate_and_move_segment(camera, events, r) for r in recordings)
             )
 
     async def validate_and_move_segment(
