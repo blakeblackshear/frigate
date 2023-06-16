@@ -232,9 +232,9 @@ detect:
   # with the recording. The value can be positive or negative.
   # TIP: Imagine there is an event clip with a person walking from left to right. 
   #      If the event timeline bounding box is consistently to the left of the person
-  #      then the value should be increased. Similarly, if a person is walking from
+  #      then the value should be decreased. Similarly, if a person is walking from
   #      left to right and the bounding box is consistently ahead of the person
-  #      then the value should be decreased.
+  #      then the value should be increased.
   # TIP: This offset is dynamic so you can change the value and it will update existing
   #      events, this makes it easy to tune.
   # WARNING: Fast moving objects will likely not have the bounding box align.
