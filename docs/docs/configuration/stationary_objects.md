@@ -1,6 +1,6 @@
 # Stationary Objects
 
-An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs near the object at which point object detection will start running again. If the object changes location, it will be considered active.
+An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs within the object at which point object detection will start running again. If the object changes location, it will be considered active.
 
 ## Why does it matter if an object is stationary?
 
@@ -13,11 +13,11 @@ The default config is:
 ```yaml
 detect:
   stationary:
-    interval: 0
+    interval: 50
     threshold: 50
 ```
 
-`interval` is defined as the frequency for running detection on stationary objects. This means that by default once an object is considered stationary, detection will not be run on it until motion is detected. With `interval > 0`, every nth frames detection will be run to make sure the object is still there.
+`interval` is defined as the frequency for running detection on stationary objects. This means that by default once an object is considered stationary, detection will not be run on it until motion is detected or until the interval (every 50th frame by default). With `interval >= 1`, every nth frames detection will be run to make sure the object is still there.
 
 NOTE: There is no way to disable stationary object tracking with this value.
 

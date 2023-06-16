@@ -13,9 +13,11 @@ from pydantic.fields import PrivateAttr
 
 from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
 from frigate.detectors import DetectorConfig, ModelConfig
-from frigate.detectors.detector_config import InputTensorEnum  # noqa: F401
-from frigate.detectors.detector_config import PixelFormatEnum  # noqa: F401
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.detector_config import (
+    BaseDetectorConfig,
+    InputTensorEnum,  # noqa: F401
+    PixelFormatEnum,  # noqa: F401
+)
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -251,9 +253,8 @@ class StationaryMaxFramesConfig(FrigateBaseModel):
 
 class StationaryConfig(FrigateBaseModel):
     interval: Optional[int] = Field(
-        default=0,
         title="Frame interval for checking stationary objects.",
-        ge=0,
+        gt=0,
     )
     threshold: Optional[int] = Field(
         title="Number of frames without a position change for an object to be considered stationary",
@@ -963,6 +964,9 @@ class FrigateConfig(FrigateBaseModel):
             stationary_threshold = camera_config.detect.fps * 10
             if camera_config.detect.stationary.threshold is None:
                 camera_config.detect.stationary.threshold = stationary_threshold
+            # default to the stationary_threshold if not defined
+            if camera_config.detect.stationary.interval is None:
+                camera_config.detect.stationary.interval = stationary_threshold
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
