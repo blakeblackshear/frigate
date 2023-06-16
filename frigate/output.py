@@ -501,14 +501,12 @@ class BirdsEyeFrameManager:
         if y + max_y > canvas_aspect_y:
             return None
 
-        final_layout = []
         row_height = int(canvas_height / coefficient)
-
         total_width, total_height, standard_candidate_layout = map_layout(row_height)
 
         # layout can't be optimized more
         if total_width / canvas_width >= 0.99:
-            return final_layout
+            return standard_candidate_layout
 
         scale_up_percent = min(
             1 - (total_width / canvas_width), 1 - (total_height / canvas_height)
