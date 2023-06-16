@@ -6,8 +6,9 @@ from pydantic import parse_obj_as
 
 import frigate.detectors as detectors
 import frigate.object_detection
-from frigate.config import DetectorConfig, InputTensorEnum, ModelConfig
+from frigate.config import DetectorConfig, ModelConfig
 from frigate.detectors import DetectorTypeEnum
+from frigate.detectors.detector_config import InputTensorEnum
 
 
 class TestLocalObjectDetector(unittest.TestCase):

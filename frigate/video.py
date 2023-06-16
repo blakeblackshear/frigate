@@ -14,8 +14,9 @@ import cv2
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig, PixelFormatEnum
+from frigate.config import CameraConfig, DetectConfig
 from frigate.const import CACHE_DIR
+from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
@@ -769,8 +770,8 @@ def process_frames(
             stationary_object_ids = [
                 obj["id"]
                 for obj in object_tracker.tracked_objects.values()
-                # if there hasn't been motion for 10 frames
-                if obj["motionless_count"] >= 10
+                # if it has exceeded the stationary threshold
+                if obj["motionless_count"] >= detect_config.stationary.threshold
                 # and it isn't due for a periodic check
                 and (
                     detect_config.stationary.interval == 0
