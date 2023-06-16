@@ -6,7 +6,7 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import '../components/MsePlayer';
 import useSWR from 'swr';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks'; // Added useState
 import CameraControlPanel from '../components/CameraControlPanel';
 import { baseUrl } from '../api/baseUrl';
 
@@ -26,11 +26,14 @@ export default function Birdseye() {
       .map(([_, camera]) => camera.name);
   }, [config]);
 
+  const [isMaxWidth, setIsMaxWidth] = useState(false); // Added state for class toggle
+
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
   let player;
+  const playerClass = isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full'; // Class based on state
   if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
@@ -93,10 +96,14 @@ export default function Birdseye() {
           </select>
          
         )}
+
+        <button onClick={() => setIsMaxWidth(!isMaxWidth)}>Toggle Width</button> {/* Added button */}
       </div>
 
       <div className="xl:flex justify-between">
-        {player}
+        <div className={playerClass}> {/* Use dynamic class */}
+          {player}
+        </div>
 
         {ptzCameras.length ? (
           <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 sm:w-min xl:h-min {playerClass}">
