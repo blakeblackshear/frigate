@@ -214,6 +214,7 @@ class TrackedObject:
             "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
             "has_snapshot": self.has_snapshot,
+            "attributes": self.obj_data["attributes"],
         }
 
         if include_thumbnail:
@@ -420,6 +421,21 @@ class CameraState:
                     thickness=thickness,
                     color=color,
                 )
+
+                # draw any attributes
+                for attribute in obj["attributes"]:
+                    box = attribute["box"]
+                    draw_box_with_label(
+                        frame_copy,
+                        box[0],
+                        box[1],
+                        box[2],
+                        box[3],
+                        attribute["label"],
+                        f"{attribute['score']:.0%}",
+                        thickness=thickness,
+                        color=color,
+                    )
 
         if draw_options.get("regions"):
             for region in regions:

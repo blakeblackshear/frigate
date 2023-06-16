@@ -723,6 +723,14 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
+    # attribute labels are not tracked and are not assigned regions
+    attribute_label_map = {
+        "person": ["face", "amazon"],
+        "car": ["ups", "fedex", "amazon", "license_plate"],
+    }
+    all_attribute_labels = [
+        item for sublist in attribute_label_map.values() for item in sublist
+    ]
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -758,6 +766,7 @@ def process_frames(
         motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
         regions = []
+        consolidated_detections = []
 
         # if detection is disabled
         if not detection_enabled.value:
@@ -894,11 +903,41 @@ def process_frames(
                 consolidated_detections = get_consolidated_object_detections(
                     detected_object_groups
                 )
+                tracked_detections = [
+                    d
+                    for d in consolidated_detections
+                    if d[0] not in all_attribute_labels
+                ]
                 # now that we have refined our detections, we need to track objects
-                object_tracker.match_and_update(frame_time, consolidated_detections)
+                object_tracker.match_and_update(frame_time, tracked_detections)
             # else, just update the frame times for the stationary objects
             else:
                 object_tracker.update_frame_times(frame_time)
+
+        # group the attribute detections based on what label they apply to
+        attribute_detections = {}
+        for label, attribute_labels in attribute_label_map.items():
+            attribute_detections[label] = [
+                d for d in consolidated_detections if d[0] in attribute_labels
+            ]
+
+        # build detections and add attributes
+        detections = {}
+        for obj in object_tracker.tracked_objects.values():
+            attributes = []
+            # if the objects label has associated attribute detections
+            if obj["label"] in attribute_detections.keys():
+                # add them to attributes if they intersect
+                for attribute_detection in attribute_detections[obj["label"]]:
+                    if box_inside(obj["box"], (attribute_detection[2])):
+                        attributes.append(
+                            {
+                                "label": attribute_detection[0],
+                                "score": attribute_detection[1],
+                                "box": attribute_detection[2],
+                            }
+                        )
+            detections[obj["id"]] = {**obj, "attributes": attributes}
 
         # debug object tracking
         if False:
@@ -982,7 +1021,7 @@ def process_frames(
                 (
                     camera_name,
                     frame_time,
-                    object_tracker.tracked_objects,
+                    detections,
                     motion_boxes,
                     regions,
                 )
