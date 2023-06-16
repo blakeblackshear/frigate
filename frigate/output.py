@@ -401,7 +401,7 @@ class BirdsEyeFrameManager:
                     camera_dims = self.cameras[cameras[0]]["dimensions"].copy()
 
                     if camera_dims[1] > camera_dims[0]:
-                        scaled_height = int(row_height * coefficient)
+                        scaled_height = int(row_height * 2)
                         scaled_width = int(
                             scaled_height * camera_dims[0] / camera_dims[1]
                         )
