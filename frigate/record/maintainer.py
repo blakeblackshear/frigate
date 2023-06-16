@@ -127,7 +127,7 @@ class RecordingMaintainer(threading.Thread):
                 *(self.validate_segment(camera, events, r) for r in recordings)
             )
 
-    async def validate_segment(
+    async def validate_and_move_segment(
         self, camera: str, events: Event, recording: dict[str, any]
     ) -> None:
         cache_path = recording["cache_path"]
