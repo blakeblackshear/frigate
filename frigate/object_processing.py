@@ -76,6 +76,7 @@ class TrackedObject:
         self.zone_presence = {}
         self.current_zones = []
         self.entered_zones = []
+        self.attributes = set()
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
@@ -133,6 +134,7 @@ class TrackedObject:
                     "area": obj_data["area"],
                     "region": obj_data["region"],
                     "score": obj_data["score"],
+                    "attributes": obj_data["attributes"],
                 }
                 thumb_update = True
 
@@ -184,6 +186,9 @@ class TrackedObject:
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
                 significant_change = True
 
+            for attr in obj_data["attributes"]:
+                self.attributes.add(attr["label"])
+
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
         return (thumb_update, significant_change)
@@ -214,7 +219,8 @@ class TrackedObject:
             "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
             "has_snapshot": self.has_snapshot,
-            "attributes": self.obj_data["attributes"],
+            "attributes": list(self.attributes),
+            "current_attributes": self.obj_data["attributes"],
         }
 
         if include_thumbnail:
@@ -294,6 +300,21 @@ class TrackedObject:
                 thickness=thickness,
                 color=color,
             )
+
+            # draw any attributes
+            for attribute in self.thumbnail_data["attributes"]:
+                box = attribute["box"]
+                draw_box_with_label(
+                    best_frame,
+                    box[0],
+                    box[1],
+                    box[2],
+                    box[3],
+                    attribute["label"],
+                    f"{attribute['score']:.0%}",
+                    thickness=thickness,
+                    color=color,
+                )
 
         if crop:
             box = self.thumbnail_data["box"]
@@ -423,7 +444,7 @@ class CameraState:
                 )
 
                 # draw any attributes
-                for attribute in obj["attributes"]:
+                for attribute in obj["current_attributes"]:
                     box = attribute["box"]
                     draw_box_with_label(
                         frame_copy,

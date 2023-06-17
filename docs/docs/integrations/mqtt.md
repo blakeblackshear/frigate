@@ -62,7 +62,9 @@ Message published for each changed event. The first message is published when th
     "has_clip": false,
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
-    "position_changes": 2 // number of times the object has moved from a stationary position
+    "position_changes": 2, // number of times the object has moved from a stationary position
+    "attributes": [], // set of unique attributes that have been identified on the object
+    "current_attributes": [] // detailed data about the current attributes in this frame
   },
   "after": {
     "id": "1607123955.475377-mxklsc",
@@ -87,7 +89,16 @@ Message published for each changed event. The first message is published when th
     "has_clip": false,
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
-    "position_changes": 2 // number of times the object has changed position
+    "position_changes": 2, // number of times the object has changed position
+    "attributes": ["face"], // set of unique attributes that have been identified on the object
+    "current_attributes": [
+      // detailed data about the current attributes in this frame
+      {
+        "label": "face",
+        "box": [442, 506, 534, 524],
+        "score": 0.64
+      }
+    ]
   }
 }
 ```
@@ -163,9 +174,9 @@ Topic with current motion contour area for a camera. Published value is an integ
 
 Topic to send PTZ commands to camera.
 
-| Command                | Description                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------- |
+| Command                | Description                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
 | `preset-<preset_name>` | send command to move to preset with name `<preset_name>`                                  |
 | `MOVE_<dir>`           | send command to continuously move in `<dir>`, possible values are [UP, DOWN, LEFT, RIGHT] |
 | `ZOOM_<dir>`           | send command to continuously zoom `<dir>`, possible values are [IN, OUT]                  |
-| `STOP`                 | send command to stop moving                                                             |
+| `STOP`                 | send command to stop moving                                                               |
