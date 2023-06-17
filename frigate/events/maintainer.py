@@ -194,6 +194,10 @@ class EventProcessor(threading.Thread):
                 },
             }
 
+            # only overwrite the sub_label in the database if it's set
+            if event_data.get("sub_label") is not None:
+                event[Event.sub_label] = event_data["sub_label"]
+
             (
                 Event.insert(event)
                 .on_conflict(

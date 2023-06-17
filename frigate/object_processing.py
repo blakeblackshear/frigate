@@ -204,6 +204,19 @@ class TrackedObject:
                 if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
 
+        # maintain attributes
+        for attr in obj_data["attributes"]:
+            self.attributes.add(attr["label"])
+
+        # populate the sub_label for car with first logo if it exists
+        if self.obj_data["label"] == "car" and "sub_label" not in self.obj_data:
+            recognized_logos = self.attributes.intersection(
+                set(["ups", "fedex", "amazon"])
+            )
+            if len(recognized_logos) > 0:
+                self.obj_data["sub_label"] = recognized_logos.pop()
+
+        # check for significant change
         if not self.false_positive:
             # if the zones changed, signal an update
             if set(self.current_zones) != set(current_zones):
@@ -223,9 +236,6 @@ class TrackedObject:
             # update at least once per minute
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
                 significant_change = True
-
-            for attr in obj_data["attributes"]:
-                self.attributes.add(attr["label"])
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
