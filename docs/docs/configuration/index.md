@@ -206,10 +206,10 @@ detect:
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
-    # Optional: Frequency for confirming stationary objects (default: shown below)
-    # When set to 0, object detection will not confirm stationary objects until movement is detected.
+    # Optional: Frequency for confirming stationary objects (default: same as threshold)
+    # When set to 1, object detection will run to confirm the object still exists on every frame.
     # If set to 10, object detection will run to confirm the object still exists on every 10th frame.
-    interval: 0
+    interval: 50
     # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
     threshold: 50
     # Optional: Define a maximum number of frames for tracking a stationary object (default: not set, track forever)
@@ -225,6 +225,20 @@ detect:
       # Optional: Object specific values
       objects:
         person: 1000
+  # Optional: Milliseconds to offset detect annotations by (default: shown below).
+  # There can often be latency between a recording and the detect process,
+  # especially when using separate streams for detect and record.
+  # Use this setting to make the timeline bounding boxes more closely align
+  # with the recording. The value can be positive or negative.
+  # TIP: Imagine there is an event clip with a person walking from left to right. 
+  #      If the event timeline bounding box is consistently to the left of the person
+  #      then the value should be decreased. Similarly, if a person is walking from
+  #      left to right and the bounding box is consistently ahead of the person
+  #      then the value should be increased.
+  # TIP: This offset is dynamic so you can change the value and it will update existing
+  #      events, this makes it easy to tune.
+  # WARNING: Fast moving objects will likely not have the bounding box align.
+  annotation_offset: 0
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
