@@ -1,101 +1,101 @@
-Speech
-Child speech, kid speaking
-Conversation
-Narration, monologue
-Babbling
-Speech synthesizer
-Shout
-Bellow
-Whoop
-Yell
-Children shouting
-Screaming
+speech
+speech
+speech
+speech
+babbling
+speech
+yell
+bellow
+whoop
+yell
+yell
+yell
 Whispering
-Laughter
-Baby laughter
-Giggle
-Snicker
-Belly laugh
-Chuckle, chortle
-Crying, sobbing
-Baby cry, infant cry
-Whimper
-Wail, moan
-Sigh
-Singing
-Choir
-Yodeling
-Chant
-Mantra
-Child singing
-Synthetic singing
-Rapping
-Humming
-Groan
-Grunt
-Whistling
-Breathing
-Wheeze
-Snoring
-Gasp
-Pant
-Snort
-Cough
-Throat clearing
-Sneeze
-Sniff
-Run
-Shuffle
-Walk, footsteps
-Chewing, mastication
-Biting
-Gargling
-Stomach rumble
-Burping, eructation
-Hiccup
-Fart
-Hands
-Finger snapping
-Clapping
-Heart sounds, heartbeat
-Heart murmur
-Cheering
-Applause
-Chatter
-Crowd
-Hubbub, speech noise, speech babble
-Children playing
-Animal
-Domestic animals, pets
-Dog
-Bark
-Yip
-Howl
-Bow-wow
-Growling
-Whimper (dog)
-Cat
-Purr
-Meow
-Hiss
-Caterwaul
-Livestock, farm animals, working animals
-Horse
-Clip-clop
-Neigh, whinny
-Cattle, bovinae
-Moo
-Cowbell
-Pig
-Oink
-Goat
-Bleat
-Sheep
-Fowl
-Chicken, rooster
-Cluck
-Crowing, cock-a-doodle-doo
-Turkey
+laughter
+laughter
+laughter
+snicker
+laughter
+laughter
+crying
+crying
+crying
+yell
+sigh
+singing
+choir
+sodeling
+chant
+mantra
+child_singing
+synthetic_singing
+rapping
+humming
+groan
+grunt
+whistling
+breathing
+wheeze
+snoring
+gasp
+pant
+snort
+cough
+throat clearing
+sneeze
+sniff
+run
+shuffle
+footsteps
+chewing
+biting
+gargling
+stomach_rumble
+burping
+hiccup
+fart
+hands
+finger snapping
+clapping
+heartbeat
+heart_murmur
+cheering
+applause
+chatter
+crowd
+speech
+children_playing
+animal
+pets
+dog
+bark
+yip
+howl
+bow-wow
+growling
+whimper_dog
+cat
+purr
+meow
+hiss
+caterwaul
+livestock
+horse
+clip-clop
+neigh
+cattle
+moo
+cowbell
+pig
+oink
+goat
+bleat
+sheep
+fowl
+chicken
+cluck
+cock-a-doodle-doo
+turkey
 Gobble
 Duck
 Quack
