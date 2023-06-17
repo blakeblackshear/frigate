@@ -12,7 +12,7 @@ FROM debian:11-slim AS slim-base
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
 RUN apt-get update \
-    && apt-get install -y wget xz-utils unzip \
+    && apt-get install -y wget xz-utils \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /rootfs
 
@@ -96,7 +96,7 @@ RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/da
 # Get Audio Model and labels
 RUN wget -qO edgetpu_audio_model.tflite https://tfhub.dev/google/coral-model/yamnet/classification/coral/1?coral-format=tflite
 RUN wget -qO cpu_audio_model.tflite https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite
-RUN unzip -q edgetpu_audio_model.tflite yamnet_label_list.txt && chmod +r yamnet_label_list.txt
+COPY audio-labelmap.txt .
 
 
 FROM wget AS s6-overlay
