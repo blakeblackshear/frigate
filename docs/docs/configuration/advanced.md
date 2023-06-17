@@ -96,6 +96,16 @@ model:
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
 
+:::caution
+
+Some labels have special handling and modifications can disable functionality.
+
+`person` objects are associated with `face` and `amazon`
+
+`car` objects are associated with `license_plate`, `ups`, `fedex`, `amazon`
+
+:::
+
 ## Custom ffmpeg build
 
 Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, a docker volume mapping can be used to overwrite the included ffmpeg build with an ffmpeg build that works for your specific hardware setup.

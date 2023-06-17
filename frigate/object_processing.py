@@ -24,6 +24,7 @@ from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
 from frigate.util import (
     SharedMemoryFrameManager,
+    area,
     calculate_region,
     draw_box_with_label,
     draw_timestamp,
@@ -42,10 +43,44 @@ def on_edge(box, frame_shape):
         return True
 
 
-def is_better_thumbnail(current_thumb, new_obj, frame_shape) -> bool:
+def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
+    max_new_attr = max(
+        [0]
+        + [area(a["box"]) for a in new_obj["attributes"] if a["label"] == attr_label]
+    )
+    max_current_attr = max(
+        [0]
+        + [
+            area(a["box"])
+            for a in current_thumb["attributes"]
+            if a["label"] == attr_label
+        ]
+    )
+
+    # if the thumb has a higher scoring attr
+    return max_new_attr > max_current_attr
+
+
+def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
     # larger is better
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
+
+    # check face on person
+    if label == "person":
+        if has_better_attr(current_thumb, new_obj, "face"):
+            return True
+        # if the current thumb has a face attr, dont update unless it gets better
+        if any([a["label"] == "face" for a in current_thumb["attributes"]]):
+            return False
+
+    # check license_plate on car
+    if label == "car":
+        if has_better_attr(current_thumb, new_obj, "license_plate"):
+            return True
+        # if the current thumb has a license_plate attr, dont update unless it gets better
+        if any([a["label"] == "license_plate" for a in current_thumb["attributes"]]):
+            return False
 
     # if the new_thumb is on an edge, and the current thumb is not
     if on_edge(new_obj["box"], frame_shape) and not on_edge(
@@ -126,7 +161,10 @@ class TrackedObject:
         if not self.false_positive:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.thumbnail_data, obj_data, self.camera_config.frame_shape
+                self.obj_data["label"],
+                self.thumbnail_data,
+                obj_data,
+                self.camera_config.frame_shape,
             ):
                 self.thumbnail_data = {
                     "frame_time": obj_data["frame_time"],
@@ -590,6 +628,7 @@ class CameraState:
                 # or the current object is older than desired, use the new object
                 if (
                     is_better_thumbnail(
+                        object_type,
                         current_best.thumbnail_data,
                         obj.thumbnail_data,
                         self.camera_config.frame_shape,
