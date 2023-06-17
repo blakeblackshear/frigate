@@ -12,6 +12,10 @@ PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
+# Audio Consts
+
+AUDIO_DETECTOR = "audio-detector"
+
 # Regex Consts
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"

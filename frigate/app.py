@@ -21,6 +21,7 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
 from frigate.const import (
+    AUDIO_DETECTOR,
     CACHE_DIR,
     CLIPS_DIR,
     CONFIG_DIR,
@@ -320,6 +321,12 @@ class FrigateApp:
                 self.detection_queue,
                 self.detection_out_events,
                 detector_config,
+            )
+
+        if any(c.audio.enabled for c in self.config.cameras.items()):
+            self.detectors[AUDIO_DETECTOR] = ObjectDetectProcess(
+                AUDIO_DETECTOR,
+                
             )
 
     def start_detected_frames_processor(self) -> None:
