@@ -30,6 +30,8 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.detectors.plugins.audio_tfl import AudioDetectorConfig
+from frigate.events.audio import AudioDetectProcess
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -60,6 +62,7 @@ class FrigateApp:
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
+        self.audio_queue: Queue = mp.Queue()
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
@@ -287,6 +290,8 @@ class FrigateApp:
         )
 
     def start_detectors(self) -> None:
+        audio_enabled = any(c.audio.enabled for c in self.config.cameras.items())
+
         for name in self.config.cameras.keys():
             self.detection_out_events[name] = mp.Event()
 
@@ -315,6 +320,33 @@ class FrigateApp:
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
+
+        if audio_enabled:
+            try:
+                shm_in_audio = mp.shared_memory.SharedMemory(
+                    name=f"{name}-audio",
+                    create=True,
+                    size=int(
+                        round(
+                            self.config.audio_model.duration
+                            * self.config.audio_model.sample_rate
+                        )
+                    )
+                    * 4,  # stored as float32, so 4 bytes per sample
+                )
+            except FileExistsError:
+                shm_in_audio = mp.shared_memory.SharedMemory(name=f"{name}-audio")
+
+            try:
+                shm_out_audio = mp.shared_memory.SharedMemory(
+                    name=f"out-{name}-audio", create=True, size=20 * 6 * 4
+                )
+            except FileExistsError:
+                shm_out_audio = mp.shared_memory.SharedMemory(
+                    name=f"out-{name}-audio"
+                )
+
+
         for name, detector_config in self.config.detectors.items():
             self.detectors[name] = ObjectDetectProcess(
                 name,
@@ -323,10 +355,12 @@ class FrigateApp:
                 detector_config,
             )
 
-        if any(c.audio.enabled for c in self.config.cameras.items()):
-            self.detectors[AUDIO_DETECTOR] = ObjectDetectProcess(
+        if audio_enabled:
+            self.detectors[AUDIO_DETECTOR] = AudioDetectProcess(
                 AUDIO_DETECTOR,
-                
+                self.audio_queue,
+                self.detection_out_events,
+                AudioDetectorConfig
             )
 
     def start_detected_frames_processor(self) -> None:

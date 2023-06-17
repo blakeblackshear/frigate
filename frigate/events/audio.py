@@ -36,6 +36,49 @@ def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
             AudioEventMaintainer(camera, stop_event)
 
 
+class AudioDetectProcess:
+    def __init__(
+        self,
+        name,
+        detection_queue,
+        out_events,
+    ):
+        self.name = name
+        self.out_events = out_events
+        self.detection_queue = detection_queue
+        self.detect_process = None
+        self.start_or_restart()
+
+    def stop(self):
+        # if the process has already exited on its own, just return
+        if self.detect_process and self.detect_process.exitcode:
+            return
+        self.detect_process.terminate()
+        logging.info("Waiting for detection process to exit gracefully...")
+        self.detect_process.join(timeout=30)
+        if self.detect_process.exitcode is None:
+            logging.info("Detection process didnt exit. Force killing...")
+            self.detect_process.kill()
+            self.detect_process.join()
+        logging.info("Detection process has exited...")
+
+    def start_or_restart(self):
+        self.detection_start.value = 0.0
+        if (self.detect_process is not None) and self.detect_process.is_alive():
+            self.stop()
+        self.detect_process = mp.Process(
+            target=run_detector,
+            name=f"detector:{self.name}",
+            args=(
+                self.name,
+                self.detection_queue,
+                self.out_events,
+            ),
+        )
+        self.detect_process.daemon = True
+        self.detect_process.start()
+
+
 class AudioEventMaintainer(threading.Thread):
     def __init__(self, camera: CameraConfig, stop_event: mp.Event) -> None:
         threading.Thread.__init__(self)

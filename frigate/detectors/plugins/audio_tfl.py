@@ -22,7 +22,7 @@ class AudioDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
 
 
-class CpuTfl(DetectionApi):
+class AudioTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: AudioDetectorConfig):
