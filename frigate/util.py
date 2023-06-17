@@ -1206,6 +1206,7 @@ def get_video_properties(url, get_duration=False):
         # Release the video stream
         video.release()
 
-        result = {"width": round(width), "height": round(height)}
+        result["width"] = round(width)
+        result["height"] = round(height)
 
     return result
