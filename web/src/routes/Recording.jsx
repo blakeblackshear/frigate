@@ -9,11 +9,12 @@ import { useApiHost } from '../api';
 import useSWR from 'swr';
 
 export default function Recording({ camera, date, hour = '00', minute = '00', second = '00' }) {
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const { data: config } = useSWR('config');
   const currentDate = useMemo(
     () => (date ? parseISO(`${date}T${hour || '00'}:${minute || '00'}:${second || '00'}`) : new Date()),
     [date, hour, minute, second]
   );
+  const timezone = useMemo(() => config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
 
   const apiHost = useApiHost();
   const { data: recordingsSummary } = useSWR([`${camera}/recordings/summary`, { timezone }], {
@@ -29,7 +30,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
   const seekSeconds = useMemo(() => {
     if (!recordings) {
-      return 0;
+      return undefined;
     }
     const currentUnix = getUnixTime(currentDate);
 
@@ -102,6 +103,9 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   }, [playlistIndex]);
 
   useEffect(() => {
+    if (seekSeconds === undefined) {
+      return;
+    }
     if (this.player) {
       // if the playlist has moved on to the next item, then reset
       if (this.player.playlist.currentItem() !== playlistIndex) {
@@ -113,7 +117,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary || !recordings) {
+  if (!recordingsSummary || !config) {
     return <ActivityIndicator />;
   }
 
@@ -132,7 +136,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   return (
     <div className="space-y-4 p-2 px-4">
       <Heading>{camera.replaceAll('_', ' ')} Recordings</Heading>
-      <div className="text-xs">Dates and times are based on the browser's timezone {timezone}</div>
+      <div className="text-xs">Dates and times are based on the timezone {timezone}</div>
 
       <VideoPlayer
         options={{
@@ -144,7 +148,9 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
             player.playlist(playlist);
             player.playlist.autoadvance(0);
             player.playlist.currentItem(playlistIndex);
-            player.currentTime(seekSeconds);
+            if (seekSeconds !== undefined)  {
+              player.currentTime(seekSeconds);
+            }
             this.player = player;
           }
         }}

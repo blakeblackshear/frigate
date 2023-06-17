@@ -10,16 +10,17 @@ apt-get -qq install --no-install-recommends -y \
     wget \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3-pip
+    python3-pip \
+    curl \
+    jq \
+    nethogs
 
-# add raspberry pi repo
 mkdir -p -m 600 /root/.gnupg
-gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
-echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list
 
 # add coral repo
-wget --quiet -O /usr/share/keyrings/google-edgetpu.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/google-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
+curl -fsSLo - https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/google-cloud-packages-archive-keyring.gpg
+echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
 echo "libedgetpu1-max libedgetpu/accepted-eula select true" | debconf-set-selections
 
 # enable non-free repo
@@ -30,21 +31,20 @@ apt-get -qq update
 apt-get -qq install --no-install-recommends --no-install-suggests -y \
     libedgetpu1-max python3-tflite-runtime python3-pycoral
 
-# btbn-ffmpeg -> amd64 / arm64
-if [[ "${TARGETARCH}" == "amd64" || "${TARGETARCH}" == "arm64" ]]; then
-    if [[ "${TARGETARCH}" == "amd64" ]]; then
-        btbn_arch="64"
-    else
-        btbn_arch="arm64"
-    fi
+# btbn-ffmpeg -> amd64
+if [[ "${TARGETARCH}" == "amd64" ]]; then
     mkdir -p /usr/lib/btbn-ffmpeg
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux${btbn_arch}-gpl-5.1.tar.xz"
+    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linux64-gpl-5.1.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
 
-# ffmpeg -> arm32
-if [[ "${TARGETARCH}" == "arm" ]]; then
+# ffmpeg -> arm64
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    # add raspberry pi repo
+    gpg --no-default-keyring --keyring /usr/share/keyrings/raspbian.gpg --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
+    echo "deb [signed-by=/usr/share/keyrings/raspbian.gpg] https://archive.raspberrypi.org/debian/ bullseye main" | tee /etc/apt/sources.list.d/raspi.list
+    apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y ffmpeg
 fi
 
@@ -57,6 +57,9 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd \
         mesa-va-drivers libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 radeontop intel-gpu-tools
+    # something about this dependency requires it to be installed in a separate call rather than in the line above
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+        i965-va-driver-shaders
     rm -f /etc/apt/sources.list.d/debian-testing.list
 fi
 
@@ -65,17 +68,13 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
         libva-drm2 mesa-va-drivers
 fi
 
-# not sure why 32bit arm requires all these
-if [[ "${TARGETARCH}" == "arm" ]]; then
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        libgtk-3-dev \
-        libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
-        libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
-        gfortran openexr libatlas-base-dev libtbb-dev libdc1394-22-dev libopenexr-dev \
-        libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev
-fi
-
 apt-get purge gnupg apt-transport-https wget xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*
+
+# Install yq, for frigate-prepare and go2rtc echo source
+curl -fsSL \
+    "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_$(dpkg --print-architecture)" \
+    --output /usr/local/bin/yq
+chmod +x /usr/local/bin/yq

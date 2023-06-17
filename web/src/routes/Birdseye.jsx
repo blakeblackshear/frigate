@@ -4,23 +4,46 @@ import ActivityIndicator from '../components/ActivityIndicator';
 import JSMpegPlayer from '../components/JSMpegPlayer';
 import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
-import MsePlayer from '../components/MsePlayer';
+import '../components/MsePlayer';
 import useSWR from 'swr';
-import videojs from 'video.js';
+import { useMemo } from 'preact/hooks';
+import CameraControlPanel from '../components/CameraControlPanel';
+import { baseUrl } from '../api/baseUrl';
 
 export default function Birdseye() {
   const { data: config } = useSWR('config');
 
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence('birdseye-source', 'mse');
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence('birdseye-source', getDefaultLiveMode(config));
   const sourceValues = ['mse', 'webrtc', 'jsmpeg'];
+
+  const ptzCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.cameras)
+      .filter(([_, conf]) => conf.onvif?.host && conf.onvif.host != '')
+      .map(([_, camera]) => camera.name);
+  }, [config]);
 
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
   let player;
-  if (viewSource == 'mse' && config.restream.birdseye) {
-    if (videojs.browser.IS_IOS) {
+  if (viewSource == 'mse' && config.birdseye.restream) {
+    if ('MediaSource' in window) {
+      player = (
+        <Fragment>
+          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+            <video-stream
+              mode="mse"
+              src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=birdseye`)}
+            />
+          </div>
+        </Fragment>
+      );
+    } else {
       player = (
         <Fragment>
           <div className="w-5xl text-center text-sm">
@@ -28,19 +51,11 @@ export default function Birdseye() {
           </div>
         </Fragment>
       );
-    } else {
-      player = (
-        <Fragment>
-          <div className="max-w-5xl">
-            <MsePlayer camera="birdseye" />
-          </div>
-        </Fragment>
-      );
     }
-  } else if (viewSource == 'webrtc' && config.restream.birdseye) {
+  } else if (viewSource == 'webrtc' && config.birdseye.restream) {
     player = (
       <Fragment>
-        <div className="max-w-5xl">
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -48,7 +63,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className="max-w-7xl">
+        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -62,7 +77,7 @@ export default function Birdseye() {
           Birdseye
         </Heading>
 
-        {config.restream.birdseye && (
+        {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
             value={viewSource}
@@ -77,7 +92,33 @@ export default function Birdseye() {
         )}
       </div>
 
-      {player}
+      <div className="xl:flex justify-between">
+        {player}
+
+        {ptzCameras.length ? (
+          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">
+            <Heading size="sm">Control Panel</Heading>
+            {ptzCameras.map((camera) => (
+              <div className="p-4" key={camera}>
+                <Heading size="lg">{camera.replaceAll('_', ' ')}</Heading>
+                <CameraControlPanel camera={camera} />
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
+}
+
+function getDefaultLiveMode(config) {
+  if (config) {
+    if (config.birdseye.restream) {
+      return config.ui.live_mode;
+    }
+
+    return 'jsmpeg';
+  }
+
+  return undefined;
 }

@@ -1,6 +1,6 @@
+import ctypes
 import logging
 
-import ctypes
 import numpy as np
 
 try:
@@ -8,13 +8,14 @@ try:
     from cuda import cuda
 
     TRT_SUPPORT = True
-except ModuleNotFoundError as e:
+except ModuleNotFoundError:
     TRT_SUPPORT = False
+
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
-from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -75,12 +76,6 @@ class TensorRtDetector(DetectionApi):
 
     def _load_engine(self, model_path):
         try:
-            ctypes.cdll.LoadLibrary(
-                "/usr/local/lib/python3.9/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.11.0"
-            )
-            ctypes.cdll.LoadLibrary(
-                "/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8"
-            )
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
             ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")
@@ -178,7 +173,7 @@ class TensorRtDetector(DetectionApi):
         if not self.context.execute_async_v2(
             bindings=self.bindings, stream_handle=self.stream
         ):
-            logger.warn(f"Execute returned false")
+            logger.warn("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [

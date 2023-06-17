@@ -1,34 +1,44 @@
 import asyncio
 import json
 import logging
+import os
+import shutil
 import threading
 import time
-import psutil
-import shutil
-import os
-import requests
-from typing import Optional, Any
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any, Optional
+
+import psutil
+import requests
+from requests.exceptions import RequestException
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
-from frigate.const import DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR, CLIPS_DIR, CACHE_DIR
-from frigate.types import StatsTrackingTypes, CameraMetricsTypes
-from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats, get_nvidia_gpu_stats
-from frigate.version import VERSION
-from frigate.util import get_cpu_stats
+from frigate.const import CACHE_DIR, CLIPS_DIR, DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
+from frigate.types import CameraMetricsTypes, StatsTrackingTypes
+from frigate.util import (
+    get_amd_gpu_stats,
+    get_bandwidth_stats,
+    get_cpu_stats,
+    get_intel_gpu_stats,
+    get_nvidia_gpu_stats,
+)
+from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
 
-def get_latest_version() -> str:
+def get_latest_version(config: FrigateConfig) -> str:
+    if not config.telemetry.version_check:
+        return "disabled"
+
     try:
         request = requests.get(
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
             timeout=10,
         )
-    except:
+    except RequestException:
         return "unknown"
 
     response = request.json()
@@ -40,14 +50,18 @@ def get_latest_version() -> str:
 
 
 def stats_init(
+    config: FrigateConfig,
     camera_metrics: dict[str, CameraMetricsTypes],
     detectors: dict[str, ObjectDetectProcess],
+    processes: dict[str, int],
 ) -> StatsTrackingTypes:
     stats_tracking: StatsTrackingTypes = {
         "camera_metrics": camera_metrics,
         "detectors": detectors,
         "started": int(time.time()),
-        "latest_frigate_version": get_latest_version(),
+        "latest_frigate_version": get_latest_version(config),
+        "last_updated": int(time.time()),
+        "processes": processes,
     }
     return stats_tracking
 
@@ -90,12 +104,15 @@ def get_processing_stats(
     """Get stats for cpu / gpu."""
 
     async def run_tasks() -> None:
-        await asyncio.wait(
-            [
-                asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
-                asyncio.create_task(set_cpu_stats(stats)),
-            ]
-        )
+        stats_tasks = [
+            asyncio.create_task(set_gpu_stats(config, stats, hwaccel_errors)),
+            asyncio.create_task(set_cpu_stats(stats)),
+        ]
+
+        if config.telemetry.stats.network_bandwidth:
+            stats_tasks.append(asyncio.create_task(set_bandwidth_stats(config, stats)))
+
+        await asyncio.wait(stats_tasks)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -109,6 +126,14 @@ async def set_cpu_stats(all_stats: dict[str, Any]) -> None:
 
     if cpu_stats:
         all_stats["cpu_usages"] = cpu_stats
+
+
+async def set_bandwidth_stats(config: FrigateConfig, all_stats: dict[str, Any]) -> None:
+    """Set bandwidth from nethogs."""
+    bandwidth_stats = get_bandwidth_stats(config)
+
+    if bandwidth_stats:
+        all_stats["bandwidth_usages"] = bandwidth_stats
 
 
 async def set_gpu_stats(
@@ -146,13 +171,19 @@ async def set_gpu_stats(
             nvidia_usage = get_nvidia_gpu_stats()
 
             if nvidia_usage:
-                name = nvidia_usage["name"]
-                del nvidia_usage["name"]
-                stats[name] = nvidia_usage
+                for i in range(len(nvidia_usage)):
+                    stats[nvidia_usage[i]["name"]] = {
+                        "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
+                        "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                    }
+
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
         elif "qsv" in args:
+            if not config.telemetry.stats.intel_gpu_stats:
+                continue
+
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
 
@@ -165,6 +196,9 @@ async def set_gpu_stats(
             driver = os.environ.get(DRIVER_ENV_VAR)
 
             if driver == DRIVER_AMD:
+                if not config.telemetry.stats.amd_gpu_stats:
+                    continue
+
                 # AMD VAAPI GPU
                 amd_usage = get_amd_gpu_stats()
 
@@ -174,6 +208,9 @@ async def set_gpu_stats(
                     stats["amd-vaapi"] = {"gpu": -1, "mem": -1}
                     hwaccel_errors.append(args)
             else:
+                if not config.telemetry.stats.intel_gpu_stats:
+                    continue
+
                 # intel VAAPI GPU
                 intel_usage = get_intel_gpu_stats()
 
@@ -215,6 +252,7 @@ def stats_snapshot(
             "process_fps": round(camera_stats["process_fps"].value, 2),
             "skipped_fps": round(camera_stats["skipped_fps"].value, 2),
             "detection_fps": round(camera_stats["detection_fps"].value, 2),
+            "detection_enabled": camera_stats["detection_enabled"].value,
             "pid": pid,
             "capture_pid": cpid,
             "ffmpeg_pid": ffmpeg_pid,
@@ -238,15 +276,26 @@ def stats_snapshot(
         "latest_version": stats_tracking["latest_frigate_version"],
         "storage": {},
         "temperatures": get_temperatures(),
+        "last_updated": int(time.time()),
     }
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
-        storage_stats = shutil.disk_usage(path)
+        try:
+            storage_stats = shutil.disk_usage(path)
+        except FileNotFoundError:
+            stats["service"]["storage"][path] = {}
+
         stats["service"]["storage"][path] = {
-            "total": round(storage_stats.total / 1000000, 1),
-            "used": round(storage_stats.used / 1000000, 1),
-            "free": round(storage_stats.free / 1000000, 1),
+            "total": round(storage_stats.total / pow(2, 20), 1),
+            "used": round(storage_stats.used / pow(2, 20), 1),
+            "free": round(storage_stats.free / pow(2, 20), 1),
             "mount_type": get_fs_type(path),
+        }
+
+    stats["processes"] = {}
+    for name, pid in stats_tracking["processes"].items():
+        stats["processes"][name] = {
+            "pid": pid,
         }
 
     return stats
@@ -271,8 +320,10 @@ class StatsEmitter(threading.Thread):
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(self.config.mqtt.stats_interval):
+            logger.debug("Starting stats collection")
             stats = stats_snapshot(
                 self.config, self.stats_tracking, self.hwaccel_errors
             )
             self.dispatcher.publish("stats", json.dumps(stats), retain=False)
-        logger.info(f"Exiting watchdog...")
+            logger.debug("Finished stats collection")
+        logger.info("Exiting stats emitter...")

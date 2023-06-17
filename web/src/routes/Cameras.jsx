@@ -16,12 +16,12 @@ export default function Cameras() {
     <ActivityIndicator />
   ) : (
     <div className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4 p-2 px-4">
-      <SortedCameras unsortedCameras={config.cameras} />
+      <SortedCameras config={config} unsortedCameras={config.cameras} />
     </div>
   );
 }
 
-function SortedCameras({ unsortedCameras }) {
+function SortedCameras({ config, unsortedCameras }) {
   const sortedCameras = useMemo(
     () =>
       Object.entries(unsortedCameras)
@@ -33,13 +33,13 @@ function SortedCameras({ unsortedCameras }) {
   return (
     <Fragment>
       {sortedCameras.map(([camera, conf]) => (
-        <Camera key={camera} name={camera} conf={conf} />
+        <Camera key={camera} name={camera} config={config.cameras[camera]} conf={conf} />
       ))}
     </Fragment>
   );
 }
 
-function Camera({ name }) {
+function Camera({ name, config }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
@@ -65,11 +65,13 @@ function Camera({ name }) {
         },
       },
       {
-        name: `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}`,
+        name: config.record.enabled_in_config ? `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}` : 'Recordings must be enabled in the config to be turned on in the UI.',
         icon: ClipIcon,
-        color: recordValue === 'ON' ? 'blue' : 'gray',
+        color: config.record.enabled_in_config ? (recordValue === 'ON' ? 'blue' : 'gray') : 'red',
         onClick: () => {
-          sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON', true);
+          if (config.record.enabled_in_config) {
+            sendRecordings(recordValue === 'ON' ? 'OFF' : 'ON', true);
+          }
         },
       },
       {
@@ -81,7 +83,7 @@ function Camera({ name }) {
         },
       },
     ],
-    [detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
+    [config, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
   return (

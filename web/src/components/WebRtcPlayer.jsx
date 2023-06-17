@@ -1,68 +1,95 @@
 import { h } from 'preact';
 import { baseUrl } from '../api/baseUrl';
-import { useEffect } from 'preact/hooks';
+import { useCallback, useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
 
-  useEffect(() => {
+  const PeerConnection = useCallback(async (media) => {
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
+
+    const localTracks = [];
+
+    if (/camera|microphone/.test(media)) {
+      const tracks = await getMediaTracks('user', {
+        video: media.indexOf('camera') >= 0,
+        audio: media.indexOf('microphone') >= 0,
+      });
+      tracks.forEach((track) => {
+        pc.addTransceiver(track, { direction: 'sendonly' });
+        if (track.kind === 'video') localTracks.push(track);
+      });
+    }
+
+    if (media.indexOf('display') >= 0) {
+      const tracks = await getMediaTracks('display', {
+        video: true,
+        audio: media.indexOf('speaker') >= 0,
+      });
+      tracks.forEach((track) => {
+        pc.addTransceiver(track, { direction: 'sendonly' });
+        if (track.kind === 'video') localTracks.push(track);
+      });
+    }
+
+    if (/video|audio/.test(media)) {
+      const tracks = ['video', 'audio']
+        .filter((kind) => media.indexOf(kind) >= 0)
+        .map((kind) => pc.addTransceiver(kind, { direction: 'recvonly' }).receiver.track);
+      localTracks.push(...tracks);
+    }
+
+    document.getElementById('video').srcObject = new MediaStream(localTracks);
+
+    return pc;
+  }, []);
+
+  async function getMediaTracks(media, constraints) {
+    try {
+      const stream =
+        media === 'user'
+          ? await navigator.mediaDevices.getUserMedia(constraints)
+          : await navigator.mediaDevices.getDisplayMedia(constraints);
+      return stream.getTracks();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  const connect = useCallback(async () => {
+    const pc = await PeerConnection('video+audio');
     const ws = new WebSocket(url);
-    ws.onopen = () => {
-      pc.createOffer().then((offer) => {
-        pc.setLocalDescription(offer).then(() => {
+
+    ws.addEventListener('open', () => {
+      pc.addEventListener('icecandidate', (ev) => {
+        if (!ev.candidate) return;
+        const msg = { type: 'webrtc/candidate', value: ev.candidate.candidate };
+        ws.send(JSON.stringify(msg));
+      });
+
+      pc.createOffer()
+        .then((offer) => pc.setLocalDescription(offer))
+        .then(() => {
           const msg = { type: 'webrtc/offer', value: pc.localDescription.sdp };
           ws.send(JSON.stringify(msg));
         });
-      });
-    };
-    ws.onmessage = (ev) => {
-      const msg = JSON.parse(ev.data);
+    });
 
+    ws.addEventListener('message', (ev) => {
+      const msg = JSON.parse(ev.data);
       if (msg.type === 'webrtc/candidate') {
         pc.addIceCandidate({ candidate: msg.value, sdpMid: '0' });
       } else if (msg.type === 'webrtc/answer') {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
-    };
-
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
-    pc.onicecandidate = (ev) => {
-      if (ev.candidate !== null) {
-        ws.send(
-          JSON.stringify({
-            type: 'webrtc/candidate',
-            value: ev.candidate.toJSON().candidate,
-          })
-        );
-      }
-    };
-    pc.ontrack = (ev) => {
-      const video = document.getElementById('video');
+  }, [PeerConnection, url]);
 
-      // when audio track not exist in Chrome
-      if (ev.streams.length === 0) return;
-      // when audio track not exist in Firefox
-      if (ev.streams[0].id[0] === '{') return;
-      // when stream already init
-      if (video.srcObject !== null) return;
-
-      video.srcObject = ev.streams[0];
-    };
-
-    // Safari don't support "offerToReceiveVideo"
-    // so need to create transeivers manually
-    pc.addTransceiver('video', { direction: 'recvonly' });
-    pc.addTransceiver('audio', { direction: 'recvonly' });
-
-    return () => {
-      const video = document.getElementById('video');
-      video.srcObject = null;
-      pc.close();
-      ws.close();
-    };
-  }, [url]);
+  useEffect(() => {
+    connect();
+  }, [connect]);
 
   return (
     <div>

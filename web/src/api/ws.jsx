@@ -1,6 +1,6 @@
 import { h, createContext } from 'preact';
 import { baseUrl } from './baseUrl';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useCallback, useContext, useEffect, useRef, useReducer } from 'preact/hooks';
 
 const initialState = Object.freeze({ __connected: false });
@@ -117,6 +117,15 @@ export function useSnapshotsState(camera) {
     send,
     connected,
   } = useWs(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
+  return { payload, send, connected };
+}
+
+export function usePtzCommand(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useWs(`${camera}/ptz`, `${camera}/ptz`);
   return { payload, send, connected };
 }
 

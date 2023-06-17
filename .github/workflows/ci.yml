@@ -6,6 +6,11 @@ on:
       - dev
       - master
 
+# only run the latest commit to avoid cache overwrites
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   PYTHON_VERSION: 3.9
 
@@ -14,6 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     name: Image Build
     steps:
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+      - id: lowercaseRepo
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ github.repository }}
       - name: Check out code
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -21,7 +35,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to the Container registry
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -31,23 +45,23 @@ jobs:
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           target: frigate
           tags: |
-            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push TensorRT
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
           platforms: linux/amd64
           target: frigate-tensorrt
           tags: |
-            ghcr.io/blakeblackshear/frigate:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
           cache-from: type=gha

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import ButtonsTabbed from '../components/ButtonsTabbed';
 import useSWR from 'swr';
 import Button from '../components/Button';
+import copy from 'copy-to-clipboard';
 
 export default function Logs() {
   const [logService, setLogService] = useState('frigate');
@@ -14,10 +15,7 @@ export default function Logs() {
   const { data: nginxLogs } = useSWR('logs/nginx');
 
   const handleCopyLogs = useCallback(() => {
-    async function copy() {
-      await window.navigator.clipboard.writeText(logs);
-    }
-    copy();
+    copy(logs);
   }, [logs]);
 
   useEffect(() => {
@@ -38,7 +36,7 @@ export default function Logs() {
     <div className="space-y-4 p-2 px-4">
       <Heading>Logs</Heading>
 
-      <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} setViewMode={setLogService} />
+      <ButtonsTabbed viewModes={['frigate', 'go2rtc', 'nginx']} currentViewMode={logService} setViewMode={setLogService} />
 
       <Button className="" onClick={handleCopyLogs}>
         Copy to Clipboard

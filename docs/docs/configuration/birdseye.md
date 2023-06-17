@@ -33,3 +33,25 @@ cameras:
     birdseye:
       enabled: False
 ```
+
+### Sorting cameras in the Birdseye view
+
+It is possible to override the order of cameras that are being shown in the Birdseye view.
+The order needs to be set at the camera level.
+
+```yaml
+# Include all cameras by default in Birdseye view
+birdseye:
+  enabled: True
+  mode: continuous
+
+cameras:
+  front:
+    birdseye:
+      order: 1
+  back:
+    birdseye:
+      order: 2
+```
+
+*Note*: Cameras are sorted by default using their name to ensure a constant view inside Birdseye.

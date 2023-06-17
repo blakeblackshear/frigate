@@ -1,12 +1,13 @@
 import faulthandler
-from flask import cli
-
-faulthandler.enable()
 import threading
 
-threading.current_thread().name = "frigate"
+from flask import cli
 
 from frigate.app import FrigateApp
+
+faulthandler.enable()
+
+threading.current_thread().name = "frigate"
 
 cli.show_server_banner = lambda *x: None
 

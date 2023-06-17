@@ -2,7 +2,12 @@
 # shellcheck shell=bash
 # Start the fake Frigate service
 
+set -o errexit -o nounset -o pipefail
+
+# Tell S6-Overlay not to restart this service
+s6-svc -O .
+
 while true; do
-  echo "The fake Frigate service is running..."
+  echo "[INFO] The fake Frigate service is running..."
   sleep 5s
 done

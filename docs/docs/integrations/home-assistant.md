@@ -16,6 +16,8 @@ See the [MQTT integration
 documentation](https://www.home-assistant.io/integrations/mqtt/) for more
 details.
 
+In addition, MQTT must be enabled in your Frigate configuration file and Frigate must be connected to the same MQTT server as Home Assistant for many of the entities created by the integration to function.
+
 ### Integration installation
 
 Available via HACS as a default repository. To install:
@@ -30,7 +32,7 @@ Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
 - Then add/configure the integration:
 
 ```
-Home Assistant > Configuration > Integrations > Add Integration > Frigate
+Home Assistant > Settings > Devices & Services > Add Integration > Frigate
 ```
 
 Note: You will also need
@@ -45,7 +47,7 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the `URL` of your frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access frigate directly from your network.
+When configuring the integration, you will be asked for the `URL` of your Frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
 
 | Addon Version                  | URL                                    |
 | ------------------------------ | -------------------------------------- |
@@ -64,13 +66,13 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 | Option            | Description                                                                                                                                                                                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RTMP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTMP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTMP streams](#streams) below. |
+| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTSP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#streams) below. |
 
 ## Entities Provided
 
 | Platform        | Description                                                                       |
 | --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTMP), camera for image of the last detected object. |
+| `camera`        | Live camera stream (requires RTSP), camera for image of the last detected object. |
 | `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
 | `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
 | `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |
@@ -124,13 +126,17 @@ https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
 
 ## RTMP stream
 
-In order for the live streams to function they need to be accessible on the RTMP
-port (default: `1935`) at `<frigatehost>:1935`. Home Assistant will directly
+RTMP is deprecated and it is recommended to switch to use RTSP restreams.
+
+## RTSP stream
+
+In order for the live streams to function they need to be accessible on the RTSP
+port (default: `8554`) at `<frigatehost>:8554`. Home Assistant will directly
 connect to that streaming port when the live camera is viewed.
 
-#### RTMP URL Template
+#### RTSP URL Template
 
-For advanced usecases, this behavior can be changed with the [RTMP URL
+For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
@@ -142,24 +148,24 @@ This is potentially useful when Frigate is behind a reverse proxy, and/or when
 the default stream port is otherwise not accessible to Home Assistant (e.g.
 firewall rules).
 
-###### RTMP URL Template Examples
+###### RTSP URL Template Examples
 
 Use a different port number:
 
 ```
-rtmp://<frigate_host>:2000/live/front_door
+rtsp://<frigate_host>:2000/front_door
 ```
 
 Use the camera name in the stream URL:
 
 ```
-rtmp://<frigate_host>:2000/live/{{ name }}
+rtsp://<frigate_host>:2000/{{ name }}
 ```
 
 Use the camera name in the stream URL, converting it to lowercase first:
 
 ```
-rtmp://<frigate_host>:2000/live/{{ name|lower }}
+rtsp://<frigate_host>:2000/{{ name|lower }}
 ```
 
 ## Multiple Instance Support

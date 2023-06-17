@@ -8,6 +8,7 @@ import { useEffect, useState } from 'preact/hooks';
 import Button from '../components/Button';
 import { editor, Uri } from 'monaco-editor';
 import { setDiagnosticsOptions } from 'monaco-yaml';
+import copy from 'copy-to-clipboard';
 
 export default function Config() {
   const apiHost = useApiHost();
@@ -16,13 +17,13 @@ export default function Config() {
   const [success, setSuccess] = useState();
   const [error, setError] = useState();
 
-  const onHandleSaveConfig = async (e) => {
+  const onHandleSaveConfig = async (e, save_option) => {
     if (e) {
       e.stopPropagation();
     }
 
     axios
-      .post('config/save', window.editor.getValue(), {
+      .post(`config/save?save_option=${save_option}`, window.editor.getValue(), {
         headers: { 'Content-Type': 'text/plain' },
       })
       .then((response) => {
@@ -40,7 +41,7 @@ export default function Config() {
   };
 
   const handleCopyConfig = async () => {
-    await window.navigator.clipboard.writeText(window.editor.getValue());
+    copy(window.editor.getValue());
   };
 
   useEffect(() => {
@@ -96,8 +97,11 @@ export default function Config() {
           <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
             Copy Config
           </Button>
-          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e)}>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "restart")}>
             Save & Restart
+          </Button>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "saveonly")}>
+            Save Only
           </Button>
         </div>
       </div>

@@ -101,7 +101,7 @@ The OpenVINO device to be used is specified using the `"device"` attribute accor
 
 OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
 
-An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector.
+An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
 
 ```yaml
 detectors:
@@ -117,6 +117,25 @@ model:
   input_tensor: nhwc
   input_pixel_format: bgr
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+```
+
+This detector also supports some YOLO variants: YOLOX, YOLOv5, and YOLOv8 specifically. Other YOLO variants are not officially supported/tested. Frigate does not come with any yolo models preloaded, so you will need to supply your own models. This detector has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. You can follow [these instructions](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny#download-a-model-and-convert-it-into-openvino-ir-format) to retrieve the OpenVINO-compatible `yolox_tiny` model. Make sure that the model input dimensions match the `width` and `height` parameters, and `model_type` is set accordingly. See [Full Configuration Reference](/configuration/index.md#full-configuration-reference) for a list of possible `model_type` options. Below is an example of how `yolox_tiny` can be used in Frigate:
+
+```yaml
+detectors:
+  ov:
+    type: openvino
+    device: AUTO
+    model:
+      path: /path/to/yolox_tiny.xml
+
+model:
+  width: 416
+  height: 416
+  input_tensor: nchw
+  input_pixel_format: bgr
+  model_type: yolox
+  labelmap_path: /path/to/coco_80cl.txt
 ```
 
 ### Intel NCS2 VPU and Myriad X Setup
@@ -179,12 +198,12 @@ To generate model files, create a new folder to save the models, download the sc
 
 ```bash
 mkdir trt-models
-wget https://raw.githubusercontent.com/blakeblackshear/frigate/docker/tensorrt_models.sh
+wget https://github.com/blakeblackshear/frigate/raw/master/docker/tensorrt_models.sh
 chmod +x tensorrt_models.sh
 docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
 ```
 
-The `trt-models` folder can then be mapped into your frigate container as `trt-models` and the models referenced from the config.
+The `trt-models` folder can then be mapped into your Frigate container as `trt-models` and the models referenced from the config.
 
 If your GPU does not support FP16 operations, you can pass the environment variable `-e USE_FP16=False` to the `docker run` command to disable it.
 
@@ -212,6 +231,10 @@ yolov4x-mish-320
 yolov4x-mish-640
 yolov7-tiny-288
 yolov7-tiny-416
+yolov7-640
+yolov7-320
+yolov7x-640
+yolov7x-320
 ```
 
 ### Configuration Parameters
@@ -233,3 +256,25 @@ model:
   width: 416
   height: 416
 ```
+
+## Deepstack / CodeProject.AI Server Detector
+
+The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
+
+### Setup
+
+To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
+
+To integrate CodeProject.AI into Frigate, you'll need to make the following changes to your Frigate configuration file:
+
+```yaml
+detectors:
+  deepstack:
+    api_url: http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
+    type: deepstack
+    api_timeout: 0.1 # seconds
+```
+
+Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server. 
+
+To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.

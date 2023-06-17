@@ -1,4 +1,5 @@
 import unittest
+
 from frigate.config import FFMPEG_INPUT_ARGS_DEFAULT, FrigateConfig
 from frigate.ffmpeg_presets import parse_preset_input
 
@@ -52,7 +53,7 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-rpi-64-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert "-c:v h264_v4l2m2m" in (
+        assert "-c:v:1 h264_v4l2m2m" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
@@ -136,10 +137,10 @@ class TestFfmpegPresets(unittest.TestCase):
     def test_ffmpeg_output_record_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"][
             "record"
-        ] = "preset-record-generic-audio"
+        ] = "preset-record-generic-audio-aac"
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         frigate_config.cameras["back"].create_ffmpeg_cmds()
-        assert "preset-record-generic-audio" not in (
+        assert "preset-record-generic-audio-aac" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert "-c:v copy -c:a aac" in (

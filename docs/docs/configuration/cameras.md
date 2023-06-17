@@ -15,7 +15,6 @@ Each role can only be assigned to one input per camera. The options for roles ar
 | ---------- | ---------------------------------------------------------------------------------------- |
 | `detect`   | Main feed for object detection                                                           |
 | `record`   | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
-| `restream` | Broadcast as RTSP feed and use the full res stream for live view. [docs](restream.md)    |
 | `rtmp`     | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
@@ -29,7 +28,7 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp
+            - rtmp # <- deprecated, recommend using restream instead
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
           roles:
             - record
@@ -49,3 +48,21 @@ cameras:
 ```
 
 For camera model specific settings check the [camera specific](camera_specific.md) infos.
+
+## Setting up camera PTZ controls
+
+Add onvif config to camera
+
+```yaml
+cameras:
+  back:
+    ffmpeg:
+      ...
+    onvif:
+      host: 10.0.10.10
+      port: 8000
+      user: admin
+      password: password
+```
+
+then PTZ controls will be available in the cameras WebUI.

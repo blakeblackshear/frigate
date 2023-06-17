@@ -36,3 +36,14 @@ class TestUserPassCleanup(unittest.TestCase):
         """Test that no change is made to path with no special characters."""
         escaped = escape_special_characters(self.rtsp_with_pass)
         assert escaped == self.rtsp_with_pass
+
+
+class TestUserPassMasking(unittest.TestCase):
+    def setUp(self) -> None:
+        self.rtsp_log_message = "Did you mean file:rtsp://user:password@192.168.1.3:554"
+
+    def test_rtsp_in_log_message(self):
+        """Test that the rtsp url in a log message is espaced."""
+        escaped = clean_camera_user_pass(self.rtsp_log_message)
+        print(f"The escaped is {escaped}")
+        assert escaped == "Did you mean file:rtsp://*:*@192.168.1.3:554"

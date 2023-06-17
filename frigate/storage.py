@@ -1,9 +1,9 @@
 """Handle storage retention and usage."""
 
 import logging
-from pathlib import Path
 import shutil
 import threading
+from pathlib import Path
 
 from peewee import fn
 
@@ -36,9 +36,7 @@ class StorageMaintainer(threading.Thread):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
                         Recordings.select(fn.COUNT(Recordings.id))
-                        .where(
-                            Recordings.camera == camera, Recordings.segment_size != 0
-                        )
+                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
                         .scalar()
                         < 50
                     )
@@ -48,7 +46,7 @@ class StorageMaintainer(threading.Thread):
             try:
                 bandwidth = round(
                     Recordings.select(fn.AVG(bandwidth_equation))
-                    .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                    .where(Recordings.camera == camera, Recordings.segment_size > 0)
                     .limit(100)
                     .scalar()
                     * 3600,
@@ -58,7 +56,7 @@ class StorageMaintainer(threading.Thread):
                 bandwidth = 0
 
             self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-            logger.debug(f"{camera} has a bandwidth of {bandwidth} MB/hr.")
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
@@ -87,7 +85,7 @@ class StorageMaintainer(threading.Thread):
         hourly_bandwidth = sum(
             [b["bandwidth"] for b in self.camera_storage_stats.values()]
         )
-        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / 1000000, 1)
+        remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
         logger.debug(
             f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
         )
@@ -178,8 +176,8 @@ class StorageMaintainer(threading.Thread):
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
+        self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
-
             if not self.camera_storage_stats or True in [
                 r["needs_refresh"] for r in self.camera_storage_stats.values()
             ]:
@@ -189,4 +187,4 @@ class StorageMaintainer(threading.Thread):
             if self.check_storage_needs_cleanup():
                 self.reduce_storage_consumption()
 
-        logger.info(f"Exiting storage maintainer...")
+        logger.info("Exiting storage maintainer...")

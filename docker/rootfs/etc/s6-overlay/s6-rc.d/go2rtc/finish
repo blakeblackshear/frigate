@@ -1,0 +1,12 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+readonly exit_code_service="${1}"
+readonly exit_code_signal="${2}"
+readonly service="go2rtc"
+
+echo "[INFO] The ${service} service exited with code ${exit_code_service} (by signal ${exit_code_signal})"

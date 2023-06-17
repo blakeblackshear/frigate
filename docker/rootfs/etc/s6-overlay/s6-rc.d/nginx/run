@@ -1,0 +1,13 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the NGINX service
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+echo "[INFO] Starting NGINX..."
+
+# Replace the bash process with the NGINX process, redirecting stderr to stdout
+exec 2>&1
+exec nginx

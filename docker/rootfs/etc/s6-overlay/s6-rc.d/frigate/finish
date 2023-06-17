@@ -1,0 +1,28 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Take down the S6 supervision tree when the service exits
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+declare exit_code_container
+exit_code_container=$(cat /run/s6-linux-init-container-results/exitcode)
+readonly exit_code_container
+readonly exit_code_service="${1}"
+readonly exit_code_signal="${2}"
+readonly service="Frigate"
+
+echo "[INFO] Service ${service} exited with code ${exit_code_service} (by signal ${exit_code_signal})"
+
+if [[ "${exit_code_service}" -eq 256 ]]; then
+  if [[ "${exit_code_container}" -eq 0 ]]; then
+    echo $((128 + exit_code_signal)) >/run/s6-linux-init-container-results/exitcode
+  fi
+elif [[ "${exit_code_service}" -ne 0 ]]; then
+  if [[ "${exit_code_container}" -eq 0 ]]; then
+    echo "${exit_code_service}" >/run/s6-linux-init-container-results/exitcode
+  fi
+fi
+
+exec /run/s6/basedir/bin/halt

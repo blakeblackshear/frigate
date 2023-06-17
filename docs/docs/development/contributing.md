@@ -36,13 +36,19 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 - [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
-- Extra Coral device (optional, but very helpful to simulate real world performance)
+- An extra detector (Coral, OpenVINO, etc.) is optional but recommended to simulate real world performance.
+
+:::note
+
+A Coral device can only be used by a single process at a time, so an extra Coral device is recommended if using a coral for development purposes.
+
+:::
 
 ### Setup
 
 #### 1. Open the repo with Visual Studio Code
 
-Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
+Upon opening, you should be prompted to open the project in a remote container. This will build a container on top of the base Frigate container with all the development dependencies installed. This ensures everyone uses a consistent development environment without the need to install any dependencies on your host machine.
 
 #### 2. Modify your local config file for testing
 
@@ -62,7 +68,6 @@ cameras:
           input_args: -re -stream_loop -1 -fflags +genpts
           roles:
             - detect
-            - rtmp
     detect:
       height: 1080
       width: 1920
@@ -75,12 +80,12 @@ These input args tell ffmpeg to read the mp4 file in an infinite loop. You can u
 
 Create and place these files in a `debug` folder in the root of the repo. This is also where recordings will be created if you enable them in your test config. Update your config from step 2 above to point at the right file. You can check the `docker-compose.yml` file in the repo to see how the volumes are mapped.
 
-#### 4. Run frigate from the command line
+#### 4. Run Frigate from the command line
 
 VSCode will start the docker compose file for you and open a terminal window connected to `frigate-dev`.
 
 - Run `python3 -m frigate` to start the backend.
-- In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm start` to start the frontend.
+- In a separate terminal window inside VS Code, change into the `web` directory and run `npm install && npm run dev` to start the frontend.
 
 #### 5. Teardown
 

@@ -3,7 +3,7 @@ id: index
 title: Configuration File
 ---
 
-For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`) and named `frigate.yml`.
+For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.
 
 For all other installation types, the config file should be mapped to `/config/config.yml` inside the container.
 
@@ -19,7 +19,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - restream
     detect:
       width: 1280
       height: 720
@@ -27,7 +26,7 @@ cameras:
 
 ### VSCode Configuration Schema
 
-VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of frigate or `ccab4aaf-frigate` if running in the addon.
+VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
 
 ### Full configuration reference:
 
@@ -36,6 +35,33 @@ VSCode (and VSCode addon) supports the JSON schemas which will automatically val
 It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
 
 :::
+
+**Note:** The following values will be replaced at runtime by using environment variables
+
+- `{FRIGATE_MQTT_USER}`
+- `{FRIGATE_MQTT_PASSWORD}`
+- `{FRIGATE_RTSP_USER}`
+- `{FRIGATE_RTSP_PASSWORD}`
+
+for example:
+
+```yaml
+mqtt:
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+```
+
+```yaml
+- path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:8554/unicast
+```
+
+```yaml
+onvif:
+  host: 10.0.10.10
+  port: 8000
+  user: "{FRIGATE_RTSP_USER}"
+  password: "{FRIGATE_RTSP_PASSWORD}"
+```
 
 ```yaml
 mqtt:
@@ -52,6 +78,8 @@ mqtt:
   # NOTE: must be unique if you are running multiple instances
   client_id: frigate
   # Optional: user
+  # NOTE: MQTT user can be specified with an environment variables that must begin with 'FRIGATE_'.
+  #       e.g. user: '{FRIGATE_MQTT_USER}'
   user: mqtt_user
   # Optional: password
   # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
@@ -85,7 +113,7 @@ detectors:
 # Optional: Database configuration
 database:
   # The path to store the SQLite DB (default: shown below)
-  path: /media/frigate/frigate.db
+  path: /config/frigate.db
 
 # Optional: model modifications
 model:
@@ -103,6 +131,9 @@ model:
   # Optional: Object detection model input tensor format
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
+  # Optional: Object detection model type, currently only used with the OpenVINO detector
+  # Valid values are ssd, yolox, yolov5, or yolov8 (default: shown below)
+  model_type: ssd
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
@@ -124,6 +155,9 @@ environment_vars:
 birdseye:
   # Optional: Enable birdseye view (default: shown below)
   enabled: True
+  # Optional: Restream birdseye via RTSP (default: shown below)
+  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
+  restream: False
   # Optional: Width of the output resolution (default: shown below)
   width: 1280
   # Optional: Height of the output resolution (default: shown below)
@@ -141,7 +175,7 @@ birdseye:
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
-  global_args: -hide_banner -loglevel warning
+  global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: shown below)
   # NOTE: See hardware acceleration docs for your specific device
   hwaccel_args: []
@@ -150,7 +184,7 @@ ffmpeg:
   # Optional: global output args
   output_args:
     # Optional: output args for detect streams (default: shown below)
-    detect: -f rawvideo -pix_fmt yuv420p
+    detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
@@ -167,16 +201,15 @@ detect:
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
   # Optional: enables detection for the camera (default: True)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: True
-  # Optional: Number of frames without a detection before frigate considers an object to be gone. (default: 5x the frame rate)
+  # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
-    # Optional: Frequency for confirming stationary objects (default: shown below)
-    # When set to 0, object detection will not confirm stationary objects until movement is detected.
+    # Optional: Frequency for confirming stationary objects (default: same as threshold)
+    # When set to 1, object detection will run to confirm the object still exists on every frame.
     # If set to 10, object detection will run to confirm the object still exists on every 10th frame.
-    interval: 0
+    interval: 50
     # Optional: Number of frames without a position change for an object to be considered stationary (default: 10x the frame rate or 10s)
     threshold: 50
     # Optional: Define a maximum number of frames for tracking a stationary object (default: not set, track forever)
@@ -192,6 +225,20 @@ detect:
       # Optional: Object specific values
       objects:
         person: 1000
+  # Optional: Milliseconds to offset detect annotations by (default: shown below).
+  # There can often be latency between a recording and the detect process,
+  # especially when using separate streams for detect and record.
+  # Use this setting to make the timeline bounding boxes more closely align
+  # with the recording. The value can be positive or negative.
+  # TIP: Imagine there is an event clip with a person walking from left to right. 
+  #      If the event timeline bounding box is consistently to the left of the person
+  #      then the value should be decreased. Similarly, if a person is walking from
+  #      left to right and the bounding box is consistently ahead of the person
+  #      then the value should be increased.
+  # TIP: This offset is dynamic so you can change the value and it will update existing
+  #      events, this makes it easy to tune.
+  # WARNING: Fast moving objects will likely not have the bounding box align.
+  annotation_offset: 0
 
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
@@ -228,27 +275,29 @@ motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
-  threshold: 25
-  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: 30)
+  threshold: 40
+  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
+  #           needs to recalibrate. (default: shown below)
+  # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
+  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
+  # a doorbell camera.
+  lightning_threshold: 0.8
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.
   # As a rule of thumb:
   #  - 15 - high sensitivity
   #  - 30 - medium sensitivity
   #  - 50 - low sensitivity
-  contour_area: 30
-  # Optional: Alpha value passed to cv2.accumulateWeighted when averaging the motion delta across multiple frames (default: shown below)
-  # Higher values mean the current frame impacts the delta a lot, and a single raindrop may register as motion.
-  # Too low and a fast moving person wont be detected as motion.
-  delta_alpha: 0.2
+  contour_area: 15
   # Optional: Alpha value passed to cv2.accumulateWeighted when averaging frames to determine the background (default: shown below)
   # Higher values mean the current frame impacts the average a lot, and a new object will be averaged into the background faster.
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
-  frame_alpha: 0.2
+  frame_alpha: 0.02
   # Optional: Height of the resized motion frame  (default: 50)
-  # This operates as an efficient blur alternative. Higher values will result in more granular motion detection at the expense
-  # of higher CPU usage. Lower values result in less CPU, but small changes may not register as motion.
+  # Higher values will result in more granular motion detection at the expense of higher CPU usage.
+  # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 50
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
@@ -256,7 +305,7 @@ motion:
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
-  improve_contrast: False
+  improve_contrast: True
   # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
   mqtt_off_delay: 30
 
@@ -266,11 +315,6 @@ record:
   # Optional: Enable recording (default: shown below)
   # WARNING: If recording is disabled in the config, turning it on via
   #          the UI or MQTT later will have no effect.
-  # WARNING: Frigate does not currently support limiting recordings based
-  #          on available disk space automatically. If using recordings,
-  #          you must specify retention settings for a number of days that
-  #          will fit within the available disk space of your drive or Frigate
-  #          will crash.
   enabled: False
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
@@ -320,7 +364,6 @@ record:
 # NOTE: Can be overridden at the camera level
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
-  # This value can be set via MQTT and will be updated in startup based on retained value
   enabled: False
   # Optional: save a clean PNG copy of the snapshot image (default: shown below)
   clean_copy: True
@@ -350,28 +393,21 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# NOTE: Can be overridden at the camera level
-restream:
-  # Optional: Enable the restream (default: True)
-  enabled: True
-  # Optional: Force audio compatibility with browsers (default: shown below)
-  force_audio: True
-  # Optional: Video encoding to be used. By default the codec will be copied but
-  # it can be switched to another or an MJPEG stream can be encoded and restreamed
-  # as h264 (default: shown below)
-  video_encoding: "copy"
-  # Optional: Restream birdseye via RTSP (default: shown below)
-  # NOTE: Enabling this will set birdseye to run 24/7 which may increase CPU usage somewhat.
-  birdseye: False
-  # Optional: jsmpeg stream configuration for WebUI
-  jsmpeg:
-    # Optional: Set the height of the jsmpeg stream. (default: 720)
-    # This must be less than or equal to the height of the detect stream. Lower resolutions
-    # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
-    height: 720
-    # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
-    # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
-    quality: 8
+# Uses https://github.com/AlexxIT/go2rtc (v1.5.0)
+go2rtc:
+
+# Optional: jsmpeg stream configuration for WebUI
+live:
+  # Optional: Set the name of the stream that should be used for live view
+  # in frigate WebUI. (default: name of camera)
+  stream_name: camera_name
+  # Optional: Set the height of the jsmpeg stream. (default: 720)
+  # This must be less than or equal to the height of the detect stream. Lower resolutions
+  # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+  height: 720
+  # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+  # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+  quality: 8
 
 # Optional: in-feed timestamp style configuration
 # NOTE: Can be overridden at the camera level
@@ -412,12 +448,12 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,restream,rtmp
-          # NOTICE: In addition to assigning the record, restream, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: detect,record,rtmp
+          # NOTICE: In addition to assigning the record and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
             - detect
-            - restream
+            - record
             - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
@@ -447,6 +483,8 @@ cameras:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 545,1077,747,939,788,805
+        # Optional: Number of consecutive frames required for object to be considered present in the zone. Allowed values are 1-10 (default: shown below)
+        inertia: 3
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
           - person
@@ -484,4 +522,77 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+    # Optional: connect to ONVIF camera
+    # to enable PTZ controls.
+    onvif:
+      # Required: host of the camera being connected to.
+      host: 0.0.0.0
+      # Optional: ONVIF port for device (default: shown below).
+      port: 8000
+      # Optional: username for login.
+      # NOTE: Some devices require admin to access ONVIF.
+      user: admin
+      # Optional: password for login.
+      password: admin
+
+    # Optional: Configuration for how to sort the cameras in the Birdseye view.
+    birdseye:
+      # Optional: Adjust sort order of cameras in the Birdseye view. Larger numbers come later (default: shown below)
+      # By default the cameras are sorted alphabetically.
+      order: 0
+
+# Optional
+ui:
+  # Optional: Set the default live mode for cameras in the UI (default: shown below)
+  live_mode: mse
+  # Optional: Set a timezone to use in the UI (default: use browser local time)
+  # timezone: America/Denver
+  # Optional: Use an experimental recordings / camera view UI (default: shown below)
+  use_experimental: False
+  # Optional: Set the time format used.
+  # Options are browser, 12hour, or 24hour (default: shown below)
+  time_format: browser
+  # Optional: Set the date style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 2/11/23
+  #    medium: Feb 11, 2023
+  #    full: Saturday, February 11, 2023
+  # (default: shown below).
+  date_style: short
+  # Optional: Set the time style for a specified length.
+  # Options are: full, long, medium, short
+  # Examples:
+  #    short: 8:14 PM
+  #    medium: 8:15:22 PM
+  #    full: 8:15:22 PM Mountain Standard Time
+  # (default: shown below).
+  time_style: medium
+  # Optional: Ability to manually override the date / time styling to use strftime format
+  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
+  # possible values are shown above (default: not set)
+  strftime_fmt: "%Y/%m/%d %H:%M"
+
+# Optional: Telemetry configuration
+telemetry:
+  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: shown below)
+  network_interfaces:
+    - eth
+    - enp
+    - eno
+    - ens
+    - wl
+    - lo
+  # Optional: Configure system stats
+  stats:
+    # Enable AMD GPU stats (default: shown below)
+    amd_gpu_stats: True
+    # Enable Intel GPU stats (default: shown below)
+    intel_gpu_stats: True
+    # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    network_bandwidth: False
+  # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  version_check: True
 ```

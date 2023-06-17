@@ -14,8 +14,9 @@ import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import WebRtcPlayer from '../components/WebRtcPlayer';
-import MsePlayer from '../components/MsePlayer';
-import videojs from 'video.js';
+import '../components/MsePlayer';
+import CameraControlPanel from '../components/CameraControlPanel';
+import { baseUrl } from '../api/baseUrl';
 
 const emptyObject = Object.freeze({});
 
@@ -26,11 +27,16 @@ export default function Camera({ camera }) {
   const [viewMode, setViewMode] = useState('live');
 
   const cameraConfig = config?.cameras[camera];
+  const restreamEnabled =
+    cameraConfig && Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.live.stream_name);
   const jsmpegWidth = cameraConfig
-    ? Math.round(cameraConfig.restream.jsmpeg.height * (cameraConfig.detect.width / cameraConfig.detect.height))
+    ? Math.round(cameraConfig.live.height * (cameraConfig.detect.width / cameraConfig.detect.height))
     : 0;
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(`${camera}-source`, 'mse');
-  const sourceValues = cameraConfig && cameraConfig.restream.enabled ? ['mse', 'webrtc', 'jsmpeg'] : ['mse'];
+  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
+    `${camera}-source`,
+    getDefaultLiveMode(config, cameraConfig, restreamEnabled)
+  );
+  const sourceValues = restreamEnabled ? ['mse', 'webrtc', 'jsmpeg'] : ['jsmpeg'];
   const [options, setOptions] = usePersistence(`${camera}-feed`, emptyObject);
 
   const handleSetOption = useCallback(
@@ -60,6 +66,10 @@ export default function Camera({ camera }) {
     return <ActivityIndicator />;
   }
 
+  if (!restreamEnabled) {
+    setViewSource('jsmpeg');
+  }
+
   const optionContent = showSettings ? (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <Switch
@@ -77,7 +87,13 @@ export default function Camera({ camera }) {
         labelPosition="after"
       />
       <Switch checked={options['zones']} id="zones" onChange={handleSetOption} label="Zones" labelPosition="after" />
-      <Switch checked={options['mask']} id="mask" onChange={handleSetOption} label="Masks" labelPosition="after" />
+      <Switch
+        checked={options['mask']}
+        id="mask"
+        onChange={handleSetOption}
+        label="Motion Masks"
+        labelPosition="after"
+      />
       <Switch
         checked={options['motion']}
         id="motion"
@@ -98,8 +114,19 @@ export default function Camera({ camera }) {
 
   let player;
   if (viewMode === 'live') {
-    if (viewSource == 'mse') {
-      if (videojs.browser.IS_IOS) {
+    if (viewSource == 'mse' && restreamEnabled) {
+      if ('MediaSource' in window) {
+        player = (
+          <Fragment>
+            <div className="max-w-5xl">
+              <video-stream
+                mode="mse"
+                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${cameraConfig.live.stream_name}`)}
+              />
+            </div>
+          </Fragment>
+        );
+      } else {
         player = (
           <Fragment>
             <div className="w-5xl text-center text-sm">
@@ -107,20 +134,12 @@ export default function Camera({ camera }) {
             </div>
           </Fragment>
         );
-      } else {
-        player = (
-          <Fragment>
-            <div className="max-w-5xl">
-              <MsePlayer camera={camera} />
-            </div>
-          </Fragment>
-        );
       }
-    } else if (viewSource == 'webrtc') {
+    } else if (viewSource == 'webrtc' && restreamEnabled) {
       player = (
         <Fragment>
           <div className="max-w-5xl">
-            <WebRtcPlayer camera={camera} />
+            <WebRtcPlayer camera={cameraConfig.live.stream_name} />
           </div>
         </Fragment>
       );
@@ -128,7 +147,7 @@ export default function Camera({ camera }) {
       player = (
         <Fragment>
           <div>
-            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.restream.jsmpeg.height} />
+            <JSMpegPlayer camera={camera} width={jsmpegWidth} height={cameraConfig.live.height} />
           </div>
         </Fragment>
       );
@@ -170,9 +189,16 @@ export default function Camera({ camera }) {
         </select>
       </div>
 
-      <ButtonsTabbed viewModes={['live', 'debug']} setViewMode={setViewMode} />
+      <ButtonsTabbed viewModes={['live', 'debug']} currentViewMode={viewMode} setViewMode={setViewMode} />
 
       {player}
+
+      {cameraConfig?.onvif?.host && (
+        <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min">
+          <Heading size="sm">Control Panel</Heading>
+          <CameraControlPanel camera={camera} />
+        </div>
+      )}
 
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
@@ -190,4 +216,16 @@ export default function Camera({ camera }) {
       </div>
     </div>
   );
+}
+
+function getDefaultLiveMode(config, cameraConfig, restreamEnabled) {
+  if (cameraConfig) {
+    if (restreamEnabled) {
+      return config.ui.live_mode;
+    }
+
+    return 'jsmpeg';
+  }
+
+  return undefined;
 }

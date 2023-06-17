@@ -24,7 +24,6 @@ Examples of available modules are:
 - `frigate.app`
 - `frigate.mqtt`
 - `frigate.object_detection`
-- `frigate.zeroconf`
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
@@ -42,7 +41,7 @@ environment_vars:
 
 ### `database`
 
-Event and recording information is managed in a sqlite database at `/media/frigate/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
+Event and recording information is managed in a sqlite database at `/config/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
 
 If you are storing your database on a network share (SMB, NFS, etc), you may get a `database is locked` error message on startup. You can customize the location of the database in the config if necessary.
 
@@ -97,6 +96,16 @@ model:
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
 
+:::caution
+
+Some labels have special handling and modifications can disable functionality.
+
+`person` objects are associated with `face` and `amazon`
+
+`car` objects are associated with `license_plate`, `ups`, `fedex`, `amazon`
+
+:::
+
 ## Custom ffmpeg build
 
 Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, a docker volume mapping can be used to overwrite the included ffmpeg build with an ffmpeg build that works for your specific hardware setup.
@@ -105,6 +114,17 @@ To do this:
 
 1. Download your ffmpeg build and uncompress to a folder on the host (let's use `/home/appdata/frigate/custom-ffmpeg` for this example).
 2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
-3. Restart frigate and the custom version will be used if the mapping was done correctly.
+3. Restart Frigate and the custom version will be used if the mapping was done correctly.
 
 NOTE: The folder that is mapped from the host needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then `/home/appdata/frigate/custom-ffmpeg` needs to be mapped to `/usr/lib/btbn-ffmpeg`.
+
+## Custom go2rtc version
+
+Frigate currently includes go2rtc v1.5.0, there may be certain cases where you want to run a different version of go2rtc.
+
+To do this:
+
+1. Download the go2rtc build to the /config folder.
+2. Rename the build to `go2rtc`.
+3. Give `go2rtc` execute permission.
+4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.

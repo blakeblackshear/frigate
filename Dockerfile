@@ -27,7 +27,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM wget AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v0.1-rc.6/go2rtc_linux_${TARGETARCH}" \
+RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}" \
     && chmod +x go2rtc
 
 
@@ -136,16 +136,16 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN if [ "${TARGETARCH}" = "arm" ]; \
-    then echo "[global]" > /etc/pip.conf \
-    && echo "extra-index-url=https://www.piwheels.org/simple" >> /etc/pip.conf; \
-    fi
-
 COPY requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
+
+# Make this a separate target so it can be built/cached optionally
+FROM wheels as trt-wheels
+ARG DEBIAN_FRONTEND
+ARG TARGETARCH
 
 # Add TensorRT wheels to another folder
 COPY requirements-tensorrt.txt /requirements-tensorrt.txt
@@ -190,22 +190,10 @@ RUN ldconfig
 EXPOSE 5000
 EXPOSE 1935
 EXPOSE 8554
-EXPOSE 8555
+EXPOSE 8555/tcp 8555/udp
 
-# Fails if cont-init.d fails
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
-# Wait indefinitely for cont-init.d to finish before starting services
-ENV S6_CMD_WAIT_FOR_SERVICES=1
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
-# Give services (including Frigate) 30 seconds to stop before killing them
-# But this is not working currently because of:
-# https://github.com/just-containers/s6-overlay/issues/503
-ENV S6_SERVICES_GRACETIME=30000
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
-# TODO: remove after a new version of s6-overlay is released. See:
-# https://github.com/just-containers/s6-overlay/issues/460#issuecomment-1327127006
-ENV S6_SERVICES_READYTIME=50
 
 ENTRYPOINT ["/init"]
 CMD []
@@ -215,7 +203,11 @@ FROM deps AS devcontainer
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VSCode
 # But start a fake service for simulating the logs
-COPY docker/fake_frigate_run /etc/services.d/frigate/run
+COPY docker/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
+
+# Create symbolic link to the frigate source code, as go2rtc's create_config.sh uses it
+RUN mkdir -p /opt/frigate \
+    && ln -svf /workspace/frigate/frigate /opt/frigate/frigate
 
 # Install Node 16
 RUN apt-get update \
@@ -238,8 +230,8 @@ CMD ["sleep", "infinity"]
 
 
 # Frigate web build
-# force this to run on amd64 because QEMU is painfully slow
-FROM --platform=linux/amd64 node:16 AS web-build
+# This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
+FROM --platform=$BUILDPLATFORM node:16 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
@@ -266,11 +258,13 @@ COPY --from=rootfs / /
 
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
-RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
+    pip3 install -U /deps/trt-wheels/*.whl && \
+    ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
+    ldconfig
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
-RUN --mount=type=bind,from=wheels,source=/trt-wheels,target=/deps/trt-wheels \
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
