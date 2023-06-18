@@ -397,6 +397,8 @@ class FrigateApp:
             name=f"audio_capture",
             args=(self.config, self.event_queue)
         )
+        audio_process.daemon = True
+        audio_process.start()
         logger.info(f"Audio process started: {audio_process.pid}")
 
     def start_timeline_processor(self) -> None:

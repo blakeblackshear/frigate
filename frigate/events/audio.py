@@ -19,7 +19,6 @@ from frigate.const import (
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
 )
-from frigate.detectors.detection_api import DetectionApi
 from frigate.object_detection import load_labels
 from frigate.util import listen
 
@@ -53,8 +52,8 @@ def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
             AudioEventMaintainer(camera, stop_event)
 
 
-class AudioTfl(DetectionApi):
-    def __init__(self, labels):
+class AudioTfl():
+    def __init__(self):
         self.labels = load_labels("/audio-labelmap.txt")
         self.interpreter = Interpreter(
             model_path="/cpu_audio_model.tflite",
