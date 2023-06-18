@@ -1,10 +1,13 @@
 """Handle creating audio events."""
 
+import datetime
 import logging
 import multiprocessing as mp
 import numpy as np
 import os
+import random
 import signal
+import string
 import subprocess as sp
 import threading
 from types import FrameType
@@ -20,6 +23,7 @@ from frigate.const import (
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
 )
+from frigate.events.maintainer import EventTypeEnum
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.object_detection import load_labels
 from frigate.util import get_ffmpeg_arg_list, listen
@@ -51,7 +55,7 @@ def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
 
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled:
-            AudioEventMaintainer(camera, stop_event).start()
+            AudioEventMaintainer(camera, event_queue, stop_event).start()
 
 
 class AudioTfl:
@@ -110,10 +114,12 @@ class AudioTfl:
 
 
 class AudioEventMaintainer(threading.Thread):
-    def __init__(self, camera: CameraConfig, stop_event: mp.Event) -> None:
+    def __init__(self, camera: CameraConfig, event_queue: mp.Queue, stop_event: mp.Event) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
+        self.queue = event_queue
+        self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl()
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
@@ -140,8 +146,24 @@ class AudioEventMaintainer(threading.Thread):
             if label not in self.config.audio.listen:
                 continue
 
-            logger.error(f"Detected audio: {label} with score {score}")
-            # TODO handle valid detect
+            self.handle_detection(label, score)
+
+    def handle_detection(self, label: str, score: float) -> None:
+        if self.detections[label] is not None:
+            self.detections[label]["last_detection"] = datetime.datetime.now().timestamp()
+        else:
+            now = datetime.datetime.now().timestamp()
+            rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            event_id = f"{now}-{rand_id}"
+            self.detections[label] = {
+                "id": event_id,
+                "label": label,
+                "camera": self.config.name,
+                "start_time": now,
+                "last_detection": now,
+            }
+            self.queue.put((EventTypeEnum.audio, "start", self.config.name, self.detections[label]))
+
 
     def init_ffmpeg(self) -> None:
         try:
