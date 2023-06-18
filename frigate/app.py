@@ -29,6 +29,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -390,6 +391,14 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_audio_processors(self) -> None:
+        audio_process = mp.Process(
+            target=listen_to_audio,
+            name=f"audio_capture",
+            args=(self.config, self.event_queue)
+        )
+        logger.info(f"Audio process started: {audio_process.pid}")
+
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
             self.config, self.timeline_queue, self.stop_event
@@ -486,6 +495,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_audio_processors()
         self.start_storage_maintainer()
         self.init_stats()
         self.init_external_event_processor()
