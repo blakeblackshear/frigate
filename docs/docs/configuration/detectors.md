@@ -200,7 +200,7 @@ To generate model files, create a new folder to save the models, download the sc
 mkdir trt-models
 wget https://github.com/blakeblackshear/frigate/raw/master/docker/tensorrt_models.sh
 chmod +x tensorrt_models.sh
-docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:22.07-py3 /tensorrt_models.sh
+docker run --gpus=all --rm -it -v `pwd`/trt-models:/tensorrt_models -v `pwd`/tensorrt_models.sh:/tensorrt_models.sh nvcr.io/nvidia/tensorrt:23.05-py3 /tensorrt_models.sh
 ```
 
 The `trt-models` folder can then be mapped into your Frigate container as `trt-models` and the models referenced from the config.
