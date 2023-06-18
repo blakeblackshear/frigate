@@ -17,6 +17,7 @@ from frigate.const import (
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
 )
+from frigate.detectors.plugins.audio_tfl import AudioTfl
 from frigate.util import listen
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,7 @@ class AudioEventMaintainer(threading.Thread):
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
         self.stop_event = stop_event
+        self.detector = AudioTfl()
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
 
     def detect_audio(self) -> None:

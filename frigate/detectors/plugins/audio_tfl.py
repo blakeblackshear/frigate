@@ -6,6 +6,7 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.object_detection import load_labels
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -18,17 +19,14 @@ logger = logging.getLogger(__name__)
 DETECTOR_KEY = "audio"
 
 
-class AudioDetectorConfig(BaseDetectorConfig):
-    type: Literal[DETECTOR_KEY]
-
-
 class AudioTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
-    def __init__(self, detector_config: AudioDetectorConfig):
+    def __init__(self, labels):
+        self.labels = load_labels("/audio-labelmap.txt")
         self.interpreter = Interpreter(
             model_path="/cpu_audio_model.tflite",
-            num_threads=3,
+            num_threads=2,
         )
 
         self.interpreter.allocate_tensors()
@@ -36,7 +34,7 @@ class AudioTfl(DetectionApi):
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
 
-    def detect_raw(self, tensor_input):
+    def _detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
         detections = np.zeros((20, 6), np.float32)
@@ -62,4 +60,17 @@ class AudioTfl(DetectionApi):
                 boxes[i][3],
             ]
 
+        return detections
+
+    def detect(self, tensor_input, threshold=0.8):
+        detections = []
+
+        raw_detections = self._detect_raw(tensor_input)
+
+        for d in raw_detections:
+            if d[1] < threshold:
+                break
+            detections.append(
+                (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
+            )
         return detections
