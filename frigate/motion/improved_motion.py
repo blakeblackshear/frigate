@@ -38,6 +38,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.improve_contrast = improve_contrast
         self.threshold = threshold
         self.contour_area = contour_area
+        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
     def detect(self, frame):
         motion_boxes = []
@@ -55,7 +56,7 @@ class ImprovedMotionDetector(MotionDetector):
 
         # Improve contrast
         if self.improve_contrast.value:
-            resized_frame = cv2.equalizeHist(resized_frame)
+            resized_frame = self.clahe.apply(resized_frame)
 
         # mask frame
         resized_frame[self.mask] = [255]
