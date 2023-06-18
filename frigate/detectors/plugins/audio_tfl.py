@@ -5,7 +5,6 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.object_detection import load_labels
 
 try:

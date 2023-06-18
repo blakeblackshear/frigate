@@ -672,7 +672,7 @@ class CameraConfig(FrigateBaseModel):
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
             has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
-            has_audio = "audio" in config["audio"]["inputs"][0].get("roles", [])
+            has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
@@ -680,7 +680,7 @@ class CameraConfig(FrigateBaseModel):
             ]
 
             if has_audio:
-                config["ffmpeg"]["inputs"][0].append("audio")
+                config["ffmpeg"]["inputs"][0]["roles"].append("audio")
 
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
