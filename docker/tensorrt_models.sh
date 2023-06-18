@@ -11,7 +11,7 @@ echo "Generating the following TRT Models: ${YOLO_MODELS:="yolov4-tiny-288,yolov
 mkdir -p ${OUTPUT_FOLDER}
 
 # Install packages
-pip install --upgrade pip && pip install onnx==1.9.0 protobuf==3.20.3
+pip install --upgrade pip && pip install onnx==1.15.0 protobuf==3.20.3
 
 # Clone tensorrt_demos repo
 git clone --depth 1 https://github.com/yeahme49/tensorrt_demos.git /tensorrt_demos
