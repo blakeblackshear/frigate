@@ -32,7 +32,7 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 FFMPEG_COMMAND = (
-    f"ffmpeg -vn {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}"
+    f"ffmpeg {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}"
 )
 
 
@@ -119,11 +119,16 @@ class AudioEventMaintainer(threading.Thread):
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
         self.pipe = f"{CACHE_DIR}/{self.config.name}-audio"
-        self.ffmpeg_command = get_ffmpeg_arg_list(FFMPEG_COMMAND.format(
-            " ".join(parse_preset_input(self.config.ffmpeg.input_args, 1)),
-            [i.path for i in self.config.ffmpeg.inputs if "audio" in i.roles][0],
-            self.pipe,
-        ))
+        self.ffmpeg_cmd = get_ffmpeg_arg_list(
+            FFMPEG_COMMAND.format(
+                " ".join(
+                    self.config.ffmpeg.global_args
+                    + parse_preset_input("preset-rtsp-audio-only", 1)
+                ),
+                [i.path for i in self.config.ffmpeg.inputs if "audio" in i.roles][0],
+                self.pipe,
+            )
+        )
         self.pipe_file = None
         self.audio_listener = None
 
@@ -135,25 +140,31 @@ class AudioEventMaintainer(threading.Thread):
             if label not in self.config.audio.listen:
                 continue
 
-        logger.error(f"Detected audio: {label} with score {score}")
-        # TODO handle valid detect
+            logger.error(f"Detected audio: {label} with score {score}")
+            # TODO handle valid detect
 
     def init_ffmpeg(self) -> None:
-        logger.error(f"Starting audio ffmpeg")
-
         try:
             os.mkfifo(self.pipe)
         except FileExistsError:
             pass
 
-        self.audio_listener = sp.run(self.ffmpeg_command)
+        logger.error(f"Made the pipe")
+
+        self.audio_listener = sp.Popen(
+            self.ffmpeg_cmd,
+            stdout=sp.DEVNULL,
+            stdin=sp.DEVNULL,
+            start_new_session=True,
+        )
+        logger.error(f"Started ffmpeg")
 
     def read_audio(self) -> None:
         if self.pipe_file is None:
             self.pipe_file = open(self.pipe, "rb")
 
         try:
-            audio = self.pipe_file.read(self.chunk_size)
+            audio = np.frombuffer(self.pipe_file.read(self.chunk_size), dtype=np.int16)
             self.detect_audio(audio)
         except BrokenPipeError as e:
             logger.error(f"There was a broken pipe :: {e}")
