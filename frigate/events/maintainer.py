@@ -72,26 +72,28 @@ class EventProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            logger.error(f"Event received: {source_type} {event_type} {camera} {event_data['id']}")
-
-            self.timeline_queue.put(
-                (
-                    camera,
-                    source_type,
-                    event_type,
-                    self.events_in_process.get(event_data["id"]),
-                    event_data,
-                )
+            logger.error(
+                f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
             )
 
             if source_type == EventTypeEnum.tracked_object:
+                self.timeline_queue.put(
+                    (
+                        camera,
+                        source_type,
+                        event_type,
+                        self.events_in_process.get(event_data["id"]),
+                        event_data,
+                    )
+                )
+
                 if event_type == "start":
                     self.events_in_process[event_data["id"]] = event_data
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
             elif source_type == EventTypeEnum.audio:
-                self.handle_audio_detection(event_type, camera, event_data)
+                self.handle_audio_detection(event_type, event_data)
             elif source_type == EventTypeEnum.api:
                 self.handle_external_detection(event_type, event_data)
 
@@ -217,7 +219,7 @@ class EventProcessor(threading.Thread):
             self.event_processed_queue.put((event_data["id"], camera))
 
     def handle_audio_detection(self, type: str, event_data: Event) -> None:
-        if type == "new":
+        if type == "start":
             event = {
                 Event.id: event_data["id"],
                 Event.label: event_data["label"],
@@ -235,14 +237,14 @@ class EventProcessor(threading.Thread):
                 Event.end_time: event_data["end_time"],
             }
 
-            (
-                Event.insert(event)
-                .on_conflict(
-                    conflict_target=[Event.id],
-                    update=event,
-                )
-                .execute()
+        (
+            Event.insert(event)
+            .on_conflict(
+                conflict_target=[Event.id],
+                update=event,
             )
+            .execute()
+        )
 
     def handle_external_detection(self, type: str, event_data: Event) -> None:
         if type == "new":

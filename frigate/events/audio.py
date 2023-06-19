@@ -195,7 +195,7 @@ class AudioEventMaintainer(threading.Thread):
         except FileExistsError:
             pass
 
-        start_or_restart_ffmpeg(
+        self.audio_listener = start_or_restart_ffmpeg(
             self.ffmpeg_cmd, logger, self.logpipe, None, self.audio_listener
         )
 
