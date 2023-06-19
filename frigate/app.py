@@ -395,7 +395,7 @@ class FrigateApp:
         audio_process = mp.Process(
             target=listen_to_audio,
             name=f"audio_capture",
-            args=(self.config, self.event_queue)
+            args=(self.config)
         )
         audio_process.daemon = True
         audio_process.start()

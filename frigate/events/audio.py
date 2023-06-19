@@ -6,9 +6,9 @@ import multiprocessing as mp
 import numpy as np
 import os
 import random
+import requests
 import signal
 import string
-import subprocess as sp
 import threading
 from types import FrameType
 from typing import Optional
@@ -17,7 +17,6 @@ from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import (
-    AUDIO_DETECTOR,
     AUDIO_DURATION,
     AUDIO_FORMAT,
     AUDIO_SAMPLE_RATE,
@@ -42,7 +41,7 @@ FFMPEG_COMMAND = (
 )
 
 
-def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
+def listen_to_audio(config: FrigateConfig) -> None:
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
@@ -57,7 +56,7 @@ def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
 
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled:
-            AudioEventMaintainer(camera, event_queue, stop_event).start()
+            AudioEventMaintainer(camera, stop_event).start()
 
 
 class AudioTfl:
@@ -116,13 +115,10 @@ class AudioTfl:
 
 
 class AudioEventMaintainer(threading.Thread):
-    def __init__(
-        self, camera: CameraConfig, event_queue: mp.Queue, stop_event: mp.Event
-    ) -> None:
+    def __init__(self, camera: CameraConfig, stop_event: mp.Event) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
-        self.queue = event_queue
         self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl()
@@ -161,35 +157,31 @@ class AudioEventMaintainer(threading.Thread):
                 "last_detection"
             ] = datetime.datetime.now().timestamp()
         else:
-            now = datetime.datetime.now().timestamp()
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
+            resp = requests.post(
+                f"http://127.0.0.1:5000/api/events/{self.config.name}/{label}/create",
+                json={"duration": None},
             )
-            event_id = f"{now}-{rand_id}"
-            self.detections[label] = {
-                "id": event_id,
-                "label": label,
-                "camera": self.config.name,
-                "score": score,
-                "start_time": now - self.config.record.events.pre_capture,
-                "last_detection": now,
-            }
-            self.queue.put(
-                (EventTypeEnum.audio, "start", self.config.name, self.detections[label])
-            )
+
+            if resp.status_code == 200:
+                event_id = resp.json["event_id"]
+                self.detections[label] = {
+                    "id": event_id,
+                    "last_detection": datetime.datetime.now().timestamp(),
+                }
 
     def expire_detections(self) -> None:
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
             if now - detection["last_detection"] > self.config.audio.max_not_heard:
-                detection["end_time"] = (
-                    detection["last_detection"] + self.config.record.events.post_capture
-                )
-                self.queue.put(
-                    (EventTypeEnum.audio, "end", self.config.name, detection)
-                )
                 self.detections[detection["label"]] = None
+                requests.put(
+                    f"http://127.0.0.1/api/events/{detection['event_id']}/end",
+                    json={
+                        "end_time": detection["last_detection"]
+                        + self.config.record.events.post_capture
+                    },
+                )
 
     def restart_audio_pipe(self) -> None:
         try:

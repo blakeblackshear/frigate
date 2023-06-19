@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 class EventTypeEnum(str, Enum):
     api = "api"
-    audio = "audio"
     tracked_object = "tracked_object"
 
 
@@ -92,8 +91,6 @@ class EventProcessor(threading.Thread):
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
-            elif source_type == EventTypeEnum.audio:
-                self.handle_audio_detection(event_type, event_data)
             elif source_type == EventTypeEnum.api:
                 self.handle_external_detection(event_type, event_data)
 
@@ -218,30 +215,6 @@ class EventProcessor(threading.Thread):
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
 
-    def handle_audio_detection(self, type: str, event_data: Event) -> None:
-        event = {
-            Event.id: event_data["id"],
-            Event.label: event_data["label"],
-            Event.score: event_data["score"],
-            Event.camera: event_data["camera"],
-            Event.start_time: event_data["start_time"],
-            Event.end_time: event_data.get("end_time"),
-            Event.thumbnail: "",
-            Event.has_clip: True,
-            Event.has_snapshot: True,
-            Event.zones: [],
-            Event.data: {},
-        }
-
-        (
-            Event.insert(event)
-            .on_conflict(
-                conflict_target=[Event.id],
-                update=event,
-            )
-            .execute()
-        )
-
     def handle_external_detection(self, type: str, event_data: Event) -> None:
         if type == "new":
             event = {
@@ -257,20 +230,14 @@ class EventProcessor(threading.Thread):
                 Event.zones: [],
                 Event.data: {},
             }
+            Event.insert(event).execute()
         elif type == "end":
             event = {
                 Event.id: event_data["id"],
                 Event.end_time: event_data["end_time"],
             }
 
-        try:
-            (
-                Event.insert(event)
-                .on_conflict(
-                    conflict_target=[Event.id],
-                    update=event,
-                )
-                .execute()
-            )
-        except Exception:
-            logger.warning(f"Failed to update manual event: {event_data['id']}")
+            try:
+                Event.update(event).execute()
+            except Exception:
+                logger.warning(f"Failed to update manual event: {event_data['id']}")
