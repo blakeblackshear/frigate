@@ -178,7 +178,7 @@ class AudioEventMaintainer(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
-            if now - detection["last_detection"] > 30:
+            if now - detection["last_detection"] > self.config.audio.max_not_heard:
                 detection["end_time"] = (
                     detection["last_detection"] + self.config.record.events.post_capture
                 )
