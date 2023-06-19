@@ -225,6 +225,13 @@ class FrigateApp:
                         )
                     f.write(line)
 
+        # get the nginx master process id
+        with open("/var/run/nginx.pid", "r") as pid_file:
+            pid = int(pid_file.read().strip())
+
+        # sending SIGHUP signal to nginx master process
+        os.kill(pid, signal.SIGHUP)
+
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
             if proc.info["name"] == "go2rtc":
