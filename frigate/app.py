@@ -392,12 +392,13 @@ class FrigateApp:
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def start_audio_processors(self) -> None:
-        audio_process = mp.Process(
-            target=listen_to_audio, name=f"audio_capture", args=(self.config,)
-        )
-        audio_process.daemon = True
-        audio_process.start()
-        logger.info(f"Audio process started: {audio_process.pid}")
+        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
+            audio_process = mp.Process(
+                target=listen_to_audio, name=f"audio_capture", args=(self.config,)
+            )
+            audio_process.daemon = True
+            audio_process.start()
+            logger.info(f"Audio process started: {audio_process.pid}")
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
