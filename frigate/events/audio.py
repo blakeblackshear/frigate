@@ -25,7 +25,9 @@ from frigate.const import (
 )
 from frigate.events.maintainer import EventTypeEnum
 from frigate.ffmpeg_presets import parse_preset_input
+from frigate.log import LogPipe
 from frigate.object_detection import load_labels
+from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util import get_ffmpeg_arg_list, listen
 
 try:
@@ -138,6 +140,7 @@ class AudioEventMaintainer(threading.Thread):
             )
         )
         self.pipe_file = None
+        self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
         self.audio_listener = None
 
     def detect_audio(self, audio) -> None:
@@ -186,17 +189,14 @@ class AudioEventMaintainer(threading.Thread):
                     (EventTypeEnum.audio, "end", self.config.name, detection)
                 )
 
-    def init_ffmpeg(self) -> None:
+    def restart_audio_pipe(self) -> None:
         try:
             os.mkfifo(self.pipe)
         except FileExistsError:
             pass
 
-        self.audio_listener = sp.Popen(
-            self.ffmpeg_cmd,
-            stdout=sp.DEVNULL,
-            stdin=sp.DEVNULL,
-            start_new_session=True,
+        start_or_restart_ffmpeg(
+            self.ffmpeg_cmd, logger, self.logpipe, None, self.audio_listener
         )
 
     def read_audio(self) -> None:
@@ -207,12 +207,12 @@ class AudioEventMaintainer(threading.Thread):
             audio = np.frombuffer(self.pipe_file.read(self.chunk_size), dtype=np.int16)
             self.detect_audio(audio)
         except BrokenPipeError as e:
-            logger.error(f"There was a broken pipe :: {e}")
-            # TODO fix broken pipe
-            pass
+            self.restart_audio_pipe()
 
     def run(self) -> None:
-        self.init_ffmpeg()
+        self.restart_audio_pipe()
 
         while not self.stop_event.is_set():
             self.read_audio()
+
+        stop_ffmpeg(self.audio_listener, logger)
