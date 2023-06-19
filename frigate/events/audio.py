@@ -19,6 +19,7 @@ from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
+    AUDIO_MAX_BIT_RANGE,
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
 )
@@ -146,7 +147,7 @@ class AudioEventMaintainer(threading.Thread):
         self.audio_listener = None
 
     def detect_audio(self, audio) -> None:
-        waveform = (audio / 32768.0).astype(np.float32)
+        waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
         model_detections = self.detector.detect(waveform)
 
         for label, score, _ in model_detections:

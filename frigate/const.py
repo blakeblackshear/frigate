@@ -14,9 +14,9 @@ BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
 # Audio Consts
 
-AUDIO_DETECTOR = "audio-detector"
 AUDIO_DURATION = 0.975
 AUDIO_FORMAT = "s16le"
+AUDIO_MAX_BIT_RANGE = 32768.0
 AUDIO_SAMPLE_RATE = 16000
 
 # Regex Consts
