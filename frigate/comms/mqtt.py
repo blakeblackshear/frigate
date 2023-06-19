@@ -41,12 +41,17 @@ class MqttClient(Communicator):  # type: ignore[misc]
         for camera_name, camera in self.config.cameras.items():
             self.publish(
                 f"{camera_name}/recordings/state",
-                "ON" if camera.record.enabled else "OFF",
+                "ON" if camera.record.enabled_in_config else "OFF",
                 retain=True,
             )
             self.publish(
                 f"{camera_name}/snapshots/state",
                 "ON" if camera.snapshots.enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/audio/state",
+                "ON" if camera.audio.enabled_in_config else "OFF",
                 retain=True,
             )
             self.publish(
