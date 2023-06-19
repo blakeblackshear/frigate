@@ -72,7 +72,7 @@ class EventProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            logger.debug(f"Event received: {event_type} {camera} {event_data['id']}")
+            logger.error(f"Event received: {source_type} {event_type} {camera} {event_data['id']}")
 
             self.timeline_queue.put(
                 (

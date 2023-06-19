@@ -114,7 +114,9 @@ class AudioTfl:
 
 
 class AudioEventMaintainer(threading.Thread):
-    def __init__(self, camera: CameraConfig, event_queue: mp.Queue, stop_event: mp.Event) -> None:
+    def __init__(
+        self, camera: CameraConfig, event_queue: mp.Queue, stop_event: mp.Event
+    ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
@@ -148,22 +150,41 @@ class AudioEventMaintainer(threading.Thread):
 
             self.handle_detection(label, score)
 
+        self.expire_detections()
+
     def handle_detection(self, label: str, score: float) -> None:
-        if self.detections[label] is not None:
-            self.detections[label]["last_detection"] = datetime.datetime.now().timestamp()
+        if self.detections.get(label) is not None:
+            self.detections[label][
+                "last_detection"
+            ] = datetime.datetime.now().timestamp()
         else:
             now = datetime.datetime.now().timestamp()
-            rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
             event_id = f"{now}-{rand_id}"
             self.detections[label] = {
                 "id": event_id,
                 "label": label,
                 "camera": self.config.name,
-                "start_time": now,
+                "start_time": now - self.config.record.events.pre_capture,
                 "last_detection": now,
             }
-            self.queue.put((EventTypeEnum.audio, "start", self.config.name, self.detections[label]))
+            self.queue.put(
+                (EventTypeEnum.audio, "start", self.config.name, self.detections[label])
+            )
 
+    def expire_detections(self) -> None:
+        now = datetime.datetime.now().timestamp()
+
+        for detection in self.detections.values():
+            if now - detection["last_detection"] > 30:
+                detection["end_time"] = (
+                    detection["last_detection"] + self.config.record.events.post_capture
+                )
+                self.queue.put(
+                    (EventTypeEnum.audio, "end", self.config.name, detection)
+                )
 
     def init_ffmpeg(self) -> None:
         try:
@@ -171,15 +192,12 @@ class AudioEventMaintainer(threading.Thread):
         except FileExistsError:
             pass
 
-        logger.error(f"Made the pipe")
-
         self.audio_listener = sp.Popen(
             self.ffmpeg_cmd,
             stdout=sp.DEVNULL,
             stdin=sp.DEVNULL,
             start_new_session=True,
         )
-        logger.error(f"Started ffmpeg")
 
     def read_audio(self) -> None:
         if self.pipe_file is None:
