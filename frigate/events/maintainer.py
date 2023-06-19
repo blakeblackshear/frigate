@@ -219,23 +219,19 @@ class EventProcessor(threading.Thread):
             self.event_processed_queue.put((event_data["id"], camera))
 
     def handle_audio_detection(self, type: str, event_data: Event) -> None:
-        if type == "start":
-            event = {
-                Event.id: event_data["id"],
-                Event.label: event_data["label"],
-                Event.camera: event_data["camera"],
-                Event.start_time: event_data["start_time"],
-                Event.thumbnail: None,
-                Event.has_clip: True,
-                Event.has_snapshot: True,
-                Event.zones: [],
-                Event.data: {},
-            }
-        elif type == "end":
-            event = {
-                Event.id: event_data["id"],
-                Event.end_time: event_data["end_time"],
-            }
+        event = {
+            Event.id: event_data["id"],
+            Event.label: event_data["label"],
+            Event.score: event_data["score"],
+            Event.camera: event_data["camera"],
+            Event.start_time: event_data["start_time"],
+            Event.end_time: event_data.get("end_time"),
+            Event.thumbnail: "",
+            Event.has_clip: True,
+            Event.has_snapshot: True,
+            Event.zones: [],
+            Event.data: {},
+        }
 
         (
             Event.insert(event)

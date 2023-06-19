@@ -51,8 +51,8 @@ def listen_to_audio(config: FrigateConfig, event_queue: mp.Queue) -> None:
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
 
-    threading.current_thread().name = "process:recording_manager"
-    setproctitle("frigate.recording_manager")
+    threading.current_thread().name = "process:audio_manager"
+    setproctitle("frigate.audio_manager")
     listen()
 
     for camera in config.cameras.values():
@@ -170,6 +170,7 @@ class AudioEventMaintainer(threading.Thread):
                 "id": event_id,
                 "label": label,
                 "camera": self.config.name,
+                "score": score,
                 "start_time": now - self.config.record.events.pre_capture,
                 "last_detection": now,
             }
@@ -188,6 +189,7 @@ class AudioEventMaintainer(threading.Thread):
                 self.queue.put(
                     (EventTypeEnum.audio, "end", self.config.name, detection)
                 )
+                self.detections[detection["label"]] = None
 
     def restart_audio_pipe(self) -> None:
         try:
@@ -216,3 +218,4 @@ class AudioEventMaintainer(threading.Thread):
             self.read_audio()
 
         stop_ffmpeg(self.audio_listener, logger)
+        self.pipe_file.close()
