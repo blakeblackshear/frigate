@@ -16,11 +16,6 @@ from frigate.util import load_labels
 logger = logging.getLogger(__name__)
 
 
-class ProducesEnum(str, Enum):
-    object = "object"
-    audio = "audio"
-
-
 class PixelFormatEnum(str, Enum):
     rgb = "rgb"
     bgr = "bgr"
