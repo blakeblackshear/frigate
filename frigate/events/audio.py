@@ -43,9 +43,13 @@ FFMPEG_COMMAND = (
 
 def listen_to_audio(config: FrigateConfig) -> None:
     stop_event = mp.Event()
+    audio_threads: list[threading.Thread] = []
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
         stop_event.set()
+
+        for thread in audio_threads:
+            thread.join()
 
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
@@ -56,7 +60,9 @@ def listen_to_audio(config: FrigateConfig) -> None:
 
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled:
-            AudioEventMaintainer(camera, stop_event).start()
+            audio = AudioEventMaintainer(camera, stop_event)
+            audio_threads.append(audio)
+            audio.start()
 
 
 class AudioTfl:
