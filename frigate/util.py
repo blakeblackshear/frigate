@@ -1147,31 +1147,66 @@ def to_relative_box(
 
 
 def get_video_properties(url, get_duration=False):
+    def calculate_duration(video: Optional[any]) -> float:
+        duration = None
+
+        if video is not None:
+            # Get the frames per second (fps) of the video stream
+            fps = video.get(cv2.CAP_PROP_FPS)
+            total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            if fps and total_frames:
+                duration = total_frames / fps
+
+        # if cv2 failed need to use ffprobe
+        if duration is None:
+            ffprobe_cmd = [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                f"{url}",
+            ]
+            p = sp.run(ffprobe_cmd, capture_output=True)
+
+            if p.returncode == 0 and p.stdout.decode():
+                duration = float(p.stdout.decode().strip())
+            else:
+                duration = -1
+
+        return duration
+
     width = height = 0
-    # Open the video stream
-    video = cv2.VideoCapture(url)
 
-    # Check if the video stream was opened successfully
-    if not video.isOpened():
-        logger.debug(f"Error opening video stream {url}.")
-        return None
+    try:
+        # Open the video stream
+        video = cv2.VideoCapture(url)
 
-    # Get the width of frames in the video stream
-    width = video.get(cv2.CAP_PROP_FRAME_WIDTH)
+        # Check if the video stream was opened successfully
+        if not video.isOpened():
+            video = None
+    except Exception:
+        video = None
 
-    # Get the height of frames in the video stream
-    height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    result = {}
 
-    # Release the video stream
-    video.release()
-
-    result = {"width": round(width), "height": round(height)}
     if get_duration:
-        # Get the frames per second (fps) of the video stream
-        fps = video.get(cv2.CAP_PROP_FPS)
-        total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-        duration = total_frames / fps
+        result["duration"] = calculate_duration(video)
 
-        result["duration"] = duration
+    if video is not None:
+        # Get the width of frames in the video stream
+        width = video.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+        # Get the height of frames in the video stream
+        height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+        # Release the video stream
+        video.release()
+
+        result["width"] = round(width)
+        result["height"] = round(height)
 
     return result

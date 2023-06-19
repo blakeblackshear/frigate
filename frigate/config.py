@@ -13,8 +13,6 @@ from pydantic.fields import PrivateAttr
 
 from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
 from frigate.detectors import DetectorConfig, ModelConfig
-from frigate.detectors.detector_config import InputTensorEnum  # noqa: F401
-from frigate.detectors.detector_config import PixelFormatEnum  # noqa: F401
 from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
@@ -191,7 +189,7 @@ class RecordConfig(FrigateBaseModel):
 
 class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
-        default=40,
+        default=30,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
@@ -200,10 +198,10 @@ class MotionConfig(FrigateBaseModel):
         default=0.8, title="Lightning detection threshold (0.3-1.0).", ge=0.3, le=1.0
     )
     improve_contrast: bool = Field(default=True, title="Improve Contrast")
-    contour_area: Optional[int] = Field(default=15, title="Contour Area")
+    contour_area: Optional[int] = Field(default=10, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
     frame_alpha: float = Field(default=0.02, title="Frame Alpha")
-    frame_height: Optional[int] = Field(default=50, title="Frame Height")
+    frame_height: Optional[int] = Field(default=100, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
@@ -253,9 +251,8 @@ class StationaryMaxFramesConfig(FrigateBaseModel):
 
 class StationaryConfig(FrigateBaseModel):
     interval: Optional[int] = Field(
-        default=0,
         title="Frame interval for checking stationary objects.",
-        ge=0,
+        gt=0,
     )
     threshold: Optional[int] = Field(
         title="Number of frames without a position change for an object to be considered stationary",
@@ -988,6 +985,9 @@ class FrigateConfig(FrigateBaseModel):
             stationary_threshold = camera_config.detect.fps * 10
             if camera_config.detect.stationary.threshold is None:
                 camera_config.detect.stationary.threshold = stationary_threshold
+            # default to the stationary_threshold if not defined
+            if camera_config.detect.stationary.interval is None:
+                camera_config.detect.stationary.interval = stationary_threshold
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:

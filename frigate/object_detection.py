@@ -10,8 +10,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import InputTensorEnum
 from frigate.detectors import create_detector
+from frigate.detectors.detector_config import InputTensorEnum
 from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
 
 logger = logging.getLogger(__name__)

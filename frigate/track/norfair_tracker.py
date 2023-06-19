@@ -91,9 +91,13 @@ class NorfairTracker(ObjectTracker):
             "ymax": self.detect_config.height,
         }
 
-    def deregister(self, id):
+    def deregister(self, id, track_id):
         del self.tracked_objects[id]
         del self.disappeared[id]
+        self.tracker.tracked_objects = [
+            o for o in self.tracker.tracked_objects if o.global_id != track_id
+        ]
+        del self.track_id_map[track_id]
 
     # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
@@ -167,7 +171,7 @@ class NorfairTracker(ObjectTracker):
         if self.update_position(id, obj["box"]):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
-                self.deregister(id)
+                self.deregister(id, track_id)
                 return
         else:
             # register the first position change and then only increment if
@@ -261,8 +265,7 @@ class NorfairTracker(ObjectTracker):
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
         for e_id in expired_ids:
-            self.deregister(self.track_id_map[e_id])
-            del self.track_id_map[e_id]
+            self.deregister(self.track_id_map[e_id], e_id)
 
     def debug_draw(self, frame, frame_time):
         active_detections = [

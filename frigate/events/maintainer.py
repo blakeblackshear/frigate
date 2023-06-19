@@ -147,6 +147,23 @@ class EventProcessor(threading.Thread):
                 )
             )
 
+            attributes = [
+                (
+                    None
+                    if event_data["snapshot"] is None
+                    else {
+                        "box": to_relative_box(
+                            width,
+                            height,
+                            a["box"],
+                        ),
+                        "label": a["label"],
+                        "score": a["score"],
+                    }
+                )
+                for a in event_data["snapshot"]["attributes"]
+            ]
+
             # keep these from being set back to false because the event
             # may have started while recordings and snapshots were enabled
             # this would be an issue for long running events
@@ -173,8 +190,13 @@ class EventProcessor(threading.Thread):
                     "region": region,
                     "score": score,
                     "top_score": event_data["top_score"],
+                    "attributes": attributes,
                 },
             }
+
+            # only overwrite the sub_label in the database if it's set
+            if event_data.get("sub_label") is not None:
+                event[Event.sub_label] = event_data["sub_label"]
 
             (
                 Event.insert(event)
