@@ -23,10 +23,10 @@ from frigate.const import (
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
 )
-from frigate.events.maintainer import EventTypeEnum
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
+from frigate.types import FeatureMetricsTypes
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util import get_ffmpeg_arg_list, listen
 
@@ -42,15 +42,15 @@ FFMPEG_COMMAND = (
 )
 
 
-def listen_to_audio(config: FrigateConfig) -> None:
+def listen_to_audio(
+    config: FrigateConfig,
+    process_info: dict[str, FeatureMetricsTypes],
+) -> None:
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
         stop_event.set()
-
-        for thread in audio_threads:
-            thread.join()
 
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
@@ -60,14 +60,23 @@ def listen_to_audio(config: FrigateConfig) -> None:
     listen()
 
     for camera in config.cameras.values():
-        if camera.enabled and camera.audio.enabled:
-            audio = AudioEventMaintainer(camera, stop_event)
+        if camera.enabled and camera.audio.enabled_in_config:
+            audio = AudioEventMaintainer(camera, process_info, stop_event)
             audio_threads.append(audio)
             audio.start()
 
+    while not stop_event.is_set():
+        pass
+
+    for thread in audio_threads:
+        thread.join()
+
+    logger.info("Exiting audio detector...")
+
 
 class AudioTfl:
-    def __init__(self):
+    def __init__(self, stop_event: mp.Event):
+        self.stop_event = stop_event
         self.labels = load_labels("/audio-labelmap.txt")
         self.interpreter = Interpreter(
             model_path="/cpu_audio_model.tflite",
@@ -110,6 +119,9 @@ class AudioTfl:
     def detect(self, tensor_input, threshold=0.8):
         detections = []
 
+        if self.stop_event.is_set():
+            return detections
+
         raw_detections = self._detect_raw(tensor_input)
 
         for d in raw_detections:
@@ -122,13 +134,19 @@ class AudioTfl:
 
 
 class AudioEventMaintainer(threading.Thread):
-    def __init__(self, camera: CameraConfig, stop_event: mp.Event) -> None:
+    def __init__(
+        self,
+        camera: CameraConfig,
+        feature_metrics: dict[str, FeatureMetricsTypes],
+        stop_event: mp.Event,
+    ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
-        self.detections: dict[dict[str, any]] = {}
+        self.feature_metrics = feature_metrics
+        self.detections: dict[dict[str, any]] = feature_metrics
         self.stop_event = stop_event
-        self.detector = AudioTfl()
+        self.detector = AudioTfl(stop_event)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
         self.pipe = f"{CACHE_DIR}/{self.config.name}-audio"
@@ -147,6 +165,11 @@ class AudioEventMaintainer(threading.Thread):
         self.audio_listener = None
 
     def detect_audio(self, audio) -> None:
+        if not self.feature_metrics[self.config.name]["audio_enabled"].value:
+            return
+
+        logger.error(f"Running audio inference")
+
         waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
         model_detections = self.detector.detect(waveform)
 
@@ -181,7 +204,10 @@ class AudioEventMaintainer(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
-            if now - detection["last_detection"] > self.config.audio.max_not_heard:
+            if (
+                now - detection.get("last_detection", now)
+                > self.config.audio.max_not_heard
+            ):
                 self.detections[detection["label"]] = None
                 requests.put(
                     f"http://127.0.0.1/api/events/{detection['event_id']}/end",

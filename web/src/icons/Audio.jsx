@@ -7,7 +7,7 @@ export function Snapshot({ className = 'h-6 w-6', stroke = 'currentColor', onCli
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       fill="none"
-      viewBox="0 0 24 24"
+      viewBox="0 0 32 32"
       stroke={stroke}
       onClick={onClick}
     >
@@ -29,7 +29,6 @@ export function Snapshot({ className = 'h-6 w-6', stroke = 'currentColor', onCli
         stroke-width="2"
         d="M9.28 8.082A3.006 3.006 0 0113 11h2a4.979 4.979 0 00-1.884-3.911 5.041 5.041 0 00-4.281-.957 4.95 4.95 0 00-3.703 3.703 5.032 5.032 0 002.304 5.458A3.078 3.078 0 019 17.924V20h2v-2.077a5.06 5.06 0 00-2.537-4.346 3.002 3.002 0 01.817-5.494z"
       />
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none" d="M0 0h32v32H0z" />
     </svg>
   );
 }

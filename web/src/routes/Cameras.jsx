@@ -94,8 +94,8 @@ function Camera({ name, config }) {
             sendAudio(audioValue === 'ON' ? 'OFF' : 'ON', true);
           },
         }
-        : {},
-    ],
+        : null,
+    ].filter((button) => button != null),
     [config, audioValue, sendAudio, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
