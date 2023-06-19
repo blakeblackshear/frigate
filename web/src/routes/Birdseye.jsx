@@ -6,7 +6,7 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import '../components/MsePlayer';
 import useSWR from 'swr';
-import { useMemo, useState } from 'preact/hooks'; // Added useState
+import { useMemo, useState } from 'preact/hooks';
 import CameraControlPanel from '../components/CameraControlPanel';
 import { baseUrl } from '../api/baseUrl';
 
@@ -26,14 +26,14 @@ export default function Birdseye() {
       .map(([_, camera]) => camera.name);
   }, [config]);
 
-  const [isMaxWidth, setIsMaxWidth] = useState(false); // Added state for class toggle
+  const [isMaxWidth, setIsMaxWidth] = useState(false);
 
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
   let player;
-  const playerClass = isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full'; // Class based on state
+  const playerClass = isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full';
   if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
