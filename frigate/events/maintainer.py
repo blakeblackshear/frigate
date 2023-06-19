@@ -71,7 +71,7 @@ class EventProcessor(threading.Thread):
             except queue.Empty:
                 continue
 
-            logger.error(
+            logger.debug(
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
             )
 
