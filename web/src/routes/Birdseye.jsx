@@ -83,8 +83,8 @@ export default function Birdseye() {
         {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
-            value={isMaxWidth ? "true" : "false"}
-            onChange={(e) => setIsMaxWidth(e.target.value)}
+            value={viewSource}
+            onChange={(e) => setViewSource(e.target.value)}
             key="width-changer"
           >
             {sourceValues.map((item) => (
