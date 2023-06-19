@@ -80,6 +80,8 @@ export default function Birdseye() {
           Birdseye
         </Heading>
 
+        <button onClick={() => setIsMaxWidth(!isMaxWidth)}>Toggle Width</button>
+
         {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
@@ -94,10 +96,7 @@ export default function Birdseye() {
             ))}
            
           </select>
-         
         )}
-
-        <button onClick={() => setIsMaxWidth(!isMaxWidth)}>Toggle Width</button> {/* Added button */}
       </div>
 
       <div className="xl:flex justify-between">
