@@ -1,6 +1,11 @@
 import logging
 
-from .detector_config import InputTensorEnum, ModelConfig, PixelFormatEnum  # noqa: F401
+from .detector_config import (  # noqa: F401
+    AudioModelConfig,
+    InputTensorEnum,
+    ModelConfig,
+    PixelFormatEnum,
+)
 from .detector_types import DetectorConfig, DetectorTypeEnum, api_types  # noqa: F401
 
 logger = logging.getLogger(__name__)

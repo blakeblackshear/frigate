@@ -12,7 +12,7 @@ from pydantic import BaseModel, Extra, Field, parse_obj_as, validator
 from pydantic.fields import PrivateAttr
 
 from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
-from frigate.detectors import DetectorConfig, ModelConfig
+from frigate.detectors import AudioModelConfig, DetectorConfig, ModelConfig
 from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
