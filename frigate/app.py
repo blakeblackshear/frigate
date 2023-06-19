@@ -388,7 +388,7 @@ class FrigateApp:
         if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
             audio_process = mp.Process(
                 target=listen_to_audio,
-                name=f"audio_capture",
+                name="audio_capture",
                 args=(self.config, self.feature_metrics),
             )
             audio_process.daemon = True
