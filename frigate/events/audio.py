@@ -50,7 +50,6 @@ def listen_to_audio(
     audio_threads: list[threading.Thread] = []
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        logger.error(f"Received end signal")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -244,6 +243,6 @@ class AudioEventMaintainer(threading.Thread):
         while not self.stop_event.is_set():
             self.read_audio()
 
-        stop_ffmpeg(self.audio_listener, logger)
         self.pipe_file.close()
-        logger.error(f"Exiting audio runner")
+        stop_ffmpeg(self.audio_listener, logger)
+        self.logpipe.close()
