@@ -3,16 +3,14 @@
 import datetime
 import logging
 import multiprocessing as mp
-import numpy as np
 import os
-import random
-import requests
 import signal
-import string
 import threading
 from types import FrameType
 from typing import Optional
 
+import numpy as np
+import requests
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, FrigateConfig
@@ -27,8 +25,8 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
 from frigate.types import FeatureMetricsTypes
-from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.util import get_ffmpeg_arg_list, listen
+from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
     from tflite_runtime.interpreter import Interpreter
