@@ -396,6 +396,9 @@ class AudioConfig(FrigateBaseModel):
     listen: List[str] = Field(
         default=DEFAULT_LISTEN_AUDIO, title="Audio to listen for."
     )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of audio detection."
+    )
 
 
 class BirdseyeModeEnum(str, Enum):
@@ -1004,8 +1007,9 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.onvif.password = camera_config.onvif.password.format(
                     **FRIGATE_ENV_VARS
                 )
-            # set config recording value
+            # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
+            camera_config.audio.enabled_in_config = camera_config.audio.enabled
 
             # Add default filters
             object_keys = camera_config.objects.track

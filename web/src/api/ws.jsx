@@ -120,6 +120,15 @@ export function useSnapshotsState(camera) {
   return { payload, send, connected };
 }
 
+export function useAudioState(camera) {
+  const {
+    value: { payload },
+    send,
+    connected,
+  } = useWs(`${camera}/audio/state`, `${camera}/audio/set`);
+  return { payload, send, connected };
+}
+
 export function usePtzCommand(camera) {
   const {
     value: { payload },
