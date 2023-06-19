@@ -45,7 +45,11 @@ DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 
 class FrigateBaseModel(BaseModel):
     class Config:
-        extra = Extra.forbid
+        extra = (
+            Extra.allow
+            if os.environ.get("FRIGATE_ALLOW_EXTRA") is not None
+            else Extra.forbid
+        )
 
 
 class LiveModeEnum(str, Enum):
