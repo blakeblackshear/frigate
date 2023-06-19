@@ -1611,7 +1611,9 @@ def logs(service: str):
     log_locations = {
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
-        "nginx": "/dev/shm/logs/nginx/error_log" if current_app.frigate_config.logger.default in ["warning", "error", "critical"] else "/dev/shm/logs/nginx/access_log",
+        "nginx": "/dev/shm/logs/nginx/error_log"
+        if current_app.frigate_config.logger.default in ["warning", "error", "critical"]
+        else "/dev/shm/logs/nginx/access_log",
     }
     service_location = log_locations.get(service)
 
