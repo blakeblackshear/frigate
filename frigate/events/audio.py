@@ -2,13 +2,13 @@
 
 import logging
 import multiprocessing as mp
-import numpy as np
 import signal
 import subprocess as sp
 import threading
 from types import FrameType
 from typing import Optional
 
+import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, FrigateConfig
