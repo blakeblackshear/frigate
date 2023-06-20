@@ -35,9 +35,15 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
-FFMPEG_COMMAND = (
-    f"ffmpeg {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}"
-)
+
+def get_ffmpeg_command(input_args: list[str], input_path: str, pipe: str) -> list[str]:
+    return get_ffmpeg_arg_list(
+        f"ffmpeg {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}".format(
+            " ".join(input_args),
+            input_path,
+            pipe,
+        )
+    )
 
 
 def listen_to_audio(
@@ -148,15 +154,11 @@ class AudioEventMaintainer(threading.Thread):
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
         self.pipe = f"{CACHE_DIR}/{self.config.name}-audio"
-        self.ffmpeg_cmd = get_ffmpeg_arg_list(
-            FFMPEG_COMMAND.format(
-                " ".join(
-                    self.config.ffmpeg.global_args
-                    + parse_preset_input("preset-rtsp-audio-only", 1)
-                ),
-                [i.path for i in self.config.ffmpeg.inputs if "audio" in i.roles][0],
-                self.pipe,
-            )
+        self.ffmpeg_cmd = get_ffmpeg_command(
+            get_ffmpeg_arg_list(self.config.ffmpeg.global_args)
+            + parse_preset_input("preset-rtsp-audio-only", 1),
+            [i.path for i in self.config.ffmpeg.inputs if "audio" in i.roles][0],
+            self.pipe,
         )
         self.pipe_file = None
         self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
