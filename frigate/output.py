@@ -299,7 +299,7 @@ class BirdsEyeFrameManager:
                 return True
 
         # check if we need to reset the layout because there is a different number of cameras
-        reset_layout = len(self.active_cameras) - len(active_cameras) is not 0
+        reset_layout = len(self.active_cameras) - len(active_cameras) != 0
 
         # reset the layout if it needs to be different
         if reset_layout:
