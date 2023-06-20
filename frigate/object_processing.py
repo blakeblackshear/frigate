@@ -189,9 +189,7 @@ class TrackedObject:
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
                 # if the object passed the filters once, dont apply again
-                if name in self.current_zones or not zone_filtered(
-                    self, zone.filters
-                ):
+                if name in self.current_zones or not zone_filtered(self, zone.filters):
                     self.zone_presence[name] = zone_score + 1
 
                     # an object is only considered present in a zone if it has a zone inertia of 3+
