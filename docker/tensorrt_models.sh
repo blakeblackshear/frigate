@@ -13,7 +13,7 @@ mkdir -p ${OUTPUT_FOLDER}
 cd /tmp/ && wget -qO tensorrt_demos.zip https://github.com/NateMeyer/tensorrt_demos/archive/refs/heads/conditional_download.zip
 unzip tensorrt_demos.zip
 
-cp /usrl/local/lib/libyolo_layer.so /tmp/tensorrt_demos-conditional_download/plugins/libyolo_layer.so
+cp /usr/local/lib/libyolo_layer.so /tmp/tensorrt_demos-conditional_download/plugins/libyolo_layer.so
 
 # Download yolo weights
 cd /tmp/tensorrt_demos-conditional_download/yolo && ./download_yolo.sh $YOLO_MODELS
