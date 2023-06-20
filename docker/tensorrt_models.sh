@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-OUTPUT_FOLDER=/trt_models
+OUTPUT_FOLDER=/trt-models
 echo "Generating the following TRT Models: ${YOLO_MODELS:="yolov4-tiny-288,yolov4-tiny-416,yolov7-tiny-416"}"
 
 # Create output folder
