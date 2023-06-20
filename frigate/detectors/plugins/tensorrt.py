@@ -78,7 +78,7 @@ class TensorRtDetector(DetectionApi):
         try:
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
-            ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")
+            ctypes.cdll.LoadLibrary("/usr/local/lib/libyolo_layer.so")
         except OSError as e:
             logger.error(
                 "ERROR: failed to load libraries. %s",
