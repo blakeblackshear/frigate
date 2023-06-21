@@ -1,3 +1,8 @@
+---
+id: motion_detection
+title: Tuning Motion Detection
+---
+
 # Tuning Motion Detection
 
 Frigate uses motion detection as a first line check to see if there is anything happening in the frame worth checking with object detection.
