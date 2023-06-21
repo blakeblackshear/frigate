@@ -14,6 +14,7 @@ module.exports = {
       "guides/ha_network_storage",
       "guides/stationary_objects",
       "guides/reverse_proxy",
+      "guides/motion_detection",
     ],
     Configuration: {
       "Configuration Files": [
