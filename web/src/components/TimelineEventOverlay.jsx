@@ -42,6 +42,8 @@ export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig
         className="absolute border-4 border-red-600"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
+        onTouchStart={() => setIsHovering(true)}
+        onTouchEnd={() => setIsHovering(false)}
         style={{
           left: `${boxLeftEdge}%`,
           top: `${boxTopEdge}%`,
