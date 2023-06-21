@@ -30,8 +30,8 @@ export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig
   };
 
   const getObjectRatio = () => {
-    const width = eventOverlay.data.box[2] * 100;
-    const height = eventOverlay.data.box[3] * 100;
+    const width = eventOverlay.data.box[2] * cameraConfig.detect.width;
+    const height = eventOverlay.data.box[3] * cameraConfig.detect.height;
     return Math.round(100 * (width / height)) / 100;
   };
 
