@@ -15,7 +15,11 @@ class ImprovedMotionDetector(MotionDetector):
         improve_contrast,
         threshold,
         contour_area,
+        clipLimit=2.0,
+        tileGridSize=(2, 2),
+        name="improved",
     ):
+        self.name = name
         self.config = config
         self.frame_shape = frame_shape
         self.resize_factor = frame_shape[0] / config.frame_height
@@ -38,7 +42,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.improve_contrast = improve_contrast
         self.threshold = threshold
         self.contour_area = contour_area
-        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        self.clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
 
     def detect(self, frame):
         motion_boxes = []
@@ -52,11 +56,20 @@ class ImprovedMotionDetector(MotionDetector):
             interpolation=cv2.INTER_LINEAR,
         )
 
+        if self.save_images:
+            resized_saved = resized_frame.copy()
+
         resized_frame = cv2.GaussianBlur(resized_frame, (3, 3), cv2.BORDER_DEFAULT)
+
+        if self.save_images:
+            blurred_saved = resized_frame.copy()
 
         # Improve contrast
         if self.improve_contrast.value:
             resized_frame = self.clahe.apply(resized_frame)
+
+        if self.save_images:
+            contrasted_saved = resized_frame.copy()
 
         # mask frame
         resized_frame[self.mask] = [255]
@@ -119,8 +132,19 @@ class ImprovedMotionDetector(MotionDetector):
                     (0, 0, 255),
                     2,
                 )
+            frames = [
+                cv2.cvtColor(resized_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(blurred_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(contrasted_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(frameDelta, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR),
+                thresh_dilated,
+            ]
             cv2.imwrite(
-                f"debug/frames/improved-{self.frame_counter}.jpg", thresh_dilated
+                f"debug/frames/{self.name}-{self.frame_counter}.jpg",
+                cv2.hconcat(frames)
+                if self.frame_shape[0] > self.frame_shape[1]
+                else cv2.vconcat(frames),
             )
 
         if len(motion_boxes) > 0:

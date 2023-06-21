@@ -187,7 +187,7 @@ class RecordConfig(FrigateBaseModel):
 
 class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
-        default=30,
+        default=20,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
@@ -198,7 +198,7 @@ class MotionConfig(FrigateBaseModel):
     improve_contrast: bool = Field(default=True, title="Improve Contrast")
     contour_area: Optional[int] = Field(default=10, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
-    frame_alpha: float = Field(default=0.02, title="Frame Alpha")
+    frame_alpha: float = Field(default=0.01, title="Frame Alpha")
     frame_height: Optional[int] = Field(default=100, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
