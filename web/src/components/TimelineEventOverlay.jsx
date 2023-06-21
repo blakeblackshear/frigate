@@ -1,6 +1,5 @@
 import { Fragment, h } from 'preact';
-import { useCallback, useState } from 'preact/hooks';
-import Heading from './Heading';
+import { useState } from 'preact/hooks';
 
 export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig }) {
   const boxLeftEdge = Math.round(eventOverlay.data.box[0] * 100);
@@ -31,9 +30,9 @@ export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig
   };
 
   const getObjectRatio = () => {
-    const width = eventOverlay.data.box[2];
-    const height = eventOverlay.data.box[3];
-    return Math.round(100 * width / height) / 100;
+    const width = eventOverlay.data.box[2] * 100;
+    const height = eventOverlay.data.box[3] * 100;
+    return Math.round(100 * (width / height)) / 100;
   };
 
   return (
