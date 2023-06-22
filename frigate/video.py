@@ -750,6 +750,7 @@ def process_frames(
         try:
             frame_time = frame_queue.get(True, 1)
         except queue.Empty:
+            time.sleep(0.01)  # short delay to reduce CPU usage when the queue is empty
             continue
 
         current_frame_time.value = frame_time

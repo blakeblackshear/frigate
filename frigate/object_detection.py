@@ -6,6 +6,7 @@ import queue
 import signal
 import threading
 from abc import ABC, abstractmethod
+import time
 
 import numpy as np
 from setproctitle import setproctitle
@@ -106,6 +107,7 @@ def run_detector(
         try:
             connection_id = detection_queue.get(timeout=1)
         except queue.Empty:
+            time.sleep(0.01)  # short delay to reduce CPU usage when the queue is empty
             continue
         input_frame = frame_manager.get(
             connection_id,
