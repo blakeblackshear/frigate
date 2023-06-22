@@ -53,8 +53,15 @@ def listen_to_audio(
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
 
+    def exit_process() -> None:
+        for thread in audio_threads:
+            thread.join()
+
+        logger.info("Exiting audio detector...")
+
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
         stop_event.set()
+        exit_process()
 
     signal.signal(signal.SIGTERM, receiveSignal)
     signal.signal(signal.SIGINT, receiveSignal)
@@ -68,14 +75,6 @@ def listen_to_audio(
             audio = AudioEventMaintainer(camera, process_info, stop_event)
             audio_threads.append(audio)
             audio.start()
-
-    while not stop_event.is_set():
-        pass
-
-    for thread in audio_threads:
-        thread.join()
-
-    logger.info("Exiting audio detector...")
 
 
 class AudioTfl:
