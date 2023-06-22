@@ -429,6 +429,39 @@ def copy_yuv_to_position(
     source_frame=None,
     source_channel_dim=None,
 ):
+    def crop_clear(frame, position, fill_value):
+        frame[position[1] : position[3], position[0] : position[2]] = fill_value
+
+    def assign_resized_frame(
+        destination_slice, source_slice, resize_dim, interpolation
+    ):
+        destination_slice[:] = cv2.resize(
+            source_slice,
+            dsize=(resize_dim[1], resize_dim[0]),
+            interpolation=interpolation,
+        )
+
+    def resize_copy(
+        frame,
+        source_frame,
+        source_channel_dim,
+        position,
+        resize_dim,
+        offset,
+        interpolation=cv2.INTER_NEAREST,
+    ):
+        dest_slice = frame[
+            position[1] + offset[0] : position[1] + offset[0] + resize_dim[0],
+            position[0] + offset[1] : position[0] + offset[1] + resize_dim[1],
+        ]
+
+        source_slice = source_frame[
+            source_channel_dim[1] : source_channel_dim[3],
+            source_channel_dim[0] : source_channel_dim[2],
+        ]
+
+        assign_resized_frame(dest_slice, source_slice, resize_dim, interpolation)
+
     # get the coordinates of the channels for this position in the layout
     y, u1, u2, v1, v2 = get_yuv_crop(
         destination_frame.shape,
@@ -440,104 +473,49 @@ def copy_yuv_to_position(
         ),
     )
 
-    # clear y
-    destination_frame[
-        y[1] : y[3],
-        y[0] : y[2],
-    ] = 16
-
-    # clear u1
-    destination_frame[u1[1] : u1[3], u1[0] : u1[2]] = 128
-    # clear u2
-    destination_frame[u2[1] : u2[3], u2[0] : u2[2]] = 128
-    # clear v1
-    destination_frame[v1[1] : v1[3], v1[0] : v1[2]] = 128
-    # clear v2
-    destination_frame[v2[1] : v2[3], v2[0] : v2[2]] = 128
+    # clear channels
+    for pos in [y, u1, u2, v1, v2]:
+        crop_clear(destination_frame, pos, fill_value=128 if pos != y else 16)
 
     if source_frame is not None:
         # calculate the resized frame, maintaining the aspect ratio
         source_aspect_ratio = source_frame.shape[1] / (source_frame.shape[0] // 3 * 2)
         dest_aspect_ratio = destination_shape[1] / destination_shape[0]
+        dest_shape_0_quarter_aligned = destination_shape[0] // 4 * 4
+        dest_shape_1_quarter_aligned = destination_shape[1] // 4 * 4
 
         if source_aspect_ratio <= dest_aspect_ratio:
-            y_resize_height = int(destination_shape[0] // 4 * 4)
+            y_resize_height = dest_shape_0_quarter_aligned
             y_resize_width = int((y_resize_height * source_aspect_ratio) // 4 * 4)
         else:
-            y_resize_width = int(destination_shape[1] // 4 * 4)
+            y_resize_width = dest_shape_1_quarter_aligned
             y_resize_height = int((y_resize_width / source_aspect_ratio) // 4 * 4)
 
         uv_resize_width = int(y_resize_width // 2)
         uv_resize_height = int(y_resize_height // 4)
 
-        y_y_offset = int((destination_shape[0] - y_resize_height) / 4 // 4 * 4)
-        y_x_offset = int((destination_shape[1] - y_resize_width) / 2 // 4 * 4)
+        y_offset = [
+            int((destination_shape[0] - y_resize_height) / 4 // 4 * 4),
+            int((destination_shape[1] - y_resize_width) / 2 // 4 * 4),
+        ]
+        uv_offset = [o // k for o, k in zip(y_offset, [4, 2])]
 
-        uv_y_offset = y_y_offset // 4
-        uv_x_offset = y_x_offset // 2
-
-        interpolation = cv2.INTER_LINEAR
-        # resize/copy y channel
-        destination_frame[
-            y[1] + y_y_offset : y[1] + y_y_offset + y_resize_height,
-            y[0] + y_x_offset : y[0] + y_x_offset + y_resize_width,
-        ] = cv2.resize(
-            source_frame[
-                source_channel_dim["y"][1] : source_channel_dim["y"][3],
-                source_channel_dim["y"][0] : source_channel_dim["y"][2],
-            ],
-            dsize=(y_resize_width, y_resize_height),
-            interpolation=interpolation,
-        )
-
-        # resize/copy u1
-        destination_frame[
-            u1[1] + uv_y_offset : u1[1] + uv_y_offset + uv_resize_height,
-            u1[0] + uv_x_offset : u1[0] + uv_x_offset + uv_resize_width,
-        ] = cv2.resize(
-            source_frame[
-                source_channel_dim["u1"][1] : source_channel_dim["u1"][3],
-                source_channel_dim["u1"][0] : source_channel_dim["u1"][2],
-            ],
-            dsize=(uv_resize_width, uv_resize_height),
-            interpolation=interpolation,
-        )
-        # resize/copy u2
-        destination_frame[
-            u2[1] + uv_y_offset : u2[1] + uv_y_offset + uv_resize_height,
-            u2[0] + uv_x_offset : u2[0] + uv_x_offset + uv_resize_width,
-        ] = cv2.resize(
-            source_frame[
-                source_channel_dim["u2"][1] : source_channel_dim["u2"][3],
-                source_channel_dim["u2"][0] : source_channel_dim["u2"][2],
-            ],
-            dsize=(uv_resize_width, uv_resize_height),
-            interpolation=interpolation,
-        )
-        # resize/copy v1
-        destination_frame[
-            v1[1] + uv_y_offset : v1[1] + uv_y_offset + uv_resize_height,
-            v1[0] + uv_x_offset : v1[0] + uv_x_offset + uv_resize_width,
-        ] = cv2.resize(
-            source_frame[
-                source_channel_dim["v1"][1] : source_channel_dim["v1"][3],
-                source_channel_dim["v1"][0] : source_channel_dim["v1"][2],
-            ],
-            dsize=(uv_resize_width, uv_resize_height),
-            interpolation=interpolation,
-        )
-        # resize/copy v2
-        destination_frame[
-            v2[1] + uv_y_offset : v2[1] + uv_y_offset + uv_resize_height,
-            v2[0] + uv_x_offset : v2[0] + uv_x_offset + uv_resize_width,
-        ] = cv2.resize(
-            source_frame[
-                source_channel_dim["v2"][1] : source_channel_dim["v2"][3],
-                source_channel_dim["v2"][0] : source_channel_dim["v2"][2],
-            ],
-            dsize=(uv_resize_width, uv_resize_height),
-            interpolation=interpolation,
-        )
+        # resize/copy channels
+        for pos, offset, resize_dim, channel in zip(
+            [y, u1, u2, v1, v2],
+            [y_offset, uv_offset, uv_offset, uv_offset, uv_offset],
+            [(y_resize_height, y_resize_width)]
+            + [(uv_resize_height, uv_resize_width)] * 4,
+            ["y", "u1", "u2", "v1", "v2"],
+        ):
+            resize_copy(
+                destination_frame,
+                source_frame,
+                source_channel_dim[channel],
+                pos,
+                resize_dim,
+                offset,
+            )
 
 
 def yuv_region_2_yuv(frame, region):
