@@ -34,7 +34,7 @@ class ImprovedMotionDetector(MotionDetector):
         resized_mask = cv2.resize(
             config.mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
-            interpolation=cv2.INTER_LINEAR,
+            interpolation=cv2.INTER_NEAREST,
         )
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
