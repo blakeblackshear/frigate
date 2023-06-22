@@ -679,14 +679,12 @@ class EventsPerSecond:
         # avoid divide by zero
         if seconds == 0:
             seconds = 1
-        return (
-            len(self._timestamps) / seconds
-        )
+        return len(self._timestamps) / seconds
 
     # remove aged out timestamps
     def expire_timestamps(self, now):
         threshold = now - self._last_n_seconds
-        while (self._timestamps and self._timestamps[0] < threshold):
+        while self._timestamps and self._timestamps[0] < threshold:
             del self._timestamps[0]
 
 
