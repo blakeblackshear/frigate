@@ -379,7 +379,14 @@ class CameraWatchdog(threading.Thread):
 
 class CameraCapture(threading.Thread):
     def __init__(
-        self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps, skipped_fps, stop_event
+        self,
+        camera_name,
+        ffmpeg_process,
+        frame_shape,
+        frame_queue,
+        fps,
+        skipped_fps,
+        stop_event,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
