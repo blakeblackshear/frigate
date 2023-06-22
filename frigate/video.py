@@ -195,17 +195,15 @@ def capture_frames(
 
         frame_rate.update()
 
-        # if the queue is full, skip this frame
-        if frame_queue.full():
+        try:
+            # add to the queue
+            frame_queue.put(current_frame.value, False)
+            # close the frame
+            frame_manager.close(frame_name)
+        except queue.Full:
+            # if the queue is full, skip this frame
             skipped_eps.update()
             frame_manager.delete(frame_name)
-            continue
-
-        # close the frame
-        frame_manager.close(frame_name)
-
-        # add to the queue
-        frame_queue.put(current_frame.value)
 
 
 class CameraWatchdog(threading.Thread):
