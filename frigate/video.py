@@ -741,13 +741,15 @@ def process_frames(
     region_min_size = int(max(model_config.height, model_config.width) / 2)
 
     while not stop_event.is_set():
-        if exit_on_empty and frame_queue.empty():
-            logger.info("Exiting track_objects...")
-            break
-
         try:
-            frame_time = frame_queue.get(True, 1)
+            if exit_on_empty:
+                frame_time = frame_queue.get(False)
+            else:
+                frame_time = frame_queue.get(True, 1)
         except queue.Empty:
+            if exit_on_empty:
+                logger.info("Exiting track_objects...")
+                break
             continue
 
         current_frame_time.value = frame_time
