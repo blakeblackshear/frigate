@@ -64,11 +64,11 @@ ARG DEBIAN_FRONTEND
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 WORKDIR /opt
-RUN apt-get update && apt-get install -y unzip build-essential automake libtool
+RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache
 RUN wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
     unzip v1.0.25.zip && cd libusb-1.0.25 && \
     ./bootstrap.sh && \
-    ./configure --disable-udev --enable-shared && \
+    ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
     make -j $(nproc --all)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libusb-1.0-0-dev && \

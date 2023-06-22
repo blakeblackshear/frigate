@@ -15,6 +15,8 @@ apt-get -yqq build-dep nginx
 
 apt-get -yqq install --no-install-recommends ca-certificates wget
 update-ca-certificates -f
+apt install -y ccache
+CC="ccache gcc"
 mkdir /tmp/nginx
 wget -nv https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 tar -zxf nginx-${NGINX_VERSION}.tar.gz -C /tmp/nginx --strip-components=1
