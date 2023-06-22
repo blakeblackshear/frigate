@@ -168,8 +168,6 @@ class AudioEventMaintainer(threading.Thread):
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
             return
 
-        logger.error("Running audio inference")
-
         waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
         model_detections = self.detector.detect(waveform)
 
