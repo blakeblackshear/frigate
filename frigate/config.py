@@ -961,8 +961,16 @@ class FrigateConfig(FrigateBaseModel):
                     if "detect" in input.roles:
                         try:
                             stream_info = get_video_properties(input.path)
-                            camera_config.detect.width = stream_info["width"]
-                            camera_config.detect.height = stream_info["height"]
+                            camera_config.detect.width = (
+                                stream_info["width"]
+                                if stream_info["width"] > 0
+                                else DEFAULT_DETECT_DIMENSIONS["width"]
+                            )
+                            camera_config.detect.height = (
+                                stream_info["height"]
+                                if stream_info["height"] > 0
+                                else DEFAULT_DETECT_DIMENSIONS["height"]
+                            )
                             break
                         except Exception:
                             camera_config.detect.width = DEFAULT_DETECT_DIMENSIONS[
