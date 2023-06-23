@@ -29,7 +29,7 @@ from playhouse.shortcuts import model_to_dict
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
@@ -408,6 +408,19 @@ def set_sub_label(id):
         ),
         200,
     )
+
+
+@bp.route("/labels")
+def get_labels():
+    try:
+        events = Event.select(Event.label).distinct()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        )
+
+    labels = sorted([e.label for e in events if e.label not in ALL_ATTRIBUTE_LABELS])
+    return jsonify(labels)
 
 
 @bp.route("/sub_labels")
