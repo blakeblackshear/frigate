@@ -29,7 +29,12 @@ from playhouse.shortcuts import model_to_dict
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import (
+    ALL_ATTRIBUTE_LABELS,
+    CLIPS_DIR,
+    MAX_SEGMENT_DURATION,
+    RECORD_DIR,
+)
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
