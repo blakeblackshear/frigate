@@ -15,7 +15,7 @@ import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
-from frigate.const import ATTRIBUTE_LABEL_MAP, ALL_ATTRIBUTE_LABELS, CACHE_DIR
+from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
