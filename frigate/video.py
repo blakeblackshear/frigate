@@ -251,8 +251,9 @@ class CameraWatchdog(threading.Thread):
                 }
             )
 
-        time.sleep(10)
-        while not self.stop_event.wait(10):
+        sleeptime = self.config.ffmpeg.timeout
+        time.sleep(sleeptime)
+        while not self.stop_event.wait(sleeptime):
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
