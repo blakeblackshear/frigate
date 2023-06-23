@@ -30,7 +30,6 @@ from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
 from frigate.const import (
-    ALL_ATTRIBUTE_LABELS,
     CLIPS_DIR,
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
@@ -417,14 +416,19 @@ def set_sub_label(id):
 
 @bp.route("/labels")
 def get_labels():
+    camera = request.args.get("camera", type=str, default="")
+
     try:
-        events = Event.select(Event.label).distinct()
+        if camera:
+            events = Event.select(Event.label).where(Event.camera == camera).distinct()
+        else:
+            events = Event.select(Event.label).distinct()
     except Exception as e:
         return jsonify(
             {"success": False, "message": f"Failed to get labels: {e}"}, "404"
         )
 
-    labels = sorted([e.label for e in events if e.label not in ALL_ATTRIBUTE_LABELS])
+    labels = sorted([e.label for e in events])
     return jsonify(labels)
 
 
