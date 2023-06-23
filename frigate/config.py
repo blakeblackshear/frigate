@@ -596,6 +596,10 @@ class CameraUiConfig(FrigateBaseModel):
     dashboard: bool = Field(
         default=True, title="Show this camera in Frigate dashboard UI."
     )
+    hidecambuttons: bool = Field(
+        default=False,
+        title="Hides this camera's Detect/Recordings/Snapshots toggle buttons in Frigate dashboard UI.",
+    )
 
 
 class CameraConfig(FrigateBaseModel):

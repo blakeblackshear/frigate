@@ -54,7 +54,9 @@ function Camera({ name, config }) {
     () => { return `${name.replaceAll('_', ' ')}` },
     [name]
   );
-  const icons = useMemo(
+
+  const hideIcons = config.ui.hidecambuttons;
+  const icons = hideIcons ? [] : useMemo(
     () => [
       {
         name: `Toggle detect ${detectValue === 'ON' ? 'off' : 'on'}`,
