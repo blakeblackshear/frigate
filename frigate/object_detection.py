@@ -5,8 +5,8 @@ import os
 import queue
 import signal
 import threading
-from abc import ABC, abstractmethod
 import time
+from abc import ABC, abstractmethod
 
 import numpy as np
 from setproctitle import setproctitle
