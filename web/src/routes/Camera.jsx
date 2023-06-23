@@ -206,7 +206,7 @@ export default function Camera({ camera }) {
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
         <div className="flex flex-wrap justify-start">
-          {trackedLabels.map((objectType) => (
+          {(trackedLabels || []).map((objectType) => (
             <Card
               className="mb-4 mr-4"
               key={objectType}
