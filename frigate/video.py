@@ -232,6 +232,7 @@ class CameraWatchdog(threading.Thread):
         self.frame_shape = self.config.frame_shape_yuv
         self.frame_size = self.frame_shape[0] * self.frame_shape[1]
         self.stop_event = stop_event
+        self.sleeptime = self.config.ffmpeg.healthcheck_interval
 
     def run(self):
         self.start_ffmpeg_detect()
@@ -251,9 +252,8 @@ class CameraWatchdog(threading.Thread):
                 }
             )
 
-        sleeptime = self.config.ffmpeg.timeout
-        time.sleep(sleeptime)
-        while not self.stop_event.wait(sleeptime):
+        time.sleep(self.sleeptime)
+        while not self.stop_event.wait(self.sleeptime):
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
