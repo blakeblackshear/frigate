@@ -1,0 +1,45 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Prepare the logs folder for s6-log
+
+set -o errexit -o nounset -o pipefail
+
+OUTPUT_FOLDER?=/media/frigate/model_cache/tensorrt
+
+# Create output folder
+mkdir -p ${OUTPUT_FOLDER}
+
+FIRST_MODEL=true
+MODEL_CONVERT=""
+
+for model in ${YOLO_MODELS//,/ }
+do
+    if ![[ -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
+        if [[FIRST_MODEL == true]]; then
+            MODEL_CONVERT="${model}"
+            FIRST_MODEL=false
+        else
+            MODEL_CONVERT+=",{$model}"
+        fi
+    fi
+done
+
+if [[${MODEL_CONVERT} == ""]]; then
+    echo "No models to convert."
+    exit 0;
+fi
+
+echo "Generating the following TRT Models: ${YOLO_MODELS}"
+
+# Build trt engine
+cd /usr/local/src/tensorrt_demos/yolo
+
+# Download yolo weights
+./download_yolo.sh $MODEL_CONVERT
+
+for model in ${MODEL_CONVERT//,/ }
+do
+    python3 yolo_to_onnx.py -m ${model}
+    python3 onnx_to_tensorrt.py -m ${model}
+    cp /tmp/tensorrt_demos-conditional_download/yolo/${model}.trt ${OUTPUT_FOLDER}/${model}.trt;
+done
