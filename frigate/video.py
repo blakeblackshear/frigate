@@ -457,6 +457,8 @@ def track_camera(
     detection_enabled = process_info["detection_enabled"]
     motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
+    ptz_autotracker_enabled = process_info["ptz_autotracker_enabled"]
+    ptz_moving = process_info["ptz_moving"]
     motion_threshold = process_info["motion_threshold"]
     motion_contour_area = process_info["motion_contour_area"]
 
@@ -476,7 +478,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = NorfairTracker(config.detect)
+    object_tracker = NorfairTracker(config, ptz_autotracker_enabled, ptz_moving)
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -497,6 +499,7 @@ def track_camera(
         detection_enabled,
         motion_enabled,
         stop_event,
+        ptz_moving,
     )
 
     logger.info(f"{name}: exiting subprocess")
@@ -721,6 +724,7 @@ def process_frames(
     detection_enabled: mp.Value,
     motion_enabled: mp.Value,
     stop_event,
+    ptz_moving: mp.Value,
     exit_on_empty: bool = False,
 ):
     # attribute labels are not tracked and are not assigned regions

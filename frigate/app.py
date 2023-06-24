@@ -117,6 +117,11 @@ class FrigateApp:
                 "improve_contrast_enabled": mp.Value(
                     "i", self.config.cameras[camera_name].motion.improve_contrast
                 ),
+                "ptz_autotracker_enabled": mp.Value(
+                    "i",
+                    self.config.cameras[camera_name].onvif.autotracking.enabled,
+                ),
+                "ptz_moving": mp.Value("i", 0),
                 "motion_threshold": mp.Value(
                     "i", self.config.cameras[camera_name].motion.threshold
                 ),
@@ -268,7 +273,7 @@ class FrigateApp:
         )
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config)
+        self.onvif_controller = OnvifController(self.config, self.camera_metrics)
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
