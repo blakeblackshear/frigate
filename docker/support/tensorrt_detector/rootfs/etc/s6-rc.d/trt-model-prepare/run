@@ -4,7 +4,7 @@
 
 set -o errexit -o nounset -o pipefail
 
-OUTPUT_FOLDER?=/media/frigate/model_cache/tensorrt
+OUTPUT_FOLDER?=/config/model_cache/tensorrt
 
 # Create output folder
 mkdir -p ${OUTPUT_FOLDER}
