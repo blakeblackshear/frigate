@@ -270,12 +270,15 @@ COPY docker/support/tensorrt_detector/rootfs/ /
 
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl && \
-    ln -s libnvrtc.so.12.1 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
+    ln -s libnvrtc.so.12 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
     ldconfig
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY docker/support/tensorrt_detector/rootfs/ /
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl
