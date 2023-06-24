@@ -463,8 +463,8 @@ class FfmpegConfig(FrigateBaseModel):
         default_factory=FfmpegOutputArgsConfig,
         title="FFmpeg output arguments per role.",
     )
-    healthcheck_interval: float = Field(
-        default=10.0, title="Time in seconds in-between ffmpeg health checks."
+    retry_interval: float = Field(
+        default=10.0, title="Time in seconds in-between FFmpeg health checks."
     )
 
 
