@@ -1,10 +1,10 @@
 #!/command/with-contenv bash
 # shellcheck shell=bash
-# Prepare the logs folder for s6-log
+# Generate models for the TensorRT detector
 
 set -o errexit -o nounset -o pipefail
 
-OUTPUT_FOLDER?=/config/model_cache/tensorrt
+OUTPUT_FOLDER=${OUTPUT_FOLDER:-"/config/model_cache/tensorrt"}
 
 # Create output folder
 mkdir -p ${OUTPUT_FOLDER}
@@ -14,22 +14,22 @@ MODEL_CONVERT=""
 
 for model in ${YOLO_MODELS//,/ }
 do
-    if ![[ -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
-        if [[FIRST_MODEL == true]]; then
+    if [[ ! -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
+        if [[ ${FIRST_MODEL} = true ]]; then
             MODEL_CONVERT="${model}"
-            FIRST_MODEL=false
+            FIRST_MODEL=false;
         else
-            MODEL_CONVERT+=",{$model}"
+            MODEL_CONVERT+=",${model}";
         fi
     fi
 done
 
-if [[${MODEL_CONVERT} == ""]]; then
+if [[ -z ${MODEL_CONVERT} ]]; then
     echo "No models to convert."
-    exit 0;
+    exit 0
 fi
 
-echo "Generating the following TRT Models: ${YOLO_MODELS}"
+echo "Generating the following TRT Models: ${MODEL_CONVERT}"
 
 # Build trt engine
 cd /usr/local/src/tensorrt_demos/yolo
@@ -41,5 +41,5 @@ for model in ${MODEL_CONVERT//,/ }
 do
     python3 yolo_to_onnx.py -m ${model}
     python3 onnx_to_tensorrt.py -m ${model}
-    cp /tmp/tensorrt_demos-conditional_download/yolo/${model}.trt ${OUTPUT_FOLDER}/${model}.trt;
+    cp ${model}.trt ${OUTPUT_FOLDER}/${model}.trt
 done
