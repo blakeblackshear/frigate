@@ -6,7 +6,7 @@ import AppBar from './AppBar';
 import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import { DarkModeProvider, DrawerProvider } from './context';
+import { DarkModeProvider, DrawerProvider, AdvOptionsProvider } from './context';
 import useSWR from 'swr';
 
 export default function App() {
@@ -16,37 +16,39 @@ export default function App() {
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <div data-testid="app" className="w-full">
-          <AppBar />
-          {!config ? (
-            <div className="flex flex-grow-1 min-h-screen justify-center items-center">
-              <ActivityIndicator />
-            </div>
-          ) : (
-            <div className="flex flex-row min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-              <Sidebar />
-              <div className="w-full flex-auto mt-16 min-w-0">
-                <Router>
-                  <AsyncRoute path="/cameras/:camera/editor" getComponent={Routes.getCameraMap} />
-                  <AsyncRoute path="/cameras/:camera" getComponent={cameraComponent} />
-                  <AsyncRoute path="/birdseye" getComponent={Routes.getBirdseye} />
-                  <AsyncRoute path="/events" getComponent={Routes.getEvents} />
-                  <AsyncRoute path="/exports" getComponent={Routes.getExports} />
-                  <AsyncRoute
-                    path="/recording/:camera/:date?/:hour?/:minute?/:second?"
-                    getComponent={Routes.getRecording}
-                  />
-                  <AsyncRoute path="/storage" getComponent={Routes.getStorage} />
-                  <AsyncRoute path="/system" getComponent={Routes.getSystem} />
-                  <AsyncRoute path="/config" getComponent={Routes.getConfig} />
-                  <AsyncRoute path="/logs" getComponent={Routes.getLogs} />
-                  <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
-                  <Cameras default path="/" />
-                </Router>
+        <AdvOptionsProvider>
+          <div data-testid="app" className="w-full">
+            {!config ? (
+              <div className="flex flex-grow-1 min-h-screen justify-center items-center">
+                <ActivityIndicator />
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="flex flex-row min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+                <Sidebar />
+                <AppBar />
+                <div className="w-full flex-auto mt-16 min-w-0">
+                  <Router>
+                    <AsyncRoute path="/cameras/:camera/editor" getComponent={Routes.getCameraMap} />
+                    <AsyncRoute path="/cameras/:camera" getComponent={cameraComponent} />
+                    <AsyncRoute path="/birdseye" getComponent={Routes.getBirdseye} />
+                    <AsyncRoute path="/events" getComponent={Routes.getEvents} />
+                    <AsyncRoute path="/exports" getComponent={Routes.getExports} />
+                    <AsyncRoute
+                      path="/recording/:camera/:date?/:hour?/:minute?/:second?"
+                      getComponent={Routes.getRecording}
+                    />
+                    <AsyncRoute path="/storage" getComponent={Routes.getStorage} />
+                    <AsyncRoute path="/system" getComponent={Routes.getSystem} />
+                    <AsyncRoute path="/config" getComponent={Routes.getConfig} />
+                    <AsyncRoute path="/logs" getComponent={Routes.getLogs} />
+                    <AsyncRoute path="/styleguide" getComponent={Routes.getStyleGuide} />
+                    <Cameras default path="/" />
+                  </Router>
+                </div>
+              </div>
+            )}
+          </div>
+        </AdvOptionsProvider>
       </DrawerProvider>
     </DarkModeProvider>
   );

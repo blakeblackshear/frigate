@@ -85,6 +85,10 @@ class UIConfig(FrigateBaseModel):
     strftime_fmt: Optional[str] = Field(
         default=None, title="Override date and time format using strftime syntax."
     )
+    show_advanced_options: bool = Field(
+        default=True,
+        title="Default setting to show Advanced Options, such as Config, Camera Rec/Motion/Snap buttons, go2rtc dashboard and more.",
+    )
 
 
 class StatsConfig(FrigateBaseModel):

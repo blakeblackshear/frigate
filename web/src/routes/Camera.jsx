@@ -9,7 +9,7 @@ import Link from '../components/Link';
 import SettingsIcon from '../icons/Settings';
 import Switch from '../components/Switch';
 import ButtonsTabbed from '../components/ButtonsTabbed';
-import { usePersistence } from '../context';
+import { usePersistence, useAdvOptions } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
@@ -25,6 +25,7 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
+  const { showAdvOptions } = useAdvOptions();
 
   const cameraConfig = config?.cameras[camera];
   const restreamEnabled =
@@ -108,7 +109,7 @@ export default function Camera({ camera }) {
         label="Regions"
         labelPosition="after"
       />
-      <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
+      {showAdvOptions ? <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link> : null}
     </div>
   ) : null;
 

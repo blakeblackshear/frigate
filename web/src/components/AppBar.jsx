@@ -2,7 +2,8 @@ import { h } from 'preact';
 import Button from './Button';
 import MenuIcon from '../icons/Menu';
 import MoreIcon from '../icons/More';
-import { useDrawer } from '../context';
+import { About } from '../icons/About';
+import { useDrawer, useAdvOptions } from '../context';
 import { useLayoutEffect, useCallback, useState } from 'preact/hooks';
 
 // We would typically preserve these in component state
@@ -13,6 +14,7 @@ export default function AppBar({ title: Title, overflowRef, onOverflowClick }) {
   const [show, setShow] = useState(true);
   const [atZero, setAtZero] = useState(window.scrollY === 0);
   const { setShowDrawer } = useDrawer();
+  const { showAdvOptions } = useAdvOptions();
 
   const scrollListener = useCallback(() => {
     const scrollY = window.scrollY;
@@ -38,7 +40,7 @@ export default function AppBar({ title: Title, overflowRef, onOverflowClick }) {
   return (
     <div
       id="appbar"
-      className={`w-full border-b border-gray-200  dark:border-gray-700 flex items-center align-middle p-2  fixed left-0 right-0 z-10 bg-white dark:bg-gray-900 transform transition-all duration-200 ${
+      className={`w-full border-b border-gray-200  dark:border-gray-700 flex items-center align-middle p-2  fixed left-0 right-0 bg-white dark:bg-gray-900 transform transition-all duration-200 ${
         !show ? '-translate-y-full' : 'translate-y-0'
       } ${!atZero ? 'shadow-sm' : ''}`}
       data-testid="appbar"
@@ -50,6 +52,19 @@ export default function AppBar({ title: Title, overflowRef, onOverflowClick }) {
       </div>
       <Title />
       <div className="flex-grow-1 flex justify-end w-full">
+        { !showAdvOptions ?
+          <Button
+            className="rounded-full"
+            type="text"
+            color="gray"
+            aria-label="Advanced Options are hidden via the nearby menu."
+          >
+            <About className="w-6" />
+          </Button>
+          : null 
+        }
+      </div>
+      <div className="flex-grow-1 flex">
         {overflowRef && onOverflowClick ? (
           <div className="w-auto" ref={overflowRef}>
             <Button

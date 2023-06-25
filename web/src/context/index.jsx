@@ -1,6 +1,29 @@
 import { h, createContext } from 'preact';
 import { get as getData, set as setData } from 'idb-keyval';
 import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'preact/hooks';
+import useSWR from 'swr';
+
+const AdvOptions = createContext(null);
+
+export function AdvOptionsProvider({ children }) {
+  const [showAdvOptions, setShowAdvOptions] = usePersistence('show-advanced-options', null);
+  const { data: config } = useSWR('config');
+
+  useEffect(() => {
+    async function load() {
+      const configValue = config.ui.show_advanced_options == true? 1 : 0; //fixes a load error
+      setShowAdvOptions(showAdvOptions || configValue);
+    }
+
+    load();
+  }, [setShowAdvOptions, config]);
+
+  return <AdvOptions.Provider value={{ showAdvOptions, setShowAdvOptions }}>{children}</AdvOptions.Provider>;
+}
+
+export function useAdvOptions() {
+  return useContext(AdvOptions);
+}
 
 const DarkMode = createContext(null);
 

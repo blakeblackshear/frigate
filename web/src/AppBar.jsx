@@ -5,9 +5,10 @@ import Menu, { MenuItem, MenuSeparator } from './components/Menu';
 import AutoAwesomeIcon from './icons/AutoAwesome';
 import LightModeIcon from './icons/LightMode';
 import DarkModeIcon from './icons/DarkMode';
+import SettingsIcon from './icons/Settings';
 import FrigateRestartIcon from './icons/FrigateRestart';
 import Prompt from './components/Prompt';
-import { useDarkMode } from './context';
+import { useDarkMode, useAdvOptions } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { useRestart } from './api/ws';
 
@@ -15,6 +16,7 @@ export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
+  const { showAdvOptions, setShowAdvOptions } = useAdvOptions();
   const { setDarkMode } = useDarkMode();
   const { send: sendRestart } = useRestart();
 
@@ -25,6 +27,11 @@ export default function AppBar() {
     },
     [setDarkMode, setShowMoreMenu]
   );
+
+  const handleToggleAdvOptions = useCallback(() => {
+    setShowAdvOptions(showAdvOptions === 1 ? 0 : 1);
+    setShowMoreMenu(false);
+  },[showAdvOptions, setShowAdvOptions, setShowMoreMenu]);
 
   const moreRef = useRef(null);
 
@@ -60,6 +67,8 @@ export default function AppBar() {
           <MenuSeparator />
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
+          <MenuSeparator />
+          <MenuItem icon={SettingsIcon} label={showAdvOptions ? 'Hide Adv. Options' : 'Show Adv. Options'} onSelect={handleToggleAdvOptions} />
           <MenuSeparator />
           <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>

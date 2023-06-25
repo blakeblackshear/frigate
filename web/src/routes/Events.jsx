@@ -29,6 +29,7 @@ import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../uti
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
+import { useAdvOptions } from '../context';
 
 const API_LIMIT = 25;
 
@@ -45,6 +46,7 @@ const monthsAgo = (num) => {
 };
 
 export default function Events({ path, ...props }) {
+  const { showAdvOptions } = useAdvOptions();
   const apiHost = useApiHost();
   const [searchParams, setSearchParams] = useState({
     before: null,
@@ -662,8 +664,9 @@ export default function Events({ path, ...props }) {
                       <div class="flex flex-col">
                         <Delete
                           className="h-6 w-6 cursor-pointer"
-                          stroke="#f87171"
-                          onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
+                          stroke={showAdvOptions ? "#f87171" : "lightgrey"}
+                          onClick={showAdvOptions ? (e) => onDelete(e, event.id, event.retain_indefinitely) : null}
+                          aria-label="Advanced Options are hidden via the nearby menu."
                         />
 
                         <Download
