@@ -95,10 +95,34 @@ export default function CameraMasks({ camera }) {
     [motionMaskPoints, setMotionMaskPoints]
   );
 
-  const handleCopyMotionMasks = useCallback(async () => {
-    await window.navigator.clipboard.writeText(`  motion:
-    mask:
-${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`);
+  const handleCopyMotionMasks = useCallback(() => {
+    const textToCopy = `  motion:
+      mask:
+  ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`;
+  
+    if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
+      // Use Clipboard API if available
+      window.navigator.clipboard.writeText(textToCopy).catch((err) => {
+       // console.error('Failed to copy text: ', err);
+      });
+    } else {
+      // Fallback to document.execCommand('copy')
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
+      textarea.select();
+  
+      try {
+        const successful = document.execCommand('copy');
+        if (!successful) {
+          throw new Error('Failed to copy text');
+        }
+      } catch (err) {
+        //console.error('Failed to copy text: ', err);
+      }
+  
+      document.body.removeChild(textarea);
+    }
   }, [motionMaskPoints]);
 
   const handleSaveMotionMasks = useCallback(async () => {
@@ -113,7 +137,7 @@ ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).jo
       }
     } catch (error) {
       // handle error
-      
+      //console.error(error);
     }
   }, [motionMaskPoints]);
   
@@ -144,11 +168,11 @@ ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).jo
   );
 
   const handleCopyZones = useCallback(async () => {
-    await window.navigator.clipboard.writeText(`  zones:
+    const textToCopy = `  zones:
 ${Object.keys(zonePoints)
     .map(
       (zoneName) => `    ${zoneName}:
-      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`).join('\n')}`);
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`).join('\n')}`;
 
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
