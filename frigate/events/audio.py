@@ -168,8 +168,21 @@ class AudioEventMaintainer(threading.Thread):
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
             return
 
-        waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
+        audio_as_float = audio.astype(np.float32)
+        waveform = audio_as_float / AUDIO_MAX_BIT_RANGE
         model_detections = self.detector.detect(waveform)
+
+        # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
+        # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
+        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2))).astype(np.float64)
+
+        # Transform RMS to dBFS (decibels relative to full scale)
+        dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
+
+        requests.post(
+            f"http://127.0.0.1:5000/api/{self.config.name}/metadata",
+            json={"dBFS": dBFS, "rms": rms},
+        )
 
         for label, score, _ in model_detections:
             if label not in self.config.audio.listen:
