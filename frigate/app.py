@@ -259,6 +259,7 @@ class FrigateApp:
             self.onvif_controller,
             self.external_event_processor,
             self.plus_api,
+            self.dispatcher,
         )
 
     def init_onvif(self) -> None:

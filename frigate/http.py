@@ -28,6 +28,7 @@ from peewee import DoesNotExist, SqliteDatabase, fn, operator
 from playhouse.shortcuts import model_to_dict
 from tzlocal import get_localzone_name
 
+from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.events.external import ExternalEventProcessor
@@ -61,6 +62,7 @@ def create_app(
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
+    dispatcher: Dispatcher,
 ):
     app = Flask(__name__)
 
@@ -81,6 +83,7 @@ def create_app(
     app.onvif = onvif
     app.external_processor = external_processor
     app.plus_api = plus_api
+    app.dispatcher = dispatcher
     app.camera_error_image = None
     app.hwaccel_errors = []
 
@@ -1394,6 +1397,38 @@ def recording_clip(camera_name, start_ts, end_ts):
     ] = f"/cache/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
 
     return response
+
+
+@bp.route("/<camera_name>/metadata", methods=["POST"])
+def create_metadata_message(camera_name):
+    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
+        return jsonify(
+            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        )
+
+    request_json = request.get_json(silent=True)
+    if request_json == {}:
+        return jsonify(
+            {"success": False, "message": "Metadata json cannot be empty."}, 404
+        )
+
+    try:
+        current_app.dispatcher.publish(
+            "metadata", json.dumps(request_json), retain=False
+        )
+    except Exception as e:
+        logger.error(f"The error is {e}")
+        return jsonify(
+            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        )
+
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully published metadata message.",
+        },
+        200,
+    )
 
 
 @bp.route("/vod/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
