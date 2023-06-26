@@ -8,7 +8,11 @@ import random
 import string
 from multiprocessing.queues import Queue
 from typing import Optional
-
+from flask import (
+    current_app,
+    jsonify,
+    request,
+)
 import cv2
 
 from frigate.config import CameraConfig, FrigateConfig
@@ -128,3 +132,56 @@ class ExternalEventProcessor:
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
         ret, jpg = cv2.imencode(".jpg", thumb)
         return base64.b64encode(jpg.tobytes()).decode("utf-8")
+
+
+def create_event(camera_name, label):
+    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
+        return jsonify(
+            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        )
+
+    if not label:
+        return jsonify({"success": False, "message": f"{label} must be set."}, 404)
+
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
+    try:
+        frame = current_app.detected_frames_processor.get_current_frame(camera_name)
+
+        event_id = current_app.external_processor.create_manual_event(
+            camera_name,
+            label,
+            json.get("sub_label", None),
+            json.get("duration", 30),
+            json.get("include_recording", True),
+            json.get("draw", {}),
+            frame,
+        )
+    except Exception as e:
+        logger.error(f"The error is {e}")
+        return jsonify(
+            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        )
+
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully created event.",
+            "event_id": event_id,
+        },
+        200,
+    )
+
+
+def end_event(event_id):
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
+    try:
+        end_time = json.get("end_time", datetime.now().timestamp())
+        current_app.external_processor.finish_manual_event(event_id, end_time)
+    except Exception:
+        return jsonify(
+            {"success": False, "message": f"{event_id} must be set and valid."}, 404
+        )
+
+    return jsonify({"success": True, "message": "Event successfully ended."}, 200)
