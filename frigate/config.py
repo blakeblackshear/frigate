@@ -970,12 +970,12 @@ class FrigateConfig(FrigateBaseModel):
 
                         camera_config.detect.width = (
                             stream_info["width"]
-                            if stream_info["width"] > 0
+                            if stream_info.get("width")
                             else DEFAULT_DETECT_DIMENSIONS["width"]
                         )
                         camera_config.detect.height = (
                             stream_info["height"]
-                            if stream_info["height"] > 0
+                            if stream_info.get("height")
                             else DEFAULT_DETECT_DIMENSIONS["height"]
                         )
 
