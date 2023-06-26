@@ -262,6 +262,9 @@ RUN --mount=type=bind,source=docker/support/tensorrt_detector/tensorrt_libyolo.s
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
 
+#Disable S6 Global timeout
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+
 ENV YOLO_MODELS="yolov7-tiny-416"
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
