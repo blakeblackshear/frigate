@@ -207,7 +207,7 @@ class AudioEventMaintainer(threading.Thread):
             ):
                 self.detections[detection["label"]] = None
                 requests.put(
-                    f"http://127.0.0.1/api/events/{detection['event_id']}/end",
+                    f"http://127.0.0.1/api/events/{detection['id']}/end",
                     json={
                         "end_time": detection["last_detection"]
                         + self.config.record.events.post_capture
