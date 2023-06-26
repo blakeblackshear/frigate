@@ -8,12 +8,9 @@ import random
 import string
 from multiprocessing.queues import Queue
 from typing import Optional
-from flask import (
-    current_app,
-    jsonify,
-    request,
-)
+
 import cv2
+from flask import Response, current_app, jsonify, request
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
@@ -134,7 +131,7 @@ class ExternalEventProcessor:
         return base64.b64encode(jpg.tobytes()).decode("utf-8")
 
 
-def create_event(camera_name, label):
+def create_event(camera_name: str, label: str, body: dict[str, any] = {}) -> Response:
     if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
         return jsonify(
             {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
@@ -143,18 +140,16 @@ def create_event(camera_name, label):
     if not label:
         return jsonify({"success": False, "message": f"{label} must be set."}, 404)
 
-    json: dict[str, any] = request.get_json(silent=True) or {}
-
     try:
         frame = current_app.detected_frames_processor.get_current_frame(camera_name)
 
         event_id = current_app.external_processor.create_manual_event(
             camera_name,
             label,
-            json.get("sub_label", None),
-            json.get("duration", 30),
-            json.get("include_recording", True),
-            json.get("draw", {}),
+            body.get("sub_label", None),
+            body.get("duration", 30),
+            body.get("include_recording", True),
+            body.get("draw", {}),
             frame,
         )
     except Exception as e:
@@ -173,11 +168,9 @@ def create_event(camera_name, label):
     )
 
 
-def end_event(event_id):
-    json: dict[str, any] = request.get_json(silent=True) or {}
-
+def end_event(event_id: str, body: dict[str, any] = {}) -> Response:
     try:
-        end_time = json.get("end_time", datetime.now().timestamp())
+        end_time = body.get("end_time", datetime.now().timestamp())
         current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return jsonify(
