@@ -882,7 +882,7 @@ def create_event(camera_name, label):
         {
             "success": True,
             "message": "Successfully created event.",
-            "event_id": event_id.decode('utf-8'),
+            "event_id": event_id.decode("utf-8"),
         },
         200,
     )
