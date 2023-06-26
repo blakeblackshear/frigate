@@ -449,7 +449,7 @@ def copy_yuv_to_position(
         position,
         resize_dim,
         offset,
-        interpolation=cv2.INTER_NEAREST,
+        interpolation=Image.Resampling.NEAREST,
     ):
         dest_slice = frame[
             position[1] + offset[0] : position[1] + offset[0] + resize_dim[0],
