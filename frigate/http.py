@@ -30,7 +30,7 @@ from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
-from frigate.events.external import ExternalEventProcessor, create_event, end_event
+from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
@@ -851,13 +851,13 @@ def events():
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
 def create_event_handler(camera_name, label):
     json: dict[str, any] = request.get_json(silent=True) or {}
-    return create_event(camera_name, label, json)
+    return current_app.external_processor.create_event(camera_name, label, json)
 
 
 @bp.route("/events/<event_id>/end", methods=["PUT"])
 def end_event_handler(event_id):
     json: dict[str, any] = request.get_json(silent=True) or {}
-    return end_event(event_id, json)
+    return current_app.external_processor.end_event(event_id, json)
 
 
 @bp.route("/config")
