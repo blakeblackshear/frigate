@@ -44,7 +44,7 @@ from frigate.util import (
     get_tz_modifiers,
     restart_frigate,
     vainfo_hwaccel,
-    update_yaml_file,
+    update_yaml_from_url,
 )
 from frigate.version import VERSION
 
@@ -1019,10 +1019,36 @@ def config_set():
     if os.path.isfile(config_file_yaml):
         config_file = config_file_yaml
 
-    for key, value in request.args:
-        logging.debug(f"Update config key {key} to {value}")
-        keys = key.split(".")
-        update_yaml_file(config_file, keys, value)
+    with open(config_file, "r") as f:
+        old_raw_config = f.read()
+        f.close()
+
+    try:
+        update_yaml_from_url(config_file, request.url)
+        with open(config_file, "r") as f:
+            new_raw_config = f.read()
+            f.close()
+        # Validate the config schema
+        try:
+            FrigateConfig.parse_raw(new_raw_config)
+        except Exception:
+            with open(config_file, "w") as f:
+                f.write(old_raw_config)
+                f.close()
+            return make_response(
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                    }
+                ),
+                400,
+            )
+    except Exception as e:
+        logging.error(f"Error updating config: {e}")
+        return "Error updating config", 500
+
+    return "Config successfully updated", 200
 
 
 @bp.route("/config/schema.json")

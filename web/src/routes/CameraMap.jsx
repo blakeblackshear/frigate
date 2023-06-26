@@ -7,7 +7,7 @@ import { useResizeObserver } from '../hooks';
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
-
+import axios from 'axios';
 export default function CameraMasks({ camera }) {
   const { data: config } = useSWR('config');
   const apiHost = useApiHost();
@@ -101,6 +101,23 @@ export default function CameraMasks({ camera }) {
 ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`);
   }, [motionMaskPoints]);
 
+  const handleSaveMotionMasks = useCallback(async () => {
+    try {
+      const queryParameters = motionMaskPoints
+        .map((mask, index) => `cameras.${camera}.motion.mask.${index}=${polylinePointsToPolyline(mask)}`)
+        .join('&');
+      const endpoint = `config/set?${queryParameters}`;
+      const response = await axios.put(endpoint);
+      if (response.status === 200) {
+        // handle successful response
+      }
+    } catch (error) {
+      // handle error
+      console.error(error);
+    }
+  }, [motionMaskPoints]);
+  
+
   // Zone methods
   const handleEditZone = useCallback(
     (key) => {
@@ -131,9 +148,47 @@ ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).jo
 ${Object.keys(zonePoints)
     .map(
       (zoneName) => `    ${zoneName}:
-      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
-    )
-    .join('\n')}`);
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`).join('\n')}`);
+
+    if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
+      // Use Clipboard API if available
+      window.navigator.clipboard.writeText(textToCopy).catch((err) => {
+        console.error('Failed to copy text: ', err);
+      });
+    } else {
+      // Fallback to document.execCommand('copy')
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
+      textarea.select();
+    
+      try {
+        const successful = document.execCommand('copy');
+        if (!successful) {
+          throw new Error('Failed to copy text');
+        }
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+    
+      document.body.removeChild(textarea);
+    }
+  }, [zonePoints]);
+
+  const handleSaveZones = useCallback(async () => {
+    try {
+      const queryParameters = Object.keys(zonePoints)
+        .map((zoneName, index) => `cameras.${camera}.zones.${zoneName}.coordinates.${index}=${polylinePointsToPolyline(zonePoints[zoneName])}`)
+        .join('&');
+      const endpoint = `config/set?${queryParameters}`;
+      const response = await axios.put(endpoint);
+      if (response.status === 200) {
+        // handle successful response
+      }
+    } catch (error) {
+      // handle error
+      console.error(error);
+    }
   }, [zonePoints]);
 
   // Object methods
@@ -173,6 +228,23 @@ ${Object.keys(objectMaskPoints)
     )
     .filter(Boolean)
     .join('\n')}`);
+  }, [objectMaskPoints]);
+
+  const handleSaveObjectMasks = useCallback(async () => {
+    try {
+      const queryParameters = Object.keys(objectMaskPoints)
+        .filter((objectName) => objectMaskPoints[objectName].length > 0)
+        .map((objectName, index) => `cameras.${camera}.objects.filters.${objectName}.mask.${index}=${polylinePointsToPolyline(objectMaskPoints[objectName])}`)
+        .join('&');
+      const endpoint = `config/set?${queryParameters}`;
+      const response = await axios.put(endpoint);
+      if (response.status === 200) {
+        // handle successful response
+      }
+    } catch (error) {
+      // handle error
+      console.error(error);
+    }
   }, [objectMaskPoints]);
 
   const handleAddToObjectMask = useCallback(
@@ -246,6 +318,7 @@ ${Object.keys(objectMaskPoints)
           editing={editing}
           title="Motion masks"
           onCopy={handleCopyMotionMasks}
+          onSave={handleSaveMotionMasks}
           onCreate={handleAddMask}
           onEdit={handleEditMask}
           onRemove={handleRemoveMask}
@@ -258,6 +331,7 @@ ${Object.keys(objectMaskPoints)
           editing={editing}
           title="Zones"
           onCopy={handleCopyZones}
+          onSave={handleSaveZones}
           onCreate={handleAddZone}
           onEdit={handleEditZone}
           onRemove={handleRemoveZone}
@@ -272,6 +346,7 @@ ${Object.keys(objectMaskPoints)
           title="Object masks"
           onAdd={handleAddToObjectMask}
           onCopy={handleCopyObjectMasks}
+          onSave={handleSaveObjectMasks}
           onCreate={handleAddObjectMask}
           onEdit={handleEditObjectMask}
           onRemove={handleRemoveObjectMask}
@@ -407,6 +482,7 @@ function MaskValues({
   title,
   onAdd,
   onCopy,
+  onSave,
   onCreate,
   onEdit,
   onRemove,
@@ -455,6 +531,15 @@ function MaskValues({
     [onAdd]
   );
 
+
+  const handleSave = useCallback(
+    (event) => {
+      const { key } = event.target.dataset;
+      onSave(key);
+    },
+    [onAdd]
+  );
+
   return (
     <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>
       <div className="flex space-x-4">
@@ -463,6 +548,7 @@ function MaskValues({
         </Heading>
         <Button onClick={onCopy}>Copy</Button>
         <Button onClick={onCreate}>Add</Button>
+        <Button onClick={onSave}>Save</Button>
       </div>
       <pre className="relative overflow-auto font-mono text-gray-900 dark:text-gray-100 rounded bg-gray-100 dark:bg-gray-800 p-2">
         {yamlPrefix}
