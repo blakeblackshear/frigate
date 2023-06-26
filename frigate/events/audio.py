@@ -179,7 +179,7 @@ class AudioEventMaintainer(threading.Thread):
         self.expire_detections()
 
     def handle_detection(self, label: str, score: float) -> None:
-        if self.detections.get(label) is not None:
+        if self.detections.get(label):
             self.detections[label][
                 "last_detection"
             ] = datetime.datetime.now().timestamp()
