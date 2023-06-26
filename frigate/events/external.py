@@ -10,7 +10,7 @@ from multiprocessing.queues import Queue
 from typing import Optional
 
 import cv2
-from flask import Response, current_app, jsonify, request
+from flask import Response, current_app, jsonify
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
