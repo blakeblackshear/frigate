@@ -113,7 +113,7 @@ ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).jo
       }
     } catch (error) {
       // handle error
-      console.error(error);
+      
     }
   }, [motionMaskPoints]);
   
@@ -153,7 +153,7 @@ ${Object.keys(zonePoints)
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
       window.navigator.clipboard.writeText(textToCopy).catch((err) => {
-        console.error('Failed to copy text: ', err);
+        //console.error('Failed to copy text: ', err);
       });
     } else {
       // Fallback to document.execCommand('copy')
@@ -168,7 +168,7 @@ ${Object.keys(zonePoints)
           throw new Error('Failed to copy text');
         }
       } catch (err) {
-        console.error('Failed to copy text: ', err);
+        //console.error('Failed to copy text: ', err);
       }
     
       document.body.removeChild(textarea);
@@ -187,7 +187,7 @@ ${Object.keys(zonePoints)
       }
     } catch (error) {
       // handle error
-      console.error(error);
+      //console.error(error);
     }
   }, [zonePoints]);
 
@@ -243,7 +243,7 @@ ${Object.keys(objectMaskPoints)
       }
     } catch (error) {
       // handle error
-      console.error(error);
+      //console.error(error);
     }
   }, [objectMaskPoints]);
 
