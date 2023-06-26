@@ -20,6 +20,7 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
+    FRIGATE_LOCALHOST,
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
@@ -185,7 +186,7 @@ class AudioEventMaintainer(threading.Thread):
             ] = datetime.datetime.now().timestamp()
         else:
             resp = requests.post(
-                f"http://127.0.0.1:5000/api/events/{self.config.name}/{label}/create",
+                f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
                 json={"duration": None},
             )
 
@@ -207,7 +208,7 @@ class AudioEventMaintainer(threading.Thread):
             ):
                 self.detections[detection["label"]] = None
                 requests.put(
-                    f"http://127.0.0.1/api/events/{detection['id']}/end",
+                    f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
                         "end_time": detection["last_detection"]
                         + self.config.record.events.post_capture
