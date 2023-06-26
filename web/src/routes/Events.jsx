@@ -719,6 +719,7 @@ export default function Events({ path, ...props }) {
                                 >
                                   {eventOverlay ? (
                                     <TimelineEventOverlay
+                                      event={event}
                                       eventOverlay={eventOverlay}
                                       cameraConfig={config.cameras[event.camera]}
                                     />
