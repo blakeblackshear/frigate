@@ -14,6 +14,7 @@ from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import Any, AnyStr, Optional, Tuple
+from ruamel.yaml import YAML
 
 import cv2
 import numpy as np
@@ -1210,3 +1211,20 @@ def get_video_properties(url, get_duration=False):
         result["height"] = round(height)
 
     return result
+
+
+def update_yaml_file(file_path, key_path, new_value):
+    yaml = YAML()
+    with open(file_path, "r") as f:
+        data = yaml.safe_load(f)
+
+    temp = data
+    for key in key_path[:-1]:
+        if key not in temp:
+            temp[key] = {}
+        temp = temp[key]
+
+    temp[key_path[-1]] = new_value
+
+    with open(file_path, "w") as f:
+        yaml.dump(data, f)

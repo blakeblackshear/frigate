@@ -29,7 +29,7 @@ from playhouse.shortcuts import model_to_dict
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR, CONFIG_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
@@ -44,6 +44,7 @@ from frigate.util import (
     get_tz_modifiers,
     restart_frigate,
     vainfo_hwaccel,
+    update_yaml_file,
 )
 from frigate.version import VERSION
 
@@ -1006,6 +1007,22 @@ def config_save():
         )
     else:
         return "Config successfully saved.", 200
+
+
+@bp.route("/config/set", methods=["PUT"])
+def config_set():
+    config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
+
+    # Check if we can use .yaml instead of .yml
+    config_file_yaml = config_file.replace(".yml", ".yaml")
+
+    if os.path.isfile(config_file_yaml):
+        config_file = config_file_yaml
+
+    for key, value in request.args:
+        logging.debug(f"Update config key {key} to {value}")
+        keys = key.split(".")
+        update_yaml_file(config_file, keys, value)
 
 
 @bp.route("/config/schema.json")
