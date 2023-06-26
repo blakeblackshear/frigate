@@ -202,7 +202,7 @@ ${Object.keys(zonePoints)
   const handleSaveZones = useCallback(async () => {
     try {
       const queryParameters = Object.keys(zonePoints)
-        .map((zoneName, index) => `cameras.${camera}.zones.${zoneName}.coordinates.${index}=${polylinePointsToPolyline(zonePoints[zoneName])}`)
+        .map((zoneName) => `cameras.${camera}.zones.${zoneName}.coordinates=${polylinePointsToPolyline(zonePoints[zoneName])}`)
         .join('&');
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
