@@ -4,7 +4,8 @@
 
 set -o errexit -o nounset -o pipefail
 
-OUTPUT_FOLDER=${OUTPUT_FOLDER:-"/config/model_cache/tensorrt"}
+MODEL_CACHE_DIR=${MODEL_CACHE_DIR:-"/config/model_cache/tensorrt"}
+OUTPUT_FOLDER="${MODEL_CACHE_DIR}/${TRT_VER}"
 
 # Create output folder
 mkdir -p ${OUTPUT_FOLDER}
@@ -14,6 +15,9 @@ MODEL_CONVERT=""
 
 for model in ${YOLO_MODELS//,/ }
 do
+    # Remove old link in case path/version changed
+    rm -f ${MODEL_CACHE_DIR}/${model}.trt
+    
     if [[ ! -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
         if [[ ${FIRST_MODEL} = true ]]; then
             MODEL_CONVERT="${model}"
@@ -21,6 +25,8 @@ do
         else
             MODEL_CONVERT+=",${model}";
         fi
+    else
+        ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
     fi
 done
 
@@ -42,4 +48,5 @@ do
     python3 yolo_to_onnx.py -m ${model}
     python3 onnx_to_tensorrt.py -m ${model}
     cp ${model}.trt ${OUTPUT_FOLDER}/${model}.trt
+    ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
 done
