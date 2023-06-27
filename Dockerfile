@@ -263,7 +263,7 @@ WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
 # Build TensorRT-specific library
-FROM nvcr.io/nvidia/tensorrt:23.05-py3 AS trt-deps
+FROM nvcr.io/nvidia/tensorrt:23.03-py3 AS trt-deps
 
 RUN --mount=type=bind,source=docker/support/tensorrt_detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
     /tensorrt_libyolo.sh
@@ -274,7 +274,7 @@ FROM frigate AS frigate-tensorrt
 #Disable S6 Global timeout
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
-ENV TRT_VER=8.6.1
+ENV TRT_VER=8.5.3
 ENV YOLO_MODELS="yolov7-tiny-416"
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
