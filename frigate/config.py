@@ -67,6 +67,12 @@ class DateTimeStyleEnum(str, Enum):
     short = "short"
 
 
+class ViewModeEnum(str, Enum):
+    user = "user"
+    advanced = "advanced"
+    admin = "admin"
+
+
 class UIConfig(FrigateBaseModel):
     live_mode: LiveModeEnum = Field(
         default=LiveModeEnum.mse, title="Default Live Mode."
@@ -85,9 +91,9 @@ class UIConfig(FrigateBaseModel):
     strftime_fmt: Optional[str] = Field(
         default=None, title="Override date and time format using strftime syntax."
     )
-    show_advanced_options: bool = Field(
-        default=True,
-        title="Default setting to show Advanced Options, such as Config, Camera Rec/Motion/Snap buttons, go2rtc dashboard and more.",
+    viewmode: ViewModeEnum = Field(
+        default=ViewModeEnum.admin,
+        title="Default setting to display or hide certain options and menus in Frigate.",
     )
 
 

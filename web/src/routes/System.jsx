@@ -12,14 +12,13 @@ import Dialog from '../components/Dialog';
 import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
 import { About } from '../icons/About';
-import { useAdvOptions } from '../context';
+import ViewOption from '../components/ViewOption';
 
 const emptyObject = Object.freeze({});
 
 export default function System() {
   const [state, setState] = useState({ showFfprobe: false, ffprobe: '' });
   const { data: config } = useSWR('config');
-  const { showAdvOptions } = useAdvOptions();
   
   const {
     value: { payload: stats },
@@ -100,7 +99,7 @@ export default function System() {
         {config && (
           <span class="p-1">
             go2rtc {go2rtc && `${go2rtc.version} `}
-            {showAdvOptions ? 
+            <ViewOption requiredmode="admin">
               <Link
                 className="text-blue-500 hover:underline"
                 target="_blank"
@@ -109,8 +108,7 @@ export default function System() {
               >
                 dashboard
               </Link>
-              : null 
-            }
+            </ViewOption>
           </span>
         )}
       </div>

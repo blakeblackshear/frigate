@@ -16,7 +16,7 @@ export default function Menu({ className, children, onDismiss, relativeTo, width
   ) : null;
 }
 
-export function MenuItem({ focus, icon: Icon, label, href, onSelect, value, ...attrs }) {
+export function MenuItem({ children, focus, icon: Icon, label, href, onSelect, value, ...attrs }) {
   const handleClick = useCallback(() => {
     onSelect && onSelect(value, label);
   }, [onSelect, value, label]);
@@ -39,6 +39,7 @@ export function MenuItem({ focus, icon: Icon, label, href, onSelect, value, ...a
         </div>
       ) : null}
       <div className="whitespace-nowrap">{label}</div>
+      {children}
     </Element>
   );
 }

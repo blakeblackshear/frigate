@@ -8,15 +8,16 @@ import DarkModeIcon from './icons/DarkMode';
 import SettingsIcon from './icons/Settings';
 import FrigateRestartIcon from './icons/FrigateRestart';
 import Prompt from './components/Prompt';
-import { useDarkMode, useAdvOptions } from './context';
+import { useDarkMode, useViewMode } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { useRestart } from './api/ws';
+import { ViewModeTypes } from './components/ViewOptionEnum'
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
-  const { showAdvOptions, setShowAdvOptions } = useAdvOptions();
+  const { viewMode, setViewMode } = useViewMode();
   const { setDarkMode } = useDarkMode();
   const { send: sendRestart } = useRestart();
 
@@ -28,10 +29,13 @@ export default function AppBar() {
     [setDarkMode, setShowMoreMenu]
   );
 
-  const handleToggleAdvOptions = useCallback(() => {
-    setShowAdvOptions(showAdvOptions === 1 ? 0 : 1);
-    setShowMoreMenu(false);
-  },[showAdvOptions, setShowAdvOptions, setShowMoreMenu]);
+  const handleSetViewMode = useCallback(
+    (value) => {
+      setViewMode(value);
+      setShowMoreMenu(false);
+    },
+    [setViewMode, setShowMoreMenu]
+  );
 
   const moreRef = useRef(null);
 
@@ -68,7 +72,15 @@ export default function AppBar() {
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
           <MenuSeparator />
-          <MenuItem icon={SettingsIcon} label={showAdvOptions ? 'Hide Adv. Options' : 'Show Adv. Options'} onSelect={handleToggleAdvOptions} />
+          <MenuItem icon={SettingsIcon} label="View:">
+            <select
+              className="flex flex-grow p-0 py-7 px-8"
+              value={viewMode}
+              onChange={(e) => handleSetViewMode(e.target.value)}
+            >
+              { Object.keys(ViewModeTypes).filter((v) => !isNaN(Number(v))).map(key => <option key={key} value={key}>{ViewModeTypes[key]}</option>) }
+            </select>
+          </MenuItem>
           <MenuSeparator />
           <MenuItem icon={FrigateRestartIcon} label="Restart Frigate" onSelect={handleRestart} />
         </Menu>

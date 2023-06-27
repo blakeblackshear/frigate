@@ -7,7 +7,8 @@ import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
 import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
 import { useMemo } from 'preact/hooks';
-import { useAdvOptions } from '../context';
+import { useViewMode } from '../context'
+import { ViewModeTypes } from '../components/ViewOptionEnum';
 import useSWR from 'swr';
 
 export default function Cameras() {
@@ -87,9 +88,9 @@ function Camera({ name, config }) {
     [config, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
-  const { showAdvOptions } = useAdvOptions();
+  const { viewMode } = useViewMode();
 
   return (
-    <Card buttons={buttons} href={href} header={cleanName} icons={showAdvOptions ? icons : []} media={<CameraImage camera={name} stretch />} />
+    <Card buttons={buttons} href={href} header={cleanName} icons={viewMode >= ViewModeTypes["admin"] ? icons : []} media={<CameraImage camera={name} stretch />} />
   );
 }

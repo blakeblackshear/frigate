@@ -6,7 +6,7 @@ import AppBar from './AppBar';
 import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import { DarkModeProvider, DrawerProvider, AdvOptionsProvider } from './context';
+import { DarkModeProvider, DrawerProvider, ViewModeProvider } from './context';
 import useSWR from 'swr';
 
 export default function App() {
@@ -16,7 +16,7 @@ export default function App() {
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <AdvOptionsProvider>
+        <ViewModeProvider>
           <div data-testid="app" className="w-full">
             {!config ? (
               <div className="flex flex-grow-1 min-h-screen justify-center items-center">
@@ -48,7 +48,7 @@ export default function App() {
               </div>
             )}
           </div>
-        </AdvOptionsProvider>
+        </ViewModeProvider>
       </DrawerProvider>
     </DarkModeProvider>
   );

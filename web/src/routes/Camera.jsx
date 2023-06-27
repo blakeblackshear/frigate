@@ -9,7 +9,7 @@ import Link from '../components/Link';
 import SettingsIcon from '../icons/Settings';
 import Switch from '../components/Switch';
 import ButtonsTabbed from '../components/ButtonsTabbed';
-import { usePersistence, useAdvOptions } from '../context';
+import { usePersistence } from '../context';
 import { useCallback, useMemo, useState } from 'preact/hooks';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
@@ -17,6 +17,7 @@ import WebRtcPlayer from '../components/WebRtcPlayer';
 import '../components/MsePlayer';
 import CameraControlPanel from '../components/CameraControlPanel';
 import { baseUrl } from '../api/baseUrl';
+import ViewOption from '../components/ViewOption'
 
 const emptyObject = Object.freeze({});
 
@@ -25,7 +26,6 @@ export default function Camera({ camera }) {
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
-  const { showAdvOptions } = useAdvOptions();
 
   const cameraConfig = config?.cameras[camera];
   const restreamEnabled =
@@ -109,7 +109,9 @@ export default function Camera({ camera }) {
         label="Regions"
         labelPosition="after"
       />
-      {showAdvOptions ? <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link> : null}
+      <ViewOption requiredmode="admin">
+        <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
+      </ViewOption>
     </div>
   ) : null;
 

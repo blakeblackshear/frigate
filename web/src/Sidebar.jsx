@@ -4,13 +4,12 @@ import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
 import { useMemo } from 'preact/hooks'
-import { useAdvOptions } from './context';
+import ViewOption from './components/ViewOption'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
 export default function Sidebar() {
   const { data: config } = useSWR('config');
-  const { showAdvOptions } = useAdvOptions();
 
   const sortedCameras = useMemo(() => {
     if (!config) {
@@ -48,11 +47,17 @@ export default function Sidebar() {
       <Destination href="/events" text="Events" />
       <Destination href="/exports" text="Exports" />
       <Separator />
-      <Destination href="/storage" text="Storage" />
-      <Destination href="/system" text="System" />
-      { showAdvOptions ? <Destination href="/config" text="Config" /> : null}
-      <Destination href="/logs" text="Logs" />
-      <Separator />
+      <ViewOption requiredmode="advanced">
+        <Destination href="/storage" text="Storage" />
+        <Destination href="/system" text="System" />
+      </ViewOption>
+      <ViewOption requiredmode="admin">
+        <Destination href="/config" text="Config" />
+      </ViewOption>
+      <ViewOption requiredmode="advanced">
+        <Destination href="/logs" text="Logs" />
+        <Separator />
+      </ViewOption>
       <div className="flex flex-grow" />
       {ENV !== 'production' ? (
         <Fragment>
