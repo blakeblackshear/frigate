@@ -1,5 +1,6 @@
 click == 8.1.*
 Flask == 2.3.*
+faster-fifo == 1.4.*
 imutils == 0.5.*
 matplotlib == 3.7.*
 mypy == 0.942

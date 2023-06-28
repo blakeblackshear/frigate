@@ -6,12 +6,12 @@ import shutil
 import signal
 import sys
 import traceback
-from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
 from typing import Optional
 
 import psutil
+from faster_fifo import Queue
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
