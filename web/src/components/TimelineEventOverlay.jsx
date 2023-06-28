@@ -1,7 +1,7 @@
 import { Fragment, h } from 'preact';
 import { useState } from 'preact/hooks';
 
-export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig }) {
+export default function TimelineEventOverlay({ eventOverlay, cameraConfig }) {
   const boxLeftEdge = Math.round(eventOverlay.data.box[0] * 100);
   const boxTopEdge = Math.round(eventOverlay.data.box[1] * 100);
   const boxRightEdge = Math.round((1 - eventOverlay.data.box[2] - eventOverlay.data.box[0]) * 100);
@@ -55,8 +55,7 @@ export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig
         ) : null}
       </div>
       {isHovering && (
-        <div className="absolute bg-slate-800 p-4 block text-white text-lg" style={getHoverStyle()}>
-          <div className="font-bold text-xl">{event.label} attributes:</div>
+        <div className="absolute bg-white dark:bg-slate-800 p-4 block dark:text-white text-lg" style={getHoverStyle()}>
           <div>{`Area: ${getObjectArea()} px`}</div>
           <div>{`Ratio: ${getObjectRatio()}`}</div>
         </div>
