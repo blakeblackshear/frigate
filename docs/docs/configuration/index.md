@@ -230,7 +230,7 @@ detect:
   # especially when using separate streams for detect and record.
   # Use this setting to make the timeline bounding boxes more closely align
   # with the recording. The value can be positive or negative.
-  # TIP: Imagine there is an event clip with a person walking from left to right. 
+  # TIP: Imagine there is an event clip with a person walking from left to right.
   #      If the event timeline bounding box is consistently to the left of the person
   #      then the value should be decreased. Similarly, if a person is walking from
   #      left to right and the bounding box is consistently ahead of the person
@@ -275,7 +275,7 @@ motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
-  threshold: 40
+  threshold: 20
   # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
   #           needs to recalibrate. (default: shown below)
   # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
@@ -286,19 +286,19 @@ motion:
   # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
   # make motion detection more sensitive to smaller moving objects.
   # As a rule of thumb:
-  #  - 15 - high sensitivity
+  #  - 10 - high sensitivity
   #  - 30 - medium sensitivity
   #  - 50 - low sensitivity
-  contour_area: 15
+  contour_area: 10
   # Optional: Alpha value passed to cv2.accumulateWeighted when averaging frames to determine the background (default: shown below)
   # Higher values mean the current frame impacts the average a lot, and a new object will be averaged into the background faster.
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
-  frame_alpha: 0.02
+  frame_alpha: 0.01
   # Optional: Height of the resized motion frame  (default: 50)
   # Higher values will result in more granular motion detection at the expense of higher CPU usage.
   # Lower values result in less CPU, but small changes may not register as motion.
-  frame_height: 50
+  frame_height: 100
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
   mask: 0,900,1080,900,1080,1920,0,1920

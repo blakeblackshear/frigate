@@ -13,6 +13,16 @@ PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
+# Attributes
+
+ATTRIBUTE_LABEL_MAP = {
+    "person": ["face", "amazon"],
+    "car": ["ups", "fedex", "amazon", "license_plate"],
+}
+ALL_ATTRIBUTE_LABELS = [
+    item for sublist in ATTRIBUTE_LABEL_MAP.values() for item in sublist
+]
+
 # Audio Consts
 
 AUDIO_DURATION = 0.975
