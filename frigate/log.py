@@ -5,7 +5,7 @@ import os
 import signal
 import queue
 import multiprocessing as mp
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from logging import handlers
 from typing import Optional
 from types import FrameType

@@ -127,7 +127,9 @@ RUN apt-get -qq update \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # scipy dependencies
-    gcc gfortran libopenblas-dev liblapack-dev && \
+    gcc gfortran libopenblas-dev liblapack-dev \
+    # faster-fifo dependencies
+    g++ cython3 && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \

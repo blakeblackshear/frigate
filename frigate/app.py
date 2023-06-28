@@ -1,11 +1,11 @@
 import logging
 import multiprocessing as mp
-from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 import os
 import shutil
 import signal
 import sys
+from faster_fifo import Queue
 from typing import Optional
 from types import FrameType
 
