@@ -464,7 +464,8 @@ class FfmpegConfig(FrigateBaseModel):
         title="FFmpeg output arguments per role.",
     )
     retry_interval: float = Field(
-        default=10.0, title="Time in seconds in-between FFmpeg health checks."
+        default=10.0,
+        title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
     )
 
 
