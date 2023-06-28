@@ -172,7 +172,7 @@ def capture_frames(
     skipped_eps.start()
     while True:
         fps.value = frame_rate.eps()
-        skipped_eps.eps()
+        skipped_fps.value = skipped_eps.eps()
 
         current_frame.value = datetime.datetime.now().timestamp()
         frame_name = f"{camera_name}{current_frame.value}"
@@ -215,6 +215,7 @@ class CameraWatchdog(threading.Thread):
         config: CameraConfig,
         frame_queue,
         camera_fps,
+        skipped_fps,
         ffmpeg_pid,
         stop_event,
     ):
@@ -227,6 +228,7 @@ class CameraWatchdog(threading.Thread):
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
         self.ffmpeg_other_processes: list[dict[str, any]] = []
         self.camera_fps = camera_fps
+        self.skipped_fps = skipped_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
         self.frame_shape = self.config.frame_shape_yuv
@@ -346,6 +348,7 @@ class CameraWatchdog(threading.Thread):
             self.frame_shape,
             self.frame_queue,
             self.camera_fps,
+            self.skipped_fps,
             self.stop_event,
         )
         self.capture_thread.start()
@@ -376,7 +379,14 @@ class CameraWatchdog(threading.Thread):
 
 class CameraCapture(threading.Thread):
     def __init__(
-        self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps, stop_event
+        self,
+        camera_name,
+        ffmpeg_process,
+        frame_shape,
+        frame_queue,
+        fps,
+        skipped_fps,
+        stop_event,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
@@ -385,14 +395,13 @@ class CameraCapture(threading.Thread):
         self.frame_queue = frame_queue
         self.fps = fps
         self.stop_event = stop_event
-        self.skipped_fps = EventsPerSecond()
+        self.skipped_fps = skipped_fps
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value("d", 0.0)
         self.last_frame = 0
 
     def run(self):
-        self.skipped_fps.start()
         capture_frames(
             self.ffmpeg_process,
             self.camera_name,
@@ -424,6 +433,7 @@ def capture_camera(name, config: CameraConfig, process_info):
         config,
         frame_queue,
         process_info["camera_fps"],
+        process_info["skipped_fps"],
         process_info["ffmpeg_pid"],
         stop_event,
     )
