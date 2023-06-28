@@ -17,6 +17,7 @@ class ImprovedMotionDetector(MotionDetector):
         threshold,
         contour_area,
         name="improved",
+        blur_radius=1,
     ):
         self.name = name
         self.config = config
@@ -40,6 +41,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.improve_contrast = improve_contrast
         self.threshold = threshold
         self.contour_area = contour_area
+        self.blur_radius = blur_radius
 
     def detect(self, frame):
         motion_boxes = []
@@ -59,7 +61,7 @@ class ImprovedMotionDetector(MotionDetector):
         if self.save_images:
             resized_saved = resized_frame.copy()
 
-        resized_frame = gaussian_filter(resized_frame, sigma=1, truncate=1.0)
+        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
 
         if self.save_images:
             blurred_saved = resized_frame.copy()
