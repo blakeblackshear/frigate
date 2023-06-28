@@ -72,9 +72,9 @@ export default function AppBar() {
           <MenuItem icon={LightModeIcon} label="Light" value="light" onSelect={handleSelectDarkMode} />
           <MenuItem icon={DarkModeIcon} label="Dark" value="dark" onSelect={handleSelectDarkMode} />
           <MenuSeparator />
-          <MenuItem icon={SettingsIcon} label="View:">
+          <MenuItem icon={SettingsIcon} label="Viewmode:">
             <select
-              className="flex flex-grow p-0 py-7 px-8"
+              className="py-0.5 pr-8"
               value={viewMode}
               onChange={(e) => handleSetViewMode(e.target.value)}
             >

@@ -38,7 +38,7 @@ export function MenuItem({ children, focus, icon: Icon, label, href, onSelect, v
           <Icon />
         </div>
       ) : null}
-      <div className="whitespace-nowrap">{label}</div>
+      <div className="whitespace-nowrap self-center">{label}</div>
       {children}
     </Element>
   );
