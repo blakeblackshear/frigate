@@ -1,6 +1,7 @@
 import cv2
 import imutils
 import numpy as np
+from scipy.ndimage import gaussian_filter
 
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
@@ -15,8 +16,6 @@ class ImprovedMotionDetector(MotionDetector):
         improve_contrast,
         threshold,
         contour_area,
-        clipLimit=2.0,
-        tileGridSize=(2, 2),
         name="improved",
     ):
         self.name = name
@@ -28,7 +27,6 @@ class ImprovedMotionDetector(MotionDetector):
             config.frame_height * frame_shape[1] // frame_shape[0],
         )
         self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
-        self.avg_delta = np.zeros(self.motion_frame_size, np.float32)
         self.motion_frame_count = 0
         self.frame_counter = 0
         resized_mask = cv2.resize(
@@ -42,7 +40,6 @@ class ImprovedMotionDetector(MotionDetector):
         self.improve_contrast = improve_contrast
         self.threshold = threshold
         self.contour_area = contour_area
-        self.clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
 
     def detect(self, frame):
         motion_boxes = []
@@ -56,23 +53,30 @@ class ImprovedMotionDetector(MotionDetector):
             interpolation=cv2.INTER_LINEAR,
         )
 
+        # mask frame
+        resized_frame[self.mask] = [255]
+
         if self.save_images:
             resized_saved = resized_frame.copy()
 
-        resized_frame = cv2.GaussianBlur(resized_frame, (3, 3), cv2.BORDER_DEFAULT)
+        resized_frame = gaussian_filter(resized_frame, sigma=1, truncate=1.0)
 
         if self.save_images:
             blurred_saved = resized_frame.copy()
 
         # Improve contrast
         if self.improve_contrast.value:
-            resized_frame = self.clahe.apply(resized_frame)
+            minval = np.percentile(resized_frame, 4)
+            maxval = np.percentile(resized_frame, 96)
+            # don't adjust if the image is a single color
+            if minval < maxval:
+                resized_frame = np.clip(resized_frame, minval, maxval)
+                resized_frame = (
+                    ((resized_frame - minval) / (maxval - minval)) * 255
+                ).astype(np.uint8)
 
         if self.save_images:
             contrasted_saved = resized_frame.copy()
-
-        # mask frame
-        resized_frame[self.mask] = [255]
 
         if self.save_images or self.calibrating:
             self.frame_counter += 1
