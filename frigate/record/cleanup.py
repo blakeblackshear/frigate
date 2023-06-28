@@ -8,10 +8,10 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import DatabaseError, DoesNotExist, chunked
+from peewee import DatabaseError, chunked
 
 from frigate.config import FrigateConfig, RetainModeEnum
-from frigate.const import RECORD_DIR, SECONDS_IN_DAY
+from frigate.const import RECORD_DIR
 from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.record.util import remove_empty_directories
 
