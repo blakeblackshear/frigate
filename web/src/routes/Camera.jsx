@@ -22,6 +22,7 @@ const emptyObject = Object.freeze({});
 
 export default function Camera({ camera }) {
   const { data: config } = useSWR('config');
+  const { data: trackedLabels } = useSWR(['labels', { camera }]);
   const apiHost = useApiHost();
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState('live');
@@ -121,7 +122,9 @@ export default function Camera({ camera }) {
             <div className="max-w-5xl">
               <video-stream
                 mode="mse"
-                src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${cameraConfig.live.stream_name}`)}
+                src={
+                  new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${cameraConfig.live.stream_name}`)
+                }
               />
             </div>
           </Fragment>
@@ -203,7 +206,7 @@ export default function Camera({ camera }) {
       <div className="space-y-4">
         <Heading size="sm">Tracked objects</Heading>
         <div className="flex flex-wrap justify-start">
-          {cameraConfig.objects.track.map((objectType) => (
+          {(trackedLabels || []).map((objectType) => (
             <Card
               className="mb-4 mr-4"
               key={objectType}

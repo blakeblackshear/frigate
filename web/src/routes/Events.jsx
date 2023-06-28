@@ -106,6 +106,7 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
+  const { data: allLabels } = useSWR(['labels']);
   const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
 
   const filterValues = useMemo(
@@ -120,15 +121,10 @@ export default function Events({ path, ...props }) {
           .filter((value, i, self) => self.indexOf(value) === i),
         'None',
       ],
-      labels: Object.values(config?.cameras || {})
-        .reduce((memo, camera) => {
-          memo = memo.concat(camera?.objects?.track || []);
-          return memo;
-        }, config?.objects?.track || [])
-        .filter((value, i, self) => self.indexOf(value) === i),
+      labels: Object.values(allLabels || {}),
       sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
-    [config, allSubLabels]
+    [config, allLabels, allSubLabels]
   );
 
   const onSave = async (e, eventId, save) => {

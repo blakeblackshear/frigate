@@ -15,7 +15,7 @@ import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
-from frigate.const import CACHE_DIR
+from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -723,14 +723,6 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
-    # attribute labels are not tracked and are not assigned regions
-    attribute_label_map = {
-        "person": ["face", "amazon"],
-        "car": ["ups", "fedex", "amazon", "license_plate"],
-    }
-    all_attribute_labels = [
-        item for sublist in attribute_label_map.values() for item in sublist
-    ]
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -906,7 +898,7 @@ def process_frames(
                 tracked_detections = [
                     d
                     for d in consolidated_detections
-                    if d[0] not in all_attribute_labels
+                    if d[0] not in ALL_ATTRIBUTE_LABELS
                 ]
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(frame_time, tracked_detections)
@@ -916,7 +908,7 @@ def process_frames(
 
         # group the attribute detections based on what label they apply to
         attribute_detections = {}
-        for label, attribute_labels in attribute_label_map.items():
+        for label, attribute_labels in ATTRIBUTE_LABEL_MAP.items():
             attribute_detections[label] = [
                 d for d in consolidated_detections if d[0] in attribute_labels
             ]

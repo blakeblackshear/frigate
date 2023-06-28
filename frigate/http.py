@@ -410,6 +410,24 @@ def set_sub_label(id):
     )
 
 
+@bp.route("/labels")
+def get_labels():
+    camera = request.args.get("camera", type=str, default="")
+
+    try:
+        if camera:
+            events = Event.select(Event.label).where(Event.camera == camera).distinct()
+        else:
+            events = Event.select(Event.label).distinct()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        )
+
+    labels = sorted([e.label for e in events])
+    return jsonify(labels)
+
+
 @bp.route("/sub_labels")
 def get_sub_labels():
     split_joined = request.args.get("split_joined", type=int)
