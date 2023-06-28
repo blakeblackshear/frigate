@@ -7,7 +7,7 @@ import signal
 import threading
 from collections import deque
 from logging import handlers
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from types import FrameType
 from typing import Deque, Optional
 

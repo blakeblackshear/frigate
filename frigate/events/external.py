@@ -6,7 +6,7 @@ import logging
 import os
 import random
 import string
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from typing import Optional
 
 import cv2

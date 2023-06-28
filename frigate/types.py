@@ -1,5 +1,5 @@
 from multiprocessing.context import Process
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from multiprocessing.sharedctypes import Synchronized
 from typing import Optional, TypedDict
 

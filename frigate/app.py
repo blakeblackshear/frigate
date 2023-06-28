@@ -6,7 +6,7 @@ import shutil
 import signal
 import sys
 import traceback
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
 from typing import Optional
