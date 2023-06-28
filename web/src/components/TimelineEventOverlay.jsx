@@ -57,8 +57,8 @@ export default function TimelineEventOverlay({ event, eventOverlay, cameraConfig
       {isHovering && (
         <div className="absolute bg-slate-800 p-4 block text-white text-lg" style={getHoverStyle()}>
           <div className="font-bold text-xl">{event.label} attributes:</div>
-          <div>{`Object Area: ${getObjectArea()} px`}</div>
-          <div>{`Object Ratio: ${getObjectRatio()}`}</div>
+          <div>{`Area: ${getObjectArea()} px`}</div>
+          <div>{`Ratio: ${getObjectRatio()}`}</div>
         </div>
       )}
     </Fragment>
