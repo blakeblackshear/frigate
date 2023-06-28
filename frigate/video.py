@@ -10,6 +10,7 @@ import threading
 import time
 from collections import defaultdict
 
+import faster_fifo as ff
 import numpy as np
 import cv2
 from setproctitle import setproctitle
@@ -162,7 +163,6 @@ def capture_frames(
     current_frame: mp.Value,
     stop_event: mp.Event,
 ):
-
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
     frame_rate.start()
@@ -577,7 +577,7 @@ def detect(
 
 def process_frames(
     camera_name: str,
-    frame_queue: mp.Queue,
+    frame_queue: ff.Queue,
     frame_shape,
     model_config,
     detect_config: DetectConfig,
@@ -585,7 +585,7 @@ def process_frames(
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
-    detected_objects_queue: mp.Queue,
+    detected_objects_queue: ff.Queue,
     process_info: dict,
     objects_to_track: list[str],
     object_filters,
@@ -594,7 +594,6 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
-
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -748,7 +747,6 @@ def process_frames(
 
                 selected_objects = []
                 for group in detected_object_groups.values():
-
                     # apply non-maxima suppression to suppress weak, overlapping bounding boxes
                     # o[2] is the box of the object: xmin, ymin, xmax, ymax
                     # apply max/min to ensure values do not exceed the known frame size

@@ -1,4 +1,5 @@
 import copy
+import ctypes
 import datetime
 import logging
 import shlex
@@ -14,6 +15,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
+from queue import Empty, Full
 from typing import Any, AnyStr, Optional, Tuple
 
 import cv2
@@ -21,6 +23,8 @@ import numpy as np
 import os
 import psutil
 import pytz
+from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
+from faster_fifo import Queue as FFQueue
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -772,7 +776,6 @@ def get_docker_memlimit_bytes() -> int:
 
     # check running a supported cgroups version
     if get_cgroups_version() == "cgroup2":
-
         memlimit_command = ["cat", "/sys/fs/cgroup/memory.max"]
 
         p = sp.run(
@@ -817,7 +820,6 @@ def get_cpu_stats() -> dict[str, dict]:
         for line in lines:
             stats = list(filter(lambda a: a != "", line.strip().split(" ")))
             try:
-
                 if docker_memlimit > 0:
                     mem_res = int(stats[5])
                     mem_pct = str(
@@ -1067,3 +1069,47 @@ def get_tz_modifiers(tz_name: str) -> Tuple[str, str]:
     hour_modifier = f"{hours_offset} hour"
     minute_modifier = f"{minutes_offset} minute"
     return hour_modifier, minute_modifier
+
+
+class LimitedQueue(FFQueue):
+    def __init__(
+        self,
+        maxsize=0,
+        max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE,
+        loads=None,
+        dumps=None,
+    ):
+        super().__init__(max_size_bytes=max_size_bytes, loads=loads, dumps=dumps)
+        self.maxsize = maxsize
+        self.size = multiprocessing.RawValue(
+            ctypes.c_int, 0
+        )  # Add a counter for the number of items in the queue
+
+    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
+        if self.maxsize > 0 and self.size.value >= self.maxsize:
+            if block:
+                start_time = time.time()
+                while self.size.value >= self.maxsize:
+                    remaining = timeout - (time.time() - start_time)
+                    if remaining <= 0.0:
+                        raise Full
+                    time.sleep(min(remaining, 0.1))
+            else:
+                raise Full
+        self.size.value += 1
+        return super().put(x, block=block, timeout=timeout)
+
+    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
+        if self.size.value <= 0 and not block:
+            raise Empty
+        self.size.value -= 1
+        return super().get(block=block, timeout=timeout)
+
+    def qsize(self):
+        return self.size
+
+    def empty(self):
+        return self.qsize() == 0
+
+    def full(self):
+        return self.qsize() == self.maxsize
