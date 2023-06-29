@@ -478,7 +478,9 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = NorfairTracker(config, ptz_autotracker_enabled, ptz_moving)
+    object_tracker = NorfairTracker(
+        config, ptz_autotracker_enabled, ptz_moving, stop_event
+    )
 
     frame_manager = SharedMemoryFrameManager()
 

@@ -6,7 +6,7 @@ from norfair import Detection, Drawable, Tracker, draw_boxes
 from norfair.drawing.drawer import Drawer
 
 from frigate.config import CameraConfig
-from frigate.ptz_autotrack import PtzMotionEstimator
+from frigate.ptz_autotrack import PtzMotionEstimatorThread
 from frigate.track import ObjectTracker
 from frigate.util import intersection_over_union
 
@@ -55,7 +55,9 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
 
 
 class NorfairTracker(ObjectTracker):
-    def __init__(self, config: CameraConfig, ptz_autotracker_enabled, ptz_moving):
+    def __init__(
+        self, config: CameraConfig, ptz_autotracker_enabled, ptz_moving, stop_event
+    ):
         self.tracked_objects = {}
         self.disappeared = {}
         self.positions = {}
@@ -75,7 +77,9 @@ class NorfairTracker(ObjectTracker):
             hit_counter_max=self.max_disappeared,
         )
         if self.ptz_autotracker_enabled:
-            self.ptz_motion_estimator = PtzMotionEstimator(config, self.ptz_moving)
+            self.ptz_motion_estimator_thread = PtzMotionEstimatorThread(
+                config, self.ptz_moving, stop_event
+            )
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -243,8 +247,10 @@ class NorfairTracker(ObjectTracker):
             self.ptz_autotracker_enabled
             and self.camera_config.onvif.autotracking.motion_estimator
         ):
-            coord_transformations = self.ptz_motion_estimator.motion_estimator(
-                detections, frame_time, self.camera_name
+            coord_transformations = (
+                self.ptz_motion_estimator_thread.ptz_motion_estimator.motion_estimator(
+                    detections, frame_time, self.camera_name
+                )
             )
 
         tracked_objects = self.tracker.update(

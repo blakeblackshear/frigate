@@ -17,6 +17,21 @@ from frigate.util import SharedMemoryFrameManager, intersection_over_union
 logger = logging.getLogger(__name__)
 
 
+class PtzMotionEstimatorThread(threading.Thread):
+    def __init__(self, config: CameraConfig, ptz_moving, stop_event) -> None:
+        threading.Thread.__init__(self)
+        self.name = "frigate_ptz_motion_estimator"
+        self.ptz_moving = ptz_moving
+        self.config = config
+        self.stop_event = stop_event
+        self.ptz_motion_estimator = PtzMotionEstimator(self.config, self.ptz_moving)
+
+    def run(self):
+        while not self.stop_event.is_set():
+            pass
+        logger.info("Exiting motion estimator...")
+
+
 class PtzMotionEstimator:
     def __init__(self, config: CameraConfig, ptz_moving) -> None:
         self.frame_manager = SharedMemoryFrameManager()
@@ -55,6 +70,10 @@ class PtzMotionEstimator:
             )
 
             self.frame_manager.close(frame_id)
+
+            logger.debug(
+                f"frame time: {frame_time}, coord_transformations: {vars(self.coord_transformations)}"
+            )
 
             return self.coord_transformations
 
