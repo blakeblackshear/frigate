@@ -18,6 +18,7 @@ class ImprovedMotionDetector(MotionDetector):
         contour_area,
         name="improved",
         blur_radius=1,
+        interpolation=cv2.INTER_NEAREST,
     ):
         self.name = name
         self.config = config
@@ -33,7 +34,7 @@ class ImprovedMotionDetector(MotionDetector):
         resized_mask = cv2.resize(
             config.mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
-            interpolation=cv2.INTER_LINEAR,
+            interpolation=cv2.INTER_AREA,
         )
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
@@ -42,6 +43,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.threshold = threshold
         self.contour_area = contour_area
         self.blur_radius = blur_radius
+        self.interpolation = interpolation
 
     def detect(self, frame):
         motion_boxes = []
@@ -52,7 +54,7 @@ class ImprovedMotionDetector(MotionDetector):
         resized_frame = cv2.resize(
             gray,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
-            interpolation=cv2.INTER_LINEAR,
+            interpolation=self.interpolation,
         )
 
         # mask frame
