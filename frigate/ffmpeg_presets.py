@@ -2,10 +2,10 @@
 
 import logging
 import os
+import subprocess
 from enum import Enum
 from typing import Any
 
-from frigate.const import BTBN_PATH
 from frigate.util import vainfo_hwaccel
 from frigate.version import VERSION
 
@@ -43,7 +43,10 @@ class LibvaGpuSelector:
         return ""
 
 
-TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
+LIBAVFORMAT_VERSION_MAJOR = int(
+    subprocess.getoutput("ffmpeg -version | grep -Po 'libavformat\W+\K\d+'")
+)
+TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
