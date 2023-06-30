@@ -188,15 +188,14 @@ class TrackedObject:
             zone_score = self.zone_presence.get(name, 0)
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
-                self.zone_presence[name] = zone_score + 1
+                # if the object passed the filters once, dont apply again
+                if name in self.current_zones or not zone_filtered(self, zone.filters):
+                    self.zone_presence[name] = zone_score + 1
 
-                # an object is only considered present in a zone if it has a zone inertia of 3+
-                if zone_score >= zone.inertia:
-                    # if the object passed the filters once, dont apply again
-                    if name in self.current_zones or not zone_filtered(
-                        self, zone.filters
-                    ):
+                    # an object is only considered present in a zone if it has a zone inertia of 3+
+                    if zone_score >= zone.inertia:
                         current_zones.append(name)
+
                         if name not in self.entered_zones:
                             self.entered_zones.append(name)
             else:

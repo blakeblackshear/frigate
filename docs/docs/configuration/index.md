@@ -189,6 +189,11 @@ ffmpeg:
     record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
     rtmp: preset-rtmp-generic
+  # Optional: Time in seconds to wait before ffmpeg retries connecting to the camera. (default: shown below)
+  # If set too low, frigate will retry a connection to the camera's stream too frequently, using up the limited streams some cameras can allow at once
+  # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
+  # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
+  retry_interval: 10
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
@@ -275,7 +280,7 @@ motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
-  threshold: 20
+  threshold: 30
   # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
   #           needs to recalibrate. (default: shown below)
   # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.

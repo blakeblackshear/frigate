@@ -18,10 +18,13 @@ WORKDIR /rootfs
 
 FROM base AS nginx
 ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
 
 # bind /var/cache/apt to tmpfs to speed up nginx build
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=docker/build_nginx.sh,target=/deps/build_nginx.sh \
+    --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
 FROM wget AS go2rtc
@@ -61,14 +64,16 @@ RUN mkdir /models \
 FROM wget as libusb-build
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 WORKDIR /opt
-RUN apt-get update && apt-get install -y unzip build-essential automake libtool
-RUN wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
+RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache
+RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
     unzip v1.0.25.zip && cd libusb-1.0.25 && \
     ./bootstrap.sh && \
-    ./configure --disable-udev --enable-shared && \
+    ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
     make -j $(nproc --all)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libusb-1.0-0-dev && \

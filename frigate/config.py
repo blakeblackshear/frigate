@@ -188,7 +188,7 @@ class RecordConfig(FrigateBaseModel):
 
 class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
-        default=20,
+        default=30,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
@@ -476,6 +476,10 @@ class FfmpegConfig(FrigateBaseModel):
     output_args: FfmpegOutputArgsConfig = Field(
         default_factory=FfmpegOutputArgsConfig,
         title="FFmpeg output arguments per role.",
+    )
+    retry_interval: float = Field(
+        default=10.0,
+        title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
     )
 
 

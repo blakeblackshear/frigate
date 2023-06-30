@@ -29,6 +29,7 @@ import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../uti
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
+import TimelineEventOverlay from '../components/TimelineEventOverlay';
 
 const API_LIMIT = 25;
 
@@ -717,23 +718,10 @@ export default function Events({ path, ...props }) {
                                   }}
                                 >
                                   {eventOverlay ? (
-                                    <div
-                                      className="absolute border-4 border-red-600"
-                                      style={{
-                                        left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
-                                        top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
-                                        right: `${Math.round(
-                                          (1 - eventOverlay.data.box[2] - eventOverlay.data.box[0]) * 100
-                                        )}%`,
-                                        bottom: `${Math.round(
-                                          (1 - eventOverlay.data.box[3] - eventOverlay.data.box[1]) * 100
-                                        )}%`,
-                                      }}
-                                    >
-                                      {eventOverlay.class_type == 'entered_zone' ? (
-                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] -translate-x-1/2 translate-y-3/4 bottom-0" />
-                                      ) : null}
-                                    </div>
+                                    <TimelineEventOverlay
+                                      eventOverlay={eventOverlay}
+                                      cameraConfig={config.cameras[event.camera]}
+                                    />
                                   ) : null}
                                 </VideoPlayer>
                               </div>
