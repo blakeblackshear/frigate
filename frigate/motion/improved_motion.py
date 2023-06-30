@@ -61,16 +61,8 @@ class ImprovedMotionDetector(MotionDetector):
             interpolation=self.interpolation,
         )
 
-        # mask frame
-        resized_frame[self.mask] = [255]
-
         if self.save_images:
             resized_saved = resized_frame.copy()
-
-        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
-
-        if self.save_images:
-            blurred_saved = resized_frame.copy()
 
         # Improve contrast
         if self.improve_contrast.value:
@@ -94,6 +86,15 @@ class ImprovedMotionDetector(MotionDetector):
 
         if self.save_images:
             contrasted_saved = resized_frame.copy()
+
+        # mask frame
+        # this has to come after contrast improvement
+        resized_frame[self.mask] = [255]
+
+        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
+
+        if self.save_images:
+            blurred_saved = resized_frame.copy()
 
         if self.save_images or self.calibrating:
             self.frame_counter += 1
@@ -155,8 +156,8 @@ class ImprovedMotionDetector(MotionDetector):
                 )
             frames = [
                 cv2.cvtColor(resized_saved, cv2.COLOR_GRAY2BGR),
-                cv2.cvtColor(blurred_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(contrasted_saved, cv2.COLOR_GRAY2BGR),
+                cv2.cvtColor(blurred_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(frameDelta, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR),
                 thresh_dilated,
