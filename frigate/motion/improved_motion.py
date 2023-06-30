@@ -19,6 +19,7 @@ class ImprovedMotionDetector(MotionDetector):
         name="improved",
         blur_radius=1,
         interpolation=cv2.INTER_NEAREST,
+        contrast_frame_history=50,
     ):
         self.name = name
         self.config = config
@@ -44,6 +45,9 @@ class ImprovedMotionDetector(MotionDetector):
         self.contour_area = contour_area
         self.blur_radius = blur_radius
         self.interpolation = interpolation
+        self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
+        self.contrast_values[:, 1:2] = 255
+        self.contrast_values_index = 0
 
     def detect(self, frame):
         motion_boxes = []
@@ -70,13 +74,22 @@ class ImprovedMotionDetector(MotionDetector):
 
         # Improve contrast
         if self.improve_contrast.value:
-            minval = np.percentile(resized_frame, 4)
-            maxval = np.percentile(resized_frame, 96)
-            # don't adjust if the image is a single color
+            # TODO tracking moving average of min/max to avoid sudden contrast changes
+            minval = np.percentile(resized_frame, 4).astype(np.uint8)
+            maxval = np.percentile(resized_frame, 96).astype(np.uint8)
+            # skip contrast calcs if the image is a single color
             if minval < maxval:
-                resized_frame = np.clip(resized_frame, minval, maxval)
+                # keep track of the last 50 contrast values
+                self.contrast_values[self.contrast_values_index] = [minval, maxval]
+                self.contrast_values_index += 1
+                if self.contrast_values_index == len(self.contrast_values):
+                    self.contrast_values_index = 0
+
+                avg_min, avg_max = np.mean(self.contrast_values, axis=0)
+
+                resized_frame = np.clip(resized_frame, avg_min, avg_max)
                 resized_frame = (
-                    ((resized_frame - minval) / (maxval - minval)) * 255
+                    ((resized_frame - avg_min) / (avg_max - avg_min)) * 255
                 ).astype(np.uint8)
 
         if self.save_images:
