@@ -18,6 +18,7 @@ export default function App() {
       <DrawerProvider>
         <ViewModeProvider>
           <div data-testid="app" className="w-full">
+          <AppBar />
             {!config ? (
               <div className="flex flex-grow-1 min-h-screen justify-center items-center">
                 <ActivityIndicator />
@@ -25,7 +26,6 @@ export default function App() {
             ) : (
               <div className="flex flex-row min-h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
                 <Sidebar />
-                <AppBar />
                 <div className="w-full flex-auto mt-16 min-w-0">
                   <Router>
                     <AsyncRoute path="/cameras/:camera/editor" getComponent={Routes.getCameraMap} />
