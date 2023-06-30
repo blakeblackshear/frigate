@@ -20,9 +20,10 @@ As of HomeAsisstant Core 2023.6, Network Mounted Storage is supported for addons
 database:
   path: /config/frigate.db
 ```
-3. Go to **Settings -> System -> Storage -> Add Network Storage**
-4. Name the share `frigate` (this is required)
-5. Choose type `media`
-6. Fill out the additional required info for your particular NAS
-7. Connect
-8. Start the Frigate addon
+3. Move the frigate.db, frigate.db-shm, frigate.db-wal files to the /config directory
+4. Go to **Settings -> System -> Storage -> Add Network Storage**
+5. Name the share `frigate` (this is required)
+6. Choose type `media`
+7. Fill out the additional required info for your particular NAS
+8. Connect
+9. Start the Frigate addon
