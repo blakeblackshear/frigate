@@ -767,7 +767,11 @@ def process_frames(
             continue
 
         # look for motion if enabled
-        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
+        motion_boxes = (
+            motion_detector.detect(frame)
+            if motion_enabled.value or ptz_moving.value
+            else []
+        )
 
         regions = []
         consolidated_detections = []
