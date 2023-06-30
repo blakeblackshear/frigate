@@ -189,6 +189,11 @@ ffmpeg:
     record: preset-record-generic
     # Optional: output args for rtmp streams (default: shown below)
     rtmp: preset-rtmp-generic
+  # Optional: Time in seconds to wait before ffmpeg retries connecting to the camera. (default: shown below)
+  # If set too low, frigate will retry a connection to the camera's stream too frequently, using up the limited streams some cameras can allow at once
+  # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
+  # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
+  retry_interval: 10
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level

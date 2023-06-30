@@ -463,6 +463,10 @@ class FfmpegConfig(FrigateBaseModel):
         default_factory=FfmpegOutputArgsConfig,
         title="FFmpeg output arguments per role.",
     )
+    retry_interval: float = Field(
+        default=10.0,
+        title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
+    )
 
 
 class CameraRoleEnum(str, Enum):
