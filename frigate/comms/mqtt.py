@@ -66,7 +66,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
             self.publish(
                 f"{camera_name}/ptz_autotracker/state",
-                "ON" if camera.onvif.autotracking.enabled else "OFF",  # type: ignore[union-attr]
+                "ON" if camera.onvif.autotracking.enabled else "OFF",
                 retain=True,
             )
             self.publish(
