@@ -769,7 +769,7 @@ def process_frames(
         # look for motion if enabled
         motion_boxes = (
             motion_detector.detect(frame)
-            if motion_enabled.value or ptz_moving.value
+            if motion_enabled.value and not ptz_moving.value
             else []
         )
 
