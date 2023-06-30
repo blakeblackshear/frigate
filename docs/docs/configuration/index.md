@@ -280,7 +280,7 @@ motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
-  threshold: 20
+  threshold: 30
   # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
   #           needs to recalibrate. (default: shown below)
   # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.

@@ -187,7 +187,7 @@ class RecordConfig(FrigateBaseModel):
 
 class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
-        default=20,
+        default=30,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
