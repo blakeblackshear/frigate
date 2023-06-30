@@ -171,6 +171,12 @@ There are important limitations in Home Assistant Operating System to be aware o
 
 :::
 
+:::tip
+
+See [the network storage guide](/guides/ha_network_storage.md) for instructions to setup network storage for frigate.
+
+:::
+
 HassOS users can install via the addon repository.
 
 1. Navigate to Supervisor > Add-on Store > Repositories
