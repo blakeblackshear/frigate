@@ -27,7 +27,7 @@ In Home Assistant the `Improve Contrast`, `Contour Area`, and `Threshold` config
 
 ## Tuning Motion Detection During The Day
 
-Now that things are setup, find a time to tune that represents normal circumstances. For exmaple: If you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
+Now that things are setup, find a time to tune that represents normal circumstances. For example: If you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
 
 :::note
 
@@ -61,4 +61,4 @@ However, if the preferred day settings do not work well at night it is recommend
 
 ## Tuning For Large Changes In Motion
 
-Larges changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
+Larges changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
