@@ -67,6 +67,7 @@ cameras:
           roles:
             - record
             - detect
+            - audio # <- only necessary if audio detection is enabled
   http_cam:
     ffmpeg:
       output_args:
@@ -77,6 +78,7 @@ cameras:
           roles:
             - record
             - detect
+            - audio # <- only necessary if audio detection is enabled
 ```
 
 ### With Sub Stream
@@ -112,6 +114,7 @@ cameras:
         - path: rtsp://127.0.0.1:8554/rtsp_cam_sub # <--- the name here must match the name of the camera_sub in restream
           input_args: preset-rtsp-restream
           roles:
+            - audio # <- only necessary if audio detection is enabled
             - detect
   http_cam:
     ffmpeg:
@@ -125,6 +128,7 @@ cameras:
         - path: rtsp://127.0.0.1:8554/http_cam_sub # <--- the name here must match the name of the camera_sub in restream
           input_args: preset-rtsp-restream
           roles:
+            - audio # <- only necessary if audio detection is enabled
             - detect
 ```
 
