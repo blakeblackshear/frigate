@@ -67,11 +67,10 @@ class ExternalEventProcessor:
 
         return event_id
 
-    def finish_manual_event(self, event_id: str) -> None:
+    def finish_manual_event(self, event_id: str, end_time: float) -> None:
         """Finish external event with indeterminate duration."""
-        now = datetime.datetime.now().timestamp()
         self.queue.put(
-            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": now})
+            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": end_time})
         )
 
     def _write_images(

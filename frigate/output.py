@@ -156,7 +156,12 @@ class BroadcastThread(threading.Thread):
 
 
 class BirdsEyeFrameManager:
-    def __init__(self, config: FrigateConfig, frame_manager: SharedMemoryFrameManager):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        frame_manager: SharedMemoryFrameManager,
+        stop_event: mp.Event,
+    ):
         self.config = config
         self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
@@ -165,6 +170,7 @@ class BirdsEyeFrameManager:
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
+        self.stop_event = stop_event
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -458,6 +464,9 @@ class BirdsEyeFrameManager:
 
                 # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
                 while calculating:
+                    if self.stop_event.is_set():
+                        return
+
                     layout_candidate = calculate_layout(
                         (canvas_width, canvas_height),
                         active_cameras_to_add,
@@ -580,7 +589,7 @@ def output_frames(config: FrigateConfig, video_output_queue):
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(config, frame_manager)
+    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, stop_event)
 
     if config.birdseye.restream:
         birdseye_buffer = frame_manager.create(

@@ -20,7 +20,7 @@ import psutil
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
-from frigate.types import RecordMetricsTypes
+from frigate.types import FeatureMetricsTypes
 from frigate.util import area, get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class RecordingMaintainer(threading.Thread):
         self,
         config: FrigateConfig,
         recordings_info_queue: mp.Queue,
-        process_info: dict[str, RecordMetricsTypes],
+        process_info: dict[str, FeatureMetricsTypes],
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)

@@ -40,6 +40,7 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_LISTEN_AUDIO = ["bark", "speech", "yell", "scream"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 
 
@@ -387,6 +388,19 @@ class ObjectConfig(FrigateBaseModel):
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
 
 
+class AudioConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio events.")
+    max_not_heard: int = Field(
+        default=30, title="Seconds of not hearing the type of audio to end the event."
+    )
+    listen: List[str] = Field(
+        default=DEFAULT_LISTEN_AUDIO, title="Audio to listen for."
+    )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of audio detection."
+    )
+
+
 class BirdseyeModeEnum(str, Enum):
     objects = "objects"
     motion = "motion"
@@ -470,6 +484,7 @@ class FfmpegConfig(FrigateBaseModel):
 
 
 class CameraRoleEnum(str, Enum):
+    audio = "audio"
     record = "record"
     rtmp = "rtmp"
     detect = "detect"
@@ -631,6 +646,9 @@ class CameraConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
     )
+    audio: AudioConfig = Field(
+        default_factory=AudioConfig, title="Audio events configuration."
+    )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
@@ -661,11 +679,15 @@ class CameraConfig(FrigateBaseModel):
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
             has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
+            has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
             ]
+
+            if has_audio:
+                config["ffmpeg"]["inputs"][0]["roles"].append("audio")
 
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
@@ -799,6 +821,11 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
             f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
         )
 
+    if camera_config.audio.enabled and "audio" not in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has audio events enabled, but audio is not assigned to an input."
+        )
+
 
 def verify_valid_live_stream_name(
     frigate_config: FrigateConfig, camera_config: CameraConfig
@@ -911,6 +938,9 @@ class FrigateConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Global object configuration."
     )
+    audio: AudioConfig = Field(
+        default_factory=AudioConfig, title="Global Audio events configuration."
+    )
     motion: Optional[MotionConfig] = Field(
         title="Global motion detection configuration."
     )
@@ -935,6 +965,7 @@ class FrigateConfig(FrigateBaseModel):
         # Global config to propagate down to camera level
         global_config = config.dict(
             include={
+                "audio": ...,
                 "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
@@ -980,8 +1011,9 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.onvif.password = camera_config.onvif.password.format(
                     **FRIGATE_ENV_VARS
                 )
-            # set config recording value
+            # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
+            camera_config.audio.enabled_in_config = camera_config.audio.enabled
 
             # Add default filters
             object_keys = camera_config.objects.track

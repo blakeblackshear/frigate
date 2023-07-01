@@ -908,8 +908,11 @@ def create_event(camera_name, label):
 
 @bp.route("/events/<event_id>/end", methods=["PUT"])
 def end_event(event_id):
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
     try:
-        current_app.external_processor.finish_manual_event(event_id)
+        end_time = json.get("end_time", datetime.now().timestamp())
+        current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404

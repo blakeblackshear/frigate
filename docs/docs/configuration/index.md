@@ -138,6 +138,20 @@ model:
   labelmap:
     2: vehicle
 
+# Optional: Audio Events Configuration
+# NOTE: Can be overridden at the camera level
+audio:
+  # Optional: Enable audio events (default: shown below)
+  enabled: False
+  # Optional: Configure the amount of seconds without detected audio to end the event (default: shown below)
+  max_not_heard: 30
+  # Optional: Types of audio to listen for (default: shown below)
+  listen:
+    - bark
+    - scream
+    - speech
+    - yell
+
 # Optional: logger verbosity settings
 logger:
   # Optional: Default log verbosity (default: shown below)

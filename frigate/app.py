@@ -29,6 +29,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -44,7 +45,7 @@ from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, RecordMetricsTypes
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -62,7 +63,7 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.record_metrics: dict[str, RecordMetricsTypes] = {}
+        self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
@@ -104,7 +105,7 @@ class FrigateApp:
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config(self.plus_api)
 
-        for camera_name in self.config.cameras.keys():
+        for camera_name, camera_config in self.config.cameras.items():
             # create camera_metrics
             self.camera_metrics[camera_name] = {
                 "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
@@ -159,13 +160,19 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
-            self.record_metrics[camera_name] = {
+            self.feature_metrics[camera_name] = {
+                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].audio.enabled,
+                ),
                 "record_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
                     # from mypy 0.981 onwards
                     "i",
                     self.config.cameras[camera_name].record.enabled,
-                )
+                ),
             }
 
     def set_log_levels(self) -> None:
@@ -253,7 +260,7 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(self.config, self.recordings_info_queue, self.record_metrics),
+            args=(self.config, self.recordings_info_queue, self.feature_metrics),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
@@ -312,7 +319,7 @@ class FrigateApp:
             self.config,
             self.onvif_controller,
             self.camera_metrics,
-            self.record_metrics,
+            self.feature_metrics,
             comms,
         )
 
@@ -421,6 +428,17 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_audio_processors(self) -> None:
+        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
+            audio_process = mp.Process(
+                target=listen_to_audio,
+                name="audio_capture",
+                args=(self.config, self.feature_metrics),
+            )
+            audio_process.daemon = True
+            audio_process.start()
+            logger.info(f"Audio process started: {audio_process.pid}")
+
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
             self.config, self.timeline_queue, self.stop_event
@@ -517,6 +535,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_audio_processors()
         self.start_storage_maintainer()
         self.init_stats()
         self.init_external_event_processor()

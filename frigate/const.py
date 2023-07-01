@@ -8,6 +8,7 @@ EXPORT_DIR = f"{BASE_DIR}/exports"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 YAML_EXT = (".yaml", ".yml")
+FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 BTBN_PATH = "/usr/lib/btbn-ffmpeg"
@@ -21,6 +22,13 @@ ATTRIBUTE_LABEL_MAP = {
 ALL_ATTRIBUTE_LABELS = [
     item for sublist in ATTRIBUTE_LABEL_MAP.values() for item in sublist
 ]
+
+# Audio Consts
+
+AUDIO_DURATION = 0.975
+AUDIO_FORMAT = "s16le"
+AUDIO_MAX_BIT_RANGE = 32768.0
+AUDIO_SAMPLE_RATE = 16000
 
 # Regex Consts
 

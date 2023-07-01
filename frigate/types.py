@@ -25,7 +25,8 @@ class CameraMetricsTypes(TypedDict):
     skipped_fps: Synchronized
 
 
-class RecordMetricsTypes(TypedDict):
+class FeatureMetricsTypes(TypedDict):
+    audio_enabled: Synchronized
     record_enabled: Synchronized
 
 
