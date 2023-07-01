@@ -202,11 +202,14 @@ class AudioEventMaintainer(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
+            if not detection:
+                continue
+
             if (
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
-                del self.detections[detection["label"]]
+                self.detections[detection["label"]] = None
                 requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
