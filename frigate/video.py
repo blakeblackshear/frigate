@@ -195,6 +195,7 @@ def capture_frames(
 
         frame_rate.update()
 
+        # don't lock the queue to check, just try since it should rarely be full
         try:
             # add to the queue
             frame_queue.put(current_frame.value, False)
