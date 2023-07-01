@@ -240,5 +240,5 @@ class EventProcessor(threading.Thread):
 
             try:
                 Event.update(event).where(Event.id == event_data["id"]).execute()
-            except Exception as e:
-                logger.warning(f"Failed to update manual event: {event_data['id']} :: {e}")
+            except Exception:
+                logger.warning(f"Failed to update manual event: {event_data['id']}")
