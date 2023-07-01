@@ -25,7 +25,7 @@ const timeAgo = ({ time, currentTime = new Date(), dense = false }: IProp): stri
   const elapsedTime: number = currentTime.getTime() - pastTime.getTime();
 
   const timeUnits: TimeUnit[] = [
-    { unit: 'ye', full: 'year', value: 31536000 },
+    { unit: 'yr', full: 'year', value: 31536000 },
     { unit: 'mo', full: 'month', value: 0 },
     { unit: 'd', full: 'day', value: 86400 },
     { unit: 'h', full: 'hour', value: 3600 },
