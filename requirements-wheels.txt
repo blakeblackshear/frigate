@@ -3,13 +3,13 @@ Flask == 2.3.*
 faster-fifo == 1.4.*
 imutils == 0.5.*
 matplotlib == 3.7.*
-mypy == 0.942
+mypy == 1.4.1
 numpy == 1.23.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.7.0.*
 paho-mqtt == 1.6.*
 peewee == 3.16.*
-peewee_migrate == 1.10.*
+peewee_migrate == 1.11.*
 psutil == 5.9.*
 pydantic == 1.10.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
