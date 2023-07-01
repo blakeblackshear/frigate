@@ -18,9 +18,9 @@ export default function Export() {
   const localISODate = localDate.toISOString().split('T')[0];
 
   const [startDate, setStartDate] = useState(localISODate);
-  const [startTime, setStartTime] = useState("00:00");
+  const [startTime, setStartTime] = useState('00:00');
   const [endDate, setEndDate] = useState(localISODate);
-  const [endTime, setEndTime] = useState("23:59");
+  const [endTime, setEndTime] = useState('23:59');
 
   const onHandleExport = () => {
     if (camera == 'select') {
@@ -32,8 +32,6 @@ export default function Export() {
       setMessage({ text: 'A playback factor needs to be selected.', error: true });
       return;
     }
-
-    
 
     if (!startDate || !startTime || !endDate || !endTime) {
       setMessage({ text: 'A start and end time needs to be selected', error: true });
@@ -48,12 +46,13 @@ export default function Export() {
       return;
     }
 
-    axios.post(`export/${camera}/start/${start}/end/${end}`, { playback })
+    axios
+      .post(`export/${camera}/start/${start}/end/${end}`, { playback })
       .then(() => {
         setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
       })
       .catch((error) => {
-        setMessage({ text: 'Failed to start export: '+error.response.data.message, error: true });
+        setMessage({ text: `Failed to start export: ${error.response.data.message}`, error: true });
       });
   };
 
@@ -93,13 +92,37 @@ export default function Export() {
         <Heading className="py-2" size="sm">
           From:
         </Heading>
-        <input className="dark:bg-slate-800" id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}/>
-        <input className="dark:bg-slate-800" id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}/>
+        <input
+          className="dark:bg-slate-800"
+          id="startDate"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+        <input
+          className="dark:bg-slate-800"
+          id="startTime"
+          type="time"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
         <Heading className="py-2" size="sm">
           To:
         </Heading>
-        <input className="dark:bg-slate-800" id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}/>
-        <input className="dark:bg-slate-800" id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}/>
+        <input
+          className="dark:bg-slate-800"
+          id="endDate"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+        <input
+          className="dark:bg-slate-800"
+          id="endTime"
+          type="time"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+        />
       </div>
       <Button onClick={() => onHandleExport()}>Submit</Button>
     </div>
