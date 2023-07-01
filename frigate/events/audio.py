@@ -202,11 +202,13 @@ class AudioEventMaintainer(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
+            if not detection:
+                continue
+
             if (
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
-                del self.detections[detection["label"]]
                 requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
@@ -214,6 +216,7 @@ class AudioEventMaintainer(threading.Thread):
                         + self.config.record.events.post_capture
                     },
                 )
+                self.detections[detection["label"]] = None
 
     def restart_audio_pipe(self) -> None:
         try:
