@@ -149,6 +149,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "recordings",
             "snapshots",
             "detect",
+            "audio",
             "motion",
             "improve_contrast",
             "motion_threshold",
