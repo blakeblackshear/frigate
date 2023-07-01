@@ -16,7 +16,7 @@ from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
 from typing import Any, AnyStr, Optional, Tuple
-from faster_fifo import Queue as FFQueue, DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT 
+from faster_fifo import Queue as FFQueue, DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
 from queue import Full, Empty
 import time
 import cv2
