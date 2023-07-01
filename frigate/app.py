@@ -108,27 +108,71 @@ class FrigateApp:
         for camera_name, camera_config in self.config.cameras.items():
             # create camera_metrics
             self.camera_metrics[camera_name] = {
-                "camera_fps": mp.Value("d", 0.0),
-                "skipped_fps": mp.Value("d", 0.0),
-                "process_fps": mp.Value("d", 0.0),
-                "detection_enabled": mp.Value("i", camera_config.detect.enabled),
-                "motion_enabled": mp.Value("i", True),
-                "improve_contrast_enabled": mp.Value(
-                    "i", camera_config.motion.improve_contrast
+                "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "skipped_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "detection_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].detect.enabled,
                 ),
-                "motion_threshold": mp.Value("i", camera_config.motion.threshold),
-                "motion_contour_area": mp.Value("i", camera_config.motion.contour_area),
-                "detection_fps": mp.Value("d", 0.0),
-                "detection_frame": mp.Value("d", 0.0),
-                "read_start": mp.Value("d", 0.0),
-                "ffmpeg_pid": mp.Value("i", 0),
+                "motion_enabled": mp.Value("i", True),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "improve_contrast_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.improve_contrast,
+                ),
+                "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.threshold,
+                ),
+                "motion_contour_area": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.contour_area,
+                ),
+                "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "detection_frame": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "read_start": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
                 "frame_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
             self.feature_metrics[camera_name] = {
-                "audio_enabled": mp.Value("i", camera_config.audio.enabled),
-                "record_enabled": mp.Value("i", camera_config.record.enabled),
+                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].audio.enabled,
+                ),
+                "record_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].record.enabled,
+                ),
             }
 
     def set_log_levels(self) -> None:
