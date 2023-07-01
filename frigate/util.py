@@ -1247,10 +1247,9 @@ def update_yaml_file(file_path, key_path, new_value):
             if key not in temp:
                 temp[key] = {}
             temp = temp[key]
-    print(new_value)
+
     last_key = key_path[-1]
     if new_value == "":
-        print(last_key)
         if isinstance(last_key, tuple):
             del temp[last_key[0]][last_key[1]]
         else:
