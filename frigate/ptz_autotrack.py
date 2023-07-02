@@ -1,6 +1,8 @@
 """Automatically pan, tilt, and zoom on detected objects via onvif."""
 
+import copy
 import logging
+import queue
 import threading
 import time
 from multiprocessing.synchronize import Event as MpEvent
@@ -22,7 +24,9 @@ class PtzMotionEstimator:
         self.frame_manager = SharedMemoryFrameManager()
         # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
         self.norfair_motion_estimator = MotionEstimator(
-            transformations_getter=TranslationTransformationGetter()
+            transformations_getter=TranslationTransformationGetter(),
+            min_distance=30,
+            max_points=500,
         )
         self.camera_config = config
         self.coord_transformations = None
@@ -31,10 +35,16 @@ class PtzMotionEstimator:
 
     def motion_estimator(self, detections, frame_time, camera_name):
         if self.camera_config.onvif.autotracking.enabled and self.ptz_moving.value:
-            logger.debug(f"Motion estimator running for {camera_name}")
+            # logger.debug(
+            #     f"Motion estimator running for {camera_name} - frame time: {frame_time}"
+            # )
 
             frame_id = f"{camera_name}{frame_time}"
-            frame = self.frame_manager.get(frame_id, self.camera_config.frame_shape)
+            yuv_frame = self.frame_manager.get(
+                frame_id, self.camera_config.frame_shape_yuv
+            )
+
+            frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2GRAY_I420)
 
             # mask out detections for better motion estimation
             mask = np.ones(frame.shape[:2], frame.dtype)
@@ -47,7 +57,7 @@ class PtzMotionEstimator:
             # merge camera config motion mask with detections. Norfair function needs 0,1 mask
             mask = np.bitwise_and(mask, self.camera_config.motion.mask).clip(max=1)
 
-            # Norfair estimator function needs color
+            # Norfair estimator function needs color so it can convert it right back to gray
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGRA)
 
             self.coord_transformations = self.norfair_motion_estimator.update(
@@ -55,6 +65,10 @@ class PtzMotionEstimator:
             )
 
             self.frame_manager.close(frame_id)
+
+            # logger.debug(
+            #     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
+            # )
 
             return self.coord_transformations
 
@@ -98,6 +112,10 @@ class PtzAutoTracker:
         self.tracked_object_previous: dict[str, object] = {}
         self.object_types = {}
         self.required_zones = {}
+        self.move_queue = queue.Queue()
+        self.move_thread = threading.Thread(target=self._process_move_queue)
+        self.move_thread.daemon = True  # Set the thread as a daemon thread
+        self.move_thread.start()
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
@@ -122,6 +140,42 @@ class PtzAutoTracker:
                             f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
                         )
 
+    def _process_move_queue(self):
+        while True:
+            try:
+                if self.move_queue.qsize() > 1:
+                    # Accumulate values since last moved
+                    pan = 0
+                    tilt = 0
+
+                    while not self.move_queue.empty():
+                        camera, queued_pan, queued_tilt = self.move_queue.get()
+                        logger.debug(
+                            f"queue pan: {queued_pan}, queue tilt: {queued_tilt}"
+                        )
+                        pan += queued_pan
+                        tilt += queued_tilt
+                else:
+                    move_data = self.move_queue.get()
+                    camera, pan, tilt = move_data
+                    logger.debug(f"removing pan: {pan}, removing tilt: {tilt}")
+
+                logger.debug(f"final pan: {pan}, final tilt: {tilt}")
+
+                self.onvif._move_relative(camera, pan, tilt, 0.1)
+
+                # Wait until the camera finishes moving
+                while self.camera_metrics[camera]["ptz_moving"].value:
+                    pass
+
+            except queue.Empty:
+                pass
+
+    def enqueue_move(self, camera, pan, tilt):
+        move_data = (camera, pan, tilt)
+        logger.debug(f"enqueue pan: {pan}, enqueue tilt: {tilt}")
+        self.move_queue.put(move_data)
+
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
@@ -139,7 +193,7 @@ class PtzAutoTracker:
         int(size_ratio * camera_height)
 
         # ideas: check object velocity for camera speed?
-        self.onvif._move_relative(camera, -pan, tilt, 1)
+        self.enqueue_move(camera, -pan, tilt)
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
@@ -160,9 +214,11 @@ class PtzAutoTracker:
                 and not obj.false_positive
                 and self.tracked_object_previous[camera] is None
             ):
-                logger.debug(f"Autotrack: New object: {obj.to_dict()}")
+                logger.debug(
+                    f"Autotrack: New object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
+                )
                 self.tracked_object[camera] = obj
-                self.tracked_object_previous[camera] = obj
+                self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self._autotrack_move_ptz(camera, obj)
 
                 return
@@ -184,15 +240,18 @@ class PtzAutoTracker:
                         self.tracked_object_previous[camera].obj_data["box"],
                         obj.obj_data["box"],
                     )
-                    < 0.05
+                    > 0.05
                 ):
                     logger.debug(
-                        f"Autotrack: Existing object (do NOT move ptz): {obj.to_dict()}"
+                        f"Autotrack: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                     )
+                    self.tracked_object_previous[camera] = copy.deepcopy(obj)
                     return
 
-                logger.debug(f"Autotrack: Existing object (move ptz): {obj.to_dict()}")
-                self.tracked_object_previous[camera] = obj
+                logger.debug(
+                    f"Autotrack: Existing object (move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
+                )
+                self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self._autotrack_move_ptz(camera, obj)
 
                 return
@@ -216,9 +275,11 @@ class PtzAutoTracker:
                     )
                     < 0.2
                 ):
-                    logger.debug(f"Autotrack: Reacquired object: {obj.to_dict()}")
+                    logger.debug(
+                        f"Autotrack: Reacquired object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
+                    )
                     self.tracked_object[camera] = obj
-                    self.tracked_object_previous[camera] = obj
+                    self.tracked_object_previous[camera] = copy.deepcopy(obj)
                     self._autotrack_move_ptz(camera, obj)
 
                 return
@@ -229,7 +290,9 @@ class PtzAutoTracker:
                 self.tracked_object[camera] is not None
                 and obj.obj_data["id"] == self.tracked_object[camera].obj_data["id"]
             ):
-                logger.debug(f"Autotrack: End object: {obj.to_dict()}")
+                logger.debug(
+                    f"Autotrack: End object: {obj.obj_data['id']} {obj.obj_data['box']}"
+                )
                 self.tracked_object[camera] = None
                 self.onvif.get_camera_status(camera)
 
@@ -249,7 +312,8 @@ class PtzAutoTracker:
                 and self.tracked_object_previous[camera] is not None
                 and (
                     # might want to use a different timestamp here?
-                    time.time() - self.tracked_object_previous[camera].last_published
+                    time.time()
+                    - self.tracked_object_previous[camera].obj_data["frame_time"]
                     > autotracker_config.timeout
                 )
                 and autotracker_config.return_preset
