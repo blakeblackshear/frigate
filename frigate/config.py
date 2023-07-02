@@ -128,17 +128,17 @@ class MqttConfig(FrigateBaseModel):
 
 
 class PtzAutotrackConfig(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="Enable PTZ auto tracking.")
+    enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to begin autotracking.",
     )
-    return_preset: Optional[str] = Field(
+    return_preset: str = Field(
         title="Name of camera preset to return to when object tracking is over."
     )
     timeout: int = Field(
-        default=5, title="Seconds to delay before returning to preset."
+        default=10, title="Seconds to delay before returning to preset."
     )
 
 
