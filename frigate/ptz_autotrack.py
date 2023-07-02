@@ -250,7 +250,7 @@ class PtzAutoTracker:
                         self.tracked_object_previous[camera].obj_data["box"],
                         obj.obj_data["box"],
                     )
-                    > 0.05
+                    > 0.5
                 ):
                     logger.debug(
                         f"Autotrack: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
