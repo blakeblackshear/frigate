@@ -5,6 +5,7 @@ import logging
 import queue
 import threading
 import time
+from functools import partial
 from multiprocessing.synchronize import Event as MpEvent
 
 import cv2
@@ -112,10 +113,8 @@ class PtzAutoTracker:
         self.tracked_object_previous: dict[str, object] = {}
         self.object_types = {}
         self.required_zones = {}
-        self.move_queue = queue.Queue()
-        self.move_thread = threading.Thread(target=self._process_move_queue)
-        self.move_thread.daemon = True  # Set the thread as a daemon thread
-        self.move_thread.start()
+        self.move_queues = {}
+        self.move_threads = {}
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
@@ -127,6 +126,8 @@ class PtzAutoTracker:
 
                 self.tracked_object[camera_name] = None
                 self.tracked_object_previous[camera_name] = None
+
+                self.move_queues[camera_name] = queue.Queue()
 
                 if not onvif.cams[camera_name]["init"]:
                     if not self.onvif._init_onvif(camera_name):
@@ -140,24 +141,33 @@ class PtzAutoTracker:
                             f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
                         )
 
-    def _process_move_queue(self):
+                        return
+
+                    # movement thread per camera
+                    self.move_threads[camera_name] = threading.Thread(
+                        target=partial(self._process_move_queue, camera_name)
+                    )
+                    self.move_threads[camera_name].daemon = True
+                    self.move_threads[camera_name].start()
+
+    def _process_move_queue(self, camera):
         while True:
             try:
-                if self.move_queue.qsize() > 1:
+                if self.move_queues[camera].qsize() > 1:
                     # Accumulate values since last moved
                     pan = 0
                     tilt = 0
 
-                    while not self.move_queue.empty():
-                        camera, queued_pan, queued_tilt = self.move_queue.get()
+                    while not self.move_queues[camera].empty():
+                        queued_pan, queued_tilt = self.move_queues[camera].get()
                         logger.debug(
                             f"queue pan: {queued_pan}, queue tilt: {queued_tilt}"
                         )
                         pan += queued_pan
                         tilt += queued_tilt
                 else:
-                    move_data = self.move_queue.get()
-                    camera, pan, tilt = move_data
+                    move_data = self.move_queues[camera].get()
+                    pan, tilt = move_data
                     logger.debug(f"removing pan: {pan}, removing tilt: {tilt}")
 
                 logger.debug(f"final pan: {pan}, final tilt: {tilt}")
@@ -172,9 +182,9 @@ class PtzAutoTracker:
                 pass
 
     def enqueue_move(self, camera, pan, tilt):
-        move_data = (camera, pan, tilt)
+        move_data = (pan, tilt)
         logger.debug(f"enqueue pan: {pan}, enqueue tilt: {tilt}")
-        self.move_queue.put(move_data)
+        self.move_queues[camera].put(move_data)
 
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
