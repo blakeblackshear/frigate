@@ -283,7 +283,6 @@ COPY docker/support/tensorrt_detector/rootfs/ /
 
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl && \
-    ln -s libnvrtc.so.12 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
     ldconfig
 
 # Dev Container w/ TRT
