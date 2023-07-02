@@ -83,9 +83,8 @@ class Dispatcher:
                 return
         elif topic == "restart":
             restart_frigate()
-        elif "metadata" in topic:
-            # example /cam_name/metadata/dbfs payload=-55.23
-            self.publish(topic, payload, retain=True)
+        else:
+            self.publish(topic, payload, retain=False)
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Handle publishing to communicators."""

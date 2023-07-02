@@ -197,10 +197,10 @@ class AudioEventMaintainer(threading.Thread):
         dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
 
         self.inter_process_communicator.queue.put(
-            (f"{self.config.name}/metadata/dBFS", float(dBFS))
+            (f"{self.config.name}/audio/dBFS", float(dBFS))
         )
         self.inter_process_communicator.queue.put(
-            (f"{self.config.name}/metadata/rms", float(rms))
+            (f"{self.config.name}/audio/rms", float(rms))
         )
 
     def handle_detection(self, label: str, score: float) -> None:

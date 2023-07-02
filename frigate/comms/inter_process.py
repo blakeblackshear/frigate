@@ -15,6 +15,7 @@ class InterProcessCommunicator(Communicator):
         self.stop_event: MpEvent = mp.Event()
 
     def publish(self, topic: str, payload: str, retain: bool) -> None:
+        """There is no communication back to the processes."""
         pass
 
     def subscribe(self, receiver: Callable) -> None:
