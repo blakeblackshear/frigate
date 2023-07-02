@@ -812,19 +812,23 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
     )
 
     if camera_config.record.enabled and "record" not in assigned_roles:
-        raise ValueError(
+        camera_config.record.enabled = False
+        logger.warning(
             f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
         )
 
     if camera_config.rtmp.enabled and "rtmp" not in assigned_roles:
-        raise ValueError(
+        camera_config.rtmp.enabled = False
+        logger.warning(
             f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
         )
 
     if camera_config.audio.enabled and "audio" not in assigned_roles:
-        raise ValueError(
+        camera_config.audio.enabled = False
+        logger.warning(
             f"Camera {camera_config.name} has audio events enabled, but audio is not assigned to an input."
         )
+    return camera_config
 
 
 def verify_valid_live_stream_name(
@@ -1062,7 +1066,7 @@ class FrigateConfig(FrigateBaseModel):
             if not camera_config.live.stream_name:
                 camera_config.live.stream_name = name
 
-            verify_config_roles(camera_config)
+            camera_config = verify_config_roles(camera_config)
             verify_valid_live_stream_name(config, camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
