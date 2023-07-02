@@ -17,7 +17,7 @@ export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
-  const { viewMode, setViewMode } = useViewMode();
+  const { currentViewMode, setViewMode } = useViewMode();
   const { setDarkMode } = useDarkMode();
   const { send: sendRestart } = useRestart();
 
@@ -75,7 +75,7 @@ export default function AppBar() {
           <MenuItem icon={SettingsIcon} label="Viewmode:">
             <select
               className="py-0.5 pr-8"
-              value={viewMode}
+              value={currentViewMode}
               onChange={(e) => handleSetViewMode(e.target.value)}
             >
               { Object.keys(ViewModeTypes).filter((v) => !isNaN(Number(v))).map(key => <option key={key} value={key}>{ViewModeTypes[key]}</option>) }

@@ -3,9 +3,9 @@ import { useViewMode } from '../context';
 import { ViewModeTypes } from './ViewOptionEnum';
 
 export default function ViewOption({children, requiredmode }) {
-  const { viewMode } = useViewMode();
+  const { currentViewMode } = useViewMode();
 
-  return viewMode >= ViewModeTypes[requiredmode] ? (
+  return currentViewMode >= ViewModeTypes[requiredmode] ? (
     <>{children}</>
     
   ) : null;

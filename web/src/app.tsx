@@ -16,7 +16,7 @@ export default function App() {
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <ViewModeProvider>
+        <ViewModeProvider config={config}>
           <div data-testid="app" className="w-full">
           <AppBar />
             {!config ? (

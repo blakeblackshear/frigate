@@ -2,24 +2,34 @@ import { h, createContext } from 'preact';
 import { get as getData, set as setData } from 'idb-keyval';
 import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'preact/hooks';
 import { ViewModeTypes } from '../components/ViewOptionEnum';
-import useSWR from 'swr';
 
-const ViewMode = createContext(null);
+const ViewMode = createContext("");
 
-export function ViewModeProvider({ children }) {
-  const [viewMode, setViewMode] = usePersistence('view-mode', null);
-  const { data: config } = useSWR('config');
+export function ViewModeProvider({ children, config }) {
+  const [currentViewMode, setCurrentViewMode] = useState(null);
+
+  const setViewMode = useCallback(
+    (value) => {
+      setData('view-mode', value);
+      setCurrentViewMode(value);
+    },
+    [setCurrentViewMode]
+  );
 
   useEffect(() => {
     async function load() {
-      const configValue = ViewModeTypes[config.ui.viewmode]; //fixes a load error
-      setViewMode(viewMode || configValue);
+      const configValue = config ? ViewModeTypes[config.ui.viewmode].toString() : "2";
+      const viewmode = await getData('view-mode');
+      setViewMode(viewmode || configValue);
     }
 
     load();
-  }, [setViewMode, config]);
+  }, [config, setViewMode]);
 
-  return <ViewMode.Provider value={{ viewMode, setViewMode }}>{children}</ViewMode.Provider>;
+  
+  return !currentViewMode ? null : (
+    <ViewMode.Provider value={{ currentViewMode, setViewMode }}>{children}</ViewMode.Provider>
+  );
 }
 
 export function useViewMode() {
