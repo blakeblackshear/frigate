@@ -18,6 +18,7 @@ import { Zone } from '../icons/Zone';
 import { Camera } from '../icons/Camera';
 import { Clock } from '../icons/Clock';
 import { Delete } from '../icons/Delete';
+import { Stop } from '../icons/Stop';
 import { Download } from '../icons/Download';
 import Menu, { MenuItem } from '../components/Menu';
 import CalendarIcon from '../icons/Calendar';
@@ -151,6 +152,14 @@ export default function Events({ path, ...props }) {
       if (response.status === 200) {
         mutate();
       }
+    }
+  };
+
+  const onStop = async (e, eventId) => {
+    e.stopPropagation();
+    const response = await axios.put(`events/${eventId}/end`);
+    if (response.status === 200) {
+      mutate();
     }
   };
 
@@ -662,6 +671,14 @@ export default function Events({ path, ...props }) {
                           stroke="#f87171"
                           onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
                         />
+                        {!event.end_time ? (
+                          <Stop
+                            className="h-6 w-6 cursor-pointer"
+                            stroke="#f87171"
+                            onClick={(e) => onStop(e, event.id)}
+                          />
+                        ) : null}
+
 
                         <Download
                           className="h-6 w-6 mt-auto"
