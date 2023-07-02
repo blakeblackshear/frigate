@@ -240,7 +240,10 @@ class TrackedObject:
                 significant_change = True
 
             # update autotrack every second? or fps?
-            if self.obj_data["frame_time"] - self.previous["frame_time"] > 1:
+            if (
+                self.obj_data["frame_time"] - self.previous["frame_time"]
+                > 0.5  # / self.camera_config.detect.fps
+            ):
                 autotracker_update = True
 
         self.obj_data.update(obj_data)
@@ -619,7 +622,7 @@ class CameraState:
                 frame_time, current_detections[id]
             )
 
-            if autotracker_update:
+            if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
                     c(self.name, updated_obj, frame_time)
 
@@ -763,6 +766,7 @@ class TrackedObjectProcessor(threading.Thread):
         event_processed_queue,
         video_output_queue,
         recordings_info_queue,
+        ptz_autotracker_thread,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -778,9 +782,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
-        self.ptz_autotracker_thread = PtzAutoTrackerThread(
-            config, dispatcher.onvif, dispatcher.camera_metrics, self.stop_event
-        )
+        self.ptz_autotracker_thread = ptz_autotracker_thread
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(
@@ -1041,7 +1043,6 @@ class TrackedObjectProcessor(threading.Thread):
         return self.camera_states[camera].current_frame_time
 
     def run(self):
-        self.ptz_autotracker_thread.start()
         while not self.stop_event.is_set():
             try:
                 (
@@ -1162,5 +1163,4 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
 
-        self.ptz_autotracker_thread.join()
         logger.info("Exiting object processor...")
