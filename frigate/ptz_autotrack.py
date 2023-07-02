@@ -85,7 +85,7 @@ class PtzAutoTrackerThread(threading.Thread):
         stop_event: MpEvent,
     ) -> None:
         threading.Thread.__init__(self)
-        self.name = "frigate_ptz_autotracker"
+        self.name = "ptz_autotracker"
         self.ptz_autotracker = PtzAutoTracker(config, onvif, camera_metrics)
         self.stop_event = stop_event
         self.config = config
@@ -152,7 +152,8 @@ class PtzAutoTracker:
             # movement thread per camera
             if not self.move_threads or not self.move_threads[camera_name]:
                 self.move_threads[camera_name] = threading.Thread(
-                    target=partial(self._process_move_queue, camera_name)
+                    name=f"move_thread_{camera_name}",
+                    target=partial(self._process_move_queue, camera_name),
                 )
                 self.move_threads[camera_name].daemon = True
                 self.move_threads[camera_name].start()
