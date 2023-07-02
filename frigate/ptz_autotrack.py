@@ -96,6 +96,7 @@ class PtzAutoTrackerThread(threading.Thread):
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
                     time.sleep(1)
+            time.sleep(0.1)
         logger.info("Exiting autotracker...")
 
 
@@ -223,6 +224,7 @@ class PtzAutoTracker:
                 and not obj.previous["false_positive"]
                 and not obj.false_positive
                 and self.tracked_object_previous[camera] is None
+                and obj.obj_data["motionless_count"] == 0
             ):
                 logger.debug(
                     f"Autotrack: New object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
