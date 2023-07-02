@@ -17,7 +17,9 @@ When tracking has ended, Frigate will return to the camera preset specified by t
 
 Frigate autotracking functions with PTZ cameras capable of relative movement within the field of view (as specified in the [ONVIF spec](https://www.onvif.org/specs/srv/ptz/ONVIF-PTZ-Service-Spec-v1712.pdf) as `RelativePanTiltTranslationSpace` having a `TranslationSpaceFov` entry).
 
-Many cheaper PTZs likely don't support this standard. To see if your PTZ camera does, you can download and run [this simple Python script](https://gist.github.com/hawkeye217/152a1d4ba80760dac95d46e143d37112), replacing the details on line 4 with your camera's IP address, ONVIF port, username, and password.
+Many cheaper PTZs likely don't support this standard. Frigate will report an error message in the log and disable autotracking if your PTZ is unsupported.
+
+Alternatively, you can download and run [this simple Python script](https://gist.github.com/hawkeye217/152a1d4ba80760dac95d46e143d37112), replacing the details on line 4 with your camera's IP address, ONVIF port, username, and password to check your camera.
 
 ## Configuration
 
