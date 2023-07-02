@@ -157,7 +157,7 @@ class PtzAutoTracker:
                 self.move_threads[camera_name].daemon = True
                 self.move_threads[camera_name].start()
 
-            self.autotracker_init[camera_name] = True
+        self.autotracker_init[camera_name] = True
 
     def _process_move_queue(self, camera):
         while True:
