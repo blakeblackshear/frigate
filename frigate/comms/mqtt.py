@@ -151,6 +151,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "detect",
             "motion",
             "improve_contrast",
+            "ptz_autotracker",
             "motion_threshold",
             "motion_contour_area",
         ]
