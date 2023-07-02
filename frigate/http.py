@@ -28,7 +28,6 @@ from peewee import DoesNotExist, SqliteDatabase, fn, operator
 from playhouse.shortcuts import model_to_dict
 from tzlocal import get_localzone_name
 
-from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.events.external import ExternalEventProcessor
@@ -62,7 +61,6 @@ def create_app(
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
-    dispatcher: Dispatcher,
 ):
     app = Flask(__name__)
 
@@ -83,7 +81,6 @@ def create_app(
     app.onvif = onvif
     app.external_processor = external_processor
     app.plus_api = plus_api
-    app.dispatcher = dispatcher
     app.camera_error_image = None
     app.hwaccel_errors = []
 
