@@ -13,7 +13,7 @@ from frigate.const import CLIPS_DIR
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
 
-from multiprocessing.queues import Queue
+from faster_fifo import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 

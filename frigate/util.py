@@ -7,6 +7,7 @@ import subprocess as sp
 import json
 import re
 import signal
+import time
 import traceback
 import urllib.parse
 import yaml
@@ -14,7 +15,7 @@ import yaml
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
-from multiprocessing import shared_memory
+from multiprocessing import shared_memory, RawValue
 from queue import Empty, Full
 from typing import Any, AnyStr, Optional, Tuple
 
@@ -1081,7 +1082,7 @@ class LimitedQueue(FFQueue):
     ):
         super().__init__(max_size_bytes=max_size_bytes, loads=loads, dumps=dumps)
         self.maxsize = maxsize
-        self.size = multiprocessing.RawValue(
+        self.size = RawValue(
             ctypes.c_int, 0
         )  # Add a counter for the number of items in the queue
 

@@ -10,6 +10,7 @@ import subprocess as sp
 import threading
 from collections import defaultdict
 from pathlib import Path
+import faster_fifo as ff
 
 import psutil
 from peewee import JOIN, DoesNotExist
@@ -42,7 +43,7 @@ def remove_empty_directories(directory):
 
 class RecordingMaintainer(threading.Thread):
     def __init__(
-        self, config: FrigateConfig, recordings_info_queue: mp.Queue, stop_event
+        self, config: FrigateConfig, recordings_info_queue: ff.Queue, stop_event
     ):
         threading.Thread.__init__(self)
         self.name = "recording_maint"
@@ -111,7 +112,6 @@ class RecordingMaintainer(threading.Thread):
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
         for camera, recordings in grouped_recordings.items():
-
             # clear out all the recording info for old frames
             while (
                 len(self.recordings_info[camera]) > 0
