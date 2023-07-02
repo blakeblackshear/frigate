@@ -121,7 +121,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
         id2 = "7890.random"
@@ -158,7 +157,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
 
@@ -180,7 +178,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
         bad_id = "654321.other"
@@ -201,7 +198,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
 
@@ -224,7 +220,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
 
@@ -251,7 +246,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -287,7 +281,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -313,7 +306,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
 
         with app.test_client() as client:
@@ -331,7 +323,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         id = "123456.random"
 
@@ -352,7 +343,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             PlusApi(),
-            None,
         )
         mock_stats.return_value = self.test_stats
 
