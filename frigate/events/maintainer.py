@@ -229,7 +229,7 @@ class EventProcessor(threading.Thread):
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],
-                Event.data: {},
+                Event.data: { "type": "api" },
             }
             Event.insert(event).execute()
         elif type == "end":
