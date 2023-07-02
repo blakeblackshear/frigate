@@ -116,40 +116,48 @@ class PtzAutoTracker:
         self.required_zones = {}
         self.move_queues = {}
         self.move_threads = {}
+        self.autotracker_init = {}
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
+            self.autotracker_init[camera_name] = False
             if cam.onvif.autotracking.enabled:
-                logger.debug(f"Autotracker init for cam: {camera_name}")
+                self._autotracker_setup(cam, camera_name)
 
-                self.object_types[camera_name] = cam.onvif.autotracking.track
-                self.required_zones[camera_name] = cam.onvif.autotracking.required_zones
+    def _autotracker_setup(self, cam, camera_name):
+        logger.debug(f"Autotracker init for cam: {camera_name}")
 
-                self.tracked_object[camera_name] = None
-                self.tracked_object_previous[camera_name] = None
+        self.object_types[camera_name] = cam.onvif.autotracking.track
+        self.required_zones[camera_name] = cam.onvif.autotracking.required_zones
 
-                self.move_queues[camera_name] = queue.Queue()
+        self.tracked_object[camera_name] = None
+        self.tracked_object_previous[camera_name] = None
 
-                if not onvif.cams[camera_name]["init"]:
-                    if not self.onvif._init_onvif(camera_name):
-                        return
-                    if not onvif.cams[camera_name]["relative_fov_supported"]:
-                        cam.onvif.autotracking.enabled = False
-                        self.camera_metrics[camera_name][
-                            "ptz_autotracker_enabled"
-                        ].value = False
-                        logger.warning(
-                            f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
-                        )
+        self.move_queues[camera_name] = queue.Queue()
 
-                        return
+        if not self.onvif.cams[camera_name]["init"]:
+            if not self.onvif._init_onvif(camera_name):
+                return
+            if not self.onvif.cams[camera_name]["relative_fov_supported"]:
+                cam.onvif.autotracking.enabled = False
+                self.camera_metrics[camera_name][
+                    "ptz_autotracker_enabled"
+                ].value = False
+                logger.warning(
+                    f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
+                )
 
-                    # movement thread per camera
-                    self.move_threads[camera_name] = threading.Thread(
-                        target=partial(self._process_move_queue, camera_name)
-                    )
-                    self.move_threads[camera_name].daemon = True
-                    self.move_threads[camera_name].start()
+                return
+
+            # movement thread per camera
+            if not self.move_threads or not self.move_threads[camera_name]:
+                self.move_threads[camera_name] = threading.Thread(
+                    target=partial(self._process_move_queue, camera_name)
+                )
+                self.move_threads[camera_name].daemon = True
+                self.move_threads[camera_name].start()
+
+            self.autotracker_init[camera_name] = True
 
     def _process_move_queue(self, camera):
         while True:
@@ -314,6 +322,8 @@ class PtzAutoTracker:
         autotracker_config = self.config.cameras[camera].onvif.autotracking
 
         if autotracker_config.enabled:
+            if not self.autotracker_init[camera]:
+                self._autotracker_setup(self.config.cameras[camera], camera)
             # regularly update camera status
             if self.camera_metrics[camera]["ptz_moving"].value:
                 self.onvif.get_camera_status(camera)
