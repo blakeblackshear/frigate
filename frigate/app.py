@@ -13,7 +13,6 @@ from typing import Optional
 import faster_fifo as ff
 import psutil
 from faster_fifo import Queue
-from frigate.util import LimitedQueue as LQueue
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -48,6 +47,7 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
+from frigate.util import LimitedQueue as LQueue
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog

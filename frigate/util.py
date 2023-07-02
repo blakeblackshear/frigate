@@ -9,22 +9,24 @@ import re
 import shlex
 import signal
 import subprocess as sp
+import time
 import traceback
 import urllib.parse
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
+from queue import Empty, Full
 from typing import Any, AnyStr, Optional, Tuple
-from faster_fifo import Queue as FFQueue, DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
-from queue import Full, Empty
-import time
+
 import cv2
 import numpy as np
 import psutil
 import py3nvml.py3nvml as nvml
 import pytz
 import yaml
+from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
+from faster_fifo import Queue as FFQueue
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
