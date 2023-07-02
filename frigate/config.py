@@ -129,17 +129,10 @@ class MqttConfig(FrigateBaseModel):
 
 class PtzAutotrackConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable PTZ auto tracking.")
-    motion_estimator: bool = Field(default=False, title="Use Norfair motion estimator.")
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to begin autotracking.",
-    )
-    size_ratio: float = Field(
-        default=0.5,
-        title="Target ratio of tracked object to field of view (0.2-0.9).",
-        ge=0.2,
-        le=0.9,
     )
     return_preset: Optional[str] = Field(
         title="Name of camera preset to return to when object tracking is over."

@@ -239,10 +239,7 @@ class NorfairTracker(ObjectTracker):
 
         coord_transformations = None
 
-        if (
-            self.ptz_autotracker_enabled
-            and self.camera_config.onvif.autotracking.motion_estimator
-        ):
+        if self.ptz_autotracker_enabled:
             coord_transformations = self.ptz_motion_estimator.motion_estimator(
                 detections, frame_time, self.camera_name
             )
