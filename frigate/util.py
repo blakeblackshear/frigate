@@ -1300,28 +1300,25 @@ class LimitedQueue(FFQueue):
         self.size = multiprocessing.RawValue(
             ctypes.c_int, 0
         )  # Add a counter for the number of items in the queue
-        self.lock = multiprocessing.Lock()  # Add a lock
 
     def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
-        with self.lock:  # Acquire the lock
-            if self.maxsize > 0 and self.size.value >= self.maxsize:
-                if block:
-                    start_time = time.time()
-                    while self.size.value >= self.maxsize:
-                        remaining = timeout - (time.time() - start_time)
-                        if remaining <= 0.0:
-                            raise Full
-                        time.sleep(min(remaining, 0.1))
-                else:
-                    raise Full
-            self.size.value += 1
+        if self.maxsize > 0 and self.size.value >= self.maxsize:
+            if block:
+                start_time = time.time()
+                while self.size.value >= self.maxsize:
+                    remaining = timeout - (time.time() - start_time)
+                    if remaining <= 0.0:
+                        raise Full
+                    time.sleep(min(remaining, 0.1))
+            else:
+                raise Full
+        self.size.value += 1
         return super().put(x, block=block, timeout=timeout)
 
     def get(self, block=True, timeout=DEFAULT_TIMEOUT):
-        with self.lock:  # Acquire the lock
-            if self.size.value <= 0 and not block:
-                raise Empty
-            self.size.value -= 1
+        if self.size.value <= 0 and not block:
+            raise Empty
+        self.size.value -= 1
         return super().get(block=block, timeout=timeout)
 
     def qsize(self):
