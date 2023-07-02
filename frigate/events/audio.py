@@ -13,6 +13,7 @@ import numpy as np
 import requests
 from setproctitle import setproctitle
 
+from frigate.comms.stream_metadata import StreamMetadataCommunicator
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import (
     AUDIO_DURATION,
@@ -50,6 +51,7 @@ def get_ffmpeg_command(input_args: list[str], input_path: str, pipe: str) -> lis
 def listen_to_audio(
     config: FrigateConfig,
     process_info: dict[str, FeatureMetricsTypes],
+    stream_metadata_communicator: StreamMetadataCommunicator,
 ) -> None:
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
@@ -73,7 +75,9 @@ def listen_to_audio(
 
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled_in_config:
-            audio = AudioEventMaintainer(camera, process_info, stop_event)
+            audio = AudioEventMaintainer(
+                camera, process_info, stop_event, stream_metadata_communicator
+            )
             audio_threads.append(audio)
             audio.start()
 
@@ -143,11 +147,13 @@ class AudioEventMaintainer(threading.Thread):
         camera: CameraConfig,
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
+        stream_metadata_communicator: StreamMetadataCommunicator,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
         self.feature_metrics = feature_metrics
+        self.stream_metadata_communicator = stream_metadata_communicator
         self.detections: dict[dict[str, any]] = feature_metrics
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event)
@@ -174,14 +180,13 @@ class AudioEventMaintainer(threading.Thread):
 
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
         # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
-        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2))).astype(np.float64)
+        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2)))
 
         # Transform RMS to dBFS (decibels relative to full scale)
         dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
 
-        requests.post(
-            f"http://127.0.0.1:5000/api/{self.config.name}/metadata",
-            json={"dBFS": dBFS, "rms": rms},
+        self.stream_metadata_communicator.queue.put(
+            (self.config.name, {"dBFS": float(dBFS), "rms": float(rms)})
         )
 
         for label, score, _ in model_detections:

@@ -18,6 +18,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.stream_metadata import StreamMetadataCommunicator
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -205,6 +206,9 @@ class FrigateApp:
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
 
+        # Queue for streams metadata
+        self.stream_metadata_queue: Queue = mp.Queue()
+
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
             db.execute_sql("VACUUM;")
@@ -293,6 +297,11 @@ class FrigateApp:
             self.config, self.event_queue
         )
 
+    def init_stream_metadata_communicator(self) -> None:
+        self.stream_metadata_communicator = StreamMetadataCommunicator(
+            self.stream_metadata_queue
+        )
+
     def init_web_server(self) -> None:
         self.flask_app = create_app(
             self.config,
@@ -316,6 +325,8 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         comms.append(WebSocketClient(self.config))
+        comms.append(self.stream_metadata_communicator)
+
         self.dispatcher = Dispatcher(
             self.config,
             self.onvif_controller,
@@ -434,7 +445,11 @@ class FrigateApp:
             audio_process = mp.Process(
                 target=listen_to_audio,
                 name="audio_capture",
-                args=(self.config, self.feature_metrics),
+                args=(
+                    self.config,
+                    self.feature_metrics,
+                    self.stream_metadata_communicator,
+                ),
             )
             audio_process.daemon = True
             audio_process.start()
@@ -526,6 +541,7 @@ class FrigateApp:
             self.init_recording_manager()
             self.init_go2rtc()
             self.bind_database()
+            self.init_stream_metadata_communicator()
             self.init_dispatcher()
         except Exception as e:
             print(e)
@@ -595,6 +611,7 @@ class FrigateApp:
             self.detected_frames_queue,
             self.recordings_info_queue,
             self.log_queue,
+            self.stream_metadata_queue,
         ]:
             while not queue.empty():
                 queue.get_nowait()
