@@ -493,7 +493,8 @@ class CameraState:
 
                 # draw thicker box around ptz autotracked object
                 if (
-                    self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
+                    self.camera_config.onvif.autotracking.enabled
+                    and self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
                         self.name
                     ]
                     is not None
