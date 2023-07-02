@@ -13,7 +13,7 @@ import numpy as np
 import requests
 from setproctitle import setproctitle
 
-from frigate.comms.stream_metadata import StreamMetadataCommunicator
+from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import (
     AUDIO_DURATION,
@@ -51,7 +51,7 @@ def get_ffmpeg_command(input_args: list[str], input_path: str, pipe: str) -> lis
 def listen_to_audio(
     config: FrigateConfig,
     process_info: dict[str, FeatureMetricsTypes],
-    stream_metadata_communicator: StreamMetadataCommunicator,
+    inter_process_communicator: InterProcessCommunicator,
 ) -> None:
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
@@ -76,7 +76,7 @@ def listen_to_audio(
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled_in_config:
             audio = AudioEventMaintainer(
-                camera, process_info, stop_event, stream_metadata_communicator
+                camera, process_info, stop_event, inter_process_communicator
             )
             audio_threads.append(audio)
             audio.start()
@@ -147,13 +147,13 @@ class AudioEventMaintainer(threading.Thread):
         camera: CameraConfig,
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
-        stream_metadata_communicator: StreamMetadataCommunicator,
+        inter_process_communicator: InterProcessCommunicator,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
         self.feature_metrics = feature_metrics
-        self.stream_metadata_communicator = stream_metadata_communicator
+        self.inter_process_communicator = inter_process_communicator
         self.detections: dict[dict[str, any]] = feature_metrics
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event)
@@ -178,16 +178,7 @@ class AudioEventMaintainer(threading.Thread):
         waveform = audio_as_float / AUDIO_MAX_BIT_RANGE
         model_detections = self.detector.detect(waveform)
 
-        # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
-        # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
-        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2)))
-
-        # Transform RMS to dBFS (decibels relative to full scale)
-        dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
-
-        self.stream_metadata_communicator.queue.put(
-            (self.config.name, {"dBFS": float(dBFS), "rms": float(rms)})
-        )
+        self.calculate_audio_levels(audio_as_float)
 
         for label, score, _ in model_detections:
             if label not in self.config.audio.listen:
@@ -196,6 +187,21 @@ class AudioEventMaintainer(threading.Thread):
             self.handle_detection(label, score)
 
         self.expire_detections()
+
+    def calculate_audio_levels(self, audio_as_float: np.float32) -> None:
+        # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
+        # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
+        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2)))
+
+        # Transform RMS to dBFS (decibels relative to full scale)
+        dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
+
+        self.inter_process_communicator.queue.put(
+            (f"{self.config.name}/metadata/dBFS", float(dBFS))
+        )
+        self.inter_process_communicator.queue.put(
+            (f"{self.config.name}/metadata/rms", float(rms))
+        )
 
     def handle_detection(self, label: str, score: float) -> None:
         if self.detections.get(label):

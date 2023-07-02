@@ -9,13 +9,10 @@ from faster_fifo import Queue
 from frigate.comms.dispatcher import Communicator
 
 
-class StreamMetadataCommunicator(Communicator):
+class InterProcessCommunicator(Communicator):
     def __init__(self, queue: Queue) -> None:
         self.queue = queue
         self.stop_event: MpEvent = mp.Event()
-
-    def _get_metadata_topic(self, camera: str, metric: str) -> str:
-        return f"{camera}/metadata/{metric}"
 
     def publish(self, topic: str, payload: str, retain: bool) -> None:
         pass
@@ -29,14 +26,13 @@ class StreamMetadataCommunicator(Communicator):
         while not self.stop_event.is_set():
             try:
                 (
-                    camera,
-                    payload,
+                    topic,
+                    value,
                 ) = self.queue.get(True, 1)
             except queue.Empty:
                 continue
 
-            for field, value in payload.items():
-                self._dispatcher(self._get_metadata_topic(camera, field), value)
+            self._dispatcher(topic, value)
 
     def stop(self) -> None:
         self.stop_event.set()

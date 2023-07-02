@@ -17,8 +17,8 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
-from frigate.comms.stream_metadata import StreamMetadataCommunicator
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -206,8 +206,8 @@ class FrigateApp:
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
 
-        # Queue for streams metadata
-        self.stream_metadata_queue: Queue = mp.Queue()
+        # Queue for inter process communication
+        self.inter_process_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
@@ -297,9 +297,9 @@ class FrigateApp:
             self.config, self.event_queue
         )
 
-    def init_stream_metadata_communicator(self) -> None:
-        self.stream_metadata_communicator = StreamMetadataCommunicator(
-            self.stream_metadata_queue
+    def init_inter_process_communicator(self) -> None:
+        self.inter_process_communicator = InterProcessCommunicator(
+            self.inter_process_queue
         )
 
     def init_web_server(self) -> None:
@@ -312,7 +312,6 @@ class FrigateApp:
             self.onvif_controller,
             self.external_event_processor,
             self.plus_api,
-            self.dispatcher,
         )
 
     def init_onvif(self) -> None:
@@ -325,7 +324,7 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         comms.append(WebSocketClient(self.config))
-        comms.append(self.stream_metadata_communicator)
+        comms.append(self.inter_process_communicator)
 
         self.dispatcher = Dispatcher(
             self.config,
@@ -448,7 +447,7 @@ class FrigateApp:
                 args=(
                     self.config,
                     self.feature_metrics,
-                    self.stream_metadata_communicator,
+                    self.inter_process_communicator,
                 ),
             )
             audio_process.daemon = True
@@ -541,7 +540,7 @@ class FrigateApp:
             self.init_recording_manager()
             self.init_go2rtc()
             self.bind_database()
-            self.init_stream_metadata_communicator()
+            self.init_inter_process_communicator()
             self.init_dispatcher()
         except Exception as e:
             print(e)
@@ -611,7 +610,7 @@ class FrigateApp:
             self.detected_frames_queue,
             self.recordings_info_queue,
             self.log_queue,
-            self.stream_metadata_queue,
+            self.inter_process_queue,
         ]:
             while not queue.empty():
                 queue.get_nowait()
