@@ -440,7 +440,7 @@ def copy_yuv_to_position(
         resized_img = source_img.resize(
             (resize_dim[1], resize_dim[0]), resample=interpolation
         )
-        destination_slice[:] = np.array(resized_img)
+        destination_slice[:] = np.asarray(resized_img)
 
     def resize_copy(
         frame,
