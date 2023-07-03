@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class PtzMotionEstimator:
-    def __init__(self, config: CameraConfig, ptz_moving) -> None:
+    def __init__(self, config: CameraConfig, ptz_stopped) -> None:
         self.frame_manager = SharedMemoryFrameManager()
         # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
         self.norfair_motion_estimator = MotionEstimator(
@@ -31,11 +31,14 @@ class PtzMotionEstimator:
         )
         self.camera_config = config
         self.coord_transformations = None
-        self.ptz_moving = ptz_moving
+        self.ptz_stopped = ptz_stopped
         logger.debug(f"Motion estimator init for cam: {config.name}")
 
     def motion_estimator(self, detections, frame_time, camera_name):
-        if self.camera_config.onvif.autotracking.enabled and self.ptz_moving.value:
+        if (
+            self.camera_config.onvif.autotracking.enabled
+            and not self.ptz_stopped.is_set()
+        ):
             # logger.debug(
             #     f"Motion estimator running for {camera_name} - frame time: {frame_time}"
             # )
@@ -96,6 +99,11 @@ class PtzAutoTrackerThread(threading.Thread):
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
                     time.sleep(1)
+                else:
+                    # disabled dynamically by mqtt
+                    if self.ptz_autotracker.tracked_object.get(camera_name):
+                        self.ptz_autotracker.tracked_object[camera_name] = None
+                        self.ptz_autotracker.tracked_object_previous[camera_name] = None
             time.sleep(0.1)
         logger.info("Exiting autotracker...")
 
@@ -169,6 +177,13 @@ class PtzAutoTracker:
                     tilt = 0
 
                     while not self.move_queues[camera].empty():
+                        queued_pan, queued_tilt = self.move_queues[camera].queue[0]
+
+                        # If exceeding the movement range, keep it in the queue and move now
+                        if abs(pan + queued_pan) > 1.0 or abs(tilt + queued_tilt) > 1.0:
+                            logger.debug("Pan or tilt value exceeds 1.0")
+                            break
+
                         queued_pan, queued_tilt = self.move_queues[camera].get()
                         logger.debug(
                             f"queue pan: {queued_pan}, queue tilt: {queued_tilt}"
@@ -182,16 +197,15 @@ class PtzAutoTracker:
 
                 logger.debug(f"final pan: {pan}, final tilt: {tilt}")
 
-                self.onvif._move_relative(camera, pan, tilt, 0.1)
+                self.onvif._move_relative(camera, pan, tilt, 1)
 
                 # Wait until the camera finishes moving
-                while self.camera_metrics[camera]["ptz_moving"].value:
-                    pass
+                self.camera_metrics[camera]["ptz_stopped"].wait()
 
             except queue.Empty:
-                pass
+                time.sleep(0.1)
 
-    def enqueue_move(self, camera, pan, tilt):
+    def _enqueue_move(self, camera, pan, tilt):
         move_data = (pan, tilt)
         logger.debug(f"enqueue pan: {pan}, enqueue tilt: {tilt}")
         self.move_queues[camera].put(move_data)
@@ -208,7 +222,7 @@ class PtzAutoTracker:
         tilt = 0.5 - (obj.obj_data["centroid"][1] / camera_height)
 
         # ideas: check object velocity for camera speed?
-        self.enqueue_move(camera, -pan, tilt)
+        self._enqueue_move(camera, -pan, tilt)
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
@@ -317,35 +331,30 @@ class PtzAutoTracker:
         # returns camera to preset after timeout when tracking is over
         autotracker_config = self.config.cameras[camera].onvif.autotracking
 
-        if autotracker_config.enabled:
-            if not self.autotracker_init[camera]:
-                self._autotracker_setup(self.config.cameras[camera], camera)
-            # regularly update camera status
-            if self.camera_metrics[camera]["ptz_moving"].value:
-                self.onvif.get_camera_status(camera)
+        if not self.autotracker_init[camera]:
+            self._autotracker_setup(self.config.cameras[camera], camera)
+        # regularly update camera status
+        if not self.camera_metrics[camera]["ptz_stopped"].is_set():
+            self.onvif.get_camera_status(camera)
 
-            # return to preset if tracking is over
-            if (
-                self.tracked_object[camera] is None
-                and self.tracked_object_previous[camera] is not None
-                and (
-                    # might want to use a different timestamp here?
-                    time.time()
-                    - self.tracked_object_previous[camera].obj_data["frame_time"]
-                    > autotracker_config.timeout
-                )
-                and autotracker_config.return_preset
-                and not self.camera_metrics[camera]["ptz_moving"].value
-            ):
-                logger.debug(
-                    f"Autotrack: Time is {time.time()}, returning to preset: {autotracker_config.return_preset}"
-                )
-                self.onvif._move_to_preset(
-                    camera,
-                    autotracker_config.return_preset.lower(),
-                )
-                self.tracked_object_previous[camera] = None
-
-    def disable_autotracking(self, camera):
-        # need to call this if autotracking is disabled by mqtt??
-        self.tracked_object[camera] = None
+        # return to preset if tracking is over
+        if (
+            self.tracked_object[camera] is None
+            and self.tracked_object_previous[camera] is not None
+            and (
+                # might want to use a different timestamp here?
+                time.time()
+                - self.tracked_object_previous[camera].obj_data["frame_time"]
+                > autotracker_config.timeout
+            )
+            and autotracker_config.return_preset
+        ):
+            self.camera_metrics[camera]["ptz_stopped"].wait()
+            logger.debug(
+                f"Autotrack: Time is {time.time()}, returning to preset: {autotracker_config.return_preset}"
+            )
+            self.onvif._move_to_preset(
+                camera,
+                autotracker_config.return_preset.lower(),
+            )
+            self.tracked_object_previous[camera] = None

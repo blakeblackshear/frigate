@@ -122,7 +122,7 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].onvif.autotracking.enabled,
                 ),
-                "ptz_moving": mp.Value("i", 0),
+                "ptz_stopped": mp.Event(),
                 "motion_threshold": mp.Value(
                     "i", self.config.cameras[camera_name].motion.threshold
                 ),
@@ -137,6 +137,7 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
+            self.camera_metrics[camera_name]["ptz_stopped"].set()
             self.record_metrics[camera_name] = {
                 "record_enabled": mp.Value(
                     "i", self.config.cameras[camera_name].record.enabled

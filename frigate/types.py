@@ -17,7 +17,7 @@ class CameraMetricsTypes(TypedDict):
     motion_enabled: Synchronized
     improve_contrast_enabled: Synchronized
     ptz_autotracker_enabled: Synchronized
-    ptz_moving: Synchronized
+    ptz_stopped: Synchronized
     motion_threshold: Synchronized
     motion_contour_area: Synchronized
     process: Optional[Process]

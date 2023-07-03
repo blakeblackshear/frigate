@@ -216,7 +216,7 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.camera_metrics[camera_name]["ptz_moving"].value = True
+        self.camera_metrics[camera_name]["ptz_stopped"].clear()
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["relative_move_request"]
 
@@ -268,7 +268,7 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.camera_metrics[camera_name]["ptz_moving"].value = True
+        self.camera_metrics[camera_name]["ptz_stopped"].clear()
         move_request = self.cams[camera_name]["move_request"]
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         preset_token = self.cams[camera_name]["presets"][preset]
@@ -278,7 +278,7 @@ class OnvifController:
                 "PresetToken": preset_token,
             }
         )
-        self.camera_metrics[camera_name]["ptz_moving"].value = False
+        self.camera_metrics[camera_name]["ptz_stopped"].set()
         self.cams[camera_name]["active"] = False
 
     def _zoom(self, camera_name: str, command: OnvifCommandEnum) -> None:
@@ -350,10 +350,12 @@ class OnvifController:
         status_request = self.cams[camera_name]["status_request"]
         status = onvif.get_service("ptz").GetStatus(status_request)
 
-        self.cams[camera_name]["active"] = status.MoveStatus.PanTilt != "IDLE"
-        self.camera_metrics[camera_name]["ptz_moving"].value = (
-            status.MoveStatus.PanTilt != "IDLE"
-        )
+        if status.MoveStatus.PanTilt == "IDLE" or status.MoveStatus.Zoom == "IDLE":
+            self.cams[camera_name]["active"] = False
+            self.camera_metrics[camera_name]["ptz_stopped"].set()
+        else:
+            self.cams[camera_name]["active"] = True
+            self.camera_metrics[camera_name]["ptz_stopped"].clear()
 
         return {
             "pan": status.Position.PanTilt.x,

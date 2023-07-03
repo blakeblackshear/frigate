@@ -55,7 +55,7 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
 
 
 class NorfairTracker(ObjectTracker):
-    def __init__(self, config: CameraConfig, ptz_autotracker_enabled, ptz_moving):
+    def __init__(self, config: CameraConfig, ptz_autotracker_enabled, ptz_stopped):
         self.tracked_objects = {}
         self.disappeared = {}
         self.positions = {}
@@ -63,7 +63,7 @@ class NorfairTracker(ObjectTracker):
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_autotracker_enabled = ptz_autotracker_enabled.value
-        self.ptz_moving = ptz_moving
+        self.ptz_stopped = ptz_stopped
         self.camera_name = config.name
         self.track_id_map = {}
         # TODO: could also initialize a tracker per object class if there
@@ -75,7 +75,7 @@ class NorfairTracker(ObjectTracker):
             hit_counter_max=self.max_disappeared,
         )
         if self.ptz_autotracker_enabled:
-            self.ptz_motion_estimator = PtzMotionEstimator(config, self.ptz_moving)
+            self.ptz_motion_estimator = PtzMotionEstimator(config, self.ptz_stopped)
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
