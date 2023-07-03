@@ -168,6 +168,7 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
+            self.camera_metrics[camera_name]["ptz_stopped"].set()
             self.feature_metrics[camera_name] = {
                 "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
