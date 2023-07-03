@@ -109,11 +109,19 @@ Same data available at `/api/stats` published at a configurable interval.
 
 ### `frigate/<camera_name>/detect/set`
 
-Topic to turn detection for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/detect/state`
 
-Topic with current state of detection for a camera. Published values are `ON` and `OFF`.
+Topic with current state of object detection for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/audio/set`
+
+Topic to turn audio detection for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/audio/state`
+
+Topic with current state of audio detection for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/recordings/set`
 

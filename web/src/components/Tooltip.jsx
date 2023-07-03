@@ -29,7 +29,7 @@ export default function Tooltip({ relativeTo, text }) {
       let newLeft = left - Math.round(tipWidth / 2);
       // too far right
       if (newLeft + tipWidth + TIP_SPACE > windowWidth - window.scrollX) {
-        newLeft = left - tipWidth - TIP_SPACE;
+        newLeft = Math.max(0, left - tipWidth - TIP_SPACE);
         newTop = top - Math.round(tipHeight / 2);
       }
       // too far left

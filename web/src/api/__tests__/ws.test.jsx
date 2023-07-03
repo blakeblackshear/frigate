@@ -113,8 +113,8 @@ describe('WsProvider', () => {
     vi.spyOn(Date, 'now').mockReturnValue(123456);
     const config = {
       cameras: {
-        front: { name: 'front', detect: { enabled: true }, record: { enabled: false }, snapshots: { enabled: true } },
-        side: { name: 'side', detect: { enabled: false }, record: { enabled: false }, snapshots: { enabled: false } },
+        front: { name: 'front', detect: { enabled: true }, record: { enabled: false }, snapshots: { enabled: true }, audio: { enabled: false } },
+        side: { name: 'side', detect: { enabled: false }, record: { enabled: false }, snapshots: { enabled: false }, audio: { enabled: false } },
       },
     };
     render(

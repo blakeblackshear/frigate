@@ -410,6 +410,24 @@ def set_sub_label(id):
     )
 
 
+@bp.route("/labels")
+def get_labels():
+    camera = request.args.get("camera", type=str, default="")
+
+    try:
+        if camera:
+            events = Event.select(Event.label).where(Event.camera == camera).distinct()
+        else:
+            events = Event.select(Event.label).distinct()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        )
+
+    labels = sorted([e.label for e in events])
+    return jsonify(labels)
+
+
 @bp.route("/sub_labels")
 def get_sub_labels():
     split_joined = request.args.get("split_joined", type=int)
@@ -890,8 +908,11 @@ def create_event(camera_name, label):
 
 @bp.route("/events/<event_id>/end", methods=["PUT"])
 def end_event(event_id):
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
     try:
-        current_app.external_processor.finish_manual_event(event_id)
+        end_time = json.get("end_time", datetime.now().timestamp())
+        current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404
@@ -1099,6 +1120,15 @@ def latest_frame(camera_name):
 
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
+
+        if frame is None:
+            return "Unable to get valid frame from {}".format(camera_name), 500
+
+        if height < 1 or width < 1:
+            return (
+                "Invalid height / width requested :: {} / {}".format(height, width),
+                400,
+            )
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 

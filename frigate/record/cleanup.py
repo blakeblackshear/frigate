@@ -8,10 +8,10 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import DatabaseError, DoesNotExist, chunked
+from peewee import DatabaseError, chunked
 
 from frigate.config import FrigateConfig, RetainModeEnum
-from frigate.const import RECORD_DIR, SECONDS_IN_DAY
+from frigate.const import RECORD_DIR
 from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.record.util import remove_empty_directories
 
@@ -28,7 +28,7 @@ class RecordingCleanup(threading.Thread):
         self.stop_event = stop_event
 
     def clean_tmp_clips(self) -> None:
-        # delete any clips more than 5 minutes old
+        """delete any clips in the cache that are more than 5 minutes old."""
         for p in Path("/tmp/cache").rglob("clip_*.mp4"):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
@@ -40,8 +40,8 @@ class RecordingCleanup(threading.Thread):
                 p.unlink(missing_ok=True)
 
     def expire_recordings(self) -> None:
-        logger.debug("Start expire recordings (new).")
-
+        """Delete recordings based on retention config."""
+        logger.debug("Start expire recordings.")
         logger.debug("Start deleted cameras.")
         # Handle deleted cameras
         expire_days = self.config.record.retain.days
@@ -161,59 +161,10 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"End camera: {camera}.")
 
         logger.debug("End all cameras.")
-        logger.debug("End expire recordings (new).")
-
-    def expire_files(self) -> None:
-        logger.debug("Start expire files (legacy).")
-
-        default_expire = (
-            datetime.datetime.now().timestamp()
-            - SECONDS_IN_DAY * self.config.record.retain.days
-        )
-        delete_before = {}
-
-        for name, camera in self.config.cameras.items():
-            delete_before[name] = (
-                datetime.datetime.now().timestamp()
-                - SECONDS_IN_DAY * camera.record.retain.days
-            )
-
-        # find all the recordings older than the oldest recording in the db
-        try:
-            oldest_recording = (
-                Recordings.select().order_by(Recordings.start_time).limit(1).get()
-            )
-
-            p = Path(oldest_recording.path)
-            oldest_timestamp = p.stat().st_mtime - 1
-        except DoesNotExist:
-            oldest_timestamp = datetime.datetime.now().timestamp()
-        except FileNotFoundError:
-            logger.warning(f"Unable to find file from recordings database: {p}")
-            Recordings.delete().where(Recordings.id == oldest_recording.id).execute()
-            return
-
-        logger.debug(f"Oldest recording in the db: {oldest_timestamp}")
-
-        files_to_check = []
-
-        for root, _, files in os.walk(RECORD_DIR):
-            for file in files:
-                file_path = os.path.join(root, file)
-                if os.path.getmtime(file_path) < oldest_timestamp:
-                    files_to_check.append(file_path)
-
-        for f in files_to_check:
-            p = Path(f)
-            try:
-                if p.stat().st_mtime < delete_before.get(p.parent.name, default_expire):
-                    p.unlink(missing_ok=True)
-            except FileNotFoundError:
-                logger.warning(f"Attempted to expire missing file: {f}")
-
-        logger.debug("End expire files (legacy).")
+        logger.debug("End expire recordings.")
 
     def sync_recordings(self) -> None:
+        """Check the db for stale recordings entries that don't exist in the filesystem."""
         logger.debug("Start sync recordings.")
 
         # get all recordings in the db
@@ -283,5 +234,4 @@ class RecordingCleanup(threading.Thread):
 
             if counter == 0:
                 self.expire_recordings()
-                self.expire_files()
                 remove_empty_directories(RECORD_DIR)
