@@ -147,7 +147,12 @@ class PtzAutoTracker:
             if not self.onvif._init_onvif(camera_name):
                 logger.warning(f"Unable to initialize onvif for {camera_name}")
                 cam.onvif.autotracking.enabled = False
+                self.camera_metrics[camera_name][
+                    "ptz_autotracker_enabled"
+                ].value = False
+
                 return
+
             if not self.onvif.cams[camera_name]["relative_fov_supported"]:
                 cam.onvif.autotracking.enabled = False
                 self.camera_metrics[camera_name][
