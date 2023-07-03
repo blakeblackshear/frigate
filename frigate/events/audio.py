@@ -187,7 +187,7 @@ class AudioEventMaintainer(threading.Thread):
         else:
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None},
+                json={"duration": None, "source_type": "audio"},
             )
 
             if resp.status_code == 200:

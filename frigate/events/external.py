@@ -29,6 +29,7 @@ class ExternalEventProcessor:
         self,
         camera: str,
         label: str,
+        source_type: str,
         sub_label: Optional[str],
         duration: Optional[int],
         include_recording: bool,
@@ -61,6 +62,7 @@ class ExternalEventProcessor:
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
+                    "type": source_type,
                 },
             )
         )
