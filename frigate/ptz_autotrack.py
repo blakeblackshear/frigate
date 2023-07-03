@@ -39,9 +39,9 @@ class PtzMotionEstimator:
             self.camera_config.onvif.autotracking.enabled
             and not self.ptz_stopped.is_set()
         ):
-            # logger.debug(
-            #     f"Motion estimator running for {camera_name} - frame time: {frame_time}"
-            # )
+            logger.debug(
+                f"Motion estimator running for {camera_name} - frame time: {frame_time}"
+            )
 
             frame_id = f"{camera_name}{frame_time}"
             yuv_frame = self.frame_manager.get(
@@ -70,9 +70,9 @@ class PtzMotionEstimator:
 
             self.frame_manager.close(frame_id)
 
-            # logger.debug(
-            #     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
-            # )
+            logger.debug(
+                f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
+            )
 
             return self.coord_transformations
 
@@ -185,17 +185,12 @@ class PtzAutoTracker:
                             break
 
                         queued_pan, queued_tilt = self.move_queues[camera].get()
-                        logger.debug(
-                            f"queue pan: {queued_pan}, queue tilt: {queued_tilt}"
-                        )
+
                         pan += queued_pan
                         tilt += queued_tilt
                 else:
                     move_data = self.move_queues[camera].get()
                     pan, tilt = move_data
-                    logger.debug(f"removing pan: {pan}, removing tilt: {tilt}")
-
-                logger.debug(f"final pan: {pan}, final tilt: {tilt}")
 
                 self.onvif._move_relative(camera, pan, tilt, 1)
 
