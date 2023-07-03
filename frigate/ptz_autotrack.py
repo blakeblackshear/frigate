@@ -207,11 +207,6 @@ class PtzAutoTracker:
         pan = 0.5 - (obj.obj_data["centroid"][0] / camera_width)
         tilt = 0.5 - (obj.obj_data["centroid"][1] / camera_height)
 
-        # Calculate zoom amount
-        size_ratio = camera_config.onvif.autotracking.size_ratio
-        int(size_ratio * camera_width)
-        int(size_ratio * camera_height)
-
         # ideas: check object velocity for camera speed?
         self.enqueue_move(camera, -pan, tilt)
 
@@ -222,8 +217,8 @@ class PtzAutoTracker:
         self.onvif.get_camera_status(camera)
 
         if camera_config.onvif.autotracking.enabled:
-            # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive, and is not initially motionless
-            # or one we're already tracking, which assumes all those things are already true
+            # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
+            # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
                 # new object
                 self.tracked_object[camera] is None
