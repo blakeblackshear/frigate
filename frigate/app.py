@@ -372,8 +372,8 @@ class FrigateApp:
     def start_ptz_autotracker(self) -> None:
         self.ptz_autotracker_thread = PtzAutoTrackerThread(
             self.config,
-            self.dispatcher.onvif,
-            self.dispatcher.camera_metrics,
+            self.onvif_controller,
+            self.camera_metrics,
             self.stop_event,
         )
         self.ptz_autotracker_thread.start()
