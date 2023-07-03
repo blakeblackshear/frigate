@@ -133,7 +133,9 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].motion.improve_contrast,
                 ),
-                "ptz_autotracker_enabled": mp.Value(
+                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
                     "i",
                     self.config.cameras[camera_name].onvif.autotracking.enabled,
                 ),
@@ -166,10 +168,19 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
-            self.record_metrics[camera_name] = {
-                "record_enabled": mp.Value(
-                    "i", self.config.cameras[camera_name].record.enabled
-                )
+            self.feature_metrics[camera_name] = {
+                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].audio.enabled,
+                ),
+                "record_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].record.enabled,
+                ),
             }
 
     def set_log_levels(self) -> None:
