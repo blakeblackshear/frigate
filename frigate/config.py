@@ -136,7 +136,8 @@ class PtzAutotrackConfig(FrigateBaseModel):
         title="List of required zones to be entered in order to begin autotracking.",
     )
     return_preset: str = Field(
-        title="Name of camera preset to return to when object tracking is over."
+        default="home",
+        title="Name of camera preset to return to when object tracking is over.",
     )
     timeout: int = Field(
         default=10, title="Seconds to delay before returning to preset."
