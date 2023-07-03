@@ -1235,6 +1235,13 @@ def update_yaml_file(file_path, key_path, new_value):
     with open(file_path, "r") as f:
         data = yaml.load(f)
 
+    data = update_yaml(data, key_path, new_value)
+
+    with open(file_path, "w") as f:
+        yaml.dump(data, f)
+
+
+def update_yaml(data, key_path, new_value):
     temp = data
     for key in key_path[:-1]:
         if isinstance(key, tuple):
@@ -1271,5 +1278,4 @@ def update_yaml_file(file_path, key_path, new_value):
             else:
                 temp[last_key] = new_value
 
-    with open(file_path, "w") as f:
-        yaml.dump(data, f)
+    return data
