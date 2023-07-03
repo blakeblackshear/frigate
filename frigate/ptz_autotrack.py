@@ -84,7 +84,7 @@ class PtzAutoTrackerThread(threading.Thread):
         self,
         config: FrigateConfig,
         onvif: OnvifController,
-        camera_metrics: CameraMetricsTypes,
+        camera_metrics: dict[str, CameraMetricsTypes],
         stop_event: MpEvent,
     ) -> None:
         threading.Thread.__init__(self)
