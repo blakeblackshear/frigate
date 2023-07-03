@@ -13,7 +13,7 @@ import numpy as np
 from norfair.camera_motion import MotionEstimator, TranslationTransformationGetter
 
 from frigate.config import CameraConfig, FrigateConfig
-from frigate.ptz import OnvifController
+from frigate.ptz.onvif import OnvifController
 from frigate.types import CameraMetricsTypes
 from frigate.util import SharedMemoryFrameManager, intersection_over_union
 

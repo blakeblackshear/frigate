@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from frigate.config import FrigateConfig
-from frigate.ptz import OnvifCommandEnum, OnvifController
+from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util import restart_frigate
 
