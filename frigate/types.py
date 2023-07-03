@@ -1,5 +1,6 @@
 from multiprocessing.context import Process
 from multiprocessing.sharedctypes import Synchronized
+from multiprocessing.synchronize import Event
 from typing import Optional, TypedDict
 
 from faster_fifo import Queue
@@ -18,7 +19,7 @@ class CameraMetricsTypes(TypedDict):
     motion_enabled: Synchronized
     improve_contrast_enabled: Synchronized
     ptz_autotracker_enabled: Synchronized
-    ptz_stopped: Synchronized
+    ptz_stopped: Event
     motion_threshold: Synchronized
     motion_contour_area: Synchronized
     process: Optional[Process]
