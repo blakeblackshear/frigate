@@ -912,6 +912,17 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
                 )
 
 
+def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
+    """Verify that required_zones are specified when autotracking is enabled."""
+    if (
+        camera_config.onvif.autotracking.enabled
+        and not camera_config.onvif.autotracking.required_zones
+    ):
+        raise ValueError(
+            f"Camera {camera_config.name} has autotracking enabled, required_zones must be set to at least one of the camera's zones."
+        )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -1087,6 +1098,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
+            verify_autotrack_zones(camera_config)
 
             if camera_config.rtmp.enabled:
                 logger.warning(
