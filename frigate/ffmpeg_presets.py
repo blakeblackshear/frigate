@@ -2,7 +2,6 @@
 
 import logging
 import os
-import subprocess
 from enum import Enum
 from typing import Any
 
@@ -43,10 +42,7 @@ class LibvaGpuSelector:
         return ""
 
 
-LIBAVFORMAT_VERSION_MAJOR = int(
-    subprocess.getoutput("ffmpeg -version | grep -Po 'libavformat\W+\K\d+'")
-)
-TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
+TIMEOUT_PARAM = "-timeout" if int(os.environ['LIBAVFORMAT_VERSION_MAJOR']) >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
