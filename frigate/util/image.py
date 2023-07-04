@@ -573,6 +573,7 @@ def clipped(obj, frame_shape):
     else:
         return False
 
+
 class FrameManager(ABC):
     @abstractmethod
     def create(self, name, size) -> AnyStr:
@@ -638,6 +639,7 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]
+
 
 def create_mask(frame_shape, mask):
     mask_img = np.zeros(frame_shape, np.uint8)
