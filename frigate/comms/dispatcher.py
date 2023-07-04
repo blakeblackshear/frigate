@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from frigate.config import FrigateConfig
 from frigate.ptz import OnvifCommandEnum, OnvifController
-from frigate.types import CameraMetricsTypes, RecordMetricsTypes
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util import restart_frigate
 
 logger = logging.getLogger(__name__)
@@ -39,19 +39,20 @@ class Dispatcher:
         config: FrigateConfig,
         onvif: OnvifController,
         camera_metrics: dict[str, CameraMetricsTypes],
-        record_metrics: dict[str, RecordMetricsTypes],
+        feature_metrics: dict[str, FeatureMetricsTypes],
         communicators: list[Communicator],
     ) -> None:
         self.config = config
         self.onvif = onvif
         self.camera_metrics = camera_metrics
-        self.record_metrics = record_metrics
+        self.feature_metrics = feature_metrics
         self.comms = communicators
 
         for comm in self.comms:
             comm.subscribe(self._receive)
 
         self._camera_settings_handlers: dict[str, Callable] = {
+            "audio": self._on_audio_command,
             "detect": self._on_detect_command,
             "improve_contrast": self._on_motion_improve_contrast_command,
             "motion": self._on_motion_command,
@@ -186,6 +187,29 @@ class Dispatcher:
         motion_settings.threshold = payload  # type: ignore[union-attr]
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
 
+    def _on_audio_command(self, camera_name: str, payload: str) -> None:
+        """Callback for audio topic."""
+        audio_settings = self.config.cameras[camera_name].audio
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].audio.enabled_in_config:
+                logger.error(
+                    "Audio detection must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not audio_settings.enabled:
+                logger.info(f"Turning on audio detection for {camera_name}")
+                audio_settings.enabled = True
+                self.feature_metrics[camera_name]["audio_enabled"].value = True
+        elif payload == "OFF":
+            if self.feature_metrics[camera_name]["audio_enabled"].value:
+                logger.info(f"Turning off audio detection for {camera_name}")
+                audio_settings.enabled = False
+                self.feature_metrics[camera_name]["audio_enabled"].value = False
+
+        self.publish(f"{camera_name}/audio/state", payload, retain=True)
+
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
         """Callback for recordings topic."""
         record_settings = self.config.cameras[camera_name].record
@@ -200,12 +224,12 @@ class Dispatcher:
             if not record_settings.enabled:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
-                self.record_metrics[camera_name]["record_enabled"].value = True
+                self.feature_metrics[camera_name]["record_enabled"].value = True
         elif payload == "OFF":
-            if self.record_metrics[camera_name]["record_enabled"].value:
+            if self.feature_metrics[camera_name]["record_enabled"].value:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
-                self.record_metrics[camera_name]["record_enabled"].value = False
+                self.feature_metrics[camera_name]["record_enabled"].value = False
 
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 

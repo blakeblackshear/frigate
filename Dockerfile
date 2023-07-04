@@ -18,10 +18,13 @@ WORKDIR /rootfs
 
 FROM base AS nginx
 ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
 
 # bind /var/cache/apt to tmpfs to speed up nginx build
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=bind,source=docker/build_nginx.sh,target=/deps/build_nginx.sh \
+    --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
 FROM wget AS go2rtc
@@ -61,14 +64,16 @@ RUN mkdir /models \
 FROM wget as libusb-build
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 WORKDIR /opt
-RUN apt-get update && apt-get install -y unzip build-essential automake libtool
-RUN wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
+RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache
+RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
     unzip v1.0.25.zip && cd libusb-1.0.25 && \
     ./bootstrap.sh && \
-    ./configure --disable-udev --enable-shared && \
+    ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
     make -j $(nproc --all)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libusb-1.0-0-dev && \
@@ -93,7 +98,9 @@ COPY labelmap.txt .
 COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
-
+# Get Audio Model and labels
+RUN wget -qO cpu_audio_model.tflite https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite
+COPY audio-labelmap.txt .
 
 
 FROM wget AS s6-overlay
@@ -127,7 +134,9 @@ RUN apt-get -qq update \
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # scipy dependencies
-    gcc gfortran libopenblas-dev liblapack-dev && \
+    gcc gfortran libopenblas-dev liblapack-dev \
+    # faster-fifo dependencies
+    g++ cython3 && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \

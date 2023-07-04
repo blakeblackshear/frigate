@@ -29,6 +29,7 @@ import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../uti
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
+import TimelineEventOverlay from '../components/TimelineEventOverlay';
 import ViewOption from '../components/ViewOption';
 
 const API_LIMIT = 25;
@@ -107,6 +108,7 @@ export default function Events({ path, ...props }) {
 
   const { data: config } = useSWR('config');
 
+  const { data: allLabels } = useSWR(['labels']);
   const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
 
   const filterValues = useMemo(
@@ -121,15 +123,10 @@ export default function Events({ path, ...props }) {
           .filter((value, i, self) => self.indexOf(value) === i),
         'None',
       ],
-      labels: Object.values(config?.cameras || {})
-        .reduce((memo, camera) => {
-          memo = memo.concat(camera?.objects?.track || []);
-          return memo;
-        }, config?.objects?.track || [])
-        .filter((value, i, self) => self.indexOf(value) === i),
+      labels: Object.values(allLabels || {}),
       sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
-    [config, allSubLabels]
+    [config, allLabels, allSubLabels]
   );
 
   const onSave = async (e, eventId, save) => {
@@ -724,23 +721,10 @@ export default function Events({ path, ...props }) {
                                   }}
                                 >
                                   {eventOverlay ? (
-                                    <div
-                                      className="absolute border-4 border-red-600"
-                                      style={{
-                                        left: `${Math.round(eventOverlay.data.box[0] * 100)}%`,
-                                        top: `${Math.round(eventOverlay.data.box[1] * 100)}%`,
-                                        right: `${Math.round(
-                                          (1 - eventOverlay.data.box[2] - eventOverlay.data.box[0]) * 100
-                                        )}%`,
-                                        bottom: `${Math.round(
-                                          (1 - eventOverlay.data.box[3] - eventOverlay.data.box[1]) * 100
-                                        )}%`,
-                                      }}
-                                    >
-                                      {eventOverlay.class_type == 'entered_zone' ? (
-                                        <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] -translate-x-1/2 translate-y-3/4 bottom-0" />
-                                      ) : null}
-                                    </div>
+                                    <TimelineEventOverlay
+                                      eventOverlay={eventOverlay}
+                                      cameraConfig={config.cameras[event.camera]}
+                                    />
                                   ) : null}
                                 </VideoPlayer>
                               </div>

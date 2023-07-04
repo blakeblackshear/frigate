@@ -282,6 +282,13 @@ PRESETS_INPUT = {
         "-use_wallclock_as_timestamps",
         "1",
     ],
+    "preset-rtsp-audio-only": [
+        "-rtsp_transport",
+        "tcp",
+        TIMEOUT_PARAM,
+        "5000000",
+        "-vn",
+    ],
     "preset-rtsp-restream": _user_agent_args
     + [
         "-rtsp_transport",

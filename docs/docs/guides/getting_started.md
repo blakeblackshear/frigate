@@ -71,7 +71,7 @@ cameras:
       ...
 ```
 
-More details on available detectors can be found [here](../configuration/detectors.md).
+More details on available detectors can be found [here](../configuration/object_detectors.md).
 
 Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they will need to be added according to the [configuration file reference](../configuration/index.md#full-configuration-reference).
 

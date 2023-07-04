@@ -650,34 +650,42 @@ def restart_frigate():
 
 
 class EventsPerSecond:
-    def __init__(self, max_events=1000):
+    def __init__(self, max_events=1000, last_n_seconds=10):
         self._start = None
         self._max_events = max_events
+        self._last_n_seconds = last_n_seconds
         self._timestamps = []
 
     def start(self):
         self._start = datetime.datetime.now().timestamp()
 
     def update(self):
+        now = datetime.datetime.now().timestamp()
         if self._start is None:
-            self.start()
-        self._timestamps.append(datetime.datetime.now().timestamp())
+            self._start = now
+        self._timestamps.append(now)
         # truncate the list when it goes 100 over the max_size
         if len(self._timestamps) > self._max_events + 100:
             self._timestamps = self._timestamps[(1 - self._max_events) :]
+        self.expire_timestamps(now)
 
-    def eps(self, last_n_seconds=10):
-        if self._start is None:
-            self.start()
-        # compute the (approximate) events in the last n seconds
+    def eps(self):
         now = datetime.datetime.now().timestamp()
-        seconds = min(now - self._start, last_n_seconds)
+        if self._start is None:
+            self._start = now
+        # compute the (approximate) events in the last n seconds
+        self.expire_timestamps(now)
+        seconds = min(now - self._start, self._last_n_seconds)
         # avoid divide by zero
         if seconds == 0:
             seconds = 1
-        return (
-            len([t for t in self._timestamps if t > (now - last_n_seconds)]) / seconds
-        )
+        return len(self._timestamps) / seconds
+
+    # remove aged out timestamps
+    def expire_timestamps(self, now):
+        threshold = now - self._last_n_seconds
+        while self._timestamps and self._timestamps[0] < threshold:
+            del self._timestamps[0]
 
 
 def print_stack(sig, frame):

@@ -262,8 +262,12 @@ def stats_snapshot(
     for name, detector in stats_tracking["detectors"].items():
         pid = detector.detect_process.pid if detector.detect_process else None
         stats["detectors"][name] = {
-            "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),
-            "detection_start": detector.detection_start.value,
+            "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),  # type: ignore[attr-defined]
+            # issue https://github.com/python/typeshed/issues/8799
+            # from mypy 0.981 onwards
+            "detection_start": detector.detection_start.value,  # type: ignore[attr-defined]
+            # issue https://github.com/python/typeshed/issues/8799
+            # from mypy 0.981 onwards
             "pid": pid,
         }
     stats["detection_fps"] = round(total_detection_fps, 2)

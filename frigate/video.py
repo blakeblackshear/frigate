@@ -15,7 +15,7 @@ import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig
-from frigate.const import CACHE_DIR
+from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -172,7 +172,7 @@ def capture_frames(
     skipped_eps.start()
     while True:
         fps.value = frame_rate.eps()
-        skipped_eps.eps()
+        skipped_fps.value = skipped_eps.eps()
 
         current_frame.value = datetime.datetime.now().timestamp()
         frame_name = f"{camera_name}{current_frame.value}"
@@ -215,6 +215,7 @@ class CameraWatchdog(threading.Thread):
         config: CameraConfig,
         frame_queue,
         camera_fps,
+        skipped_fps,
         ffmpeg_pid,
         stop_event,
     ):
@@ -227,11 +228,13 @@ class CameraWatchdog(threading.Thread):
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
         self.ffmpeg_other_processes: list[dict[str, any]] = []
         self.camera_fps = camera_fps
+        self.skipped_fps = skipped_fps
         self.ffmpeg_pid = ffmpeg_pid
         self.frame_queue = frame_queue
         self.frame_shape = self.config.frame_shape_yuv
         self.frame_size = self.frame_shape[0] * self.frame_shape[1]
         self.stop_event = stop_event
+        self.sleeptime = self.config.ffmpeg.retry_interval
 
     def run(self):
         self.start_ffmpeg_detect()
@@ -251,8 +254,8 @@ class CameraWatchdog(threading.Thread):
                 }
             )
 
-        time.sleep(10)
-        while not self.stop_event.wait(10):
+        time.sleep(self.sleeptime)
+        while not self.stop_event.wait(self.sleeptime):
             now = datetime.datetime.now().timestamp()
 
             if not self.capture_thread.is_alive():
@@ -346,6 +349,7 @@ class CameraWatchdog(threading.Thread):
             self.frame_shape,
             self.frame_queue,
             self.camera_fps,
+            self.skipped_fps,
             self.stop_event,
         )
         self.capture_thread.start()
@@ -376,7 +380,14 @@ class CameraWatchdog(threading.Thread):
 
 class CameraCapture(threading.Thread):
     def __init__(
-        self, camera_name, ffmpeg_process, frame_shape, frame_queue, fps, stop_event
+        self,
+        camera_name,
+        ffmpeg_process,
+        frame_shape,
+        frame_queue,
+        fps,
+        skipped_fps,
+        stop_event,
     ):
         threading.Thread.__init__(self)
         self.name = f"capture:{camera_name}"
@@ -385,14 +396,13 @@ class CameraCapture(threading.Thread):
         self.frame_queue = frame_queue
         self.fps = fps
         self.stop_event = stop_event
-        self.skipped_fps = EventsPerSecond()
+        self.skipped_fps = skipped_fps
         self.frame_manager = SharedMemoryFrameManager()
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = mp.Value("d", 0.0)
         self.last_frame = 0
 
     def run(self):
-        self.skipped_fps.start()
         capture_frames(
             self.ffmpeg_process,
             self.camera_name,
@@ -424,6 +434,7 @@ def capture_camera(name, config: CameraConfig, process_info):
         config,
         frame_queue,
         process_info["camera_fps"],
+        process_info["skipped_fps"],
         process_info["ffmpeg_pid"],
         stop_event,
     )
@@ -723,14 +734,6 @@ def process_frames(
     stop_event,
     exit_on_empty: bool = False,
 ):
-    # attribute labels are not tracked and are not assigned regions
-    attribute_label_map = {
-        "person": ["face", "amazon"],
-        "car": ["ups", "fedex", "amazon", "license_plate"],
-    }
-    all_attribute_labels = [
-        item for sublist in attribute_label_map.values() for item in sublist
-    ]
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
@@ -906,7 +909,7 @@ def process_frames(
                 tracked_detections = [
                     d
                     for d in consolidated_detections
-                    if d[0] not in all_attribute_labels
+                    if d[0] not in ALL_ATTRIBUTE_LABELS
                 ]
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(frame_time, tracked_detections)
@@ -916,7 +919,7 @@ def process_frames(
 
         # group the attribute detections based on what label they apply to
         attribute_detections = {}
-        for label, attribute_labels in attribute_label_map.items():
+        for label, attribute_labels in ATTRIBUTE_LABEL_MAP.items():
             attribute_detections[label] = [
                 d for d in consolidated_detections if d[0] in attribute_labels
             ]

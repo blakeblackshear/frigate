@@ -3,8 +3,9 @@
 import logging
 import queue
 import threading
-from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
+
+from faster_fifo import Queue
 
 from frigate.config import FrigateConfig
 from frigate.events.maintainer import EventTypeEnum
