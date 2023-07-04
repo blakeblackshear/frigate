@@ -56,9 +56,16 @@ class Canvas:
         )
         self.width = canvas_width
         self.height = (self.width * self.aspect[1]) / self.aspect[0]
+        self.coefficient_cache: dict[int, int] = {}
 
     def get_aspect(self, coefficient: int) -> tuple[int, int]:
         return (self.aspect[0] * coefficient, self.aspect[1] * coefficient)
+
+    def get_coefficient(self, camera_count: int) -> int:
+        return self.coefficient_cache.get(camera_count, 2)
+
+    def set_coefficient(self, camera_count: int, coefficient: int) -> None:
+        self.coefficient_cache[camera_count] = coefficient
 
 
 class FFMpegConverter:
@@ -376,7 +383,7 @@ class BirdsEyeFrameManager:
                 ]
             else:
                 # calculate optimal layout
-                coefficient = 2
+                coefficient = self.canvas.get_coefficient(len(active_cameras))
                 calculating = True
 
                 # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
@@ -398,6 +405,7 @@ class BirdsEyeFrameManager:
                             return
 
                     calculating = False
+                    self.canvas.set_coefficient(len(active_cameras), coefficient)
 
                 self.camera_layout = layout_candidate
 
