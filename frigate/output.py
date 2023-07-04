@@ -385,7 +385,7 @@ class BirdsEyeFrameManager:
 
         def get_standard_aspect_ratio(camera_width, camera_height) -> tuple[int, int]:
             """Ensure that only standard aspect ratios are used."""
-            known_aspects = [(16, 9), (9, 16), (32, 9), (12, 9), (9, 12)] # aspects are scaled to be same ratio
+            known_aspects = [(16, 9), (9, 16), (32, 9), (12, 9), (9, 12)] # aspects are scaled to have common relative size
             known_aspects_ratios = list(map(lambda aspect: aspect[0] / aspect[1], known_aspects))
             closest = min(known_aspects_ratios, key=lambda x:abs(x-(camera_width / camera_height)))
             return known_aspects[known_aspects_ratios.index(closest)]
