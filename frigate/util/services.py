@@ -15,7 +15,6 @@ import py3nvml.py3nvml as nvml
 
 from frigate.util.builtin import escape_special_characters
 
-
 logger = logging.getLogger(__name__)
 
 

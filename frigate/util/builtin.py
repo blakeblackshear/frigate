@@ -3,7 +3,6 @@
 import copy
 import datetime
 import logging
-import pytz
 import re
 import shlex
 import urllib.parse
@@ -11,10 +10,10 @@ from collections import Counter
 from collections.abc import Mapping
 from typing import Any, Tuple
 
+import pytz
 import yaml
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
-
 
 logger = logging.getLogger(__name__)
 
