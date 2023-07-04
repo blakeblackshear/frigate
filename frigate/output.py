@@ -441,12 +441,15 @@ class BirdsEyeFrameManager:
             return max_width, y, candidate_layout
 
         canvas_width = canvas[0]
-        canvas_height = canvas[1]
         camera_layout: list[list[any]] = []
         camera_layout.append([])
-        canvas_gcd = math.gcd(canvas[0], canvas[1])
-        canvas_aspect_x = (canvas[0] / canvas_gcd) * coefficient
-        canvas_aspect_y = (canvas[1] / canvas_gcd) * coefficient
+        canvas_gcd = math.gcd(canvas_width, canvas[1])
+        canvas_aspect = get_standard_aspect_ratio(
+            (canvas_width / canvas_gcd), (canvas[1] / canvas_gcd)
+        )
+        canvas_aspect_x = canvas_aspect[0] * coefficient
+        canvas_aspect_y = canvas_aspect[1] * coefficient
+        canvas_height = (canvas_width * canvas_aspect_y) / canvas_aspect_x
         starting_x = 0
         x = starting_x
         y = 0
