@@ -415,18 +415,15 @@ class BirdsEyeFrameManager:
                 x = starting_x
                 for cameras in row:
                     camera_dims = self.cameras[cameras[0]]["dimensions"].copy()
+                    camera_aspect = cameras[1]
 
                     if camera_dims[1] > camera_dims[0]:
                         scaled_height = int(row_height * 2)
-                        scaled_width = int(
-                            scaled_height * camera_dims[0] / camera_dims[1]
-                        )
+                        scaled_width = int(scaled_height * camera_aspect)
                         starting_x = scaled_width
                     else:
                         scaled_height = row_height
-                        scaled_width = int(
-                            scaled_height * camera_dims[0] / camera_dims[1]
-                        )
+                        scaled_width = int(scaled_height * camera_aspect)
 
                     # layout is too large
                     if (
@@ -472,10 +469,7 @@ class BirdsEyeFrameManager:
                 camera_layout[y_i].append(
                     (
                         camera,
-                        (
-                            camera_aspect_x,
-                            camera_aspect_y,
-                        ),
+                        camera_aspect_x / camera_aspect_y,
                     )
                 )
 
@@ -501,7 +495,7 @@ class BirdsEyeFrameManager:
                 camera_layout[y_i].append(
                     (
                         camera,
-                        (camera_aspect_x, camera_aspect_y),
+                        camera_aspect_x / camera_aspect_y,
                     )
                 )
                 x += camera_aspect_x
