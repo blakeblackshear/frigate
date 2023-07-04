@@ -446,7 +446,7 @@ class BirdsEyeFrameManager:
         camera_layout.append([])
         canvas_gcd = math.gcd(canvas[0], canvas[1])
         canvas_aspect_x = (canvas[0] / canvas_gcd) * coefficient
-        canvas_aspect_y = (canvas[0] / canvas_gcd) * coefficient
+        canvas_aspect_y = (canvas[1] / canvas_gcd) * coefficient
         starting_x = 0
         x = starting_x
         y = 0
