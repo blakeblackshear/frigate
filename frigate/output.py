@@ -385,9 +385,20 @@ class BirdsEyeFrameManager:
 
         def get_standard_aspect_ratio(camera_width, camera_height) -> tuple[int, int]:
             """Ensure that only standard aspect ratios are used."""
-            known_aspects = [(16, 9), (9, 16), (32, 9), (12, 9), (9, 12)] # aspects are scaled to have common relative size
-            known_aspects_ratios = list(map(lambda aspect: aspect[0] / aspect[1], known_aspects))
-            closest = min(known_aspects_ratios, key=lambda x:abs(x-(camera_width / camera_height)))
+            known_aspects = [
+                (16, 9),
+                (9, 16),
+                (32, 9),
+                (12, 9),
+                (9, 12),
+            ]  # aspects are scaled to have common relative size
+            known_aspects_ratios = list(
+                map(lambda aspect: aspect[0] / aspect[1], known_aspects)
+            )
+            closest = min(
+                known_aspects_ratios,
+                key=lambda x: abs(x - (camera_width / camera_height)),
+            )
             return known_aspects[known_aspects_ratios.index(closest)]
 
         def map_layout(row_height: int):
@@ -447,7 +458,9 @@ class BirdsEyeFrameManager:
         for camera in cameras_to_add:
             camera_dims = self.cameras[camera]["dimensions"].copy()
             camera_gcd = math.gcd(camera_dims[0], camera_dims[1])
-            camera_aspect_x, camera_aspect_y = get_standard_aspect_ratio(camera_dims[0] / camera_gcd, camera_dims[1] / camera_gcd)
+            camera_aspect_x, camera_aspect_y = get_standard_aspect_ratio(
+                camera_dims[0] / camera_gcd, camera_dims[1] / camera_gcd
+            )
 
             if camera_dims[1] > camera_dims[0]:
                 portrait = True
