@@ -91,6 +91,6 @@ function Camera({ name, config }) {
   const { currentViewMode } = useViewMode();
 
   return (
-    <Card buttons={buttons} href={href} header={cleanName} icons={currentViewMode >= ViewModeTypes["admin"] ? icons : []} media={<CameraImage camera={name} stretch />} />
+    <Card buttons={buttons} href={href} header={cleanName} icons={!currentViewMode || currentViewMode >= ViewModeTypes["admin"] ? icons : []} media={<CameraImage camera={name} stretch />} />
   );
 }
