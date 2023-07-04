@@ -11,7 +11,7 @@ from faster_fifo import Queue
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
-from frigate.util import to_relative_box
+from frigate.util.builtin import to_relative_box
 
 logger = logging.getLogger(__name__)
 

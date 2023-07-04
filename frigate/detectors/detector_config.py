@@ -11,7 +11,7 @@ from pydantic import BaseModel, Extra, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.plus import PlusApi
-from frigate.util import load_labels
+from frigate.util.builtin import load_labels
 
 logger = logging.getLogger(__name__)
 

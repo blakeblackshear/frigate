@@ -38,13 +38,8 @@ from frigate.ptz import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
-from frigate.util import (
-    clean_camera_user_pass,
-    ffprobe_stream,
-    get_tz_modifiers,
-    restart_frigate,
-    vainfo_hwaccel,
-)
+from frigate.util.builtin import clean_camera_user_pass, get_tz_modifiers
+from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
