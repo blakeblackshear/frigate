@@ -29,7 +29,7 @@ from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv
 logger = logging.getLogger(__name__)
 
 
-def get_standard_aspect_ratio(camera_width, camera_height) -> tuple[int, int]:
+def get_standard_aspect_ratio(width, height) -> tuple[int, int]:
     """Ensure that only standard aspect ratios are used."""
     known_aspects = [
         (16, 9),
@@ -43,20 +43,21 @@ def get_standard_aspect_ratio(camera_width, camera_height) -> tuple[int, int]:
     )
     closest = min(
         known_aspects_ratios,
-        key=lambda x: abs(x - (camera_width / camera_height)),
+        key=lambda x: abs(x - (width / height)),
     )
     return known_aspects[known_aspects_ratios.index(closest)]
 
 
 class Canvas:
     def __init__(self, canvas_width: int, canvas_height: int) -> None:
-        canvas_gcd = math.gcd(canvas_width, canvas_height)
+        gcd = math.gcd(canvas_width, canvas_height)
         self.aspect = get_standard_aspect_ratio(
-            (canvas_width / canvas_gcd), (canvas_height / canvas_gcd)
+            (canvas_width / gcd), (canvas_height / gcd)
         )
         self.width = canvas_width
         self.height = (self.width * self.aspect[1]) / self.aspect[0]
         self.coefficient_cache: dict[int, int] = {}
+        self.aspect_cache: dict[str, tuple[int, int]] = {}
 
     def get_aspect(self, coefficient: int) -> tuple[int, int]:
         return (self.aspect[0] * coefficient, self.aspect[1] * coefficient)
@@ -66,6 +67,21 @@ class Canvas:
 
     def set_coefficient(self, camera_count: int, coefficient: int) -> None:
         self.coefficient_cache[camera_count] = coefficient
+
+    def get_camera_aspect(
+        self, cam_name: str, camera_width: int, camera_height: int
+    ) -> tuple[int, int]:
+        cached = self.aspect_cache.get(cam_name)
+
+        if cached:
+            return cached
+
+        gcd = math.gcd(camera_width, camera_height)
+        camera_aspect = get_standard_aspect_ratio(
+            camera_width / gcd, camera_height / gcd
+        )
+        self.aspect_cache[cam_name] = camera_aspect
+        return camera_aspect
 
 
 class FFMpegConverter:
@@ -469,9 +485,8 @@ class BirdsEyeFrameManager:
         max_y = 0
         for camera in cameras_to_add:
             camera_dims = self.cameras[camera]["dimensions"].copy()
-            camera_gcd = math.gcd(camera_dims[0], camera_dims[1])
-            camera_aspect_x, camera_aspect_y = get_standard_aspect_ratio(
-                camera_dims[0] / camera_gcd, camera_dims[1] / camera_gcd
+            camera_aspect_x, camera_aspect_y = self.canvas.get_camera_aspect(
+                camera, camera_dims[0], camera_dims[1]
             )
 
             if camera_dims[1] > camera_dims[0]:
