@@ -14,6 +14,11 @@ curl -L https://api.github.com/meta | jq -r '.ssh_keys | .[]' | \
 sudo mkdir -p /media/frigate
 sudo chown -R "$(id -u):$(id -g)" /media/frigate
 
+# When started as a service, LIBAVFORMAT_VERSION_MAJOR is defined in the
+# s6 service file. For dev, where frigate is started from an interactive
+# shell, we define it in .bashrc instead.
+echo 'export LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po "libavformat\W+\K\d+")' >> $HOME/.bashrc
+
 make version
 
 cd web

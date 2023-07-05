@@ -42,10 +42,9 @@ function migrate_db_path() {
     fi
 }
 
-LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po 'libavformat\W+\K\d+') || echo "[ERROR] Failed to determine ffmpeg version"
-
 echo "[INFO] Preparing Frigate..."
 migrate_db_path
+export LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po 'libavformat\W+\K\d+')
 
 echo "[INFO] Starting Frigate..."
 
