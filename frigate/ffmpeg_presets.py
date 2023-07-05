@@ -43,7 +43,9 @@ class LibvaGpuSelector:
 
 
 TIMEOUT_PARAM = (
-    "-timeout" if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) >= 59 else "-stimeout"
+    "-timeout"
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    else "-stimeout"
 )
 
 _gpu_selector = LibvaGpuSelector()
