@@ -102,11 +102,7 @@ def get_min_region_size(model_config: ModelConfig) -> int:
     if half % 4 == 0:
         return half
 
-    while True:
-        half += 1
-
-        if half % 4 == 0:
-            return half
+    return int((half + 3) / 4) * 4
 
 
 def create_tensor_input(frame, model_config: ModelConfig, region):
