@@ -18,9 +18,15 @@ export function ViewModeProvider({ children, config }) {
 
   useEffect(() => {
     async function load() {
-      const configValue = config ? ViewModeTypes[config.ui.viewmode].toString() : "2";
-      const viewmode = await getData('view-mode');
-      setViewMode(viewmode || configValue);
+      let viewmode = await getData('view-mode');
+
+      if(viewmode == null) {
+        const maxViewMode = (Object.keys(ViewModeTypes).filter(isNaN).length-1).toString();
+        const configValue = config ? ViewModeTypes[config.ui.viewmode].toString() : maxViewMode;
+        viewmode = configValue;
+      }
+
+      setViewMode(viewmode);
     }
 
     load();
