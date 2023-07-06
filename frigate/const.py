@@ -8,9 +8,26 @@ EXPORT_DIR = f"{BASE_DIR}/exports"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 YAML_EXT = (".yaml", ".yml")
+FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
-BTBN_PATH = "/usr/lib/btbn-ffmpeg"
+
+# Attributes
+
+ATTRIBUTE_LABEL_MAP = {
+    "person": ["face", "amazon"],
+    "car": ["ups", "fedex", "amazon", "license_plate"],
+}
+ALL_ATTRIBUTE_LABELS = [
+    item for sublist in ATTRIBUTE_LABEL_MAP.values() for item in sublist
+]
+
+# Audio Consts
+
+AUDIO_DURATION = 0.975
+AUDIO_FORMAT = "s16le"
+AUDIO_MAX_BIT_RANGE = 32768.0
+AUDIO_SAMPLE_RATE = 16000
 
 # Regex Consts
 
@@ -28,5 +45,4 @@ DRIVER_INTEL_iHD = "iHD"
 # Record Values
 
 MAX_SEGMENT_DURATION = 600
-SECONDS_IN_DAY = 60 * 60 * 24
 MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to account for cameras with inconsistent segment times

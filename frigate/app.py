@@ -6,12 +6,13 @@ import shutil
 import signal
 import sys
 import traceback
-from multiprocessing.queues import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
 from typing import Optional
 
+import faster_fifo as ff
 import psutil
+from faster_fifo import Queue
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -29,6 +30,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -44,7 +46,8 @@ from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, RecordMetricsTypes
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
+from frigate.util import LimitedQueue as LQueue
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -55,14 +58,14 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = mp.Queue()
+        self.detection_queue: Queue = ff.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
-        self.log_queue: Queue = mp.Queue()
+        self.log_queue: Queue = ff.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.record_metrics: dict[str, RecordMetricsTypes] = {}
+        self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
@@ -104,37 +107,74 @@ class FrigateApp:
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config(self.plus_api)
 
-        for camera_name in self.config.cameras.keys():
+        for camera_name, camera_config in self.config.cameras.items():
             # create camera_metrics
             self.camera_metrics[camera_name] = {
-                "camera_fps": mp.Value("d", 0.0),
-                "skipped_fps": mp.Value("d", 0.0),
-                "process_fps": mp.Value("d", 0.0),
-                "detection_enabled": mp.Value(
-                    "i", self.config.cameras[camera_name].detect.enabled
+                "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "skipped_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "detection_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].detect.enabled,
                 ),
-                "motion_enabled": mp.Value("i", True),
-                "improve_contrast_enabled": mp.Value(
-                    "i", self.config.cameras[camera_name].motion.improve_contrast
+                "motion_enabled": mp.Value("i", True),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "improve_contrast_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.improve_contrast,
                 ),
-                "motion_threshold": mp.Value(
-                    "i", self.config.cameras[camera_name].motion.threshold
+                "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.threshold,
                 ),
-                "motion_contour_area": mp.Value(
-                    "i", self.config.cameras[camera_name].motion.contour_area
+                "motion_contour_area": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].motion.contour_area,
                 ),
-                "detection_fps": mp.Value("d", 0.0),
-                "detection_frame": mp.Value("d", 0.0),
-                "read_start": mp.Value("d", 0.0),
-                "ffmpeg_pid": mp.Value("i", 0),
-                "frame_queue": mp.Queue(maxsize=2),
+                "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "detection_frame": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "read_start": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "frame_queue": LQueue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
-            self.record_metrics[camera_name] = {
-                "record_enabled": mp.Value(
-                    "i", self.config.cameras[camera_name].record.enabled
-                )
+            self.feature_metrics[camera_name] = {
+                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].audio.enabled,
+                ),
+                "record_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].record.enabled,
+                ),
             }
 
     def set_log_levels(self) -> None:
@@ -150,22 +190,22 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = mp.Queue()
-        self.event_processed_queue: Queue = mp.Queue()
-        self.video_output_queue: Queue = mp.Queue(
+        self.event_queue: Queue = ff.Queue()
+        self.event_processed_queue: Queue = ff.Queue()
+        self.video_output_queue: Queue = LQueue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for cameras to push tracked objects to
-        self.detected_frames_queue: Queue = mp.Queue(
+        self.detected_frames_queue: Queue = LQueue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = mp.Queue()
+        self.recordings_info_queue: Queue = ff.Queue()
 
         # Queue for timeline events
-        self.timeline_queue: Queue = mp.Queue()
+        self.timeline_queue: Queue = ff.Queue()
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
@@ -222,7 +262,7 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(self.config, self.recordings_info_queue, self.record_metrics),
+            args=(self.config, self.recordings_info_queue, self.feature_metrics),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
@@ -281,7 +321,7 @@ class FrigateApp:
             self.config,
             self.onvif_controller,
             self.camera_metrics,
-            self.record_metrics,
+            self.feature_metrics,
             comms,
         )
 
@@ -390,6 +430,18 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
+    def start_audio_processors(self) -> None:
+        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
+            audio_process = mp.Process(
+                target=listen_to_audio,
+                name="audio_capture",
+                args=(self.config, self.feature_metrics),
+            )
+            audio_process.daemon = True
+            audio_process.start()
+            self.processes["audioDetector"] = audio_process.pid or 0
+            logger.info(f"Audio process started: {audio_process.pid}")
+
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
             self.config, self.timeline_queue, self.stop_event
@@ -486,6 +538,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
+        self.start_audio_processors()
         self.start_storage_maintainer()
         self.init_stats()
         self.init_external_event_processor()
