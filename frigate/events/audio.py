@@ -27,7 +27,8 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
 from frigate.types import FeatureMetricsTypes
-from frigate.util import get_ffmpeg_arg_list, listen
+from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
@@ -211,7 +212,7 @@ class AudioEventMaintainer(threading.Thread):
         else:
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None},
+                json={"duration": None, "source_type": "audio"},
             )
 
             if resp.status_code == 200:
@@ -226,18 +227,26 @@ class AudioEventMaintainer(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for detection in self.detections.values():
+            if not detection:
+                continue
+
             if (
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
-                self.detections[detection["label"]] = None
-                requests.put(
+                resp = requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
                         "end_time": detection["last_detection"]
                         + self.config.record.events.post_capture
                     },
                 )
+                if resp.status_code == 200:
+                    self.detections[detection["label"]] = None
+                else:
+                    logger.warn(
+                        f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
+                    )
 
     def restart_audio_pipe(self) -> None:
         try:

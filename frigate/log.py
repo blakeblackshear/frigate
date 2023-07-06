@@ -13,7 +13,7 @@ from typing import Deque, Optional
 from faster_fifo import Queue
 from setproctitle import setproctitle
 
-from frigate.util import clean_camera_user_pass
+from frigate.util.builtin import clean_camera_user_pass
 
 
 def listener_configurer() -> None:

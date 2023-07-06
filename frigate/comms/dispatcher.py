@@ -7,7 +7,7 @@ from typing import Any, Callable
 from frigate.config import FrigateConfig
 from frigate.ptz import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
-from frigate.util import restart_frigate
+from frigate.util.services import restart_frigate
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +255,7 @@ class Dispatcher:
         try:
             if "preset" in payload.lower():
                 command = OnvifCommandEnum.preset
-                param = payload.lower().split("-")[1]
+                param = payload.lower()[payload.index("_") + 1 :]
             else:
                 command = OnvifCommandEnum[payload.lower()]
                 param = ""

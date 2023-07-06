@@ -11,7 +11,7 @@ from faster_fifo import Queue
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
-from frigate.util import to_relative_box
+from frigate.util.builtin import to_relative_box
 
 logger = logging.getLogger(__name__)
 
@@ -193,6 +193,7 @@ class EventProcessor(threading.Thread):
                     "score": score,
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
+                    "type": "object",
                 },
             }
 
@@ -216,8 +217,8 @@ class EventProcessor(threading.Thread):
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
 
-    def handle_external_detection(self, type: str, event_data: Event) -> None:
-        if type == "new":
+    def handle_external_detection(self, event_type: str, event_data: Event) -> None:
+        if event_type == "new":
             event = {
                 Event.id: event_data["id"],
                 Event.label: event_data["label"],
@@ -229,16 +230,16 @@ class EventProcessor(threading.Thread):
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],
-                Event.data: {},
+                Event.data: {"type": event_data["type"]},
             }
             Event.insert(event).execute()
-        elif type == "end":
+        elif event_type == "end":
             event = {
                 Event.id: event_data["id"],
                 Event.end_time: event_data["end_time"],
             }
 
             try:
-                Event.update(event).execute()
+                Event.update(event).where(Event.id == event_data["id"]).execute()
             except Exception:
                 logger.warning(f"Failed to update manual event: {event_data['id']}")

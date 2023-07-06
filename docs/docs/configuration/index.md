@@ -467,10 +467,11 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: detect,record,rtmp
-          # NOTICE: In addition to assigning the record and rtmp roles,
+          # Required: list of roles for this stream. valid values are: audio,detect,record,rtmp
+          # NOTICE: In addition to assigning the audio, record, and rtmp roles,
           # they must also be enabled in the camera config.
           roles:
+            - audio
             - detect
             - record
             - rtmp

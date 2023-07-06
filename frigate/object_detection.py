@@ -7,12 +7,15 @@ import signal
 import threading
 from abc import ABC, abstractmethod
 
+import faster_fifo as ff
 import numpy as np
 from setproctitle import setproctitle
 
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import InputTensorEnum
-from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
+from frigate.util.builtin import EventsPerSecond, load_labels
+from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +75,7 @@ class LocalObjectDetector(ObjectDetector):
 
 def run_detector(
     name: str,
-    detection_queue: mp.Queue,
+    detection_queue: ff.Queue,
     out_events: dict[str, mp.Event],
     avg_speed,
     start,

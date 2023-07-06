@@ -10,6 +10,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
 from typing import Optional
 
+import faster_fifo as ff
 import psutil
 from faster_fifo import Queue
 from peewee_migrate import Router
@@ -47,6 +48,7 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
+from frigate.util.builtin import LimitedQueue as LQueue
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -57,11 +59,11 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = mp.Queue()
+        self.detection_queue: Queue = ff.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
-        self.log_queue: Queue = mp.Queue()
+        self.log_queue: Queue = ff.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
@@ -157,7 +159,7 @@ class FrigateApp:
                 "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
-                "frame_queue": mp.Queue(maxsize=2),
+                "frame_queue": LQueue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
@@ -189,22 +191,22 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = mp.Queue()
-        self.event_processed_queue: Queue = mp.Queue()
-        self.video_output_queue: Queue = mp.Queue(
+        self.event_queue: Queue = ff.Queue()
+        self.event_processed_queue: Queue = ff.Queue()
+        self.video_output_queue: Queue = LQueue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for cameras to push tracked objects to
-        self.detected_frames_queue: Queue = mp.Queue(
+        self.detected_frames_queue: Queue = LQueue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = mp.Queue()
+        self.recordings_info_queue: Queue = ff.Queue()
 
         # Queue for timeline events
-        self.timeline_queue: Queue = mp.Queue()
+        self.timeline_queue: Queue = ff.Queue()
 
         # Queue for inter process communication
         self.inter_process_queue: Queue = mp.Queue()
@@ -452,6 +454,7 @@ class FrigateApp:
             )
             audio_process.daemon = True
             audio_process.start()
+            self.processes["audioDetector"] = audio_process.pid or 0
             logger.info(f"Audio process started: {audio_process.pid}")
 
     def start_timeline_processor(self) -> None:
