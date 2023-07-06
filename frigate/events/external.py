@@ -57,8 +57,12 @@ class ExternalEventProcessor:
                     "label": label,
                     "sub_label": sub_label,
                     "camera": camera,
-                    "start_time": now,
-                    "end_time": now + duration if duration is not None else None,
+                    "start_time": now - camera_config.record.events.pre_capture,
+                    "end_time": now
+                    + duration
+                    + camera_config.record.events.post_capture
+                    if duration is not None
+                    else None,
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
