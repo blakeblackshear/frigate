@@ -103,7 +103,7 @@ export default function CameraMasks({ camera }) {
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
       window.navigator.clipboard.writeText(textToCopy).catch((err) => {
-       // console.error('Failed to copy text: ', err);
+        throw new Error('Failed to copy text: ', err);
       });
     } else {
       // Fallback to document.execCommand('copy')
@@ -118,7 +118,7 @@ export default function CameraMasks({ camera }) {
           throw new Error('Failed to copy text');
         }
       } catch (err) {
-        //console.error('Failed to copy text: ', err);
+        throw new Error('Failed to copy text: ', err);
       }
   
       document.body.removeChild(textarea);
@@ -139,7 +139,7 @@ export default function CameraMasks({ camera }) {
       // handle error
       //console.error(error);
     }
-  }, [motionMaskPoints]);
+  }, [camera, motionMaskPoints]);
   
 
   // Zone methods
@@ -177,7 +177,7 @@ ${Object.keys(zonePoints)
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
       window.navigator.clipboard.writeText(textToCopy).catch((err) => {
-        //console.error('Failed to copy text: ', err);
+        throw new Error('Failed to copy text: ', err);
       });
     } else {
       // Fallback to document.execCommand('copy')
@@ -192,7 +192,7 @@ ${Object.keys(zonePoints)
           throw new Error('Failed to copy text');
         }
       } catch (err) {
-        //console.error('Failed to copy text: ', err);
+        throw new Error('Failed to copy text: ', err);
       }
     
       document.body.removeChild(textarea);
@@ -213,7 +213,7 @@ ${Object.keys(zonePoints)
       // handle error
       //console.error(error);
     }
-  }, [zonePoints]);
+  }, [camera, zonePoints]);
 
   // Object methods
   const handleEditObjectMask = useCallback(
@@ -269,7 +269,7 @@ ${Object.keys(objectMaskPoints)
       // handle error
       //console.error(error);
     }
-  }, [objectMaskPoints]);
+  }, [camera, objectMaskPoints]);
 
   const handleAddToObjectMask = useCallback(
     (key) => {
@@ -556,13 +556,6 @@ function MaskValues({
   );
 
 
-  const handleSave = useCallback(
-    (event) => {
-      const { key } = event.target.dataset;
-      onSave(key);
-    },
-    [onAdd]
-  );
 
   return (
     <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>
