@@ -10,7 +10,7 @@ from faster_fifo import Queue
 from frigate.config import FrigateConfig
 from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Timeline
-from frigate.util import to_relative_box
+from frigate.util.builtin import to_relative_box
 
 logger = logging.getLogger(__name__)
 

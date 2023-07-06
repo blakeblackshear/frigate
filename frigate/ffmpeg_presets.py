@@ -5,7 +5,7 @@ import os
 from enum import Enum
 from typing import Any
 
-from frigate.util import vainfo_hwaccel
+from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)

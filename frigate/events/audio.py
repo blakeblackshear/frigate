@@ -26,7 +26,8 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
 from frigate.types import FeatureMetricsTypes
-from frigate.util import get_ffmpeg_arg_list, listen
+from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:

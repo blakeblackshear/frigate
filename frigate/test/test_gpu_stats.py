@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from frigate.util import get_amd_gpu_stats, get_intel_gpu_stats
+from frigate.util.services import get_amd_gpu_stats, get_intel_gpu_stats
 
 
 class TestGpuStats(unittest.TestCase):
