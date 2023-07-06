@@ -11,12 +11,11 @@ import time
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
+from queue import Empty, Full
 from typing import Any, Tuple
 
 import pytz
 import yaml
-from queue import Empty, Full
-
 from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
 from faster_fifo import Queue as FFQueue
 
