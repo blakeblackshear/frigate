@@ -14,10 +14,12 @@ from collections.abc import Mapping
 from queue import Empty, Full
 from typing import Any, Tuple
 
+import numpy as np
 import pytz
 import yaml
 from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
 from faster_fifo import Queue as FFQueue
+from ruamel.yaml import YAML
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -224,3 +226,76 @@ def to_relative_box(
         (box[2] - box[0]) / width,  # w
         (box[3] - box[1]) / height,  # h
     )
+
+
+def create_mask(frame_shape, mask):
+    mask_img = np.zeros(frame_shape, np.uint8)
+    mask_img[:] = 255
+
+
+def update_yaml_from_url(file_path, url):
+    parsed_url = urllib.parse.urlparse(url)
+    query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
+
+    for key_path_str, new_value_list in query_string.items():
+        key_path = key_path_str.split(".")
+        for i in range(len(key_path)):
+            try:
+                index = int(key_path[i])
+                key_path[i] = (key_path[i - 1], index)
+                key_path.pop(i - 1)
+            except ValueError:
+                pass
+        new_value = new_value_list[0]
+        update_yaml_file(file_path, key_path, new_value)
+
+
+def update_yaml_file(file_path, key_path, new_value):
+    yaml = YAML()
+    with open(file_path, "r") as f:
+        data = yaml.load(f)
+
+    data = update_yaml(data, key_path, new_value)
+
+    with open(file_path, "w") as f:
+        yaml.dump(data, f)
+
+
+def update_yaml(data, key_path, new_value):
+    temp = data
+    for key in key_path[:-1]:
+        if isinstance(key, tuple):
+            if key[0] not in temp:
+                temp[key[0]] = [{}] * max(1, key[1] + 1)
+            elif len(temp[key[0]]) <= key[1]:
+                temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
+            temp = temp[key[0]][key[1]]
+        else:
+            if key not in temp:
+                temp[key] = {}
+            temp = temp[key]
+
+    last_key = key_path[-1]
+    if new_value == "":
+        if isinstance(last_key, tuple):
+            del temp[last_key[0]][last_key[1]]
+        else:
+            del temp[last_key]
+    else:
+        if isinstance(last_key, tuple):
+            if last_key[0] not in temp:
+                temp[last_key[0]] = [{}] * max(1, last_key[1] + 1)
+            elif len(temp[last_key[0]]) <= last_key[1]:
+                temp[last_key[0]] += [{}] * (last_key[1] - len(temp[last_key[0]]) + 1)
+            temp[last_key[0]][last_key[1]] = new_value
+        else:
+            if (
+                last_key in temp
+                and isinstance(temp[last_key], dict)
+                and isinstance(new_value, dict)
+            ):
+                temp[last_key].update(new_value)
+            else:
+                temp[last_key] = new_value
+
+    return data
