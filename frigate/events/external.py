@@ -14,7 +14,7 @@ from faster_fifo import Queue
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
-from frigate.util import draw_box_with_label
+from frigate.util.image import draw_box_with_label
 
 logger = logging.getLogger(__name__)
 

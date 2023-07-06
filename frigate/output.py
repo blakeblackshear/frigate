@@ -24,7 +24,11 @@ from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
-from frigate.util import SharedMemoryFrameManager, copy_yuv_to_position, get_yuv_crop
+from frigate.util.image import (
+    SharedMemoryFrameManager,
+    copy_yuv_to_position,
+    get_yuv_crop,
+)
 
 logger = logging.getLogger(__name__)
 

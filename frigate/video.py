@@ -24,8 +24,8 @@ from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.object_detection import RemoteObjectDetector
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.util import (
-    EventsPerSecond,
+from frigate.util.builtin import EventsPerSecond
+from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
     area,
@@ -33,11 +33,11 @@ from frigate.util import (
     draw_box_with_label,
     intersection,
     intersection_over_union,
-    listen,
     yuv_region_2_bgr,
     yuv_region_2_rgb,
     yuv_region_2_yuv,
 )
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 
