@@ -1,18 +1,22 @@
 import copy
+import ctypes
 import datetime
 import json
 import logging
+import multiprocessing
 import os
 import re
 import shlex
 import signal
 import subprocess as sp
+import time
 import traceback
 import urllib.parse
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Mapping
 from multiprocessing import shared_memory
+from queue import Empty, Full
 from typing import Any, AnyStr, Optional, Tuple
 
 import cv2
@@ -21,6 +25,8 @@ import psutil
 import py3nvml.py3nvml as nvml
 import pytz
 import yaml
+from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
+from faster_fifo import Queue as FFQueue
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -1218,3 +1224,47 @@ def get_video_properties(url, get_duration=False):
         result["height"] = round(height)
 
     return result
+
+
+class LimitedQueue(FFQueue):
+    def __init__(
+        self,
+        maxsize=0,
+        max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE,
+        loads=None,
+        dumps=None,
+    ):
+        super().__init__(max_size_bytes=max_size_bytes, loads=loads, dumps=dumps)
+        self.maxsize = maxsize
+        self.size = multiprocessing.RawValue(
+            ctypes.c_int, 0
+        )  # Add a counter for the number of items in the queue
+
+    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
+        if self.maxsize > 0 and self.size.value >= self.maxsize:
+            if block:
+                start_time = time.time()
+                while self.size.value >= self.maxsize:
+                    remaining = timeout - (time.time() - start_time)
+                    if remaining <= 0.0:
+                        raise Full
+                    time.sleep(min(remaining, 0.1))
+            else:
+                raise Full
+        self.size.value += 1
+        return super().put(x, block=block, timeout=timeout)
+
+    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
+        if self.size.value <= 0 and not block:
+            raise Empty
+        self.size.value -= 1
+        return super().get(block=block, timeout=timeout)
+
+    def qsize(self):
+        return self.size
+
+    def empty(self):
+        return self.qsize() == 0
+
+    def full(self):
+        return self.qsize() == self.maxsize

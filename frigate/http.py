@@ -884,6 +884,7 @@ def create_event(camera_name, label):
         event_id = current_app.external_processor.create_manual_event(
             camera_name,
             label,
+            json.get("source_type", "api"),
             json.get("sub_label", None),
             json.get("duration", 30),
             json.get("include_recording", True),

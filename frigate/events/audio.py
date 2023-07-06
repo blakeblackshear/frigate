@@ -187,7 +187,7 @@ class AudioEventMaintainer(threading.Thread):
         else:
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None},
+                json={"duration": None, "source_type": "audio"},
             )
 
             if resp.status_code == 200:
@@ -209,14 +209,19 @@ class AudioEventMaintainer(threading.Thread):
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
-                requests.put(
+                resp = requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
                         "end_time": detection["last_detection"]
                         + self.config.record.events.post_capture
                     },
                 )
-                self.detections[detection["label"]] = None
+                if resp.status_code == 200:
+                    self.detections[detection["label"]] = None
+                else:
+                    logger.warn(
+                        f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
+                    )
 
     def restart_audio_pipe(self) -> None:
         try:
