@@ -2,6 +2,7 @@ click == 8.1.*
 Flask == 2.3.*
 faster-fifo == 1.4.*
 imutils == 0.5.*
+httpx == 0.24.*
 matplotlib == 3.7.*
 mypy == 1.4.1
 numpy == 1.23.*

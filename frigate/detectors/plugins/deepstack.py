@@ -1,8 +1,8 @@
 import io
 import logging
 
+import httpx
 import numpy as np
-import requests
 from PIL import Image
 from pydantic import Field
 from typing_extensions import Literal
@@ -20,7 +20,7 @@ class DeepstackDetectorConfig(BaseDetectorConfig):
     api_url: str = Field(
         default="http://localhost:80/v1/vision/detection", title="DeepStack API URL"
     )
-    api_timeout: float = Field(default=0.1, title="DeepStack API timeout (in seconds)")
+    api_timeout: float = Field(default=1.0, title="DeepStack API timeout (in seconds)")
     api_key: str = Field(default="", title="DeepStack API key (if required)")
 
 
@@ -44,18 +44,23 @@ class DeepStack(DetectionApi):
     def detect_raw(self, tensor_input):
         image_data = np.squeeze(tensor_input).astype(np.uint8)
         image = Image.fromarray(image_data)
-        self.w, self.h = image.size
+        w, h = image.size
         with io.BytesIO() as output:
             image.save(output, format="JPEG")
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
-        response = requests.post(
-            self.api_url,
-            data=data,
-            files={"image": image_bytes},
-            timeout=self.api_timeout,
-        )
-        response_json = response.json()
+        try:
+            response = httpx.post(
+                self.api_url,
+                data=data,
+                files={"image": image_bytes},
+                timeout=self.api_timeout,
+            )
+            response_json = response.json()
+        except httpx.RequestError as e:
+            logger.error(f"An error occurred while making the request: {e}")
+            return np.zeros((20, 6), np.float32)
+
         detections = np.zeros((20, 6), np.float32)
         if response_json.get("predictions") is None:
             logger.debug(f"Error in parsing response json: {response_json}")
@@ -73,10 +78,10 @@ class DeepStack(DetectionApi):
             detections[i] = [
                 label,
                 float(detection["confidence"]),
-                detection["y_min"] / self.h,
-                detection["x_min"] / self.w,
-                detection["y_max"] / self.h,
-                detection["x_max"] / self.w,
+                detection["y_min"] / h,
+                detection["x_min"] / w,
+                detection["y_max"] / h,
+                detection["x_max"] / w,
             ]
 
         return detections
