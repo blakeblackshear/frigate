@@ -25,8 +25,8 @@ from flask import (
     request,
 )
 from peewee import DoesNotExist, fn, operator
-from playhouse.sqliteq import SqliteQueueDatabase
 from playhouse.shortcuts import model_to_dict
+from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
@@ -1101,8 +1101,9 @@ def latest_frame(camera_name):
             camera_name, draw_options
         )
         retry_interval = float(
-                current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval or 10
-            )
+            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
+            or 10
+        )
 
         if frame is None or datetime.now().timestamp() > (
             current_app.detected_frames_processor.get_current_frame_time(camera_name)
