@@ -253,7 +253,7 @@ class Dispatcher:
         try:
             if "preset" in payload.lower():
                 command = OnvifCommandEnum.preset
-                param = payload.lower().split("-")[1]
+                param = payload.lower()[payload.index("_") + 1 :]
             else:
                 command = OnvifCommandEnum[payload.lower()]
                 param = ""
