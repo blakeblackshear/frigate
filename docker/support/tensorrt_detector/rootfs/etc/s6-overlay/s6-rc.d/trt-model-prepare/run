@@ -41,12 +41,13 @@ echo "Generating the following TRT Models: ${MODEL_CONVERT}"
 cd /usr/local/src/tensorrt_demos/yolo
 
 # Download yolo weights
-./download_yolo.sh $MODEL_CONVERT
+./download_yolo.sh $MODEL_CONVERT > /dev/null
 
 for model in ${MODEL_CONVERT//,/ }
 do
-    python3 yolo_to_onnx.py -m ${model}
-    python3 onnx_to_tensorrt.py -m ${model}
+    echo "Converting ${model} model"
+    python3 yolo_to_onnx.py -m ${model} > /dev/null
+    python3 onnx_to_tensorrt.py -m ${model} > /dev/null
     cp ${model}.trt ${OUTPUT_FOLDER}/${model}.trt
     ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
 done
