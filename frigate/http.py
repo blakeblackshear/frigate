@@ -24,8 +24,9 @@ from flask import (
     make_response,
     request,
 )
-from peewee import DoesNotExist, SqliteDatabase, fn, operator
+from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
+from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
@@ -49,7 +50,7 @@ bp = Blueprint("frigate", __name__)
 
 def create_app(
     frigate_config,
-    database: SqliteDatabase,
+    database: SqliteQueueDatabase,
     stats_tracking,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
@@ -1099,10 +1100,14 @@ def latest_frame(camera_name):
         frame = current_app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
+        retry_interval = float(
+            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
+            or 10
+        )
 
         if frame is None or datetime.now().timestamp() > (
             current_app.detected_frames_processor.get_current_frame_time(camera_name)
-            + 10
+            + retry_interval
         ):
             if current_app.camera_error_image is None:
                 error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
