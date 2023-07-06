@@ -6,15 +6,15 @@ import logging
 import os
 import random
 import string
-from multiprocessing.queues import Queue
 from typing import Optional
 
 import cv2
+from faster_fifo import Queue
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
-from frigate.util import draw_box_with_label
+from frigate.util.image import draw_box_with_label
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ class ExternalEventProcessor:
         self,
         camera: str,
         label: str,
+        source_type: str,
         sub_label: Optional[str],
         duration: Optional[int],
         include_recording: bool,
@@ -56,22 +57,26 @@ class ExternalEventProcessor:
                     "label": label,
                     "sub_label": sub_label,
                     "camera": camera,
-                    "start_time": now,
-                    "end_time": now + duration if duration is not None else None,
+                    "start_time": now - camera_config.record.events.pre_capture,
+                    "end_time": now
+                    + duration
+                    + camera_config.record.events.post_capture
+                    if duration is not None
+                    else None,
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
+                    "type": source_type,
                 },
             )
         )
 
         return event_id
 
-    def finish_manual_event(self, event_id: str) -> None:
+    def finish_manual_event(self, event_id: str, end_time: float) -> None:
         """Finish external event with indeterminate duration."""
-        now = datetime.datetime.now().timestamp()
         self.queue.put(
-            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": now})
+            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": end_time})
         )
 
     def _write_images(

@@ -2,10 +2,11 @@ import { h, Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Card from '../components/Card';
 import CameraImage from '../components/CameraImage';
+import AudioIcon from '../icons/Audio';
 import ClipIcon from '../icons/Clip';
 import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
-import { useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
+import { useAudioState, useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
 import { useMemo } from 'preact/hooks';
 import useSWR from 'swr';
 
@@ -43,6 +44,7 @@ function Camera({ name, config }) {
   const { payload: detectValue, send: sendDetect } = useDetectState(name);
   const { payload: recordValue, send: sendRecordings } = useRecordingsState(name);
   const { payload: snapshotValue, send: sendSnapshots } = useSnapshotsState(name);
+  const { payload: audioValue, send: sendAudio } = useAudioState(name);
   const href = `/cameras/${name}`;
   const buttons = useMemo(() => {
     return [
@@ -50,10 +52,9 @@ function Camera({ name, config }) {
       { name: 'Recordings', href: `/recording/${name}` },
     ];
   }, [name]);
-  const cleanName = useMemo(
-    () => { return `${name.replaceAll('_', ' ')}` },
-    [name]
-  );
+  const cleanName = useMemo(() => {
+    return `${name.replaceAll('_', ' ')}`;
+  }, [name]);
   const icons = useMemo(
     () => [
       {
@@ -65,7 +66,9 @@ function Camera({ name, config }) {
         },
       },
       {
-        name: config.record.enabled_in_config ? `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}` : 'Recordings must be enabled in the config to be turned on in the UI.',
+        name: config.record.enabled_in_config
+          ? `Toggle recordings ${recordValue === 'ON' ? 'off' : 'on'}`
+          : 'Recordings must be enabled in the config to be turned on in the UI.',
         icon: ClipIcon,
         color: config.record.enabled_in_config ? (recordValue === 'ON' ? 'blue' : 'gray') : 'red',
         onClick: () => {
@@ -82,11 +85,27 @@ function Camera({ name, config }) {
           sendSnapshots(snapshotValue === 'ON' ? 'OFF' : 'ON', true);
         },
       },
-    ],
-    [config, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
+      config.audio.enabled_in_config
+        ? {
+          name: `Toggle audio detection ${audioValue === 'ON' ? 'off' : 'on'}`,
+          icon: AudioIcon,
+          color: audioValue === 'ON' ? 'blue' : 'gray',
+          onClick: () => {
+            sendAudio(audioValue === 'ON' ? 'OFF' : 'ON', true);
+          },
+        }
+        : null,
+    ].filter((button) => button != null),
+    [config, audioValue, sendAudio, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
   return (
-    <Card buttons={buttons} href={href} header={cleanName} icons={icons} media={<CameraImage camera={name} stretch />} />
+    <Card
+      buttons={buttons}
+      href={href}
+      header={cleanName}
+      icons={icons}
+      media={<CameraImage camera={name} stretch />}
+    />
   );
 }

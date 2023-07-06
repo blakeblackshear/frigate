@@ -15,6 +15,10 @@ apt-get -yqq build-dep nginx
 
 apt-get -yqq install --no-install-recommends ca-certificates wget
 update-ca-certificates -f
+apt install -y ccache
+
+export PATH="/usr/lib/ccache:$PATH"
+
 mkdir /tmp/nginx
 wget -nv https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 tar -zxf nginx-${NGINX_VERSION}.tar.gz -C /tmp/nginx --strip-components=1
@@ -62,5 +66,5 @@ cd /tmp/nginx
     --add-module=../nginx-rtmp-module \
     --with-cc-opt="-O3 -Wno-error=implicit-fallthrough"
 
-make -j$(nproc) && make install
+make CC="ccache gcc" -j$(nproc) && make install
 rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default

@@ -109,11 +109,19 @@ Same data available at `/api/stats` published at a configurable interval.
 
 ### `frigate/<camera_name>/detect/set`
 
-Topic to turn detection for a camera on and off. Expected values are `ON` and `OFF`.
+Topic to turn object detection for a camera on and off. Expected values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/detect/state`
 
-Topic with current state of detection for a camera. Published values are `ON` and `OFF`.
+Topic with current state of object detection for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/audio/set`
+
+Topic to turn audio detection for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/audio/state`
+
+Topic with current state of audio detection for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/recordings/set`
 
@@ -176,7 +184,7 @@ Topic to send PTZ commands to camera.
 
 | Command                | Description                                                                               |
 | ---------------------- | ----------------------------------------------------------------------------------------- |
-| `preset-<preset_name>` | send command to move to preset with name `<preset_name>`                                  |
+| `preset_<preset_name>` | send command to move to preset with name `<preset_name>`                                  |
 | `MOVE_<dir>`           | send command to continuously move in `<dir>`, possible values are [UP, DOWN, LEFT, RIGHT] |
 | `ZOOM_<dir>`           | send command to continuously zoom `<dir>`, possible values are [IN, OUT]                  |
 | `STOP`                 | send command to stop moving                                                               |

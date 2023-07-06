@@ -38,14 +38,9 @@ from frigate.ptz import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
-from frigate.util import (
-    clean_camera_user_pass,
-    ffprobe_stream,
-    get_tz_modifiers,
-    restart_frigate,
-    update_yaml_from_url,
-    vainfo_hwaccel,
-)
+from frigate.util.builtin import clean_camera_user_pass, get_tz_modifiers
+from frigate.util.image import update_yaml_from_url
+from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -409,6 +404,24 @@ def set_sub_label(id):
         ),
         200,
     )
+
+
+@bp.route("/labels")
+def get_labels():
+    camera = request.args.get("camera", type=str, default="")
+
+    try:
+        if camera:
+            events = Event.select(Event.label).where(Event.camera == camera).distinct()
+        else:
+            events = Event.select(Event.label).distinct()
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        )
+
+    labels = sorted([e.label for e in events])
+    return jsonify(labels)
 
 
 @bp.route("/sub_labels")
@@ -867,6 +880,7 @@ def create_event(camera_name, label):
         event_id = current_app.external_processor.create_manual_event(
             camera_name,
             label,
+            json.get("source_type", "api"),
             json.get("sub_label", None),
             json.get("duration", 30),
             json.get("include_recording", True),
@@ -891,8 +905,11 @@ def create_event(camera_name, label):
 
 @bp.route("/events/<event_id>/end", methods=["PUT"])
 def end_event(event_id):
+    json: dict[str, any] = request.get_json(silent=True) or {}
+
     try:
-        current_app.external_processor.finish_manual_event(event_id)
+        end_time = json.get("end_time", datetime.now().timestamp())
+        current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return jsonify(
             {"success": False, "message": f"{event_id} must be set and valid."}, 404
@@ -1142,6 +1159,15 @@ def latest_frame(camera_name):
 
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
+
+        if frame is None:
+            return "Unable to get valid frame from {}".format(camera_name), 500
+
+        if height < 1 or width < 1:
+            return (
+                "Invalid height / width requested :: {} / {}".format(height, width),
+                400,
+            )
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 

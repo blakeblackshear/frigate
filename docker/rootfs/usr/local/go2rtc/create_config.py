@@ -7,7 +7,7 @@ import sys
 import yaml
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.const import BIRDSEYE_PIPE, BTBN_PATH  # noqa: E402
+from frigate.const import BIRDSEYE_PIPE  # noqa: E402
 from frigate.ffmpeg_presets import (  # noqa: E402
     parse_preset_hardware_acceleration_encode,
 )
@@ -71,7 +71,7 @@ elif go2rtc_config["rtsp"].get("default_query") is None:
     go2rtc_config["rtsp"]["default_query"] = "mp4"
 
 # need to replace ffmpeg command when using ffmpeg4
-if not os.path.exists(BTBN_PATH):
+if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
     if go2rtc_config.get("ffmpeg") is None:
         go2rtc_config["ffmpeg"] = {
             "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"

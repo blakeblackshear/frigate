@@ -16,6 +16,7 @@ export const handlers = [
           front: {
             name: 'front',
             objects: { track: ['taco', 'cat', 'dog'] },
+            audio: { enabled: false, enabled_in_config: false },
             record: { enabled: true, enabled_in_config: true },
             detect: { width: 1280, height: 720 },
             snapshots: {},
@@ -25,6 +26,7 @@ export const handlers = [
           side: {
             name: 'side',
             objects: { track: ['taco', 'cat', 'dog'] },
+            audio: { enabled: false, enabled_in_config: false },
             record: { enabled: false, enabled_in_config: true },
             detect: { width: 1280, height: 720 },
             snapshots: {},

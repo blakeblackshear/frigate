@@ -25,9 +25,9 @@ const timeAgo = ({ time, currentTime = new Date(), dense = false }: IProp): stri
   const elapsedTime: number = currentTime.getTime() - pastTime.getTime();
 
   const timeUnits: TimeUnit[] = [
-    { unit: 'ye', full: 'year', value: 31536000 },
+    { unit: 'yr', full: 'year', value: 31536000 },
     { unit: 'mo', full: 'month', value: 0 },
-    { unit: 'day', full: 'day', value: 86400 },
+    { unit: 'd', full: 'day', value: 86400 },
     { unit: 'h', full: 'hour', value: 3600 },
     { unit: 'm', full: 'minute', value: 60 },
     { unit: 's', full: 'second', value: 1 },
@@ -58,11 +58,11 @@ const timeAgo = ({ time, currentTime = new Date(), dense = false }: IProp): stri
 
       if (monthDiff > 0) {
         const unitAmount = monthDiff;
-        return `${unitAmount}${dense ? timeUnits[i].unit[0] : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
+        return `${unitAmount}${dense ? timeUnits[i].unit : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
       }
     } else if (elapsed >= timeUnits[i].value) {
       const unitAmount: number = Math.floor(elapsed / timeUnits[i].value);
-      return `${unitAmount}${dense ? timeUnits[i].unit[0] : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
+      return `${unitAmount}${dense ? timeUnits[i].unit : ` ${timeUnits[i].full}`}${dense ? '' : 's'} ago`;
     }
   }
   return 'Invalid Time';
