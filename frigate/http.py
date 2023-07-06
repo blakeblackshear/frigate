@@ -30,7 +30,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import CLIPS_DIR, CONFIG_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
@@ -39,7 +39,11 @@ from frigate.ptz import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
-from frigate.util.builtin import clean_camera_user_pass, get_tz_modifiers
+from frigate.util.builtin import (
+    clean_camera_user_pass,
+    get_tz_modifiers,
+    update_yaml_from_url,
+)
 from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
 from frigate.version import VERSION
 
@@ -1024,6 +1028,48 @@ def config_save():
         )
     else:
         return "Config successfully saved.", 200
+
+
+@bp.route("/config/set", methods=["PUT"])
+def config_set():
+    config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
+
+    # Check if we can use .yaml instead of .yml
+    config_file_yaml = config_file.replace(".yml", ".yaml")
+
+    if os.path.isfile(config_file_yaml):
+        config_file = config_file_yaml
+
+    with open(config_file, "r") as f:
+        old_raw_config = f.read()
+        f.close()
+
+    try:
+        update_yaml_from_url(config_file, request.url)
+        with open(config_file, "r") as f:
+            new_raw_config = f.read()
+            f.close()
+        # Validate the config schema
+        try:
+            FrigateConfig.parse_raw(new_raw_config)
+        except Exception:
+            with open(config_file, "w") as f:
+                f.write(old_raw_config)
+                f.close()
+            return make_response(
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                    }
+                ),
+                400,
+            )
+    except Exception as e:
+        logging.error(f"Error updating config: {e}")
+        return "Error updating config", 500
+
+    return "Config successfully updated", 200
 
 
 @bp.route("/config/schema.json")
