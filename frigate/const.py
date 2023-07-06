@@ -11,7 +11,6 @@ YAML_EXT = (".yaml", ".yml")
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
-BTBN_PATH = "/usr/lib/btbn-ffmpeg"
 
 # Attributes
 

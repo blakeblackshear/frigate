@@ -5,7 +5,6 @@ import os
 from enum import Enum
 from typing import Any
 
-from frigate.const import BTBN_PATH
 from frigate.util import vainfo_hwaccel
 from frigate.version import VERSION
 
@@ -43,7 +42,11 @@ class LibvaGpuSelector:
         return ""
 
 
-TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
+TIMEOUT_PARAM = (
+    "-timeout"
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    else "-stimeout"
+)
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
