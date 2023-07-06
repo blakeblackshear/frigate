@@ -15,7 +15,7 @@ from norfair.camera_motion import MotionEstimator, TranslationTransformationGett
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.ptz.onvif import OnvifController
 from frigate.types import CameraMetricsTypes
-from frigate.util import SharedMemoryFrameManager, intersection_over_union
+from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
 logger = logging.getLogger(__name__)
 
