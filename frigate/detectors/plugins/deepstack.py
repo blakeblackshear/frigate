@@ -32,6 +32,7 @@ class DeepStack(DetectionApi):
         self.api_timeout = detector_config.api_timeout
         self.api_key = detector_config.api_key
         self.labels = detector_config.model.merged_labelmap
+        self.client = httpx.Client()
 
     def get_label_index(self, label_value):
         if label_value.lower() == "truck":
@@ -50,14 +51,14 @@ class DeepStack(DetectionApi):
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
         try:
-            response = httpx.post(
+            response = self.client.post(
                 self.api_url,
                 data=data,
                 files={"image": image_bytes},
                 timeout=self.api_timeout,
             )
             response_json = response.json()
-        except httpx.RequestError as e:
+        except (httpx.RequestError, httpx.TimeoutException) as e:
             logger.error(f"An error occurred while making the request: {e}")
             return np.zeros((20, 6), np.float32)
 
@@ -85,3 +86,6 @@ class DeepStack(DetectionApi):
             ]
 
         return detections
+
+    def close(self):
+        self.client.close()
