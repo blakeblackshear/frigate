@@ -193,6 +193,7 @@ class EventProcessor(threading.Thread):
                     "score": score,
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
+                    "type": "object",
                 },
             }
 
@@ -216,8 +217,8 @@ class EventProcessor(threading.Thread):
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
 
-    def handle_external_detection(self, type: str, event_data: Event) -> None:
-        if type == "new":
+    def handle_external_detection(self, event_type: str, event_data: Event) -> None:
+        if event_type == "new":
             event = {
                 Event.id: event_data["id"],
                 Event.label: event_data["label"],
@@ -229,10 +230,10 @@ class EventProcessor(threading.Thread):
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],
-                Event.data: {},
+                Event.data: {"type": event_data["type"]},
             }
             Event.insert(event).execute()
-        elif type == "end":
+        elif event_type == "end":
             event = {
                 Event.id: event_data["id"],
                 Event.end_time: event_data["end_time"],

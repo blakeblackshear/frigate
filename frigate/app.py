@@ -437,6 +437,7 @@ class FrigateApp:
             )
             audio_process.daemon = True
             audio_process.start()
+            self.processes["audioDetector"] = audio_process.pid or 0
             logger.info(f"Audio process started: {audio_process.pid}")
 
     def start_timeline_processor(self) -> None:

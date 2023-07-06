@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig
+from frigate.config import CameraConfig, DetectConfig, ModelConfig
 from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
@@ -95,7 +95,17 @@ def filtered(obj, objects_to_track, object_filters):
     return False
 
 
-def create_tensor_input(frame, model_config, region):
+def get_min_region_size(model_config: ModelConfig) -> int:
+    """Get the min region size and ensure it is divisible by 4."""
+    half = int(max(model_config.height, model_config.width) / 2)
+
+    if half % 4 == 0:
+        return half
+
+    return int((half + 3) / 4) * 4
+
+
+def create_tensor_input(frame, model_config: ModelConfig, region):
     if model_config.input_pixel_format == PixelFormatEnum.rgb:
         cropped_frame = yuv_region_2_rgb(frame, region)
     elif model_config.input_pixel_format == PixelFormatEnum.bgr:
@@ -719,7 +729,7 @@ def process_frames(
     camera_name: str,
     frame_queue: mp.Queue,
     frame_shape,
-    model_config,
+    model_config: ModelConfig,
     detect_config: DetectConfig,
     frame_manager: FrameManager,
     motion_detector: MotionDetector,
@@ -743,7 +753,7 @@ def process_frames(
 
     startup_scan_counter = 0
 
-    region_min_size = int(max(model_config.height, model_config.width) / 2)
+    region_min_size = get_min_region_size(model_config)
 
     while not stop_event.is_set():
         if exit_on_empty and frame_queue.empty():
