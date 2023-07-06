@@ -5,10 +5,10 @@ import logging
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from typing import AnyStr, Optional
-from PIL import Image
 
 import cv2
 import numpy as np
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
