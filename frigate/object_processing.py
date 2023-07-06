@@ -23,7 +23,7 @@ from frigate.config import (
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
-from frigate.util import (
+from frigate.util.image import (
     SharedMemoryFrameManager,
     area,
     calculate_region,

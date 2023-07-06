@@ -22,13 +22,13 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_rtmp,
 )
 from frigate.plus import PlusApi
-from frigate.util import (
-    create_mask,
+from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
     get_ffmpeg_arg_list,
     load_config_with_no_duplicates,
 )
+from frigate.util.image import create_mask
 
 logger = logging.getLogger(__name__)
 

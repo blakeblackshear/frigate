@@ -3,7 +3,7 @@ from unittest import TestCase, main
 import cv2
 import numpy as np
 
-from frigate.util import yuv_region_2_rgb
+from frigate.util.image import yuv_region_2_rgb
 
 
 class TestYuvRegion2RGB(TestCase):

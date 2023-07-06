@@ -13,7 +13,9 @@ from setproctitle import setproctitle
 
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import InputTensorEnum
-from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
+from frigate.util.builtin import EventsPerSecond, load_labels
+from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 

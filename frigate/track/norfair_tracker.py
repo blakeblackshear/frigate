@@ -8,7 +8,7 @@ from norfair.drawing.drawer import Drawer
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
-from frigate.util import intersection_over_union
+from frigate.util.image import intersection_over_union
 
 
 # Normalizes distance from estimate relative to object size
