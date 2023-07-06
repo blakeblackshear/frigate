@@ -11,6 +11,7 @@ import time
 from collections import defaultdict
 
 import cv2
+import faster_fifo as ff
 import numpy as np
 from setproctitle import setproctitle
 
@@ -727,7 +728,7 @@ def get_consolidated_object_detections(detected_object_groups):
 
 def process_frames(
     camera_name: str,
-    frame_queue: mp.Queue,
+    frame_queue: ff.Queue,
     frame_shape,
     model_config: ModelConfig,
     detect_config: DetectConfig,
@@ -735,7 +736,7 @@ def process_frames(
     motion_detector: MotionDetector,
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
-    detected_objects_queue: mp.Queue,
+    detected_objects_queue: ff.Queue,
     process_info: dict,
     objects_to_track: list[str],
     object_filters,
