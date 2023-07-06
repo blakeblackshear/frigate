@@ -1,13 +1,34 @@
+<<<<<<< HEAD:frigate/util/image.py
 """Utilities for creating and manipulating image frames."""
 
+=======
+import copy
+import ctypes
+>>>>>>> 2fae9dcb93f41936ee1907fc0813719c8559fe1b:frigate/util.py
 import datetime
 import logging
+
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
+<<<<<<< HEAD:frigate/util/image.py
 from typing import AnyStr, Optional
 
 import cv2
 import numpy as np
+=======
+from queue import Empty, Full
+from typing import Any, AnyStr, Optional, Tuple
+
+import cv2
+import numpy as np
+import psutil
+import py3nvml.py3nvml as nvml
+import pytz
+import yaml
+
+
+from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+>>>>>>> 2fae9dcb93f41936ee1907fc0813719c8559fe1b:frigate/util.py
 
 logger = logging.getLogger(__name__)
 

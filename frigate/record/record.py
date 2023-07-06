@@ -7,6 +7,7 @@ import threading
 from types import FrameType
 from typing import Optional
 
+import faster_fifo as ff
 from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def manage_recordings(
     config: FrigateConfig,
-    recordings_info_queue: mp.Queue,
+    recordings_info_queue: ff.Queue,
     process_info: dict[str, FeatureMetricsTypes],
 ) -> None:
     stop_event = mp.Event()
