@@ -24,8 +24,8 @@ from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.object_detection import RemoteObjectDetector
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.util import (
-    EventsPerSecond,
+from frigate.util.builtin import EventsPerSecond
+from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
     area,
@@ -33,11 +33,11 @@ from frigate.util import (
     draw_box_with_label,
     intersection,
     intersection_over_union,
-    listen,
     yuv_region_2_bgr,
     yuv_region_2_rgb,
     yuv_region_2_yuv,
 )
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 
@@ -206,17 +206,16 @@ def capture_frames(
 
         frame_rate.update()
 
-        # if the queue is full, skip this frame
-        if frame_queue.full():
+        # don't lock the queue to check, just try since it should rarely be full
+        try:
+            # add to the queue
+            frame_queue.put(current_frame.value, False)
+            # close the frame
+            frame_manager.close(frame_name)
+        except queue.Full:
+            # if the queue is full, skip this frame
             skipped_eps.update()
             frame_manager.delete(frame_name)
-            continue
-
-        # close the frame
-        frame_manager.close(frame_name)
-
-        # add to the queue
-        frame_queue.put(current_frame.value)
 
 
 class CameraWatchdog(threading.Thread):
@@ -757,13 +756,15 @@ def process_frames(
     region_min_size = get_min_region_size(model_config)
 
     while not stop_event.is_set():
-        if exit_on_empty and frame_queue.empty():
-            logger.info("Exiting track_objects...")
-            break
-
         try:
-            frame_time = frame_queue.get(True, 1)
+            if exit_on_empty:
+                frame_time = frame_queue.get(False)
+            else:
+                frame_time = frame_queue.get(True, 1)
         except queue.Empty:
+            if exit_on_empty:
+                logger.info("Exiting track_objects...")
+                break
             continue
 
         current_frame_time.value = frame_time

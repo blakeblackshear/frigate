@@ -47,7 +47,7 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
-from frigate.util import LimitedQueue as LQueue
+from frigate.util.builtin import LimitedQueue as LQueue
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog

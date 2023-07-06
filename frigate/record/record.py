@@ -16,7 +16,7 @@ from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.maintainer import RecordingMaintainer
 from frigate.types import FeatureMetricsTypes
-from frigate.util import listen
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 

@@ -21,7 +21,8 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.types import FeatureMetricsTypes
-from frigate.util import area, get_video_properties
+from frigate.util.image import area
+from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
