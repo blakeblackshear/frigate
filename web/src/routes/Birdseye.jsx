@@ -6,7 +6,7 @@ import Heading from '../components/Heading';
 import WebRtcPlayer from '../components/WebRtcPlayer';
 import '../components/MsePlayer';
 import useSWR from 'swr';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import CameraControlPanel from '../components/CameraControlPanel';
 import { baseUrl } from '../api/baseUrl';
 
@@ -26,16 +26,19 @@ export default function Birdseye() {
       .map(([_, camera]) => camera.name);
   }, [config]);
 
+  const [isMaxWidth, setIsMaxWidth] = useState(false);
+
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
   let player;
+  const playerClass = isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full';
   if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
         <Fragment>
-          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+          <div className={ptzCameras.length && !isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
             <video-stream
               mode="mse"
               src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=birdseye`)}
@@ -52,10 +55,10 @@ export default function Birdseye() {
         </Fragment>
       );
     }
-  } else if (viewSource == 'webrtc' && config.birdseye.restream) {
+  } else if (viewSource == 'webrtc' ) {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={ptzCameras.length && config.birdseye.restream && !isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full'}>
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -63,7 +66,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={ ptzCameras.length && config.birdseye.restream && !isMaxWidth ? 'max-w-5xl xl:w-1/2' : 'w-full' }>
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -77,26 +80,37 @@ export default function Birdseye() {
           Birdseye
         </Heading>
 
+        <button
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => setIsMaxWidth(!isMaxWidth)}
+        >
+          Toggle width
+        </button>
+
         {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
             value={viewSource}
             onChange={(e) => setViewSource(e.target.value)}
+            key="width-changer"
           >
             {sourceValues.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
             ))}
+           
           </select>
         )}
       </div>
 
       <div className="xl:flex justify-between">
-        {player}
+        <div className={playerClass}> {/* Use dynamic class */}
+          {player}
+        </div>
 
         {ptzCameras.length ? (
-          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">
+          <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 sm:w-min xl:h-min {playerClass}">
             <Heading size="sm">Control Panel</Heading>
             {ptzCameras.map((camera) => (
               <div className="p-4" key={camera}>
