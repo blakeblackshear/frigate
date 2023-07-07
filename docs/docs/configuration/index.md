@@ -593,6 +593,12 @@ ui:
   # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
   # possible values are shown above (default: not set)
   strftime_fmt: "%Y/%m/%d %H:%M"
+  # Optional: Display or hide certain options and menus in Frigate. (default: shown below)
+  # Examples:
+  #    user: hides all options that affect Frigate behavior
+  #    advanced: shows more menus and options for additional system information
+  #    admin: all options, menus, and config are visible.
+  viewmode: admin
 
 # Optional: Telemetry configuration
 telemetry:
