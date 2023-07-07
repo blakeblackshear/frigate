@@ -15,10 +15,7 @@ import pytz
 import yaml
 from ruamel.yaml import YAML
 
-from frigate.const import (
-    REGEX_HTTP_CAMERA_USER_PASS,
-    REGEX_RTSP_CAMERA_USER_PASS,
-)
+from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
 
