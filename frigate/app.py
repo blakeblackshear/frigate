@@ -26,7 +26,7 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
-    DEFAULT_QUEUE_SIZE,
+    DEFAULT_QUEUE_BUFFER_SIZE,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -191,8 +191,8 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = ff.Queue(DEFAULT_QUEUE_SIZE)
-        self.event_processed_queue: Queue = ff.Queue(DEFAULT_QUEUE_SIZE)
+        self.event_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.event_processed_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
         self.video_output_queue: Queue = LQueue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
@@ -203,10 +203,10 @@ class FrigateApp:
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = ff.Queue(DEFAULT_QUEUE_SIZE)
+        self.recordings_info_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
         # Queue for timeline events
-        self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_SIZE)
+        self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:

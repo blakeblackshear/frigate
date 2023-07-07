@@ -20,7 +20,11 @@ import yaml
 from faster_fifo import Queue as FFQueue
 from ruamel.yaml import YAML
 
-from frigate.const import DEFAULT_QUEUE_SIZE, REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+from frigate.const import (
+    DEFAULT_QUEUE_BUFFER_SIZE,
+    REGEX_HTTP_CAMERA_USER_PASS,
+    REGEX_RTSP_CAMERA_USER_PASS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +72,7 @@ class LimitedQueue(FFQueue):
     def __init__(
         self,
         maxsize=0,
-        max_size_bytes=DEFAULT_QUEUE_SIZE,
+        max_size_bytes=DEFAULT_QUEUE_BUFFER_SIZE,
         loads=None,
         dumps=None,
     ):
