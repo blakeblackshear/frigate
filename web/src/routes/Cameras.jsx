@@ -101,12 +101,19 @@ function Camera({ name, config }) {
   );
 
   const [isHovered, setIsHovered] = useState(false); // Add a state to track if the mouse is over the card
+  const [timerId, setTimerId] = useState(null); // Add a state to keep track of the timer
 
   const handleMouseEnter = () => {
-    setIsHovered(true);
+    // Set a timer to change the state after 0.5 seconds
+    const id = setTimeout(() => {
+      setIsHovered(true);
+    }, 500);
+    setTimerId(id);
   };
 
   const handleMouseLeave = () => {
+    // Clear the timer if the mouse leaves before the 0.5 seconds are up
+    clearTimeout(timerId);
     setIsHovered(false);
   };
 
