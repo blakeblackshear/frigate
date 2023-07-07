@@ -420,8 +420,8 @@ def get_labels():
         else:
             events = Event.select(Event.label).distinct()
     except Exception as e:
-        return jsonify(
-            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        return make_response(
+            jsonify({"success": False, "message": f"Failed to get labels: {e}"}), 404
         )
 
     labels = sorted([e.label for e in events])
@@ -435,8 +435,9 @@ def get_sub_labels():
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception as e:
-        return jsonify(
-            {"success": False, "message": f"Failed to get sub_labels: {e}"}, "404"
+        return make_response(
+            jsonify({"success": False, "message": f"Failed to get sub_labels: {e}"}),
+            404,
         )
 
     sub_labels = [e.sub_label for e in events]
@@ -869,12 +870,17 @@ def events():
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
 def create_event(camera_name, label):
     if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
-        return jsonify(
-            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        return make_response(
+            jsonify(
+                {"success": False, "message": f"{camera_name} is not a valid camera."}
+            ),
+            404,
         )
 
     if not label:
-        return jsonify({"success": False, "message": f"{label} must be set."}, 404)
+        return make_response(
+            jsonify({"success": False, "message": f"{label} must be set."}), 404
+        )
 
     json: dict[str, any] = request.get_json(silent=True) or {}
 
@@ -892,17 +898,19 @@ def create_event(camera_name, label):
             frame,
         )
     except Exception as e:
-        logger.error(f"The error is {e}")
-        return jsonify(
-            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        return make_response(
+            jsonify({"success": False, "message": f"An unknown error occurred: {e}"}),
+            404,
         )
 
-    return jsonify(
-        {
-            "success": True,
-            "message": "Successfully created event.",
-            "event_id": event_id,
-        },
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Successfully created event.",
+                "event_id": event_id,
+            }
+        ),
         200,
     )
 
@@ -915,11 +923,16 @@ def end_event(event_id):
         end_time = json.get("end_time", datetime.now().timestamp())
         current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
-        return jsonify(
-            {"success": False, "message": f"{event_id} must be set and valid."}, 404
+        return make_response(
+            jsonify(
+                {"success": False, "message": f"{event_id} must be set and valid."}
+            ),
+            404,
         )
 
-    return jsonify({"success": True, "message": "Event successfully ended."}, 200)
+    return make_response(
+        jsonify({"success": True, "message": "Event successfully ended."}), 200
+    )
 
 
 @bp.route("/config")
@@ -1621,21 +1634,24 @@ def ffprobe():
     path_param = request.args.get("paths", "")
 
     if not path_param:
-        return jsonify(
-            {"success": False, "message": "Path needs to be provided."}, "404"
+        return make_response(
+            jsonify({"success": False, "message": "Path needs to be provided."}), 404
         )
 
     if path_param.startswith("camera"):
         camera = path_param[7:]
 
         if camera not in current_app.frigate_config.cameras.keys():
-            return jsonify(
-                {"success": False, "message": f"{camera} is not a valid camera."}, "404"
+            return make_response(
+                jsonify(
+                    {"success": False, "message": f"{camera} is not a valid camera."}
+                ),
+                404,
             )
 
         if not current_app.frigate_config.cameras[camera].enabled:
-            return jsonify(
-                {"success": False, "message": f"{camera} is not enabled."}, "404"
+            return make_response(
+                jsonify({"success": False, "message": f"{camera} is not enabled."}), 404
             )
 
         paths = map(
