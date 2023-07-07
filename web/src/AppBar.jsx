@@ -8,16 +8,16 @@ import DarkModeIcon from './icons/DarkMode';
 import SettingsIcon from './icons/Settings';
 import FrigateRestartIcon from './icons/FrigateRestart';
 import Prompt from './components/Prompt';
-import { useDarkMode, useViewMode } from './context';
+import { useDarkMode, useUserView } from './context';
 import { useCallback, useRef, useState } from 'preact/hooks';
 import { useRestart } from './api/ws';
-import { ViewModeTypes } from './components/ViewOptionEnum'
+import { UserViewTypes } from './context/UserViewTypes'
 
 export default function AppBar() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [showDialogWait, setShowDialogWait] = useState(false);
-  const { currentViewMode, setViewMode } = useViewMode();
+  const { currentUserView, setUserView } = useUserView();
   const { setDarkMode } = useDarkMode();
   const { send: sendRestart } = useRestart();
 
@@ -29,12 +29,12 @@ export default function AppBar() {
     [setDarkMode, setShowMoreMenu]
   );
 
-  const handleSetViewMode = useCallback(
+  const handleSetUserView = useCallback(
     (value) => {
-      setViewMode(value);
+      setUserView(value);
       setShowMoreMenu(false);
     },
-    [setViewMode, setShowMoreMenu]
+    [setUserView, setShowMoreMenu]
   );
 
   const moreRef = useRef(null);
@@ -75,10 +75,10 @@ export default function AppBar() {
           <MenuItem icon={SettingsIcon} label="Viewmode:">
             <select
               className="py-0.5 pr-8"
-              value={currentViewMode}
-              onChange={(e) => handleSetViewMode(e.target.value)}
+              value={currentUserView}
+              onChange={(e) => handleSetUserView(e.target.value)}
             >
-              { Object.keys(ViewModeTypes).filter((v) => !isNaN(Number(v))).map(key => <option key={key} value={key}>{ViewModeTypes[key]}</option>) }
+              { Object.keys(UserViewTypes).filter((v) => !isNaN(Number(v))).map(key => <option key={key} value={key}>{UserViewTypes[key]}</option>) }
             </select>
           </MenuItem>
           <MenuSeparator />

@@ -4,7 +4,7 @@ import { Match } from 'preact-router/match';
 import { memo } from 'preact/compat';
 import { ENV } from './env';
 import { useMemo } from 'preact/hooks'
-import ViewOption from './components/ViewOption'
+import UserViewer from './components/UserViewer'
 import useSWR from 'swr';
 import NavigationDrawer, { Destination, Separator } from './components/NavigationDrawer';
 
@@ -47,17 +47,17 @@ export default function Sidebar() {
       <Destination href="/events" text="Events" />
       <Destination href="/exports" text="Exports" />
       <Separator />
-      <ViewOption requiredmode="advanced">
+      <UserViewer requiredmode="advanced">
         <Destination href="/storage" text="Storage" />
         <Destination href="/system" text="System" />
-      </ViewOption>
-      <ViewOption requiredmode="admin">
+      </UserViewer>
+      <UserViewer requiredmode="admin">
         <Destination href="/config" text="Config" />
-      </ViewOption>
-      <ViewOption requiredmode="advanced">
+      </UserViewer>
+      <UserViewer requiredmode="advanced">
         <Destination href="/logs" text="Logs" />
         <Separator />
-      </ViewOption>
+      </UserViewer>
       <div className="flex flex-grow" />
       {ENV !== 'production' ? (
         <Fragment>

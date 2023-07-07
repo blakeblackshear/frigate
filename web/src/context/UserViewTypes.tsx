@@ -1,5 +1,5 @@
-export enum ViewModeTypes {
+export enum UserViewTypes {
     "user",
     "advanced",
     "admin",
-  }
+}

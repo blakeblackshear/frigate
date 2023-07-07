@@ -12,7 +12,7 @@ import Dialog from '../components/Dialog';
 import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
 import { About } from '../icons/About';
-import ViewOption from '../components/ViewOption';
+import UserViewer from '../components/UserViewer';
 
 const emptyObject = Object.freeze({});
 
@@ -99,7 +99,7 @@ export default function System() {
         {config && (
           <span class="p-1">
             go2rtc {go2rtc && `${go2rtc.version} `}
-            <ViewOption requiredmode="admin">
+            <UserViewer requiredmode="admin">
               <Link
                 className="text-blue-500 hover:underline"
                 target="_blank"
@@ -108,7 +108,7 @@ export default function System() {
               >
                 dashboard
               </Link>
-            </ViewOption>
+            </UserViewer>
           </span>
         )}
       </div>

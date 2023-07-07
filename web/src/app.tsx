@@ -6,7 +6,7 @@ import AppBar from './AppBar';
 import Cameras from './routes/Cameras';
 import { Router } from 'preact-router';
 import Sidebar from './Sidebar';
-import { DarkModeProvider, DrawerProvider, ViewModeProvider } from './context';
+import { DarkModeProvider, DrawerProvider, UserViewProvider } from './context';
 import useSWR from 'swr';
 
 export default function App() {
@@ -16,7 +16,7 @@ export default function App() {
   return (
     <DarkModeProvider>
       <DrawerProvider>
-        <ViewModeProvider config={config}>
+        <UserViewProvider config={config}>
           <div data-testid="app" className="w-full">
           <AppBar />
             {!config ? (
@@ -48,7 +48,7 @@ export default function App() {
               </div>
             )}
           </div>
-        </ViewModeProvider>
+        </UserViewProvider>
       </DrawerProvider>
     </DarkModeProvider>
   );

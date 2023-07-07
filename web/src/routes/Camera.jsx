@@ -17,7 +17,7 @@ import WebRtcPlayer from '../components/WebRtcPlayer';
 import '../components/MsePlayer';
 import CameraControlPanel from '../components/CameraControlPanel';
 import { baseUrl } from '../api/baseUrl';
-import ViewOption from '../components/ViewOption'
+import UserViewer from '../components/UserViewer'
 
 const emptyObject = Object.freeze({});
 
@@ -110,9 +110,9 @@ export default function Camera({ camera }) {
         label="Regions"
         labelPosition="after"
       />
-      <ViewOption requiredmode="admin">
+      <UserViewer requiredmode="admin">
         <Link href={`/cameras/${camera}/editor`}>Mask & Zone creator</Link>
-      </ViewOption>
+      </UserViewer>
     </div>
   ) : null;
 

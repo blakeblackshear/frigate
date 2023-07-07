@@ -30,7 +30,7 @@ import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
 import TimelineEventOverlay from '../components/TimelineEventOverlay';
-import ViewOption from '../components/ViewOption';
+import UserViewer from '../components/UserViewer';
 
 const API_LIMIT = 25;
 
@@ -658,13 +658,13 @@ export default function Events({ path, ...props }) {
                         )}
                       </div>
                       <div class="flex flex-col">
-                        <ViewOption requiredmode="admin">
+                        <UserViewer requiredmode="admin">
                           <Delete
                             className="h-6 w-6 cursor-pointer"
                             stroke="#f87171"
                             onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
                           />
-                        </ViewOption>
+                        </UserViewer>
 
                         <Download
                           className="h-6 w-6 mt-auto"

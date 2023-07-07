@@ -1,19 +1,19 @@
 import { h, createContext } from 'preact';
 import { get as getData, set as setData } from 'idb-keyval';
 import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'preact/hooks';
-import { ViewModeTypes } from '../components/ViewOptionEnum';
+import { UserViewTypes } from './UserViewTypes';
 
-const ViewMode = createContext("");
+const UserView = createContext("");
 
-export function ViewModeProvider({ children, config }) {
-  const [currentViewMode, setCurrentViewMode] = useState(null);
+export function UserViewProvider({ children, config }) {
+  const [currentUserView, setCurrentUserView] = useState(null);
 
-  const setViewMode = useCallback(
+  const setUserView = useCallback(
     (value) => {
       setData('view-mode', value);
-      setCurrentViewMode(value);
+      setCurrentUserView(value);
     },
-    [setCurrentViewMode]
+    [setCurrentUserView]
   );
 
   useEffect(() => {
@@ -21,25 +21,25 @@ export function ViewModeProvider({ children, config }) {
       let viewmode = await getData('view-mode');
 
       if(viewmode == null) {
-        const maxViewMode = (Object.keys(ViewModeTypes).filter(isNaN).length-1).toString();
-        const configValue = config ? ViewModeTypes[config.ui.viewmode].toString() : maxViewMode;
+        const maxViewMode = (Object.keys(UserViewTypes).filter(isNaN).length-1).toString();
+        const configValue = config ? UserViewTypes[config.ui.viewmode].toString() : maxViewMode;
         viewmode = configValue;
       }
 
-      setViewMode(viewmode);
+      setUserView(viewmode);
     }
 
     load();
-  }, [config, setViewMode]);
+  }, [config, setUserView]);
 
   
-  return !currentViewMode ? null : (
-    <ViewMode.Provider value={{ currentViewMode, setViewMode }}>{children}</ViewMode.Provider>
+  return !currentUserView ? null : (
+    <UserView.Provider value={{ currentUserView, setUserView }}>{children}</UserView.Provider>
   );
 }
 
-export function useViewMode() {
-  return useContext(ViewMode);
+export function useUserView() {
+  return useContext(UserView);
 }
 
 const DarkMode = createContext(null);

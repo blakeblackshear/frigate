@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { set as setData, get as getData } from 'idb-keyval';
-import { DarkModeProvider, useDarkMode, usePersistence, ViewModeProvider, useViewMode } from '..';
-import { ViewModeTypes } from '../../components/ViewOptionEnum'
+import { DarkModeProvider, useDarkMode, usePersistence, UserViewProvider, useUserView } from '..';
+import { UserViewTypes } from '../../context/UserViewTypes'
 import { fireEvent, render, screen } from 'testing-library';
 import { useCallback } from 'preact/hooks';
 import * as WS from '../../api/ws';
@@ -197,9 +197,9 @@ describe('usePersistence', () => {
   });
 });
 
-function ViewModeChecker() {
-  const { currentViewMode } = useViewMode();
-  return <div data-testid={currentViewMode}>{currentViewMode}</div>;
+function UserViewChecker() {
+  const { currentUserView } = useUserView();
+  return <div data-testid={currentUserView}>{currentUserView}</div>;
 }
 
 describe('ViewMode', () => {
@@ -211,24 +211,24 @@ describe('ViewMode', () => {
     setData('view-mode', null);
 
     render(
-      <ViewModeProvider>
-        <ViewModeChecker />
-      </ViewModeProvider>
+      <UserViewProvider>
+        <UserViewChecker />
+      </UserViewProvider>
     );
 
-    const maxViewMode = (Object.keys(ViewModeTypes).filter(isNaN).length-1);
+    const maxViewMode = (Object.keys(UserViewTypes).filter(isNaN).length-1);
     const el = await screen.findByTestId(maxViewMode);
     expect(el).toBeInTheDocument();
   });
 
-  Object.keys(ViewModeTypes).filter((v) => !isNaN(Number(v))).map(key => 
-    test(`uses a viewmode option that is stored in idb - ${ViewModeTypes[key]}`, async () => {
+  Object.keys(UserViewTypes).filter((v) => !isNaN(Number(v))).map(key => 
+    test(`uses a viewmode option that is stored in idb - ${UserViewTypes[key]}`, async () => {
       setData('view-mode', key);
 
       render(
-        <ViewModeProvider>
-          <ViewModeChecker />
-        </ViewModeProvider>
+        <UserViewProvider>
+          <UserViewChecker />
+        </UserViewProvider>
       );
 
       const el = await screen.findByTestId(key);
@@ -236,26 +236,26 @@ describe('ViewMode', () => {
     })
   )
 
-  test('update viewmode live, using setViewMode from context and verify idb save', async () => {
+  test('update viewmode live, using setUserView from context and verify idb save', async () => {
     setData('view-mode', null);
 
     function Updater() {
-      const { setViewMode } = useViewMode();
+      const { setUserView } = useUserView();
       const handleClick = useCallback((value) => {
-        setViewMode(value.button.toString());
-      }, [setViewMode]);
+        setUserView(value.button.toString());
+      }, [setUserView]);
       return <div onClick={handleClick}>click me</div>;
     }
 
     render(
-      <ViewModeProvider>
-        <ViewModeChecker />
+      <UserViewProvider>
+        <UserViewChecker />
         <Updater />
-      </ViewModeProvider>
+      </UserViewProvider>
     );
 
     const button = await screen.findByText('click me');
-    const maxViewMode = (Object.keys(ViewModeTypes).filter(isNaN).length-1);
+    const maxViewMode = (Object.keys(UserViewTypes).filter(isNaN).length-1);
 
     fireEvent.click(button, {button: '0'});
     const minmode = await screen.findByTestId('0');

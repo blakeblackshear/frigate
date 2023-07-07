@@ -8,8 +8,8 @@ import MotionIcon from '../icons/Motion';
 import SnapshotIcon from '../icons/Snapshot';
 import { useAudioState, useDetectState, useRecordingsState, useSnapshotsState } from '../api/ws';
 import { useMemo } from 'preact/hooks';
-import { useViewMode } from '../context'
-import { ViewModeTypes } from '../components/ViewOptionEnum';
+import { useUserView } from '../context'
+import { UserViewTypes } from '../context/UserViewTypes';
 import useSWR from 'swr';
 
 export default function Cameras() {
@@ -101,14 +101,14 @@ function Camera({ name, config }) {
     [config, audioValue, sendAudio, detectValue, sendDetect, recordValue, sendRecordings, snapshotValue, sendSnapshots]
   );
 
-  const { currentViewMode } = useViewMode();
+  const { currentUserView } = useUserView();
 
   return (
     <Card
       buttons={buttons}
       href={href}
       header={cleanName}
-      icons={!currentViewMode || currentViewMode >= ViewModeTypes["admin"] ? icons : []}
+      icons={!currentUserView || currentUserView >= UserViewTypes["admin"] ? icons : []}
       media={<CameraImage camera={name} stretch />}
     />
   );
