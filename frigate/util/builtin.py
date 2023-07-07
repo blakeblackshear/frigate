@@ -17,11 +17,10 @@ from typing import Any, Tuple
 import numpy as np
 import pytz
 import yaml
-from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
 from faster_fifo import Queue as FFQueue
 from ruamel.yaml import YAML
 
-from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+from frigate.const import DEFAULT_QUEUE_SIZE, REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ class LimitedQueue(FFQueue):
     def __init__(
         self,
         maxsize=0,
-        max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE,
+        max_size_bytes=DEFAULT_QUEUE_SIZE,
         loads=None,
         dumps=None,
     ):
@@ -80,7 +79,7 @@ class LimitedQueue(FFQueue):
         )  # Add a counter for the number of items in the queue
         self.lock = multiprocessing.Lock()  # Add a lock for thread-safety
 
-    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
+    def put(self, x, block=True, timeout=None):
         with self.lock:  # Ensure thread-safety
             if self.maxsize > 0 and self.size.value >= self.maxsize:
                 if block:
@@ -95,7 +94,7 @@ class LimitedQueue(FFQueue):
             self.size.value += 1
         return super().put(x, block=block, timeout=timeout)
 
-    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
+    def get(self, block=True, timeout=None):
         item = super().get(block=block, timeout=timeout)
         with self.lock:  # Ensure thread-safety
             if self.size.value <= 0 and not block:
