@@ -169,7 +169,7 @@ class AudioEventMaintainer(threading.Thread):
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
             return
 
-        rms = np.sqrt(np.mean(np.absolute(audio.astype(np.float32)**2)))
+        rms = np.sqrt(np.mean(np.absolute(audio.astype(np.float32) ** 2)))
 
         # only run audio detection when volume is above min_volume
         if rms >= self.config.audio.min_volume:
