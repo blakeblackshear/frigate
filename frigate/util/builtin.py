@@ -1,27 +1,21 @@
 """Utilities for builtin types manipulation."""
 
 import copy
-import ctypes
 import datetime
 import logging
-import multiprocessing
 import re
 import shlex
-import time
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
-from queue import Empty, Full
 from typing import Any, Tuple
 
 import numpy as np
 import pytz
 import yaml
-from faster_fifo import Queue as FFQueue
 from ruamel.yaml import YAML
 
 from frigate.const import (
-    DEFAULT_QUEUE_BUFFER_SIZE,
     REGEX_HTTP_CAMERA_USER_PASS,
     REGEX_RTSP_CAMERA_USER_PASS,
 )
