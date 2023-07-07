@@ -196,7 +196,7 @@ class AudioEventMaintainer(threading.Thread):
             )
 
             if resp.status_code == 200:
-                event_id = resp.json()[0]["event_id"]
+                event_id = resp.json()["event_id"]
                 self.detections[label] = {
                     "id": event_id,
                     "label": label,
