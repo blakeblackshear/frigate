@@ -1026,10 +1026,7 @@ def process_frames(
                 bgr_frame,
             )
         # add to the queue if not full
-        if detected_objects_queue.full():
-            frame_manager.delete(f"{camera_name}{frame_time}")
-            continue
-        else:
+        try:
             fps_tracker.update()
             fps.value = fps_tracker.eps()
             detected_objects_queue.put(
@@ -1043,3 +1040,8 @@ def process_frames(
             )
             detection_fps.value = object_detector.fps.eps()
             frame_manager.close(f"{camera_name}{frame_time}")
+        except queue.Full:
+            logger.warn(
+                f"Dropping frame due to full queue for {camera_name} at {frame_time}"
+            )
+            frame_manager.delete(f"{camera_name}{frame_time}")
