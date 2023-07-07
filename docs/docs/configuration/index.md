@@ -145,6 +145,12 @@ audio:
   enabled: False
   # Optional: Configure the amount of seconds without detected audio to end the event (default: shown below)
   max_not_heard: 30
+  # Optional: Configure the min rms volume required to run audio detection (default: shown below)
+  # As a rule of thumb:
+  #  - 200 - high sensitivity
+  #  - 500 - medium sensitivity
+  #  - 1000 - low sensitivity
+  min_volume: 500
   # Optional: Types of audio to listen for (default: shown below)
   listen:
     - bark
