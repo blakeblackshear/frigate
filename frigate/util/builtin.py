@@ -1,7 +1,6 @@
 """Utilities for builtin types manipulation."""
 
 import copy
-import ctypes
 import datetime
 import logging
 import multiprocessing
@@ -11,7 +10,7 @@ import time
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
-from queue import Empty, Full
+from queue import Full
 from typing import Any, Tuple
 
 import numpy as np
@@ -75,39 +74,40 @@ class LimitedQueue(FFQueue):
     ):
         super().__init__(max_size_bytes=max_size_bytes, loads=loads, dumps=dumps)
         self.maxsize = maxsize
-        self.size = multiprocessing.RawValue(
-            ctypes.c_int, 0
-        )  # Add a counter for the number of items in the queue
         self.lock = multiprocessing.Lock()  # Add a lock for thread-safety
 
-    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
-        with self.lock:  # Ensure thread-safety
-            if self.maxsize > 0 and self.size.value >= self.maxsize:
+    def put(self, x, block=True, timeout=None):
+        # ensure only one writer.
+        with self.lock:
+            # block/full due to num elems
+            if self.maxsize > 0 and self.qsize() >= self.maxsize:
                 if block:
-                    start_time = time.time()
-                    while self.size.value >= self.maxsize:
-                        remaining = timeout - (time.time() - start_time)
-                        if remaining <= 0.0:
-                            raise Full
-                        time.sleep(min(remaining, 0.1))
+                    if timeout is None:
+                        while self.qsize() >= self.maxsize:
+                            time.sleep(
+                                0.1
+                            )  # 0.1s, might want to replace this with a signal.
+                    else:
+                        start_time = time.time()
+                        while self.qsize() >= self.maxsize:
+                            remaining = timeout - (time.time() - start_time)
+                            if remaining <= 0.0:
+                                raise Full
+                            time.sleep(min(remaining, 0.1))
                 else:
                     raise Full
-            self.size.value += 1
-        return super().put(x, block=block, timeout=timeout)
-
-    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
-        item = super().get(block=block, timeout=timeout)
-        with self.lock:  # Ensure thread-safety
-            if self.size.value <= 0 and not block:
-                raise Empty
-            self.size.value -= 1
-        return item
-
-    def qsize(self):
-        return self.size.value
-
-    def empty(self):
-        return self.qsize() == 0
+            # block/full due to underlying circular buffer being full
+            if block and timeout is None:
+                # workaround for https://github.com/alex-petrenko/faster-fifo/issues/42
+                while True:
+                    try:
+                        return super().put(x, block=block, timeout=DEFAULT_TIMEOUT)
+                    except Full:
+                        logger.warn("Queue was full, retrying in 1s")
+                        time.sleep(1)
+            return super().put(
+                x, block=block, timeout=DEFAULT_TIMEOUT if timeout is None else timeout
+            )
 
     def full(self):
         return self.qsize() == self.maxsize

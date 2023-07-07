@@ -1025,21 +1025,17 @@ def process_frames(
                 f"debug/frames/{camera_name}-{'{:.6f}'.format(frame_time)}.jpg",
                 bgr_frame,
             )
-        # add to the queue if not full
-        if detected_objects_queue.full():
-            frame_manager.delete(f"{camera_name}{frame_time}")
-            continue
-        else:
-            fps_tracker.update()
-            fps.value = fps_tracker.eps()
-            detected_objects_queue.put(
-                (
-                    camera_name,
-                    frame_time,
-                    detections,
-                    motion_boxes,
-                    regions,
-                )
+        # add to the queue, blocking in case the queue is full.
+        fps_tracker.update()
+        fps.value = fps_tracker.eps()
+        detected_objects_queue.put(
+            (
+                camera_name,
+                frame_time,
+                detections,
+                motion_boxes,
+                regions,
             )
-            detection_fps.value = object_detector.fps.eps()
-            frame_manager.close(f"{camera_name}{frame_time}")
+        )
+        detection_fps.value = object_detector.fps.eps()
+        frame_manager.close(f"{camera_name}{frame_time}")
