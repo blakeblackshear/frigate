@@ -229,10 +229,10 @@ class PtzAutoTracker:
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
-        # check if ptz is moving
-        self.onvif.get_camera_status(camera)
-
         if camera_config.onvif.autotracking.enabled:
+            # check if ptz is moving
+            self.onvif.get_camera_status(camera)
+
             # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
             # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
