@@ -42,7 +42,8 @@ from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
-from frigate.ptz import OnvifController
+from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.onvif import OnvifController
 from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
@@ -134,6 +135,13 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].motion.improve_contrast,
                 ),
+                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].onvif.autotracking.enabled,
+                ),
+                "ptz_stopped": mp.Event(),
                 "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
                     # from mypy 0.981 onwards
@@ -162,6 +170,7 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
+            self.camera_metrics[camera_name]["ptz_stopped"].set()
             self.feature_metrics[camera_name] = {
                 "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
@@ -308,7 +317,7 @@ class FrigateApp:
         )
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config)
+        self.onvif_controller = OnvifController(self.config, self.camera_metrics)
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -362,6 +371,15 @@ class FrigateApp:
                 detector_config,
             )
 
+    def start_ptz_autotracker(self) -> None:
+        self.ptz_autotracker_thread = PtzAutoTrackerThread(
+            self.config,
+            self.onvif_controller,
+            self.camera_metrics,
+            self.stop_event,
+        )
+        self.ptz_autotracker_thread.start()
+
     def start_detected_frames_processor(self) -> None:
         self.detected_frames_processor = TrackedObjectProcessor(
             self.config,
@@ -371,6 +389,7 @@ class FrigateApp:
             self.event_processed_queue,
             self.video_output_queue,
             self.recordings_info_queue,
+            self.ptz_autotracker_thread,
             self.stop_event,
         )
         self.detected_frames_processor.start()
@@ -535,6 +554,7 @@ class FrigateApp:
             sys.exit(1)
         self.start_detectors()
         self.start_video_output_processor()
+        self.start_ptz_autotracker()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
@@ -579,6 +599,7 @@ class FrigateApp:
 
         self.dispatcher.stop()
         self.detected_frames_processor.join()
+        self.ptz_autotracker_thread.join()
         self.event_processor.join()
         self.event_cleanup.join()
         self.stats_emitter.join()

@@ -188,3 +188,11 @@ Topic to send PTZ commands to camera.
 | `MOVE_<dir>`           | send command to continuously move in `<dir>`, possible values are [UP, DOWN, LEFT, RIGHT] |
 | `ZOOM_<dir>`           | send command to continuously zoom `<dir>`, possible values are [IN, OUT]                  |
 | `STOP`                 | send command to stop moving                                                               |
+
+### `frigate/<camera_name>/ptz_autotracker/set`
+
+Topic to turn the PTZ autotracker for a camera on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/ptz_autotracker/state`
+
+Topic with current state of the PTZ autotracker for a camera. Published values are `ON` and `OFF`.

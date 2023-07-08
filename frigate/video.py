@@ -478,6 +478,8 @@ def track_camera(
     detection_enabled = process_info["detection_enabled"]
     motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
+    ptz_autotracker_enabled = process_info["ptz_autotracker_enabled"]
+    ptz_stopped = process_info["ptz_stopped"]
     motion_threshold = process_info["motion_threshold"]
     motion_contour_area = process_info["motion_contour_area"]
 
@@ -497,7 +499,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = NorfairTracker(config.detect)
+    object_tracker = NorfairTracker(config, ptz_autotracker_enabled, ptz_stopped)
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -518,6 +520,7 @@ def track_camera(
         detection_enabled,
         motion_enabled,
         stop_event,
+        ptz_stopped,
     )
 
     logger.info(f"{name}: exiting subprocess")
@@ -742,6 +745,7 @@ def process_frames(
     detection_enabled: mp.Value,
     motion_enabled: mp.Value,
     stop_event,
+    ptz_stopped: mp.Event,
     exit_on_empty: bool = False,
 ):
     fps = process_info["process_fps"]
@@ -778,7 +782,11 @@ def process_frames(
             continue
 
         # look for motion if enabled
-        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
+        motion_boxes = (
+            motion_detector.detect(frame)
+            if motion_enabled.value and ptz_stopped.is_set()
+            else []
+        )
 
         regions = []
         consolidated_detections = []

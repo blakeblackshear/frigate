@@ -128,11 +128,31 @@ class MqttConfig(FrigateBaseModel):
         return v
 
 
+class PtzAutotrackConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
+    track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to begin autotracking.",
+    )
+    return_preset: str = Field(
+        default="home",
+        title="Name of camera preset to return to when object tracking is over.",
+    )
+    timeout: int = Field(
+        default=10, title="Seconds to delay before returning to preset."
+    )
+
+
 class OnvifConfig(FrigateBaseModel):
     host: str = Field(default="", title="Onvif Host")
     port: int = Field(default=8000, title="Onvif Port")
     user: Optional[str] = Field(title="Onvif Username")
     password: Optional[str] = Field(title="Onvif Password")
+    autotracking: PtzAutotrackConfig = Field(
+        default_factory=PtzAutotrackConfig,
+        title="PTZ auto tracking config.",
+    )
 
 
 class RetainModeEnum(str, Enum):
@@ -892,6 +912,17 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
                 )
 
 
+def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
+    """Verify that required_zones are specified when autotracking is enabled."""
+    if (
+        camera_config.onvif.autotracking.enabled
+        and not camera_config.onvif.autotracking.required_zones
+    ):
+        raise ValueError(
+            f"Camera {camera_config.name} has autotracking enabled, required_zones must be set to at least one of the camera's zones."
+        )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -1067,6 +1098,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
+            verify_autotrack_zones(camera_config)
 
             if camera_config.rtmp.enabled:
                 logger.warning(
