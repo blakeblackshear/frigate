@@ -26,6 +26,7 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
+    DEFAULT_QUEUE_BUFFER_SIZE,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -47,7 +48,6 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
-from frigate.util.builtin import LimitedQueue as LQueue
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -158,7 +158,7 @@ class FrigateApp:
                 "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
-                "frame_queue": LQueue(maxsize=2),
+                "frame_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
@@ -190,22 +190,22 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = ff.Queue()
-        self.event_processed_queue: Queue = ff.Queue()
-        self.video_output_queue: Queue = LQueue(
+        self.event_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.event_processed_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.video_output_queue: Queue = mp.Queue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for cameras to push tracked objects to
-        self.detected_frames_queue: Queue = LQueue(
+        self.detected_frames_queue: Queue = mp.Queue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = ff.Queue()
+        self.recordings_info_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
         # Queue for timeline events
-        self.timeline_queue: Queue = ff.Queue()
+        self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:

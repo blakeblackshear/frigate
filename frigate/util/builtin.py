@@ -1,24 +1,18 @@
 """Utilities for builtin types manipulation."""
 
 import copy
-import ctypes
 import datetime
 import logging
-import multiprocessing
 import re
 import shlex
-import time
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
-from queue import Empty, Full
 from typing import Any, Tuple
 
 import numpy as np
 import pytz
 import yaml
-from faster_fifo import DEFAULT_CIRCULAR_BUFFER_SIZE, DEFAULT_TIMEOUT
-from faster_fifo import Queue as FFQueue
 from ruamel.yaml import YAML
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
@@ -63,54 +57,6 @@ class EventsPerSecond:
         threshold = now - self._last_n_seconds
         while self._timestamps and self._timestamps[0] < threshold:
             del self._timestamps[0]
-
-
-class LimitedQueue(FFQueue):
-    def __init__(
-        self,
-        maxsize=0,
-        max_size_bytes=DEFAULT_CIRCULAR_BUFFER_SIZE,
-        loads=None,
-        dumps=None,
-    ):
-        super().__init__(max_size_bytes=max_size_bytes, loads=loads, dumps=dumps)
-        self.maxsize = maxsize
-        self.size = multiprocessing.RawValue(
-            ctypes.c_int, 0
-        )  # Add a counter for the number of items in the queue
-        self.lock = multiprocessing.Lock()  # Add a lock for thread-safety
-
-    def put(self, x, block=True, timeout=DEFAULT_TIMEOUT):
-        with self.lock:  # Ensure thread-safety
-            if self.maxsize > 0 and self.size.value >= self.maxsize:
-                if block:
-                    start_time = time.time()
-                    while self.size.value >= self.maxsize:
-                        remaining = timeout - (time.time() - start_time)
-                        if remaining <= 0.0:
-                            raise Full
-                        time.sleep(min(remaining, 0.1))
-                else:
-                    raise Full
-            self.size.value += 1
-        return super().put(x, block=block, timeout=timeout)
-
-    def get(self, block=True, timeout=DEFAULT_TIMEOUT):
-        item = super().get(block=block, timeout=timeout)
-        with self.lock:  # Ensure thread-safety
-            if self.size.value <= 0 and not block:
-                raise Empty
-            self.size.value -= 1
-        return item
-
-    def qsize(self):
-        return self.size.value
-
-    def empty(self):
-        return self.qsize() == 0
-
-    def full(self):
-        return self.qsize() == self.maxsize
 
 
 def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dict:
