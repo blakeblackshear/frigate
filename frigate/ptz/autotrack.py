@@ -207,7 +207,10 @@ class PtzAutoTracker:
                 self.onvif._move_relative(camera, pan, tilt, 1)
 
                 # Wait until the camera finishes moving
-                self.camera_metrics[camera]["ptz_stopped"].wait()
+                while not self.camera_metrics[camera]["ptz_stopped"].is_set():
+                    # check if ptz is moving
+                    self.onvif.get_camera_status(camera)
+                    time.sleep(1 / (self.config.cameras[camera].detect.fps / 2))
 
             except queue.Empty:
                 time.sleep(0.1)
