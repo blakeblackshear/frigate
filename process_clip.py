@@ -152,7 +152,7 @@ class ProcessClip:
                 current_tracked_objects,
                 motion_boxes,
                 regions,
-            ) = self.detected_objects_queue.get()
+            ) = self.detected_objects_queue.get_nowait()
 
             if debug_path:
                 self.save_debug_frame(

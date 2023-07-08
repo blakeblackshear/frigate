@@ -1040,7 +1040,7 @@ def process_frames(
         else:
             fps_tracker.update()
             fps.value = fps_tracker.eps()
-            detected_objects_queue.put(
+            detected_objects_queue.put_nowait(
                 (
                     camera_name,
                     frame_time,
