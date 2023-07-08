@@ -15,7 +15,7 @@ As of HomeAsisstant Core 2023.6, Network Mounted Storage is supported for addons
 ### Initial Setup
 
 1. Stop the Frigate addon
-2. Update your config so the DB is stored in the /config directory by adding:
+2. Update your [config](configuration/index.md) so the DB is stored in the /config directory by adding:
 ```yaml
 database:
   path: /config/frigate.db
