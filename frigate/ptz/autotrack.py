@@ -198,6 +198,12 @@ class PtzAutoTracker:
                     move_data = self.move_queues[camera].get()
                     pan, tilt = move_data
 
+                # check if ptz is moving
+                self.onvif.get_camera_status(camera)
+
+                # Wait until the camera finishes moving
+                self.camera_metrics[camera]["ptz_stopped"].wait()
+
                 self.onvif._move_relative(camera, pan, tilt, 1)
 
                 # Wait until the camera finishes moving
@@ -229,9 +235,6 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
-            # check if ptz is moving
-            self.onvif.get_camera_status(camera)
-
             # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
             # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
