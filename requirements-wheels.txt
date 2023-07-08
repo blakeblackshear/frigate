@@ -1,6 +1,6 @@
 click == 8.1.*
 Flask == 2.3.*
-faster-fifo == 1.4.*
+git+https://github.com/skrashevich/faster-fifo
 imutils == 0.5.*
 matplotlib == 3.7.*
 mypy == 1.4.1
