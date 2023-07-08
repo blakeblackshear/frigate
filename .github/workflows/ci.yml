@@ -5,6 +5,9 @@ on:
     branches:
       - dev
       - master
+  schedule:
+    # Build a nighly image every day at 2am UTC
+    - cron:  '0 2 * * *'
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
@@ -44,6 +47,14 @@ jobs:
         run: make version
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Docker Meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}-${{ env.SHORT_SHA }},enable=${{ github.event_name != 'schedule') }}
+            type=raw,value=nightly,enable=${{ github.event_name == 'schedule') }}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
@@ -51,10 +62,17 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           target: frigate
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Docker Meta TensorRT
+        id: meta-tensorrt
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt,enable=${{ github.event_name != 'schedule') }}
+            type=raw,value=nightly-tensorrt,enable=${{ github.event_name == 'schedule') }}
       - name: Build and push TensorRT
         uses: docker/build-push-action@v4
         with:
@@ -62,6 +80,5 @@ jobs:
           push: true
           platforms: linux/amd64
           target: frigate-tensorrt
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+          tags: ${{ steps.meta-tensorrt.outputs.tags }}
           cache-from: type=gha
