@@ -98,13 +98,12 @@ class PtzAutoTrackerThread(threading.Thread):
             for camera_name, cam in self.config.cameras.items():
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
-                    time.sleep(1)
                 else:
                     # disabled dynamically by mqtt
                     if self.ptz_autotracker.tracked_object.get(camera_name):
                         self.ptz_autotracker.tracked_object[camera_name] = None
                         self.ptz_autotracker.tracked_object_previous[camera_name] = None
-            time.sleep(0.1)
+            time.sleep(1)
         logger.info("Exiting autotracker...")
 
 
