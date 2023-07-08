@@ -247,14 +247,7 @@ class OnvifController:
             "Zoom": 0,
         }
 
-        # move pan and tilt separately
         move_request.Translation.PanTilt.x = pan
-        move_request.Translation.PanTilt.y = 0
-        move_request.Translation.Zoom.x = 0
-
-        onvif.get_service("ptz").RelativeMove(move_request)
-
-        move_request.Translation.PanTilt.x = 0
         move_request.Translation.PanTilt.y = tilt
         move_request.Translation.Zoom.x = 0
 
