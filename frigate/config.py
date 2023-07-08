@@ -413,6 +413,9 @@ class AudioConfig(FrigateBaseModel):
     max_not_heard: int = Field(
         default=30, title="Seconds of not hearing the type of audio to end the event."
     )
+    min_volume: int = Field(
+        default=500, title="Min volume required to run audio detection."
+    )
     listen: List[str] = Field(
         default=DEFAULT_LISTEN_AUDIO, title="Audio to listen for."
     )
