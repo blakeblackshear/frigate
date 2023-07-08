@@ -98,13 +98,12 @@ class PtzAutoTrackerThread(threading.Thread):
             for camera_name, cam in self.config.cameras.items():
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
-                    time.sleep(1)
                 else:
                     # disabled dynamically by mqtt
                     if self.ptz_autotracker.tracked_object.get(camera_name):
                         self.ptz_autotracker.tracked_object[camera_name] = None
                         self.ptz_autotracker.tracked_object_previous[camera_name] = None
-            time.sleep(0.1)
+            time.sleep(1)
         logger.info("Exiting autotracker...")
 
 
@@ -199,10 +198,19 @@ class PtzAutoTracker:
                     move_data = self.move_queues[camera].get()
                     pan, tilt = move_data
 
-                self.onvif._move_relative(camera, pan, tilt, 1)
+                # check if ptz is moving
+                self.onvif.get_camera_status(camera)
 
                 # Wait until the camera finishes moving
                 self.camera_metrics[camera]["ptz_stopped"].wait()
+
+                self.onvif._move_relative(camera, pan, tilt, 1)
+
+                # Wait until the camera finishes moving
+                while not self.camera_metrics[camera]["ptz_stopped"].is_set():
+                    # check if ptz is moving
+                    self.onvif.get_camera_status(camera)
+                    time.sleep(1 / (self.config.cameras[camera].detect.fps / 2))
 
             except queue.Empty:
                 time.sleep(0.1)
@@ -229,10 +237,10 @@ class PtzAutoTracker:
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
-        # check if ptz is moving
-        self.onvif.get_camera_status(camera)
-
-        if camera_config.onvif.autotracking.enabled:
+        if (
+            camera_config.onvif.autotracking.enabled
+            and self.camera_metrics[camera]["ptz_stopped"].is_set()
+        ):
             # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
             # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
