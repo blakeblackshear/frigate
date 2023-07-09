@@ -128,19 +128,26 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: Dat
     }
 
     // DateTime format options
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       dateStyle: date_style,
       timeStyle: time_style,
-      timeZone: timezone || resolvedTimeZone,
       hour12: time_format !== 'browser' ? time_format == '12hour' : undefined,
     };
+
+    // Only set timeZone option when resolvedTimeZone does not match UTC±HH:MM format, or when timezone is set in config
+    const isUTCOffsetFormat = /^UTC[+-]\d{2}:\d{2}$/.test(resolvedTimeZone);
+    if (timezone || !isUTCOffsetFormat) {
+      options.timeZone = timezone || resolvedTimeZone;
+    }
+
     const formatter = new Intl.DateTimeFormat(locale, options);
     const formattedDateTime = formatter.format(date);
 
-    // simple regex to check for existence of time
+    // Regex to check for existence of time. This is needed because dateStyle/timeStyle is not always supported.
     const containsTime = /\d{1,2}:\d{1,2}/.test(formattedDateTime);
 
     // fallback if the browser does not support dateStyle/timeStyle in Intl.DateTimeFormat
+    // This works even tough the timezone is undefined, it will use the runtime's default time zone
     if (!containsTime) {
       const dateOptions = { ...formatMap[date_style]?.date, timeZone: options.timeZone, hour12: options.hour12 };
       const timeOptions = { ...formatMap[time_style]?.time, timeZone: options.timeZone, hour12: options.hour12 };
@@ -203,6 +210,15 @@ export const getDurationFromTimestamps = (start_time: number, end_time: number |
  * @returns number of minutes offset from UTC
  */
 const getUTCOffset = (date: Date, timezone: string): number => {
+  // If timezone is in UTC±HH:MM format, parse it to get offset
+  const utcOffsetMatch = timezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
+  if (utcOffsetMatch) {
+    const hours = parseInt(utcOffsetMatch[2], 10);
+    const minutes = parseInt(utcOffsetMatch[3], 10);
+    return (utcOffsetMatch[1] === '+' ? 1 : -1) * (hours * 60 + minutes);
+  }
+
+  // Otherwise, calculate offset using provided timezone
   const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
   // locale of en-CA is required for proper locale format
   let iso = utcDate.toLocaleString('en-CA', { timeZone: timezone, hour12: false }).replace(', ', 'T');
