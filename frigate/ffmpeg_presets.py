@@ -5,8 +5,7 @@ import os
 from enum import Enum
 from typing import Any
 
-from frigate.const import BTBN_PATH
-from frigate.util import vainfo_hwaccel
+from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,11 @@ class LibvaGpuSelector:
         return ""
 
 
-TIMEOUT_PARAM = "-timeout" if os.path.exists(BTBN_PATH) else "-stimeout"
+TIMEOUT_PARAM = (
+    "-timeout"
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    else "-stimeout"
+)
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
@@ -107,14 +110,14 @@ PRESETS_HW_ACCEL_DECODE = {
 }
 
 PRESETS_HW_ACCEL_SCALE = {
-    "preset-rpi-32-h264": "-r {0} -s {1}x{2}",
-    "preset-rpi-64-h264": "-r {0} -s {1}x{2}",
+    "preset-rpi-32-h264": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=yuv420p",
     "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "default": "-r {0} -s {1}x{2}",
+    "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {

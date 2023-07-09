@@ -23,7 +23,7 @@ export default function CameraControlPanel({ camera = '' }) {
       return;
     }
 
-    sendPtz(`preset-${currentPreset}`);
+    sendPtz(`preset_${currentPreset}`);
     setCurrentPreset('');
   };
 

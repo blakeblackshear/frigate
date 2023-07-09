@@ -145,6 +145,12 @@ audio:
   enabled: False
   # Optional: Configure the amount of seconds without detected audio to end the event (default: shown below)
   max_not_heard: 30
+  # Optional: Configure the min rms volume required to run audio detection (default: shown below)
+  # As a rule of thumb:
+  #  - 200 - high sensitivity
+  #  - 500 - medium sensitivity
+  #  - 1000 - low sensitivity
+  min_volume: 500
   # Optional: Types of audio to listen for (default: shown below)
   listen:
     - bark
@@ -555,6 +561,21 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
+      # Optional: PTZ camera object autotracking. Keeps a moving object in
+      # the center of the frame by automatically moving the PTZ camera.
+      autotracking:
+        # Optional: enable/disable object autotracking. (default: shown below)
+        enabled: False
+        # Optional: list of objects to track from labelmap.txt (default: shown below)
+        track:
+          - person
+        # Required: Begin automatically tracking an object when it enters any of the listed zones.
+        required_zones:
+          - zone_name
+        # Required: Name of ONVIF camera preset to return to when tracking is over.
+        return_preset: preset_name
+        # Optional: Seconds to delay before returning to preset. (default: shown below)
+        timeout: 10
 
     # Optional: Configuration for how to sort the cameras in the Birdseye view.
     birdseye:

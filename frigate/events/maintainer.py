@@ -11,7 +11,7 @@ from faster_fifo import Queue
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
 from frigate.types import CameraMetricsTypes
-from frigate.util import to_relative_box
+from frigate.util.builtin import to_relative_box
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +199,8 @@ class EventProcessor(threading.Thread):
 
             # only overwrite the sub_label in the database if it's set
             if event_data.get("sub_label") is not None:
-                event[Event.sub_label] = event_data["sub_label"]
+                event[Event.sub_label] = event_data["sub_label"][0]
+                event[Event.data]["sub_label_score"] = event_data["sub_label"][1]
 
             (
                 Event.insert(event)

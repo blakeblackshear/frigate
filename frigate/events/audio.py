@@ -26,7 +26,8 @@ from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
 from frigate.types import FeatureMetricsTypes
-from frigate.util import get_ffmpeg_arg_list, listen
+from frigate.util.builtin import get_ffmpeg_arg_list
+from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
@@ -168,14 +169,18 @@ class AudioEventMaintainer(threading.Thread):
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
             return
 
-        waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
-        model_detections = self.detector.detect(waveform)
+        rms = np.sqrt(np.mean(np.absolute(np.square(audio.astype(np.float32)))))
 
-        for label, score, _ in model_detections:
-            if label not in self.config.audio.listen:
-                continue
+        # only run audio detection when volume is above min_volume
+        if rms >= self.config.audio.min_volume:
+            waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
+            model_detections = self.detector.detect(waveform)
 
-            self.handle_detection(label, score)
+            for label, score, _ in model_detections:
+                if label not in self.config.audio.listen:
+                    continue
+
+                self.handle_detection(label, score)
 
         self.expire_detections()
 
@@ -191,7 +196,7 @@ class AudioEventMaintainer(threading.Thread):
             )
 
             if resp.status_code == 200:
-                event_id = resp.json()[0]["event_id"]
+                event_id = resp.json()["event_id"]
                 self.detections[label] = {
                     "id": event_id,
                     "label": label,

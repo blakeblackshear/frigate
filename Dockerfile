@@ -262,15 +262,35 @@ FROM deps AS frigate
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
+# Build TensorRT-specific library
+FROM nvcr.io/nvidia/tensorrt:23.03-py3 AS trt-deps
+
+RUN --mount=type=bind,source=docker/support/tensorrt_detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
+    /tensorrt_libyolo.sh
+
 # Frigate w/ TensorRT Support as separate image
 FROM frigate AS frigate-tensorrt
+
+#Disable S6 Global timeout
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+
+ENV TRT_VER=8.5.3
+ENV YOLO_MODELS="yolov7-tiny-416"
+
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY docker/support/tensorrt_detector/rootfs/ /
+
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl && \
-    ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so && \
     ldconfig
 
 # Dev Container w/ TRT
 FROM devcontainer AS devcontainer-trt
 
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY docker/support/tensorrt_detector/rootfs/ /
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl

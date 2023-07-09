@@ -24,27 +24,27 @@ from flask import (
     make_response,
     request,
 )
-from peewee import DoesNotExist, SqliteDatabase, fn, operator
+from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
+from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import CLIPS_DIR, CONFIG_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
-from frigate.ptz import OnvifController
+from frigate.ptz.onvif import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer
-from frigate.util import (
+from frigate.util.builtin import (
     clean_camera_user_pass,
-    ffprobe_stream,
     get_tz_modifiers,
-    restart_frigate,
-    vainfo_hwaccel,
+    update_yaml_from_url,
 )
+from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ bp = Blueprint("frigate", __name__)
 
 def create_app(
     frigate_config,
-    database: SqliteDatabase,
+    database: SqliteQueueDatabase,
     stats_tracking,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
@@ -420,8 +420,8 @@ def get_labels():
         else:
             events = Event.select(Event.label).distinct()
     except Exception as e:
-        return jsonify(
-            {"success": False, "message": f"Failed to get labels: {e}"}, "404"
+        return make_response(
+            jsonify({"success": False, "message": f"Failed to get labels: {e}"}), 404
         )
 
     labels = sorted([e.label for e in events])
@@ -435,8 +435,9 @@ def get_sub_labels():
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception as e:
-        return jsonify(
-            {"success": False, "message": f"Failed to get sub_labels: {e}"}, "404"
+        return make_response(
+            jsonify({"success": False, "message": f"Failed to get sub_labels: {e}"}),
+            404,
         )
 
     sub_labels = [e.sub_label for e in events]
@@ -869,12 +870,17 @@ def events():
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
 def create_event(camera_name, label):
     if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
-        return jsonify(
-            {"success": False, "message": f"{camera_name} is not a valid camera."}, 404
+        return make_response(
+            jsonify(
+                {"success": False, "message": f"{camera_name} is not a valid camera."}
+            ),
+            404,
         )
 
     if not label:
-        return jsonify({"success": False, "message": f"{label} must be set."}, 404)
+        return make_response(
+            jsonify({"success": False, "message": f"{label} must be set."}), 404
+        )
 
     json: dict[str, any] = request.get_json(silent=True) or {}
 
@@ -892,17 +898,19 @@ def create_event(camera_name, label):
             frame,
         )
     except Exception as e:
-        logger.error(f"The error is {e}")
-        return jsonify(
-            {"success": False, "message": f"An unknown error occurred: {e}"}, 404
+        return make_response(
+            jsonify({"success": False, "message": f"An unknown error occurred: {e}"}),
+            404,
         )
 
-    return jsonify(
-        {
-            "success": True,
-            "message": "Successfully created event.",
-            "event_id": event_id,
-        },
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Successfully created event.",
+                "event_id": event_id,
+            }
+        ),
         200,
     )
 
@@ -915,11 +923,16 @@ def end_event(event_id):
         end_time = json.get("end_time", datetime.now().timestamp())
         current_app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
-        return jsonify(
-            {"success": False, "message": f"{event_id} must be set and valid."}, 404
+        return make_response(
+            jsonify(
+                {"success": False, "message": f"{event_id} must be set and valid."}
+            ),
+            404,
         )
 
-    return jsonify({"success": True, "message": "Event successfully ended."}, 200)
+    return make_response(
+        jsonify({"success": True, "message": "Event successfully ended."}), 200
+    )
 
 
 @bp.route("/config")
@@ -1030,6 +1043,48 @@ def config_save():
         return "Config successfully saved.", 200
 
 
+@bp.route("/config/set", methods=["PUT"])
+def config_set():
+    config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
+
+    # Check if we can use .yaml instead of .yml
+    config_file_yaml = config_file.replace(".yml", ".yaml")
+
+    if os.path.isfile(config_file_yaml):
+        config_file = config_file_yaml
+
+    with open(config_file, "r") as f:
+        old_raw_config = f.read()
+        f.close()
+
+    try:
+        update_yaml_from_url(config_file, request.url)
+        with open(config_file, "r") as f:
+            new_raw_config = f.read()
+            f.close()
+        # Validate the config schema
+        try:
+            FrigateConfig.parse_raw(new_raw_config)
+        except Exception:
+            with open(config_file, "w") as f:
+                f.write(old_raw_config)
+                f.close()
+            return make_response(
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"\nConfig Error:\n\n{str(traceback.format_exc())}",
+                    }
+                ),
+                400,
+            )
+    except Exception as e:
+        logging.error(f"Error updating config: {e}")
+        return "Error updating config", 500
+
+    return "Config successfully updated", 200
+
+
 @bp.route("/config/schema.json")
 def config_schema():
     return current_app.response_class(
@@ -1104,10 +1159,14 @@ def latest_frame(camera_name):
         frame = current_app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
+        retry_interval = float(
+            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
+            or 10
+        )
 
         if frame is None or datetime.now().timestamp() > (
             current_app.detected_frames_processor.get_current_frame_time(camera_name)
-            + 10
+            + retry_interval
         ):
             if current_app.camera_error_image is None:
                 error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
@@ -1575,21 +1634,24 @@ def ffprobe():
     path_param = request.args.get("paths", "")
 
     if not path_param:
-        return jsonify(
-            {"success": False, "message": "Path needs to be provided."}, "404"
+        return make_response(
+            jsonify({"success": False, "message": "Path needs to be provided."}), 404
         )
 
     if path_param.startswith("camera"):
         camera = path_param[7:]
 
         if camera not in current_app.frigate_config.cameras.keys():
-            return jsonify(
-                {"success": False, "message": f"{camera} is not a valid camera."}, "404"
+            return make_response(
+                jsonify(
+                    {"success": False, "message": f"{camera} is not a valid camera."}
+                ),
+                404,
             )
 
         if not current_app.frigate_config.cameras[camera].enabled:
-            return jsonify(
-                {"success": False, "message": f"{camera} is not enabled."}, "404"
+            return make_response(
+                jsonify({"success": False, "message": f"{camera} is not enabled."}), 404
             )
 
         paths = map(
