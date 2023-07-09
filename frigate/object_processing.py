@@ -212,7 +212,11 @@ class TrackedObject:
 
         # populate the sub_label for car with highest scoring logo
         if self.obj_data["label"] == "car":
-            recognized_logos = {k: self.attributes[k] for k in ["ups", "fedex", "amazon"] if k in self.attributes}
+            recognized_logos = {
+                k: self.attributes[k]
+                for k in ["ups", "fedex", "amazon"]
+                if k in self.attributes
+            }
             if len(recognized_logos) > 0:
                 max_logo = max(recognized_logos, key=recognized_logos.get)
                 self.obj_data["sub_label"] = (max_logo, recognized_logos[max_logo])
