@@ -30,6 +30,7 @@ import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
 import TimelineEventOverlay from '../components/TimelineEventOverlay';
+import { Score } from '../icons/Score';
 
 const API_LIMIT = 25;
 
@@ -602,13 +603,10 @@ export default function Events({ path, ...props }) {
                     <div className="m-2 flex grow">
                       <div className="flex flex-col grow">
                         <div className="capitalize text-lg font-bold">
-                          {event.sub_label
-                            ? `${event.label.replaceAll('_', ' ')}: ${event.sub_label.replaceAll('_', ' ')}`
-                            : event.label.replaceAll('_', ' ')}
-                          {(event?.data?.top_score || event.top_score || 0) == 0
-                            ? null
-                            : ` (${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%)`}
+                          {event.label.replaceAll('_', ' ')}
+                          {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
                         </div>
+
                         <div className="text-sm flex">
                           <Clock className="h-5 w-5 mr-2 inline" />
                           {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
@@ -627,6 +625,15 @@ export default function Events({ path, ...props }) {
                         <div className="capitalize  text-sm flex align-center">
                           <Zone className="w-5 h-5 mr-2 inline" />
                           {event.zones.join(', ').replaceAll('_', ' ')}
+                        </div>
+                        <div className="capitalize  text-sm flex align-center">
+                          <Score className="w-5 h-5 mr-2 inline" />
+                          {(event?.data?.top_score || event.top_score || 0) == 0
+                            ? null
+                            : `Label: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
+                          {(event?.data?.sub_label_score || 0) == 0
+                            ? null
+                            : `, Sub Label: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
