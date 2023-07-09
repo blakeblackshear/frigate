@@ -63,7 +63,9 @@ Message published for each changed event. The first message is published when th
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
     "position_changes": 2, // number of times the object has moved from a stationary position
-    "attributes": [], // set of unique attributes that have been identified on the object
+    "attributes": {
+      "face": 0.64
+    }, // attributes with top score that have been identified on the object at any point
     "current_attributes": [] // detailed data about the current attributes in this frame
   },
   "after": {
@@ -90,13 +92,15 @@ Message published for each changed event. The first message is published when th
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
     "position_changes": 2, // number of times the object has changed position
-    "attributes": ["face"], // set of unique attributes that have been identified on the object
+    "attributes": {
+      "face": 0.86
+    }, // attributes with top score that have been identified on the object at any point
     "current_attributes": [
       // detailed data about the current attributes in this frame
       {
         "label": "face",
         "box": [442, 506, 534, 524],
-        "score": 0.64
+        "score": 0.86
       }
     ]
   }

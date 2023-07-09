@@ -112,7 +112,7 @@ class TrackedObject:
         self.zone_presence = {}
         self.current_zones = []
         self.entered_zones = []
-        self.attributes = set()
+        self.attributes = defaultdict(float)
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
@@ -207,15 +207,19 @@ class TrackedObject:
 
         # maintain attributes
         for attr in obj_data["attributes"]:
-            self.attributes.add(attr["label"])
+            if self.attributes[attr["label"]] < attr["score"]:
+                self.attributes[attr["label"]] = attr["score"]
 
-        # populate the sub_label for car with first logo if it exists
-        if self.obj_data["label"] == "car" and "sub_label" not in self.obj_data:
-            recognized_logos = self.attributes.intersection(
-                set(["ups", "fedex", "amazon"])
-            )
+        # populate the sub_label for car with highest scoring logo
+        if self.obj_data["label"] == "car":
+            recognized_logos = {
+                k: self.attributes[k]
+                for k in ["ups", "fedex", "amazon"]
+                if k in self.attributes
+            }
             if len(recognized_logos) > 0:
-                self.obj_data["sub_label"] = recognized_logos.pop()
+                max_logo = max(recognized_logos, key=recognized_logos.get)
+                self.obj_data["sub_label"] = (max_logo, recognized_logos[max_logo])
 
         # check for significant change
         if not self.false_positive:
@@ -274,7 +278,7 @@ class TrackedObject:
             "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
             "has_snapshot": self.has_snapshot,
-            "attributes": list(self.attributes),
+            "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
         }
 
