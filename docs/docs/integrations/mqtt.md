@@ -74,7 +74,7 @@ Message published for each changed event. The first message is published when th
     "frame_time": 1607123962.082975,
     "snapshot_time": 1607123961.837752,
     "label": "person",
-    "sub_label": null,
+    "sub_label": ["John Smith", 0.79],
     "top_score": 0.958984375,
     "false_positive": false,
     "start_time": 1607123955.475377,
