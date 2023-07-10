@@ -1,5 +1,6 @@
 """Configure and control camera via onvif."""
 
+import datetime
 import logging
 import site
 from enum import Enum
@@ -207,7 +208,6 @@ class OnvifController:
             return
 
         logger.debug(f"{camera_name} called RelativeMove: pan: {pan} tilt: {tilt}")
-        self.get_camera_status(camera_name)
 
         if self.cams[camera_name]["active"]:
             logger.warning(
@@ -217,6 +217,11 @@ class OnvifController:
 
         self.cams[camera_name]["active"] = True
         self.camera_metrics[camera_name]["ptz_stopped"].clear()
+        logger.debug(f"PTZ start time: {datetime.datetime.now().timestamp()}")
+        self.camera_metrics[camera_name][
+            "ptz_start_time"
+        ].value = datetime.datetime.now().timestamp()
+        self.camera_metrics[camera_name]["ptz_stop_time"].value = 0
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["relative_move_request"]
 
@@ -345,10 +350,25 @@ class OnvifController:
 
         if status.MoveStatus.PanTilt == "IDLE" and status.MoveStatus.Zoom == "IDLE":
             self.cams[camera_name]["active"] = False
-            self.camera_metrics[camera_name]["ptz_stopped"].set()
+            if not self.camera_metrics[camera_name]["ptz_stopped"].is_set():
+                self.camera_metrics[camera_name]["ptz_stopped"].set()
+
+                logger.debug(f"PTZ stop time: {datetime.datetime.now().timestamp()}")
+
+                self.camera_metrics[camera_name][
+                    "ptz_stop_time"
+                ].value = datetime.datetime.now().timestamp()
         else:
             self.cams[camera_name]["active"] = True
-            self.camera_metrics[camera_name]["ptz_stopped"].clear()
+            if self.camera_metrics[camera_name]["ptz_stopped"].is_set():
+                self.camera_metrics[camera_name]["ptz_stopped"].clear()
+
+                logger.debug(f"PTZ start time: {datetime.datetime.now().timestamp()}")
+
+                self.camera_metrics[camera_name][
+                    "ptz_start_time"
+                ].value = datetime.datetime.now().timestamp()
+                self.camera_metrics[camera_name]["ptz_stop_time"].value = 0
 
         return {
             "pan": status.Position.PanTilt.x,

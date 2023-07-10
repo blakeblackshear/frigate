@@ -20,6 +20,8 @@ class CameraMetricsTypes(TypedDict):
     improve_contrast_enabled: Synchronized
     ptz_autotracker_enabled: Synchronized
     ptz_stopped: Event
+    ptz_start_time: Synchronized
+    ptz_stop_time: Synchronized
     motion_threshold: Synchronized
     motion_contour_area: Synchronized
     process: Optional[Process]

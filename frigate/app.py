@@ -142,6 +142,12 @@ class FrigateApp:
                     self.config.cameras[camera_name].onvif.autotracking.enabled,
                 ),
                 "ptz_stopped": mp.Event(),
+                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
                 "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
                     # from mypy 0.981 onwards
