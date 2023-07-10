@@ -370,10 +370,9 @@ def set_sub_label(id):
             jsonify({"success": False, "message": "Event " + id + " not found"}), 404
         )
 
-    if request.json:
-        new_sub_label = request.json.get("subLabel")
-    else:
-        new_sub_label = None
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    new_sub_label = json.get("subLabel")
+    new_score = json.get("subLabelScore")
 
     if new_sub_label and len(new_sub_label) > 100:
         return make_response(
@@ -395,9 +394,15 @@ def set_sub_label(id):
         )
 
         if tracked_obj:
-            tracked_obj.obj_data["sub_label"] = new_sub_label
+            tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
 
     event.sub_label = new_sub_label
+
+    if new_score:
+        data = event.data
+        data["sub_label_score"] = new_score
+        event.data = data
+    
     event.save()
     return make_response(
         jsonify(
