@@ -1165,7 +1165,9 @@ def latest_frame(camera_name):
             or 10
         )
 
-        latest_frame = frame_time + retry_interval * 1.5 #magic number, because of shit happens
+        latest_frame = (
+            frame_time + retry_interval * 1.5
+        )  # magic number, because of shit happens
         now = datetime.now().timestamp()
         if frame is None or now > latest_frame:
             if (
@@ -1181,7 +1183,7 @@ def latest_frame(camera_name):
                             waiting_image[0], cv2.IMREAD_UNCHANGED
                         )
                 frame = current_app.camera_waiting_image
-                logger.warning(
+                logger.debug(
                     f"Return waiting image for camera {camera_name}: latency is {now - latest_frame}s, retry_interval: {retry_interval}s"
                 )
             else:
