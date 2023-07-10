@@ -798,7 +798,6 @@ def process_frames(
         motion_boxes = (
             motion_detector.detect(frame)
             if motion_enabled.value
-            and ptz_stopped.is_set()
             and not ptz_moving_at_frame_time(
                 frame_time, ptz_start_time.value, ptz_stop_time.value
             )
