@@ -35,7 +35,7 @@ from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
-from frigate.ptz import OnvifController
+from frigate.ptz.onvif import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 from frigate.stats import stats_snapshot
 from frigate.storage import StorageMaintainer

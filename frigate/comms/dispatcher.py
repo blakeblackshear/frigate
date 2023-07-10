@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from frigate.config import FrigateConfig
-from frigate.ptz import OnvifCommandEnum, OnvifController
+from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util.services import restart_frigate
 
@@ -55,6 +55,7 @@ class Dispatcher:
             "audio": self._on_audio_command,
             "detect": self._on_detect_command,
             "improve_contrast": self._on_motion_improve_contrast_command,
+            "ptz_autotracker": self._on_ptz_autotracker_command,
             "motion": self._on_motion_command,
             "motion_contour_area": self._on_motion_contour_area_command,
             "motion_threshold": self._on_motion_threshold_command,
@@ -158,6 +159,25 @@ class Dispatcher:
                 motion_settings.improve_contrast = False  # type: ignore[union-attr]
 
         self.publish(f"{camera_name}/improve_contrast/state", payload, retain=True)
+
+    def _on_ptz_autotracker_command(self, camera_name: str, payload: str) -> None:
+        """Callback for ptz_autotracker topic."""
+        ptz_autotracker_settings = self.config.cameras[camera_name].onvif.autotracking
+
+        if payload == "ON":
+            if not self.camera_metrics[camera_name]["ptz_autotracker_enabled"].value:
+                logger.info(f"Turning on ptz autotracker for {camera_name}")
+                self.camera_metrics[camera_name]["ptz_autotracker_enabled"].value = True
+                ptz_autotracker_settings.enabled = True
+        elif payload == "OFF":
+            if self.camera_metrics[camera_name]["ptz_autotracker_enabled"].value:
+                logger.info(f"Turning off ptz autotracker for {camera_name}")
+                self.camera_metrics[camera_name][
+                    "ptz_autotracker_enabled"
+                ].value = False
+                ptz_autotracker_settings.enabled = False
+
+        self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)
 
     def _on_motion_contour_area_command(self, camera_name: str, payload: int) -> None:
         """Callback for motion contour topic."""

@@ -199,7 +199,8 @@ class EventProcessor(threading.Thread):
 
             # only overwrite the sub_label in the database if it's set
             if event_data.get("sub_label") is not None:
-                event[Event.sub_label] = event_data["sub_label"]
+                event[Event.sub_label] = event_data["sub_label"][0]
+                event[Event.data]["sub_label_score"] = event_data["sub_label"][1]
 
             (
                 Event.insert(event)
