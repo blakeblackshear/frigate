@@ -462,6 +462,7 @@ def track_camera(
     result_connection,
     detected_objects_queue,
     process_info,
+    ptz_info,
 ):
     stop_event = mp.Event()
 
@@ -479,12 +480,13 @@ def track_camera(
     detection_enabled = process_info["detection_enabled"]
     motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
-    ptz_autotracker_enabled = process_info["ptz_autotracker_enabled"]
-    ptz_start_time = process_info["ptz_start_time"]
-    ptz_stop_time = process_info["ptz_stop_time"]
-    ptz_stopped = process_info["ptz_stopped"]
     motion_threshold = process_info["motion_threshold"]
     motion_contour_area = process_info["motion_contour_area"]
+
+    ptz_autotracker_enabled = ptz_info["ptz_autotracker_enabled"]
+    ptz_start_time = ptz_info["ptz_start_time"]
+    ptz_stop_time = ptz_info["ptz_stop_time"]
+    ptz_stopped = ptz_info["ptz_stopped"]
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track

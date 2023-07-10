@@ -15,7 +15,7 @@ from norfair.camera_motion import MotionEstimator, TranslationTransformationGett
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.ptz.onvif import OnvifController
-from frigate.types import CameraMetricsTypes
+from frigate.types import PTZMetricsTypes
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
 logger = logging.getLogger(__name__)
@@ -97,12 +97,12 @@ class PtzAutoTrackerThread(threading.Thread):
         self,
         config: FrigateConfig,
         onvif: OnvifController,
-        camera_metrics: dict[str, CameraMetricsTypes],
+        ptz_metrics: dict[str, PTZMetricsTypes],
         stop_event: MpEvent,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = "ptz_autotracker"
-        self.ptz_autotracker = PtzAutoTracker(config, onvif, camera_metrics)
+        self.ptz_autotracker = PtzAutoTracker(config, onvif, ptz_metrics)
         self.stop_event = stop_event
         self.config = config
 
@@ -125,11 +125,11 @@ class PtzAutoTracker:
         self,
         config: FrigateConfig,
         onvif: OnvifController,
-        camera_metrics: CameraMetricsTypes,
+        ptz_metrics: PTZMetricsTypes,
     ) -> None:
         self.config = config
         self.onvif = onvif
-        self.camera_metrics = camera_metrics
+        self.ptz_metrics = ptz_metrics
         self.tracked_object: dict[str, object] = {}
         self.tracked_object_previous: dict[str, object] = {}
         self.object_types = {}
@@ -159,17 +159,13 @@ class PtzAutoTracker:
             if not self.onvif._init_onvif(camera_name):
                 logger.warning(f"Unable to initialize onvif for {camera_name}")
                 cam.onvif.autotracking.enabled = False
-                self.camera_metrics[camera_name][
-                    "ptz_autotracker_enabled"
-                ].value = False
+                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
 
                 return
 
             if not self.onvif.cams[camera_name]["relative_fov_supported"]:
                 cam.onvif.autotracking.enabled = False
-                self.camera_metrics[camera_name][
-                    "ptz_autotracker_enabled"
-                ].value = False
+                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
                 )
@@ -214,7 +210,7 @@ class PtzAutoTracker:
                 self.onvif._move_relative(camera, pan, tilt, 1)
 
                 # Wait until the camera finishes moving
-                while not self.camera_metrics[camera]["ptz_stopped"].is_set():
+                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
                     # check if ptz is moving
                     self.onvif.get_camera_status(camera)
                     time.sleep(1 / (self.config.cameras[camera].detect.fps / 2))
@@ -264,8 +260,8 @@ class PtzAutoTracker:
                 self.tracked_object[camera] = obj
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 # only enqueue another move if the camera isn't moving
-                if self.camera_metrics[camera]["ptz_stopped"].is_set():
-                    self.camera_metrics[camera]["ptz_stopped"].clear()
+                if self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                    self.ptz_metrics[camera]["ptz_stopped"].clear()
                     logger.debug("Autotrack: New object, moving ptz")
                     self._autotrack_move_ptz(camera, obj)
 
@@ -312,7 +308,7 @@ class PtzAutoTracker:
                     f"Distance: {distance}, threshold: {distance_threshold}, iou: {iou}"
                 )
 
-                if (distance < distance_threshold or iou > 0.5) and self.camera_metrics[
+                if (distance < distance_threshold or iou > 0.5) and self.ptz_metrics[
                     camera
                 ]["ptz_stopped"].is_set():
                     logger.debug(
@@ -326,8 +322,8 @@ class PtzAutoTracker:
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
 
                 # only enqueue another move if the camera isn't moving
-                if self.camera_metrics[camera]["ptz_stopped"].is_set():
-                    self.camera_metrics[camera]["ptz_stopped"].clear()
+                if self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                    self.ptz_metrics[camera]["ptz_stopped"].clear()
                     logger.debug("Autotrack: Existing object, moving ptz")
                     self._autotrack_move_ptz(camera, obj)
 
@@ -358,8 +354,8 @@ class PtzAutoTracker:
                     self.tracked_object[camera] = obj
                     self.tracked_object_previous[camera] = copy.deepcopy(obj)
                     # only enqueue another move if the camera isn't moving
-                    if self.camera_metrics[camera]["ptz_stopped"].is_set():
-                        self.camera_metrics[camera]["ptz_stopped"].clear()
+                    if self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                        self.ptz_metrics[camera]["ptz_stopped"].clear()
                         logger.debug("Autotrack: Reacquired object, moving ptz")
                         self._autotrack_move_ptz(camera, obj)
 
@@ -384,7 +380,7 @@ class PtzAutoTracker:
         if not self.autotracker_init[camera]:
             self._autotracker_setup(self.config.cameras[camera], camera)
         # regularly update camera status
-        if not self.camera_metrics[camera]["ptz_stopped"].is_set():
+        if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
             self.onvif.get_camera_status(camera)
 
         # return to preset if tracking is over
@@ -399,7 +395,7 @@ class PtzAutoTracker:
             )
             and autotracker_config.return_preset
         ):
-            self.camera_metrics[camera]["ptz_stopped"].wait()
+            self.ptz_metrics[camera]["ptz_stopped"].wait()
             logger.debug(
                 f"Autotrack: Time is {time.time()}, returning to preset: {autotracker_config.return_preset}"
             )
