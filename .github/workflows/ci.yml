@@ -44,24 +44,41 @@ jobs:
         run: make version
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build and push
+      - name: Create base image path
+        run: echo "BASE_IMAGE=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}" >> $GITHUB_ENV
+      - name: Build and push main build
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: {context}/docker/build/main/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           target: frigate
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+            ${{ env.BASE_IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Build and push RPi build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: {context}/docker/build/rpi/Dockerfile
+          push: true
+          platforms: linux/arm64
+          target: frigate-rpi
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_IMAGE }}
+          tags: |
+            ${{ env.BASE_IMAGE }}-rpi
+          cache-from: type=gha
       - name: Build and push TensorRT
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: {context}/docker/build/main/Dockerfile
           push: true
           platforms: linux/amd64
           target: frigate-tensorrt
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            ${{ env.BASE_IMAGE }}-tensorrt
           cache-from: type=gha
