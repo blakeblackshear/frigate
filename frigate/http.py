@@ -1156,7 +1156,7 @@ def latest_frame(camera_name):
     resize_quality = request.args.get("quality", default=70, type=int)
 
     if camera_name in current_app.frigate_config.cameras:
-        frame = current_app.detected_frames_processor.get_current_frame(
+        frame, frame_time = current_app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
         retry_interval = float(
@@ -1164,6 +1164,7 @@ def latest_frame(camera_name):
             or 10
         )
 
+        latest_frame = frame_time + retry_interval
         now = datetime.now().timestamp()
         if frame is None or now > latest_frame:
             if (
@@ -1180,7 +1181,7 @@ def latest_frame(camera_name):
                         )
                 frame = current_app.camera_waiting_image
                 logger.warning(
-                    f"Return waiting image for camera {camera_name}: latensy is {datetime.now().timestamp() - latest_frame}s"
+                    f"Return waiting image for camera {camera_name}: latency is {datetime.now().timestamp() - latest_frame}s, retry_interval: {retry_interval}s"
                 )
             else:
                 if current_app.camera_error_image is None:
@@ -1195,7 +1196,7 @@ def latest_frame(camera_name):
 
                 frame = current_app.camera_error_image
                 logger.warning(
-                    f"Return error image for camera {camera_name}: latensy is {datetime.now().timestamp() - latest_frame}s"
+                    f"Return error image for camera {camera_name}: latency is {datetime.now().timestamp() - latest_frame}s"
                 )
 
         height = int(request.args.get("h", str(frame.shape[0])))

@@ -11,6 +11,7 @@ from typing import Callable
 
 import cv2
 import numpy as np
+from cv2 import Mat
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
@@ -1032,18 +1033,17 @@ class TrackedObjectProcessor(threading.Thread):
         else:
             return {}
 
-    def get_current_frame(self, camera, draw_options={}):
+    def get_current_frame(self, camera, draw_options={}) -> tuple[Mat, float]:
         if camera == "birdseye":
             return self.frame_manager.get(
                 "birdseye",
                 (self.config.birdseye.height * 3 // 2, self.config.birdseye.width),
             )
 
-        return self.camera_states[camera].get_current_frame(draw_options)
-
-    def get_current_frame_time(self, camera) -> int:
-        """Returns the latest frame time for a given camera."""
-        return self.camera_states[camera].current_frame_time
+        return (
+            self.camera_states[camera].get_current_frame(draw_options),
+            self.camera_states[camera].current_frame_time,
+        )
 
     def run(self):
         while not self.stop_event.is_set():
