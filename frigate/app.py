@@ -178,15 +178,22 @@ class FrigateApp:
             }
 
     def set_log_levels(self) -> None:
-        logging.getLogger().setLevel(self.config.logger.default.value.upper())
-        for log, level in self.config.logger.logs.items():
-            logging.getLogger(log).setLevel(level.value.upper())
+        default_level = self.config.logger.default.value.upper()
+        log_levels = {
+            log: level.value.upper() for log, level in self.config.logger.logs.items()
+        }
 
-        if "werkzeug" not in self.config.logger.logs:
-            logging.getLogger("werkzeug").setLevel("ERROR")
+        # Set default log level for all loggers
+        logging.getLogger().setLevel(default_level)
 
-        if "ws4py" not in self.config.logger.logs:
-            logging.getLogger("ws4py").setLevel("ERROR")
+        # Set log levels for specific loggers
+        for log, level in log_levels.items():
+            logging.getLogger(log).setLevel(level)
+
+        # Set log level for specific loggers that are not specified in the configuration
+        for log in ["werkzeug", "ws4py", "httpcore", "httpx"]:
+            if log not in log_levels:
+                logging.getLogger(log).setLevel("ERROR")
 
     def init_queues(self) -> None:
         # Queues for clip processing
