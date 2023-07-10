@@ -402,7 +402,7 @@ def set_sub_label(id):
         data = event.data
         data["sub_label_score"] = new_score
         event.data = data
-    
+
     event.save()
     return make_response(
         jsonify(
