@@ -82,6 +82,7 @@ def create_app(
     app.external_processor = external_processor
     app.plus_api = plus_api
     app.camera_error_image = None
+    app.camera_waiting_image = None
     app.hwaccel_errors = []
 
     app.register_blueprint(bp)
@@ -1164,7 +1165,7 @@ def latest_frame(camera_name):
             or 10
         )
 
-        latest_frame = frame_time + retry_interval
+        latest_frame = frame_time + retry_interval * 1.5 #magic number, because of shit happens
         now = datetime.now().timestamp()
         if frame is None or now > latest_frame:
             if (
@@ -1181,7 +1182,7 @@ def latest_frame(camera_name):
                         )
                 frame = current_app.camera_waiting_image
                 logger.warning(
-                    f"Return waiting image for camera {camera_name}: latency is {datetime.now().timestamp() - latest_frame}s, retry_interval: {retry_interval}s"
+                    f"Return waiting image for camera {camera_name}: latency is {now - latest_frame}s, retry_interval: {retry_interval}s"
                 )
             else:
                 if current_app.camera_error_image is None:
@@ -1196,7 +1197,7 @@ def latest_frame(camera_name):
 
                 frame = current_app.camera_error_image
                 logger.warning(
-                    f"Return error image for camera {camera_name}: latency is {datetime.now().timestamp() - latest_frame}s"
+                    f"Return error image for camera {camera_name}: latency is {now - latest_frame}s, retry_interval: {retry_interval}s"
                 )
 
         height = int(request.args.get("h", str(frame.shape[0])))
