@@ -8,6 +8,7 @@ from norfair.drawing.drawer import Drawer
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
+from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
 
 
@@ -58,9 +59,7 @@ class NorfairTracker(ObjectTracker):
     def __init__(
         self,
         config: CameraConfig,
-        ptz_autotracker_enabled,
-        ptz_start_time,
-        ptz_stop_time,
+        ptz_metrics: PTZMetricsTypes,
     ):
         self.tracked_objects = {}
         self.disappeared = {}
@@ -68,7 +67,7 @@ class NorfairTracker(ObjectTracker):
         self.max_disappeared = config.detect.max_disappeared
         self.camera_config = config
         self.detect_config = config.detect
-        self.ptz_autotracker_enabled = ptz_autotracker_enabled
+        self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
         self.camera_name = config.name
         self.track_id_map = {}
         # TODO: could also initialize a tracker per object class if there
@@ -80,9 +79,7 @@ class NorfairTracker(ObjectTracker):
             hit_counter_max=self.max_disappeared,
         )
         if self.ptz_autotracker_enabled.value:
-            self.ptz_motion_estimator = PtzMotionEstimator(
-                config, ptz_start_time, ptz_stop_time
-            )
+            self.ptz_motion_estimator = PtzMotionEstimator(config, ptz_metrics)
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))

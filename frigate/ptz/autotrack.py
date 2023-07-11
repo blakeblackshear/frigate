@@ -36,7 +36,7 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
 
 
 class PtzMotionEstimator:
-    def __init__(self, config: CameraConfig, ptz_start_time, ptz_stop_time) -> None:
+    def __init__(self, config: CameraConfig, ptz_metrics: PTZMetricsTypes) -> None:
         self.frame_manager = SharedMemoryFrameManager()
         # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
         self.norfair_motion_estimator = MotionEstimator(
@@ -46,8 +46,9 @@ class PtzMotionEstimator:
         )
         self.camera_config = config
         self.coord_transformations = None
-        self.ptz_start_time = ptz_start_time
-        self.ptz_stop_time = ptz_stop_time
+        self.ptz_metrics = ptz_metrics
+        self.ptz_start_time = self.ptz_metrics["ptz_start_time"]
+        self.ptz_stop_time = self.ptz_metrics["ptz_stop_time"]
         logger.debug(f"Motion estimator init for cam: {config.name}")
 
     def motion_estimator(self, detections, frame_time, camera_name):
@@ -55,7 +56,7 @@ class PtzMotionEstimator:
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
         ):
             logger.debug(
-                f"Motion estimator running for {camera_name} - frame time: {frame_time}"
+                f"Motion estimator running for {camera_name} - frame time: {frame_time}, {self.ptz_start_time.value}, {self.ptz_stop_time.value}"
             )
 
             frame_id = f"{camera_name}{frame_time}"

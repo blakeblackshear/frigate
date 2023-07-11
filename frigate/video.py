@@ -25,6 +25,7 @@ from frigate.object_detection import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
+from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import (
     FrameManager,
@@ -462,7 +463,7 @@ def track_camera(
     result_connection,
     detected_objects_queue,
     process_info,
-    ptz_info,
+    ptz_metrics,
 ):
     stop_event = mp.Event()
 
@@ -483,11 +484,6 @@ def track_camera(
     motion_threshold = process_info["motion_threshold"]
     motion_contour_area = process_info["motion_contour_area"]
 
-    ptz_autotracker_enabled = ptz_info["ptz_autotracker_enabled"]
-    ptz_start_time = ptz_info["ptz_start_time"]
-    ptz_stop_time = ptz_info["ptz_stop_time"]
-    ptz_stopped = ptz_info["ptz_stopped"]
-
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
     object_filters = config.objects.filters
@@ -504,9 +500,7 @@ def track_camera(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
     )
 
-    object_tracker = NorfairTracker(
-        config, ptz_autotracker_enabled, ptz_start_time, ptz_stop_time
-    )
+    object_tracker = NorfairTracker(config, ptz_metrics)
 
     frame_manager = SharedMemoryFrameManager()
 
@@ -527,9 +521,7 @@ def track_camera(
         detection_enabled,
         motion_enabled,
         stop_event,
-        ptz_start_time,
-        ptz_stop_time,
-        ptz_stopped,
+        ptz_metrics,
     )
 
     logger.info(f"{name}: exiting subprocess")
@@ -754,9 +746,7 @@ def process_frames(
     detection_enabled: mp.Value,
     motion_enabled: mp.Value,
     stop_event,
-    ptz_start_time: mp.Value,
-    ptz_stop_time: mp.Value,
-    ptz_stopped: mp.Event,
+    ptz_metrics: PTZMetricsTypes,
     exit_on_empty: bool = False,
 ):
     fps = process_info["process_fps"]
@@ -799,7 +789,9 @@ def process_frames(
             motion_detector.detect(frame)
             if motion_enabled.value
             and not ptz_moving_at_frame_time(
-                frame_time, ptz_start_time.value, ptz_stop_time.value
+                frame_time,
+                ptz_metrics["ptz_start_time"].value,
+                ptz_metrics["ptz_stop_time"].value,
             )
             else []
         )
