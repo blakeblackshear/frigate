@@ -36,22 +36,33 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
 
 
 class PtzMotionEstimator:
-    def __init__(self, config: CameraConfig, ptz_metrics: PTZMetricsTypes) -> None:
+    def __init__(
+        self, config: CameraConfig, ptz_metrics: dict[str, PTZMetricsTypes]
+    ) -> None:
         self.frame_manager = SharedMemoryFrameManager()
-        # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
-        self.norfair_motion_estimator = MotionEstimator(
-            transformations_getter=TranslationTransformationGetter(),
-            min_distance=30,
-            max_points=900,
-        )
+        self.norfair_motion_estimator = None
         self.camera_config = config
         self.coord_transformations = None
         self.ptz_metrics = ptz_metrics
         self.ptz_start_time = self.ptz_metrics["ptz_start_time"]
         self.ptz_stop_time = self.ptz_metrics["ptz_stop_time"]
+
+        self.ptz_metrics["ptz_reset"].set()
         logger.debug(f"Motion estimator init for cam: {config.name}")
 
     def motion_estimator(self, detections, frame_time, camera_name):
+        # If we've just started up or returned to our preset, reset motion estimator for new tracking session
+        if self.ptz_metrics["ptz_reset"].is_set():
+            self.ptz_metrics["ptz_reset"].clear()
+            logger.debug("Motion estimator reset")
+            # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
+            self.norfair_motion_estimator = MotionEstimator(
+                transformations_getter=TranslationTransformationGetter(),
+                min_distance=30,
+                max_points=900,
+            )
+            self.coord_transformations = None
+
         if ptz_moving_at_frame_time(
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
         ):
@@ -242,6 +253,9 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
+            if not self.autotracker_init[camera]:
+                self._autotracker_setup(self.config.cameras[camera], camera)
+
             # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
             # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
@@ -404,4 +418,5 @@ class PtzAutoTracker:
                 camera,
                 autotracker_config.return_preset.lower(),
             )
+            self.ptz_metrics[camera]["ptz_reset"].set()
             self.tracked_object_previous[camera] = None
