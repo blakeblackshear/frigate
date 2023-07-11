@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - master
+      - community-boards
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
