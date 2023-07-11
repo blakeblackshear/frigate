@@ -386,13 +386,13 @@ def set_sub_label(id):
             400,
         )
 
-    if new_score > 1.0 or new_score < 0:
+    if new_score is not None and (new_score > 1.0 or new_score < 0):
         return make_response(
             jsonify(
                 {
                     "success": False,
                     "message": new_score
-                    + " does not fit within the expected bounds 0 < score < 1.0",
+                    + " does not fit within the expected bounds 0 <= score <= 1.0",
                 }
             ),
             400,
