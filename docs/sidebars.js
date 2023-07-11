@@ -45,7 +45,7 @@ module.exports = {
     ],
     Development: [
       "development/contributing",
-      "development/contributing-boards.md"
+      "development/contributing-boards"
     ],
   },
 };
