@@ -386,6 +386,18 @@ def set_sub_label(id):
             400,
         )
 
+    if new_score > 1.0 or new_score < 0:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": new_score
+                    + " does not fit within the expected bounds 0 < score < 1.0",
+                }
+            ),
+            400,
+        )
+
     if not event.end_time:
         tracked_obj: TrackedObject = (
             current_app.detected_frames_processor.camera_states[
