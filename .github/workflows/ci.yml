@@ -50,7 +50,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: {context}/docker/build/main/Dockerfile
+          file: docker/build/main/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           target: frigate
@@ -62,7 +62,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: {context}/docker/build/rpi/Dockerfile
+          file: docker/build/rpi/Dockerfile
           push: true
           platforms: linux/arm64
           target: frigate-rpi
@@ -75,7 +75,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: {context}/docker/build/main/Dockerfile
+          file: docker/build/main/Dockerfile
           push: true
           platforms: linux/amd64
           target: frigate-tensorrt
