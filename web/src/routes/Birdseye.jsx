@@ -33,7 +33,7 @@ export default function Birdseye() {
   }
 
   let player;
-  const playerClass = ptzCameras.length || !isMaxWidth ? 'w-full' : 'max-w-5xl xl:w-1/2';
+  const playerClass = ptzCameras.length || isMaxWidth ? 'w-full' : 'max-w-5xl xl:w-1/2';
   if (viewSource == 'mse' && config.birdseye.restream) {
     if ('MediaSource' in window) {
       player = (
