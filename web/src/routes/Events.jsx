@@ -1,4 +1,5 @@
 import { h, Fragment } from 'preact';
+import { usePersistence } from '../context';
 import { route } from 'preact-router';
 import ActivityIndicator from '../components/ActivityIndicator';
 import Heading from '../components/Heading';
@@ -111,6 +112,8 @@ export default function Events({ path, ...props }) {
   const { data: allLabels } = useSWR(['labels']);
   const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
 
+  const [displayLabels, setDisplayLabels] = usePersistence('display-labels', false);
+
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
@@ -214,6 +217,13 @@ export default function Events({ path, ...props }) {
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
+  };
+
+  const onLabelsClick = (e) => {
+    setDisplayLabels(!displayLabels);
+    if (e) {
+      e.stopPropagation();
+    }
   };
 
   const showSubmitToPlus = (event_id, label, box, e) => {
@@ -627,13 +637,13 @@ export default function Events({ path, ...props }) {
                           {event.zones.join(', ').replaceAll('_', ' ')}
                         </div>
                         <div className="capitalize  text-sm flex align-center">
-                          <Score className="w-5 h-5 mr-2 inline" />
+                          <Score className="w-5 h-5 mr-2 inline" onClick={(e) => onLabelsClick(e, event.id)} />
                           {(event?.data?.top_score || event.top_score || 0) == 0
                             ? null
-                            : `Label: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
+                            : `${displayLabels ? event.label : 'Label'}: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
                           {(event?.data?.sub_label_score || 0) == 0
                             ? null
-                            : `, Sub Label: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
+                            : `, ${displayLabels ? event.sub_label : 'Sub-label'}: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
