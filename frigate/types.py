@@ -18,14 +18,19 @@ class CameraMetricsTypes(TypedDict):
     frame_queue: Queue
     motion_enabled: Synchronized
     improve_contrast_enabled: Synchronized
-    ptz_autotracker_enabled: Synchronized
-    ptz_stopped: Event
     motion_threshold: Synchronized
     motion_contour_area: Synchronized
     process: Optional[Process]
     process_fps: Synchronized
     read_start: Synchronized
     skipped_fps: Synchronized
+
+
+class PTZMetricsTypes(TypedDict):
+    ptz_autotracker_enabled: Synchronized
+    ptz_stopped: Event
+    ptz_start_time: Synchronized
+    ptz_stop_time: Synchronized
 
 
 class FeatureMetricsTypes(TypedDict):

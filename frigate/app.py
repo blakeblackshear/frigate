@@ -48,7 +48,7 @@ from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -67,6 +67,7 @@ class FrigateApp:
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
+        self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
@@ -135,13 +136,6 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].motion.improve_contrast,
                 ),
-                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].onvif.autotracking.enabled,
-                ),
-                "ptz_stopped": mp.Event(),
                 "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
                     # from mypy 0.981 onwards
@@ -170,7 +164,22 @@ class FrigateApp:
                 "capture_process": None,
                 "process": None,
             }
-            self.camera_metrics[camera_name]["ptz_stopped"].set()
+            self.ptz_metrics[camera_name] = {
+                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].onvif.autotracking.enabled,
+                ),
+                "ptz_stopped": mp.Event(),
+                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+            }
+            self.ptz_metrics[camera_name]["ptz_stopped"].set()
             self.feature_metrics[camera_name] = {
                 "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
@@ -317,7 +326,7 @@ class FrigateApp:
         )
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config, self.camera_metrics)
+        self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -331,6 +340,7 @@ class FrigateApp:
             self.onvif_controller,
             self.camera_metrics,
             self.feature_metrics,
+            self.ptz_metrics,
             comms,
         )
 
@@ -375,7 +385,7 @@ class FrigateApp:
         self.ptz_autotracker_thread = PtzAutoTrackerThread(
             self.config,
             self.onvif_controller,
-            self.camera_metrics,
+            self.ptz_metrics,
             self.stop_event,
         )
         self.ptz_autotracker_thread.start()
@@ -426,6 +436,7 @@ class FrigateApp:
                     self.detection_out_events[name],
                     self.detected_frames_queue,
                     self.camera_metrics[name],
+                    self.ptz_metrics[name],
                 ),
             )
             camera_process.daemon = True
