@@ -5,7 +5,7 @@ title: Community Supported Boards
 
 ## About Community Supported Boards
 
-There are many examples of SBCs (small board computers) that hav a passionate community behind them, Jetson Nano for example. These SBCs often have dedicated hardware that can greatly accelerate Frigate's AI and video workloads, but this hardware requires very specific frameworks for interfacing with it.
+There are many SBCs (small board computers) that have a passionate community behind them, Jetson Nano for example. These SBCs often have dedicated hardware that can greatly accelerate Frigate's AI and video workloads, but this hardware requires very specific frameworks for interfacing with it.
 
 This means it would be very difficult for Frigate's maintainers to support these different boards especially given the relatively low userbase.
 
