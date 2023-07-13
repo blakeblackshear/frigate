@@ -68,7 +68,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
         libva-drm2 mesa-va-drivers
 fi
 
-apt-get purge gnupg apt-transport-https wget xz-utils -y
+apt-get purge gnupg apt-transport-https xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*

@@ -66,3 +66,5 @@ cameras:
 ```
 
 then PTZ controls will be available in the cameras WebUI.
+
+An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.

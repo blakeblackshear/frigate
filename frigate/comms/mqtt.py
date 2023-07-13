@@ -70,6 +70,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 retain=True,
             )
             self.publish(
+                f"{camera_name}/ptz_autotracker/state",
+                "ON" if camera.onvif.autotracking.enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
                 f"{camera_name}/motion_threshold/state",
                 camera.motion.threshold,  # type: ignore[union-attr]
                 retain=True,
@@ -152,6 +157,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "audio",
             "motion",
             "improve_contrast",
+            "ptz_autotracker",
             "motion_threshold",
             "motion_contour_area",
         ]

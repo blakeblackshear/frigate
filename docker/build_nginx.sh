@@ -2,10 +2,10 @@
 
 set -euxo pipefail
 
-NGINX_VERSION="1.22.1"
-VOD_MODULE_VERSION="1.30"
-SECURE_TOKEN_MODULE_VERSION="1.4"
-RTMP_MODULE_VERSION="1.2.1"
+NGINX_VERSION="1.25.1"
+VOD_MODULE_VERSION="1.31"
+SECURE_TOKEN_MODULE_VERSION="1.5"
+RTMP_MODULE_VERSION="1.2.2"
 
 cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
 sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list

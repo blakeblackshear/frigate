@@ -7,7 +7,7 @@ import os
 import signal
 import threading
 from types import FrameType
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import requests
@@ -176,20 +176,22 @@ class AudioEventMaintainer(threading.Thread):
             return
 
         audio_as_float = audio.astype(np.float32)
-        waveform = audio_as_float / AUDIO_MAX_BIT_RANGE
-        model_detections = self.detector.detect(waveform)
+        rms, _ = self.calculate_audio_levels(audio_as_float)
 
-        self.calculate_audio_levels(audio_as_float)
+        # only run audio detection when volume is above min_volume
+        if rms >= self.config.audio.min_volume:
+            waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
+            model_detections = self.detector.detect(waveform)
 
-        for label, score, _ in model_detections:
-            if label not in self.config.audio.listen:
-                continue
+            for label, score, _ in model_detections:
+                if label not in self.config.audio.listen:
+                    continue
 
-            self.handle_detection(label, score)
+                self.handle_detection(label, score)
 
         self.expire_detections()
 
-    def calculate_audio_levels(self, audio_as_float: np.float32) -> None:
+    def calculate_audio_levels(self, audio_as_float: np.float32) -> Tuple[float, float]:
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
         # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
         rms = np.sqrt(np.mean(np.absolute(audio_as_float**2)))
@@ -204,6 +206,8 @@ class AudioEventMaintainer(threading.Thread):
             (f"{self.config.name}/audio/rms", float(rms))
         )
 
+        return float(rms), float(dBFS)
+
     def handle_detection(self, label: str, score: float) -> None:
         if self.detections.get(label):
             self.detections[label][
@@ -216,7 +220,7 @@ class AudioEventMaintainer(threading.Thread):
             )
 
             if resp.status_code == 200:
-                event_id = resp.json()[0]["event_id"]
+                event_id = resp.json()["event_id"]
                 self.detections[label] = {
                     "id": event_id,
                     "label": label,

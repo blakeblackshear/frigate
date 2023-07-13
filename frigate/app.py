@@ -27,6 +27,7 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
+    DEFAULT_QUEUE_BUFFER_SIZE,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -42,13 +43,13 @@ from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
-from frigate.ptz import OnvifController
+from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.onvif import OnvifController
 from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
-from frigate.util.builtin import LimitedQueue as LQueue
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -67,6 +68,7 @@ class FrigateApp:
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
+        self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
 
     def set_environment_vars(self) -> None:
@@ -159,10 +161,27 @@ class FrigateApp:
                 "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
-                "frame_queue": LQueue(maxsize=2),
+                "frame_queue": mp.Queue(maxsize=2),
                 "capture_process": None,
                 "process": None,
             }
+            self.ptz_metrics[camera_name] = {
+                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
+                    # issue https://github.com/python/typeshed/issues/8799
+                    # from mypy 0.981 onwards
+                    "i",
+                    self.config.cameras[camera_name].onvif.autotracking.enabled,
+                ),
+                "ptz_stopped": mp.Event(),
+                "ptz_reset": mp.Event(),
+                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
+                # issue https://github.com/python/typeshed/issues/8799
+                # from mypy 0.981 onwards
+            }
+            self.ptz_metrics[camera_name]["ptz_stopped"].set()
             self.feature_metrics[camera_name] = {
                 "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
@@ -191,22 +210,22 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = ff.Queue()
-        self.event_processed_queue: Queue = ff.Queue()
-        self.video_output_queue: Queue = LQueue(
+        self.event_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.event_processed_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.video_output_queue: Queue = mp.Queue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for cameras to push tracked objects to
-        self.detected_frames_queue: Queue = LQueue(
+        self.detected_frames_queue: Queue = mp.Queue(
             maxsize=len(self.config.cameras.keys()) * 2
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = ff.Queue()
+        self.recordings_info_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
         # Queue for timeline events
-        self.timeline_queue: Queue = ff.Queue()
+        self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
         # Queue for inter process communication
         self.inter_process_queue: Queue = ff.Queue()
@@ -317,7 +336,7 @@ class FrigateApp:
         )
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config)
+        self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -333,6 +352,7 @@ class FrigateApp:
             self.onvif_controller,
             self.camera_metrics,
             self.feature_metrics,
+            self.ptz_metrics,
             comms,
         )
 
@@ -373,6 +393,15 @@ class FrigateApp:
                 detector_config,
             )
 
+    def start_ptz_autotracker(self) -> None:
+        self.ptz_autotracker_thread = PtzAutoTrackerThread(
+            self.config,
+            self.onvif_controller,
+            self.ptz_metrics,
+            self.stop_event,
+        )
+        self.ptz_autotracker_thread.start()
+
     def start_detected_frames_processor(self) -> None:
         self.detected_frames_processor = TrackedObjectProcessor(
             self.config,
@@ -382,6 +411,7 @@ class FrigateApp:
             self.event_processed_queue,
             self.video_output_queue,
             self.recordings_info_queue,
+            self.ptz_autotracker_thread,
             self.stop_event,
         )
         self.detected_frames_processor.start()
@@ -418,6 +448,7 @@ class FrigateApp:
                     self.detection_out_events[name],
                     self.detected_frames_queue,
                     self.camera_metrics[name],
+                    self.ptz_metrics[name],
                 ),
             )
             camera_process.daemon = True
@@ -551,6 +582,7 @@ class FrigateApp:
             sys.exit(1)
         self.start_detectors()
         self.start_video_output_processor()
+        self.start_ptz_autotracker()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
@@ -595,6 +627,7 @@ class FrigateApp:
 
         self.dispatcher.stop()
         self.detected_frames_processor.join()
+        self.ptz_autotracker_thread.join()
         self.event_processor.join()
         self.event_cleanup.join()
         self.stats_emitter.join()

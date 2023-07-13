@@ -5,8 +5,10 @@ import numpy as np
 from norfair import Detection, Drawable, Tracker, draw_boxes
 from norfair.drawing.drawer import Drawer
 
-from frigate.config import DetectConfig
+from frigate.config import CameraConfig
+from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
+from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
 
 
@@ -54,12 +56,21 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
 
 
 class NorfairTracker(ObjectTracker):
-    def __init__(self, config: DetectConfig):
+    def __init__(
+        self,
+        config: CameraConfig,
+        ptz_metrics: PTZMetricsTypes,
+    ):
         self.tracked_objects = {}
         self.disappeared = {}
         self.positions = {}
-        self.max_disappeared = config.max_disappeared
-        self.detect_config = config
+        self.max_disappeared = config.detect.max_disappeared
+        self.camera_config = config
+        self.detect_config = config.detect
+        self.ptz_metrics = ptz_metrics
+        self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
+        self.ptz_motion_estimator = {}
+        self.camera_name = config.name
         self.track_id_map = {}
         # TODO: could also initialize a tracker per object class if there
         #       was a good reason to have different distance calculations
@@ -69,6 +80,10 @@ class NorfairTracker(ObjectTracker):
             initialization_delay=0,
             hit_counter_max=self.max_disappeared,
         )
+        if self.ptz_autotracker_enabled.value:
+            self.ptz_motion_estimator = PtzMotionEstimator(
+                self.camera_config, self.ptz_metrics
+            )
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -230,7 +245,22 @@ class NorfairTracker(ObjectTracker):
                 )
             )
 
-        tracked_objects = self.tracker.update(detections=norfair_detections)
+        coord_transformations = None
+
+        if self.ptz_autotracker_enabled.value:
+            # we must have been enabled by mqtt, so set up the estimator
+            if not self.ptz_motion_estimator:
+                self.ptz_motion_estimator = PtzMotionEstimator(
+                    self.camera_config, self.ptz_metrics
+                )
+
+            coord_transformations = self.ptz_motion_estimator.motion_estimator(
+                detections, frame_time, self.camera_name
+            )
+
+        tracked_objects = self.tracker.update(
+            detections=norfair_detections, coord_transformations=coord_transformations
+        )
 
         # update or create new tracks
         active_ids = []
