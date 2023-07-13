@@ -31,6 +31,7 @@ build: version amd64 arm64
 push: build
 	docker buildx build --push --platform linux/arm64/v8,linux/amd64 --target=frigate --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH) --file docker/build/main/Dockerfile .
 	docker buildx build --push --platform linux/amd64 --target=frigate-tensorrt --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt --file docker/build/main/Dockerfile .
+	docker buildx build --push --platform linux/arm64 --build-arg BASE_IMAGE=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH) --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rpi --file docker/build/rpi/Dockerfile .
 
 run: local
 	docker run --rm --publish=5000:5000 --volume=${PWD}/config:/config frigate:latest
