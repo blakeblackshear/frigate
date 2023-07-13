@@ -228,7 +228,7 @@ class FrigateApp:
         self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
         # Queue for inter process communication
-        self.inter_process_queue: Queue = ff.Queue()
+        self.inter_process_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
