@@ -66,7 +66,7 @@ class Recordings(Model):  # type: ignore[misc]
     duration = FloatField()
     motion = IntegerField(null=True)
     objects = IntegerField(null=True)
-    audio = IntegerField(null=True) # audio events in this recording
+    audio = BooleanField(default=False) # audio events in this recording
     segment_size = FloatField(default=0)  # this should be stored as MB
 
 

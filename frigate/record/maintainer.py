@@ -342,7 +342,7 @@ class RecordingMaintainer(threading.Thread):
                     motion=motion_count,
                     # TODO: update this to store list of active objects at some point
                     objects=active_count,
-                    audio=1 if audio_event else 0,
+                    audio=audio_event,
                     segment_size=segment_size,
                 )
         except Exception as e:

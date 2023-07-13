@@ -31,7 +31,7 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         Recordings,
-        audio=pw.IntegerField(null=True),
+        audio=pw.BooleanField(default=False),
     )
 
 
