@@ -201,6 +201,7 @@ class RecordingMaintainer(threading.Thread):
                     duration,
                     cache_path,
                     record_mode,
+                    events.data.get("type", "object") == "audio",
                 )
             # if it doesn't overlap with an event, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
@@ -215,7 +216,13 @@ class RecordingMaintainer(threading.Thread):
         else:
             record_mode = self.config.cameras[camera].record.retain.mode
             self.store_segment(
-                camera, start_time, end_time, duration, cache_path, record_mode
+                camera,
+                start_time,
+                end_time,
+                duration,
+                cache_path,
+                record_mode,
+                events.data.get("type", "object") == "audio",
             )
 
     def segment_stats(
@@ -251,12 +258,14 @@ class RecordingMaintainer(threading.Thread):
         duration: float,
         cache_path: str,
         store_mode: RetainModeEnum,
+        audio_event: bool,
     ) -> None:
         motion_count, active_count = self.segment_stats(camera, start_time, end_time)
 
         # check if the segment shouldn't be stored
-        if (store_mode == RetainModeEnum.motion and motion_count == 0) or (
-            store_mode == RetainModeEnum.active_objects and active_count == 0
+        if not audio_event and (
+            (store_mode == RetainModeEnum.motion and motion_count == 0)
+            or (store_mode == RetainModeEnum.active_objects and active_count == 0)
         ):
             Path(cache_path).unlink(missing_ok=True)
             self.end_time_cache.pop(cache_path, None)
@@ -333,6 +342,7 @@ class RecordingMaintainer(threading.Thread):
                     motion=motion_count,
                     # TODO: update this to store list of active objects at some point
                     objects=active_count,
+                    audio=1 if audio_event else 0,
                     segment_size=segment_size,
                 )
         except Exception as e:
