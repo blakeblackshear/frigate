@@ -630,10 +630,10 @@ export default function Events({ path, ...props }) {
                           <Score className="w-5 h-5 mr-2 inline" />
                           {(event?.data?.top_score || event.top_score || 0) == 0
                             ? null
-                            : `Label: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
+                            : `${event.label}: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
                           {(event?.data?.sub_label_score || 0) == 0
                             ? null
-                            : `, Sub Label: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
+                            : `, ${event.sub_label}: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
