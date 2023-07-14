@@ -52,7 +52,11 @@ def manage_recordings(
     db.bind(models)
 
     maintainer = RecordingMaintainer(
-        config, object_recordings_info_queue, audio_recordings_info_queue, process_info, stop_event
+        config,
+        object_recordings_info_queue,
+        audio_recordings_info_queue,
+        process_info,
+        stop_event,
     )
     maintainer.start()
 
