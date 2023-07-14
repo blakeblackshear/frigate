@@ -214,6 +214,10 @@ class AudioEventMaintainer(threading.Thread):
                 "last_detection"
             ] = datetime.datetime.now().timestamp()
         else:
+            self.inter_process_communicator.queue.put(
+                (f"{self.config.name}/audio/{label}", True)
+            )
+
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
                 json={"duration": None, "source_type": "audio"},
@@ -238,6 +242,10 @@ class AudioEventMaintainer(threading.Thread):
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
+                self.inter_process_communicator.queue.put(
+                    (f"{self.config.name}/audio/{detection['label']}", True)
+                )
+
                 resp = requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
@@ -245,6 +253,7 @@ class AudioEventMaintainer(threading.Thread):
                         + self.config.record.events.post_capture
                     },
                 )
+
                 if resp.status_code == 200:
                     self.detections[detection["label"]] = None
                 else:
