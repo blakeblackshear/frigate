@@ -217,7 +217,8 @@ Sub labels must be 100 characters or shorter.
 
 ```json
 {
-  "subLabel": "some_string"
+  "subLabel": "some_string",
+  "subLabelScore": 0.79,
 }
 ```
 
