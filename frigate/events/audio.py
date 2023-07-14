@@ -215,7 +215,7 @@ class AudioEventMaintainer(threading.Thread):
             ] = datetime.datetime.now().timestamp()
         else:
             self.inter_process_communicator.queue.put(
-                (f"{self.config.name}/audio/{label}", True)
+                (f"{self.config.name}/audio/{label}", "ON")
             )
 
             resp = requests.post(
@@ -243,7 +243,7 @@ class AudioEventMaintainer(threading.Thread):
                 > self.config.audio.max_not_heard
             ):
                 self.inter_process_communicator.queue.put(
-                    (f"{self.config.name}/audio/{detection['label']}", False)
+                    (f"{self.config.name}/audio/{detection['label']}", "OFF")
                 )
 
                 resp = requests.put(
