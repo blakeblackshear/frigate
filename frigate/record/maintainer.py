@@ -287,7 +287,9 @@ class RecordingMaintainer(threading.Thread):
         # check if the segment shouldn't be stored
         if (
             (store_mode == RetainModeEnum.motion and motion_count == 0)
-            or (store_mode == RetainModeEnum.motion and averageDBFS > 0)
+            or (
+                store_mode == RetainModeEnum.motion and averageDBFS < 0
+            )  # dBFS is stored in a negative scale
             or (store_mode == RetainModeEnum.active_objects and active_count == 0)
         ):
             Path(cache_path).unlink(missing_ok=True)
