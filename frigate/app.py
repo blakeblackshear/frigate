@@ -677,7 +677,7 @@ class FrigateApp:
             self.log_queue,
             self.inter_process_queue,
         ]:
-            while not queue.empty():
+            while queue and not queue.empty():
                 queue.get_nowait()
             queue.close()
             queue.join_thread()
