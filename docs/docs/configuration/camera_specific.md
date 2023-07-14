@@ -80,8 +80,8 @@ cameras:
     rtmp:
       enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
-      width: # <---- update for your camera's resolution
-      height: # <---- update for your camera's resolution
+      width: # <- optional, by default Frigate tries to automatically detect resolution 
+      height: # <- optional, by default Frigate tries to automatically detect resolution 
 ```
 
 ### Blue Iris RTSP Cameras

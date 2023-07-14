@@ -68,10 +68,6 @@ cameras:
           input_args: -re -stream_loop -1 -fflags +genpts
           roles:
             - detect
-    detect:
-      height: 1080
-      width: 1920
-      fps: 5
 ```
 
 These input args tell ffmpeg to read the mp4 file in an infinite loop. You can use any valid ffmpeg input here.

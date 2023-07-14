@@ -22,8 +22,6 @@ cameras:
             - detect
     detect:
       enabled: False # <---- disable detection until you have a working camera feed
-      width: 1280 # <---- update for your camera's resolution
-      height: 720 # <---- update for your camera's resolution
 ```
 
 ### Step 2: Start Frigate
@@ -105,9 +103,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp
           roles:
             - detect
-    detect:
-      width: 1280
-      height: 720
     motion:
       mask:
         - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432

@@ -19,9 +19,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-    detect:
-      width: 1280
-      height: 720
 ```
 
 ### VSCode Configuration Schema
