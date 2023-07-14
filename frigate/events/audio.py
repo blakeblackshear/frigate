@@ -243,7 +243,7 @@ class AudioEventMaintainer(threading.Thread):
                 > self.config.audio.max_not_heard
             ):
                 self.inter_process_communicator.queue.put(
-                    (f"{self.config.name}/audio/{detection['label']}", True)
+                    (f"{self.config.name}/audio/{detection['label']}", False)
                 )
 
                 resp = requests.put(
