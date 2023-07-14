@@ -86,6 +86,8 @@ class Dispatcher:
                 return
         elif topic == "restart":
             restart_frigate()
+        else:
+            self.publish(topic, payload, retain=False)
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Handle publishing to communicators."""

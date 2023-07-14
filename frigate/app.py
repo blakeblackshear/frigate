@@ -18,6 +18,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
 from frigate.config import FrigateConfig
@@ -226,6 +227,9 @@ class FrigateApp:
         # Queue for timeline events
         self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
 
+        # Queue for inter process communication
+        self.inter_process_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
             db.execute_sql("VACUUM;")
@@ -314,6 +318,11 @@ class FrigateApp:
             self.config, self.event_queue
         )
 
+    def init_inter_process_communicator(self) -> None:
+        self.inter_process_communicator = InterProcessCommunicator(
+            self.inter_process_queue
+        )
+
     def init_web_server(self) -> None:
         self.flask_app = create_app(
             self.config,
@@ -336,6 +345,8 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         comms.append(WebSocketClient(self.config))
+        comms.append(self.inter_process_communicator)
+
         self.dispatcher = Dispatcher(
             self.config,
             self.onvif_controller,
@@ -466,7 +477,11 @@ class FrigateApp:
             audio_process = mp.Process(
                 target=listen_to_audio,
                 name="audio_capture",
-                args=(self.config, self.feature_metrics),
+                args=(
+                    self.config,
+                    self.feature_metrics,
+                    self.inter_process_communicator,
+                ),
             )
             audio_process.daemon = True
             audio_process.start()
@@ -559,6 +574,7 @@ class FrigateApp:
             self.init_recording_manager()
             self.init_go2rtc()
             self.bind_database()
+            self.init_inter_process_communicator()
             self.init_dispatcher()
         except Exception as e:
             print(e)
@@ -630,6 +646,7 @@ class FrigateApp:
             self.detected_frames_queue,
             self.recordings_info_queue,
             self.log_queue,
+            self.inter_process_queue,
         ]:
             while not queue.empty():
                 queue.get_nowait()
