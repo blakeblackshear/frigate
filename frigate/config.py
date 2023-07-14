@@ -26,10 +26,10 @@ from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
     get_ffmpeg_arg_list,
-    get_video_properties,
     load_config_with_no_duplicates,
 )
 from frigate.util.image import create_mask
+from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
