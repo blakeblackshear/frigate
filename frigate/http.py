@@ -593,24 +593,14 @@ def timeline():
 @bp.route("/<camera_name>/<label>/thumbnail.jpg")
 def label_thumbnail(camera_name, label):
     label = unquote(label)
-    if label == "any":
-        event_query = (
-            Event.select()
-            .where(Event.camera == camera_name)
-            .order_by(Event.start_time.desc())
-        )
-    else:
-        event_query = (
-            Event.select()
-            .where(Event.camera == camera_name)
-            .where(Event.label == label)
-            .order_by(Event.start_time.desc())
-        )
+    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
 
     try:
-        event = event_query.get()
+        event = event_query.scalar()
 
-        return event_thumbnail(event.id, 60)
+        return event_thumbnail(event, 60)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
