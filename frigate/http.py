@@ -917,7 +917,7 @@ def create_event(camera_name, label):
     except Exception as e:
         return make_response(
             jsonify({"success": False, "message": f"An unknown error occurred: {e}"}),
-            404,
+            500,
         )
 
     return make_response(

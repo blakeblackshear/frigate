@@ -49,4 +49,4 @@ MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to 
 
 # Queue Values
 
-DEFAULT_QUEUE_BUFFER_SIZE = 2000 * 1000  # 2MB
+DEFAULT_QUEUE_BUFFER_SIZE = 1000 * 1000  # 1MB

@@ -210,22 +210,34 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
-        self.event_processed_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.event_queue: Queue = ff.Queue(
+            DEFAULT_QUEUE_BUFFER_SIZE
+            * sum(camera.enabled for camera in self.config.cameras.values())
+        )
+        self.event_processed_queue: Queue = ff.Queue(
+            DEFAULT_QUEUE_BUFFER_SIZE
+            * sum(camera.enabled for camera in self.config.cameras.values())
+        )
         self.video_output_queue: Queue = mp.Queue(
-            maxsize=len(self.config.cameras.keys()) * 2
+            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue: Queue = mp.Queue(
-            maxsize=len(self.config.cameras.keys()) * 2
+            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
         # Queue for recordings info
-        self.recordings_info_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.recordings_info_queue: Queue = ff.Queue(
+            DEFAULT_QUEUE_BUFFER_SIZE
+            * sum(camera.enabled for camera in self.config.cameras.values())
+        )
 
         # Queue for timeline events
-        self.timeline_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.timeline_queue: Queue = ff.Queue(
+            DEFAULT_QUEUE_BUFFER_SIZE
+            * sum(camera.enabled for camera in self.config.cameras.values())
+        )
 
         # Queue for inter process communication
         self.inter_process_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
