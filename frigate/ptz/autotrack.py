@@ -119,7 +119,7 @@ class PtzAutoTrackerThread(threading.Thread):
         self.config = config
 
     def run(self):
-        while not self.stop_event.is_set():
+        while not self.stop_event.wait(1):
             for camera_name, cam in self.config.cameras.items():
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
@@ -128,7 +128,7 @@ class PtzAutoTrackerThread(threading.Thread):
                     if self.ptz_autotracker.tracked_object.get(camera_name):
                         self.ptz_autotracker.tracked_object[camera_name] = None
                         self.ptz_autotracker.tracked_object_previous[camera_name] = None
-            time.sleep(1)
+
         logger.info("Exiting autotracker...")
 
 
@@ -199,66 +199,39 @@ class PtzAutoTracker:
     def _process_move_queue(self, camera):
         while True:
             try:
-                if self.move_queues[camera].qsize() > 1:
-                    # Accumulate values since last moved
-                    pan = 0
-                    tilt = 0
+                move_data = self.move_queues[camera].get()
+                frame_time, pan, tilt = move_data
 
-                    while not self.move_queues[camera].empty():
-                        frame_time, queued_pan, queued_tilt = self.move_queues[
-                            camera
-                        ].queue[0]
-
-                        # if we're receiving move requests during a PTZ move, ignore them
-                        if ptz_moving_at_frame_time(
-                            frame_time,
-                            self.ptz_metrics[camera]["ptz_start_time"].value,
-                            self.ptz_metrics[camera]["ptz_stop_time"].value,
-                        ):
-                            self.move_queues[camera].get()
-
-                            # instead of dequeueing this might be a good place to preemptively move based
-                            # on an estimate - for fast moving objects, etc.
-                            logger.debug(
-                                f"Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, queued pan: {queued_pan}, queued tilt: {queued_tilt}, final pan: {pan}, final tilt: {tilt}"
-                            )
-
-                        else:
-                            # TODO: this may need rethinking
-                            logger.debug(
-                                f"Move queue: PTZ NOT moving, frame time: {frame_time}, queued pan: {queued_pan}, queued tilt: {queued_tilt}, final pan: {pan}, final tilt: {tilt}"
-                            )
-                            _, queued_pan, queued_tilt = self.move_queues[camera].get()
-
-                            # If exceeding the movement range, keep it in the queue and move now
-                            if (
-                                abs(pan + queued_pan) > 1.0
-                                or abs(tilt + queued_tilt) > 1.0
-                            ):
-                                logger.debug("Pan or tilt value exceeds 1.0")
-                                break
-
-                            pan += queued_pan
-                            tilt += queued_tilt
+                # if we're receiving move requests during a PTZ move, ignore them
+                if ptz_moving_at_frame_time(
+                    frame_time,
+                    self.ptz_metrics[camera]["ptz_start_time"].value,
+                    self.ptz_metrics[camera]["ptz_stop_time"].value,
+                ):
+                    # instead of dequeueing this might be a good place to preemptively move based
+                    # on an estimate - for fast moving objects, etc.
+                    logger.debug(
+                        f"Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, final pan: {pan}, final tilt: {tilt}"
+                    )
+                    continue
 
                 else:
-                    move_data = self.move_queues[camera].get()
-                    frame_time, pan, tilt = move_data
+                    # on some cameras with cheaper motors it seems like small values can cause jerky movement
+                    # TODO: double check, might not need this
+                    if abs(pan) > 0.02 or abs(tilt) > 0.02:
+                        self.onvif._move_relative(camera, pan, tilt, 1)
+                    else:
+                        logger.debug(
+                            f"Not moving, pan and tilt too small: {pan}, {tilt}"
+                        )
 
-                # on some cameras with cheaper motors it seems like small values can cause jerky movement
-                # TODO: double check, might not need this
-                if abs(pan) > 0.02 or abs(tilt) > 0.02:
-                    self.onvif._move_relative(camera, pan, tilt, 1)
-                else:
-                    logger.debug(f"Not moving, pan and tilt too small: {pan}, {tilt}")
-
-                # Wait until the camera finishes moving
-                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
-                    # check if ptz is moving
-                    self.onvif.get_camera_status(camera)
+                    # Wait until the camera finishes moving
+                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                        # check if ptz is moving
+                        self.onvif.get_camera_status(camera)
 
             except queue.Empty:
-                time.sleep(0.1)
+                continue
 
     def _enqueue_move(self, camera, frame_time, pan, tilt):
         move_data = (frame_time, pan, tilt)
