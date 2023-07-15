@@ -3,9 +3,11 @@ import { useState } from 'preact/hooks';
 import useSWR from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
+import { useApiHost } from '../api';
 
 export default function Export() {
   const { data: config } = useSWR('config');
+  const { data: exports } = axios.get(`${useApiHost()}/exports/`).then((res) => res.data)
 
   const [camera, setCamera] = useState('select');
   const [playback, setPlayback] = useState('select');
