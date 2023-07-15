@@ -9,6 +9,7 @@ import threading
 from types import FrameType
 from typing import Optional, Tuple
 
+import faster_fifo as ff
 import numpy as np
 import requests
 from setproctitle import setproctitle
@@ -51,6 +52,7 @@ def get_ffmpeg_command(input_args: list[str], input_path: str, pipe: str) -> lis
 
 def listen_to_audio(
     config: FrigateConfig,
+    recordings_info_queue: ff.Queue,
     process_info: dict[str, FeatureMetricsTypes],
     inter_process_communicator: InterProcessCommunicator,
 ) -> None:
@@ -77,7 +79,11 @@ def listen_to_audio(
     for camera in config.cameras.values():
         if camera.enabled and camera.audio.enabled_in_config:
             audio = AudioEventMaintainer(
-                camera, process_info, stop_event, inter_process_communicator
+                camera,
+                recordings_info_queue,
+                process_info,
+                stop_event,
+                inter_process_communicator,
             )
             audio_threads.append(audio)
             audio.start()
@@ -146,6 +152,7 @@ class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
+        recordings_info_queue: ff.Queue,
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
         inter_process_communicator: InterProcessCommunicator,
@@ -153,6 +160,7 @@ class AudioEventMaintainer(threading.Thread):
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
+        self.recordings_info_queue = recordings_info_queue
         self.feature_metrics = feature_metrics
         self.inter_process_communicator = inter_process_communicator
         self.detections: dict[dict[str, any]] = feature_metrics
@@ -176,10 +184,16 @@ class AudioEventMaintainer(threading.Thread):
             return
 
         audio_as_float = audio.astype(np.float32)
-        rms, _ = self.calculate_audio_levels(audio_as_float)
+        rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
         # only run audio detection when volume is above min_volume
         if rms >= self.config.audio.min_volume:
+            # add audio info to recordings queue
+            self.recordings_info_queue.put(
+                (self.config.name, datetime.datetime.now().timestamp(), dBFS)
+            )
+
+            # create waveform relative to max range and look for detections
             waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
             model_detections = self.detector.detect(waveform)
 
@@ -194,7 +208,7 @@ class AudioEventMaintainer(threading.Thread):
     def calculate_audio_levels(self, audio_as_float: np.float32) -> Tuple[float, float]:
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
         # Note: np.float32 isn't serializable, we must use np.float64 to publish the message
-        rms = np.sqrt(np.mean(np.absolute(audio_as_float**2)))
+        rms = np.sqrt(np.mean(np.absolute(np.square(audio_as_float))))
 
         # Transform RMS to dBFS (decibels relative to full scale)
         dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)

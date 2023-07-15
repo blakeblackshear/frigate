@@ -110,7 +110,7 @@ class FrigateApp:
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config(self.plus_api)
 
-        for camera_name, camera_config in self.config.cameras.items():
+        for camera_name in self.config.cameras.keys():
             # create camera_metrics
             self.camera_metrics[camera_name] = {
                 "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
@@ -227,10 +227,20 @@ class FrigateApp:
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
-        # Queue for recordings info
-        self.recordings_info_queue: Queue = ff.Queue(
+        # Queue for object recordings info
+        self.object_recordings_info_queue: Queue = ff.Queue(
             DEFAULT_QUEUE_BUFFER_SIZE
             * sum(camera.enabled for camera in self.config.cameras.values())
+        )
+
+        # Queue for audio recordings info if enabled
+        self.audio_recordings_info_queue: Optional[Queue] = (
+            ff.Queue(
+                DEFAULT_QUEUE_BUFFER_SIZE
+                * sum(camera.audio.enabled for camera in self.config.cameras.values())
+            )
+            if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0
+            else None
         )
 
         # Queue for timeline events
@@ -297,7 +307,12 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(self.config, self.recordings_info_queue, self.feature_metrics),
+            args=(
+                self.config,
+                self.object_recordings_info_queue,
+                self.audio_recordings_info_queue,
+                self.feature_metrics,
+            ),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
@@ -422,7 +437,7 @@ class FrigateApp:
             self.event_queue,
             self.event_processed_queue,
             self.video_output_queue,
-            self.recordings_info_queue,
+            self.object_recordings_info_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -491,6 +506,7 @@ class FrigateApp:
                 name="audio_capture",
                 args=(
                     self.config,
+                    self.audio_recordings_info_queue,
                     self.feature_metrics,
                     self.inter_process_communicator,
                 ),
@@ -656,11 +672,13 @@ class FrigateApp:
             self.event_processed_queue,
             self.video_output_queue,
             self.detected_frames_queue,
-            self.recordings_info_queue,
+            self.object_recordings_info_queue,
+            self.audio_recordings_info_queue,
             self.log_queue,
             self.inter_process_queue,
         ]:
-            while not queue.empty():
-                queue.get_nowait()
-            queue.close()
-            queue.join_thread()
+            if queue is not None:
+                while not queue.empty():
+                    queue.get_nowait()
+                queue.close()
+                queue.join_thread()
