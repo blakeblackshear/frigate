@@ -6,12 +6,11 @@ import axios from 'axios';
 import { baseUrl } from '../api/baseUrl';
 import { Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
-import { useEffect } from 'react';
 
 export default function Export() {
   const { data: config } = useSWR('config');
+  const { data: exports } = useSWR('exports/', (url) => axios({ baseURL: baseUrl, url }).then((res) => res.data));
 
-  const [exports, setExports] = useState([]);
   const [camera, setCamera] = useState('select');
   const [playback, setPlayback] = useState('select');
   const [message, setMessage] = useState({ text: '', error: false });
@@ -26,10 +25,6 @@ export default function Export() {
   const [startTime, setStartTime] = useState('00:00');
   const [endDate, setEndDate] = useState(localISODate);
   const [endTime, setEndTime] = useState('23:59');
-
-  useEffect(() => {
-    axios({ baseURL: baseUrl, url: 'exports/' }).then((res) => setExports(res.data));
-  }, [])
 
   const onHandleExport = () => {
     if (camera == 'select') {
