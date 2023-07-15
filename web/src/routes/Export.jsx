@@ -6,11 +6,12 @@ import axios from 'axios';
 import { baseUrl } from '../api/baseUrl';
 import { Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
+import { useEffect } from 'react';
 
 export default function Export() {
   const { data: config } = useSWR('config');
-  const { data: exports } = axios({ baseURL: baseUrl, url: 'exports' }).then((res) => res.data);
 
+  const [exports, setExports] = useState([]);
   const [camera, setCamera] = useState('select');
   const [playback, setPlayback] = useState('select');
   const [message, setMessage] = useState({ text: '', error: false });
@@ -25,6 +26,10 @@ export default function Export() {
   const [startTime, setStartTime] = useState('00:00');
   const [endDate, setEndDate] = useState(localISODate);
   const [endTime, setEndTime] = useState('23:59');
+
+  useEffect(() => {
+    axios({ baseURL: baseUrl, url: 'exports/' }).then((res) => setExports(res.data));
+  }, [])
 
   const onHandleExport = () => {
     if (camera == 'select') {
@@ -160,7 +165,7 @@ function Exports({ exports }) {
             </div>
           ) : (
             <div className="flex justify-start items-center">
-              <a className="text-blue-500 hover:underline" href={`${baseUrl}exports/${item.name}`}>
+              <a className="text-blue-500 hover:underline" href={`${baseUrl}exports/${item.name}`} download>
                 {item.name.substring(0, item.name.length - 4)}
               </a>
             </div>
