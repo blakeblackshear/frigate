@@ -288,7 +288,7 @@ class RecordingMaintainer(threading.Thread):
         if (
             (store_mode == RetainModeEnum.motion and motion_count == 0)
             or (
-                store_mode == RetainModeEnum.motion and averageDBFS < 0
+                store_mode == RetainModeEnum.motion and averageDBFS == 0
             )  # dBFS is stored in a negative scale
             or (store_mode == RetainModeEnum.active_objects and active_count == 0)
         ):
