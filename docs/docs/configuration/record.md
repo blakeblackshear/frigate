@@ -84,3 +84,18 @@ record:
 ## How do I export recordings?
 
 The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a timelapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.
+
+## Syncing Recordings With Disk
+
+In some cases the recordings files may be deleted but Frigate will not know this has happened. Sync on startup can be enabled which will tell Frigate to check the file system and delete any db entries for files which don't exist.
+
+```yaml
+record:
+  sync_on_startup: True
+```
+
+:::warning
+
+The sync operation uses considerable CPU resources and in most cases is not needed, only enable when necessary.
+
+:::

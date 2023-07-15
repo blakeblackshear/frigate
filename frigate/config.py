@@ -193,6 +193,9 @@ class RecordRetainConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    sync_on_startup: bool = Field(
+        default=False, title="Sync recordings with disk on startup."
+    )
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",
