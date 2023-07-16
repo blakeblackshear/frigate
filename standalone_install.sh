@@ -17,8 +17,6 @@
 #Command to launch script:
 #wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
-#echo "This is an interactive script. User input will be required a few times during the installation process."
-
 #Run everything as root
 sudo su
 
@@ -29,43 +27,45 @@ export APT_LISTCHANGES_FRONTEND=none
 #especially libc6, installed part of the dependency script (install_deps.sh)
 echo 'libc6 libraries/restart-without-asking boolean true' | debconf-set-selections
 
-echo "Building ffmpeg from source to enable Nvidia hardware acceleration..."
 
-#Work from root home dir
-cd /opt
+### No need to build custom ffmpeg, the btbn release should work with hwaccel
+# #echo "Building ffmpeg from source to enable Nvidia hardware acceleration..."
 
-apt update
-apt upgrade -y
-#I tried to install all the dependencies at the beginning, but it induced an error when building nginx, so I kept them in the same order of the Dockerfile
-apt install -y git automake build-essential wget xz-utils
+# #Work from root home dir
+# cd /opt
 
-#Build latest ffmpeg with nvenc/nvdec support
-mkdir -p /opt/ffmpeg
-cd /opt/ffmpeg
+# apt update
+# apt upgrade -y
+# #I tried to install all the dependencies at the beginning, but it induced an error when building nginx, so I kept them in the same order of the Dockerfile
+# apt install -y git automake build-essential wget xz-utils
 
-apt install -y autoconf automake build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev
+# #Build latest ffmpeg with nvenc/nvdec support
+# mkdir -p /opt/ffmpeg
+# cd /opt/ffmpeg
 
-#cd /opt/ffmpeg
-git clone https://github.com/FFmpeg/nv-codec-headers.git
-cd nv-codec-headers
-make -j$(nproc)
-make install
+# apt install -y autoconf automake build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev
 
-cd /opt/ffmpeg
+# #cd /opt/ffmpeg
+# git clone https://github.com/FFmpeg/nv-codec-headers.git
+# cd nv-codec-headers
+# make -j$(nproc)
+# make install
 
-git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+# cd /opt/ffmpeg
 
-cd ffmpeg
+# git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
 
-#ffmpeg will automatically detect nvidia drivers
-./configure
+# cd ffmpeg
 
-make -j$(nproc)
-make install
+# #ffmpeg will automatically detect nvidia drivers
+# ./configure
 
-#Test
-#wget https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4
-#ffmpeg -y -hwaccel cuda -i Big_Buck_Bunny_1080_10s_10MB.mp4 Big_Buck_Bunny_1080_10s_10MB.avi    
+# make -j$(nproc)
+# make install
+
+# #Test
+# #wget https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4
+# #ffmpeg -y -hwaccel cuda -i Big_Buck_Bunny_1080_10s_10MB.mp4 Big_Buck_Bunny_1080_10s_10MB.avi    
 
 echo "Deploying Frigate stack..."
 
@@ -126,7 +126,6 @@ mkdir -p /usr/local/lib/pkgconfig
 cd /opt/frigate/libusb-1.0.25/
 /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig'
 ldconfig
-
 
 ######## Frigate expects model files at root of filesystem
 #cd /opt/frigate/models
@@ -203,6 +202,8 @@ cp /config/config.yml.example /config/config.yml
 #cameras:
 #  Camera1:
 #    ffmpeg:
+#      hwaccel_args: -c:v h264_cuvid
+##      hwaccel_args: preset-nvidia-h264 #This one is not working...
 #      inputs:
 #        - path: rtsp://user:password@192.168.1.123:554/h264Preview_01_main
 #          roles:
