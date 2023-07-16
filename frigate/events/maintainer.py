@@ -230,7 +230,11 @@ class EventProcessor(threading.Thread):
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],
-                Event.data: {"type": event_data["type"]},
+                Event.data: {
+                    "type": event_data["type"],
+                    "score": event_data["score"],
+                    "top_score": event_data["score"],
+                },
             }
             Event.insert(event).execute()
         elif event_type == "end":
