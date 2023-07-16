@@ -17,10 +17,17 @@
 #Command to launch script:
 #wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
-echo "This is an interactive script. User input will be required a few times during the installation process."
+#echo "This is an interactive script. User input will be required a few times during the installation process."
 
 #Run everything as root
 sudo su
+
+#Configuration to make unattended installs with APT
+#https://serverfault.com/questions/48724/100-non-interactive-debian-dist-upgrade
+export DEBIAN_FRONTEND=noninteractive
+export APT_LISTCHANGES_FRONTEND=none
+#especially libc6, installed part of the dependency script (install_deps.sh)
+echo 'libc6 libraries/restart-without-asking boolean true' | debconf-set-selections
 
 echo "Building ffmpeg from source to enable Nvidia hardware acceleration..."
 
@@ -78,21 +85,21 @@ docker/build_nginx.sh
 mkdir -p /usr/local/go2rtc/bin
 cd /usr/local/go2rtc/bin
 
-wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}"
+wget -O go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}"
 chmod +x go2rtc
 
 cd /opt/frigate
 
 ### OpenVino
 apt install -y wget python3 python3-distutils 
-wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py
+wget https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 python3 get-pip.py "pip"
 pip install -r requirements-ov.txt
 
 
 # Get OpenVino Model
 mkdir -p /opt/frigate/models 
-cd /opt/frigate/models && omz_downloader --name ssdlite_mobilenet_v2 
+cd /opt/frigate/models && omz_downloader --name ssdlite_mobilenet_v2
 cd /opt/frigate/models && omz_converter --name ssdlite_mobilenet_v2 --precision FP16
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
@@ -100,7 +107,7 @@ cd /opt/frigate
 
 apt install -y unzip build-essential automake libtool
 
-wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip
+wget https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip
 unzip v1.0.25.zip
 cd libusb-1.0.25
 ./bootstrap.sh
@@ -126,14 +133,14 @@ ldconfig
 cd /
 
 # Get model and labels
-wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
-wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
+wget -O edgetpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite
+wget -O cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
 
 #cp /opt/frigate/labelmap.txt .
 cp /opt/frigate/labelmap.txt /labelmap.txt
 cp -r /opt/frigate/models/public/ssdlite_mobilenet_v2/FP16 openvino-model
 
-wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt
+wget https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt
 sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 
 # opencv & scipy dependencies
@@ -156,7 +163,7 @@ pip3 install -U /wheels/*.whl
 ldconfig
 
 # Install Node 16
-wget -qO- https://deb.nodesource.com/setup_16.x | bash -
+wget -O- https://deb.nodesource.com/setup_16.x | bash -
 
 apt install -y nodejs 
 npm install -g npm@9
@@ -272,7 +279,7 @@ systemctl enable go2rtc
 sed -i '/^s6-svc -O \.$/s/^/#/' /opt/frigate/docker/rootfs/etc/s6-overlay/s6-rc.d/frigate/run
 
 #Second, install yq, needed by script to check database path
-wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+wget -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
 chmod a+x /usr/local/bin/yq
 
 #Create systemd service
