@@ -38,14 +38,12 @@ class SegmentInfo:
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
         return (
-            (retain_mode == RetainModeEnum.motion and self.motion_box_count == 0)
-            or (
-                retain_mode == RetainModeEnum.motion and self.average_dBFS == 0
-            )  # dBFS is stored in a negative scale
-            or (
-                retain_mode == RetainModeEnum.active_objects
-                and self.active_object_count == 0
-            )
+            retain_mode == RetainModeEnum.motion
+            and self.motion_box_count == 0
+            and self.average_dBFS == 0
+        ) or (
+            retain_mode == RetainModeEnum.active_objects
+            and self.active_object_count == 0
         )
 
 
