@@ -7,10 +7,10 @@ import signal
 import threading
 from collections import deque
 from logging import handlers
+from multiprocessing import Queue
 from types import FrameType
 from typing import Deque, Optional
 
-from faster_fifo import Queue
 from setproctitle import setproctitle
 
 from frigate.util.builtin import clean_camera_user_pass

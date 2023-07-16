@@ -1,10 +1,9 @@
 import multiprocessing as mp
 import queue
 import threading
+from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Callable
-
-from faster_fifo import Queue
 
 from frigate.comms.dispatcher import Communicator
 
