@@ -71,6 +71,11 @@ echo "Deploying Frigate stack..."
 
 cd /opt
 
+apt update
+apt upgrade -y
+#I tried to install all the dependencies at the beginning, but it induced an error when building nginx, so I kept them in the same order of the Dockerfile
+apt install -y git automake build-essential wget xz-utils
+
 #Pull Frigate from  repo
 git clone https://github.com/blakeblackshear/frigate.git
 
