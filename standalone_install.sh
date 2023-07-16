@@ -17,21 +17,26 @@
 #Command to launch script:
 #wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
+echo "This is an interactive script. User input will be required a few times during the installation process."
+
 #Run everything as root
 sudo su
+
+echo "Building ffmpeg from source to enable Nvidia hardware acceleration..."
 
 #Work from root home dir
 cd /opt
 
 apt update
 apt upgrade -y
-apt install -y git autoconf automake cmake build-essential wget xz-utils yasm libtool libc6 libc6-dev unzip libnuma1 libnuma-dev python3 python3-distutils python3-dev pkg-config libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev libssl-dev libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev gcc libopenblas-dev liblapack-dev
-apt install -y --no-install-recommends libusb-1.0-0-dev
+#I tried to install all the dependencies at the beginning, but it induced an error when building nginx, so I kept them in the same order of the Dockerfile
+apt install -y git automake build-essential wget xz-utils
 
 #Build latest ffmpeg with nvenc/nvdec support
 mkdir -p /opt/ffmpeg
 cd /opt/ffmpeg
 
+apt install -y autoconf automake build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev
 
 #cd /opt/ffmpeg
 git clone https://github.com/FFmpeg/nv-codec-headers.git
@@ -55,6 +60,8 @@ make install
 #wget https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4
 #ffmpeg -y -hwaccel cuda -i Big_Buck_Bunny_1080_10s_10MB.mp4 Big_Buck_Bunny_1080_10s_10MB.avi    
 
+echo "Deploying Frigate stack..."
+
 cd /opt
 
 #Pull Frigate from  repo
@@ -77,6 +84,7 @@ chmod +x go2rtc
 cd /opt/frigate
 
 ### OpenVino
+apt install -y wget python3 python3-distutils 
 wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 python3 get-pip.py "pip"
 pip install -r requirements-ov.txt
@@ -90,6 +98,8 @@ cd /opt/frigate/models && omz_converter --name ssdlite_mobilenet_v2 --precision 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 cd /opt/frigate
 
+apt install -y unzip build-essential automake libtool
+
 wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip
 unzip v1.0.25.zip
 cd libusb-1.0.25
@@ -97,6 +107,7 @@ cd libusb-1.0.25
 ./configure --disable-udev --enable-shared
 make -j $(nproc --all)
 
+apt install -y --no-install-recommends libusb-1.0-0-dev
 
 cd /opt/frigate/libusb-1.0.25/libusb
 
@@ -127,6 +138,8 @@ sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 
 # opencv & scipy dependencies
 cd /opt/frigate
+
+apt install -y python3 python3-dev wget build-essential cmake git pkg-config libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev libssl-dev libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev gcc gfortran libopenblas-dev liblapack-dev
 
 pip3 install -r requirements.txt
 
