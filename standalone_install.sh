@@ -461,3 +461,6 @@ systemctl enable nginx
 
 ######## FULL FRIGATE CONFIG EXAMPLE:
 #https://docs.frigate.video/configuration/
+
+echo "Don't forget to edit the Frigate config file (/config/config.yml) and reboot."
+echo "Frigate standalone installation complete! You can access the web interface at http://<machine_ip>:5000"
