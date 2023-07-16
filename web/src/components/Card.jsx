@@ -39,7 +39,7 @@ export default function Box({
               ))}
               <div class="flex-grow" />
               {icons.map(({ name, icon: Icon, ...props }) => (
-                <Button aria-label={name} className="rounded-full" key={name} type="text" {...props}>
+                <Button aria-label={name} ariaCapitalize={true} className="rounded-full" key={name} type="text" {...props}>
                   <Icon className="w-6" />
                 </Button>
               ))}

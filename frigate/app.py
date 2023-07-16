@@ -6,13 +6,12 @@ import shutil
 import signal
 import sys
 import traceback
+from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
 from typing import Optional
 
-import faster_fifo as ff
 import psutil
-from faster_fifo import Queue
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -27,7 +26,6 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
-    DEFAULT_QUEUE_BUFFER_SIZE,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -60,11 +58,11 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = ff.Queue()
+        self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
-        self.log_queue: Queue = ff.Queue()
+        self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
@@ -210,14 +208,8 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = ff.Queue(
-            DEFAULT_QUEUE_BUFFER_SIZE
-            * sum(camera.enabled for camera in self.config.cameras.values())
-        )
-        self.event_processed_queue: Queue = ff.Queue(
-            DEFAULT_QUEUE_BUFFER_SIZE
-            * sum(camera.enabled for camera in self.config.cameras.values())
-        )
+        self.event_queue: Queue = mp.Queue()
+        self.event_processed_queue: Queue = mp.Queue()
         self.video_output_queue: Queue = mp.Queue(
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
@@ -228,29 +220,20 @@ class FrigateApp:
         )
 
         # Queue for object recordings info
-        self.object_recordings_info_queue: Queue = ff.Queue(
-            DEFAULT_QUEUE_BUFFER_SIZE
-            * sum(camera.enabled for camera in self.config.cameras.values())
-        )
+        self.object_recordings_info_queue: Queue = mp.Queue()
 
         # Queue for audio recordings info if enabled
         self.audio_recordings_info_queue: Optional[Queue] = (
-            ff.Queue(
-                DEFAULT_QUEUE_BUFFER_SIZE
-                * sum(camera.audio.enabled for camera in self.config.cameras.values())
-            )
+            mp.Queue()
             if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0
             else None
         )
 
         # Queue for timeline events
-        self.timeline_queue: Queue = ff.Queue(
-            DEFAULT_QUEUE_BUFFER_SIZE
-            * sum(camera.enabled for camera in self.config.cameras.values())
-        )
+        self.timeline_queue: Queue = mp.Queue()
 
         # Queue for inter process communication
-        self.inter_process_queue: Queue = ff.Queue(DEFAULT_QUEUE_BUFFER_SIZE)
+        self.inter_process_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
