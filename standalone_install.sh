@@ -15,8 +15,7 @@
 #lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
 
 #Command to launch script:
-#wget -qO- https://github.com/remz1337/frigate/standalone_install.sh | bash - 
-
+#wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
 #Run everything as root
 
@@ -72,7 +71,8 @@ git clone https://github.com/blakeblackshear/frigate.git
 
 cd /opt/frigate
 
-#export TARGETARCH=amd64
+#Used in build dependencies scripts
+export TARGETARCH=amd64
 
 #apt update
 #apt install -y wget xz-utils
@@ -84,8 +84,7 @@ docker/build_nginx.sh
 mkdir -p /usr/local/go2rtc/bin
 cd /usr/local/go2rtc/bin
 
-#wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}"
-wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_amd64"
+wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.5.0/go2rtc_linux_${TARGETARCH}"
 chmod +x go2rtc
 
 cd /opt/frigate
@@ -227,7 +226,10 @@ ldconfig
 # Install Node 16
 apt update
 apt install -y wget
-wget -qO- https://deb.nodesource.com/setup_16.x | bash - 
+wget -qO- https://deb.nodesource.com/setup_16.x | bash -
+
+sleep 1
+
 apt install -y nodejs 
 #rm -rf /var/lib/apt/lists/* 
 npm install -g npm@9
@@ -304,7 +306,7 @@ cp /config/config.yml.example /config/config.yml
 #  Camera1:
 #    ffmpeg:
 #      inputs:
-#        - path: rtsp://user@password:192.168.1.123:554/h264Preview_01_main
+#        - path: rtsp://user:password@192.168.1.123:554/h264Preview_01_main
 #          roles:
 #            - detect
 #    detect:
