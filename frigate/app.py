@@ -26,7 +26,6 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     DEFAULT_DB_PATH,
-    DEFAULT_QUEUE_BUFFER_SIZE,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
