@@ -28,6 +28,25 @@ from frigate.util.services import get_video_properties
 logger = logging.getLogger(__name__)
 
 
+class SegmentInfo:
+    def __init__(
+        self, motion_box_count: int, active_object_count: int, average_dBFS: int
+    ) -> None:
+        self.motion_box_count = motion_box_count
+        self.active_object_count = active_object_count
+        self.average_dBFS = average_dBFS
+
+    def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
+        return (
+            retain_mode == RetainModeEnum.motion
+            and self.motion_box_count == 0
+            and self.average_dBFS == 0
+        ) or (
+            retain_mode == RetainModeEnum.active_objects
+            and self.active_object_count == 0
+        )
+
+
 class RecordingMaintainer(threading.Thread):
     def __init__(
         self,
@@ -234,7 +253,7 @@ class RecordingMaintainer(threading.Thread):
 
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
-    ) -> Tuple[int, int, int]:
+    ) -> SegmentInfo:
         active_count = 0
         motion_count = 0
         for frame in self.object_recordings_info[camera]:
@@ -269,7 +288,7 @@ class RecordingMaintainer(threading.Thread):
 
         average_dBFS = 0 if not audio_values else np.average(audio_values)
 
-        return (motion_count, active_count, round(average_dBFS))
+        return SegmentInfo(motion_count, active_count, round(average_dBFS))
 
     def store_segment(
         self,
@@ -280,18 +299,10 @@ class RecordingMaintainer(threading.Thread):
         cache_path: str,
         store_mode: RetainModeEnum,
     ) -> None:
-        motion_count, active_count, averageDBFS = self.segment_stats(
-            camera, start_time, end_time
-        )
+        segment_info = self.segment_stats(camera, start_time, end_time)
 
         # check if the segment shouldn't be stored
-        if (
-            (store_mode == RetainModeEnum.motion and motion_count == 0)
-            or (
-                store_mode == RetainModeEnum.motion and averageDBFS == 0
-            )  # dBFS is stored in a negative scale
-            or (store_mode == RetainModeEnum.active_objects and active_count == 0)
-        ):
+        if segment_info.should_discard_segment(store_mode):
             Path(cache_path).unlink(missing_ok=True)
             self.end_time_cache.pop(cache_path, None)
             return
@@ -364,10 +375,10 @@ class RecordingMaintainer(threading.Thread):
                     start_time=start_time.timestamp(),
                     end_time=end_time.timestamp(),
                     duration=duration,
-                    motion=motion_count,
+                    motion=segment_info.motion_box_count,
                     # TODO: update this to store list of active objects at some point
-                    objects=active_count,
-                    dBFS=averageDBFS,
+                    objects=segment_info.active_object_count,
+                    dBFS=segment_info.average_dBFS,
                     segment_size=segment_size,
                 )
         except Exception as e:
