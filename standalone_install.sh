@@ -18,7 +18,6 @@
 #wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
 #Run everything as root
-
 sudo su
 
 #Work from root home dir
@@ -26,19 +25,13 @@ cd /opt
 
 apt update
 apt upgrade -y
-apt install -y git automake build-essential wget xz-utils
-
+apt install -y git autoconf automake cmake build-essential wget xz-utils yasm libtool libc6 libc6-dev unzip libnuma1 libnuma-dev python3 python3-distutils python3-dev pkg-config libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev libssl-dev libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev gcc libopenblas-dev liblapack-dev
+apt install -y --no-install-recommends libusb-1.0-0-dev
 
 #Build latest ffmpeg with nvenc/nvdec support
 mkdir -p /opt/ffmpeg
 cd /opt/ffmpeg
 
-
-
-#apt install -y autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libtool libvorbis-dev meson ninja-build pkg-config texinfo wget yasm zlib1g-dev
-#apt install -y libx264-dev libx265-dev libnuma-dev libdav1d-dev
-
-apt install -y autoconf automake build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev
 
 #cd /opt/ffmpeg
 git clone https://github.com/FFmpeg/nv-codec-headers.git
@@ -48,12 +41,11 @@ make install
 
 cd /opt/ffmpeg
 
-
 git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
 
 cd ffmpeg
 
-#./configure --enable-nonfree --enable-nvenc
+#ffmpeg will automatically detect nvidia drivers
 ./configure
 
 make -j$(nproc)
@@ -62,7 +54,6 @@ make install
 #Test
 #wget https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4
 #ffmpeg -y -hwaccel cuda -i Big_Buck_Bunny_1080_10s_10MB.mp4 Big_Buck_Bunny_1080_10s_10MB.avi    
-
 
 cd /opt
 
@@ -73,10 +64,6 @@ cd /opt/frigate
 
 #Used in build dependencies scripts
 export TARGETARCH=amd64
-
-#apt update
-#apt install -y wget xz-utils
-#rm -rf /var/lib/apt/lists/*
 
 docker/build_nginx.sh
 
@@ -90,8 +77,6 @@ chmod +x go2rtc
 cd /opt/frigate
 
 ### OpenVino
-#apt update
-apt install -y wget python3 python3-distutils 
 wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 python3 get-pip.py "pip"
 pip install -r requirements-ov.txt
@@ -104,8 +89,6 @@ cd /opt/frigate/models && omz_converter --name ssdlite_mobilenet_v2 --precision 
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 cd /opt/frigate
-#apt update
-apt install -y unzip build-essential automake libtool
 
 wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip
 unzip v1.0.25.zip
@@ -114,9 +97,6 @@ cd libusb-1.0.25
 ./configure --disable-udev --enable-shared
 make -j $(nproc --all)
 
-#apt update
-apt install -y --no-install-recommends libusb-1.0-0-dev
-#rm -rf /var/lib/apt/lists/*
 
 cd /opt/frigate/libusb-1.0.25/libusb
 
@@ -145,141 +125,44 @@ cp -r /opt/frigate/models/public/ssdlite_mobilenet_v2/FP16 openvino-model
 wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt
 sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 
-##### NO NEED FOR S6 in LXC
-#/opt/frigate/docker/install_s6_overlay.sh
-
-#apt update
-#apt install -y apt-transport-https gnupg wget
-#apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E
-#echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list 
-
 # opencv & scipy dependencies
-#apt update
-apt install -y python3 python3-dev wget build-essential cmake git pkg-config libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev libssl-dev libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev gcc gfortran libopenblas-dev liblapack-dev
-
-#rm -rf /var/lib/apt/lists/*
-
-#wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py
-#python3 get-pip.py "pip"
-
 cd /opt/frigate
 
 pip3 install -r requirements.txt
 
 pip3 wheel --wheel-dir=/wheels -r /opt/frigate/requirements-wheels.txt
-
-#mkdir -p /trt-wheels
 pip3 wheel --wheel-dir=/trt-wheels -r /opt/frigate/requirements-tensorrt.txt
 
-#cp -r /opt/frigate/docker/rootfs/ /
+#Copy preconfigured files
 cp -a /opt/frigate/docker/rootfs/. /
-
-
-# http://stackoverflow.com/questions/48162574/ddg#49462622
-#ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-
-# https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
-#ENV NVIDIA_VISIBLE_DEVICES=all
-#ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
-
-#ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
-
 
 # Install dependencies
 /opt/frigate/docker/install_deps.sh
 
-#RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels pip3 install -U /deps/wheels/*.whl
 pip3 install -U /wheels/*.whl
-
-
-#COPY --from=deps-rootfs / /
-########## MAYBE TRY THIS??
-#cp -r /rootfs /
-
 ldconfig
 
-########### OPENING PORTS ####
-# 5000=nginx, 5001=Frigate API, 5173=Vite server, 1935=RTMP, 8554=RTSP, 8555=go2rtc
-#EXPOSE 5000
-#EXPOSE 1935
-#EXPOSE 8554
-#EXPOSE 8555/tcp 8555/udp
-
-# Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
-#ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
-#export S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
-
-#ENTRYPOINT ["/init"]
-
-# Do not start the actual Frigate service on devcontainer as it will be started by VSCode
-# But start a fake service for simulating the logs
-#mkdir -p /etc/s6-overlay/s6-rc.d/frigate
-#cp -r /root/frigate/docker/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
-
-# Create symbolic link to the frigate source code, as go2rtc's create_config.sh uses it
-#mkdir -p /opt/frigate
-
-#### NO NEED TO CREATE SYMBOLIC LINK, SIMPLY COPY THE frigate FOLDER FROM THE REPO
-#### COPYING THE FOLDER IS DONE LATER IN THE SCRIPT.... MIGHT NEED TO DO IT HERE...
-#ln -svf /workspace/frigate/frigate /opt/frigate/frigate
-
 # Install Node 16
-apt update
-apt install -y wget
 wget -qO- https://deb.nodesource.com/setup_16.x | bash -
 
-sleep 1
-
 apt install -y nodejs 
-#rm -rf /var/lib/apt/lists/* 
 npm install -g npm@9
-
-#cd /workspace/frigate
-#cd /root/frigate
-#cd /opt/frigate
-
-#apt update
-#apt install -y make automake cmake
-#rm -rf /var/lib/apt/lists/*
 
 pip3 install -r /opt/frigate/requirements-dev.txt
 
-#CMD ["sleep", "infinity"]
-
 # Frigate web build
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
-
-#cd /work
 cd /opt/frigate/web
-
-#cp /root/frigate/web/package.json  .
-#cp /root/frigate/web/package-lock.json .
 
 npm install
 
-#cp -r /root/frigate/web .
-
-#cd web
-
 npm run build
 
-#mv dist/BASE_PATH/monacoeditorwork/* dist/assets/
-#rm -rf dist/BASE_PATH
 cp -r dist/BASE_PATH/monacoeditorwork/* dist/assets/
 
 cd /opt/frigate/
 
-##### NEEDS TO REPLACE THE SYMBOLIC LINK CREATED EARLIER ##########
-#cp -r /root/frigate/frigate frigate/
-#cp -r /root/frigate/migrations migrations/
-
-##### NOT SURE... MAYBE cp -r /opt/frigate/web/dist /opt/frigate/web 
-#cp -r /work/dist/ web/
-#cp -r /opt/frigate/web/dist/ web/
 cp -r /opt/frigate/web/dist/* /opt/frigate/web/
-
-#already there
-#cd /opt/frigate/
 
 pip3 install -U /trt-wheels/*.whl
 ln -s libnvrtc.so.11.2 /usr/local/lib/python3.9/dist-packages/nvidia/cuda_nvrtc/lib/libnvrtc.so
@@ -289,14 +172,9 @@ pip3 install -U /trt-wheels/*.whl
 
 ### BUILD COMPLETE, NOW INITIALIZE
 
-
-#PUT IN /opt/frigate
 mkdir /config
-#cp -r /root/frigate/config/ /
 cp -r /opt/frigate/config/. /config
 cp /config/config.yml.example /config/config.yml
-
-
 
 ################### EDIT CONFIG FILE HERE ################
 #mqtt:
@@ -337,11 +215,6 @@ cd /opt/frigate/web
 npm install
 
 npm run build
-
-
-############# LAUNCHING SERVICES MANUALLY (instead of S6)
-###REPLACE S6 overlay by SystemD
-###--> init scripts in /docker/rootfs/etc/...s6...
 
 cd /opt/frigate
 
@@ -389,7 +262,6 @@ sed -i '/^s6-svc -O \.$/s/^/#/' /opt/frigate/docker/rootfs/etc/s6-overlay/s6-rc.
 wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
 chmod a+x /usr/local/bin/yq
 
-
 #Create systemd service
 frigate_service="$(cat << EOF
 
@@ -415,7 +287,6 @@ echo "${frigate_service}" > /etc/systemd/system/frigate.service
 	
 systemctl start frigate
 systemctl enable frigate
-
 
 
 ### Starting Nginx
