@@ -11,7 +11,13 @@ import numpy as np
 from pydantic import BaseModel, Extra, Field, parse_obj_as, validator
 from pydantic.fields import PrivateAttr
 
-from frigate.const import CACHE_DIR, DEFAULT_DB_PATH, REGEX_CAMERA_NAME, YAML_EXT
+from frigate.const import (
+    AUDIO_MIN_CONFIDENCE,
+    CACHE_DIR,
+    DEFAULT_DB_PATH,
+    REGEX_CAMERA_NAME,
+    YAML_EXT,
+)
 from frigate.detectors import DetectorConfig, ModelConfig
 from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.ffmpeg_presets import (
@@ -334,6 +340,15 @@ class FilterConfig(FrigateBaseModel):
     )
 
 
+class AudioFilterConfig(FrigateBaseModel):
+    threshold: float = Field(
+        default=0.8,
+        ge=AUDIO_MIN_CONFIDENCE,
+        lt=1.0,
+        title="Minimum detection confidence threshold for audio to be counted.",
+    )
+
+
 class RuntimeFilterConfig(FilterConfig):
     mask: Optional[np.ndarray]
     raw_mask: Optional[Union[str, List[str]]]
@@ -424,6 +439,7 @@ class AudioConfig(FrigateBaseModel):
     listen: List[str] = Field(
         default=DEFAULT_LISTEN_AUDIO, title="Audio to listen for."
     )
+    filters: Optional[Dict[str, AudioFilterConfig]] = Field(title="Audio filters.")
     enabled_in_config: Optional[bool] = Field(
         title="Keep track of original state of audio detection."
     )
