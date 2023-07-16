@@ -3,6 +3,7 @@
 import asyncio
 import datetime
 import logging
+import multiprocessing as mp
 import os
 import queue
 import random
@@ -14,7 +15,6 @@ from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
-import faster_fifo as ff
 import numpy as np
 import psutil
 
@@ -32,8 +32,8 @@ class RecordingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        object_recordings_info_queue: ff.Queue,
-        audio_recordings_info_queue: Optional[ff.Queue],
+        object_recordings_info_queue: mp.Queue,
+        audio_recordings_info_queue: Optional[mp.Queue],
         process_info: dict[str, FeatureMetricsTypes],
         stop_event: MpEvent,
     ):

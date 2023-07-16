@@ -9,7 +9,6 @@ import threading
 from types import FrameType
 from typing import Optional, Tuple
 
-import faster_fifo as ff
 import numpy as np
 import requests
 from setproctitle import setproctitle
@@ -52,7 +51,7 @@ def get_ffmpeg_command(input_args: list[str], input_path: str, pipe: str) -> lis
 
 def listen_to_audio(
     config: FrigateConfig,
-    recordings_info_queue: ff.Queue,
+    recordings_info_queue: mp.Queue,
     process_info: dict[str, FeatureMetricsTypes],
     inter_process_communicator: InterProcessCommunicator,
 ) -> None:
@@ -152,7 +151,7 @@ class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
-        recordings_info_queue: ff.Queue,
+        recordings_info_queue: mp.Queue,
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
         inter_process_communicator: InterProcessCommunicator,

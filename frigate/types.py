@@ -1,9 +1,8 @@
+from multiprocessing import Queue
 from multiprocessing.context import Process
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.synchronize import Event
 from typing import Optional, TypedDict
-
-from faster_fifo import Queue
 
 from frigate.object_detection import ObjectDetectProcess
 
