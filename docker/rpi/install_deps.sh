@@ -2,6 +2,19 @@
 
 set -euxo pipefail
 
+apt-get -qq update
+
+apt-get -qq install --no-install-recommends -y \
+    apt-transport-https \
+    gnupg \
+    wget \
+    procps vainfo \
+    unzip locales tzdata libxml2 xz-utils \
+    python3-pip \
+    curl \
+    jq \
+    nethogs
+
 mkdir -p -m 600 /root/.gnupg
 
 # enable non-free repo
