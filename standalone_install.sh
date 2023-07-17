@@ -160,8 +160,15 @@ pip3 wheel --wheel-dir=/trt-wheels -r /opt/frigate/requirements-tensorrt.txt
 #Copy preconfigured files
 cp -a /opt/frigate/docker/rootfs/. /
 
+#export PATH="$PATH:/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin"
+
 # Install dependencies
 /opt/frigate/docker/install_deps.sh
+
+#Create symbolic links to ffmpeg and go2rtc
+ln -svf /usr/lib/btbn-ffmpeg/bin/ffmpeg /usr/local/bin/ffmpeg
+ln -svf /usr/lib/btbn-ffmpeg/bin/ffprobe /usr/local/bin/ffprobe
+ln -svf /usr/local/go2rtc/bin/go2rtc /usr/local/bin/go2rtc
 
 pip3 install -U /wheels/*.whl
 ldconfig
