@@ -1,5 +1,4 @@
-# syntax = edrevo/dockerfile-plus
-INCLUDE+ docker/main/Dockerfile
+# syntax=docker/dockerfile:1.4
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive

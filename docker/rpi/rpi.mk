@@ -1,10 +1,10 @@
 BOARDS += rpi
 
 local-rpi: version
-	docker buildx build --tag frigate:latest-rpi --load --file docker/build/rpi/Dockerfile .
+	docker buildx bake --file=docker/rpi/bake.hcl --set rpi.tagsfrigate:latest-rpi rpi
 
-build-rpi:
-	docker buildx build --platform linux/arm64 --tag $(IMAGE_REPO):${VERSION}-$(COMMIT_HASH)-rpi --file docker/build/rpi/Dockerfile .
+build-rpi: version
+	docker buildx bake --file=docker/rpi/bake.hcl --set rpi.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rpi rpi
 
 push-rpi: build-rpi
-	docker buildx build --push --platform linux/arm64 --tag $(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rpi --file docker/build/rpi/Dockerfile .
+	docker buildx bake --push --file=docker/rpi/bake.hcl --set rpi.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rpi rpi
