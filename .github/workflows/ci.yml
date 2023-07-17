@@ -61,7 +61,7 @@ jobs:
         uses: docker/bake-action@v3
         with:
           push: true
-          target: rpi
+          targets: rpi
           files: docker/rpi/bake.hcl
           set: |
             rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
@@ -70,7 +70,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          target: tensorrt
+          targets: tensorrt
           files: docker/tensorrt/bake.hcl
           set: |
             tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
