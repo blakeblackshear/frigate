@@ -11,7 +11,7 @@ services:
     shm_size: "256mb"
     build:
       context: .
-      dockerfile: docker/build/main/Dockerfile
+      dockerfile: docker/main/Dockerfile
       # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
     deploy:
