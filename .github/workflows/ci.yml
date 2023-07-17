@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: docker/build/main/Dockerfile
+          file: docker/main/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           target: frigate
