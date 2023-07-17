@@ -54,27 +54,24 @@ jobs:
           platforms: linux/amd64,linux/arm64
           target: frigate
           tags: |
-            ${{ env.BASE_IMAGE }}
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push RPi build
-        uses: docker/build-push-action@v4
+        uses: docker/bake-action@v3
         with:
-          context: .
-          file: docker/build/rpi/Dockerfile
           push: true
-          platforms: linux/arm64
-          tags: |
-            ${{ env.BASE_IMAGE }}-rpi
-          cache-from: type=gha
+          target: rpi
+          files: docker/rpi/bake.hcl
+          set: |
+            rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
+            rpi.cache-from=type=gha
       - name: Build and push TensorRT
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: docker/build/trt/Dockerfile
           push: true
-          platforms: linux/amd64
-          target: frigate-tensorrt
-          tags: |
-            ${{ env.BASE_IMAGE }}-tensorrt
-          cache-from: type=gha
+          target: tensorrt
+          files: docker/tensorrt/bake.hcl
+          set: |
+            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            tensorrt.cache-from=type=gha
