@@ -899,6 +899,7 @@ def create_event(camera_name, label):
             label,
             json.get("source_type", "api"),
             json.get("sub_label", None),
+            json.get("score", 0),
             json.get("duration", 30),
             json.get("include_recording", True),
             json.get("draw", {}),

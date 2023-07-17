@@ -154,6 +154,12 @@ audio:
     - scream
     - speech
     - yell
+  # Optional: Filters to configure detection.
+  filters:
+    # Label that matches label in listen config.
+    speech:
+      # Minimum score that triggers an audio event (default: shown below)
+      threshold: 0.8
 
 # Optional: logger verbosity settings
 logger:

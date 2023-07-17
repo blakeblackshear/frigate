@@ -19,6 +19,7 @@ from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
     AUDIO_MAX_BIT_RANGE,
+    AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
     CACHE_DIR,
     FRIGATE_LOCALHOST,
@@ -130,7 +131,7 @@ class AudioTfl:
 
         return detections
 
-    def detect(self, tensor_input, threshold=0.8):
+    def detect(self, tensor_input, threshold=AUDIO_MIN_CONFIDENCE):
         detections = []
 
         if self.stop_event.is_set():
@@ -200,7 +201,10 @@ class AudioEventMaintainer(threading.Thread):
                 if label not in self.config.audio.listen:
                     continue
 
-                self.handle_detection(label, score)
+                if score > (self.config.audio.filters or {}).get(label, {}).get(
+                    "threshold", 0.8
+                ):
+                    self.handle_detection(label, score)
 
         self.expire_detections()
 
@@ -233,7 +237,7 @@ class AudioEventMaintainer(threading.Thread):
 
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None, "source_type": "audio"},
+                json={"duration": None, "score": score, "source_type": "audio"},
             )
 
             if resp.status_code == 200:
