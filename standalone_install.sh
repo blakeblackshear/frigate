@@ -17,6 +17,8 @@
 #Command to launch script:
 #wget -O- https://raw.githubusercontent.com/remz1337/frigate/dev/standalone_install.sh | bash -
 
+echo "Installing Frigate stack..."
+
 #Run everything as root
 sudo su
 
@@ -26,48 +28,6 @@ export DEBIAN_FRONTEND=noninteractive
 export APT_LISTCHANGES_FRONTEND=none
 #especially libc6, installed part of the dependency script (install_deps.sh)
 echo 'libc6 libraries/restart-without-asking boolean true' | debconf-set-selections
-
-
-### No need to build custom ffmpeg, the btbn release should work with hwaccel
-# #echo "Building ffmpeg from source to enable Nvidia hardware acceleration..."
-
-# #Work from root home dir
-# cd /opt
-
-# apt update
-# apt upgrade -y
-# #I tried to install all the dependencies at the beginning, but it induced an error when building nginx, so I kept them in the same order of the Dockerfile
-# apt install -y git automake build-essential wget xz-utils
-
-# #Build latest ffmpeg with nvenc/nvdec support
-# mkdir -p /opt/ffmpeg
-# cd /opt/ffmpeg
-
-# apt install -y autoconf automake build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev
-
-# #cd /opt/ffmpeg
-# git clone https://github.com/FFmpeg/nv-codec-headers.git
-# cd nv-codec-headers
-# make -j$(nproc)
-# make install
-
-# cd /opt/ffmpeg
-
-# git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg
-
-# cd ffmpeg
-
-# #ffmpeg will automatically detect nvidia drivers
-# ./configure
-
-# make -j$(nproc)
-# make install
-
-# #Test
-# #wget https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4
-# #ffmpeg -y -hwaccel cuda -i Big_Buck_Bunny_1080_10s_10MB.mp4 Big_Buck_Bunny_1080_10s_10MB.avi    
-
-echo "Deploying Frigate stack..."
 
 cd /opt
 
@@ -160,6 +120,7 @@ pip3 wheel --wheel-dir=/trt-wheels -r /opt/frigate/requirements-tensorrt.txt
 #Copy preconfigured files
 cp -a /opt/frigate/docker/rootfs/. /
 
+#exports are lost upon system reboot...
 #export PATH="$PATH:/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin"
 
 # Install dependencies
@@ -224,7 +185,7 @@ cp /config/config.yml.example /config/config.yml
 #      enabled: False
 #      width: 2560
 #      height: 1920
-########################
+#########################################################
 
 cd /opt/frigate
 
@@ -283,6 +244,9 @@ echo "${go2rtc_service}" > /etc/systemd/system/go2rtc.service
 systemctl start go2rtc
 systemctl enable go2rtc
 
+#Allow for a small delay before starting the next service
+sleep 3
+
 #Test go2rtc access at
 #http://<machine_ip>:1984/
 
@@ -321,6 +285,8 @@ echo "${frigate_service}" > /etc/systemd/system/frigate.service
 systemctl start frigate
 systemctl enable frigate
 
+#Allow for a small delay before starting the next service
+sleep 3
 
 ### Starting Nginx
 
