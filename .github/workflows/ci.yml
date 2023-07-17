@@ -62,16 +62,16 @@ jobs:
         with:
           push: true
           targets: rpi
-          files: docker/rpi/bake.hcl
+          files: docker/rpi/rpi.hcl
           set: |
             rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
             rpi.cache-from=type=gha
       - name: Build and push TensorRT
-        uses: docker/build-push-action@v4
+        uses: docker/bake-action@v3
         with:
           push: true
           targets: tensorrt
-          files: docker/tensorrt/bake.hcl
+          files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
             tensorrt.cache-from=type=gha
