@@ -22,6 +22,7 @@ from frigate.util.services import (
     get_bandwidth_stats,
     get_cpu_stats,
     get_intel_gpu_stats,
+    get_jetson_stats,
     get_nvidia_gpu_stats,
 )
 from frigate.version import VERSION
@@ -179,6 +180,15 @@ async def set_gpu_stats(
 
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
+                hwaccel_errors.append(args)
+        elif "nvmpi" in args or "jetson" in args:
+            # nvidia Jetson
+            jetson_usage = get_jetson_stats()
+
+            if jetson_usage:
+                stats["jetson-gpu"] = jetson_usage
+            else:
+                stats["jetson-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
         elif "qsv" in args:
             if not config.telemetry.stats.intel_gpu_stats:
