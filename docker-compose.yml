@@ -30,8 +30,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config:/config
       - ./debug:/media/frigate
-      # Create the trt-models folder using the documented method of generating TRT models
-      # - ./debug/trt-models:/trt-models
       - /dev/bus/usb:/dev/bus/usb
   mqtt:
     container_name: mqtt
