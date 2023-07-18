@@ -1090,7 +1090,7 @@ def config_set():
         logging.error(f"Error updating config: {e}")
         return "Error updating config", 500
 
-    return "Config successfully updated", 200
+    return "Config successfully updated, restart to apply", 200
 
 
 @bp.route("/config/schema.json")

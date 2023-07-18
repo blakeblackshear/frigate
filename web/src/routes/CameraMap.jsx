@@ -53,6 +53,8 @@ export default function CameraMasks({ camera }) {
   );
 
   const [editing, setEditing] = useState({ set: motionMaskPoints, key: 0, fn: setMotionMaskPoints });
+  const [success, setSuccess] = useState();
+  const [error, setError] = useState();
 
   const handleUpdateEditable = useCallback(
     (newPoints) => {
@@ -99,7 +101,7 @@ export default function CameraMasks({ camera }) {
     const textToCopy = `  motion:
       mask:
   ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`;
-  
+
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
       window.navigator.clipboard.writeText(textToCopy).catch((err) => {
@@ -111,7 +113,7 @@ export default function CameraMasks({ camera }) {
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
       textarea.select();
-  
+
       try {
         const successful = document.execCommand('copy');
         if (!successful) {
@@ -120,7 +122,7 @@ export default function CameraMasks({ camera }) {
       } catch (err) {
         throw new Error('Failed to copy text: ', err);
       }
-  
+
       document.body.removeChild(textarea);
     }
   }, [motionMaskPoints]);
@@ -133,14 +135,17 @@ export default function CameraMasks({ camera }) {
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, motionMaskPoints]);
-  
+
 
   // Zone methods
   const handleEditZone = useCallback(
@@ -185,7 +190,7 @@ ${Object.keys(zonePoints)
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
       textarea.select();
-    
+
       try {
         const successful = document.execCommand('copy');
         if (!successful) {
@@ -194,7 +199,7 @@ ${Object.keys(zonePoints)
       } catch (err) {
         throw new Error('Failed to copy text: ', err);
       }
-    
+
       document.body.removeChild(textarea);
     }
   }, [zonePoints]);
@@ -207,11 +212,14 @@ ${Object.keys(zonePoints)
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, zonePoints]);
 
@@ -263,11 +271,14 @@ ${Object.keys(objectMaskPoints)
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, objectMaskPoints]);
 
@@ -319,6 +330,9 @@ ${Object.keys(objectMaskPoints)
         }
         header="Warning"
       />
+
+      {success && <div className="max-h-20 text-green-500">{success}</div>}
+      {error && <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">{error}</div>}
 
       <div className="space-y-4">
         <div className="relative">
