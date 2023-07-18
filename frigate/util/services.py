@@ -309,6 +309,21 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
+def get_jetson_stats() -> dict[int, dict]:
+    results = {}
+
+    try:
+        results["mem"] = "-"  # no discrete gpu memory
+
+        with open("/sys/devices/gpu.0/load", "r") as f:
+            gpuload = float(f.readline()) / 10
+            results["gpu"] = f"{gpuload}%"
+    except Exception:
+        return None
+
+    return results
+
+
 def ffprobe_stream(path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)

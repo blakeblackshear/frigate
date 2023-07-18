@@ -1,8 +1,22 @@
 variable "ARCH" {
   default = "amd64"
 }
+variable "BASE_IMAGE" {
+  default = null
+}
+variable "SLIM_BASE" {
+  default = null
+}
+variable "TRT_BASE" {
+  default = null
+}
 
 target "_build_args" {
+  args = {
+    BASE_IMAGE = BASE_IMAGE,
+    SLIM_BASE = SLIM_BASE,
+    TRT_BASE = TRT_BASE
+  }
   platforms = ["linux/${ARCH}"]
 }
 
