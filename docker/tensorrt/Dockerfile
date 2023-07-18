@@ -37,3 +37,13 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Dev Container w/ TRT
+FROM devcontainer AS devcontainer-trt
+
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY docker/tensorrt/detector/rootfs/ /
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
+    pip3 install -U /deps/trt-wheels/*.whl
