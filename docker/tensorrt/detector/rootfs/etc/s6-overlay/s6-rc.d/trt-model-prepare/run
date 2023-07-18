@@ -17,7 +17,7 @@ for model in ${YOLO_MODELS//,/ }
 do
     # Remove old link in case path/version changed
     rm -f ${MODEL_CACHE_DIR}/${model}.trt
-    
+
     if [[ ! -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
         if [[ ${FIRST_MODEL} = true ]]; then
             MODEL_CONVERT="${model}"
@@ -40,14 +40,21 @@ echo "Generating the following TRT Models: ${MODEL_CONVERT}"
 # Build trt engine
 cd /usr/local/src/tensorrt_demos/yolo
 
-# Download yolo weights
-./download_yolo.sh $MODEL_CONVERT > /dev/null
+echo "Downloading yolo weights"
+./download_yolo.sh $MODEL_DOWNLOAD 2> /dev/null
 
 for model in ${MODEL_CONVERT//,/ }
 do
-    echo "Converting ${model} model"
     python3 yolo_to_onnx.py -m ${model} > /dev/null
-    python3 onnx_to_tensorrt.py -m ${model} > /dev/null
-    cp ${model}.trt ${OUTPUT_FOLDER}/${model}.trt
+
+    echo -e "\nGenerating ${model}.trt. This may take a few minutes.\n"; start=$(date +%s)
+    cmd="python3 onnx_to_tensorrt.py -m ${model}"
+    $cmd > /tmp/onnx_to_tensorrt.log || { cat /tmp/onnx_to_tensorrt.log && continue; }
+
+    mv ${model%-dla}.trt ${OUTPUT_FOLDER}/${model}.trt;
     ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
+    echo "Generated ${model}.trt in $(($(date +%s)-start)) seconds"
 done
+
+echo "Available tensorrt models:"
+cd ${OUTPUT_FOLDER} && ls *.trt;
