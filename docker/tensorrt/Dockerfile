@@ -9,7 +9,7 @@ ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 
 # Add TensorRT wheels to another folder
-COPY requirements-tensorrt.txt /requirements-tensorrt.txt
+COPY docker/tensorrt/requirements.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 # Build TensorRT-specific library

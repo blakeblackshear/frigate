@@ -71,7 +71,7 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install -U pip
-          python3 -m pip install -r requirements-dev.txt
+          python3 -m pip install -r docker/main/requirements-dev.txt
       - name: Check black
         run: |
           black --check --diff frigate migrations docker *.py
