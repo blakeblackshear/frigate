@@ -804,9 +804,19 @@ class CameraConfig(FrigateBaseModel):
             ffmpeg_input.global_args or self.ffmpeg.global_args
         )
         hwaccel_args = get_ffmpeg_arg_list(
-            parse_preset_hardware_acceleration_decode(ffmpeg_input.hwaccel_args)
+            parse_preset_hardware_acceleration_decode(
+                ffmpeg_input.hwaccel_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
+            )
             or ffmpeg_input.hwaccel_args
-            or parse_preset_hardware_acceleration_decode(self.ffmpeg.hwaccel_args)
+            or parse_preset_hardware_acceleration_decode(
+                self.ffmpeg.hwaccel_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
+            )
             or self.ffmpeg.hwaccel_args
         )
         input_args = get_ffmpeg_arg_list(
