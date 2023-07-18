@@ -47,7 +47,7 @@ FROM base_amd64 AS ov-converter
 ARG DEBIAN_FRONTEND
 
 # Install OpenVino Runtime and Dev library
-COPY requirements-ov.txt /requirements-ov.txt
+COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-distutils \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
@@ -140,10 +140,10 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-COPY requirements.txt /requirements.txt
+COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY requirements-wheels.txt /requirements-wheels.txt
+COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
 
 
@@ -218,7 +218,7 @@ RUN apt-get update \
     && apt-get install make -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
+RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
 
 CMD ["sleep", "infinity"]
