@@ -389,7 +389,7 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id && (
+          {(event?.data?.type || "object") == "object" && downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
               label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
@@ -637,7 +637,7 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.end_time && event.has_snapshot && (
+                        {event.end_time && event.has_snapshot && (event?.data?.type || "object") == "object" && (
                           <Fragment>
                             {event.plus_id ? (
                               <div className="uppercase text-xs underline">
