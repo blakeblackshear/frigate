@@ -3,11 +3,14 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-FROM debian:11 AS base
+ARG BASE_IMAGE=debian:11
+ARG SLIM_BASE=debian:11-slim
+
+FROM ${BASE_IMAGE} AS base
 
 FROM --platform=linux/amd64 debian:11 AS base_amd64
 
-FROM debian:11-slim AS slim-base
+FROM ${SLIM_BASE} AS slim-base
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -123,8 +126,8 @@ RUN apt-get -qq update \
     && echo "deb http://deb.debian.org/debian bullseye main contrib non-free" | tee /etc/apt/sources.list.d/raspi.list \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3 \
-    python3-dev \
+    python3.9 \
+    python3.9-dev \
     wget \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
@@ -137,14 +140,17 @@ RUN apt-get -qq update \
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Ensure python3 defaults to python3.9
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r /requirements.txt
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
+RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
 
 # Collect deps in a single layer
@@ -176,6 +182,7 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
+    python3 -m pip install --upgrade pip && \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /

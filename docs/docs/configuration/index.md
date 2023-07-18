@@ -101,7 +101,7 @@ detectors:
   # Required: name of the detector
   detector_name:
     # Required: type of the detector
-    # Frigate provided types include 'cpu', 'edgetpu', and 'openvino' (default: shown below)
+    # Frigate provided types include 'cpu', 'edgetpu', 'openvino' and 'tensorrt' (default: shown below)
     # Additional detector types can also be plugged in.
     # Detectors may require additional configuration.
     # Refer to the Detectors configuration page for more information.
@@ -414,6 +414,8 @@ snapshots:
     # Optional: Per object retention days
     objects:
       person: 15
+  # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
+  quality: 70
 
 # Optional: RTMP configuration
 # NOTE: RTMP is deprecated in favor of restream

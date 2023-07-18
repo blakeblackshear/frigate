@@ -55,58 +55,14 @@ _user_agent_args = [
 ]
 
 PRESETS_HW_ACCEL_DECODE = {
-    "preset-rpi-32-h264": ["-c:v:1", "h264_v4l2m2m"],
-    "preset-rpi-64-h264": ["-c:v:1", "h264_v4l2m2m"],
-    "preset-vaapi": [
-        "-hwaccel_flags",
-        "allow_profile_mismatch",
-        "-hwaccel",
-        "vaapi",
-        "-hwaccel_device",
-        _gpu_selector.get_selected_gpu(),
-        "-hwaccel_output_format",
-        "vaapi",
-    ],
-    "preset-intel-qsv-h264": [
-        "-hwaccel",
-        "qsv",
-        "-qsv_device",
-        _gpu_selector.get_selected_gpu(),
-        "-hwaccel_output_format",
-        "qsv",
-        "-c:v",
-        "h264_qsv",
-    ],
-    "preset-intel-qsv-h265": [
-        "-load_plugin",
-        "hevc_hw",
-        "-hwaccel",
-        "qsv",
-        "-qsv_device",
-        _gpu_selector.get_selected_gpu(),
-        "-hwaccel_output_format",
-        "qsv",
-        "-c:v",
-        "hevc_qsv",
-    ],
-    "preset-nvidia-h264": [
-        "-hwaccel",
-        "cuda",
-        "-hwaccel_output_format",
-        "cuda",
-    ],
-    "preset-nvidia-h265": [
-        "-hwaccel",
-        "cuda",
-        "-hwaccel_output_format",
-        "cuda",
-    ],
-    "preset-nvidia-mjpeg": [
-        "-hwaccel",
-        "cuda",
-        "-hwaccel_output_format",
-        "cuda",
-    ],
+    "preset-rpi-32-h264": "-c:v:1 h264_v4l2m2m",
+    "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
+    "preset-vaapi": f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_devic {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_devic {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv",
+    "preset-nvidia-h264": "-hwaccel cuda -hwaccel_output_format cuda",
+    "preset-nvidia-h265": "-hwaccel cuda -hwaccel_output_format cuda",
+    "preset-nvidia-mjpeg": "-hwaccel cuda -hwaccel_output_format cuda",
 }
 
 PRESETS_HW_ACCEL_SCALE = {
@@ -148,7 +104,12 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     if not isinstance(arg, str):
         return None
 
-    return PRESETS_HW_ACCEL_DECODE.get(arg, None)
+    decode = PRESETS_HW_ACCEL_DECODE.get(arg, None)
+
+    if not decode:
+        return None
+
+    return decode.split(" ")
 
 
 def parse_preset_hardware_acceleration_scale(
@@ -160,20 +121,13 @@ def parse_preset_hardware_acceleration_scale(
 ) -> list[str]:
     """Return the correct scaling preset or default preset if none is set."""
     if not isinstance(arg, str) or " " in arg:
-        scale = PRESETS_HW_ACCEL_SCALE["default"].format(fps, width, height).split(" ")
-        scale.extend(detect_args)
-        return scale
-
-    scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
-
-    if scale:
-        scale = scale.format(fps, width, height).split(" ")
-        scale.extend(detect_args)
-        return scale
+        scale = PRESETS_HW_ACCEL_SCALE["default"]
     else:
-        scale = scale.format(fps, width, height).split(" ")
-        scale.extend(detect_args)
-        return scale
+        scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
+
+    scale = scale.format(fps, width, height).split(" ")
+    scale.extend(detect_args)
+    return scale
 
 
 class EncodeTypeEnum(str, Enum):
