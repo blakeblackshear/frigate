@@ -28,9 +28,10 @@ class EventCleanup(threading.Thread):
         self.stop_event = stop_event
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
-        self.camera_labels: dict[str, list] = {}
+        self.camera_labels: dict[str, dict[str, any]] = {}
 
     def get_removed_camera_labels(self) -> list[Event]:
+        """Get a list of distinct labels for removed cameras."""
         if self.removed_camera_labels is None:
             self.removed_camera_labels = list(
                 Event.select(Event.label)
@@ -42,15 +43,23 @@ class EventCleanup(threading.Thread):
         return self.removed_camera_labels
 
     def get_camera_labels(self, camera: str) -> list[Event]:
-        if self.camera_labels.get(camera) is None:
-            self.camera_labels[camera] = list(
-                Event.select(Event.label)
-                .where(Event.camera == camera)
-                .distinct()
-                .execute()
-            )
+        """Get a list of distinct labels for each camera, updating once a day."""
+        if (
+            self.camera_labels.get(camera) is None
+            or self.camera_labels[camera]["last_update"]
+            < (datetime.datetime.now() - datetime.timedelta(days=1)).timestamp()
+        ):
+            self.camera_labels[camera] = {
+                "last_update": datetime.datetime.now().timestamp(),
+                "labels": list(
+                    Event.select(Event.label)
+                    .where(Event.camera == camera)
+                    .distinct()
+                    .execute()
+                ),
+            }
 
-        return self.camera_labels[camera]
+        return self.camera_labels[camera]["labels"]
 
     def expire(self, media_type: EventCleanupType) -> None:
         ## Expire events from unlisted cameras based on the global config
