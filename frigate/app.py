@@ -313,7 +313,7 @@ class FrigateApp:
                 "cache_size": -512 * 1000,  # 512MB of cache,
                 "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
             },
-            timeout=60,
+            timeout=10 * len([c for c in self.config.cameras.values() if c.enabled]),
         )
         models = [Event, Recordings, Timeline]
         self.db.bind(models)
