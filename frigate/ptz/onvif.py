@@ -54,6 +54,7 @@ class OnvifController:
                         ),
                         "init": False,
                         "active": False,
+                        "features": [],
                         "presets": {},
                     }
                 except ONVIFError as e:
