@@ -161,7 +161,9 @@ class RecordingMaintainer(threading.Thread):
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
-        Recordings.insert_many([r for r in recordings_to_insert if r is not None])
+        Recordings.insert_many(
+            [r for r in recordings_to_insert if r is not None]
+        ).execute()
 
     async def validate_and_move_segment(
         self, camera: str, events: Event, recording: dict[str, any]
