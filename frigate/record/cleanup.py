@@ -12,7 +12,7 @@ from peewee import DatabaseError, chunked
 
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import RECORD_DIR
-from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete
 from frigate.record.util import remove_empty_directories
 
 logger = logging.getLogger(__name__)
