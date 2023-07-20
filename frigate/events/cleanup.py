@@ -10,7 +10,7 @@ from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
-from frigate.models import Event
+from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class EventCleanup(threading.Thread):
 
         return self.camera_labels[camera]["labels"]
 
-    def expire(self, media_type: EventCleanupType) -> None:
+    def expire(self, media_type: EventCleanupType) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
         if media_type == EventCleanupType.clips:
             retain_config = self.config.record.events.retain
@@ -111,6 +111,8 @@ class EventCleanup(threading.Thread):
             )
             update_query.execute()
 
+        events_to_update = []
+
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
             if media_type == EventCleanupType.clips:
@@ -142,6 +144,8 @@ class EventCleanup(threading.Thread):
                 # only snapshots are stored in /clips
                 # so no need to delete mp4 files
                 for event in expired_events:
+                    events_to_update.append(event.id)
+
                     if media_type == EventCleanupType.snapshots:
                         media_name = f"{event.camera}-{event.id}"
                         media_path = Path(
@@ -153,14 +157,9 @@ class EventCleanup(threading.Thread):
                         )
                         media_path.unlink(missing_ok=True)
 
-                # update the clips attribute for the db entry
-                update_query = Event.update(update_params).where(
-                    Event.camera == name,
-                    Event.start_time < expire_after,
-                    Event.label == event.label,
-                    Event.retain_indefinitely == False,
-                )
-                update_query.execute()
+        # update the clips attribute for the db entry
+        Event.update(update_params).where(Event.id << events_to_update).execute()
+        return events_to_update
 
     def purge_duplicates(self) -> None:
         duplicate_query = """with grouped_events as (
@@ -197,7 +196,13 @@ class EventCleanup(threading.Thread):
     def run(self) -> None:
         # only expire events every 5 minutes
         while not self.stop_event.wait(300):
-            self.expire(EventCleanupType.clips)
+            events_with_expired_clips = self.expire(EventCleanupType.clips)
+
+            # delete timeline entries for events that have expired recordings
+            Timeline.delete().where(
+                Timeline.source_id << events_with_expired_clips
+            ).execute()
+
             self.expire(EventCleanupType.snapshots)
             self.purge_duplicates()
 
