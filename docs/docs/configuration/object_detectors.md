@@ -3,6 +3,8 @@ id: object_detectors
 title: Object Detectors
 ---
 
+# Officially Supported Detectors
+
 Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## CPU Detector (not recommended)
@@ -278,3 +280,6 @@ detectors:
 Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server.
 
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
+
+
+# Community Supported Detectors
