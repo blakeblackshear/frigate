@@ -14,6 +14,81 @@ The community support boards framework allows a user in the community to be the 
 ## Getting Started
 
 1. Follow the steps from [the main contributing docs](/development/contributing.md).
-2. Create a new build type under `docker/build`
-3. Create a Dockerfile and use `BASE_IMAGE` as the base, `docker/build/rpi/Dockerfile` can be used as an example for this.
-4. Create install_deps.sh to install any deps needed for the device.
+2. Create a new build type under `docker/`
+3. Get build working as expected, all board-specific changes should be done inside of the board specific docker file.
+
+## Required Structure
+
+Each board will have different build requirements, run on different architectures, etc. however there are set of files that all boards will need.
+
+### Bake File .hcl
+
+The `board.hcl` file is what allows the community boards build to be built using the main build as a cache. This enables a clean base and quicker build times. For more information on the format and options available in the Bake file, [see the official Buildx Bake docs](https://docs.docker.com/build/bake/reference/)
+
+### Board Make File
+
+The `board.mk` file is what allows automated and configurable Make targets to be included in the main Make file. Below is the general format for this file:
+
+```Makefile
+BOARDS += board # Replace `board` with the board suffix ex: rpi
+
+local-rpi: version
+	docker buildx bake --load --file=docker/board/board.hcl --set board.tags=frigate:latest-board bake-target # Replace `board` with the board suffix ex: rpi. Bake target is the target in the board.hcl file ex: board
+
+build-rpi: version
+	docker buildx bake --file=docker/board/board.hcl --set board.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-board bake-target # Replace `board` with the board suffix ex: rpi. Bake target is the target in the board.hcl file ex: board
+
+push-rpi: build-rpi
+	docker buildx bake --push --file=docker/board/board.hcl --set board.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-board bake-target # Replace `board` with the board suffix ex: rpi. Bake target is the target in the board.hcl file ex: board
+```
+
+### Code Owner File
+
+A file called `codeowners.json` should be added in `docker/board/` with the contents `[@github_username]` where `@github_username` is a comma separated list of the GitHub usernames of the code owners for that particular community board. This makes it easy to assign support issues and PRs to the appropriate users.
+
+### Dockerfile
+
+The `Dockerfile` is what orchestrates the build, this will vary greatly depending on the board but some parts are required for things to work. Below are the required parts of the Dockerfile:
+
+```Dockerfile
+# syntax=docker/dockerfile:1.4
+
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND=noninteractive
+
+# All board-specific work should be done with `deps` as the base
+FROM deps AS board-deps
+
+# do stuff specific
+# to the board
+
+# set workdir
+WORKDIR /opt/frigate/
+
+# copies base files from the main frigate build
+COPY --from=rootfs / /
+```
+
+## Other Required Changes
+
+### CI/CD
+
+The images for each board will be built for each Frigate release, this is done in the `.github/workflows/ci.yml` file. The board build workflow will need to be added here.
+
+```yml
+      - name: Build and push board build
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: board # this is the target in the board.hcl file
+          files: docker/board/board.hcl # this should be updated with the actual board type
+          # the tags should be updated with the actual board types as well
+          # the community board builds should never push to cache, but it can pull from cache
+          set: |
+            board.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-board
+            *.cache-from=type=gha
+```
+
+# Docs
+
+At a minimum the `installation`, `object_detectors`, `hardware_acceleration`, and `ffmpeg-presets` docs should be updated (if applicable) to reflect the configuration of this community board.
