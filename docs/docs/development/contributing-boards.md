@@ -42,10 +42,6 @@ push-rpi: build-rpi
 	docker buildx bake --push --file=docker/board/board.hcl --set board.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-board bake-target # Replace `board` with the board suffix ex: rpi. Bake target is the target in the board.hcl file ex: board
 ```
 
-### Code Owner File
-
-A file called `codeowners.json` should be added in `docker/board/` with the contents `[@github_username]` where `@github_username` is a comma separated list of the GitHub usernames of the code owners for that particular community board. This makes it easy to assign support issues and PRs to the appropriate users.
-
 ### Dockerfile
 
 The `Dockerfile` is what orchestrates the build, this will vary greatly depending on the board but some parts are required for things to work. Below are the required parts of the Dockerfile:
@@ -88,6 +84,10 @@ The images for each board will be built for each Frigate release, this is done i
             board.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-board
             *.cache-from=type=gha
 ```
+
+### Code Owner File
+
+The `CODEOWNERS` file should be updated to include the `docker/board` along with `@user` for each user that is a code owner of this board
 
 # Docs
 
