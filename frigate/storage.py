@@ -42,21 +42,21 @@ class StorageMaintainer(threading.Thread):
                     )
                 }
 
-            # calculate MB/hr
-            try:
-                bandwidth = round(
-                    Recordings.select(fn.AVG(bandwidth_equation))
-                    .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                    .limit(100)
-                    .scalar()
-                    * 3600,
-                    2,
-                )
-            except TypeError:
-                bandwidth = 0
+                # calculate MB/hr
+                try:
+                    bandwidth = round(
+                        Recordings.select(fn.AVG(bandwidth_equation))
+                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
+                        .limit(100)
+                        .scalar()
+                        * 3600,
+                        2,
+                    )
+                except TypeError:
+                    bandwidth = 0
 
-            self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
+                self.camera_storage_stats[camera]["bandwidth"] = bandwidth
+                logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""

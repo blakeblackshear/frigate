@@ -12,7 +12,7 @@ from peewee import DatabaseError, chunked
 
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import RECORD_DIR
-from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete
 from frigate.record.util import remove_empty_directories
 
 logger = logging.getLogger(__name__)
@@ -139,15 +139,6 @@ class RecordingCleanup(threading.Thread):
                 ):
                     Path(recording.path).unlink(missing_ok=True)
                     deleted_recordings.add(recording.id)
-
-                    # delete timeline entries relevant to this recording segment
-                    Timeline.delete().where(
-                        Timeline.timestamp.between(
-                            recording.start_time, recording.end_time
-                        ),
-                        Timeline.timestamp < expire_date,
-                        Timeline.camera == camera,
-                    ).execute()
 
             logger.debug(f"Expiring {len(deleted_recordings)} recordings")
             # delete up to 100,000 at a time

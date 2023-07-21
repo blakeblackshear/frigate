@@ -45,7 +45,7 @@ def manage_recordings(
             "cache_size": -512 * 1000,  # 512MB of cache
             "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
         },
-        timeout=10 * len([c for c in config.cameras.values() if c.enabled]),
+        timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
     )
     models = [Event, Recordings, Timeline, RecordingsToDelete]
     db.bind(models)
