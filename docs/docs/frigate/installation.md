@@ -87,8 +87,8 @@ Running in Docker with compose is the recommended install method:
 
 The following officially supported builds are available:
 
-`ghcr.io/blakeblackshear/frigate:stable` - Standard Frigate build for amd64 & arm64
-`ghcr.io/blakeblackshear/frigate:stable-rpi` - Frigate build specific for the Raspberry Pi Devices
+`ghcr.io/blakeblackshear/frigate:stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64
+`ghcr.io/blakeblackshear/frigate:stable-standard-arm64` - Standard Frigate build for arm64
 `ghcr.io/blakeblackshear/frigate:stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
 
 The following community supported builds are available:
