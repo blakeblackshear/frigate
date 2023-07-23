@@ -44,24 +44,30 @@ jobs:
         run: make version
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: docker/metadata-action@v4
-        id: metadata
-        with:
-          images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
-          # avoid overwriting the latest tag because metadata-action does not add a suffix to it
-          flavor: latest=false,suffix=-${{ matrix.platform }}
       # The majority of users running arm64 are rpi users, so the rpi
       # build should be the primary arm64 image
-      - name: Build and push standard build
+      - name: Build and push amd64 standard build
         uses: docker/build-push-action@v4
         with:
           context: .
           file: docker/main/Dockerfile
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           target: frigate
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push arm64 standard build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/main/Dockerfile
+          push: true
+          platforms: linux/arm64
+          target: frigate
+          tags: |
+            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-standard-arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push RPi build
