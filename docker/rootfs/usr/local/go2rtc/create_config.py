@@ -67,8 +67,19 @@ else:
 # as source for frigate and the integration supports HLS playback
 if go2rtc_config.get("rtsp") is None:
     go2rtc_config["rtsp"] = {"default_query": "mp4"}
-elif go2rtc_config["rtsp"].get("default_query") is None:
-    go2rtc_config["rtsp"]["default_query"] = "mp4"
+else:
+    if go2rtc_config["rtsp"].get("default_query") is None:
+        go2rtc_config["rtsp"]["default_query"] = "mp4"
+
+    if go2rtc_config["rtsp"].get("username") is not None:
+        go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
+            **FRIGATE_ENV_VARS
+        )
+
+    if go2rtc_config["rtsp"].get("password") is not None:
+        go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
+            **FRIGATE_ENV_VARS
+        )
 
 # need to replace ffmpeg command when using ffmpeg4
 if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
