@@ -32,16 +32,16 @@ logger = logging.getLogger(__name__)
 def calculate_max_segment_count(config: FrigateConfig) -> int:
     """Calculate the maximum allowed segment count for each camera."""
 
-    # calculate total space allocated to cache
+    # calculate total space allocated to cache in megabytes
     try:
         total_cache = round(shutil.disk_usage(CACHE_DIR).total / pow(2, 20), 1)
     except FileNotFoundError:
-        total_cache = 1074000000  # 1 GiB
+        total_cache = 1024  # 1 GiB
 
     # reserve half the cache for clips.mp4 endpoint
     total_cache /= 2
-    safe_segment_size = 10490000 * len(config.cameras.keys())  # 10 MiB per camera
-    return int(total_cache / safe_segment_size)
+    safe_segment_size = 10 * len(config.cameras.keys())  # 10 MiB per camera
+    return max(5, int(total_cache / safe_segment_size))
 
 
 class SegmentInfo:
