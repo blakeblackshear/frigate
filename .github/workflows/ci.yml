@@ -44,10 +44,19 @@ jobs:
         run: make version
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build and push
+      - uses: docker/metadata-action@v4
+        id: metadata
+        with:
+          images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          # avoid overwriting the latest tag because metadata-action does not add a suffix to it
+          flavor: latest=false,suffix=-${{ matrix.platform }}
+      # The majority of users running arm64 are rpi users, so the rpi
+      # build should be the primary arm64 image
+      - name: Build and push standard build
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: docker/main/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           target: frigate
@@ -55,13 +64,28 @@ jobs:
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Build and push TensorRT
-        uses: docker/build-push-action@v4
+      - name: Build and push RPi build
+        uses: docker/bake-action@v3
         with:
-          context: .
           push: true
-          platforms: linux/amd64
-          target: frigate-tensorrt
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
-          cache-from: type=gha
+          targets: rpi
+          files: docker/rpi/rpi.hcl
+          set: |
+            rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
+            *.cache-from=type=gha
+      - name: Build and push TensorRT
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            *.cache-from=type=gha
+      - name: Assemble and push default build
+        uses: int128/docker-manifest-create-action@v1
+        with:
+          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          suffixes: |
+            -amd64
+            -rpi

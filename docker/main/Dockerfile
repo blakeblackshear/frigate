@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.4
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
@@ -23,7 +23,7 @@ ENV CCACHE_MAXSIZE 2G
 
 # bind /var/cache/apt to tmpfs to speed up nginx build
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=bind,source=docker/build_nginx.sh,target=/deps/build_nginx.sh \
+    --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
@@ -47,7 +47,7 @@ FROM base_amd64 AS ov-converter
 ARG DEBIAN_FRONTEND
 
 # Install OpenVino Runtime and Dev library
-COPY requirements-ov.txt /requirements-ov.txt
+COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-distutils \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
@@ -105,7 +105,7 @@ COPY audio-labelmap.txt .
 
 FROM wget AS s6-overlay
 ARG TARGETARCH
-RUN --mount=type=bind,source=docker/install_s6_overlay.sh,target=/deps/install_s6_overlay.sh \
+RUN --mount=type=bind,source=docker/main/install_s6_overlay.sh,target=/deps/install_s6_overlay.sh \
     /deps/install_s6_overlay.sh
 
 
@@ -119,8 +119,8 @@ RUN apt-get -qq update \
     apt-transport-https \
     gnupg \
     wget \
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E \
-    && echo "deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi" | tee /etc/apt/sources.list.d/raspi.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138 \
+    && echo "deb http://deb.debian.org/debian bullseye main contrib non-free" | tee /etc/apt/sources.list.d/raspi.list \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3 \
@@ -140,20 +140,11 @@ RUN apt-get -qq update \
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
-COPY requirements.txt /requirements.txt
+COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY requirements-wheels.txt /requirements-wheels.txt
+COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r requirements-wheels.txt
-
-# Make this a separate target so it can be built/cached optionally
-FROM wheels as trt-wheels
-ARG DEBIAN_FRONTEND
-ARG TARGETARCH
-
-# Add TensorRT wheels to another folder
-COPY requirements-tensorrt.txt /requirements-tensorrt.txt
-RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r requirements-tensorrt.txt
 
 
 # Collect deps in a single layer
@@ -163,7 +154,7 @@ COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
-COPY docker/rootfs/ /
+COPY docker/main/rootfs/ /
 
 
 # Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
@@ -181,7 +172,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
-RUN --mount=type=bind,source=docker/install_deps.sh,target=/deps/install_deps.sh \
+RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
@@ -207,7 +198,7 @@ FROM deps AS devcontainer
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VSCode
 # But start a fake service for simulating the logs
-COPY docker/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
+COPY docker/main/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
 
 # Create symbolic link to the frigate source code, as go2rtc's create_config.sh uses it
 RUN mkdir -p /opt/frigate \
@@ -227,7 +218,7 @@ RUN apt-get update \
     && apt-get install make -y \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=bind,source=./requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
+RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
 
 CMD ["sleep", "infinity"]
@@ -259,36 +250,3 @@ FROM deps AS frigate
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
-
-# Build TensorRT-specific library
-FROM nvcr.io/nvidia/tensorrt:23.03-py3 AS trt-deps
-
-RUN --mount=type=bind,source=docker/support/tensorrt_detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
-    /tensorrt_libyolo.sh
-
-# Frigate w/ TensorRT Support as separate image
-FROM frigate AS frigate-tensorrt
-
-#Disable S6 Global timeout
-ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
-
-ENV TRT_VER=8.5.3
-ENV YOLO_MODELS="yolov7-tiny-416"
-
-COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
-COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY docker/support/tensorrt_detector/rootfs/ /
-
-RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl && \
-    ldconfig
-
-# Dev Container w/ TRT
-FROM devcontainer AS devcontainer-trt
-
-COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
-COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY docker/support/tensorrt_detector/rootfs/ /
-COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
-RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl

@@ -83,6 +83,18 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 Running in Docker with compose is the recommended install method:
 
+:::note
+
+The following officially supported builds are available:
+
+`ghcr.io/blakeblackshear/frigate:stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64
+`ghcr.io/blakeblackshear/frigate:stable-standard-arm64` - Standard Frigate build for arm64
+`ghcr.io/blakeblackshear/frigate:stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
+
+The following community supported builds are available:
+
+:::
+
 ```yaml
 version: "3.9"
 services:

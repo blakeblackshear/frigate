@@ -1,6 +1,6 @@
 ---
 id: contributing
-title: Contributing
+title: Contributing To The Main Code Base
 ---
 
 ## Getting the source
