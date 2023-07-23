@@ -7,6 +7,7 @@ import multiprocessing as mp
 import os
 import queue
 import random
+import shutil
 import string
 import subprocess as sp
 import threading
@@ -27,6 +28,17 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
+
+def calculate_max_segment_count(config: FrigateConfig) -> int:
+    """Calculate the maximum allowed segment count for each camera."""
+
+    # calculate total space allocated to cache
+    try:
+        total_cache = round(shutil.disk_usage(CACHE_DIR).total / pow(2, 20), 1)
+    except FileNotFoundError:
+        total_cache = 1074000000 # 1GiB
+
+    # assuming a safe
 
 class SegmentInfo:
     def __init__(
@@ -66,6 +78,7 @@ class RecordingMaintainer(threading.Thread):
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
+        self.max_segment_count = calculate_max_segment_count(config)
 
     async def move_files(self) -> None:
         cache_files = sorted(
