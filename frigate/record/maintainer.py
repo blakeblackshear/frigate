@@ -36,9 +36,13 @@ def calculate_max_segment_count(config: FrigateConfig) -> int:
     try:
         total_cache = round(shutil.disk_usage(CACHE_DIR).total / pow(2, 20), 1)
     except FileNotFoundError:
-        total_cache = 1074000000 # 1GiB
+        total_cache = 1074000000  # 1 GiB
 
-    # assuming a safe
+    # reserve half the cache for clips.mp4 endpoint
+    total_cache /= 2
+    safe_segment_size = 10490000 * len(config.cameras.keys())  # 10 MiB per camera
+    return int(total_cache / safe_segment_size)
+
 
 class SegmentInfo:
     def __init__(
@@ -79,6 +83,7 @@ class RecordingMaintainer(threading.Thread):
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
         self.max_segment_count = calculate_max_segment_count(config)
+        self.warning_segment_count = 5
 
     async def move_files(self) -> None:
         cache_files = sorted(
@@ -123,12 +128,12 @@ class RecordingMaintainer(threading.Thread):
                 }
             )
 
-        # delete all cached files past the most recent 5
-        keep_count = 5
+        # check if segment maintenance is falling behind
         for camera in grouped_recordings.keys():
             segment_count = len(grouped_recordings[camera])
-            if segment_count > keep_count:
-                logger.warning(
+            if segment_count > self.max_segment_count:
+                keep_count = int(self.max_segment_count / 2)
+                logger.error(
                     f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
                 )
                 to_remove = grouped_recordings[camera][:-keep_count]
@@ -137,6 +142,10 @@ class RecordingMaintainer(threading.Thread):
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
+            elif segment_count > self.warning_segment_count:
+                logger.warning(
+                    f"Management of cached recordings segments is running behind for {camera}. Currently at {segment_count} and will start discarding segments at {self.max_segment_count}..."
+                )
 
         tasks = []
         for camera, recordings in grouped_recordings.items():
