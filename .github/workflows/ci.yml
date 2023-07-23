@@ -80,13 +80,6 @@ jobs:
           set: |
             rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
             *.cache-from=type=gha
-      - name: Assemble and push default build
-        uses: int128/docker-manifest-create-action@v1
-        with:
-          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
-          suffixes: |
-            -amd64
-            -rpi
       - name: Build and push TensorRT
         uses: docker/bake-action@v3
         with:
@@ -96,3 +89,10 @@ jobs:
           set: |
             tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
             *.cache-from=type=gha
+      - name: Assemble and push default build
+        uses: int128/docker-manifest-create-action@v1
+        with:
+          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          suffixes: |
+            -amd64
+            -rpi
