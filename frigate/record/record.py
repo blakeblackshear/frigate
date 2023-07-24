@@ -58,6 +58,3 @@ def manage_recordings(
         stop_event,
     )
     maintainer.start()
-
-    cleanup = RecordingCleanup(config, stop_event)
-    cleanup.start()

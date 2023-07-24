@@ -43,6 +43,7 @@ from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
+from frigate.record.cleanup import RecordingCleanup
 from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
@@ -522,6 +523,10 @@ class FrigateApp:
         self.event_cleanup = EventCleanup(self.config, self.stop_event)
         self.event_cleanup.start()
 
+    def start_record_cleanup(self) -> None:
+        self.record_cleanup = RecordingCleanup(self.config, self.stop_event)
+        self.record_cleanup.start()
+
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
@@ -607,6 +612,7 @@ class FrigateApp:
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
+        self.start_record_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
@@ -643,6 +649,7 @@ class FrigateApp:
         self.ptz_autotracker_thread.join()
         self.event_processor.join()
         self.event_cleanup.join()
+        self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
