@@ -101,10 +101,16 @@ This should show <50% CPU in top, and ~80% CPU without `-c:v h264_v4l2m2m`.
 ffmpeg -c:v h264_v4l2m2m -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
 ```
 
-**NVIDIA**
+**NVIDIA GPU**
 
 ```shell
 ffmpeg -c:v h264_cuvid -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
+```
+
+**NVIDIA Jetson**
+
+```shell
+ffmpeg -c:v h264_nvmpi -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
 ```
 
 **VAAPI**

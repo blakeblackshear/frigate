@@ -20,6 +20,12 @@ target "_build_args" {
   platforms = ["linux/${ARCH}"]
 }
 
+target wget {
+  dockerfile = "docker/main/Dockerfile"
+  target = "wget"
+  inherits = ["_build_args"]
+}
+
 target deps {
   dockerfile = "docker/main/Dockerfile"
   target = "deps"
@@ -66,6 +72,7 @@ target "tensorrt" {
   dockerfile = "docker/tensorrt/Dockerfile.${ARCH}"
   context = "."
   contexts = {
+    wget = "target:wget",
     tensorrt-base = "target:tensorrt-base",
     rootfs = "target:rootfs"
     wheels = "target:wheels"

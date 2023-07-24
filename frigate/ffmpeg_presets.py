@@ -63,6 +63,8 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-nvidia-h264": "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-nvidia-h265": "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-nvidia-mjpeg": "-hwaccel cuda -hwaccel_output_format cuda",
+    "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
+    "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
 }
 
 PRESETS_HW_ACCEL_SCALE = {
@@ -73,6 +75,8 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-jetson-h264": "-r {0}",  # scaled in decoder
+    "preset-jetson-h265": "-r {0}",  # scaled in decoder
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 
@@ -84,6 +88,8 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "preset-nvidia-h265": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
+    "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
+    "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
 
@@ -95,11 +101,18 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v h264_nvenc {1}",
     "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
+    "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
+    "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v hevc_nvmpi -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
 
 
-def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
+def parse_preset_hardware_acceleration_decode(
+    arg: Any,
+    fps: int,
+    width: int,
+    height: int,
+) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
@@ -109,7 +122,7 @@ def parse_preset_hardware_acceleration_decode(arg: Any) -> list[str]:
     if not decode:
         return None
 
-    return decode.split(" ")
+    return decode.format(fps, width, height).split(" ")
 
 
 def parse_preset_hardware_acceleration_scale(
@@ -146,6 +159,10 @@ def parse_preset_hardware_acceleration_encode(
 
     if not isinstance(arg, str):
         return arg_map["default"].format(input, output)
+
+    # Not all jetsons have HW encoders, so fall back to default SW encoder if not
+    if arg.startswith("preset-jetson-") and not os.path.exists("/dev/nvhost-msenc"):
+        arg = "default"
 
     return arg_map.get(arg, arg_map["default"]).format(
         input,

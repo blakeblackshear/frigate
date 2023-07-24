@@ -52,11 +52,22 @@ RUN apt-get update \
 RUN --mount=type=bind,source=docker/tensorrt/requirements-models-arm64.txt,target=/requirements-tensorrt-models.txt \
     pip3 wheel --wheel-dir=/trt-model-wheels -r /requirements-tensorrt-models.txt
 
+FROM wget AS jetson-ffmpeg
+ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
+RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps/build_jetson_ffmpeg.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/build_jetson_ffmpeg.sh
+
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
     && apt-get install -y python-is-python3 libprotobuf17  \
     && rm -rf /var/lib/apt/lists/*
+
+RUN rm -rf /usr/lib/btbn-ffmpeg/
+COPY --from=jetson-ffmpeg /rootfs /
 
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
