@@ -18,7 +18,12 @@ import numpy as np
 import psutil
 
 from frigate.config import FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, INSERT_MANY_RECORDINGS, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    INSERT_MANY_RECORDINGS,
+    MAX_SEGMENT_DURATION,
+    RECORD_DIR,
+)
 from frigate.models import Event, Recordings
 from frigate.types import FeatureMetricsTypes
 from frigate.util.image import area
@@ -164,7 +169,9 @@ class RecordingMaintainer(threading.Thread):
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
 
         # fire and forget recordings entries
-        self.inter_process_queue.put((INSERT_MANY_RECORDINGS, [r for r in recordings_to_insert if r is not None]))
+        self.inter_process_queue.put(
+            (INSERT_MANY_RECORDINGS, [r for r in recordings_to_insert if r is not None])
+        )
 
     async def validate_and_move_segment(
         self, camera: str, events: Event, recording: dict[str, any]
