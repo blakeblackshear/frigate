@@ -250,10 +250,14 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 ## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
 
 A separate set of docker images is available that is based on Jetpack/L4T. They comes with an `ffmpeg` build
-with codecs that use the Jetson's dedicated media engine. Use the `frigate-tensorrt-jp*` image with the nvidia container
-runtime:
+with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 4.6, use the
+`frigate-tensorrt-jp4` image, or if your Jetson host is running Jetpack 5.0+, use the `frigate-tensorrt-jp5`
+image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform,
+but the image will still allow hardware decoding and tensorrt object detection.
 
-#### Docker Run CLI
+You will need to use the image with the nvidia container runtime:
+
+### Docker Run CLI - Jetson
 
 ```bash
 docker run -d \
@@ -262,7 +266,34 @@ docker run -d \
   ghcr.io/blakeblackshear/frigate-tensorrt-jp5
 ```
 
-If your Jetson host is running Jetpack 4.6, use the `frigate-tensorrt-jp4` image, or if your Jetson host is running Jetpack 5.0+, use the `frigate-tensorrt-jp5` image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform, but the image will still allow hardware decoding and tensorrt object detection.
+### Docker Compose - Jetson
+
+```yaml
+version: '2.4'
+services:
+  frigate:
+    ...
+    image: ghcr.io/blakeblackshear/frigate-tensorrt-jp5
+    runtime: nvidia   # Add this
+```
+
+:::note
+
+The `runtime:` tag is not supported on older versions of docker-compose. If you run into this, you can instead use the nvidia runtime system-wide by adding `"default-runtime": "nvidia"` to `/etc/docker/daemon.json`:
+
+```
+{
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
+    "default-runtime": "nvidia"
+}
+```
+
+:::
 
 ### Setup Decoder
 

@@ -21,8 +21,8 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 | preset-nvidia-h264    | Nvidia GPU with h264 stream    |                                                       |
 | preset-nvidia-h265    | Nvidia GPU with h265 stream    |                                                       |
 | preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream   | Recommend restreaming mjpeg and using nvidia-h264     |
-| preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                        |
-| preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                        |
+| preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
+| preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
 
 ### Input Args Presets
 
