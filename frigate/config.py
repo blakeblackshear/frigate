@@ -16,6 +16,7 @@ from frigate.const import (
     AUDIO_MIN_CONFIDENCE,
     CACHE_DIR,
     DEFAULT_DB_PATH,
+    MIN_SEGMENT_DURATION,
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
@@ -931,9 +932,10 @@ def verify_recording_segments_setup_with_reasonable_time(
             f"Camera {camera_config.name} has no segment_time in recording output args, segment args are required for record."
         )
 
-    if int(record_args[seg_arg_index + 1]) > 60:
+    config_duration = int(record_args[seg_arg_index + 1])
+    if config_duration < MIN_SEGMENT_DURATION or config_duration > 60:
         raise ValueError(
-            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be 60 or less."
+            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be {MIN_SEGMENT_DURATION} <= x <= 60."
         )
 
 

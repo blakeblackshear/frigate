@@ -22,6 +22,7 @@ from frigate.const import (
     CACHE_DIR,
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
+    MIN_SEGMENT_DURATION,
     RECORD_DIR,
 )
 from frigate.models import Event, Recordings
@@ -199,7 +200,7 @@ class RecordingMaintainer(threading.Thread):
                 duration = -1
 
             # ensure duration is within expected length
-            if 0 < duration < MAX_SEGMENT_DURATION:
+            if MIN_SEGMENT_DURATION < duration < MAX_SEGMENT_DURATION:
                 end_time = start_time + datetime.timedelta(seconds=duration)
                 self.end_time_cache[cache_path] = (end_time, duration)
             else:
