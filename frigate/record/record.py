@@ -11,8 +11,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
-from frigate.record.cleanup import RecordingCleanup
+from frigate.models import Event, Recordings
 from frigate.record.maintainer import RecordingMaintainer
 from frigate.types import FeatureMetricsTypes
 from frigate.util.services import listen
@@ -47,7 +46,7 @@ def manage_recordings(
         },
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
     )
-    models = [Event, Recordings, Timeline, RecordingsToDelete]
+    models = [Event, Recordings]
     db.bind(models)
 
     maintainer = RecordingMaintainer(

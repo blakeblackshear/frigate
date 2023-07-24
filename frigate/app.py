@@ -36,7 +36,7 @@ from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -318,7 +318,7 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, Timeline]
+        models = [Event, Recordings, RecordingsToDelete, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
