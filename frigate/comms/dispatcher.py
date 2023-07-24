@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from frigate.config import FrigateConfig
+from frigate.const import INSERT_MANY_RECORDINGS
+from frigate.models import Recordings
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
 from frigate.util.services import restart_frigate
@@ -86,6 +88,8 @@ class Dispatcher:
                 return
         elif topic == "restart":
             restart_frigate()
+        elif topic == INSERT_MANY_RECORDINGS:
+            Recordings.insert_many(payload).execute()
         else:
             self.publish(topic, payload, retain=False)
 

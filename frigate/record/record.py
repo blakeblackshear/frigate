@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def manage_recordings(
     config: FrigateConfig,
+    inter_process_queue: mp.Queue,
     object_recordings_info_queue: mp.Queue,
     audio_recordings_info_queue: mp.Queue,
     process_info: dict[str, FeatureMetricsTypes],
@@ -51,6 +52,7 @@ def manage_recordings(
 
     maintainer = RecordingMaintainer(
         config,
+        inter_process_queue,
         object_recordings_info_queue,
         audio_recordings_info_queue,
         process_info,

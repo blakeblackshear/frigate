@@ -293,6 +293,7 @@ class FrigateApp:
             name="recording_manager",
             args=(
                 self.config,
+                self.inter_process_queue,
                 self.object_recordings_info_queue,
                 self.audio_recordings_info_queue,
                 self.feature_metrics,
