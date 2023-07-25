@@ -79,7 +79,7 @@ jobs:
           set: |
             rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
             *.cache-from=type=gha
-      - name: Build and push TensorRT
+      - name: Build and push TensorRT (x86 GPU)
         uses: docker/bake-action@v3
         with:
           push: true
@@ -87,6 +87,34 @@ jobs:
           files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            *.cache-from=type=gha
+      - name: Build and push TensorRT (Jetson, Jetpack 4)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
+          SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
+          TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp4
+            *.cache-from=type=gha
+      - name: Build and push TensorRT (Jetson, Jetpack 5)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+          SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+          TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp5
             *.cache-from=type=gha
       - name: Assemble and push default build
         uses: int128/docker-manifest-create-action@v1
