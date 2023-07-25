@@ -23,4 +23,4 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
 COPY docker/tensorrt/detector/rootfs/ /
-ENV YOLO_MODELS="yolov7-tiny-416"
+ENV YOLO_MODELS="yolov7-320"
