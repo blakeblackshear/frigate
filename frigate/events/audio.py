@@ -168,6 +168,7 @@ class AudioEventMaintainer(threading.Thread):
         self.detector = AudioTfl(stop_event)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
+        self.logger = logging.getLogger(f"audio.{self.config.name}")
         self.pipe = f"{CACHE_DIR}/{self.config.name}-audio"
         self.ffmpeg_cmd = get_ffmpeg_command(
             get_ffmpeg_arg_list(self.config.ffmpeg.global_args)
@@ -274,18 +275,25 @@ class AudioEventMaintainer(threading.Thread):
                 if resp.status_code == 200:
                     self.detections[detection["label"]] = None
                 else:
-                    logger.warn(
+                    self.logger.warn(
                         f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
                     )
 
     def restart_audio_pipe(self) -> None:
         try:
+            if self.pipe_file:
+                os.close(self.pipe_file)
+
+            if os.path.exists(self.pipe):
+                os.remove(self.pipe)
+
+            self.pipe_file = None
             os.mkfifo(self.pipe)
         except FileExistsError:
             pass
 
         self.audio_listener = start_or_restart_ffmpeg(
-            self.ffmpeg_cmd, logger, self.logpipe, None, self.audio_listener
+            self.ffmpeg_cmd, self.logger, self.logpipe, None, self.audio_listener
         )
 
     def read_audio(self) -> None:
@@ -306,5 +314,5 @@ class AudioEventMaintainer(threading.Thread):
             self.read_audio()
 
         self.pipe_file.close()
-        stop_ffmpeg(self.audio_listener, logger)
+        stop_ffmpeg(self.audio_listener, self.logger)
         self.logpipe.close()
