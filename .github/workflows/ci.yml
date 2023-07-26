@@ -104,6 +104,7 @@ jobs:
           set: |
             tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp4
             *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
   jetson_jp5_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 5
@@ -129,6 +130,7 @@ jobs:
           set: |
             tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp5
             *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
