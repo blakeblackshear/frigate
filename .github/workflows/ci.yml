@@ -19,31 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     name: Image Build
     steps:
-      - name: Remove unnecessary files
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-      - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v5
-        with:
-          string: ${{ github.repository }}
       - name: Check out code
         uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to the Container registry
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create version file
-        run: make version
-      - name: Create short sha
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # The majority of users running arm64 are rpi users, so the rpi
       # build should be the primary arm64 image
       - name: Build and push amd64 standard build
@@ -55,7 +37,7 @@ jobs:
           platforms: linux/amd64
           target: frigate
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-amd64
+            ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push arm64 standard build
@@ -67,7 +49,7 @@ jobs:
           platforms: linux/arm64
           target: frigate
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-standard-arm64
+            ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-standard-arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Build and push RPi build
@@ -77,7 +59,7 @@ jobs:
           targets: rpi
           files: docker/rpi/rpi.hcl
           set: |
-            rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
+            rpi.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
             *.cache-from=type=gha
       - name: Build and push TensorRT (x86 GPU)
         uses: docker/bake-action@v3
@@ -86,7 +68,7 @@ jobs:
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
           set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
             *.cache-from=type=gha
       - name: Build and push TensorRT (Jetson, Jetpack 4)
         env:
@@ -100,7 +82,7 @@ jobs:
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
           set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp4
+            tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp4
             *.cache-from=type=gha
       - name: Build and push TensorRT (Jetson, Jetpack 5)
         env:
@@ -114,12 +96,12 @@ jobs:
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
           set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp5
+            tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp5
             *.cache-from=type=gha
       - name: Assemble and push default build
         uses: int128/docker-manifest-create-action@v1
         with:
-          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          tags: ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           suffixes: |
             -amd64
             -rpi
