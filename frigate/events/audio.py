@@ -285,18 +285,32 @@ class AudioEventMaintainer(threading.Thread):
         )
 
     def read_audio(self) -> None:
+        def log_and_restart() -> None:
+            if self.stop_event.is_set():
+                return
+
+            time.sleep(self.config.ffmpeg.retry_interval)
+            self.logpipe.dump()
+            self.start_or_restart_ffmpeg()
+
         try:
-            self.logger.error("Trying to read from process")
-            audio = np.frombuffer(self.audio_listener.stdout.read(self.chunk_size), dtype=np.int16)
-            self.logger.error("Finished reading from process")
+            chunk = self.audio_listener.stdout.read(self.chunk_size)
+
+            if not chunk:
+                if self.audio_listener.poll() is not None:
+                    self.logger.error("ffmpeg process is not running, restarting...")
+                    log_and_restart()
+                    return
+
+                return
+
+            audio = np.frombuffer(chunk, dtype=np.int16)
             self.detect_audio(audio)
         except Exception:
             self.logger.error(
                 "Error reading audio data from ffmpeg process, restarting..."
             )
-            time.sleep(self.config.ffmpeg.retry_interval)
-            self.logpipe.dump()
-            self.start_or_restart_ffmpeg()
+            log_and_restart()
 
     def run(self) -> None:
         self.start_or_restart_ffmpeg()
