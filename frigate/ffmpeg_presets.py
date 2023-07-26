@@ -57,8 +57,8 @@ _user_agent_args = [
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-32-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
-    "preset-vaapi": f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_devic {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_devic {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
+    "preset-vaapi": f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
     "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv",
     "preset-nvidia-h264": "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-nvidia-h265": "-hwaccel cuda -hwaccel_output_format cuda",
