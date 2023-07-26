@@ -11,8 +11,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
-from frigate.record.cleanup import RecordingCleanup
+from frigate.models import Event, Recordings
 from frigate.record.maintainer import RecordingMaintainer
 from frigate.types import FeatureMetricsTypes
 from frigate.util.services import listen
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def manage_recordings(
     config: FrigateConfig,
+    inter_process_queue: mp.Queue,
     object_recordings_info_queue: mp.Queue,
     audio_recordings_info_queue: mp.Queue,
     process_info: dict[str, FeatureMetricsTypes],
@@ -47,17 +47,15 @@ def manage_recordings(
         },
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
     )
-    models = [Event, Recordings, Timeline, RecordingsToDelete]
+    models = [Event, Recordings]
     db.bind(models)
 
     maintainer = RecordingMaintainer(
         config,
+        inter_process_queue,
         object_recordings_info_queue,
         audio_recordings_info_queue,
         process_info,
         stop_event,
     )
     maintainer.start()
-
-    cleanup = RecordingCleanup(config, stop_event)
-    cleanup.start()

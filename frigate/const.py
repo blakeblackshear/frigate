@@ -47,3 +47,7 @@ DRIVER_INTEL_iHD = "iHD"
 
 MAX_SEGMENT_DURATION = 600
 MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to account for cameras with inconsistent segment times
+
+# Internal Comms Topics
+
+INSERT_MANY_RECORDINGS = "insert_many_recordings"

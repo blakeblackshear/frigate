@@ -36,13 +36,14 @@ from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
 from frigate.plus import PlusApi
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
+from frigate.record.cleanup import RecordingCleanup
 from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
@@ -292,6 +293,7 @@ class FrigateApp:
             name="recording_manager",
             args=(
                 self.config,
+                self.inter_process_queue,
                 self.object_recordings_info_queue,
                 self.audio_recordings_info_queue,
                 self.feature_metrics,
@@ -317,7 +319,7 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, Timeline]
+        models = [Event, Recordings, RecordingsToDelete, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
@@ -522,6 +524,10 @@ class FrigateApp:
         self.event_cleanup = EventCleanup(self.config, self.stop_event)
         self.event_cleanup.start()
 
+    def start_record_cleanup(self) -> None:
+        self.record_cleanup = RecordingCleanup(self.config, self.stop_event)
+        self.record_cleanup.start()
+
     def start_storage_maintainer(self) -> None:
         self.storage_maintainer = StorageMaintainer(self.config, self.stop_event)
         self.storage_maintainer.start()
@@ -607,6 +613,7 @@ class FrigateApp:
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
+        self.start_record_cleanup()
         self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
@@ -643,6 +650,7 @@ class FrigateApp:
         self.ptz_autotracker_thread.join()
         self.event_processor.join()
         self.event_cleanup.join()
+        self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()

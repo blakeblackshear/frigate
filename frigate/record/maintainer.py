@@ -8,7 +8,6 @@ import os
 import queue
 import random
 import string
-import subprocess as sp
 import threading
 from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
@@ -19,7 +18,12 @@ import numpy as np
 import psutil
 
 from frigate.config import FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    INSERT_MANY_RECORDINGS,
+    MAX_SEGMENT_DURATION,
+    RECORD_DIR,
+)
 from frigate.models import Event, Recordings
 from frigate.types import FeatureMetricsTypes
 from frigate.util.image import area
@@ -51,6 +55,7 @@ class RecordingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
+        inter_process_queue: mp.Queue,
         object_recordings_info_queue: mp.Queue,
         audio_recordings_info_queue: Optional[mp.Queue],
         process_info: dict[str, FeatureMetricsTypes],
@@ -59,6 +64,7 @@ class RecordingMaintainer(threading.Thread):
         threading.Thread.__init__(self)
         self.name = "recording_maintainer"
         self.config = config
+        self.inter_process_queue = inter_process_queue
         self.object_recordings_info_queue = object_recordings_info_queue
         self.audio_recordings_info_queue = audio_recordings_info_queue
         self.process_info = process_info
@@ -161,9 +167,11 @@ class RecordingMaintainer(threading.Thread):
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
-        Recordings.insert_many(
-            [r for r in recordings_to_insert if r is not None]
-        ).execute()
+
+        # fire and forget recordings entries
+        self.inter_process_queue.put(
+            (INSERT_MANY_RECORDINGS, [r for r in recordings_to_insert if r is not None])
+        )
 
     async def validate_and_move_segment(
         self, camera: str, events: Event, recording: dict[str, any]
@@ -183,7 +191,7 @@ class RecordingMaintainer(threading.Thread):
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
         else:
-            segment_info = get_video_properties(cache_path, get_duration=True)
+            segment_info = await get_video_properties(cache_path, get_duration=True)
 
             if segment_info["duration"]:
                 duration = float(segment_info["duration"])
@@ -231,7 +239,7 @@ class RecordingMaintainer(threading.Thread):
             if overlaps:
                 record_mode = self.config.cameras[camera].record.events.retain.mode
                 # move from cache to recordings immediately
-                return self.move_segment(
+                return await self.move_segment(
                     camera,
                     start_time,
                     end_time,
@@ -253,7 +261,7 @@ class RecordingMaintainer(threading.Thread):
         # else retain days includes this segment
         else:
             record_mode = self.config.cameras[camera].record.retain.mode
-            return self.move_segment(
+            return await self.move_segment(
                 camera, start_time, end_time, duration, cache_path, record_mode
             )
 
@@ -296,7 +304,7 @@ class RecordingMaintainer(threading.Thread):
 
         return SegmentInfo(motion_count, active_count, round(average_dBFS))
 
-    def move_segment(
+    async def move_segment(
         self,
         camera: str,
         start_time: datetime.datetime,
@@ -332,7 +340,7 @@ class RecordingMaintainer(threading.Thread):
                 start_frame = datetime.datetime.now().timestamp()
 
                 # add faststart to kept segments to improve metadata reading
-                ffmpeg_cmd = [
+                p = await asyncio.create_subprocess_exec(
                     "ffmpeg",
                     "-hide_banner",
                     "-y",
@@ -343,17 +351,13 @@ class RecordingMaintainer(threading.Thread):
                     "-movflags",
                     "+faststart",
                     file_path,
-                ]
-
-                p = sp.run(
-                    ffmpeg_cmd,
-                    encoding="ascii",
-                    capture_output=True,
+                    stderr=asyncio.subprocess.PIPE,
                 )
+                await p.wait()
 
                 if p.returncode != 0:
                     logger.error(f"Unable to convert {cache_path} to {file_path}")
-                    logger.error(p.stderr)
+                    logger.error((await p.stderr.read()).decode("ascii"))
                     return None
                 else:
                     logger.debug(

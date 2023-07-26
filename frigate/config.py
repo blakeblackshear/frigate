@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -1059,7 +1060,7 @@ class FrigateConfig(FrigateBaseModel):
                     if "detect" in input.roles:
                         stream_info = {"width": 0, "height": 0}
                         try:
-                            stream_info = get_video_properties(input.path)
+                            stream_info = asyncio.run(get_video_properties(input.path))
                         except Exception:
                             logger.warn(
                                 f"Error detecting stream resolution automatically for {input.path} Applying default values."

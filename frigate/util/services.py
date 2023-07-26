@@ -1,5 +1,6 @@
 """Utilities for services."""
 
+import asyncio
 import json
 import logging
 import os
@@ -352,8 +353,8 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def get_video_properties(url, get_duration=False):
-    def calculate_duration(video: Optional[any]) -> float:
+async def get_video_properties(url, get_duration=False):
+    async def calculate_duration(video: Optional[any]) -> float:
         duration = None
 
         if video is not None:
@@ -366,7 +367,7 @@ def get_video_properties(url, get_duration=False):
 
         # if cv2 failed need to use ffprobe
         if duration is None:
-            ffprobe_cmd = [
+            p = await asyncio.create_subprocess_exec(
                 "ffprobe",
                 "-v",
                 "error",
@@ -375,11 +376,18 @@ def get_video_properties(url, get_duration=False):
                 "-of",
                 "default=noprint_wrappers=1:nokey=1",
                 f"{url}",
-            ]
-            p = sp.run(ffprobe_cmd, capture_output=True)
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await p.wait()
 
-            if p.returncode == 0 and p.stdout.decode():
-                duration = float(p.stdout.decode().strip())
+            if p.returncode == 0:
+                result = (await p.stdout.read()).decode()
+            else:
+                result = None
+
+            if result:
+                duration = float(result.strip())
             else:
                 duration = -1
 
@@ -400,7 +408,7 @@ def get_video_properties(url, get_duration=False):
     result = {}
 
     if get_duration:
-        result["duration"] = calculate_duration(video)
+        result["duration"] = await calculate_duration(video)
 
     if video is not None:
         # Get the width of frames in the video stream
