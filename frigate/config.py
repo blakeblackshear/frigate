@@ -939,7 +939,7 @@ def verify_recording_segments_setup_with_reasonable_time(
         or config_duration > MAX_SEGMENT_CONFIG_DURATION
     ):
         raise ValueError(
-            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be {MIN_SEGMENT_DURATION} <= x <= 60."
+            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be {MIN_SEGMENT_DURATION} <= x <= {MAX_SEGMENT_CONFIG_DURATION}."
         )
 
 
