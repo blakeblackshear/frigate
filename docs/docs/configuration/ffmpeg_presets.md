@@ -11,16 +11,18 @@ It is highly recommended to use hwaccel presets in the config. These presets not
 
 See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on how to setup hwaccel for your GPU / iGPU.
 
-| Preset                | Usage                        | Other Notes                                           |
-| --------------------- | ---------------------------- | ----------------------------------------------------- |
-| preset-rpi-32-h264    | 32 bit Rpi with h264 stream  |                                                       |
-| preset-rpi-64-h264    | 64 bit Rpi with h264 stream  |                                                       |
-| preset-vaapi          | Intel & AMD VAAPI            | Check hwaccel docs to ensure correct driver is chosen |
-| preset-intel-qsv-h264 | Intel QSV with h264 stream   | If issues occur recommend using vaapi preset instead  |
-| preset-intel-qsv-h265 | Intel QSV with h265 stream   | If issues occur recommend using vaapi preset instead  |
-| preset-nvidia-h264    | Nvidia GPU with h264 stream  |                                                       |
-| preset-nvidia-h265    | Nvidia GPU with h265 stream  |                                                       |
-| preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream | Recommend restreaming mjpeg and using nvidia-h264     |
+| Preset                | Usage                          | Other Notes                                           |
+| --------------------- | ------------------------------ | ----------------------------------------------------- |
+| preset-rpi-32-h264    | 32 bit Rpi with h264 stream    |                                                       |
+| preset-rpi-64-h264    | 64 bit Rpi with h264 stream    |                                                       |
+| preset-vaapi          | Intel & AMD VAAPI              | Check hwaccel docs to ensure correct driver is chosen |
+| preset-intel-qsv-h264 | Intel QSV with h264 stream     | If issues occur recommend using vaapi preset instead  |
+| preset-intel-qsv-h265 | Intel QSV with h265 stream     | If issues occur recommend using vaapi preset instead  |
+| preset-nvidia-h264    | Nvidia GPU with h264 stream    |                                                       |
+| preset-nvidia-h265    | Nvidia GPU with h265 stream    |                                                       |
+| preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream   | Recommend restreaming mjpeg and using nvidia-h264     |
+| preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
+| preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
 
 ### Input Args Presets
 

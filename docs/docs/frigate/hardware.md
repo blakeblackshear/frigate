@@ -70,7 +70,7 @@ Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known
 | Intel i5 1135G7      | 10 - 15 ms      |                                                                       |
 | Intel i5 12600K      | ~ 15 ms         | Inference speeds on CPU were ~ 35 ms                                  |
 
-### TensorRT
+### TensorRT - Nvidia GPU
 
 The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which supports the 12.x series of CUDA libraries. The minimum driver version on the host system must be `>=525.60.13`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the [TensorRT docs for more info](/configuration/object_detectors#nvidia-tensorrt-detector).
 
@@ -86,6 +86,14 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | RTX 3070 Mobile | ~ 5 ms          |
 | Quadro P400 2GB | 20 - 25 ms      |
 | Quadro P2000    | ~ 12 ms         |
+
+### Community Supported:
+
+#### Nvidia Jetson
+
+Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+
+Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

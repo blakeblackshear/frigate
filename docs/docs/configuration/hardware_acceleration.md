@@ -246,3 +246,77 @@ If you do not see these processes, check the `docker logs` for the container and
 These instructions were originally based on the [Jellyfin documentation](https://jellyfin.org/docs/general/administration/hardware-acceleration.html#nvidia-hardware-acceleration-on-docker-linux).
 
 # Community Supported
+
+## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
+
+A separate set of docker images is available that is based on Jetpack/L4T. They comes with an `ffmpeg` build
+with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 4.6, use the
+`frigate-tensorrt-jp4` image, or if your Jetson host is running Jetpack 5.0+, use the `frigate-tensorrt-jp5`
+image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform,
+but the image will still allow hardware decoding and tensorrt object detection.
+
+You will need to use the image with the nvidia container runtime:
+
+### Docker Run CLI - Jetson
+
+```bash
+docker run -d \
+  ...
+  --runtime nvidia
+  ghcr.io/blakeblackshear/frigate-tensorrt-jp5
+```
+
+### Docker Compose - Jetson
+
+```yaml
+version: '2.4'
+services:
+  frigate:
+    ...
+    image: ghcr.io/blakeblackshear/frigate-tensorrt-jp5
+    runtime: nvidia   # Add this
+```
+
+:::note
+
+The `runtime:` tag is not supported on older versions of docker-compose. If you run into this, you can instead use the nvidia runtime system-wide by adding `"default-runtime": "nvidia"` to `/etc/docker/daemon.json`:
+
+```
+{
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
+    "default-runtime": "nvidia"
+}
+```
+
+:::
+
+### Setup Decoder
+
+The decoder you need to pass in the `hwaccel_args` will depend on the input video.
+
+A list of supported codecs (you can use `ffmpeg -decoders | grep nvmpi` in the container to get the ones your card supports)
+
+```
+ V..... h264_nvmpi           h264 (nvmpi) (codec h264)
+ V..... hevc_nvmpi           hevc (nvmpi) (codec hevc)
+ V..... mpeg2_nvmpi          mpeg2 (nvmpi) (codec mpeg2video)
+ V..... mpeg4_nvmpi          mpeg4 (nvmpi) (codec mpeg4)
+ V..... vp8_nvmpi            vp8 (nvmpi) (codec vp8)
+ V..... vp9_nvmpi            vp9 (nvmpi) (codec vp9)
+```
+
+For example, for H264 video, you'll select `preset-jetson-h264`.
+
+```yaml
+ffmpeg:
+  hwaccel_args: preset-jetson-h264
+```
+
+If everything is working correctly, you should see a significant reduction in ffmpeg CPU load and power consumption.
+Verify that hardware decoding is working by running `jtop` (`sudo pip3 install -U jetson-stats`), which should show
+that NVDEC/NVDEC1 are in use.

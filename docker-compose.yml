@@ -21,6 +21,8 @@ services:
                       - driver: nvidia
                         count: 1
                         capabilities: [gpu]
+    environment:
+      YOLO_MODELS: yolov7-320
     devices:
       - /dev/bus/usb:/dev/bus/usb
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
@@ -30,8 +32,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config:/config
       - ./debug:/media/frigate
-      # Create the trt-models folder using the documented method of generating TRT models
-      # - ./debug/trt-models:/trt-models
       - /dev/bus/usb:/dev/bus/usb
   mqtt:
     container_name: mqtt
