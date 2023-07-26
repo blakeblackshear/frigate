@@ -40,6 +40,15 @@ jobs:
             ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Build and push TensorRT (x86 GPU)
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
+            *.cache-from=type=gha
       - name: Build and push arm64 standard build
         uses: docker/build-push-action@v4
         with:
@@ -60,15 +69,6 @@ jobs:
           files: docker/rpi/rpi.hcl
           set: |
             rpi.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
-            *.cache-from=type=gha
-      - name: Build and push TensorRT (x86 GPU)
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=ghcr.io/${{ steps.setup.outputs.lowercase-repo }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
             *.cache-from=type=gha
       - name: Build and push TensorRT (Jetson, Jetpack 4)
         env:
