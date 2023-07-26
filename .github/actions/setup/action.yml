@@ -4,8 +4,10 @@ inputs:
   GITHUB_TOKEN:
     required: true
 outputs:
-  lowercase-repo:
-    value: ${{ steps.lowercaseRepo.outputs.lowercase }}
+  image-name:
+    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+  cache-name:
+    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:cache
 runs:
   using: "composite"
   steps:
