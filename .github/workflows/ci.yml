@@ -37,7 +37,6 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-          cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max,compression=zstd
       - name: Build and push TensorRT (x86 GPU)
         uses: docker/bake-action@v3
         with:
@@ -46,6 +45,8 @@ jobs:
           files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max,compression=zstd
   arm64_build:
     runs-on: ubuntu-latest
     name: ARM Build
@@ -67,8 +68,7 @@ jobs:
           target: frigate
           tags: |
             ${{ steps.setup.outputs.image-name }}-standard-arm64
-          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-standard-arm64
-          cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-standard-arm64,mode=max,compression=zstd
+          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
         uses: docker/bake-action@v3
         with:
@@ -77,6 +77,8 @@ jobs:
           files: docker/rpi/rpi.hcl
           set: |
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max,compression=zstd
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
@@ -152,7 +154,7 @@ jobs:
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - uses: int128/docker-manifest-create-action@v1
         with:
-          tags: ${{ steps.setup.outputs.image-name }}
+          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           suffixes: |
             -amd64
             -rpi

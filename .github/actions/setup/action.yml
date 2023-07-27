@@ -5,7 +5,7 @@ inputs:
     required: true
 outputs:
   image-name:
-    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ steps.create-short-sha.outputs.SHORT_SHA }}
   cache-name:
     value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:cache
 runs:
@@ -34,6 +34,6 @@ runs:
     - name: Create version file
       run: make version
       shell: bash
-    - name: Create short sha
-      run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+    - id: create-short-sha
+      run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
       shell: bash
