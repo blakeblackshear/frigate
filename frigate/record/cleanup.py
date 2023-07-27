@@ -11,7 +11,7 @@ from pathlib import Path
 from peewee import DatabaseError, chunked
 
 from frigate.config import FrigateConfig, RetainModeEnum
-from frigate.const import RECORD_DIR
+from frigate.const import CACHE_DIR, RECORD_DIR
 from frigate.models import Event, Recordings, RecordingsToDelete
 from frigate.record.util import remove_empty_directories
 
@@ -29,7 +29,7 @@ class RecordingCleanup(threading.Thread):
 
     def clean_tmp_clips(self) -> None:
         """delete any clips in the cache that are more than 5 minutes old."""
-        for p in Path("/tmp/cache").rglob("clip_*.mp4"):
+        for p in Path(CACHE_DIR).rglob("clip_*.mp4"):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
