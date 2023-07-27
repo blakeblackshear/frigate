@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev
@@ -15,37 +16,17 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  multi_arch_build:
+  amd64_build:
     runs-on: ubuntu-latest
-    name: Image Build
+    name: AMD64 Build
     steps:
-      - name: Remove unnecessary files
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-      - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v5
-        with:
-          string: ${{ github.repository }}
       - name: Check out code
         uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to the Container registry
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create version file
-        run: make version
-      - name: Create short sha
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      # The majority of users running arm64 are rpi users, so the rpi
-      # build should be the primary arm64 image
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push amd64 standard build
         uses: docker/build-push-action@v4
         with:
@@ -54,10 +35,28 @@ jobs:
           push: true
           platforms: linux/amd64
           target: frigate
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ steps.setup.outputs.image-name }}-amd64
+          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+          cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max,compression=zstd
+      - name: Build and push TensorRT (x86 GPU)
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
+  arm64_build:
+    runs-on: ubuntu-latest
+    name: ARM Build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push arm64 standard build
         uses: docker/build-push-action@v4
         with:
@@ -67,9 +66,9 @@ jobs:
           platforms: linux/arm64
           target: frigate
           tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-standard-arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ steps.setup.outputs.image-name }}-standard-arm64
+          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-standard-arm64
+          cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-standard-arm64,mode=max,compression=zstd
       - name: Build and push RPi build
         uses: docker/bake-action@v3
         with:
@@ -77,17 +76,18 @@ jobs:
           targets: rpi
           files: docker/rpi/rpi.hcl
           set: |
-            rpi.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rpi
-            *.cache-from=type=gha
-      - name: Build and push TensorRT (x86 GPU)
-        uses: docker/bake-action@v3
+            rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
+  jetson_jp4_build:
+    runs-on: ubuntu-latest
+    name: Jetson Jetpack 4
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
         with:
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
-            *.cache-from=type=gha
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push TensorRT (Jetson, Jetpack 4)
         env:
           ARCH: arm64
@@ -100,8 +100,20 @@ jobs:
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
           set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp4
-            *.cache-from=type=gha
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp4
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp4,mode=max,compression=zstd
+  jetson_jp5_build:
+    runs-on: ubuntu-latest
+    name: Jetson Jetpack 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push TensorRT (Jetson, Jetpack 5)
         env:
           ARCH: arm64
@@ -114,12 +126,33 @@ jobs:
           targets: tensorrt
           files: docker/tensorrt/trt.hcl
           set: |
-            tensorrt.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt-jp5
-            *.cache-from=type=gha
-      - name: Assemble and push default build
-        uses: int128/docker-manifest-create-action@v1
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp5
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp5,mode=max,compression=zstd
+  # The majority of users running arm64 are rpi users, so the rpi
+  # build should be the primary arm64 image
+  assemble_default_build:
+    runs-on: ubuntu-latest
+    name: Assemble and push default build
+    needs:
+      - amd64_build
+      - arm64_build
+    steps:
+      - id: lowercaseRepo
+        uses: ASzc/change-string-case-action@v5
         with:
-          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          string: ${{ github.repository }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create short sha
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: int128/docker-manifest-create-action@v1
+        with:
+          tags: ${{ steps.setup.outputs.image-name }}
           suffixes: |
             -amd64
             -rpi
