@@ -152,7 +152,7 @@ jobs:
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - uses: int128/docker-manifest-create-action@v1
         with:
-          tags: ${{ steps.setup.outputs.image-name }}
+          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           suffixes: |
             -amd64
             -rpi
