@@ -46,7 +46,7 @@ jobs:
           set: |
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max,compression=zstd
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
   arm64_build:
     runs-on: ubuntu-latest
     name: ARM Build
@@ -78,7 +78,7 @@ jobs:
           set: |
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max,compression=zstd
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
@@ -103,8 +103,8 @@ jobs:
           files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp4
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp4,mode=max,compression=zstd
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
   jetson_jp5_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 5
@@ -129,8 +129,8 @@ jobs:
           files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp5
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt-jp5,mode=max,compression=zstd
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
