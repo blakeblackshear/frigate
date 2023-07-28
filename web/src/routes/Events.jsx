@@ -19,6 +19,7 @@ import { Camera } from '../icons/Camera';
 import { Clock } from '../icons/Clock';
 import { Delete } from '../icons/Delete';
 import { Download } from '../icons/Download';
+import { Export } from '../icons/Export';
 import Menu, { MenuItem } from '../components/Menu';
 import CalendarIcon from '../icons/Calendar';
 import Calendar from '../components/Calendar';
@@ -214,6 +215,17 @@ export default function Events({ path, ...props }) {
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
+  };
+
+  const onExport = async (e, camera, start_time, end_time) => {
+    e.stopPropagation();
+
+    const response = await axios.post(`export/${camera}/start/${Math.round(start_time)}/end/${Math.round(end_time)}`, {playback : "realtime"});
+     
+    if (response.status === 200) {
+      mutate();
+    }
+    
   };
 
   const showSubmitToPlus = (event_id, label, box, e) => {
@@ -662,6 +674,13 @@ export default function Events({ path, ...props }) {
                             )}
                           </Fragment>
                         )}
+                      </div>
+                      <div class="sm:flex flex-col justify-end mr-2">
+                        <Export
+                          className="h-6 w-6 cursor-pointer"
+                          stroke="#3b82f6"
+                          onClick={(e) => onExport(e, event.camera, event.start_time, event.end_time)}
+                        />
                       </div>
                       <div class="flex flex-col">
                         <Delete
