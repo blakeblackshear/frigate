@@ -169,7 +169,7 @@ class TrackedObject:
                 self.camera_config.frame_shape,
             ):
                 self.thumbnail_data = {
-                    "frame_time": obj_data["frame_time"],
+                    "frame_time": current_frame_time,
                     "box": obj_data["box"],
                     "area": obj_data["area"],
                     "region": obj_data["region"],
