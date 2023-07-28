@@ -59,7 +59,13 @@ class RecordingCleanup(threading.Thread):
             deleted_recordings.add(recording.id)
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-        Recordings.delete().where(Recordings.id << deleted_recordings).execute()
+        # delete up to 100,000 at a time
+        max_deletes = 100000
+        deleted_recordings_list = list(deleted_recordings)
+        for i in range(0, len(deleted_recordings_list), max_deletes):
+            Recordings.delete().where(
+                Recordings.id << deleted_recordings_list[i : i + max_deletes]
+            ).execute()
         logger.debug("End deleted cameras.")
 
         logger.debug("Start all cameras.")
