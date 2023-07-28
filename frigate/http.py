@@ -1603,8 +1603,13 @@ def vod_event(id):
     )
 
 
-@bp.route("/export/<camera_name>/start/<int:start_time>/end/<int:end_time>", methods=["POST"])
-@bp.route("/export/<camera_name>/start/<float:start_time>/end/<float:end_time>", methods=["POST"])
+@bp.route(
+    "/export/<camera_name>/start/<int:start_time>/end/<int:end_time>", methods=["POST"]
+)
+@bp.route(
+    "/export/<camera_name>/start/<float:start_time>/end/<float:end_time>", 
+    methods=["POST"],
+)
 def export_recording(camera_name: str, start_time, end_time):
     playback_factor = request.get_json(silent=True).get("playback", "realtime")
     exporter = RecordingExporter(
