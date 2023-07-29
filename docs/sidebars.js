@@ -29,6 +29,7 @@ module.exports = {
       "configuration/birdseye",
       "configuration/stationary_objects",
       "configuration/advanced",
+      "configuration/autotracking",
       "configuration/hardware_acceleration",
       "configuration/camera_specific",
       "configuration/ffmpeg_presets",
