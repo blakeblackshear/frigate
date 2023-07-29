@@ -30,7 +30,13 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, CONFIG_DIR, MAX_SEGMENT_DURATION, RECORD_DIR
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    CONFIG_DIR,
+    MAX_SEGMENT_DURATION,
+    RECORD_DIR,
+)
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
@@ -1441,7 +1447,7 @@ def recording_clip(camera_name, start_ts, end_ts):
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
     file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
-    path = f"/tmp/cache/{file_name}"
+    path = os.path.join(CACHE_DIR, file_name)
 
     if not os.path.exists(path):
         ffmpeg_cmd = [
