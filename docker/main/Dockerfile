@@ -30,11 +30,10 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
-FROM wget AS go2rtc
+FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-RUN wget -qO go2rtc "https://github.com/AlexxIT/go2rtc/releases/download/v1.6.2/go2rtc_linux_${TARGETARCH}" \
-    && chmod +x go2rtc
+ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.6.2/go2rtc_linux_${TARGETARCH}" go2rtc
 
 
 ####
