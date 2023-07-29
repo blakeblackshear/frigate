@@ -21,9 +21,9 @@ function migrate_db_path() {
     fi
     unset config_file_yaml
 
-    # Use yq to check if database.path is set
+    # check if database.path is set
     local user_db_path
-    user_db_path=$(yq eval '.database.path' "${config_file}")
+    user_db_path=$(python3 -c "import yaml, json; data = json.loads(json.dumps(yaml.safe_load(open('${config_file}')))); print(data['database']['path']) if 'database' in data and 'path' in data['database'] else print('null')")
 
     if [[ "${user_db_path}" == "null" ]]; then
         local previous_db_path="/media/frigate/frigate.db"

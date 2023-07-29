@@ -77,9 +77,3 @@ apt-get purge gnupg apt-transport-https xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*
-
-# Install yq, for frigate-prepare and go2rtc echo source
-curl -fsSL \
-    "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_$(dpkg --print-architecture)" \
-    --output /usr/local/bin/yq
-chmod +x /usr/local/bin/yq
