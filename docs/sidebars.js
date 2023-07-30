@@ -29,16 +29,13 @@ module.exports = {
       ],
       Cameras: [
         "configuration/cameras",
+        "configuration/record",
+        "configuration/snapshots",
         "configuration/birdseye",
         "configuration/live",
         "configuration/restream",
+        "configuration/autotracking",
         "configuration/camera_specific",
-        "configuration/record",
-        "configuration/snapshots",
-      ],
-      Hardware: [
-        "configuration/hardware_acceleration",
-        "configuration/ffmpeg_presets",
       ],
       Objects: [
         "configuration/masks",
@@ -46,7 +43,9 @@ module.exports = {
         "configuration/stationary_objects",
         "configuration/zones",
       ],
-      Advanced: [
+      "Extra Configuration": [
+        "configuration/hardware_acceleration",
+        "configuration/ffmpeg_presets",
         "configuration/advanced",
       ],
     },
