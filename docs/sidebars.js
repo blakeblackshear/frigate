@@ -15,7 +15,14 @@ module.exports = {
       "guides/reverse_proxy",
     ],
     Configuration: {
-      Configuration_File: "configuration/index",
+      "Configuration Files": [
+        "configuration/index",
+        {
+          type: "link",
+          label: "Go2RTC Configuration Reference",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.6.2#configuration"
+        }
+      ],
       Detectors: [
         "configuration/object_detectors",
         "configuration/audio_detectors",
