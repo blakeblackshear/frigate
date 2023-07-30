@@ -1,6 +1,6 @@
 ---
 id: autotracking
-title: Autotracking
+title: Camera Autotracking
 ---
 
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.

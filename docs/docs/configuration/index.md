@@ -1,6 +1,6 @@
 ---
 id: index
-title: Configuration File
+title: Frigate Configuration Reference
 ---
 
 For Home Assistant Addon installations, the config file needs to be in the root of your Home Assistant config directory (same location as `configuration.yaml`). It can be named `frigate.yaml` or `frigate.yml`, but if both files exist `frigate.yaml` will be preferred and `frigate.yml` will be ignored.

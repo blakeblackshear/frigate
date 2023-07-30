@@ -14,25 +14,41 @@ module.exports = {
       "guides/stationary_objects",
       "guides/reverse_proxy",
     ],
-    Configuration: [
-      "configuration/index",
-      "configuration/object_detectors",
-      "configuration/audio_detectors",
-      "configuration/cameras",
-      "configuration/masks",
-      "configuration/record",
-      "configuration/snapshots",
-      "configuration/objects",
-      "configuration/restream",
-      "configuration/live",
-      "configuration/zones",
-      "configuration/birdseye",
-      "configuration/stationary_objects",
-      "configuration/advanced",
-      "configuration/hardware_acceleration",
-      "configuration/camera_specific",
-      "configuration/ffmpeg_presets",
-    ],
+    Configuration: {
+      "Configuration Files": [
+        "configuration/index",
+        {
+          type: "link",
+          label: "Go2RTC Configuration Reference",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.6.2#configuration"
+        }
+      ],
+      Detectors: [
+        "configuration/object_detectors",
+        "configuration/audio_detectors",
+      ],
+      Cameras: [
+        "configuration/cameras",
+        "configuration/record",
+        "configuration/snapshots",
+        "configuration/birdseye",
+        "configuration/live",
+        "configuration/restream",
+        "configuration/autotracking",
+        "configuration/camera_specific",
+      ],
+      Objects: [
+        "configuration/masks",
+        "configuration/objects",
+        "configuration/stationary_objects",
+        "configuration/zones",
+      ],
+      "Extra Configuration": [
+        "configuration/hardware_acceleration",
+        "configuration/ffmpeg_presets",
+        "configuration/advanced",
+      ],
+    },
     Integrations: [
       "integrations/plus",
       "integrations/home-assistant",
