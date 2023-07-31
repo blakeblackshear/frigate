@@ -185,7 +185,9 @@ class StorageMaintainer(threading.Thread):
                 logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
 
             if self.check_storage_needs_cleanup():
-                logger.info("Less than 1 hour of recording space left, running storage maintenance...")
+                logger.info(
+                    "Less than 1 hour of recording space left, running storage maintenance..."
+                )
                 self.reduce_storage_consumption()
 
         logger.info("Exiting storage maintainer...")
