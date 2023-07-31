@@ -99,12 +99,9 @@ def filtered(obj, objects_to_track, object_filters):
 
 def get_min_region_size(model_config: ModelConfig) -> int:
     """Get the min region size and ensure it is divisible by 4."""
-    half = int(max(model_config.height, model_config.width) / 2)
+    size = int(max(model_config.height, model_config.width))
 
-    if half % 4 == 0:
-        return half
-
-    return int((half + 3) / 4) * 4
+    return ((size + 3) // 4) * 4
 
 
 def create_tensor_input(frame, model_config: ModelConfig, region):
