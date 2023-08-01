@@ -79,14 +79,20 @@ class TimelineProcessor(threading.Thread):
         if event_type == "start":
             timeline_entry[Timeline.class_type] = "visible"
             Timeline.insert(timeline_entry).execute()
-        elif (
-            event_type == "update"
-            and prev_event_data["current_zones"] != event_data["current_zones"]
-            and len(event_data["current_zones"]) > 0
-        ):
-            timeline_entry[Timeline.class_type] = "entered_zone"
-            timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
-            Timeline.insert(timeline_entry).execute()
+        elif event_type == "update":
+            # zones have been updated
+            if (
+                prev_event_data["current_zones"] != event_data["current_zones"]
+                and len(event_data["current_zones"]) > 0
+            ):
+                timeline_entry[Timeline.class_type] = "entered_zone"
+                timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
+                Timeline.insert(timeline_entry).execute()
+            elif prev_event_data["stationary"] != event_data["stationary"]:
+                timeline_entry[Timeline.class_type] = (
+                    "stationary" if event_data["stationary"] else "active"
+                )
+                Timeline.insert(timeline_entry).execute()
         elif event_type == "end":
             timeline_entry[Timeline.class_type] = "gone"
             Timeline.insert(timeline_entry).execute()
