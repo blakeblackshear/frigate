@@ -101,7 +101,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
     setState((prev) => ({
       ...prev,
       selectedDay: todayTimestamp,
-      monthDetails: getMonthDetails(year, month)
+      monthDetails: getMonthDetails(year, month),
     }));
   }, [year, month, getMonthDetails]);
 
