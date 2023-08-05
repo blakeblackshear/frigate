@@ -306,10 +306,8 @@ class AudioEventMaintainer(threading.Thread):
 
             audio = np.frombuffer(chunk, dtype=np.int16)
             self.detect_audio(audio)
-        except Exception:
-            self.logger.error(
-                "Error reading audio data from ffmpeg process, restarting..."
-            )
+        except Exception as e:
+            self.logger.error(f"Error reading audio data from ffmpeg process: {e}")
             log_and_restart()
 
     def run(self) -> None:

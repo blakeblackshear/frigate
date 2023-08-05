@@ -76,6 +76,7 @@ class OnvifController:
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
         ptz_config = ptz.GetConfigurationOptions(request)
+        logger.debug(f"Onvif config for {camera_name}: {ptz_config}")
 
         fov_space_id = next(
             (
