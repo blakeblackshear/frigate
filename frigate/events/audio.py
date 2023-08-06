@@ -198,7 +198,7 @@ class AudioEventMaintainer(threading.Thread):
                 if label not in self.config.audio.listen:
                     continue
 
-                if score > (self.config.audio.filters or {}).get(label, {}).get(
+                if score > dict((self.config.audio.filters or {}).get(label, {})).get(
                     "threshold", 0.8
                 ):
                     self.handle_detection(label, score)
