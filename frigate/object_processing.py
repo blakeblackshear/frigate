@@ -253,7 +253,6 @@ class TrackedObject:
         return (thumb_update, significant_change, autotracker_update)
 
     def to_dict(self, include_thumbnail: bool = False):
-        (self.thumbnail_data["frame_time"] if self.thumbnail_data is not None else 0.0)
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera,
