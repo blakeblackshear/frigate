@@ -593,7 +593,7 @@ def detect(
         width = x_max - x_min
         height = y_max - y_min
         area = width * height
-        ratio = width / height
+        ratio = width / max(1, height)
         det = (
             d[0],
             d[1],
