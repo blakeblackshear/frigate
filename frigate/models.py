@@ -1,6 +1,7 @@
 from peewee import (
     BooleanField,
     CharField,
+    CompositeKey,
     DateTimeField,
     FloatField,
     IntegerField,
@@ -68,6 +69,15 @@ class Recordings(Model):  # type: ignore[misc]
     objects = IntegerField(null=True)
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
+
+
+class RecordingsToEvents(Model):  # type: ignore[misc]
+    event_id = CharField(null=False, index=True, max_length=30)
+    recording_id = CharField(null=False, index=True, max_length=30)
+
+    class Meta:
+        db_table = "recordingstoevents"
+        primary_key = CompositeKey("event", "recording")
 
 
 # Used for temporary table in record/cleanup.py

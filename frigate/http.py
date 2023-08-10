@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import subprocess as sp
+import tempfile
 import time
 import traceback
 from datetime import datetime, timedelta, timezone
@@ -23,6 +24,7 @@ from flask import (
     jsonify,
     make_response,
     request,
+    send_from_directory,
 )
 from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
@@ -38,7 +40,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Recordings, RecordingsToEvents, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
@@ -699,6 +701,66 @@ def label_snapshot(camera_name, label):
         return response
 
 
+@bp.route("/events/<id>/record.mp3")
+def event_audio(id):
+    download = request.args.get("download", type=bool)
+
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return "Event not found.", 404
+
+    recordings = (
+        Recordings.select(Recordings.path)
+        .join(RecordingsToEvents, on=(Recordings.id == RecordingsToEvents.recording_id))
+        .where(RecordingsToEvents.event_id == event.id)
+    )
+    # Extract file paths from the query
+    file_paths = [rec.path for rec in recordings]
+
+    # Generate a temporary output file name for the combined MP3
+    output_file = tempfile.NamedTemporaryFile(
+        prefix=id, suffix=".mp3", delete=False
+    ).name
+    os.unlink(output_file)  # fucking python
+
+    # Create a list of inputs for FFmpeg
+    ffmpeg_inputs = sum([["-i", path] for path in file_paths], [])
+
+    # Use FFmpeg to extract audio from each mp4 and combine into a single MP3
+    cmd = [
+        "ffmpeg",
+        "-y",  # fucking python #2
+        *ffmpeg_inputs,
+        "-filter_complex",
+        "concat=n={}:v=0:a=1[aout]".format(len(file_paths)),
+        "-map",
+        "[aout]",
+        "-vn",
+        output_file,
+    ]
+    logger.debug(f"ffmpeg command for {id}/record.mp3: {cmd}")
+    sp.run(cmd)
+
+    if not os.path.exists(output_file):
+        return "Error processing audio files.", 500
+
+    # Trigger download if requested
+    if download:
+        return send_from_directory(
+            os.path.dirname(output_file),
+            os.path.basename(output_file),
+            as_attachment=True,
+            attachment_filename=f"event-{id}.mp3",
+        )
+
+    # Otherwise, just return the combined file's path or content
+    # Depending on your needs, you can directly stream the audio or just provide the path
+    return send_from_directory(
+        os.path.dirname(output_file), os.path.basename(output_file)
+    )
+
+
 @bp.route("/events/<id>/clip.mp4")
 def event_clip(id):
     download = request.args.get("download", type=bool)
@@ -1167,6 +1229,8 @@ def latest_frame(camera_name):
         "motion_boxes": request.args.get("motion", type=int),
         "regions": request.args.get("regions", type=int),
     }
+    # TODO: debug print draw_options
+    logger.debug(f"Drawing options for {camera_name}: {draw_options}")
     resize_quality = request.args.get("quality", default=70, type=int)
 
     if camera_name in current_app.frigate_config.cameras:

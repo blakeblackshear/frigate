@@ -24,7 +24,7 @@ from frigate.const import (
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
 )
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, RecordingsToEvents
 from frigate.types import FeatureMetricsTypes
 from frigate.util.image import area
 from frigate.util.services import get_video_properties
@@ -173,6 +173,13 @@ class RecordingMaintainer(threading.Thread):
             (INSERT_MANY_RECORDINGS, [r for r in recordings_to_insert if r is not None])
         )
 
+    def store_recording_to_event_relation(
+        self, recording_id: str, event_id: str
+    ) -> None:
+        """Store the relationship between a recording and an event in the RecordingsToEvents table."""
+        relation = RecordingsToEvents(recording=recording_id, event=event_id)
+        relation.save()
+
     async def validate_and_move_segment(
         self, camera: str, events: Event, recording: dict[str, any]
     ) -> None:
@@ -221,6 +228,7 @@ class RecordingMaintainer(threading.Thread):
         ):
             # if the cached segment overlaps with the events:
             overlaps = False
+            overlapping_event_id = None
             for event in events:
                 # if the event starts in the future, stop checking events
                 # and remove this segment
@@ -234,12 +242,13 @@ class RecordingMaintainer(threading.Thread):
                 # and stop looking at events
                 if event.end_time is None or event.end_time >= start_time.timestamp():
                     overlaps = True
+                    overlapping_event_id = event.id
                     break
 
             if overlaps:
                 record_mode = self.config.cameras[camera].record.events.retain.mode
                 # move from cache to recordings immediately
-                return await self.move_segment(
+                recording_result = await self.move_segment(
                     camera,
                     start_time,
                     end_time,
@@ -247,6 +256,24 @@ class RecordingMaintainer(threading.Thread):
                     cache_path,
                     record_mode,
                 )
+                if recording_result:
+                    try:
+                        # Store the relation in the RecordingsToEvents table
+                        self.store_recording_to_event_relation(
+                            recording_result.id, overlapping_event_id
+                        )
+                        logging.debug(
+                            f"Successfully stored relation for recording_id: {recording_result}, event_id: {overlapping_event_id} in RecordingsToEvents table"
+                        )
+                    except Exception as e:
+                        logging.error(
+                            f"Failed to store relation r:{recording_result},e:{overlapping_event_id} in RecordingsToEvents table: {str(e)}"
+                        )
+                else:
+                    logging.debug(
+                        f"No recording result available for overlapping event_id {overlapping_event_id}"
+                    )
+                return recording_result
             # if it doesn't overlap with an event, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
             else:

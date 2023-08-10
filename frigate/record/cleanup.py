@@ -66,6 +66,14 @@ class RecordingCleanup(threading.Thread):
             Recordings.delete().where(
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
+            """
+            TODO: right way
+            
+            RecordingsToEvents.update(is_deleted=True).where(
+                RecordingsToEvents.recording_id
+                << deleted_recordings_list[i : i + max_deletes]
+            ).execute()
+            """
         logger.debug("End deleted cameras.")
 
         logger.debug("Start all cameras.")
@@ -154,6 +162,14 @@ class RecordingCleanup(threading.Thread):
                 Recordings.delete().where(
                     Recordings.id << deleted_recordings_list[i : i + max_deletes]
                 ).execute()
+                """
+                TODO: right way
+                
+                RecordingsToEvents.update(is_deleted=True).where(
+                    RecordingsToEvents.recording_id
+                    << deleted_recordings_list[i : i + max_deletes]
+                ).execute()
+                """
 
             logger.debug(f"End camera: {camera}.")
 

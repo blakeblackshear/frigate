@@ -173,6 +173,14 @@ class StorageMaintainer(threading.Thread):
             Recordings.delete().where(
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
+            """
+            TODO: right way
+            
+            RecordingsToEvents.update(is_deleted=True).where(
+                RecordingsToEvents.recording_id
+                << deleted_recordings_list[i : i + max_deletes]
+            ).execute()
+            """
 
     def run(self):
         """Check every 5 minutes if storage needs to be cleaned up."""
