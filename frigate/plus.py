@@ -27,7 +27,7 @@ def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
 
     ret, jpg = cv2.imencode(".jpg", original, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
     jpg_bytes = jpg.tobytes()
-    return jpg_bytes if type(jpg_bytes) is bytes else b""
+    return jpg_bytes if isinstance(jpg_bytes, bytes) else b""
 
 
 class PlusApi:
