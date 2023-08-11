@@ -2,7 +2,6 @@
 from peewee import CharField, CompositeKey, Model
 
 
-
 def migrate(migrator, database, fake=False, **kwargs):
     """Write your migrations here."""
 
