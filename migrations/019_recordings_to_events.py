@@ -1,7 +1,6 @@
 # migrations/019_recordings_to_events.py
 from peewee import CharField, CompositeKey, Model
 
-from frigate.models import Recordings, Event
 
 
 def migrate(migrator, database, fake=False, **kwargs):
