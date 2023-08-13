@@ -271,7 +271,7 @@ You need to configure 2 paths:
 
 These instructions were tested on a QNAP with an Intel J3455 CPU and 16G RAM, running QTS 4.5.4.2117.
 
-QNAP has a graphic tool named Container Station to intall and manage docker containers.  However, there are two limitations with Container Station that make it unsuitable to install Frigate:
+QNAP has a graphic tool named Container Station to install and manage docker containers.  However, there are two limitations with Container Station that make it unsuitable to install Frigate:
 
 1. Container Station does not incorporate GitHub Container Registry (ghcr), which hosts Frigate docker image version 0.12.0 and above.
 2. Container Station uses default 64 Mb shared memory size (shm-size), and does not have a mechanism to adjust it.  Frigate requires a larger shm-size to be able to work properly with more than two high resolution cameras.
