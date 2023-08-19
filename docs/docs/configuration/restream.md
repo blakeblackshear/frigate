@@ -17,7 +17,11 @@ You can access the go2rtc webUI at `http://frigate_ip:5000/live/webrtc` which ca
 
 ### Birdseye Restream
 
-Birdseye RTSP restream can be enabled at `birdseye -> restream` and accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
+Birdseye RTSP restream can be accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the birdseye restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
+```yaml
+birdseye:
+  restream: true
+```
 
 ### Securing Restream With Authentication
 
