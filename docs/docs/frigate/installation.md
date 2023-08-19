@@ -166,7 +166,7 @@ docker run -d \
 As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
 
 There are important limitations in Home Assistant Operating System to be aware of:
-- Separate local storage for media is not yet supprted by Home Assistant
+- Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
 - Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
