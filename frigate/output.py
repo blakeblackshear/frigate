@@ -210,6 +210,8 @@ class BroadcastThread(threading.Thread):
                             ws.send(buf, binary=True)
                         except ValueError:
                             pass
+                        except ConnectionResetError as e:
+                            logger.debug(f"Websocket unexpectedly closed {e}")
             elif self.converter.process.poll() is not None:
                 break
 
