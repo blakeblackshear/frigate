@@ -212,6 +212,8 @@ class BroadcastThread(threading.Thread):
                             pass
                         except ConnectionResetError as e:
                             logger.debug(f"Websocket unexpectedly closed {e}")
+                        except BrokenPipeError as e:
+                            logger.debug(f"Websocket encountered a Broken pipe {e}")
             elif self.converter.process.poll() is not None:
                 break
 
