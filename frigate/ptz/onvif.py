@@ -106,13 +106,13 @@ class OnvifController:
             ][fov_space_id]["URI"]
 
         try:
-            move_request.Translation.Zoom.space = ptz_config["Spaces"][ 
-                "RelativeZoomTranslationSpace" 
-             ][0]["URI"] 
+            move_request.Translation.Zoom.space = ptz_config["Spaces"][
+                "RelativeZoomTranslationSpace"
+            ][0]["URI"]
         except Exception:
-            // camera does not support relative zoom
+            # camera does not support relative zoom
             pass
-        
+
         if move_request.Speed is None:
             move_request.Speed = ptz.GetStatus({"ProfileToken": profile.token}).Position
         self.cams[camera_name]["relative_move_request"] = move_request
