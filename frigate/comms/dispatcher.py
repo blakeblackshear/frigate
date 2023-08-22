@@ -52,9 +52,6 @@ class Dispatcher:
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
 
-        for comm in self.comms:
-            comm.subscribe(self._receive)
-
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
             "detect": self._on_detect_command,
@@ -66,6 +63,9 @@ class Dispatcher:
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
         }
+
+        for comm in self.comms:
+            comm.subscribe(self._receive)
 
     def _receive(self, topic: str, payload: str) -> None:
         """Handle receiving of payload from communicators."""
