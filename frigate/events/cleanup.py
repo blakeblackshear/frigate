@@ -170,6 +170,7 @@ class EventCleanup(threading.Thread):
             has_clip,
             row_number() over (
               partition by label, camera, round(start_time/5,0)*5
+              where end_time is not null
               order by end_time-start_time desc
             ) as copy_number
           from event
