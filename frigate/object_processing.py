@@ -509,13 +509,14 @@ class CameraState:
 
                 # draw the bounding boxes on the frame
                 box = obj["box"]
+                text = obj["label"] if not obj.get("sub_label") else obj["sub_label"][0]
                 draw_box_with_label(
                     frame_copy,
                     box[0],
                     box[1],
                     box[2],
                     box[3],
-                    obj["label"],
+                    text,
                     f"{obj['score']:.0%} {int(obj['area'])}",
                     thickness=thickness,
                     color=color,
