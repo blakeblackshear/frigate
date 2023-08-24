@@ -32,5 +32,23 @@ export function Snapshot({ className = 'h-6 w-6', stroke = 'currentColor', onCli
     </svg>
   );
 }
-
+export function AudioIcon({ className = 'h-6 w-6', stroke = 'currentColor', fill = 'none', onClick = () => {} }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill={fill}
+      viewBox="0 0 24 24"
+      stroke={stroke}
+      onClick={onClick}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M11 5L6 9H2v6h4l5 4V5zM19 9a2 2 0 01-2-2a2 2 0 012-2a2 2 0 012 2a2 2 0 01-2 2zm0 4a4 4 0 01-4-4a4 4 0 014-4a4 4 0 014 4a4 4 0 01-4 4zm0 4a6 6 0 01-6-6a6 6 0 016-6a6 6 0 016 6a6 6 0 01-6 6z"
+      />
+    </svg>
+  );
+}
 export default memo(Snapshot);
