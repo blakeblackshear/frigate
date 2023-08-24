@@ -89,12 +89,13 @@ def listen_to_audio(
 
 
 class AudioTfl:
-    def __init__(self, stop_event: mp.Event):
+    def __init__(self, stop_event: mp.Event, num_threads=2):
         self.stop_event = stop_event
-        self.labels = load_labels("/audio-labelmap.txt")
+        self.num_threads = num_threads
+        self.labels = load_labels("/audio-labelmap.txt", prefill=521)
         self.interpreter = Interpreter(
             model_path="/cpu_audio_model.tflite",
-            num_threads=2,
+            num_threads=self.num_threads,
         )
 
         self.interpreter.allocate_tensors()
@@ -117,7 +118,7 @@ class AudioTfl:
         count = len(scores)
 
         for i in range(count):
-            if scores[i] < 0.4 or i == 20:
+            if scores[i] < AUDIO_MIN_CONFIDENCE or i == 20:
                 break
             detections[i] = [
                 class_ids[i],
@@ -164,7 +165,7 @@ class AudioEventMaintainer(threading.Thread):
         self.inter_process_communicator = inter_process_communicator
         self.detections: dict[dict[str, any]] = feature_metrics
         self.stop_event = stop_event
-        self.detector = AudioTfl(stop_event)
+        self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
         self.logger = logging.getLogger(f"audio.{self.config.name}")
