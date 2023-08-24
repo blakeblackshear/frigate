@@ -5,7 +5,7 @@ import { ArrowDropdown } from '../icons/ArrowDropdown';
 import Heading from './Heading';
 import Button from './Button';
 import CameraIcon from '../icons/Camera';
-import { AudioIcon } from '../icons/Audio';
+import SpeakerIcon from '../icons/Speaker';
 import useSWR from 'swr';
 
 export default function MultiSelect({ className, title, options, selection, onToggle, onShowAll, onSelectSingle }) {
@@ -61,7 +61,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
                   className="max-h-[35px] mx-2"
                   onClick={() => onSelectSingle(item)}
                 >
-                  { (title === "Labels" && config.audio.listen.includes(item)) ? ( <AudioIcon /> ) : ( <CameraIcon /> ) }
+                  { (title === "Labels" && config.audio.listen.includes(item)) ? ( <SpeakerIcon /> ) : ( <CameraIcon /> ) }
                   
                 </Button>
               </div>
