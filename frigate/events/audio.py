@@ -199,7 +199,7 @@ class AudioEventMaintainer(threading.Thread):
                     continue
 
                 if score > dict((self.config.audio.filters or {}).get(label, {})).get(
-                    "threshold", 0.8
+                    "threshold", AUDIO_MIN_CONFIDENCE
                 ):
                     self.handle_detection(label, score)
 

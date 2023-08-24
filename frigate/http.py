@@ -38,6 +38,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
+from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Event, Recordings, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
@@ -903,7 +904,7 @@ def create_event(camera_name, label):
         event_id = current_app.external_processor.create_manual_event(
             camera_name,
             label,
-            json.get("source_type", "api"),
+            json.get("source_type", EventTypeEnum.api),
             json.get("sub_label", None),
             json.get("score", 0),
             json.get("duration", 30),
