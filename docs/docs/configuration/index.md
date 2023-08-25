@@ -579,7 +579,7 @@ cameras:
         # Required: Begin automatically tracking an object when it enters any of the listed zones.
         required_zones:
           - zone_name
-        # Required: Name of ONVIF camera preset to return to when tracking is over.
+        # Required: Name of ONVIF preset in camera's firmware to return to when tracking is over. (default: shown below)
         return_preset: preset_name
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
