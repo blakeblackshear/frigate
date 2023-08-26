@@ -71,22 +71,22 @@ ENV CCACHE_MAXSIZE 2G
 
 # Build libUSB without udev.  Needed for Openvino NCS2 support
 WORKDIR /opt
-RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache
-RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.25.zip -O v1.0.25.zip && \
-    unzip v1.0.25.zip && cd libusb-1.0.25 && \
+RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache pkg-config
+RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.26.zip -O v1.0.26.zip && \
+    unzip v1.0.26.zip && cd libusb-1.0.26 && \
     ./bootstrap.sh && \
     ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
     make -j $(nproc --all)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libusb-1.0-0-dev && \
     rm -rf /var/lib/apt/lists/*
-WORKDIR /opt/libusb-1.0.25/libusb
+WORKDIR /opt/libusb-1.0.26/libusb
 RUN /bin/mkdir -p '/usr/local/lib' && \
     /bin/bash ../libtool  --mode=install /usr/bin/install -c libusb-1.0.la '/usr/local/lib' && \
     /bin/mkdir -p '/usr/local/include/libusb-1.0' && \
     /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
     /bin/mkdir -p '/usr/local/lib/pkgconfig' && \
-    cd  /opt/libusb-1.0.25/ && \
+    cd  /opt/libusb-1.0.26/ && \
     /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
     ldconfig
 
