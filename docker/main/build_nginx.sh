@@ -60,6 +60,7 @@ cd /tmp/nginx
     --with-file-aio \
     --with-http_sub_module \
     --with-http_ssl_module \
+    --with-http_v2_module \
     --with-threads \
     --add-module=../nginx-vod-module \
     --add-module=../nginx-secure-token-module \
