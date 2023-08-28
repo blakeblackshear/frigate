@@ -89,6 +89,17 @@ class OnvifController:
             None,
         )
 
+        zoom_space_id = next(
+            (
+                i
+                for i, space in enumerate(
+                    ptz_config.Spaces.RelativeZoomTranslationSpace
+                )
+                if "TranslationGenericSpace" in space["URI"]
+            ),
+            None,
+        )
+
         # setup continuous moving request
         move_request = ptz.create_type("ContinuousMove")
         move_request.ProfileToken = profile.token
@@ -104,9 +115,10 @@ class OnvifController:
             move_request.Translation.PanTilt.space = ptz_config["Spaces"][
                 "RelativePanTiltTranslationSpace"
             ][fov_space_id]["URI"]
-            move_request.Translation.Zoom.space = ptz_config["Spaces"][
-                "RelativeZoomTranslationSpace"
-            ][0]["URI"]
+            if zoom_space_id is not None:
+                move_request.Translation.Zoom.space = ptz_config["Spaces"][
+                    "RelativeZoomTranslationSpace"
+                ][0]["URI"]
         if move_request.Speed is None:
             move_request.Speed = ptz.GetStatus({"ProfileToken": profile.token}).Position
         self.cams[camera_name]["relative_move_request"] = move_request
@@ -152,8 +164,6 @@ class OnvifController:
             self.cams[camera_name][
                 "relative_fov_range"
             ] = ptz_config.Spaces.RelativePanTiltTranslationSpace[fov_space_id]
-
-        self.cams[camera_name]["relative_fov_supported"] = fov_space_id is not None
 
         self.cams[camera_name]["features"] = supported_features
 
@@ -204,8 +214,8 @@ class OnvifController:
 
         onvif.get_service("ptz").ContinuousMove(move_request)
 
-    def _move_relative(self, camera_name: str, pan, tilt, speed) -> None:
-        if not self.cams[camera_name]["relative_fov_supported"]:
+    def _move_relative(self, camera_name: str, pan, tilt, zoom, speed) -> None:
+        if "pt-r-fov" not in self.cams[camera_name]["features"]:
             logger.error(f"{camera_name} does not support ONVIF RelativeMove (FOV).")
             return
 
@@ -251,12 +261,14 @@ class OnvifController:
                 "x": speed,
                 "y": speed,
             },
-            "Zoom": 0,
         }
 
         move_request.Translation.PanTilt.x = pan
         move_request.Translation.PanTilt.y = tilt
-        move_request.Translation.Zoom.x = 0
+
+        if "zoom-r" in self.cams[camera_name]["features"]:
+            move_request.Speed["Zoom"] = 0
+            move_request.Translation.Zoom.x = zoom
 
         onvif.get_service("ptz").RelativeMove(move_request)
 

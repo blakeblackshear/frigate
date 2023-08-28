@@ -176,7 +176,7 @@ class PtzAutoTracker:
 
                 return
 
-            if not self.onvif.cams[camera_name]["relative_fov_supported"]:
+            if "pt-r-fov" not in self.onvif.cams[camera_name]["features"]:
                 cam.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
                 logger.warning(
@@ -219,7 +219,7 @@ class PtzAutoTracker:
                     # on some cameras with cheaper motors it seems like small values can cause jerky movement
                     # TODO: double check, might not need this
                     if abs(pan) > 0.02 or abs(tilt) > 0.02:
-                        self.onvif._move_relative(camera, pan, tilt, 1)
+                        self.onvif._move_relative(camera, pan, tilt, 0, 1)
                     else:
                         logger.debug(
                             f"Not moving, pan and tilt too small: {pan}, {tilt}"
