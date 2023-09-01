@@ -42,8 +42,6 @@ detectors:
   coral:
     type: edgetpu
     device: usb
-    model:
-      path: "/custom_model.tflite"
 ```
 
 ### Multiple USB Corals
