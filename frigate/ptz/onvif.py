@@ -33,6 +33,7 @@ class OnvifController:
         self, config: FrigateConfig, ptz_metrics: dict[str, PTZMetricsTypes]
     ) -> None:
         self.cams: dict[str, ONVIFCamera] = {}
+        self.config = config
         self.ptz_metrics = ptz_metrics
 
         for cam_name, cam in config.cameras.items():
@@ -93,16 +94,17 @@ class OnvifController:
             None,
         )
 
-        zoom_space_id = next(
-            (
-                i
-                for i, space in enumerate(
-                    ptz_config.Spaces.RelativeZoomTranslationSpace
-                )
-                if "TranslationGenericSpace" in space["URI"]
-            ),
-            None,
-        )
+        if self.config.cameras[camera_name].onvif.autotracking.zooming:
+            zoom_space_id = next(
+                (
+                    i
+                    for i, space in enumerate(
+                        ptz_config.Spaces.RelativeZoomTranslationSpace
+                    )
+                    if "TranslationGenericSpace" in space["URI"]
+                ),
+                None,
+            )
 
         # setup continuous moving request
         move_request = ptz.create_type("ContinuousMove")
@@ -121,12 +123,17 @@ class OnvifController:
             ][fov_space_id]["URI"]
 
         try:
-            if zoom_space_id is not None:
-                move_request.Translation.Zoom.space = ptz_config["Spaces"][
-                    "RelativeZoomTranslationSpace"
-                ][0]["URI"]
+            if self.config.cameras[camera_name].onvif.autotracking.zooming:
+                if zoom_space_id is not None:
+                    move_request.Translation.Zoom.space = ptz_config["Spaces"][
+                        "RelativeZoomTranslationSpace"
+                    ][0]["URI"]
         except Exception:
             # camera does not support relative zoom
+            self.config.cameras[camera_name].onvif.autotracking.zooming = False
+            logger.warning(
+                f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
+            )
             pass
 
         if move_request.Speed is None:
@@ -351,7 +358,7 @@ class OnvifController:
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["relative_move_request"]
 
-        # function takes in -1 to 1 for zoom, interpolate to the values of the camera.
+        # function takes in -1 to 1 for zoom, interpolate to the relative values of the camera.
         zoom = numpy.interp(
             zoom,
             [-1, 1],
@@ -449,26 +456,32 @@ class OnvifController:
                 ].value = datetime.datetime.now().timestamp()
                 self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
 
-        logger.debug(f"PTZ zoom level: {status.Position.Zoom.x}")
-        self.ptz_metrics[camera_name]["ptz_zoom_level"].value = numpy.interp(
-            status.Position.Zoom.x,
-            [
-                self.cams[camera_name]["zoom_limits"]["Range"]["XRange"]["Min"],
-                self.cams[camera_name]["zoom_limits"]["Range"]["XRange"]["Max"],
-            ],
-            [
-                self.cams[camera_name]["relative_zoom_range"]["XRange"]["Min"],
-                self.cams[camera_name]["relative_zoom_range"]["XRange"]["Max"],
-            ],
-        )
-        logger.debug(
-            f"Relative zoom level: {self.ptz_metrics[camera_name]['ptz_zoom_level'].value}"
-        )
+        if self.config.cameras[camera_name].onvif.autotracking.zooming:
+            # interpolate the actual zoom level reported by the camera into the relative zoom range
+            self.ptz_metrics[camera_name]["ptz_zoom_level"].value = numpy.interp(
+                status.Position.Zoom.x,
+                [
+                    self.cams[camera_name]["zoom_limits"]["Range"]["XRange"]["Min"],
+                    self.cams[camera_name]["zoom_limits"]["Range"]["XRange"]["Max"],
+                ],
+                [
+                    self.cams[camera_name]["relative_zoom_range"]["XRange"]["Min"],
+                    self.cams[camera_name]["relative_zoom_range"]["XRange"]["Max"],
+                ],
+            )
+            logger.debug(f"Actual zoom level: {status.Position.Zoom.x}")
+            logger.debug(
+                f"Relative zoom level: {self.ptz_metrics[camera_name]['ptz_zoom_level'].value}"
+            )
 
         return {
             "pan": status.Position.PanTilt.x,
             "tilt": status.Position.PanTilt.y,
-            "zoom": status.Position.Zoom.x,
+            "zoom": status.Position.Zoom.x
+            if self.config.cameras[camera_name].onvif.autotracking.zooming
+            else 0,
             "pantilt_moving": status.MoveStatus.PanTilt,
-            "zoom_moving": status.MoveStatus.Zoom,
+            "zoom_moving": status.MoveStatus.Zoom
+            if self.config.cameras[camera_name].onvif.autotracking.zooming
+            else "IDLE",
         }

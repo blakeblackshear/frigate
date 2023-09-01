@@ -11,7 +11,11 @@ from multiprocessing.synchronize import Event as MpEvent
 
 import cv2
 import numpy as np
-from norfair.camera_motion import HomographyTransformationGetter, MotionEstimator
+from norfair.camera_motion import (
+    HomographyTransformationGetter,
+    MotionEstimator,
+    TranslationTransformationGetter,
+)
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.ptz.onvif import OnvifController
@@ -54,13 +58,22 @@ class PtzMotionEstimator:
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics["ptz_reset"].is_set():
             self.ptz_metrics["ptz_reset"].clear()
-            logger.debug("Motion estimator reset")
             # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
-            self.norfair_motion_estimator = MotionEstimator(
-                transformations_getter=HomographyTransformationGetter(),
-                min_distance=30,
-                max_points=900,
-            )
+            if self.camera_config.onvif.autotracking.zooming:
+                logger.debug("Motion estimator reset - homography")
+                self.norfair_motion_estimator = MotionEstimator(
+                    transformations_getter=HomographyTransformationGetter(),
+                    min_distance=30,
+                    max_points=900,
+                )
+            else:
+                logger.debug("Motion estimator reset - translation")
+                self.norfair_motion_estimator = MotionEstimator(
+                    transformations_getter=TranslationTransformationGetter(),
+                    min_distance=30,
+                    max_points=900,
+                )
+
             self.coord_transformations = None
 
         if ptz_moving_at_frame_time(
@@ -97,10 +110,11 @@ class PtzMotionEstimator:
 
             self.frame_manager.close(frame_id)
 
-            # doesn't work with homography
-            # logger.debug(
-            #     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
-            # )
+            if not self.camera_config.onvif.autotracking.zooming:
+                # doesn't work with homography
+                logger.debug(
+                    f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
+                )
 
         return self.coord_transformations
 
@@ -265,26 +279,30 @@ class PtzAutoTracker:
     def _autotrack_zoom_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
-        # frame width and height
-        camera_width = camera_config.frame_shape[1]
-        camera_height = camera_config.frame_shape[0]
+        if camera_config.onvif.autotracking.zooming:
+            # frame width and height
+            camera_width = camera_config.frame_shape[1]
+            camera_height = camera_config.frame_shape[0]
 
-        bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
+            bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
 
-        zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
+            zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
-        if -1 <= zoom_level < 1:
-            if (
-                bb_left > 0.1 * camera_width
-                and bb_right < 0.9 * camera_width
-                and bb_top > 0.1 * camera_height
-                and bb_bottom < 0.9 * camera_height
-            ):
-                zoom = 0.1  # Zoom in
-            else:
-                zoom = -0.1  # Zoom out
+            # ensure zooming level is in range
+            # if so, check if bounding box is 10% of an edge
+            # if so, try zooming in, otherwise try zooming out
+            if -1 <= zoom_level < 1:
+                if (
+                    bb_left > 0.1 * camera_width
+                    and bb_right < 0.9 * camera_width
+                    and bb_top > 0.1 * camera_height
+                    and bb_bottom < 0.9 * camera_height
+                ):
+                    zoom = 0.1  # Zoom in
+                else:
+                    zoom = -0.1  # Zoom out
 
-            self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
+                self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]

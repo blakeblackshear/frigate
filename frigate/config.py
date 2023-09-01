@@ -139,6 +139,7 @@ class MqttConfig(FrigateBaseModel):
 
 class PtzAutotrackConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
+    zooming: bool = Field(default=False, title="Enable zooming on autotracked object.")
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(
         default_factory=list,
