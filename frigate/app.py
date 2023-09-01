@@ -625,7 +625,7 @@ class FrigateApp:
         signal.signal(signal.SIGTERM, receiveSignal)
 
         try:
-            self.flask_app.run(host="127.0.0.1", port=5001, debug=False)
+            self.flask_app.run(host="127.0.0.1", port=5001, debug=False, threaded=True)
         except KeyboardInterrupt:
             pass
 
