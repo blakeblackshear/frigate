@@ -434,7 +434,11 @@ class OnvifController:
         status_request = self.cams[camera_name]["status_request"]
         status = onvif.get_service("ptz").GetStatus(status_request)
 
-        if status.MoveStatus.PanTilt == "IDLE" and status.MoveStatus.Zoom == "IDLE":
+        # zooming is optional
+        pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
+        zoom_status = getattr(status.MoveStatus, "Zoom", None)
+
+        if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
             self.cams[camera_name]["active"] = False
             if not self.ptz_metrics[camera_name]["ptz_stopped"].is_set():
                 self.ptz_metrics[camera_name]["ptz_stopped"].set()

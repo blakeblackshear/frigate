@@ -58,21 +58,20 @@ class PtzMotionEstimator:
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics["ptz_reset"].is_set():
             self.ptz_metrics["ptz_reset"].clear()
+
             # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
             if self.camera_config.onvif.autotracking.zooming:
                 logger.debug("Motion estimator reset - homography")
-                self.norfair_motion_estimator = MotionEstimator(
-                    transformations_getter=HomographyTransformationGetter(),
-                    min_distance=30,
-                    max_points=900,
-                )
+                transformation_type = HomographyTransformationGetter()
             else:
                 logger.debug("Motion estimator reset - translation")
-                self.norfair_motion_estimator = MotionEstimator(
-                    transformations_getter=TranslationTransformationGetter(),
-                    min_distance=30,
-                    max_points=900,
-                )
+                transformation_type = TranslationTransformationGetter()
+
+            self.norfair_motion_estimator = MotionEstimator(
+                transformations_getter=transformation_type,
+                min_distance=30,
+                max_points=900,
+            )
 
             self.coord_transformations = None
 
