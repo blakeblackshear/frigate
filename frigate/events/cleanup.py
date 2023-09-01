@@ -168,6 +168,7 @@ class EventCleanup(threading.Thread):
             camera,
             has_snapshot,
             has_clip,
+            end_time,
             row_number() over (
               partition by label, camera, round(start_time/5,0)*5
               order by end_time-start_time desc
@@ -176,7 +177,7 @@ class EventCleanup(threading.Thread):
         )
 
         select distinct id, camera, has_snapshot, has_clip from grouped_events
-        where copy_number > 1;"""
+        where copy_number > 1 and end_time not null;"""
 
         duplicate_events = Event.raw(duplicate_query)
         for event in duplicate_events:
