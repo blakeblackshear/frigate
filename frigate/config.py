@@ -444,6 +444,7 @@ class AudioConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         title="Keep track of original state of audio detection."
     )
+    num_threads: int = Field(default=2, title="Number of detection threads", ge=1)
 
 
 class BirdseyeModeEnum(str, Enum):

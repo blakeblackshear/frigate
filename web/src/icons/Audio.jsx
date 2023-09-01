@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-export function Snapshot({ className = 'h-6 w-6', stroke = 'currentColor', onClick = () => {} }) {
+export function Audio({ className = 'h-6 w-6', stroke = 'currentColor', onClick = () => {} }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -33,4 +33,4 @@ export function Snapshot({ className = 'h-6 w-6', stroke = 'currentColor', onCli
   );
 }
 
-export default memo(Snapshot);
+export default memo(Audio);

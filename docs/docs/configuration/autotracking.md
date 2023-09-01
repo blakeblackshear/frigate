@@ -11,7 +11,7 @@ Once Frigate determines that an object is not a false positive and has entered o
 
 Upon loss of tracking, Frigate will scan the region of the lost object for `timeout` seconds. If an object of the same type is found in that region, Frigate will autotrack that new object.
 
-When tracking has ended, Frigate will return to the camera preset specified by the `return_preset` configuration entry.
+When tracking has ended, Frigate will return to the camera firmware's PTZ preset specified by the `return_preset` configuration entry.
 
 ## Checking ONVIF camera support
 
@@ -23,7 +23,7 @@ Alternatively, you can download and run [this simple Python script](https://gist
 
 ## Configuration
 
-First, set up a PTZ preset in your camera's firmware and give it a name.
+First, set up a PTZ preset in your camera's firmware and give it a name. If you're unsure how to do this, consult the documentation for your camera manufacturer's firmware. Some tutorials for common brands: [Amcrest](https://www.youtube.com/watch?v=lJlE9-krmrM), [Reolink](https://www.youtube.com/watch?v=VAnxHUY5i5w), [Dahua](https://www.youtube.com/watch?v=7sNbc5U-k54).
 
 Edit your Frigate configuration file and enter the ONVIF parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
 
@@ -56,7 +56,7 @@ cameras:
         # Required: Begin automatically tracking an object when it enters any of the listed zones.
         required_zones:
           - zone_name
-        # Required: Name of ONVIF camera preset to return to when tracking is over. (default: shown below)
+        # Required: Name of ONVIF preset in camera's firmware to return to when tracking is over. (default: shown below)
         return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10

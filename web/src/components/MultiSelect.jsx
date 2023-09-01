@@ -5,6 +5,8 @@ import { ArrowDropdown } from '../icons/ArrowDropdown';
 import Heading from './Heading';
 import Button from './Button';
 import CameraIcon from '../icons/Camera';
+import SpeakerIcon from '../icons/Speaker';
+import useSWR from 'swr';
 
 export default function MultiSelect({ className, title, options, selection, onToggle, onShowAll, onSelectSingle }) {
   const popupRef = useRef(null);
@@ -18,7 +20,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
   };
 
   const menuHeight = Math.round(window.innerHeight * 0.55);
-
+  const { data: config } = useSWR('config');
   return (
     <div className={`${className} p-2`} ref={popupRef}>
       <div className="flex justify-between min-w-[120px]" onClick={() => setState({ showMenu: true })}>
@@ -59,7 +61,8 @@ export default function MultiSelect({ className, title, options, selection, onTo
                   className="max-h-[35px] mx-2"
                   onClick={() => onSelectSingle(item)}
                 >
-                  <CameraIcon />
+                  { (title === "Labels" && config.audio.listen.includes(item)) ? ( <SpeakerIcon /> ) : ( <CameraIcon /> ) }
+                  
                 </Button>
               </div>
             </div>

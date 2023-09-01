@@ -134,7 +134,7 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
-def load_labels(path, encoding="utf-8"):
+def load_labels(path, encoding="utf-8", prefill=91):
     """Loads labels from file (with or without index numbers).
     Args:
       path: path to label file.
@@ -143,7 +143,7 @@ def load_labels(path, encoding="utf-8"):
       Dictionary mapping indices to labels.
     """
     with open(path, "r", encoding=encoding) as f:
-        labels = {index: "unknown" for index in range(91)}
+        labels = {index: "unknown" for index in range(prefill)}
         lines = f.readlines()
         if not lines:
             return {}

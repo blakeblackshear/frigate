@@ -58,6 +58,7 @@ module.exports = {
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
+      "troubleshooting/recordings",
     ],
     Development: [
       "development/contributing",

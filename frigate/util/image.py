@@ -4,6 +4,7 @@ import datetime
 import logging
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
+from string import printable
 from typing import AnyStr, Optional
 
 import cv2
@@ -152,6 +153,11 @@ def draw_box_with_label(
         color=(0, 0, 0),
         thickness=2,
     )
+
+
+def is_label_printable(label) -> bool:
+    """Check if label is printable."""
+    return not bool(set(label) - set(printable))
 
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier=2):
