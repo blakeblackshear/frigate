@@ -11,7 +11,7 @@ from multiprocessing.synchronize import Event as MpEvent
 
 import cv2
 import numpy as np
-from norfair.camera_motion import MotionEstimator, TranslationTransformationGetter
+from norfair.camera_motion import HomographyTransformationGetter, MotionEstimator
 
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.ptz.onvif import OnvifController
@@ -57,7 +57,7 @@ class PtzMotionEstimator:
             logger.debug("Motion estimator reset")
             # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
             self.norfair_motion_estimator = MotionEstimator(
-                transformations_getter=TranslationTransformationGetter(),
+                transformations_getter=HomographyTransformationGetter(),
                 min_distance=30,
                 max_points=900,
             )
@@ -97,9 +97,10 @@ class PtzMotionEstimator:
 
             self.frame_manager.close(frame_id)
 
-            logger.debug(
-                f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
-            )
+            # doesn't work with homography
+            # logger.debug(
+            #     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
+            # )
 
         return self.coord_transformations
 
@@ -200,7 +201,7 @@ class PtzAutoTracker:
         while True:
             try:
                 move_data = self.move_queues[camera].get()
-                frame_time, pan, tilt = move_data
+                frame_time, pan, tilt, zoom = move_data
 
                 # if we're receiving move requests during a PTZ move, ignore them
                 if ptz_moving_at_frame_time(
@@ -211,15 +212,18 @@ class PtzAutoTracker:
                     # instead of dequeueing this might be a good place to preemptively move based
                     # on an estimate - for fast moving objects, etc.
                     logger.debug(
-                        f"Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, final pan: {pan}, final tilt: {tilt}"
+                        f"Move queue: PTZ moving, dequeueing move request - frame time: {frame_time}, final pan: {pan}, final tilt: {tilt}, final zoom: {zoom}"
                     )
                     continue
 
                 else:
+                    if abs(zoom) > 0:
+                        self.onvif._zoom_relative(camera, zoom, 1)
+
                     # on some cameras with cheaper motors it seems like small values can cause jerky movement
                     # TODO: double check, might not need this
                     if abs(pan) > 0.02 or abs(tilt) > 0.02:
-                        self.onvif._move_relative(camera, pan, tilt, 0, 1)
+                        self.onvif._move_relative(camera, pan, tilt, 1)
                     else:
                         logger.debug(
                             f"Not moving, pan and tilt too small: {pan}, {tilt}"
@@ -233,13 +237,15 @@ class PtzAutoTracker:
             except queue.Empty:
                 continue
 
-    def _enqueue_move(self, camera, frame_time, pan, tilt):
-        move_data = (frame_time, pan, tilt)
+    def _enqueue_move(self, camera, frame_time, pan, tilt, zoom):
+        move_data = (frame_time, pan, tilt, zoom)
         if (
             frame_time > self.ptz_metrics[camera]["ptz_start_time"].value
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
         ):
-            logger.debug(f"enqueue pan: {pan}, enqueue tilt: {tilt}")
+            logger.debug(
+                f"enqueue pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
+            )
             self.move_queues[camera].put(move_data)
 
     def _autotrack_move_ptz(self, camera, obj):
@@ -254,7 +260,31 @@ class PtzAutoTracker:
         tilt = (0.5 - (obj.obj_data["centroid"][1] / camera_height)) * 2
 
         # ideas: check object velocity for camera speed?
-        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt)
+        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, 0)
+
+    def _autotrack_zoom_ptz(self, camera, obj):
+        camera_config = self.config.cameras[camera]
+
+        # frame width and height
+        camera_width = camera_config.frame_shape[1]
+        camera_height = camera_config.frame_shape[0]
+
+        bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
+
+        zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
+
+        if -1 <= zoom_level < 1:
+            if (
+                bb_left > 0.1 * camera_width
+                and bb_right < 0.9 * camera_width
+                and bb_top > 0.1 * camera_height
+                and bb_bottom < 0.9 * camera_height
+            ):
+                zoom = 0.1  # Zoom in
+            else:
+                zoom = -0.1  # Zoom out
+
+            self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
@@ -331,6 +361,10 @@ class PtzAutoTracker:
                     logger.debug(
                         f"Autotrack: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                     )
+
+                    # no need to move, but try zooming
+                    self._autotrack_zoom_ptz(camera, obj)
+
                     return
 
                 logger.debug(
@@ -338,6 +372,9 @@ class PtzAutoTracker:
                 )
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self._autotrack_move_ptz(camera, obj)
+
+                # try zooming too
+                self._autotrack_zoom_ptz(camera, obj)
 
                 return
 
