@@ -50,6 +50,8 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
+        # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
+        zooming: False
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -71,6 +73,8 @@ The object tracker in Frigate estimates the motion of the PTZ so that tracked ob
 A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. If Frigate already has trouble keeping track of your object, the autotracker will struggle as well.
 
 The autotracker will add PTZ motion requests to a queue while the motor is moving. Once the motor stops, the events in the queue will be executed together as one large move (rather than incremental moves). If your PTZ's motor is slow, you may not be able to reliably autotrack fast moving objects.
+
+Zooming is an experimental feature. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
 
 ## Usage applications
 

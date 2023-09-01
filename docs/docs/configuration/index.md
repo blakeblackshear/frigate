@@ -573,6 +573,8 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
+        # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
+        zooming: False
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
