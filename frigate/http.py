@@ -1617,7 +1617,36 @@ def vod_event(id):
     methods=["POST"],
 )
 def export_recording(camera_name: str, start_time, end_time):
-    playback_factor = request.get_json(silent=True).get("playback", "realtime")
+    if not camera_name or not current_app.frigate_config.cameras.get(camera_name):
+        return make_response(
+            jsonify(
+                {"success": False, "message": f"{camera_name} is not a valid camera."}
+            ),
+            404,
+        )
+
+    json = request.get_json(silent=True)
+
+    if json:
+        playback_factor = json.get("playback", "realtime")
+    else:
+        playback_factor = "realtime"
+
+    recordings_count = (
+        Recordings.select()
+        .where(
+            Recordings.start_time.between(start_time, end_time)
+            | Recordings.end_time.between(start_time, end_time)
+            | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
+        )
+        .where(Recordings.camera == camera_name)
+        .order_by(Recordings.start_time.asc())
+        .count()
+    )
+
+    if recordings_count <= 0:
+        return "No recordings found for time range", 400
+
     exporter = RecordingExporter(
         current_app.frigate_config,
         camera_name,

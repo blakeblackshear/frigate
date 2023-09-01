@@ -52,11 +52,17 @@ export default function Export() {
 
     axios
       .post(`export/${camera}/start/${start}/end/${end}`, { playback })
-      .then(() => {
-        setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
+      .then((response) => {
+        if (response.status == 200) {
+          setMessage({ text: 'Successfully started export. View the file in the /exports folder.', error: false });
+        }
       })
       .catch((error) => {
-        setMessage({ text: `Failed to start export: ${error.response.data.message}`, error: true });
+        if (error.response) {
+          setMessage({ text: `Failed to start export: ${error.response.data.message}`, error: true });
+        } else {
+          setMessage({ text: `Failed to start export: ${error.message}`, error: true });
+        }
       });
   };
 
