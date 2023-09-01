@@ -1636,7 +1636,6 @@ def export_recording(camera_name: str, start_time, end_time):
             | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
         )
         .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
         .count()
     )
 
