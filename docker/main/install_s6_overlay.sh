@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-s6_version="3.1.4.1"
+s6_version="3.1.5.0"
 
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     s6_arch="x86_64"
