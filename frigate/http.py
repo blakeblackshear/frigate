@@ -1625,12 +1625,8 @@ def export_recording(camera_name: str, start_time, end_time):
             404,
         )
 
-    json = request.get_json(silent=True)
-
-    if json:
-        playback_factor = json.get("playback", "realtime")
-    else:
-        playback_factor = "realtime"
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    playback_factor = json.get("playback", "realtime")
 
     recordings_count = (
         Recordings.select()
