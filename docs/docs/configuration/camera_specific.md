@@ -80,8 +80,8 @@ cameras:
     rtmp:
       enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
-      width: # <- optional, by default Frigate tries to automatically detect resolution 
-      height: # <- optional, by default Frigate tries to automatically detect resolution 
+      width: # <- optional, by default Frigate tries to automatically detect resolution
+      height: # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
 ### Blue Iris RTSP Cameras
@@ -117,11 +117,11 @@ cameras:
   reolink:
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub?video=copy
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -140,7 +140,7 @@ go2rtc:
       - rtspx://192.168.1.1:7441/abcdefghijk
 ```
 
-[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.6.2#source-rtsp)
+[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.7.1#source-rtsp)
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp if used directly with unifi protect.
 
