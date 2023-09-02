@@ -105,7 +105,9 @@ for name in go2rtc_config.get("streams", {}):
                 **FRIGATE_ENV_VARS
             )
         except KeyError as e:
-            print("[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info.")
+            print(
+                "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
+            )
             sys.exit(e)
 
     elif isinstance(stream, list):
@@ -113,7 +115,9 @@ for name in go2rtc_config.get("streams", {}):
             try:
                 go2rtc_config["streams"][name][i] = stream.format(**FRIGATE_ENV_VARS)
             except KeyError as e:
-                print("[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info.")
+                print(
+                    "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
+                )
                 sys.exit(e)
 
 # add birdseye restream stream if enabled
