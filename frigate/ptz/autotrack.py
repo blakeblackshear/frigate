@@ -230,8 +230,8 @@ class PtzAutoTracker:
                     continue
 
                 else:
-                    if abs(zoom) > 0:
-                        self.onvif._zoom_relative(camera, zoom, 1)
+                    if zoom > 0:
+                        self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # on some cameras with cheaper motors it seems like small values can cause jerky movement
                     # TODO: double check, might not need this
@@ -290,16 +290,16 @@ class PtzAutoTracker:
             # ensure zooming level is in range
             # if so, check if bounding box is 10% of an edge
             # if so, try zooming in, otherwise try zooming out
-            if -1 <= zoom_level < 1:
+            if 0 < zoom_level <= 1:
                 if (
                     bb_left > 0.1 * camera_width
                     and bb_right < 0.9 * camera_width
                     and bb_top > 0.1 * camera_height
                     and bb_bottom < 0.9 * camera_height
                 ):
-                    zoom = 0.1  # Zoom in
+                    zoom = min(1.0, zoom_level + 0.1)
                 else:
-                    zoom = -0.1  # Zoom out
+                    zoom = max(0.0, zoom_level - 0.1)
 
                 self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
