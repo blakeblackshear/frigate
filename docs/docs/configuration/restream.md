@@ -136,6 +136,22 @@ cameras:
             - detect
 ```
 
+## HomeKit Restream
+
+Restreaming to HomeKit is supported but there are some requirements:
+- Frigate must be run in host mode, this means that this feature is not supported in the addon
+- Only h264 video / opus audio is supported
+
+```yaml
+go2rtc:
+  streams:
+    your_camera: rtsp://192.168.1.5:554/live0
+  homekit:
+    your_camera:  # same stream ID from streams list, default PIN - 195502224
+```
+
+For more information [see the go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.7.0#module-homekit)
+
 ## Advanced Restream Configurations
 
 The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.7.0#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
