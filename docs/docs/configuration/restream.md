@@ -147,7 +147,7 @@ go2rtc:
   streams:
     your_camera: rtsp://192.168.1.5:554/live0
   homekit:
-    your_camera:  # same stream ID from streams list, default PIN - 195502224
+    your_camera:  # same stream ID from streams list, default PIN - 19550224
 ```
 
 For more information [see the go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.7.0#module-homekit)
