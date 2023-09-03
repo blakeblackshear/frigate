@@ -288,14 +288,16 @@ class PtzAutoTracker:
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
             # ensure zooming level is in range
-            # if so, check if bounding box is 10% of an edge
+            # if so, check if bounding box is 20% of an edge
             # if so, try zooming in, otherwise try zooming out
+            edge_threshold = 0.2
+
             if 0 < zoom_level <= 1:
                 if (
-                    bb_left > 0.1 * camera_width
-                    and bb_right < 0.9 * camera_width
-                    and bb_top > 0.1 * camera_height
-                    and bb_bottom < 0.9 * camera_height
+                    bb_left > edge_threshold * camera_width
+                    and bb_right < (1 - edge_threshold) * camera_width
+                    and bb_top > edge_threshold * camera_height
+                    and bb_bottom < (1 - edge_threshold) * camera_height
                 ):
                     zoom = min(1.0, zoom_level + 0.1)
                 else:
