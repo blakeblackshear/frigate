@@ -282,15 +282,17 @@ class PtzAutoTracker:
             # frame width and height
             camera_width = camera_config.frame_shape[1]
             camera_height = camera_config.frame_shape[0]
+            camera_area = camera_width * camera_height
 
             bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
 
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
             # ensure zooming level is in range
-            # if so, check if bounding box is 20% of an edge
+            # if so, check if bounding box is 10% of an edge
             # if so, try zooming in, otherwise try zooming out
-            edge_threshold = 0.2
+            edge_threshold = 0.1
+            area_threshold = 0.6
 
             if 0 < zoom_level <= 1:
                 if (
@@ -298,12 +300,14 @@ class PtzAutoTracker:
                     and bb_right < (1 - edge_threshold) * camera_width
                     and bb_top > edge_threshold * camera_height
                     and bb_bottom < (1 - edge_threshold) * camera_height
+                    and obj.obj_data["area"] < area_threshold * camera_area
                 ):
                     zoom = min(1.0, zoom_level + 0.1)
                 else:
                     zoom = max(0.0, zoom_level - 0.1)
 
-                self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
+                if zoom != zoom_level:
+                    self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
