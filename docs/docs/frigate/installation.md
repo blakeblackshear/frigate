@@ -149,12 +149,14 @@ docker run -d \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
-## Home Assistant Operating System (HassOS)
+## Home Assistant Addon
 
 :::caution
 
+As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
+
 There are important limitations in Home Assistant Operating System to be aware of:
-- Utilizing external storage for recordings or snapshots requires [modifying udev rules manually](https://community.home-assistant.io/t/solved-mount-usb-drive-in-hassio-to-be-used-on-the-media-folder-with-udev-customization/258406/46).
+- Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
 - Nvidia GPUs are not supported because addons do not support the nvidia runtime.
 
@@ -162,7 +164,7 @@ There are important limitations in Home Assistant Operating System to be aware o
 
 :::tip
 
-If possible, it is recommended to run Frigate standalone in Docker and use [Frigate's Proxy Addon](https://github.com/blakeblackshear/frigate-hass-addons/blob/main/frigate_proxy/README.md).
+See [the network storage guide](/guides/ha_network_storage.md) for instructions to setup network storage for frigate.
 
 :::
 
@@ -185,32 +187,6 @@ There are several versions of the addon available:
 | Frigate NVR Beta               | Beta release with protection mode on                       |
 | Frigate NVR Beta (Full Access) | Beta release with the option to disable protection mode    |
 
-## Home Assistant Supervised
-
-:::caution
-
-There are important limitations in Home Assistant Supervised to be aware of:
-- Nvidia GPUs are not supported because addons do not support the nvidia runtime.
-
-:::
-
-:::tip
-
-If possible, it is recommended to run Frigate standalone in Docker and use [Frigate's Proxy Addon](https://github.com/blakeblackshear/frigate-hass-addons/blob/main/frigate_proxy/README.md).
-
-:::
-
-When running Home Assistant with the [Supervised install method](https://github.com/home-assistant/supervised-installer), you can get the benefit of running the Addon along with the ability to customize the storage used by Frigate.
-
-In order to customize the storage location for Frigate, simply use `fstab` to mount the drive you want at `/usr/share/hassio/media`. Here is an example fstab entry:
-
-```shell
-UUID=1a65fec6-c25f-404a-b3d2-1f2fcf6095c8 /media/data ext4 defaults 0 0
-/media/data/homeassistant/media /usr/share/hassio/media none bind 0 0
-```
-
-Then follow the instructions listed for [Home Assistant Operating System](#home-assistant-operating-system-hassos).
-
 ## Kubernetes
 
 Use the [helm chart](https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate).
@@ -224,9 +200,9 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more information.
 
-## ESX
+## ESXi
 
-For details on running Frigate under ESX, see details [here](https://github.com/blakeblackshear/frigate/issues/305).
+For details on running Frigate using ESXi, please see the instructions [here](https://williamlam.com/2023/05/frigate-nvr-with-coral-tpu-igpu-passthrough-using-esxi-on-intel-nuc.html).
 
 ## Synology NAS on DSM 7
 
