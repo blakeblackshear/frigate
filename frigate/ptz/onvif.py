@@ -458,11 +458,18 @@ class OnvifController:
                 self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
 
         if self.config.cameras[camera_name].onvif.autotracking.zooming:
-            # interpolate the actual zoom level reported by the camera into the relative zoom range
-            self.ptz_metrics[camera_name][
-                "ptz_zoom_level"
-            ].value = status.Position.Zoom.x
-            logger.debug(f"Camera zoom level: {status.Position.Zoom.x}")
+            # store zoom level as 0 to 1 interpolated from the values of the camera
+            self.ptz_metrics[camera_name]["ptz_zoom_level"].value = numpy.interp(
+                round(status.Position.Zoom.x, 2),
+                [0, 1],
+                [
+                    self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Min"],
+                    self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Max"],
+                ],
+            )
+            logger.debug(
+                f'Camera zoom level: {self.ptz_metrics[camera_name]["ptz_zoom_level"].value}'
+            )
 
         return {
             "pan": status.Position.PanTilt.x,

@@ -199,6 +199,8 @@ class PtzAutoTracker:
 
                 return
 
+            self.onvif.get_camera_status(camera_name)
+
             # movement thread per camera
             if not self.move_threads or not self.move_threads[camera_name]:
                 self.move_threads[camera_name] = threading.Thread(
@@ -279,7 +281,6 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.zooming:
-            # frame width and height
             camera_width = camera_config.frame_shape[1]
             camera_height = camera_config.frame_shape[0]
             camera_area = camera_width * camera_height
@@ -291,6 +292,7 @@ class PtzAutoTracker:
             # ensure zooming level is in range
             # if so, check if bounding box is 10% of an edge
             # if so, try zooming in, otherwise try zooming out
+            # should we make these configurable?
             edge_threshold = 0.1
             area_threshold = 0.6
 
@@ -473,4 +475,11 @@ class PtzAutoTracker:
                 autotracker_config.return_preset.lower(),
             )
             self.ptz_metrics[camera]["ptz_reset"].set()
+
+            # empty move queue
+            while not self.move_queues[camera].empty():
+                self.move_queues[camera].get()
+
+            # clear tracked object
+            self.tracked_object[camera] = None
             self.tracked_object_previous[camera] = None
