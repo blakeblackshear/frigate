@@ -94,6 +94,7 @@ class OnvifController:
             None,
         )
 
+        # autoracking relative panning/tilting needs a relative zoom value set to 0
         if self.config.cameras[camera_name].onvif.autotracking.zooming:
             zoom_space_id = next(
                 (
@@ -122,6 +123,7 @@ class OnvifController:
                 "RelativePanTiltTranslationSpace"
             ][fov_space_id]["URI"]
 
+        # try setting relative zoom translation space
         try:
             if self.config.cameras[camera_name].onvif.autotracking.zooming:
                 if zoom_space_id is not None:
@@ -129,11 +131,6 @@ class OnvifController:
                         "RelativeZoomTranslationSpace"
                     ][0]["URI"]
         except Exception:
-            # camera does not support relative zoom
-            self.config.cameras[camera_name].onvif.autotracking.zooming = False
-            logger.warning(
-                f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
-            )
             pass
 
         if move_request.Speed is None:
@@ -176,13 +173,23 @@ class OnvifController:
         if ptz_config.Spaces and ptz_config.Spaces.RelativeZoomTranslationSpace:
             supported_features.append("zoom-r")
 
+        # autotracker uses absolute zooming
         if ptz_config.Spaces and ptz_config.Spaces.AbsoluteZoomPositionSpace:
             supported_features.append("zoom-a")
-            self.cams[camera_name][
-                "absolute_zoom_range"
-            ] = ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
-            self.cams[camera_name]["zoom_limits"] = configs.ZoomLimits
+            try:
+                # get camera's zoom limits from onvif config
+                self.cams[camera_name][
+                    "absolute_zoom_range"
+                ] = ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
+                self.cams[camera_name]["zoom_limits"] = configs.ZoomLimits
+            except Exception:
+                if self.config.cameras[camera_name].onvif.autotracking.zooming:
+                    self.config.cameras[camera_name].onvif.autotracking.zooming = False
+                    logger.warning(
+                        f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported"
+                    )
 
+        # set relative pan/tilt space for autotracker
         if fov_space_id is not None:
             supported_features.append("pt-r-fov")
             self.cams[camera_name][
