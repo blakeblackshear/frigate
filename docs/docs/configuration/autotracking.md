@@ -52,6 +52,8 @@ cameras:
         enabled: False
         # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
         zooming: False
+        # Optional: enable/disable relative zooming for the camera (default: shown below)
+        zoom_relative: False
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -75,6 +77,8 @@ A fast [detector](object_detectors.md) is recommended. CPU detectors will not pe
 The autotracker will add PTZ motion requests to a queue while the motor is moving. Once the motor stops, the events in the queue will be executed together as one large move (rather than incremental moves). If your PTZ's motor is slow, you may not be able to reliably autotrack fast moving objects.
 
 Zooming is an experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
+
+Relative zooming makes a zoom movement concurrently with any pan/tilt movements and was tested to work with some Dahua and Amcrest PTZs. If zooming behavior is erratic or relative zooming is unsupported, the autotracker will fall back to absolute zooming where any zoom movements are separate from pan/tilt movements.
 
 ## Usage applications
 

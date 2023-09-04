@@ -575,6 +575,8 @@ cameras:
         enabled: False
         # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
         zooming: False
+        # Optional: enable/disable relative zooming for the camera (default: shown below)
+        zoom_relative: False
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person

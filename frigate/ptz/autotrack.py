@@ -232,17 +232,23 @@ class PtzAutoTracker:
                     continue
 
                 else:
-                    if zoom > 0:
-                        self.onvif._zoom_absolute(camera, zoom, 1)
-
-                    # on some cameras with cheaper motors it seems like small values can cause jerky movement
-                    # TODO: double check, might not need this
-                    if abs(pan) > 0.02 or abs(tilt) > 0.02:
-                        self.onvif._move_relative(camera, pan, tilt, 1)
+                    if (
+                        self.config.cameras[camera].onvif.autotracking.zooming
+                        and self.config.cameras[camera].onvif.autotracking.zoom_relative
+                    ):
+                        self.onvif._move_relative(camera, pan, tilt, zoom, 1)
                     else:
-                        logger.debug(
-                            f"Not moving, pan and tilt too small: {pan}, {tilt}"
-                        )
+                        if zoom > 0:
+                            self.onvif._zoom_absolute(camera, zoom, 1)
+
+                        # on some cameras with cheaper motors it seems like small values can cause jerky movement
+                        # TODO: double check, might not need this
+                        if abs(pan) > 0.02 or abs(tilt) > 0.02:
+                            self.onvif._move_relative(camera, pan, tilt, 0, 1)
+                        else:
+                            logger.debug(
+                                f"Not moving, pan and tilt too small: {pan}, {tilt}"
+                            )
 
                     # Wait until the camera finishes moving
                     while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
@@ -263,6 +269,30 @@ class PtzAutoTracker:
             )
             self.move_queues[camera].put(move_data)
 
+    def _should_zoom_in(self, obj, camera):
+        camera_config = self.config.cameras[camera]
+        camera_width = camera_config.frame_shape[1]
+        camera_height = camera_config.frame_shape[0]
+        camera_area = camera_width * camera_height
+
+        bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
+
+        # If bounding box is not within 5% of an edge
+        # If object area is less than 70% of frame
+        # Then zoom in, otherwise try zooming out
+        # should we make these configurable?
+        edge_threshold = 0.05
+        area_threshold = 0.7
+
+        # returns True to zoom in, False to zoom out
+        return (
+            bb_left > edge_threshold * camera_width
+            and bb_right < (1 - edge_threshold) * camera_width
+            and bb_top > edge_threshold * camera_height
+            and bb_bottom < (1 - edge_threshold) * camera_height
+            and obj.obj_data["area"] < area_threshold * camera_area
+        )
+
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
@@ -275,35 +305,38 @@ class PtzAutoTracker:
         tilt = (0.5 - (obj.obj_data["centroid"][1] / camera_height)) * 2
 
         # ideas: check object velocity for camera speed?
-        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, 0)
+        if (
+            camera_config.onvif.autotracking.zooming
+            and camera_config.onvif.autotracking.zoom_relative
+        ):
+            zoom = obj.obj_data["area"] / (camera_width * camera_height)
+
+            # test if we need to zoom out
+            if not self._should_zoom_in(obj, camera):
+                zoom = -(1 - zoom)
+
+            self._enqueue_move(
+                camera,
+                obj.obj_data["frame_time"],
+                pan,
+                tilt,
+                zoom,
+            )
+        else:
+            self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, 0)
 
     def _autotrack_zoom_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
-        if camera_config.onvif.autotracking.zooming:
-            camera_width = camera_config.frame_shape[1]
-            camera_height = camera_config.frame_shape[0]
-            camera_area = camera_width * camera_height
-
-            bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
-
+        if (
+            camera_config.onvif.autotracking.zooming
+            and not camera_config.onvif.autotracking.zoom_relative
+        ):
+            # absolute zooming
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
-            # ensure zooming level is in range
-            # if so, check if bounding box is 10% of an edge
-            # if so, try zooming in, otherwise try zooming out
-            # should we make these configurable?
-            edge_threshold = 0.1
-            area_threshold = 0.6
-
             if 0 < zoom_level <= 1:
-                if (
-                    bb_left > edge_threshold * camera_width
-                    and bb_right < (1 - edge_threshold) * camera_width
-                    and bb_top > edge_threshold * camera_height
-                    and bb_bottom < (1 - edge_threshold) * camera_height
-                    and obj.obj_data["area"] < area_threshold * camera_area
-                ):
+                if self._should_zoom_in(obj, camera):
                     zoom = min(1.0, zoom_level + 0.1)
                 else:
                     zoom = max(0.0, zoom_level - 0.1)
