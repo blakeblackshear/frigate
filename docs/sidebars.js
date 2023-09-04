@@ -11,6 +11,7 @@ module.exports = {
       "guides/configuring_go2rtc",
       "guides/false_positives",
       "guides/ha_notifications",
+      "guides/ha_network_storage",
       "guides/stationary_objects",
       "guides/reverse_proxy",
     ],
