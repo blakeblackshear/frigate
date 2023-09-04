@@ -6,10 +6,10 @@ from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from string import printable
 from typing import AnyStr, Optional
-from unidecode import unidecode
 
 import cv2
 import numpy as np
+from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
 
