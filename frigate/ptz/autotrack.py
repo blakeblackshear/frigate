@@ -240,10 +240,6 @@ class PtzAutoTracker:
                     else:
                         if zoom > 0:
                             self.onvif._zoom_absolute(camera, zoom, 1)
-
-                        # on some cameras with cheaper motors it seems like small values can cause jerky movement
-                        # TODO: double check, might not need this
-                        if abs(pan) > 0.02 or abs(tilt) > 0.02:
                             self.onvif._move_relative(camera, pan, tilt, 0, 1)
                         else:
                             logger.debug(
@@ -264,10 +260,17 @@ class PtzAutoTracker:
             frame_time > self.ptz_metrics[camera]["ptz_start_time"].value
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
         ):
-            logger.debug(
-                f"enqueue pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
-            )
-            self.move_queues[camera].put(move_data)
+            # don't make small movements
+            if abs(pan) < 0.02:
+                pan = 0
+            if abs(tilt) < 0.02:
+                tilt = 0
+
+            if pan != 0 or tilt != 0 or zoom != 0:
+                logger.debug(
+                    f"enqueue pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
+                )
+                self.move_queues[camera].put(move_data)
 
     def _should_zoom_in(self, obj, camera):
         camera_config = self.config.cameras[camera]
@@ -309,30 +312,34 @@ class PtzAutoTracker:
             camera_config.onvif.autotracking.zooming
             and camera_config.onvif.autotracking.zoom_relative
         ):
+            # relative zooming concurrently with pan/tilt
             zoom = obj.obj_data["area"] / (camera_width * camera_height)
 
             # test if we need to zoom out
             if not self._should_zoom_in(obj, camera):
                 zoom = -(1 - zoom)
 
-            self._enqueue_move(
-                camera,
-                obj.obj_data["frame_time"],
-                pan,
-                tilt,
-                zoom,
-            )
+            # don't make small movements if area hasn't changed significantly
+            if (
+                "area" in obj.previous
+                and abs(obj.obj_data["area"] - obj.previous["area"])
+                / obj.obj_data["area"]
+                < 0.1
+            ):
+                zoom = 0
         else:
-            self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, 0)
+            zoom = 0
 
-    def _autotrack_zoom_ptz(self, camera, obj):
+        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
+
+    def _autotrack_zoom_only(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
+        # absolute zooming separately from pan/tilt
         if (
             camera_config.onvif.autotracking.zooming
             and not camera_config.onvif.autotracking.zoom_relative
         ):
-            # absolute zooming
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
             if 0 < zoom_level <= 1:
@@ -420,8 +427,8 @@ class PtzAutoTracker:
                         f"Autotrack: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                     )
 
-                    # no need to move, but try zooming
-                    self._autotrack_zoom_ptz(camera, obj)
+                    # no need to move, but try absolute zooming
+                    self._autotrack_zoom_only(camera, obj)
 
                     return
 
@@ -431,8 +438,8 @@ class PtzAutoTracker:
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self._autotrack_move_ptz(camera, obj)
 
-                # try zooming too
-                self._autotrack_zoom_ptz(camera, obj)
+                # try absolute zooming too
+                self._autotrack_zoom_only(camera, obj)
 
                 return
 
