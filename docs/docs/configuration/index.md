@@ -25,7 +25,37 @@ cameras:
 
 VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
 
-### Full configuration reference:
+### Overview of the video pipeline
+
+The following diagram shows the different processing stages for a video source. Each stage shows the key elements and how they relate to each other.
+
+```mermaid
+%%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
+
+flowchart TD
+    ClipStore[(Clip\nstore)]
+    SnapStore[(Snapshot\nstore)]
+
+    subgraph Camera
+        Stream[Video\nstreams] --> |detect stream|Decode 
+        Decode --> Downscale
+    end
+    subgraph Motion
+        Downscale --> MotionM(Apply\nmotion masks)
+        MotionM --> MotionD(Motion\ndetection)
+    end
+    subgraph Detection
+        MotionD --> |motion regions| ObjectD(Object\ndetection)
+        Downscale --> ObjectD
+        ObjectD --> ObjectZ(Track objects and apply zones)
+    end
+    MotionD --> |motion clips|ClipStore
+    ObjectZ --> |detection clip|ClipStore
+    Stream -->|continuous record| ClipStore
+    ObjectZ --> |detection snapshot|SnapStore
+
+```
+### Full configuration reference
 
 :::caution
 
