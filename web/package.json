@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@cycjimmy/jsmpeg-player": "^6.0.5",
-    "axios": "^1.4.0",
+    "axios": "^1.5.0",
     "copy-to-clipboard": "3.3.3",
     "date-fns": "^2.30.0",
     "idb-keyval": "^6.2.0",
