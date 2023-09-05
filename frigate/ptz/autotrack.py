@@ -240,11 +240,8 @@ class PtzAutoTracker:
                     else:
                         if zoom > 0:
                             self.onvif._zoom_absolute(camera, zoom, 1)
-                            self.onvif._move_relative(camera, pan, tilt, 0, 1)
                         else:
-                            logger.debug(
-                                f"Not moving, pan and tilt too small: {pan}, {tilt}"
-                            )
+                            self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
                     # Wait until the camera finishes moving
                     while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
