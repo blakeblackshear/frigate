@@ -252,7 +252,6 @@ class PtzAutoTracker:
                 continue
 
     def _enqueue_move(self, camera, frame_time, pan, tilt, zoom):
-        move_data = (frame_time, pan, tilt, zoom)
         if (
             frame_time > self.ptz_metrics[camera]["ptz_start_time"].value
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
@@ -267,6 +266,7 @@ class PtzAutoTracker:
                 logger.debug(
                     f"enqueue pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
                 )
+                move_data = (frame_time, pan, tilt, zoom)
                 self.move_queues[camera].put(move_data)
 
     def _should_zoom_in(self, obj, camera):
