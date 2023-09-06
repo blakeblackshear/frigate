@@ -21,7 +21,7 @@ jobs:
     name: AMD64 Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -52,7 +52,7 @@ jobs:
     name: ARM Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -84,7 +84,7 @@ jobs:
     name: Jetson Jetpack 4
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
@@ -110,7 +110,7 @@ jobs:
     name: Jetson Jetpack 5
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup

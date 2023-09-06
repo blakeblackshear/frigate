@@ -15,7 +15,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -34,7 +34,7 @@ jobs:
     name: Web - Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -48,7 +48,7 @@ jobs:
     name: Web - Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -63,7 +63,7 @@ jobs:
     name: Python Checks
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
         uses: actions/setup-python@v4.7.0
         with:
@@ -87,7 +87,7 @@ jobs:
     name: Python Tests
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
