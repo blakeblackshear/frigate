@@ -145,7 +145,9 @@ class ZoomingModeEnum(str, Enum):
 
 class PtzAutotrackConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
-    zooming: ZoomingModeEnum = Field(default=ZoomingModeEnum.disabled, title="Autotracker zooming mode.")
+    zooming: ZoomingModeEnum = Field(
+        default=ZoomingModeEnum.disabled, title="Autotracker zooming mode."
+    )
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(
         default_factory=list,
