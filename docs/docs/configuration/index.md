@@ -573,10 +573,12 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
-        # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
-        zooming: False
-        # Optional: enable/disable relative zooming for the camera (default: shown below)
-        zoom_relative: False
+        # Optional: the mode to use for zooming in/out on objects during autotracking. (default: shown below)
+        # Available options are: disabled, absolute, and relative
+        #   disabled - don't zoom in/out on autotracked objects, use pan/tilt only
+        #   absolute - use absolute zooming (supported by most PTZ capable cameras)
+        #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
+        zooming: disabled
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person

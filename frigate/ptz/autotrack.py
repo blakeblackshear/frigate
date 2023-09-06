@@ -17,7 +17,7 @@ from norfair.camera_motion import (
     TranslationTransformationGetter,
 )
 
-from frigate.config import CameraConfig, FrigateConfig
+from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
 from frigate.ptz.onvif import OnvifController
 from frigate.types import PTZMetricsTypes
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
@@ -60,7 +60,10 @@ class PtzMotionEstimator:
             self.ptz_metrics["ptz_reset"].clear()
 
             # homography is nice (zooming) but slow, translation is pan/tilt only but fast.
-            if self.camera_config.onvif.autotracking.zooming:
+            if (
+                self.camera_config.onvif.autotracking.zooming
+                != ZoomingModeEnum.disabled
+            ):
                 logger.debug("Motion estimator reset - homography")
                 transformation_type = HomographyTransformationGetter()
             else:
@@ -109,7 +112,10 @@ class PtzMotionEstimator:
 
             self.frame_manager.close(frame_id)
 
-            if not self.camera_config.onvif.autotracking.zooming:
+            if (
+                self.camera_config.onvif.autotracking.zooming
+                == ZoomingModeEnum.disabled
+            ):
                 # doesn't work with homography
                 logger.debug(
                     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
@@ -234,7 +240,7 @@ class PtzAutoTracker:
                 else:
                     if (
                         self.config.cameras[camera].onvif.autotracking.zooming
-                        and self.config.cameras[camera].onvif.autotracking.zoom_relative
+                        == ZoomingModeEnum.relative
                     ):
                         self.onvif._move_relative(camera, pan, tilt, zoom, 1)
                     else:
@@ -305,10 +311,7 @@ class PtzAutoTracker:
         tilt = (0.5 - (obj.obj_data["centroid"][1] / camera_height)) * 2
 
         # ideas: check object velocity for camera speed?
-        if (
-            camera_config.onvif.autotracking.zooming
-            and camera_config.onvif.autotracking.zoom_relative
-        ):
+        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
             zoom = obj.obj_data["area"] / (camera_width * camera_height)
 
@@ -333,10 +336,7 @@ class PtzAutoTracker:
         camera_config = self.config.cameras[camera]
 
         # absolute zooming separately from pan/tilt
-        if (
-            camera_config.onvif.autotracking.zooming
-            and not camera_config.onvif.autotracking.zoom_relative
-        ):
+        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
             if 0 < zoom_level <= 1:

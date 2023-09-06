@@ -50,10 +50,12 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
-        # Optional: enable/disable camera zooming in/out on objects during autotracking. (default: shown below)
-        zooming: False
-        # Optional: enable/disable relative zooming for the camera (default: shown below)
-        zoom_relative: False
+        # Optional: the mode to use for zooming in/out on objects during autotracking. (default: shown below)
+        # Available options are: disabled, absolute, and relative
+        #   disabled - don't zoom in/out on autotracked objects, use pan/tilt only
+        #   absolute - use absolute zooming (supported by most PTZ capable cameras)
+        #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
+        zooming: disabled
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -74,9 +76,13 @@ The object tracker in Frigate estimates the motion of the PTZ so that tracked ob
 
 A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. If your PTZ's motor is slow, you may not be able to reliably autotrack fast moving objects or objects close to the camera.
 
+# Zooming
+
 Zooming is an experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
 
-Relative zooming makes a zoom movement concurrently with any pan/tilt movements and was tested to work with some Dahua and Amcrest PTZs. If zooming behavior is erratic or relative zooming is unsupported, the autotracker will fall back to absolute zooming and make zoom movements separate from pan/tilt movements.
+Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming.
+
+Relative zooming attempts to make a zoom movement concurrently with any pan/tilt movements. It was tested to work with some Dahua and Amcrest PTZs. But the ONVIF specification indicates that there no assumption about how the generic zoom range is mapped to magnification, field of view or other physical zoom dimension when using relative zooming. So if relative zooming behavior is erratic or just doesn't work, use absolute zooming.
 
 ## Usage applications
 

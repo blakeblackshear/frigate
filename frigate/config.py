@@ -137,12 +137,15 @@ class MqttConfig(FrigateBaseModel):
         return v
 
 
+class ZoomingModeEnum(str, Enum):
+    disabled = "disabled"
+    absolute = "absolute"
+    relative = "relative"
+
+
 class PtzAutotrackConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
-    zooming: bool = Field(default=False, title="Enable zooming on autotracked object.")
-    zoom_relative: bool = Field(
-        default=False, title="Use relative zooming instead of absolute."
-    )
+    zooming: ZoomingModeEnum = Field(default=ZoomingModeEnum.disabled, title="Autotracker zooming mode.")
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(
         default_factory=list,
