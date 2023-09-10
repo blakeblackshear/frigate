@@ -89,7 +89,10 @@ class RecordingCleanup(threading.Thread):
 
             # Get all the events to check against
             events: Event = (
-                Event.select()
+                Event.select(
+                    Event.start_time,
+                    Event.end_time,
+                )
                 .where(
                     Event.camera == camera,
                     # need to ensure segments for all events starting
@@ -109,7 +112,7 @@ class RecordingCleanup(threading.Thread):
                 keep = False
                 # Now look for a reason to keep this recording segment
                 for idx in range(event_start, len(events)):
-                    event = events[idx]
+                    event: Event = events[idx]
 
                     # if the event starts in the future, stop checking events
                     # and let this recording segment expire
