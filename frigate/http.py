@@ -673,14 +673,14 @@ def label_snapshot(camera_name, label):
     label = unquote(label)
     if label == "any":
         event_query = (
-            Event.select()
+            Event.select(Event.id)
             .where(Event.camera == camera_name)
             .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
     else:
         event_query = (
-            Event.select()
+            Event.select(Event.id)
             .where(Event.camera == camera_name)
             .where(Event.label == label)
             .where(Event.has_snapshot == True)
@@ -1242,7 +1242,10 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
 
     frame_time = float(frame_time)
     recording_query = (
-        Recordings.select()
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+        )
         .where(
             ((frame_time > Recordings.start_time) & (frame_time < Recordings.end_time))
         )
@@ -1425,7 +1428,11 @@ def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
     recordings = (
-        Recordings.select()
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+            Recordings.end_time,
+        )
         .where(
             (Recordings.start_time.between(start_ts, end_ts))
             | (Recordings.end_time.between(start_ts, end_ts))
@@ -1501,7 +1508,7 @@ def recording_clip(camera_name, start_ts, end_ts):
 @bp.route("/vod/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
 def vod_ts(camera_name, start_ts, end_ts):
     recordings = (
-        Recordings.select()
+        Recordings.select(Recordings.path, Recordings.duration, Recordings.end_time)
         .where(
             Recordings.start_time.between(start_ts, end_ts)
             | Recordings.end_time.between(start_ts, end_ts)

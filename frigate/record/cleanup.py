@@ -48,7 +48,10 @@ class RecordingCleanup(threading.Thread):
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
-        no_camera_recordings: Recordings = Recordings.select().where(
+        no_camera_recordings: Recordings = Recordings.select(
+            Recordings.id,
+            Recordings.path,
+        ).where(
             Recordings.camera.not_in(list(self.config.cameras.keys())),
             Recordings.end_time < expire_before,
         )
@@ -79,7 +82,14 @@ class RecordingCleanup(threading.Thread):
 
             # Get recordings to check for expiration
             recordings: Recordings = (
-                Recordings.select()
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.start_time,
+                    Recordings.end_time,
+                    Recordings.path,
+                    Recordings.objects,
+                    Recordings.motion,
+                )
                 .where(
                     Recordings.camera == camera,
                     Recordings.end_time < expire_date,

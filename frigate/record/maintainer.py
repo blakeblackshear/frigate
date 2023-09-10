@@ -152,7 +152,10 @@ class RecordingMaintainer(threading.Thread):
             # get all events with the end time after the start of the oldest cache file
             # or with end_time None
             events: Event = (
-                Event.select()
+                Event.select(
+                    Event.start_time,
+                    Event.end_time,
+                )
                 .where(
                     Event.camera == camera,
                     (Event.end_time == None)
