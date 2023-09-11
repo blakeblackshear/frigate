@@ -590,9 +590,10 @@ def timeline():
         .where(reduce(operator.and_, clauses))
         .order_by(Timeline.timestamp.asc())
         .limit(limit)
+        .dicts()
     )
 
-    return jsonify([model_to_dict(t) for t in timeline])
+    return jsonify([t for t in timeline])
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")
@@ -673,14 +674,14 @@ def label_snapshot(camera_name, label):
     label = unquote(label)
     if label == "any":
         event_query = (
-            Event.select()
+            Event.select(Event.id)
             .where(Event.camera == camera_name)
             .where(Event.has_snapshot == True)
             .order_by(Event.start_time.desc())
         )
     else:
         event_query = (
-            Event.select()
+            Event.select(Event.id)
             .where(Event.camera == camera_name)
             .where(Event.label == label)
             .where(Event.has_snapshot == True)
@@ -774,7 +775,6 @@ def events():
     favorites = request.args.get("favorites", type=int)
 
     clauses = []
-    excluded_fields = []
 
     selected_columns = [
         Event.id,
@@ -859,9 +859,7 @@ def events():
     if in_progress is not None:
         clauses.append((Event.end_time.is_null(in_progress)))
 
-    if not include_thumbnails:
-        excluded_fields.append(Event.thumbnail)
-    else:
+    if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
     if favorites:
@@ -875,9 +873,10 @@ def events():
         .where(reduce(operator.and_, clauses))
         .order_by(Event.start_time.desc())
         .limit(limit)
+        .dicts()
     )
 
-    return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
+    return jsonify([e for e in events])
 
 
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
@@ -1242,7 +1241,10 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
 
     frame_time = float(frame_time)
     recording_query = (
-        Recordings.select()
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+        )
         .where(
             ((frame_time > Recordings.start_time) & (frame_time < Recordings.end_time))
         )
@@ -1425,7 +1427,11 @@ def recording_clip(camera_name, start_ts, end_ts):
     download = request.args.get("download", type=bool)
 
     recordings = (
-        Recordings.select()
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+            Recordings.end_time,
+        )
         .where(
             (Recordings.start_time.between(start_ts, end_ts))
             | (Recordings.end_time.between(start_ts, end_ts))
@@ -1501,7 +1507,7 @@ def recording_clip(camera_name, start_ts, end_ts):
 @bp.route("/vod/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
 def vod_ts(camera_name, start_ts, end_ts):
     recordings = (
-        Recordings.select()
+        Recordings.select(Recordings.path, Recordings.duration, Recordings.end_time)
         .where(
             Recordings.start_time.between(start_ts, end_ts)
             | Recordings.end_time.between(start_ts, end_ts)

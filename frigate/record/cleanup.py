@@ -48,7 +48,10 @@ class RecordingCleanup(threading.Thread):
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
-        no_camera_recordings: Recordings = Recordings.select().where(
+        no_camera_recordings: Recordings = Recordings.select(
+            Recordings.id,
+            Recordings.path,
+        ).where(
             Recordings.camera.not_in(list(self.config.cameras.keys())),
             Recordings.end_time < expire_before,
         )
@@ -79,7 +82,14 @@ class RecordingCleanup(threading.Thread):
 
             # Get recordings to check for expiration
             recordings: Recordings = (
-                Recordings.select()
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.start_time,
+                    Recordings.end_time,
+                    Recordings.path,
+                    Recordings.objects,
+                    Recordings.motion,
+                )
                 .where(
                     Recordings.camera == camera,
                     Recordings.end_time < expire_date,
@@ -89,7 +99,10 @@ class RecordingCleanup(threading.Thread):
 
             # Get all the events to check against
             events: Event = (
-                Event.select()
+                Event.select(
+                    Event.start_time,
+                    Event.end_time,
+                )
                 .where(
                     Event.camera == camera,
                     # need to ensure segments for all events starting
@@ -109,7 +122,7 @@ class RecordingCleanup(threading.Thread):
                 keep = False
                 # Now look for a reason to keep this recording segment
                 for idx in range(event_start, len(events)):
-                    event = events[idx]
+                    event: Event = events[idx]
 
                     # if the event starts in the future, stop checking events
                     # and let this recording segment expire
