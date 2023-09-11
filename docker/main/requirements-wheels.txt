@@ -5,7 +5,7 @@ matplotlib == 3.7.*
 mypy == 1.4.1
 numpy == 1.23.*
 onvif_zeep == 0.2.12
-opencv-python-headless == 4.7.0.*
+opencv-python-headless == 4.8.0.*
 paho-mqtt == 1.6.*
 peewee == 3.16.*
 peewee_migrate == 1.12.*
