@@ -13,7 +13,7 @@ updates:
     open-pull-requests-limit: 10
     target-branch: dev
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/docker/main"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
