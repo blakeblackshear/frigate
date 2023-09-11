@@ -590,9 +590,10 @@ def timeline():
         .where(reduce(operator.and_, clauses))
         .order_by(Timeline.timestamp.asc())
         .limit(limit)
+        .dicts()
     )
 
-    return jsonify([model_to_dict(t) for t in timeline])
+    return jsonify([t for t in timeline])
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")
@@ -774,7 +775,6 @@ def events():
     favorites = request.args.get("favorites", type=int)
 
     clauses = []
-    excluded_fields = []
 
     selected_columns = [
         Event.id,
@@ -859,9 +859,7 @@ def events():
     if in_progress is not None:
         clauses.append((Event.end_time.is_null(in_progress)))
 
-    if not include_thumbnails:
-        excluded_fields.append(Event.thumbnail)
-    else:
+    if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
     if favorites:
@@ -875,9 +873,10 @@ def events():
         .where(reduce(operator.and_, clauses))
         .order_by(Event.start_time.desc())
         .limit(limit)
+        .dicts()
     )
 
-    return jsonify([model_to_dict(e, exclude=excluded_fields) for e in events])
+    return jsonify([e for e in events])
 
 
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
