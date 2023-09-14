@@ -27,7 +27,7 @@ flowchart LR
 %%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 
 flowchart TD
-    ClipStore[(Clip\nstore)]
+    RecStore[(Recording\nstore)]
     SnapStore[(Snapshot\nstore)]
 
     subgraph Camera
@@ -41,16 +41,17 @@ flowchart TD
         MotionM --> MotionD(Motion\ndetection)
     end
     subgraph Detection
-        MotionD --> |motion regions| ObjectD(Object\ndetection)
+        MotionD --> |motion regions| ObjectD(Object detection)
         Decode --> ObjectD
-        ObjectD --> ObjectZ(Track objects and apply zones)
+        ObjectD --> ObjectFilter(Apply object filters & zones)
+        ObjectFilter --> ObjectZ(Track objects)
     end
-    MotionD --> |motion snapshots|BirdsEye
-    ObjectZ --> |detection snapshot|BirdsEye
+    Stream --> |decoded frames|BirdsEye
+    MotionD --> |motion event|BirdsEye
+    ObjectZ --> |object event|BirdsEye
 
-    MotionD --> |motion clips|ClipStore
-    ObjectZ --> |detection clip|ClipStore
-    Stream -->|continuous record| ClipStore
+    MotionD --> |"video segments\n(retain motion)"|RecStore
+    ObjectZ --> |detection clip|RecStore
+    Stream -->|"video segments\n(retain all)"| RecStore
     ObjectZ --> |detection snapshot|SnapStore
-
 ```
