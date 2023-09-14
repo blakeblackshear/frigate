@@ -174,6 +174,7 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
     )
 
     if p.returncode != 0:
+        logger.error(f"Error getting network stats :: {p.stderr}")
         return usages
     else:
         lines = p.stdout.split("\n")
