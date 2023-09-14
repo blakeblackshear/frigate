@@ -624,7 +624,7 @@ ui:
 
 # Optional: Telemetry configuration
 telemetry:
-  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: shown below)
+  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: empty list, let nethogs search all)
   network_interfaces:
     - eth
     - enp
