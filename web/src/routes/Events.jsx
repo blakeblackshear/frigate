@@ -51,11 +51,12 @@ export default function Events({ path, ...props }) {
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
-    cameras: props.event ? '' : props.cameras ?? 'all',
+    cameras: props.cameras ?? 'all',
     labels: props.labels ?? 'all',
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
     favorites: props.favorites ?? 0,
+    event: props.event,
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -87,8 +88,8 @@ export default function Events({ path, ...props }) {
   });
 
   const eventsFetcher = useCallback((path, params) => {
-    if (props.event) {
-      path = `${path}/${props.event}`;
+    if (params.event) {
+      path = `${path}/${params.event}`;
       return axios.get(path).then((res) => [res.data]);
     }
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
@@ -358,6 +359,11 @@ export default function Events({ path, ...props }) {
             onShowAll={() => onFilter('sub_labels', ['all'])}
             onSelectSingle={(item) => onFilter('sub_labels', item)}
           />
+        )}
+        {searchParams.event && (
+          <Button className="ml-2" onClick={() => onFilter('event',null)} type="text">
+            View All
+          </Button>
         )}
 
         <StarRecording
