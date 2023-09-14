@@ -48,7 +48,7 @@ cameras:
             - detect
 ```
 
-### Conciguring Minimum Volume
+### Configuring Minimum Volume
 
 The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widelely between camera models so it is important to run tests to see what volume levels are. MQTT explorer can be used on the audio topic to see what volume level is being detected.
 
