@@ -145,7 +145,7 @@ def get_cpu_stats() -> dict[str, dict]:
 def get_physical_interfaces(interfaces) -> list:
     if not interfaces:
         return []
-    
+
     with open("/proc/net/dev", "r") as file:
         lines = file.readlines()
 
