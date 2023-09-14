@@ -503,6 +503,10 @@ class PtzAutoTracker:
             )
             and autotracker_config.return_preset
         ):
+            # empty move queue
+            while not self.move_queues[camera].empty():
+                self.move_queues[camera].get()
+
             self.ptz_metrics[camera]["ptz_stopped"].wait()
             logger.debug(
                 f"Autotrack: Time is {time.time()}, returning to preset: {autotracker_config.return_preset}"
@@ -512,10 +516,6 @@ class PtzAutoTracker:
                 autotracker_config.return_preset.lower(),
             )
             self.ptz_metrics[camera]["ptz_reset"].set()
-
-            # empty move queue
-            while not self.move_queues[camera].empty():
-                self.move_queues[camera].get()
 
             # clear tracked object
             self.tracked_object[camera] = None
