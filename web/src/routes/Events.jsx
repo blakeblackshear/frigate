@@ -51,7 +51,7 @@ export default function Events({ path, ...props }) {
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
-    cameras: props.cameras ?? 'all',
+    cameras: props.event ? '' : props.cameras ?? 'all',
     labels: props.labels ?? 'all',
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
@@ -69,7 +69,7 @@ export default function Events({ path, ...props }) {
     validBox: null,
   });
   const [uploading, setUploading] = useState([]);
-  const [viewEvent, setViewEvent] = useState();
+  const [viewEvent, setViewEvent] = useState(props.event);
   const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
@@ -87,6 +87,10 @@ export default function Events({ path, ...props }) {
   });
 
   const eventsFetcher = useCallback((path, params) => {
+    if (props.event) {
+      path = `${path}/${props.event}`;
+      return axios.get(path).then((res) => [res.data]);
+    }
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
     return axios.get(path, { params }).then((res) => res.data);
   }, []);
