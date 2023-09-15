@@ -79,7 +79,7 @@ export default function CameraControlPanel({ camera = '' }) {
         }
       }
     }
-  }, [ptz]);
+  }, [onSetMove, onSetZoom, ptz]);
 
   const keyupListener = useCallback((e) => {
     if (!e || e.repeat) {
@@ -97,7 +97,7 @@ export default function CameraControlPanel({ camera = '' }) {
       e.preventDefault();
       onSetStop(e);
     }
-  }, []);
+  }, [onSetStop]);
 
   useEffect(() => {
     document.addEventListener('keydown', keydownListener);
