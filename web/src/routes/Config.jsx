@@ -28,10 +28,13 @@ export default function Config() {
       })
       .then((response) => {
         if (response.status === 200) {
+          setError('');
           setSuccess(response.data);
         }
       })
       .catch((error) => {
+        setSuccess('');
+        
         if (error.response) {
           setError(error.response.data.message);
         } else {
