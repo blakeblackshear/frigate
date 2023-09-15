@@ -88,13 +88,13 @@ export default function Events({ path, ...props }) {
   });
 
   const eventsFetcher = useCallback((path, params) => {
-    if (params.event) {
-      path = `${path}/${params.event}`;
+    if (searchParams.event) {
+      path = `${path}/${searchParams.event}`;
       return axios.get(path).then((res) => [res.data]);
     }
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
     return axios.get(path, { params }).then((res) => res.data);
-  }, []);
+  }, [searchParams]);
 
   const getKey = useCallback(
     (index, prevData) => {
