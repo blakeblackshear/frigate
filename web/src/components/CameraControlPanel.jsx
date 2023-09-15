@@ -27,22 +27,22 @@ export default function CameraControlPanel({ camera = '' }) {
     setCurrentPreset('');
   };
 
-  const onSetMove = async (e, dir) => {
+  const onSetMove = useCallback(async (e, dir) => {
     e.stopPropagation();
     sendPtz(`MOVE_${dir}`);
     setCurrentPreset('');
-  };
+  }, [sendPtz, setCurrentPreset]);
 
-  const onSetZoom = async (e, dir) => {
+  const onSetZoom = useCallback(async (e, dir) => {
     e.stopPropagation();
     sendPtz(`ZOOM_${dir}`);
     setCurrentPreset('');
-  };
+  }, [sendPtz, setCurrentPreset]);
 
-  const onSetStop = async (e) => {
+  const onSetStop = useCallback(async (e) => {
     e.stopPropagation();
     sendPtz('STOP');
-  };
+  }, [sendPtz]);
 
   const keydownListener = useCallback((e) => {
     if (!ptz || !e) {
