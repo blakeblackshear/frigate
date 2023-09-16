@@ -1646,7 +1646,12 @@ def export_recording(camera_name: str, start_time, end_time):
     )
 
     if recordings_count <= 0:
-        return "No recordings found for time range", 400
+        return make_response(
+            jsonify(
+                {"success": False, "message": "No recordings found for time range"}
+            ),
+            400,
+        )
 
     exporter = RecordingExporter(
         current_app.frigate_config,

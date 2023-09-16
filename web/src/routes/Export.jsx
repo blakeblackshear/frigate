@@ -58,7 +58,7 @@ export default function Export() {
         }
       })
       .catch((error) => {
-        if (error.response) {
+        if (error.response?.data?.message) {
           setMessage({ text: `Failed to start export: ${error.response.data.message}`, error: true });
         } else {
           setMessage({ text: `Failed to start export: ${error.message}`, error: true });
