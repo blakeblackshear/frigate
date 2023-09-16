@@ -235,7 +235,7 @@ An example `docker-compose.yml` fragment that converts the `yolov4-608` and `yol
 ```yml
 frigate:
   environment:
-    - YOLO_MODELS="yolov4-608,yolov7x-640"
+    - YOLO_MODELS=yolov4-608,yolov7x-640
     - USE_FP16=false
 ```
 
