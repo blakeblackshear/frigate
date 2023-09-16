@@ -362,6 +362,12 @@ record:
     #   active_objects - save all recording segments with active/moving objects
     # NOTE: this mode only applies when the days setting above is greater than 0
     mode: all
+  # Optional: Recording Export Settings
+  export:
+    # Optional: Timelapse Output Args (default: shown below).
+    # NOTE: The default args are set to fit 24 hours of recording into 1 hour playback.
+    # See https://stackoverflow.com/a/58268695 for more info on how this works
+    timelapse_args: "-vf setpts=0.04*PTS -r 30"
   # Optional: Event recording settings
   events:
     # Optional: Number of seconds before the event to include (default: shown below)
