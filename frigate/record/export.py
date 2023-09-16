@@ -99,7 +99,7 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.hwaccel_args,
-                    ffmpeg_input,
+                    "-an -skip_frame nokey" + ffmpeg_input, # make sure only keyframes and no audio is not processed for time-lapse
                     f"-vf setpts=0.04*PTS -r 30 -an {file_name}",
                     EncodeTypeEnum.timelapse,
                 )
