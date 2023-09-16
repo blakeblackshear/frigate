@@ -200,7 +200,9 @@ class RecordRetainConfig(FrigateBaseModel):
 
 
 class RecordExportConfig(FrigateBaseModel):
-    timelapse_args: str = Field(default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args")
+    timelapse_args: str = Field(
+        default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
+    )
 
 
 class RecordConfig(FrigateBaseModel):
