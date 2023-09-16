@@ -62,7 +62,7 @@ class RecordingExporter(threading.Thread):
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
             ffmpeg_input = (
-                f"-y -protocol_whitelist pipe,file,http,tcp -i {playlist_lines}"
+                f" -y -protocol_whitelist pipe,file,http,tcp -i {playlist_lines}"
             )
         else:
             playlist_lines = []
