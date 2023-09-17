@@ -6,7 +6,7 @@ Frigate uses a sophisticated video pipeline that starts with the camera feed and
 
 This guide provides an overview to help users understand some of the key Frigate concepts.
 
-### Overview
+## Overview
 
 At a high level, there are five processing steps that could be applied to a camera feed 
 
