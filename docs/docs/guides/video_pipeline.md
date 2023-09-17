@@ -2,26 +2,29 @@
 id: video_pipeline
 title: The Video Pipeline
 ---
-Frigate uses a sophisticated video pipeline that starts with the camera feeds and progressively applies transformations to them (e.g. decoding, motion detection, etc.).
+Frigate uses a sophisticated video pipeline that starts with the camera feed and progressively applies transformations to it (e.g. decoding, motion detection, etc.).
 
-This guide provides an overview to help users put the key Frigate concepts on a map.
+This guide provides an overview to help users understand some of the key Frigate concepts.
 
-### High level view of the video pipeline
+### Overview
+
+At a high level, there are five processing steps that could be applied to a camera feed 
 
 ```mermaid
 %%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 
 flowchart LR
-    Feed(Feed\nProcessing) --> Decode(Video\ndecoding)
+    Feed(Feed\nAcquisition) --> Decode(Video\ndecoding)
     Decode --> Motion(Motion\nDetection)
     Motion --> Object(Object\nDetection)
     Feed --> Recording(Recording\n&\nVisualization)
     Motion --> Recording
     Object --> Recording
 ```
-
+As the diagram shows, all feeds first need to be acquired. Depending on the data source, it may be as simple as using FFmpeg to connect to an RTSP source via TCP or something more involved like connecting to an Apple Homekit camera using go2rtc. A single camera can produce a main (i.e. high quality) and a sub (i.e. low quality) video feed. Typically, the sub-feed will be decoded to produce full-frame images. As part of this process, the resolution may be downscaled and an image sampling frequency may be imposed (e.g. keep 5 frames per second). These frames will then be compared over time to detect movement areas (a.k.a. motion boxes). Once a box reaches a "significant size" to contain an object, it will be analyzed by a machine learning model to detect known objects. Finally, depending on the configuration, we will decide what video clips and events should be saved, what alarms should be triggered, etc.
 ### Detailed view of the video pipeline
 
+The following diagram adds a lot more detail than the simple view explained before. The goal is to show the detailed data paths between the processing steps.
 
 ```mermaid
 %%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
@@ -30,11 +33,11 @@ flowchart TD
     RecStore[(Recording\nstore)]
     SnapStore[(Snapshot\nstore)]
 
-    subgraph Camera
-        MainS[\Main Stream\n/] --> Go2RTC
-        SubS[\Sub Stream/] -.-> Go2RTC
-        Go2RTC("Go2RTC\n(optional)") --> Stream
-        Stream[Video\nstreams] --> |detect stream|Decode(Decode & Downscale)
+    subgraph Aquisition
+        Cam["Camera"] -->|FFmpeg supported| Stream
+        Cam -->|"Other streaming\nprotocols"| go2rtc
+        go2rtc("go2rtc") --> Stream
+        Stream[Capture main & Sub\nstreams] --> |detect stream|Decode(Decode & Downscale)
     end
     subgraph Motion
         Decode --> MotionM(Apply\nmotion masks)
