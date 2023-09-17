@@ -1,3 +1,4 @@
+
 ---
 id: motion_detection
 title: Tuning Motion Detection
@@ -31,7 +32,7 @@ Now that things are setup, find a time to tune that represents normal circumstan
 
 :::note
 
-It is very unlikely to find motion detection settings that only detect desired motion and never detect undesired moition. Realistically, the goal is to find a balance that detects the desired motion without too much undesired motion being detected.
+It is very unlikely to find motion detection settings that only detect desired motion and never detect undesired motion. Realistically, the goal is to find a balance that detects the desired motion without too much undesired motion being detected.
 
 :::
 
@@ -39,9 +40,9 @@ It is very unlikely to find motion detection settings that only detect desired m
 
 The threshold value dictates how much of a change in a pixels luminance is required to be considered motion. 
 
-Lower values mean motion detection is more sensitive to changes in color, making it more likely for exmaple to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
+Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
-Watching the motion boxes in the debug view, adjust the threshold until the undesired motion is not detected but be sure to also check with desired motion to ensure it is still detected.
+Watching the motion boxes in the debug view, adjust the threshold until the undesired motion is not detected. Once this is done, it is important to test and ensure that desired motion is still detected.
 
 ### Contour Area
 
