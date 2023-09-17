@@ -1,6 +1,6 @@
 ---
 id: video_pipeline
-title: The Video Pipeline
+title: The video pipeline
 ---
 Frigate uses a sophisticated video pipeline that starts with the camera feed and progressively applies transformations to it (e.g. decoding, motion detection, etc.).
 
