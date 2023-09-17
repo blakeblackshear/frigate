@@ -556,6 +556,9 @@ export default function Events({ path, ...props }) {
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => setDeleteFavoriteState({ ...state, showDeleteFavorite: false })} type="text">
+              Cancel
+            </Button>
             <Button
               className="ml-2"
               color="red"
