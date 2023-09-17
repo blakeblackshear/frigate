@@ -79,7 +79,7 @@ class RecordingExporter(threading.Thread):
             for page in range(num_pages):
                 page = export_recordings.paginate(page, page_size)
                 playlist_lines.append(
-                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{page[0].start_time}/end/{page[-1].end_time}/index.m3u8'"
+                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{float(page[0].start_time)}/end/{float(page[-1].end_time)}/index.m3u8'"
                 )
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
