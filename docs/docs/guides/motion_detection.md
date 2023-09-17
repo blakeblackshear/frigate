@@ -1,4 +1,3 @@
-
 ---
 id: motion_detection
 title: Tuning Motion Detection
