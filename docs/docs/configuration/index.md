@@ -366,7 +366,11 @@ record:
   export:
     # Optional: Timelapse Output Args (default: shown below).
     # NOTE: The default args are set to fit 24 hours of recording into 1 hour playback.
-    # See https://stackoverflow.com/a/58268695 for more info on how this works
+    # See https://stackoverflow.com/a/58268695 for more info on how these args work.
+    # As an example: if you wanted to go from 24 hours to 30 minutes that would be going
+    # from 86400 seconds to 1800 seconds which would be 1800 / 86400 = 0.02.
+    # The -r (framerate) dictates how smooth the output video is.
+    # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
   # Optional: Event recording settings
   events:
