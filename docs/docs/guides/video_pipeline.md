@@ -21,8 +21,13 @@ flowchart LR
     Motion --> Recording
     Object --> Recording
 ```
-As the diagram shows, all feeds first need to be acquired. Depending on the data source, it may be as simple as using FFmpeg to connect to an RTSP source via TCP or something more involved like connecting to an Apple Homekit camera using go2rtc. A single camera can produce a main (i.e. high quality) and a sub (i.e. low quality) video feed. Typically, the sub-feed will be decoded to produce full-frame images. As part of this process, the resolution may be downscaled and an image sampling frequency may be imposed (e.g. keep 5 frames per second). These frames will then be compared over time to detect movement areas (a.k.a. motion boxes). Once a box reaches a "significant size" to contain an object, it will be analyzed by a machine learning model to detect known objects. Finally, depending on the configuration, we will decide what video clips and events should be saved, what alarms should be triggered, etc.
-### Detailed view of the video pipeline
+As the diagram shows, all feeds first need to be acquired. Depending on the data source, it may be as simple as using FFmpeg to connect to an RTSP source via TCP or something more involved like connecting to an Apple Homekit camera using go2rtc. A single camera can produce a main (i.e. high resolution) and a sub (i.e. lower resolution) video feed. 
+
+Typically, the sub-feed will be decoded to produce full-frame images. As part of this process, the resolution may be downscaled and an image sampling frequency may be imposed (e.g. keep 5 frames per second). 
+
+These frames will then be compared over time to detect movement areas (a.k.a. motion boxes). These motion boxes are combined into motion regions and are analyzed by a machine learning model to detect known objects. Finally, the snapshot and recording retention config will decide what video clips and events should be saved.
+
+## Detailed view of the video pipeline
 
 The following diagram adds a lot more detail than the simple view explained before. The goal is to show the detailed data paths between the processing steps.
 
