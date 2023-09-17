@@ -39,11 +39,33 @@ It is very unlikely to find motion detection settings that only detect desired m
 
 The threshold value dictates how much of a change in a pixels luminance is required to be considered motion. 
 
+```yaml
+# default threshold value
+motion:
+  # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
+  # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
+  # The value should be between 1 and 255.
+  threshold: 30
+```
+
 Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
 Watching the motion boxes in the debug view, adjust the threshold until the undesired motion is not detected. Once this is done, it is important to test and ensure that desired motion is still detected.
 
 ### Contour Area
+
+```yaml
+# default contour_area value
+motion:
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: shown below)
+  # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
+  # make motion detection more sensitive to smaller moving objects.
+  # As a rule of thumb:
+  #  - 10 - high sensitivity
+  #  - 30 - medium sensitivity
+  #  - 50 - low sensitivity
+  contour_area: 10
+```
 
 Once the threshold calculation is run, the pixels that have changed are grouped together. The contour area value is used to decide which groups of changed pixels qualify as motion. Smaller values are more sensitive meaning people that are far away, small animals, etc. are more likely to be detected as motion, but it also means that small changes in shadows, leaves, etc. are detected as motion. Higher values are less sensitive meaning these things won't be detected as motion but with the risk that desired motion won't be detected until closer to the camera.
 
@@ -60,5 +82,16 @@ Once daytime motion detection is tuned, there is a chance that the settings will
 However, if the preferred day settings do not work well at night it is recommended to use HomeAssistant or some other solution to automate changing the settings. That way completely separate sets of motion settings can be used for optimal day and night motion detection.
 
 ## Tuning For Large Changes In Motion
+
+```yaml
+# default lightning_threshold:
+motion:
+  # Optional: The percentage of the image used to detect lightning or other substantial changes where motion detection
+  #           needs to recalibrate. (default: shown below)
+  # Increasing this value will make motion detection more likely to consider lightning or ir mode changes as valid motion.
+  # Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching
+  # a doorbell camera.
+  lightning_threshold: 0.8
+```
 
 Larges changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
