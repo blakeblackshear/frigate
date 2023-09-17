@@ -66,7 +66,10 @@ class RecordingExporter(threading.Thread):
                 .where(
                     Recordings.start_time.between(self.start_time, self.end_time)
                     | Recordings.end_time.between(self.start_time, self.end_time)
-                    | ((self.start_time > Recordings.start_time) & (self.end_time < Recordings.end_time))
+                    | (
+                        (self.start_time > Recordings.start_time)
+                        & (self.end_time < Recordings.end_time)
+                    )
                 )
                 .where(Recordings.camera == self.camera)
                 .order_by(Recordings.start_time.asc())
