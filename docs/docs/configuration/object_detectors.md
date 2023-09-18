@@ -239,6 +239,14 @@ frigate:
     - USE_FP16=false
 ```
 
+If you have multiple GPUs passed through to Frigate, you can specify which one to use for the model conversion.  The conversion script will use the first visible GPU, however in systems with mixed GPU models you may not want to use the default index for object detection.  Add the `TRT_MODEL_PREP_DEVICE` environment variable to select a specific GPU.
+
+```yml
+frigate:
+  environment:
+    - TRT_MODEL_PREP_DEVICE=0 # Optionally, select which GPU is used for  model optimization
+```
+
 ### Configuration Parameters
 
 The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpu) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
