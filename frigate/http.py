@@ -1673,9 +1673,7 @@ def export_delete(file_name: str):
 
     if not os.path.exists(file):
         return make_response(
-            jsonify(
-                {"success": False, "message": f"{file_name} not found."}
-            ),
+            jsonify({"success": False, "message": f"{file_name} not found."}),
             404,
         )
 
