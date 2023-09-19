@@ -1,14 +1,16 @@
 import Heading from '../components/Heading';
 import { useState } from 'preact/hooks';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import Button from '../components/Button';
 import axios from 'axios';
 import { baseUrl } from '../api/baseUrl';
 import { Fragment } from 'preact';
 import ActivityIndicator from '../components/ActivityIndicator';
 import { Play } from '../icons/Play';
+import { Delete } from '../icons/Delete';
 import LargeDialog from '../components/DialogLarge';
 import VideoPlayer from '../components/VideoPlayer';
+import Dialog from '../components/Dialog';
 
 export default function Export() {
   const { data: config } = useSWR('config');
@@ -30,9 +32,10 @@ export default function Export() {
   const [endDate, setEndDate] = useState(localISODate);
   const [endTime, setEndTime] = useState('23:59');
 
-  // Playback States
+  // Export States
 
   const [selectedClip, setSelectedClip] = useState();
+  const [deleteClip, setDeleteClip] = useState();
 
   const onHandleExport = () => {
     if (camera == 'select') {
@@ -74,6 +77,15 @@ export default function Export() {
       });
   };
 
+  const onHandleDelete = (clip) => {
+    axios.delete(`export/${clip}`).then((response) => {
+      if (response.status == 200) {
+        setDeleteClip();
+        mutate();
+      }
+    });
+  };
+
   return (
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Export</Heading>
@@ -84,7 +96,7 @@ export default function Export() {
 
       {selectedClip && (
         <LargeDialog>
-          <div className="min-w-[720px] max-w-7xl">
+          <div className="max-w-7xl">
             <Heading className="p-2">Playback</Heading>
             <VideoPlayer
               options={{
@@ -112,6 +124,23 @@ export default function Export() {
             </Button>
           </div>
         </LargeDialog>
+      )}
+
+      {deleteClip && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Delete Export?</Heading>
+            <p className="py-4 mb-2">Confirm deletion of {deleteClip}.</p>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button className="ml-2" onClick={() => setDeleteClip('')} type="text">
+              Close
+            </Button>
+            <Button className="ml-2" color="red" onClick={() => onHandleDelete(deleteClip)} type="text">
+              Delete
+            </Button>
+          </div>
+        </Dialog>
       )}
 
       <div className="xl:flex justify-between">
@@ -184,7 +213,11 @@ export default function Export() {
         {exports && (
           <div className="p-4 bg-gray-800 xl:w-1/2">
             <Heading size="md">Exports</Heading>
-            <Exports exports={exports} onSetClip={(clip) => setSelectedClip(clip)} />
+            <Exports
+              exports={exports}
+              onSetClip={(clip) => setSelectedClip(clip)}
+              onDeleteClip={(clip) => setDeleteClip(clip)}
+            />
           </div>
         )}
       </div>
@@ -192,7 +225,7 @@ export default function Export() {
   );
 }
 
-function Exports({ exports, onSetClip }) {
+function Exports({ exports, onSetClip, onDeleteClip }) {
   return (
     <Fragment>
       {exports.map((item) => (
@@ -209,9 +242,16 @@ function Exports({ exports, onSetClip }) {
               <Button type="iconOnly" onClick={() => onSetClip(item.name)}>
                 <Play className="h-6 w-6 text-green-600" />
               </Button>
-              <a className="text-blue-500 hover:underline" href={`${baseUrl}exports/${item.name}`} download>
+              <a
+                className="text-blue-500 hover:underline overflow-hidden"
+                href={`${baseUrl}exports/${item.name}`}
+                download
+              >
                 {item.name.substring(0, item.name.length - 4)}
               </a>
+              <Button className="ml-auto" type="iconOnly" onClick={() => onDeleteClip(item.name)}>
+                <Delete className="h-6 w-6" stroke="#f87171" />
+              </Button>
             </div>
           )}
         </div>
