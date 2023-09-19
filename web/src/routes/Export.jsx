@@ -96,7 +96,7 @@ export default function Export() {
 
       {selectedClip && (
         <LargeDialog>
-          <div className="max-w-7xl">
+          <div>
             <Heading className="p-2">Playback</Heading>
             <VideoPlayer
               options={{
