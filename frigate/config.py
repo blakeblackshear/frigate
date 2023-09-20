@@ -387,7 +387,6 @@ class ZoneConfig(BaseModel):
         default=3,
         title="Number of consecutive frames required for object to be considered present in the zone.",
         gt=0,
-        le=10,
     )
     objects: List[str] = Field(
         default_factory=list,
