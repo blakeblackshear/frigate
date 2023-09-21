@@ -3,13 +3,7 @@ id: plus
 title: Frigate+
 ---
 
-:::info
-
-Frigate+ is under active development. Models are available as a part of an invitation only beta. It is free to create an account and upload/annotate your examples.
-
-:::
-
-Frigate+ offers models trained from scratch and specifically designed for the way Frigate NVR analyzes video footage. They offer higher accuracy with less resources and include a more relevant set of objects for security cameras. By uploading your own labeled examples, your model can be uniquely tuned for accuracy in your specific conditions. After tuning, performance is evaluated against a broad dataset and real world examples submitted by other Frigate+ users to prevent overfitting.
+For more information about how to use Frigate+ to improve your model, see the [Frigate+ docs](/plus/).
 
 ## Setup
 
