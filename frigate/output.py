@@ -580,7 +580,7 @@ class BirdsEyeFrameManager:
         except Exception:
             updated_frame = False
             self.active_cameras = []
-            self.camera_layout = 0
+            self.camera_layout = []
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
