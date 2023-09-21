@@ -17,6 +17,10 @@ from frigate.ffmpeg_presets import (
 logger = logging.getLogger(__name__)
 
 
+def lower_priority():
+    os.nice(10)
+
+
 class PlaybackFactorEnum(str, Enum):
     realtime = "realtime"
     timelapse_25x = "timelapse_25x"
@@ -86,6 +90,7 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd,
             input="\n".join(playlist_lines),
             encoding="ascii",
+            preexec_fn=lower_priority,
             capture_output=True,
         )
 
