@@ -313,7 +313,7 @@ Get PTZ info for the camera.
 
 ### `POST /api/events/<camera_name>/<label>/create`
 
-Create a manual API with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
 
 **Optional Body:**
 
