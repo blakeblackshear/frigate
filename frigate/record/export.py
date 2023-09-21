@@ -13,6 +13,7 @@ from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
+from frigate.models import Recordings
 
 logger = logging.getLogger(__name__)
 
@@ -62,13 +63,31 @@ class RecordingExporter(threading.Thread):
             )
         else:
             playlist_lines = []
-            playlist_start = self.start_time
 
-            while playlist_start < self.end_time:
-                playlist_lines.append(
-                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{playlist_start}/end/{min(playlist_start + MAX_PLAYLIST_SECONDS, self.end_time)}/index.m3u8'"
+            # get full set of recordings
+            export_recordings = (
+                Recordings.select()
+                .where(
+                    Recordings.start_time.between(self.start_time, self.end_time)
+                    | Recordings.end_time.between(self.start_time, self.end_time)
+                    | (
+                        (self.start_time > Recordings.start_time)
+                        & (self.end_time < Recordings.end_time)
+                    )
                 )
-                playlist_start += MAX_PLAYLIST_SECONDS
+                .where(Recordings.camera == self.camera)
+                .order_by(Recordings.start_time.asc())
+            )
+
+            # Use pagination to process records in chunks
+            page_size = 1000
+            num_pages = (export_recordings.count() + page_size - 1) // page_size
+
+            for page in range(1, num_pages + 1):
+                playlist = export_recordings.paginate(page, page_size)
+                playlist_lines.append(
+                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{float(playlist[0].start_time)}/end/{float(playlist[-1].end_time)}/index.m3u8'"
+                )
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
