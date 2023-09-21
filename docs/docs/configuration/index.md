@@ -151,6 +151,7 @@ audio:
   # Optional: Types of audio to listen for (default: shown below)
   listen:
     - bark
+    - fire_alarm
     - scream
     - speech
     - yell
