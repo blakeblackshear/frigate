@@ -56,6 +56,7 @@ export default function Events({ path, ...props }) {
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
     favorites: props.favorites ?? 0,
+    event: props.event,
   });
   const [state, setState] = useState({
     showDownloadMenu: false,
@@ -69,7 +70,7 @@ export default function Events({ path, ...props }) {
     validBox: null,
   });
   const [uploading, setUploading] = useState([]);
-  const [viewEvent, setViewEvent] = useState();
+  const [viewEvent, setViewEvent] = useState(props.event);
   const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
   const [downloadEvent, setDownloadEvent] = useState({
@@ -87,9 +88,13 @@ export default function Events({ path, ...props }) {
   });
 
   const eventsFetcher = useCallback((path, params) => {
+    if (searchParams.event) {
+      path = `${path}/${searchParams.event}`;
+      return axios.get(path).then((res) => [res.data]);
+    }
     params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
     return axios.get(path, { params }).then((res) => res.data);
-  }, []);
+  }, [searchParams]);
 
   const getKey = useCallback(
     (index, prevData) => {
@@ -354,6 +359,11 @@ export default function Events({ path, ...props }) {
             onShowAll={() => onFilter('sub_labels', ['all'])}
             onSelectSingle={(item) => onFilter('sub_labels', item)}
           />
+        )}
+        {searchParams.event && (
+          <Button className="ml-2" onClick={() => onFilter('event',null)} type="text">
+            View All
+          </Button>
         )}
 
         <StarRecording
