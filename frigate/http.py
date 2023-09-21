@@ -34,6 +34,7 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     CONFIG_DIR,
+    EXPORT_DIR,
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
 )
@@ -1664,6 +1665,20 @@ def export_recording(camera_name: str, start_time, end_time):
     )
     exporter.start()
     return "Starting export of recording", 200
+
+
+@bp.route("/export/<file_name>", methods=["DELETE"])
+def export_delete(file_name: str):
+    file = os.path.join(EXPORT_DIR, file_name)
+
+    if not os.path.exists(file):
+        return make_response(
+            jsonify({"success": False, "message": f"{file_name} not found."}),
+            404,
+        )
+
+    os.unlink(file)
+    return "Successfully deleted file", 200
 
 
 def imagestream(detected_frames_processor, camera_name, fps, height, draw_options):
