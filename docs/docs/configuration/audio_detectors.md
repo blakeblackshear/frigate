@@ -48,6 +48,16 @@ cameras:
             - detect
 ```
 
+### Configuring Minimum Volume
+
+The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widelely between camera models so it is important to run tests to see what volume levels are. MQTT explorer can be used on the audio topic to see what volume level is being detected.
+
+:::tip
+
+Volume is considered motion for recordings, this means when the `record -> retain -> mode` is set to `motion` any time audio volume is > min_volume that recording segment for that camera will be kept.
+
+:::
+
 ### Configuring Audio Events
 
 The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `scream`, `speech`, and `yell` are enabled but these can be customized.
