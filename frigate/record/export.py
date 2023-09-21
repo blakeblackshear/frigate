@@ -18,6 +18,9 @@ from frigate.models import Recordings
 logger = logging.getLogger(__name__)
 
 
+TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
+
+
 def lower_priority():
     os.nice(10)
 
@@ -99,8 +102,8 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.hwaccel_args,
-                    ffmpeg_input,
-                    f"-vf setpts=0.04*PTS -r 30 -an {file_name}",
+                    f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} {file_name}",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")

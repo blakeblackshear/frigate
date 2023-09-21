@@ -51,6 +51,7 @@ DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
+DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 
 
 class FrigateBaseModel(BaseModel):
@@ -198,6 +199,12 @@ class RecordRetainConfig(FrigateBaseModel):
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
+class RecordExportConfig(FrigateBaseModel):
+    timelapse_args: str = Field(
+        default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
+    )
+
+
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
     sync_on_startup: bool = Field(
@@ -212,6 +219,9 @@ class RecordConfig(FrigateBaseModel):
     )
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
+    )
+    export: RecordExportConfig = Field(
+        default_factory=RecordExportConfig, title="Recording Export Config"
     )
     enabled_in_config: Optional[bool] = Field(
         title="Keep track of original state of recording."
