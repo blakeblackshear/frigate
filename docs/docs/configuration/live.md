@@ -78,7 +78,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
         - 192.168.1.10:8555
         - stun:8555
   ```
-  
+
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.0.0.0/8` CIDR block.
 
 :::tip
@@ -115,4 +115,4 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.6.2#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.7.1#module-webrtc) for more information about this.
