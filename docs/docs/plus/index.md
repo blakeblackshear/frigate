@@ -1,6 +1,6 @@
 ---
 id: index
-title: Guide
+title: Models Guide
 ---
 
 Frigate+ offers models trained from scratch and specifically designed for the way Frigate NVR analyzes video footage. These models offer higher accuracy with less resources. By uploading your own labeled examples, your model is tuned for accuracy in your specific conditions. After tuning, performance is evaluated against a broad dataset and real world examples submitted by other Frigate+ users to prevent overfitting.
