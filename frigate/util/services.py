@@ -143,6 +143,9 @@ def get_cpu_stats() -> dict[str, dict]:
 
 
 def get_physical_interfaces(interfaces) -> list:
+    if not interfaces:
+        return []
+
     with open("/proc/net/dev", "r") as file:
         lines = file.readlines()
 
@@ -171,6 +174,7 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
     )
 
     if p.returncode != 0:
+        logger.error(f"Error getting network stats :: {p.stderr}")
         return usages
     else:
         lines = p.stdout.split("\n")

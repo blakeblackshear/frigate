@@ -107,7 +107,7 @@ class StatsConfig(FrigateBaseModel):
 
 class TelemetryConfig(FrigateBaseModel):
     network_interfaces: List[str] = Field(
-        default=["eth", "enp", "eno", "ens", "wl", "lo"],
+        default=[],
         title="Enabled network interfaces for bandwidth calculation.",
     )
     stats: StatsConfig = Field(

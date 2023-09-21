@@ -625,7 +625,7 @@ ui:
 
 # Optional: Telemetry configuration
 telemetry:
-  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: shown below)
+  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: empty list, let nethogs search all)
   network_interfaces:
     - eth
     - enp
@@ -640,6 +640,7 @@ telemetry:
     # Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
     # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
