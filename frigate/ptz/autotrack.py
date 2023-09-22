@@ -326,7 +326,10 @@ class PtzAutoTracker:
             self.move_coefficients[camera] = np.linalg.lstsq(
                 X_with_intercept, y, rcond=None
             )[0]
-            self.intercept[camera] = y[0]
+
+            # only assign a new intercept if we're calibrating
+            if calibration:
+                self.intercept[camera] = y[0]
 
             # write the intercept and coefficients back to the config file as a comma separated string
             movement_weights = np.concatenate(
@@ -430,19 +433,19 @@ class PtzAutoTracker:
                 move_data = (frame_time, pan, tilt, zoom)
                 self.move_queues[camera].put(move_data)
 
-    def _should_zoom_in(self, obj, camera):
+    def _should_zoom_in(self, camera, box, area):
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
         camera_area = camera_width * camera_height
 
-        bb_left, bb_top, bb_right, bb_bottom = obj.obj_data["box"]
+        bb_left, bb_top, bb_right, bb_bottom = box
 
         # If bounding box is not within 5% of an edge
         # If object area is less than 70% of frame
         # Then zoom in, otherwise try zooming out
         # should we make these configurable?
-        edge_threshold = 0.05
+        edge_threshold = 0.15
         area_threshold = 0.7
 
         # returns True to zoom in, False to zoom out
@@ -451,7 +454,7 @@ class PtzAutoTracker:
             and bb_right < (1 - edge_threshold) * camera_width
             and bb_top > edge_threshold * camera_height
             and bb_bottom < (1 - edge_threshold) * camera_height
-            and obj.obj_data["area"] < area_threshold * camera_area
+            and area < area_threshold * camera_area
         )
 
     def _autotrack_move_ptz(self, camera, obj):
@@ -514,7 +517,13 @@ class PtzAutoTracker:
             zoom = obj.obj_data["area"] / (camera_width * camera_height)
 
             # test if we need to zoom out
-            if not self._should_zoom_in(obj, camera):
+            if not self._should_zoom_in(
+                camera,
+                predicted_box
+                if camera_config.onvif.autotracking.movement_weights
+                else obj.obj_data["box"],
+                obj.obj_data["area"],
+            ):
                 zoom = -(1 - zoom)
 
             # don't make small movements if area hasn't changed significantly
@@ -538,7 +547,9 @@ class PtzAutoTracker:
             zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
 
             if 0 < zoom_level <= 1:
-                if self._should_zoom_in(obj, camera):
+                if self._should_zoom_in(
+                    camera, obj.obj_data["box"], obj.obj_data["area"]
+                ):
                     zoom = min(1.0, zoom_level + 0.1)
                 else:
                     zoom = max(0.0, zoom_level - 0.1)
