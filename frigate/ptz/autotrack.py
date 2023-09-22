@@ -307,7 +307,7 @@ class PtzAutoTracker:
     def _calculate_move_coefficients(self, camera, calibration=False):
         # calculate new coefficients when we have 50 more new values. Save up to 500
         if calibration or (
-            len(self.move_metrics[camera]) % 5 == 0
+            len(self.move_metrics[camera]) % 50 == 0
             and len(self.move_metrics[camera]) != 0
             and len(self.move_metrics[camera]) <= 500
         ):
