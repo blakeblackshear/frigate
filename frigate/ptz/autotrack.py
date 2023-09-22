@@ -3,6 +3,7 @@
 import copy
 import logging
 import math
+import os
 import queue
 import threading
 import time
@@ -18,8 +19,10 @@ from norfair.camera_motion import (
 )
 
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
+from frigate.const import CONFIG_DIR
 from frigate.ptz.onvif import OnvifController
 from frigate.types import PTZMetricsTypes
+from frigate.util.builtin import update_yaml_file
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
 logger = logging.getLogger(__name__)
@@ -112,14 +115,9 @@ class PtzMotionEstimator:
 
             self.frame_manager.close(frame_id)
 
-            if (
-                self.camera_config.onvif.autotracking.zooming
-                == ZoomingModeEnum.disabled
-            ):
-                # doesn't work with homography
-                logger.debug(
-                    f"Motion estimator transformation: {self.coord_transformations.rel_to_abs((0,0))}"
-                )
+            logger.debug(
+                f"Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
+            )
 
         return self.coord_transformations
 
@@ -164,12 +162,16 @@ class PtzAutoTracker:
         self.ptz_metrics = ptz_metrics
         self.tracked_object: dict[str, object] = {}
         self.tracked_object_previous: dict[str, object] = {}
-        self.previous_frame_time = None
-        self.object_types = {}
-        self.required_zones = {}
-        self.move_queues = {}
-        self.move_threads = {}
-        self.autotracker_init = {}
+        self.previous_frame_time: dict[str, object] = {}
+        self.object_types = dict[str, object] = {}
+        self.required_zones = dict[str, object] = {}
+        self.move_queues = dict[str, object] = {}
+        self.move_threads = dict[str, object] = {}
+        self.autotracker_init = dict[str, object] = {}
+        self.move_metrics: dict[str, object] = {}
+        self.calibrating: dict[str, object] = {}
+        self.intercept: dict[str, object] = {}
+        self.move_coefficients: dict[str, object] = {}
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
@@ -185,6 +187,10 @@ class PtzAutoTracker:
 
         self.tracked_object[camera_name] = None
         self.tracked_object_previous[camera_name] = None
+
+        self.calibrating[camera_name] = False
+        self.move_metrics[camera_name] = []
+        self.move_coefficients[camera_name] = []
 
         self.move_queues[camera_name] = queue.Queue()
 
@@ -216,7 +222,131 @@ class PtzAutoTracker:
                 self.move_threads[camera_name].daemon = True
                 self.move_threads[camera_name].start()
 
+            if cam.onvif.autotracking.movement_weights:
+                self.intercept[camera_name] = cam.onvif.autotracking.movement_weights[0]
+                self.move_coefficients[
+                    camera_name
+                ] = cam.onvif.autotracking.movement_weights[1:]
+
+            if cam.onvif.autotracking.calibrate_on_startup:
+                self._calibrate_camera(camera_name)
+
         self.autotracker_init[camera_name] = True
+
+    def write_config(self, camera):
+        config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
+
+        logger.debug(
+            f"Writing new config with autotracker motion coefficients: {self.config.cameras[camera].onvif.autotracking.movement_weights}"
+        )
+
+        update_yaml_file(
+            config_file,
+            ["cameras", camera, "onvif", "autotracking", "movement_weights"],
+            self.config.cameras[camera].onvif.autotracking.movement_weights,
+        )
+
+    def _calibrate_camera(self, camera):
+        # move the camera from the preset in steps and measure the time it takes to move that amount
+        # this will allow us to predict movement times with a simple linear regression
+        # start with 0 so we can determine a baseline (to be used as the intercept in the regression calc)
+        # TODO: take zooming into account too
+        num_steps = 30
+        step_sizes = np.linspace(0, 1, num_steps)
+
+        self.calibrating[camera] = True
+
+        self.onvif._move_to_preset(
+            camera,
+            self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
+        )
+        self.ptz_metrics[camera]["ptz_reset"].set()
+        self.ptz_metrics[camera]["ptz_stopped"].clear()
+
+        # Wait until the camera finishes moving
+        while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+            self.onvif.get_camera_status(camera)
+
+        for step in range(num_steps):
+            pan = step_sizes[step]
+            tilt = step_sizes[step]
+
+            self.onvif._move_relative(camera, pan, tilt, 0, 1)
+
+            # Wait until the camera finishes moving
+            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                self.onvif.get_camera_status(camera)
+
+            self.move_metrics[camera].append(
+                {
+                    "pan": pan,
+                    "tilt": tilt,
+                    "start_timestamp": self.ptz_metrics[camera]["ptz_start_time"].value,
+                    "end_timestamp": self.ptz_metrics[camera]["ptz_stop_time"].value,
+                }
+            )
+
+            self.onvif._move_to_preset(
+                camera,
+                self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
+            )
+            self.ptz_metrics[camera]["ptz_reset"].set()
+            self.ptz_metrics[camera]["ptz_stopped"].clear()
+
+            # Wait until the camera finishes moving
+            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                self.onvif.get_camera_status(camera)
+
+        self.calibrating[camera] = False
+
+        logger.debug("Calibration complete")
+
+        # calculate and save new intercept and coefficients
+        self._calculate_move_coefficients(camera, True)
+
+    def _calculate_move_coefficients(self, camera, calibration=False):
+        # calculate new coefficients when we have 50 more new values. Save up to 500
+        if calibration or (
+            len(self.move_metrics[camera]) % 5 == 0
+            and len(self.move_metrics[camera]) != 0
+            and len(self.move_metrics[camera]) <= 500
+        ):
+            X = np.array(
+                [abs(d["pan"]) + abs(d["tilt"]) for d in self.move_metrics[camera]]
+            )
+            y = np.array(
+                [
+                    d["end_timestamp"] - d["start_timestamp"]
+                    for d in self.move_metrics[camera]
+                ]
+            )
+
+            # simple linear regression with intercept
+            X_with_intercept = np.column_stack((np.ones(X.shape[0]), X))
+            self.move_coefficients[camera] = np.linalg.lstsq(
+                X_with_intercept, y, rcond=None
+            )[0]
+            self.intercept[camera] = y[0]
+
+            # write the intercept and coefficients back to the config file as a comma separated string
+            movement_weights = np.concatenate(
+                ([self.intercept[camera]], self.move_coefficients[camera])
+            )
+            self.config.cameras[camera].onvif.autotracking.movement_weights = ", ".join(
+                map(str, movement_weights)
+            )
+
+            logger.debug(
+                f"New regression parameters - intercept: {self.intercept[camera]}, coefficients: {self.move_coefficients[camera]}"
+            )
+
+            self.write_config(camera)
+
+    def _predict_movement_time(self, camera, pan, tilt):
+        combined_movement = abs(pan) + abs(tilt)
+        input_data = np.array([self.intercept[camera], combined_movement])
+
+        return np.dot(self.move_coefficients[camera], input_data)
 
     def _process_move_queue(self, camera):
         while True:
@@ -253,6 +383,31 @@ class PtzAutoTracker:
                     while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
                         # check if ptz is moving
                         self.onvif.get_camera_status(camera)
+
+                    if self.config.cameras[camera].onvif.autotracking.movement_weights:
+                        logger.debug(
+                            f"Predicted movement time: {self._predict_movement_time(camera, pan, tilt)}"
+                        )
+                        logger.debug(
+                            f'Actual movement time: {self.ptz_metrics[camera]["ptz_stop_time"].value-self.ptz_metrics[camera]["ptz_start_time"].value}'
+                        )
+
+                    # save metrics for better estimate calculations
+                    self.move_metrics[camera].append(
+                        {
+                            "pan": pan,
+                            "tilt": tilt,
+                            "start_timestamp": self.ptz_metrics[camera][
+                                "ptz_start_time"
+                            ].value,
+                            "end_timestamp": self.ptz_metrics[camera][
+                                "ptz_stop_time"
+                            ].value,
+                        }
+                    )
+
+                    # calculate new coefficients if we have enough data
+                    self._calculate_move_coefficients(camera)
 
             except queue.Empty:
                 continue
@@ -305,10 +460,53 @@ class PtzAutoTracker:
         # # frame width and height
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
+        camera_fps = camera_config.detect.fps
+
+        centroid_x = obj.obj_data["centroid"][0]
+        centroid_y = obj.obj_data["centroid"][1]
 
         # Normalize coordinates. top right of the fov is (1,1), center is (0,0), bottom left is (-1, -1).
-        pan = ((obj.obj_data["centroid"][0] / camera_width) - 0.5) * 2
-        tilt = (0.5 - (obj.obj_data["centroid"][1] / camera_height)) * 2
+        pan = ((centroid_x / camera_width) - 0.5) * 2
+        tilt = (0.5 - (centroid_y / camera_height)) * 2
+
+        if (
+            camera_config.onvif.autotracking.movement_weights
+        ):  # use estimates if we have available coefficients
+            predicted_movement_time = self._predict_movement_time(camera, pan, tilt)
+
+            # Norfair gives us two points for the velocity of an object represented as x1, y1, x2, y2
+            x1, y1, x2, y2 = obj.obj_data["estimate_velocity"]
+            average_velocity = (
+                (x1 + x2) / 2,
+                (y1 + y2) / 2,
+                (x1 + x2) / 2,
+                (y1 + y2) / 2,
+            )
+
+            # ensure bounding box remains in the frame
+            predicted_box = [
+                round(
+                    max(
+                        0,
+                        min(
+                            x + camera_fps * predicted_movement_time * v,
+                            camera_width if i % 2 == 0 else camera_height,
+                        ),
+                    )
+                )
+                for i, (x, v) in enumerate(zip(obj.obj_data["box"], average_velocity))
+            ]
+
+            centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
+            centroid_y = round((predicted_box[1] + predicted_box[3]) / 2)
+
+            # recalculate pan and tilt with new centroid
+            pan = ((centroid_x / camera_width) - 0.5) * 2
+            tilt = (0.5 - (centroid_y / camera_height)) * 2
+
+            logger.debug(f'Original box: {obj.obj_data["box"]}')
+            logger.debug(f"Predicted box: {predicted_box}")
+            logger.debug(f'Velocity: {obj.obj_data["estimate_velocity"]}')
 
         # ideas: check object velocity for camera speed?
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
@@ -355,6 +553,10 @@ class PtzAutoTracker:
             if not self.autotracker_init[camera]:
                 self._autotracker_setup(self.config.cameras[camera], camera)
 
+            if self.calibrating[camera]:
+                logger.debug("Calibrating camera")
+                return
+
             # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
             # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
             if (
@@ -373,7 +575,7 @@ class PtzAutoTracker:
                 )
                 self.tracked_object[camera] = obj
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
-                self.previous_frame_time = obj.obj_data["frame_time"]
+                self.previous_frame_time[camera] = obj.obj_data["frame_time"]
                 self._autotrack_move_ptz(camera, obj)
 
                 return
@@ -385,7 +587,7 @@ class PtzAutoTracker:
                 and obj.obj_data["id"] == self.tracked_object[camera].obj_data["id"]
                 and obj.obj_data["frame_time"] != self.previous_frame_time
             ):
-                self.previous_frame_time = obj.obj_data["frame_time"]
+                self.previous_frame_time[camera] = obj.obj_data["frame_time"]
                 # Don't move ptz if Euclidean distance from object to center of frame is
                 # less than 15% of the of the larger dimension (width or height) of the frame,
                 # multiplied by a scaling factor for object size.
@@ -449,10 +651,9 @@ class PtzAutoTracker:
                 and obj.obj_data["label"] in self.object_types[camera]
                 and not obj.previous["false_positive"]
                 and not obj.false_positive
-                and obj.obj_data["motionless_count"] == 0
                 and self.tracked_object_previous[camera] is not None
             ):
-                self.previous_frame_time = obj.obj_data["frame_time"]
+                self.previous_frame_time[camera] = obj.obj_data["frame_time"]
                 if (
                     intersection_over_union(
                         self.tracked_object_previous[camera].obj_data["region"],
@@ -481,6 +682,12 @@ class PtzAutoTracker:
                 self.tracked_object[camera] = None
 
     def camera_maintenance(self, camera):
+        # bail and don't check anything if we're calibrating or tracking an object
+        if self.calibrating[camera] or self.tracked_object[camera] is not None:
+            return
+
+        logger.debug("Running camera maintenance")
+
         # calls get_camera_status to check/update ptz movement
         # returns camera to preset after timeout when tracking is over
         autotracker_config = self.config.cameras[camera].onvif.autotracking

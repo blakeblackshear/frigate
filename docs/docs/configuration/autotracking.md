@@ -50,6 +50,12 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
+        # Optional: calibrate the camera on startup (default: shown below)
+        # A calibration will move the PTZ in increments and measure the time it takes to move.
+        # The results are used to help estimate the position of tracked objects after a camera move.
+        # Frigate will update your config file automatically after a calibration with
+        # a "movement_weights" entry for the camera. You should then set calibrate_on_startup to False.
+        calibrate_on_startup: False
         # Optional: the mode to use for zooming in/out on objects during autotracking. (default: shown below)
         # Available options are: disabled, absolute, and relative
         #   disabled - don't zoom in/out on autotracked objects, use pan/tilt only
@@ -66,7 +72,23 @@ cameras:
         return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
+        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: None)
+        movement_weights: None
 ```
+
+## Calibration
+
+PTZ motors operate at different speeds. Performing a calibration will direct Frigate to measure this speed over a variety of movements and use those measurements to better predict the amount of movement necessary to keep autotracked objects in the center of the frame.
+
+Calibration is optional, but will greatly assist Frigate in autotracking objects that move across the camera's field of view more quickly.
+
+To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of 30 small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
+
+After calibration has ended, your PTZ will be moved to the preset specified by `return_preset` and you should set `calibrate_on_startup` in your config file to `False`.
+
+Note that Frigate will refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+
+You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic.
 
 ## Best practices and considerations
 
@@ -74,7 +96,7 @@ Every PTZ camera is different, so autotracking may not perform ideally in every 
 
 The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases (especially for faster moving objects), the default 5 fps is insufficient for the motion estimator to perform accurately. 10 fps is the current recommendation. Higher frame rates will likely not be more performant and will only slow down Frigate and the motion estimator. Adjust your camera to output at least 10 frames per second and change the `fps` parameter in the [detect configuration](index.md) of your configuration file.
 
-A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. If your PTZ's motor is slow, you may not be able to reliably autotrack fast moving objects or objects close to the camera.
+A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all.
 
 # Zooming
 

@@ -145,6 +145,9 @@ class ZoomingModeEnum(str, Enum):
 
 class PtzAutotrackConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
+    calibrate_on_startup: bool = Field(
+        default=False, title="Perform a camera calibration when Frigate starts."
+    )
     zooming: ZoomingModeEnum = Field(
         default=ZoomingModeEnum.disabled, title="Autotracker zooming mode."
     )
@@ -160,6 +163,27 @@ class PtzAutotrackConfig(FrigateBaseModel):
     timeout: int = Field(
         default=10, title="Seconds to delay before returning to preset."
     )
+    movement_weights: Optional[Union[float, List[float]]] = Field(
+        default=[],
+        title="Internal value used for PTZ movements based on the speed of your camera's motor.",
+    )
+
+    @validator("movement_weights", pre=True)
+    def validate_weights(cls, v):
+        if v is None:
+            return None
+
+        if isinstance(v, str):
+            weights = list(map(float, v.split(",")))
+        elif isinstance(v, list):
+            weights = [float(val) for val in v]
+        else:
+            raise ValueError("Invalid type for movement_weights")
+
+        if len(weights) != 3:
+            raise ValueError("movement_weights must have exactly 3 floats")
+
+        return weights
 
 
 class OnvifConfig(FrigateBaseModel):
