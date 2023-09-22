@@ -595,8 +595,8 @@ cameras:
         return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
-        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: None)
-        movement_weights: None
+        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: shown below)
+        movement_weights: []
 
     # Optional: Configuration for how to sort the cameras in the Birdseye view.
     birdseye:

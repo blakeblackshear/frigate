@@ -72,8 +72,8 @@ cameras:
         return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
-        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: None)
-        movement_weights: None
+        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: shown below)
+        movement_weights: []
 ```
 
 ## Calibration
