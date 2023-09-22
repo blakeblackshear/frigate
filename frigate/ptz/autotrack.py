@@ -163,11 +163,11 @@ class PtzAutoTracker:
         self.tracked_object: dict[str, object] = {}
         self.tracked_object_previous: dict[str, object] = {}
         self.previous_frame_time: dict[str, object] = {}
-        self.object_types = dict[str, object] = {}
-        self.required_zones = dict[str, object] = {}
-        self.move_queues = dict[str, object] = {}
-        self.move_threads = dict[str, object] = {}
-        self.autotracker_init = dict[str, object] = {}
+        self.object_types: dict[str, object] = {}
+        self.required_zones: dict[str, object] = {}
+        self.move_queues: dict[str, object] = {}
+        self.move_threads: dict[str, object] = {}
+        self.autotracker_init: dict[str, object] = {}
         self.move_metrics: dict[str, object] = {}
         self.calibrating: dict[str, object] = {}
         self.intercept: dict[str, object] = {}
