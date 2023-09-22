@@ -112,3 +112,5 @@ You may find that it's helpful to lower your thresholds a little in order to gen
 Note that only verified images will be used when training your model. Submitting an image from Frigate as a true or false positive will not verify the image. You still must verify the image in Frigate+ in order for it to be used in training.
 
 In order to request your first model, you will need to have annotated and verified at least 10 images. Each subsequent model request will require that 10 additional images are verified. However, this is the bare minimum. For the best results, you should provide at least 100 verified images per camera. Keep in mind that varying conditions should be included. You will want images from cloudy days, sunny days, dawn, dusk, and night.
+
+As circumstances change, you may need to submit new examples to address new types of false positives. For example, the change from summer days to snowy winter days or other changes such as a new grill or patio furniture may require additional examples and training.
