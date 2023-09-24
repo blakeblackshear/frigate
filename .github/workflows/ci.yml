@@ -28,7 +28,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push amd64 standard build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/main/Dockerfile
@@ -38,7 +38,7 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
       - name: Build and push TensorRT (x86 GPU)
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         with:
           push: true
           targets: tensorrt
@@ -59,7 +59,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push arm64 standard build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/main/Dockerfile
@@ -70,7 +70,7 @@ jobs:
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         with:
           push: true
           targets: rpi
@@ -96,7 +96,7 @@ jobs:
           BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
           SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
           TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         with:
           push: true
           targets: tensorrt
@@ -122,7 +122,7 @@ jobs:
           BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
           TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         with:
           push: true
           targets: tensorrt
@@ -145,7 +145,7 @@ jobs:
         with:
           string: ${{ github.repository }}
       - name: Log in to the Container registry
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
