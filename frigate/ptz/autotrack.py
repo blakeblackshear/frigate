@@ -121,6 +121,9 @@ class PtzAutoTrackerThread(threading.Thread):
     def run(self):
         while not self.stop_event.wait(1):
             for camera_name, cam in self.config.cameras.items():
+                if not cam.enabled:
+                    continue
+
                 if cam.onvif.autotracking.enabled:
                     self.ptz_autotracker.camera_maintenance(camera_name)
                 else:
@@ -153,6 +156,9 @@ class PtzAutoTracker:
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
+            if not cam.enabled:
+                continue
+
             self.autotracker_init[camera_name] = False
             if cam.onvif.autotracking.enabled:
                 self._autotracker_setup(cam, camera_name)
