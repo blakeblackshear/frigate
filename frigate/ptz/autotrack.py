@@ -6,6 +6,7 @@ import math
 import os
 import queue
 import threading
+import time
 from functools import partial
 from multiprocessing.synchronize import Event as MpEvent
 
@@ -252,6 +253,8 @@ class PtzAutoTracker:
 
         self.calibrating[camera] = True
 
+        logger.info(f"Camera calibration for {camera} in progress")
+
         self.onvif._move_to_preset(
             camera,
             self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
@@ -267,18 +270,20 @@ class PtzAutoTracker:
             pan = step_sizes[step]
             tilt = step_sizes[step]
 
+            start_time = time.time()
             self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
             # Wait until the camera finishes moving
             while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
                 self.onvif.get_camera_status(camera)
+            stop_time = time.time()
 
             self.move_metrics[camera].append(
                 {
                     "pan": pan,
                     "tilt": tilt,
-                    "start_timestamp": self.ptz_metrics[camera]["ptz_start_time"].value,
-                    "end_timestamp": self.ptz_metrics[camera]["ptz_stop_time"].value,
+                    "start_timestamp": start_time,
+                    "end_timestamp": stop_time,
                 }
             )
 
@@ -295,7 +300,7 @@ class PtzAutoTracker:
 
         self.calibrating[camera] = False
 
-        logger.debug("Calibration complete")
+        logger.info(f"Calibration for {camera} complete")
 
         # calculate and save new intercept and coefficients
         self._calculate_move_coefficients(camera, True)
