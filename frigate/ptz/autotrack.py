@@ -528,10 +528,7 @@ class PtzAutoTracker:
 
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
-            # double the object area so we leave some room around the object
-            # perhaps make this a configurable value?
-            area_scale = 2
-            zoom = (obj.obj_data["area"] * area_scale) / (camera_width * camera_height)
+            zoom = obj.obj_data["area"] / (camera_width * camera_height)
 
             # test if we need to zoom out
             if not self._should_zoom_in(
