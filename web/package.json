@@ -18,7 +18,7 @@
     "date-fns": "^2.30.0",
     "idb-keyval": "^6.2.0",
     "immer": "^10.0.1",
-    "monaco-yaml": "^4.0.4",
+    "monaco-yaml": "^5.1.0",
     "preact": "^10.17.1",
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.1.0",
