@@ -6,7 +6,6 @@ import math
 import os
 import queue
 import threading
-import time
 from functools import partial
 from multiprocessing.synchronize import Event as MpEvent
 
@@ -33,12 +32,8 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     # for non ptz/autotracking cameras, this will always return False
     # ptz_start_time is initialized to 0 on startup and only changes
     # when autotracking movements are made
-
-    # the offset "primes" the motion estimator with a few frames before movement
-    offset = 0.5
-
-    return (ptz_start_time != 0.0 and frame_time >= ptz_start_time - offset) and (
-        ptz_stop_time == 0.0 or (ptz_start_time - offset <= frame_time <= ptz_stop_time)
+    return (ptz_start_time != 0.0 and frame_time > ptz_start_time) and (
+        ptz_stop_time == 0.0 or (ptz_start_time <= frame_time <= ptz_stop_time)
     )
 
 
@@ -190,6 +185,7 @@ class PtzAutoTracker:
 
         self.calibrating[camera_name] = False
         self.move_metrics[camera_name] = []
+        self.intercept[camera_name] = None
         self.move_coefficients[camera_name] = []
 
         self.move_queues[camera_name] = queue.Queue()
@@ -396,18 +392,23 @@ class PtzAutoTracker:
                         )
 
                     # save metrics for better estimate calculations
-                    self.move_metrics[camera].append(
-                        {
-                            "pan": pan,
-                            "tilt": tilt,
-                            "start_timestamp": self.ptz_metrics[camera][
-                                "ptz_start_time"
-                            ].value,
-                            "end_timestamp": self.ptz_metrics[camera][
-                                "ptz_stop_time"
-                            ].value,
-                        }
-                    )
+                    if (
+                        self.intercept[camera] is not None
+                        and len(self.move_metrics[camera]) < 500
+                    ):
+                        logger.debug("Adding new values to move metrics")
+                        self.move_metrics[camera].append(
+                            {
+                                "pan": pan,
+                                "tilt": tilt,
+                                "start_timestamp": self.ptz_metrics[camera][
+                                    "ptz_start_time"
+                                ].value,
+                                "end_timestamp": self.ptz_metrics[camera][
+                                    "ptz_stop_time"
+                                ].value,
+                            }
+                        )
 
                     # calculate new coefficients if we have enough data
                     self._calculate_move_coefficients(camera)
@@ -416,9 +417,14 @@ class PtzAutoTracker:
                 continue
 
     def _enqueue_move(self, camera, frame_time, pan, tilt, zoom):
+        def split_value(value):
+            clipped = np.clip(value, -1, 1)
+            return clipped, value - clipped
+
         if (
             frame_time > self.ptz_metrics[camera]["ptz_start_time"].value
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
+            and self.move_queues[camera].qsize() == 0
         ):
             # don't make small movements
             if abs(pan) < 0.02:
@@ -426,12 +432,21 @@ class PtzAutoTracker:
             if abs(tilt) < 0.02:
                 tilt = 0
 
-            if pan != 0 or tilt != 0 or zoom != 0:
+            # split up any large moves caused by velocity estimated movements
+            while pan != 0 or tilt != 0 or zoom != 0:
+                pan, pan_excess = split_value(pan)
+                tilt, tilt_excess = split_value(tilt)
+                zoom, zoom_excess = split_value(zoom)
+
                 logger.debug(
-                    f"enqueue pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
+                    f"Enqueue movement for frame time: {frame_time} pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
                 )
                 move_data = (frame_time, pan, tilt, zoom)
                 self.move_queues[camera].put(move_data)
+
+                pan = pan_excess
+                tilt = tilt_excess
+                zoom = zoom_excess
 
     def _should_zoom_in(self, camera, box, area):
         camera_config = self.config.cameras[camera]
@@ -445,6 +460,8 @@ class PtzAutoTracker:
         # If object area is less than 70% of frame
         # Then zoom in, otherwise try zooming out
         # should we make these configurable?
+        #
+        # TODO: Take into account the area changing when an object is moving out of frame
         edge_threshold = 0.15
         area_threshold = 0.7
 
@@ -486,18 +503,11 @@ class PtzAutoTracker:
                 (y1 + y2) / 2,
             )
 
-            # ensure bounding box remains in the frame
+            # this box could exceed the frame boundaries if velocity is high
+            # but we'll handle that in _enqueue_move() as two separate moves
             predicted_box = [
-                round(
-                    max(
-                        0,
-                        min(
-                            x + camera_fps * predicted_movement_time * v,
-                            camera_width if i % 2 == 0 else camera_height,
-                        ),
-                    )
-                )
-                for i, (x, v) in enumerate(zip(obj.obj_data["box"], average_velocity))
+                round(x + camera_fps * predicted_movement_time * v)
+                for x, v in zip(obj.obj_data["box"], average_velocity)
             ]
 
             centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
@@ -511,10 +521,12 @@ class PtzAutoTracker:
             logger.debug(f"Predicted box: {predicted_box}")
             logger.debug(f'Velocity: {obj.obj_data["estimate_velocity"]}')
 
-        # ideas: check object velocity for camera speed?
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
-            zoom = obj.obj_data["area"] / (camera_width * camera_height)
+            # double the object area so we leave some room around the object
+            # perhaps make this a configurable value?
+            area_scale = 2
+            zoom = (obj.obj_data["area"] * area_scale) / (camera_width * camera_height)
 
             # test if we need to zoom out
             if not self._should_zoom_in(
@@ -715,7 +727,7 @@ class PtzAutoTracker:
             and self.tracked_object_previous[camera] is not None
             and (
                 # might want to use a different timestamp here?
-                time.time()
+                self.ptz_metrics[camera]["ptz_frame_time"].value
                 - self.tracked_object_previous[camera].obj_data["frame_time"]
                 > autotracker_config.timeout
             )
@@ -731,7 +743,7 @@ class PtzAutoTracker:
 
             self.ptz_metrics[camera]["ptz_stopped"].wait()
             logger.debug(
-                f"Autotrack: Time is {time.time()}, returning to preset: {autotracker_config.return_preset}"
+                f"Autotrack: Time is {self.ptz_metrics[camera]['ptz_frame_time'].value}, returning to preset: {autotracker_config.return_preset}"
             )
             self.onvif._move_to_preset(
                 camera,

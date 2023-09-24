@@ -1,6 +1,5 @@
 """Configure and control camera via onvif."""
 
-import datetime
 import logging
 import site
 from enum import Enum
@@ -8,7 +7,7 @@ from enum import Enum
 import numpy
 from onvif import ONVIFCamera, ONVIFError
 
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, ZoomingModeEnum
 from frigate.types import PTZMetricsTypes
 
 logger = logging.getLogger(__name__)
@@ -266,10 +265,12 @@ class OnvifController:
 
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
-        logger.debug(f"PTZ start time: {datetime.datetime.now().timestamp()}")
-        self.ptz_metrics[camera_name][
-            "ptz_start_time"
-        ].value = datetime.datetime.now().timestamp()
+        logger.debug(
+            f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+        )
+        self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
+            camera_name
+        ]["ptz_frame_time"].value
         self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["relative_move_request"]
@@ -376,10 +377,12 @@ class OnvifController:
 
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
-        logger.debug(f"PTZ start time: {datetime.datetime.now().timestamp()}")
-        self.ptz_metrics[camera_name][
-            "ptz_start_time"
-        ].value = datetime.datetime.now().timestamp()
+        logger.debug(
+            f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+        )
+        self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
+            camera_name
+        ]["ptz_frame_time"].value
         self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["absolute_move_request"]
@@ -463,24 +466,31 @@ class OnvifController:
             if not self.ptz_metrics[camera_name]["ptz_stopped"].is_set():
                 self.ptz_metrics[camera_name]["ptz_stopped"].set()
 
-                logger.debug(f"PTZ stop time: {datetime.datetime.now().timestamp()}")
+                logger.debug(
+                    f"PTZ stop time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+                )
 
-                self.ptz_metrics[camera_name][
-                    "ptz_stop_time"
-                ].value = datetime.datetime.now().timestamp()
+                self.ptz_metrics[camera_name]["ptz_stop_time"].value = self.ptz_metrics[
+                    camera_name
+                ]["ptz_frame_time"].value
         else:
             self.cams[camera_name]["active"] = True
             if self.ptz_metrics[camera_name]["ptz_stopped"].is_set():
                 self.ptz_metrics[camera_name]["ptz_stopped"].clear()
 
-                logger.debug(f"PTZ start time: {datetime.datetime.now().timestamp()}")
+                logger.debug(
+                    f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+                )
 
                 self.ptz_metrics[camera_name][
                     "ptz_start_time"
-                ].value = datetime.datetime.now().timestamp()
+                ].value = self.ptz_metrics[camera_name]["ptz_frame_time"].value
                 self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
 
-        if self.config.cameras[camera_name].onvif.autotracking.zooming:
+        if (
+            self.config.cameras[camera_name].onvif.autotracking.zooming
+            == ZoomingModeEnum.absolute
+        ):
             # store absolute zoom level as 0 to 1 interpolated from the values of the camera
             self.ptz_metrics[camera_name]["ptz_zoom_level"].value = numpy.interp(
                 round(status.Position.Zoom.x, 2),
