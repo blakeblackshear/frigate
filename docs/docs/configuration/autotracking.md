@@ -5,6 +5,8 @@ title: Camera Autotracking
 
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
+![Autotracking Example](/img/frigate-autotracking-example.gif)
+
 ## Autotracking behavior
 
 Once Frigate determines that an object is not a false positive and has entered one of the required zones, the autotracker will move the PTZ camera to keep the object centered in the frame until the object either moves out of the frame, the PTZ is not capable of any more movement, or Frigate loses track of it.
