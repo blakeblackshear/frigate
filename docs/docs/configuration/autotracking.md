@@ -102,7 +102,7 @@ A fast [detector](object_detectors.md) is recommended. CPU detectors will not pe
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
-# Zooming
+## Zooming
 
 Zooming is an experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
 
