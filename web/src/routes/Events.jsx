@@ -277,12 +277,16 @@ export default function Events({ path, ...props }) {
     (node) => {
       if (isValidating) return;
       if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isDone) {
-          setSize(size + 1);
-        }
-      });
-      if (node) observer.current.observe(node);
+      try {
+        observer.current = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !isDone) {
+            setSize(size + 1);
+          }
+        });
+        if (node) observer.current.observe(node);
+      } catch (e) {
+        // no op
+      }
     },
     [size, setSize, isValidating, isDone]
   );
