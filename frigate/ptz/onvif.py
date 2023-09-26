@@ -152,6 +152,8 @@ class OnvifController:
         status_request = ptz.create_type("GetStatus")
         status_request.ProfileToken = profile.token
         self.cams[camera_name]["status_request"] = status_request
+        status = ptz.GetStatus(status_request)
+        logger.debug(f"Onvif status config for {camera_name}: {status}")
 
         # setup existing presets
         try:
@@ -460,6 +462,12 @@ class OnvifController:
         # zooming is optional
         pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
         zoom_status = getattr(status.MoveStatus, "Zoom", None)
+
+        if pan_tilt_status is None:
+            logger.error(
+                f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
+            )
+            return
 
         if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
             self.cams[camera_name]["active"] = False
