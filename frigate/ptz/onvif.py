@@ -82,6 +82,12 @@ class OnvifController:
         ptz_config = ptz.GetConfigurationOptions(request)
         logger.debug(f"Onvif config for {camera_name}: {ptz_config}")
 
+        service_capabilities_request = ptz.create_type("GetServiceCapabilities")
+        service_capabilities = ptz.GetServiceCapabilities(service_capabilities_request)
+        logger.debug(
+            f"Onvif service capabilities for {camera_name}: {service_capabilities}"
+        )
+
         fov_space_id = next(
             (
                 i
