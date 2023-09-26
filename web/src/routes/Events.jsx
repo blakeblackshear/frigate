@@ -48,6 +48,7 @@ const monthsAgo = (num) => {
 
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
+  const timezone = useMemo(() => config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
@@ -55,6 +56,8 @@ export default function Events({ path, ...props }) {
     labels: props.labels ?? 'all',
     zones: props.zones ?? 'all',
     sub_labels: props.sub_labels ?? 'all',
+    time_range: '00:00,24:00',
+    timezone,
     favorites: props.favorites ?? 0,
     event: props.event,
   });
