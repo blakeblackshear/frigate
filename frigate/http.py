@@ -864,10 +864,25 @@ def events():
         time_before = times[1]
 
         start_hour_fun = fn.strftime(
-            "%H:%M", fn.datetime(Event.start_time, "unixepoch", hour_modifier, minute_modifier)
+            "%H:%M",
+            fn.datetime(Event.start_time, "unixepoch", hour_modifier, minute_modifier),
         )
-        clauses.append((start_hour_fun > time_after))
-        clauses.append((start_hour_fun < time_before))
+
+        # cases where user wants events overnight, ex: from 20:00 to 06:00
+        # should use or operator
+        if time_after > time_before:
+            clauses.append(
+                (
+                    reduce(
+                        operator.or_,
+                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    )
+                )
+            )
+        # all other cases should be and operator
+        else:
+            clauses.append((start_hour_fun > time_after))
+            clauses.append((start_hour_fun < time_before))
 
     if has_clip is not None:
         clauses.append((Event.has_clip == has_clip))
