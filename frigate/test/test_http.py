@@ -238,7 +238,14 @@ class TestHttp(unittest.TestCase):
 
     def test_event_time_filtering(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config), self.db, None, None, None
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
+            None,
+            None,
+            None,
+            None,
+            PlusApi(),
         )
         morning_id = "123456.random"
         evening_id = "654321.random"

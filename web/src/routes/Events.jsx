@@ -49,7 +49,7 @@ const monthsAgo = (num) => {
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
   const { data: config } = useSWR('config');
-  const timezone = useMemo(() => config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
+  const timezone = useMemo(() => config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
   const [searchParams, setSearchParams] = useState({
     before: null,
     after: null,
@@ -100,7 +100,7 @@ export default function Events({ path, ...props }) {
       params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
       return axios.get(path, { params }).then((res) => res.data);
     },
-    [searchParams],
+    [searchParams]
   );
 
   const getKey = useCallback(
@@ -113,7 +113,7 @@ export default function Events({ path, ...props }) {
 
       return ['events', searchParams];
     },
-    [searchParams],
+    [searchParams]
   );
 
   const { data: eventPages, mutate, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
@@ -136,7 +136,7 @@ export default function Events({ path, ...props }) {
       labels: Object.values(allLabels || {}),
       sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
-    [config, allLabels, allSubLabels],
+    [config, allLabels, allSubLabels]
   );
 
   const onSave = async (e, eventId, save) => {
@@ -241,14 +241,14 @@ export default function Events({ path, ...props }) {
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
       setState({ ...state, showDatePicker: false });
     },
-    [searchParams, setSearchParams, state, setState],
+    [searchParams, setSearchParams, state, setState]
   );
 
   const handleSelectTimeRange = useCallback(
     (timeRange) => {
       setSearchParams({ ...searchParams, time_range: timeRange });
     },
-    [searchParams],
+    [searchParams]
   );
 
   const onFilter = useCallback(
@@ -266,7 +266,7 @@ export default function Events({ path, ...props }) {
         .join('&');
       route(`${path}?${queryString}`);
     },
-    [path, searchParams, setSearchParams],
+    [path, searchParams, setSearchParams]
   );
 
   const isDone = (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT;
@@ -284,7 +284,7 @@ export default function Events({ path, ...props }) {
       });
       if (node) observer.current.observe(node);
     },
-    [size, setSize, isValidating, isDone],
+    [size, setSize, isValidating, isDone]
   );
 
   const onSendToPlus = async (id, false_positive, validBox) => {
@@ -307,9 +307,9 @@ export default function Events({ path, ...props }) {
                 return { ...event, plus_id: response.data.plus_id };
               }
               return event;
-            }),
+            })
           ),
-        false,
+        false
       );
     }
 
@@ -415,13 +415,13 @@ export default function Events({ path, ...props }) {
             downloadEvent.end_time &&
             downloadEvent.has_snapshot &&
             !downloadEvent.plus_id && (
-              <MenuItem
-                icon={UploadPlus}
-                label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
-                value="plus"
-                onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
-              />
-            )}
+            <MenuItem
+              icon={UploadPlus}
+              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
+              value="plus"
+              onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
+            />
+          )}
           {downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
@@ -776,7 +776,7 @@ export default function Events({ path, ...props }) {
                                     : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
                                 alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
-                                  0,
+                                  0
                                 )}% confidence`}
                               />
                             </div>
