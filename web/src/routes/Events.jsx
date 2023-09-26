@@ -48,6 +48,7 @@ const monthsAgo = (num) => {
 
 export default function Events({ path, ...props }) {
   const apiHost = useApiHost();
+  const { data: config } = useSWR('config');
   const timezone = useMemo(() => config.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
   const [searchParams, setSearchParams] = useState({
     before: null,
@@ -90,14 +91,17 @@ export default function Events({ path, ...props }) {
     showDeleteFavorite: false,
   });
 
-  const eventsFetcher = useCallback((path, params) => {
-    if (searchParams.event) {
-      path = `${path}/${searchParams.event}`;
-      return axios.get(path).then((res) => [res.data]);
-    }
-    params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
-    return axios.get(path, { params }).then((res) => res.data);
-  }, [searchParams]);
+  const eventsFetcher = useCallback(
+    (path, params) => {
+      if (searchParams.event) {
+        path = `${path}/${searchParams.event}`;
+        return axios.get(path).then((res) => [res.data]);
+      }
+      params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
+      return axios.get(path, { params }).then((res) => res.data);
+    },
+    [searchParams],
+  );
 
   const getKey = useCallback(
     (index, prevData) => {
@@ -109,12 +113,10 @@ export default function Events({ path, ...props }) {
 
       return ['events', searchParams];
     },
-    [searchParams]
+    [searchParams],
   );
 
   const { data: eventPages, mutate, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
-
-  const { data: config } = useSWR('config');
 
   const { data: allLabels } = useSWR(['labels']);
   const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
@@ -134,7 +136,7 @@ export default function Events({ path, ...props }) {
       labels: Object.values(allLabels || {}),
       sub_labels: (allSubLabels || []).length > 0 ? [...Object.values(allSubLabels), 'None'] : [],
     }),
-    [config, allLabels, allSubLabels]
+    [config, allLabels, allSubLabels],
   );
 
   const onSave = async (e, eventId, save) => {
@@ -239,7 +241,14 @@ export default function Events({ path, ...props }) {
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
       setState({ ...state, showDatePicker: false });
     },
-    [searchParams, setSearchParams, state, setState]
+    [searchParams, setSearchParams, state, setState],
+  );
+
+  const handleSelectTimeRange = useCallback(
+    (timeRange) => {
+      setSearchParams({ ...searchParams, time_range: timeRange });
+    },
+    [searchParams],
   );
 
   const onFilter = useCallback(
@@ -257,7 +266,7 @@ export default function Events({ path, ...props }) {
         .join('&');
       route(`${path}?${queryString}`);
     },
-    [path, searchParams, setSearchParams]
+    [path, searchParams, setSearchParams],
   );
 
   const isDone = (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT;
@@ -275,7 +284,7 @@ export default function Events({ path, ...props }) {
       });
       if (node) observer.current.observe(node);
     },
-    [size, setSize, isValidating, isDone]
+    [size, setSize, isValidating, isDone],
   );
 
   const onSendToPlus = async (id, false_positive, validBox) => {
@@ -298,9 +307,9 @@ export default function Events({ path, ...props }) {
                 return { ...event, plus_id: response.data.plus_id };
               }
               return event;
-            })
+            }),
           ),
-        false
+        false,
       );
     }
 
@@ -364,7 +373,7 @@ export default function Events({ path, ...props }) {
           />
         )}
         {searchParams.event && (
-          <Button className="ml-2" onClick={() => onFilter('event',null)} type="text">
+          <Button className="ml-2" onClick={() => onFilter('event', null)} type="text">
             View All
           </Button>
         )}
@@ -402,14 +411,17 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {(event?.data?.type || "object") == "object" && downloadEvent.end_time && downloadEvent.has_snapshot && !downloadEvent.plus_id && (
-            <MenuItem
-              icon={UploadPlus}
-              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
-              value="plus"
-              onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
-            />
-          )}
+          {(event?.data?.type || 'object') == 'object' &&
+            downloadEvent.end_time &&
+            downloadEvent.has_snapshot &&
+            !downloadEvent.plus_id && (
+              <MenuItem
+                icon={UploadPlus}
+                label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
+                value="plus"
+                onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
+              />
+            )}
           {downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
@@ -462,10 +474,7 @@ export default function Events({ path, ...props }) {
               dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
               close={() => setState({ ...state, showCalendar: false })}
             >
-              <Timepicker
-                dateRange={{ before: searchParams.before * 1000 || null, after: searchParams.after * 1000 || null }}
-                onChange={handleSelectDateRange}
-              />
+              <Timepicker timeRange={searchParams.time_range} onChange={handleSelectTimeRange} />
             </Calendar>
           </Menu>
         </span>
@@ -569,7 +578,11 @@ export default function Events({ path, ...props }) {
             <p className="mb-2">Confirm deletion of saved event.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
-            <Button className="ml-2" onClick={() => setDeleteFavoriteState({ ...state, showDeleteFavorite: false })} type="text">
+            <Button
+              className="ml-2"
+              onClick={() => setDeleteFavoriteState({ ...state, showDeleteFavorite: false })}
+              type="text"
+            >
               Cancel
             </Button>
             <Button
@@ -638,10 +651,12 @@ export default function Events({ path, ...props }) {
                           <Camera className="h-5 w-5 mr-2 inline" />
                           {event.camera.replaceAll('_', ' ')}
                         </div>
-                        {event.zones.length ? <div className="capitalize  text-sm flex align-center">
-                          <Zone className="w-5 h-5 mr-2 inline" />
-                          {event.zones.join(', ').replaceAll('_', ' ')}
-                        </div> : null}
+                        {event.zones.length ? (
+                          <div className="capitalize  text-sm flex align-center">
+                            <Zone className="w-5 h-5 mr-2 inline" />
+                            {event.zones.join(', ').replaceAll('_', ' ')}
+                          </div>
+                        ) : null}
                         <div className="capitalize  text-sm flex align-center">
                           <Score className="w-5 h-5 mr-2 inline" />
                           {(event?.data?.top_score || event.top_score || 0) == 0
@@ -653,7 +668,7 @@ export default function Events({ path, ...props }) {
                         </div>
                       </div>
                       <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.end_time && event.has_snapshot && (event?.data?.type || "object") == "object" && (
+                        {event.end_time && event.has_snapshot && (event?.data?.type || 'object') == 'object' && (
                           <Fragment>
                             {event.plus_id ? (
                               <div className="uppercase text-xs underline">
@@ -761,7 +776,7 @@ export default function Events({ path, ...props }) {
                                     : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
                                 }
                                 alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
-                                  0
+                                  0,
                                 )}% confidence`}
                               />
                             </div>
