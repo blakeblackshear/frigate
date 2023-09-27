@@ -85,7 +85,22 @@ Frigate+ models support a more relevant set of objects for security cameras. Cur
 
 Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate events. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
 
-In order to have Frigate start using these labels, you will need to add them to the
+In order to have Frigate start using these attribute labels, you will need to add them to the list of objects to track:
+
+```yaml
+objects:
+  track:
+    - person
+    - face
+    - license_plate
+    - dog
+    - cat
+    - car
+    - amazon
+    - fedex
+    - ups
+    - package
+```
 
 When using Frigate+ models, Frigate will choose the snapshot of a person object that has the largest visible face. For cars, the snapshot with the largest visible license plate will be selected. This aids in secondary processing such as facial and license plate recognition for person and car objects.
 
