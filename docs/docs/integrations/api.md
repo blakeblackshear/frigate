@@ -254,7 +254,7 @@ Accepts the following query string parameters, but they are only applied when an
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
-### `GET /api/<camera_name>/recording/<frame_time>/snapshot.png`
+### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
 
 Returns the snapshot image from the specific point in that cameras recordings.
 
