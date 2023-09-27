@@ -321,7 +321,7 @@ Create a manual event with a given `label` (ex: doorbell press) to capture a spe
 
 ```json
 {
-  "subLabel": "some_string", // add sub label to event
+  "sub_label": "some_string", // add sub label to event
   "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
   "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
   "draw": {
