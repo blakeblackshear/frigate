@@ -208,6 +208,17 @@ class PtzAutoTracker:
 
                 return
 
+            movestatus_supported = self.onvif.get_service_capabilities(camera_name)
+
+            if movestatus_supported is None or movestatus_supported.lower() != "true":
+                cam.onvif.autotracking.enabled = False
+                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
+                logger.warning(
+                    f"Disabling autotracking for {camera_name}: ONVIF MoveStatus not supported"
+                )
+
+                return
+
             self.onvif.get_camera_status(camera_name)
 
             # movement thread per camera

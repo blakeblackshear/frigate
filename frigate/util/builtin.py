@@ -249,3 +249,15 @@ def update_yaml(data, key_path, new_value):
                 temp[last_key] = new_value
 
     return data
+
+
+def find_by_key(dictionary, target_key):
+    if target_key in dictionary:
+        return dictionary[target_key]
+    else:
+        for value in dictionary.values():
+            if isinstance(value, dict):
+                result = find_by_key(value, target_key)
+                if result is not None:
+                    return result
+    return None
