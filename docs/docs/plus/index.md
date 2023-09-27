@@ -11,7 +11,13 @@ Information on how to integrate Frigate+ with Frigate can be found in the [integ
 
 ## Frequently asked questions
 
-While developing these models, there were some common questions that arose.
+### Are my models trained just on my image uploads? How are they built?
+
+Frigate+ models are built by fine tuning a base model with the images you have annotated and verified. The base model is trained from scratch from a sampling of images across all Frigate+ user submissions and takes weeks of expensive GPU resources to train. If the models were built using your image uploads alone, you would need to provide tens of thousands of examples and it would take more than a week (and considerable cost) to train. Diversity helps the model generalize.
+
+### What is a training credit and how do I use them?
+
+Essentially, `1 training credit = 1 trained model`. When you have uploaded, annotated, and verified additional images and you are ready to train your model, you will submit a model request which will use one credit. The model that is trained will utilize all of the verified images in your account.
 
 ### Are my video feeds sent to the cloud for analysis when using Frigate+ models?
 
@@ -78,6 +84,23 @@ Frigate+ models support a more relevant set of objects for security cameras. Cur
 #### Label attributes
 
 Frigate has special handling for some labels when using Frigate+ models. `face`, `license_plate`, `amazon`, `ups`, and `fedex` are considered attribute labels which are not tracked like regular objects and do not generate events. In addition, the `threshold` filter will have no effect on these labels. You should adjust the `min_score` and other filter values as needed.
+
+In order to have Frigate start using these attribute labels, you will need to add them to the list of objects to track:
+
+```yaml
+objects:
+  track:
+    - person
+    - face
+    - license_plate
+    - dog
+    - cat
+    - car
+    - amazon
+    - fedex
+    - ups
+    - package
+```
 
 When using Frigate+ models, Frigate will choose the snapshot of a person object that has the largest visible face. For cars, the snapshot with the largest visible license plate will be selected. This aids in secondary processing such as facial and license plate recognition for person and car objects.
 
