@@ -28,9 +28,9 @@ export default function Export() {
   const localISODate = localDate.toISOString().split('T')[0];
 
   const [startDate, setStartDate] = useState(localISODate);
-  const [startTime, setStartTime] = useState('00:00');
+  const [startTime, setStartTime] = useState('00:00:00');
   const [endDate, setEndDate] = useState(localISODate);
-  const [endTime, setEndTime] = useState('23:59');
+  const [endTime, setEndTime] = useState('23:59:59');
 
   // Export States
 
@@ -185,6 +185,7 @@ export default function Export() {
               id="startTime"
               type="time"
               value={startTime}
+              step="1"
               onChange={(e) => setStartTime(e.target.value)}
             />
             <Heading className="py-2" size="sm">
@@ -202,6 +203,7 @@ export default function Export() {
               id="endTime"
               type="time"
               value={endTime}
+              step="1"
               onChange={(e) => setEndTime(e.target.value)}
             />
           </div>
