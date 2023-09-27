@@ -35,7 +35,7 @@ export default function Birdseye() {
   let player;
   const playerClass = ptzCameras.length || isMaxWidth ? 'w-full' : 'max-w-5xl xl:w-1/2';
   if (viewSource == 'mse' && config.birdseye.restream) {
-    if ('MediaSource' in window) {
+    if ('MediaSource' in window || 'ManagedMediaSource' in window) {
       player = (
         <Fragment>
           <div className={playerClass}>

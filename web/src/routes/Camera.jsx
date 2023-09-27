@@ -116,7 +116,7 @@ export default function Camera({ camera }) {
   let player;
   if (viewMode === 'live') {
     if (viewSource == 'mse' && restreamEnabled) {
-      if ('MediaSource' in window) {
+      if ('MediaSource' in window || 'ManagedMediaSource' in window) {
         player = (
           <Fragment>
             <div className="max-w-5xl">
