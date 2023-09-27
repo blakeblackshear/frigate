@@ -165,6 +165,7 @@ class PtzAutoTracker:
         self.object_types: dict[str, object] = {}
         self.required_zones: dict[str, object] = {}
         self.move_queues: dict[str, object] = {}
+        self.move_queue_locks: dict[str, object] = {}
         self.move_threads: dict[str, object] = {}
         self.autotracker_init: dict[str, object] = {}
         self.move_metrics: dict[str, object] = {}
@@ -196,6 +197,7 @@ class PtzAutoTracker:
         self.move_coefficients[camera_name] = []
 
         self.move_queues[camera_name] = queue.Queue()
+        self.move_queue_locks[camera_name] = threading.Lock()
 
         if not self.onvif.cams[camera_name]["init"]:
             if not self.onvif._init_onvif(camera_name):
@@ -371,8 +373,9 @@ class PtzAutoTracker:
 
     def _process_move_queue(self, camera):
         while True:
-            try:
-                move_data = self.move_queues[camera].get()
+            move_data = self.move_queues[camera].get()
+
+            with self.move_queue_locks[camera]:
                 frame_time, pan, tilt, zoom = move_data
 
                 # if we're receiving move requests during a PTZ move, ignore them
@@ -435,9 +438,6 @@ class PtzAutoTracker:
                     # calculate new coefficients if we have enough data
                     self._calculate_move_coefficients(camera)
 
-            except queue.Empty:
-                continue
-
     def _enqueue_move(self, camera, frame_time, pan, tilt, zoom):
         def split_value(value):
             clipped = np.clip(value, -1, 1)
@@ -446,7 +446,7 @@ class PtzAutoTracker:
         if (
             frame_time > self.ptz_metrics[camera]["ptz_start_time"].value
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
-            and self.move_queues[camera].qsize() == 0
+            and not self.move_queue_locks[camera].locked()
         ):
             # don't make small movements
             if abs(pan) < 0.02:
