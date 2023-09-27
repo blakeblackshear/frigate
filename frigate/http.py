@@ -56,6 +56,8 @@ from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_TIME_RANGE = "00:00,24:00"
+
 bp = Blueprint("frigate", __name__)
 
 
@@ -769,6 +771,7 @@ def events():
     limit = request.args.get("limit", 100)
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
+    time_range = request.args.get("time_range", DEFAULT_TIME_RANGE)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
     in_progress = request.args.get("in_progress", type=int)
@@ -850,6 +853,36 @@ def events():
 
     if before:
         clauses.append((Event.start_time < before))
+
+    if time_range != DEFAULT_TIME_RANGE:
+        # get timezone arg to ensure browser times are used
+        tz_name = request.args.get("timezone", default="utc", type=str)
+        hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
+
+        times = time_range.split(",")
+        time_after = times[0]
+        time_before = times[1]
+
+        start_hour_fun = fn.strftime(
+            "%H:%M",
+            fn.datetime(Event.start_time, "unixepoch", hour_modifier, minute_modifier),
+        )
+
+        # cases where user wants events overnight, ex: from 20:00 to 06:00
+        # should use or operator
+        if time_after > time_before:
+            clauses.append(
+                (
+                    reduce(
+                        operator.or_,
+                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    )
+                )
+            )
+        # all other cases should be and operator
+        else:
+            clauses.append((start_hour_fun > time_after))
+            clauses.append((start_hour_fun < time_before))
 
     if has_clip is not None:
         clauses.append((Event.has_clip == has_clip))

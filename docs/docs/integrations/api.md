@@ -155,18 +155,20 @@ Version info
 
 Events from the database. Accepts the following query string parameters:
 
-| param                | Type | Description                                   |
-| -------------------- | ---- | --------------------------------------------- |
-| `before`             | int  | Epoch time                                    |
-| `after`              | int  | Epoch time                                    |
-| `cameras`            | str  | , separated list of cameras                   |
-| `labels`             | str  | , separated list of labels                    |
-| `zones`              | str  | , separated list of zones                     |
-| `limit`              | int  | Limit the number of events returned           |
-| `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1) |
-| `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
-| `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
-| `in_progress`        | int  | Limit to events in progress (0 or 1)          |
+| param                | Type | Description                                     |
+| -------------------- | ---- | ----------------------------------------------- |
+| `before`             | int  | Epoch time                                      |
+| `after`              | int  | Epoch time                                      |
+| `cameras`            | str  | , separated list of cameras                     |
+| `labels`             | str  | , separated list of labels                      |
+| `zones`              | str  | , separated list of zones                       |
+| `limit`              | int  | Limit the number of events returned             |
+| `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1)   |
+| `has_clip`           | int  | Filter to events that have clips (0 or 1)       |
+| `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)     |
+| `in_progress`        | int  | Limit to events in progress (0 or 1)            |
+| `time_range`         | str  | Time range in format after,before (00:00,24:00) |
+| `timezone`           | str  | Timezone to use for time range                  |
 
 ### `GET /api/timeline`
 
