@@ -364,24 +364,24 @@ class VideoRTC extends HTMLElement {
     let ms;
 
     if ('ManagedMediaSource' in window) {
-        const MediaSource = window.ManagedMediaSource;
+      const MediaSource = window.ManagedMediaSource;
 
-        ms = new MediaSource();
-        ms.addEventListener('sourceopen', () => {
-            this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
-        }, {once: true});
+      ms = new MediaSource();
+      ms.addEventListener('sourceopen', () => {
+        this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
+      }, {once: true});
 
-        this.video.disableRemotePlayback = true;
-        this.video.srcObject = ms;
+      this.video.disableRemotePlayback = true;
+      this.video.srcObject = ms;
     } else {
-        ms = new MediaSource();
-        ms.addEventListener('sourceopen', () => {
-            URL.revokeObjectURL(this.video.src);
-            this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
-        }, {once: true});
+      ms = new MediaSource();
+      ms.addEventListener('sourceopen', () => {
+        URL.revokeObjectURL(this.video.src);
+        this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
+      }, {once: true});
 
-        this.video.src = URL.createObjectURL(ms);
-        this.video.srcObject = null;
+      this.video.src = URL.createObjectURL(ms);
+      this.video.srcObject = null;
     }
     this.play();
 
