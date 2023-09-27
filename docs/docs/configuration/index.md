@@ -324,7 +324,7 @@ motion:
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
   frame_alpha: 0.01
-  # Optional: Height of the resized motion frame  (default: 50)
+  # Optional: Height of the resized motion frame  (default: 100)
   # Higher values will result in more granular motion detection at the expense of higher CPU usage.
   # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 100
