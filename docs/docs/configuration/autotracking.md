@@ -5,6 +5,8 @@ title: Camera Autotracking
 
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
+![Autotracking Example](/img/frigate-autotracking-example.gif)
+
 ## Autotracking behavior
 
 Once Frigate determines that an object is not a false positive and has entered one of the required zones, the autotracker will move the PTZ camera to keep the object centered in the frame until the object either moves out of the frame, the PTZ is not capable of any more movement, or Frigate loses track of it.
@@ -50,6 +52,18 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
+        # Optional: calibrate the camera on startup (default: shown below)
+        # A calibration will move the PTZ in increments and measure the time it takes to move.
+        # The results are used to help estimate the position of tracked objects after a camera move.
+        # Frigate will update your config file automatically after a calibration with
+        # a "movement_weights" entry for the camera. You should then set calibrate_on_startup to False.
+        calibrate_on_startup: False
+        # Optional: the mode to use for zooming in/out on objects during autotracking. (default: shown below)
+        # Available options are: disabled, absolute, and relative
+        #   disabled - don't zoom in/out on autotracked objects, use pan/tilt only
+        #   absolute - use absolute zooming (supported by most PTZ capable cameras)
+        #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
+        zooming: disabled
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -60,7 +74,23 @@ cameras:
         return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
+        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: shown below)
+        movement_weights: []
 ```
+
+## Calibration
+
+PTZ motors operate at different speeds. Performing a calibration will direct Frigate to measure this speed over a variety of movements and use those measurements to better predict the amount of movement necessary to keep autotracked objects in the center of the frame.
+
+Calibration is optional, but will greatly assist Frigate in autotracking objects that move across the camera's field of view more quickly.
+
+To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of 30 small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
+
+After calibration has ended, your PTZ will be moved to the preset specified by `return_preset` and you should set `calibrate_on_startup` in your config file to `False`.
+
+Note that Frigate will refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+
+You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic. If you change your `return_preset` in any way, a recalibration is also recommended.
 
 ## Best practices and considerations
 
@@ -68,9 +98,17 @@ Every PTZ camera is different, so autotracking may not perform ideally in every 
 
 The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases (especially for faster moving objects), the default 5 fps is insufficient for the motion estimator to perform accurately. 10 fps is the current recommendation. Higher frame rates will likely not be more performant and will only slow down Frigate and the motion estimator. Adjust your camera to output at least 10 frames per second and change the `fps` parameter in the [detect configuration](index.md) of your configuration file.
 
-A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. If Frigate already has trouble keeping track of your object, the autotracker will struggle as well.
+A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's debug viewer for your camera to see a thicker colored box around the object currently being autotracked.
 
-The autotracker will add PTZ motion requests to a queue while the motor is moving. Once the motor stops, the events in the queue will be executed together as one large move (rather than incremental moves). If your PTZ's motor is slow, you may not be able to reliably autotrack fast moving objects.
+A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
+
+## Zooming
+
+Zooming is an experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
+
+Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming.
+
+Relative zooming attempts to make a zoom movement concurrently with any pan/tilt movements. It was tested to work with some Dahua and Amcrest PTZs. But the ONVIF specification indicates that there no assumption about how the generic zoom range is mapped to magnification, field of view or other physical zoom dimension when using relative zooming. So if relative zooming behavior is erratic or just doesn't work, use absolute zooming.
 
 ## Usage applications
 

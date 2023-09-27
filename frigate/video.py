@@ -767,6 +767,7 @@ def process_frames(
             continue
 
         current_frame_time.value = frame_time
+        ptz_metrics["ptz_frame_time"].value = frame_time
 
         frame = frame_manager.get(
             f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])

@@ -1536,6 +1536,46 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.cameras["back"].objects.filters["dog"].min_ratio == 0.2
         assert runtime_config.cameras["back"].objects.filters["dog"].max_ratio == 10.1
 
+    def test_valid_movement_weights(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "onvif": {"autotracking": {"movement_weights": "1.23, 2.34, 0.50"}},
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+
+        runtime_config = frigate_config.runtime_config()
+        assert runtime_config.cameras["back"].onvif.autotracking.movement_weights == [
+            1.23,
+            2.34,
+            0.50,
+        ]
+
+    def test_fails_invalid_movement_weights(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "onvif": {"autotracking": {"movement_weights": "1.234, 2.345a"}},
+                }
+            },
+        }
+
+        self.assertRaises(ValueError, lambda: FrigateConfig(**config))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

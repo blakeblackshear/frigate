@@ -278,9 +278,11 @@ class NorfairTracker(ObjectTracker):
                 min(self.detect_config.width - 1, estimate[2]),
                 min(self.detect_config.height - 1, estimate[3]),
             )
+            estimate_velocity = tuple(t.estimate_velocity.flatten().astype(int))
             obj = {
                 **t.last_detection.data,
                 "estimate": estimate,
+                "estimate_velocity": estimate_velocity,
             }
             active_ids.append(t.global_id)
             if t.global_id not in self.track_id_map:
