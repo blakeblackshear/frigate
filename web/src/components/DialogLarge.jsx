@@ -21,7 +21,7 @@ export default function LargeDialog({ children, portalRootID = 'dialogs' }) {
       >
         <div
           role="modal"
-          className={`absolute rounded shadow-2xl bg-white dark:bg-gray-700 w-4/5 max-w-7xl text-gray-900 dark:text-white transition-transform transition-opacity duration-75 transform scale-90 opacity-0 ${
+          className={`absolute rounded shadow-2xl bg-white dark:bg-gray-700 w-4/5 md:h-2/3 max-w-7xl text-gray-900 dark:text-white transition-transform transition-opacity duration-75 transform scale-90 opacity-0 ${
             show ? 'scale-100 opacity-100' : ''
           }`}
         >
