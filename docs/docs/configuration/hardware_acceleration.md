@@ -62,7 +62,7 @@ ffmpeg:
 
 #### Configuring Intel GPU Stats in Docker
 
-Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Three are two options:
+Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. There are two options:
 
 1. Run the container as privileged.
 2. Add the `CAP_PERFMON` capability (note: you might need to set the `perf_event_paranoid` low enough to allow access to the performance event system.)
