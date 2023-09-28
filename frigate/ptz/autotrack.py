@@ -105,9 +105,16 @@ class PtzMotionEstimator:
             # Norfair estimator function needs color so it can convert it right back to gray
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGRA)
 
-            self.coord_transformations = self.norfair_motion_estimator.update(
-                frame, mask
-            )
+            try:
+                self.coord_transformations = self.norfair_motion_estimator.update(
+                    frame, mask
+                )
+            except:
+                # sometimes opencv can't find enough features in the image to find homography, so catch this error
+                logger.error(
+                    f"Autotracker: motion estimator couldn't find homography for {camera_name} at frame time {frame_time}"
+                )
+                self.coord_transformations = None
 
             self.frame_manager.close(frame_id)
 
@@ -545,7 +552,10 @@ class PtzAutoTracker:
 
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
-            zoom = obj.obj_data["area"] / (camera_width * camera_height)
+            zoom_factor = 30
+            zoom = max(
+                obj.obj_data["area"] / (camera_width * camera_height) * zoom_factor, 1
+            )
 
             # test if we need to zoom out
             if not self._should_zoom_in(
@@ -557,12 +567,14 @@ class PtzAutoTracker:
             ):
                 zoom = -(1 - zoom)
 
-            # don't make small movements if area hasn't changed significantly
+            # don't make small movements to zoom in if area hasn't changed significantly
+            # but always zoom out if necessary
             if (
                 "area" in obj.previous
                 and abs(obj.obj_data["area"] - obj.previous["area"])
                 / obj.obj_data["area"]
-                < 0.1
+                < 0.2
+                and zoom > 0
             ):
                 zoom = 0
         else:
