@@ -254,7 +254,7 @@ Accepts the following query string parameters, but they are only applied when an
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
-### `GET /api/<camera_name>/recording/<frame_time>/snapshot.png`
+### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
 
 Returns the snapshot image from the specific point in that cameras recordings.
 
@@ -321,7 +321,7 @@ Create a manual event with a given `label` (ex: doorbell press) to capture a spe
 
 ```json
 {
-  "subLabel": "some_string", // add sub label to event
+  "sub_label": "some_string", // add sub label to event
   "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
   "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
   "draw": {
