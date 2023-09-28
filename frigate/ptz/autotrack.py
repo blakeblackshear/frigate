@@ -559,7 +559,7 @@ class PtzAutoTracker:
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
             zoom_factor = 30
-            zoom = max(
+            zoom = min(
                 obj.obj_data["area"] / (camera_width * camera_height) * zoom_factor, 1
             )
 
