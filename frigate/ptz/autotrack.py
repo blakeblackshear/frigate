@@ -532,12 +532,19 @@ class PtzAutoTracker:
                 (y1 + y2) / 2,
             )
 
-            # this box could exceed the frame boundaries if velocity is high
-            # but we'll handle that in _enqueue_move() as two separate moves
-            predicted_box = [
-                round(x + camera_fps * predicted_movement_time * v)
-                for x, v in zip(obj.obj_data["box"], average_velocity)
-            ]
+            # get euclidean distance of the two points, sometimes the estimate is way off
+            distance = np.linalg.norm([x2 - x1, y2 - y1])
+
+            if distance <= 5:
+                # this box could exceed the frame boundaries if velocity is high
+                # but we'll handle that in _enqueue_move() as two separate moves
+                predicted_box = [
+                    round(x + camera_fps * predicted_movement_time * v)
+                    for x, v in zip(obj.obj_data["box"], average_velocity)
+                ]
+            else:
+                # estimate was bad
+                predicted_box = obj.obj_data["box"]
 
             centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
             centroid_y = round((predicted_box[1] + predicted_box[3]) / 2)
