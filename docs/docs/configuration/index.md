@@ -596,6 +596,11 @@ cameras:
         #   absolute - use absolute zooming (supported by most PTZ capable cameras)
         #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
         zooming: disabled
+        # Optional: A value to change the behavior of zooming on autotracked objects. (default: shown below)
+        # A lower value will keep more of the scene in view around a tracked object.
+        # A higher value will zoom in more on a tracked object, but Frigate may lose tracking more quickly.
+        # The value should be between 0.1 and 0.75
+        zoom_factor: 0.3
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
