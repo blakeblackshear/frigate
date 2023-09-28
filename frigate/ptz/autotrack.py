@@ -111,7 +111,7 @@ class PtzMotionEstimator:
                 logger.debug(
                     f"Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
                 )
-            except:
+            except Exception:
                 # sometimes opencv can't find enough features in the image to find homography, so catch this error
                 logger.warning(
                     f"Autotracker: motion estimator couldn't get transformations for {camera_name} at frame time {frame_time}"
