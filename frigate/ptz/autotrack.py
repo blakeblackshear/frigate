@@ -2,7 +2,6 @@
 
 import copy
 import logging
-import math
 import os
 import queue
 import threading
@@ -656,10 +655,11 @@ class PtzAutoTracker:
                 # more often to keep the object in the center. Raising the percentage will cause less
                 # movement and will be more flexible with objects not quite being centered.
                 # TODO: there's probably a better way to approach this
-                distance = math.sqrt(
-                    (obj.obj_data["centroid"][0] - camera_config.detect.width / 2) ** 2
-                    + (obj.obj_data["centroid"][1] - camera_config.detect.height / 2)
-                    ** 2
+                distance = np.linalg.norm(
+                    [
+                        obj.obj_data["centroid"][0] - camera_config.detect.width / 2,
+                        obj.obj_data["centroid"][1] - camera_config.detect.height / 2,
+                    ]
                 )
 
                 obj_width = obj.obj_data["box"][2] - obj.obj_data["box"][0]
