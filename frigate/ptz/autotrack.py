@@ -108,6 +108,9 @@ class PtzMotionEstimator:
                 self.coord_transformations = self.norfair_motion_estimator.update(
                     frame, mask
                 )
+                logger.debug(
+                    f"Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
+                )
             except:
                 # sometimes opencv can't find enough features in the image to find homography, so catch this error
                 logger.error(
@@ -116,10 +119,6 @@ class PtzMotionEstimator:
                 self.coord_transformations = None
 
             self.frame_manager.close(frame_id)
-
-            logger.debug(
-                f"Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
-            )
 
         return self.coord_transformations
 
