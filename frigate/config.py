@@ -152,11 +152,11 @@ class PtzAutotrackConfig(FrigateBaseModel):
     zooming: ZoomingModeEnum = Field(
         default=ZoomingModeEnum.disabled, title="Autotracker zooming mode."
     )
-    zoom_factor: int = Field(
-        default=30,
-        title="Zooming factor (1-75).",
-        ge=1,
-        le=75,
+    zoom_factor: float = Field(
+        default=0.3,
+        title="Zooming factor (0.1-0.75).",
+        ge=0.1,
+        le=0.75,
     )
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     required_zones: List[str] = Field(

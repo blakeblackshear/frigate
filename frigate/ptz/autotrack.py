@@ -177,6 +177,7 @@ class PtzAutoTracker:
         self.calibrating: dict[str, object] = {}
         self.intercept: dict[str, object] = {}
         self.move_coefficients: dict[str, object] = {}
+        self.zoom_factor: dict[str, object] = {}
 
         # if cam is set to autotrack, onvif should be set up
         for camera_name, cam in self.config.cameras.items():
@@ -192,6 +193,7 @@ class PtzAutoTracker:
 
         self.object_types[camera_name] = cam.onvif.autotracking.track
         self.required_zones[camera_name] = cam.onvif.autotracking.required_zones
+        self.zoom_factor[camera_name] = cam.onvif.autotracking.zoom_factor
 
         self.tracked_object[camera_name] = None
         self.tracked_object_previous[camera_name] = None
@@ -476,7 +478,7 @@ class PtzAutoTracker:
                 tilt = tilt_excess
                 zoom = zoom_excess
 
-    def _should_zoom_in(self, camera, box, area):
+    def _should_zoom_in(self, camera, box, area, average_velocity):
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
@@ -491,7 +493,15 @@ class PtzAutoTracker:
         #
         # TODO: Take into account the area changing when an object is moving out of frame
         edge_threshold = 0.15
-        area_threshold = 0.7
+        area_threshold = self.zoom_factor[camera]
+        velocity_threshold = 0.1
+
+        # if we have a fast moving object, let's zoom out
+        # fast moving is defined as a velocity of more than 10% of the camera's width or height
+        # so an object with an x velocity of 15 pixels on a 1280x720 camera would trigger a zoom out
+        velocity_threshold = average_velocity[0] > (
+            camera_width * velocity_threshold
+        ) or average_velocity[1] > (camera_height * velocity_threshold)
 
         # returns True to zoom in, False to zoom out
         return (
@@ -500,10 +510,12 @@ class PtzAutoTracker:
             and bb_top > edge_threshold * camera_height
             and bb_bottom < (1 - edge_threshold) * camera_height
             and area < area_threshold * camera_area
+            and not velocity_threshold
         )
 
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
+        average_velocity = (0,) * 4
 
         # # frame width and height
         camera_width = camera_config.frame_shape[1]
@@ -558,10 +570,15 @@ class PtzAutoTracker:
 
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
-            zoom_factor = 30
             zoom = min(
-                obj.obj_data["area"] / (camera_width * camera_height) * zoom_factor, 1
+                obj.obj_data["area"]
+                / (camera_width * camera_height)
+                * 100
+                * self.zoom_factor[camera],
+                1,
             )
+
+            logger.debug(f"Zoom value: {zoom}")
 
             # test if we need to zoom out
             if not self._should_zoom_in(
@@ -570,6 +587,7 @@ class PtzAutoTracker:
                 if camera_config.onvif.autotracking.movement_weights
                 else obj.obj_data["box"],
                 obj.obj_data["area"],
+                average_velocity,
             ):
                 zoom = -(1 - zoom)
 
@@ -597,7 +615,7 @@ class PtzAutoTracker:
 
             if 0 < zoom_level <= 1:
                 if self._should_zoom_in(
-                    camera, obj.obj_data["box"], obj.obj_data["area"]
+                    camera, obj.obj_data["box"], obj.obj_data["area"], (0, 0, 0, 0)
                 ):
                     zoom = min(1.0, zoom_level + 0.1)
                 else:
