@@ -474,7 +474,7 @@ class ZoneConfig(BaseModel):
 
 class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
-    filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
+    filters: Dict[str, FilterConfig] = Field(default={}, title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
 
 
@@ -1078,10 +1078,12 @@ class FrigateConfig(FrigateBaseModel):
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
-        # set min_score for object attributes
+        # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
             if not config.objects.filters.get(attribute):
                 config.objects.filters[attribute] = FilterConfig(min_score=0.7)
+            elif config.objects.filters[attribute].min_score == 0.5:
+                config.objects.filters[attribute].min_score = 0.7
 
         # Global config to propagate down to camera level
         global_config = config.dict(
