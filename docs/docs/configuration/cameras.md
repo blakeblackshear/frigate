@@ -11,11 +11,11 @@ A camera is enabled by default but can be temporarily disabled by using `enabled
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role       | Description                                                                              |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| `detect`   | Main feed for object detection                                                           |
-| `record`   | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
-| `rtmp`     | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
+| Role     | Description                                                                              |
+| -------- | ---------------------------------------------------------------------------------------- |
+| `detect` | Main feed for object detection                                                           |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
+| `rtmp`   | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
 mqtt:
@@ -51,13 +51,18 @@ For camera model specific settings check the [camera specific](camera_specific.m
 
 ## Setting up camera PTZ controls
 
-Add onvif config to camera
+:::caution
+
+Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check your camera documentation or manufacturer's website to ensure your camera supports ONVIF. If your camera supports ONVIF and you continue to have trouble, make sure your camera is running the latest firmware.
+
+:::
+
+Add the onvif section to your camera in your configuration file:
 
 ```yaml
 cameras:
   back:
-    ffmpeg:
-      ...
+    ffmpeg: ...
     onvif:
       host: 10.0.10.10
       port: 8000
@@ -65,6 +70,20 @@ cameras:
       password: password
 ```
 
-then PTZ controls will be available in the cameras WebUI.
+If the ONVIF connection is successful, PTZ controls will be available in the camera's WebUI.
 
 An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
+
+## ONVIF PTZ camera recommendations
+
+This list of working and non-working PTZ cameras is based on user feedback.
+
+| Brand or specific camera | PTZ Controls | Autotracking | Notes                                                   |
+| ------------------------ | :----------: | :----------: | ------------------------------------------------------- |
+| Amcrest                  |      ✅      |     ⛔️      | Some older models (IP2M-841) don't support autotracking |
+| Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                        |
+| Dahua                    |      ✅      |      ✅      |
+| Reolink 511WA            |      ✅      |      ❌      | Zoom only                                               |
+| Reolink E1 Zoom          |      ✅      |      ❌      |                                                         |
+| Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                |
+| Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                |
