@@ -43,5 +43,5 @@ class TestBirdseye(unittest.TestCase):
         width = 1280
         height = 840
         canvas_width, canvas_height = get_canvas_shape(width, height)
-        assert canvas_width == width # width will be the same
+        assert canvas_width == width  # width will be the same
         assert canvas_height != height

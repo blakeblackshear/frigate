@@ -51,6 +51,7 @@ def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     )
     return known_aspects[known_aspects_ratios.index(closest)]
 
+
 def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
     """Get birdseye canvas shape."""
     canvas_width = width
@@ -60,7 +61,9 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
     if round(a_w / a_h, 2) != round(width / height, 2):
         canvas_width = width
         canvas_height = (canvas_width / a_w) * a_h
-        logger.warning(f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}")
+        logger.warning(
+            f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}"
+        )
 
     return (canvas_width, canvas_height)
 
