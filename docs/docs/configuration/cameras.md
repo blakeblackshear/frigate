@@ -78,12 +78,12 @@ An ONVIF-capable camera that supports relative movement within the field of view
 
 This list of working and non-working PTZ cameras is based on user feedback.
 
-| Brand or specific camera | Status            | Notes                                                                 |
-| ------------------------ | ----------------- | --------------------------------------------------------------------- |
-| Dahua                    | Working           | PTZ controls and autotracking                                         |
-| Amcrest                  | Partially working | PTZ controls, some older models (IP2M-841) don't support autotracking |
-| Amcrest ASH21            | Not working       | No ONVIF support                                                      |
-| Tapo C210                | Not working       | Incomplete ONVIF support                                              |
-| Vikylin PTZ-2804X-I2     | Not working       | Incomplete ONVIF support                                              |
-| Reolink E1 Zoom          | Working           |                                                                       |
-| Reolink 511WA            | Working           |                                                                       |
+| Brand or specific camera | PTZ Controls | Autotracking | Notes                                                                 |
+| ------------------------ | ------------ | ------------ | --------------------------------------------------------------------- |
+| Amcrest                  | ✅           | ⛔️          | PTZ controls, some older models (IP2M-841) don't support autotracking |
+| Amcrest ASH21            | ❌           | ❌           | No ONVIF support                                                      |
+| Dahua                    | ✅           | ✅           |
+| Reolink 511WA            | ✅           |              |                                                                       |
+| Reolink E1 Zoom          | ✅           |              |                                                                       |
+| Tapo C210                | ❌           | ❌           | Incomplete ONVIF support                                              |
+| Vikylin PTZ-2804X-I2     | ❌           | ❌           | Incomplete ONVIF support                                              |
