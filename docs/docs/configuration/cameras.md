@@ -83,7 +83,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest                  |      ✅      |     ⛔️      | PTZ controls, some older models (IP2M-841) don't support autotracking |
 | Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                      |
 | Dahua                    |      ✅      |      ✅      |
-| Reolink 511WA            |      ✅      |              |                                                                       |
-| Reolink E1 Zoom          |      ✅      |              |                                                                       |
+| Reolink 511WA            |      ✅      |      ❌      |                                                                       |
+| Reolink E1 Zoom          |      ✅      |      ❌      |                                                                       |
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                              |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                              |
