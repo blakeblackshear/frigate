@@ -24,3 +24,6 @@ COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_laye
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS="yolov7-320"
+
+HEALTHCHECK --start-period=600s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
+    CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1

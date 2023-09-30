@@ -257,5 +257,5 @@ FROM deps AS frigate
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-HEALTHCHECK --start-period=90s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
+HEALTHCHECK --start-period=120s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
     CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
