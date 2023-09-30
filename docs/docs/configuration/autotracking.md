@@ -5,7 +5,7 @@ title: Camera Autotracking
 
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
-![Autotracking Example](/img/frigate-autotracking-example.gif)
+![Autotracking example with zooming](/img/frigate-autotracking-example.gif)
 
 ## Autotracking behavior
 
@@ -104,6 +104,8 @@ Every PTZ camera is different, so autotracking may not perform ideally in every 
 The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases (especially for faster moving objects), the default 5 fps is insufficient for the motion estimator to perform accurately. 10 fps is the current recommendation. Higher frame rates will likely not be more performant and will only slow down Frigate and the motion estimator. Adjust your camera to output at least 10 frames per second and change the `fps` parameter in the [detect configuration](index.md) of your configuration file.
 
 A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's debug viewer for your camera to see a thicker colored box around the object currently being autotracked.
+
+![Autotracking Debug View](/img/autotracking-debug.gif)
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
