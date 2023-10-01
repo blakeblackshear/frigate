@@ -6,7 +6,7 @@ export function SelectOnly({ className = 'h-5 w-5', stroke = 'currentColor', fil
     <svg
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      fill="none"
+      fill={fill}
       viewBox="0 0 24 24"
       stroke={stroke}
       onClick={onClick}
