@@ -537,7 +537,7 @@ class OnvifController:
 
         if (
             self.config.cameras[camera_name].onvif.autotracking.zooming
-            == ZoomingModeEnum.absolute
+            != ZoomingModeEnum.disabled
         ):
             # store absolute zoom level as 0 to 1 interpolated from the values of the camera
             self.ptz_metrics[camera_name]["ptz_zoom_level"].value = numpy.interp(

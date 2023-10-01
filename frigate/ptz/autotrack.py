@@ -402,13 +402,23 @@ class PtzAutoTracker:
                     if (
                         self.config.cameras[camera].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
+                        and self.tracked_object[camera] is not None
                     ):
                         self.onvif._move_relative(camera, pan, tilt, zoom, 1)
                     else:
-                        if zoom > 0:
-                            self.onvif._zoom_absolute(camera, zoom, 1)
-                        else:
+                        if pan != 0 or tilt != 0:
                             self.onvif._move_relative(camera, pan, tilt, 0, 1)
+
+                        if (
+                            zoom > 0
+                            and self.ptz_metrics[camera]["ptz_zoom_level"].value != zoom
+                        ):
+                            self.onvif._zoom_absolute(camera, zoom, 1)
+
+                            # Wait until the camera finishes moving
+                            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                                # check if ptz is moving
+                                self.onvif.get_camera_status(camera)
 
                     # Wait until the camera finishes moving
                     while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
@@ -427,6 +437,7 @@ class PtzAutoTracker:
                     if (
                         self.intercept[camera] is not None
                         and len(self.move_metrics[camera]) < 500
+                        and (pan != 0 or tilt != 0)
                     ):
                         logger.debug("Adding new values to move metrics")
                         self.move_metrics[camera].append(
@@ -477,11 +488,20 @@ class PtzAutoTracker:
                 tilt = tilt_excess
                 zoom = zoom_excess
 
-    def _should_zoom_in(self, camera, box, area, average_velocity):
+    def _should_zoom_in(self, camera, obj, box):
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
         camera_area = camera_width * camera_height
+
+        obj.obj_data["area"]
+        x1, y1, x2, y2 = obj.obj_data["estimate_velocity"]
+        average_velocity = (
+            (x1 + x2) / 2,
+            (y1 + y2) / 2,
+            (x1 + x2) / 2,
+            (y1 + y2) / 2,
+        )
 
         bb_left, bb_top, bb_right, bb_bottom = box
 
@@ -492,13 +512,22 @@ class PtzAutoTracker:
         #
         # TODO: Take into account the area changing when an object is moving out of frame
         edge_threshold = 0.15
-        area_threshold = self.zoom_factor[camera]
         velocity_threshold = 0.1
+
+        # if we have a big object, let's zoom out
+        # base the area threshold on 5 times the zoom_factor
+        above_area_threshold = (
+            min(
+                obj.obj_data["area"] / camera_area * 5 * self.zoom_factor[camera],
+                1,
+            )
+            == 1
+        )
 
         # if we have a fast moving object, let's zoom out
         # fast moving is defined as a velocity of more than 10% of the camera's width or height
         # so an object with an x velocity of 15 pixels on a 1280x720 camera would trigger a zoom out
-        velocity_threshold = average_velocity[0] > (
+        above_velocity_threshold = average_velocity[0] > (
             camera_width * velocity_threshold
         ) or average_velocity[1] > (camera_height * velocity_threshold)
 
@@ -508,13 +537,14 @@ class PtzAutoTracker:
             and bb_right < (1 - edge_threshold) * camera_width
             and bb_top > edge_threshold * camera_height
             and bb_bottom < (1 - edge_threshold) * camera_height
-            and area < area_threshold * camera_area
-            and not velocity_threshold
+            and not above_area_threshold
+            and not above_velocity_threshold
         )
 
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
         average_velocity = (0,) * 4
+        predicted_box = []
 
         # # frame width and height
         camera_width = camera_config.frame_shape[1]
@@ -543,29 +573,55 @@ class PtzAutoTracker:
             )
 
             # get euclidean distance of the two points, sometimes the estimate is way off
-            distance = np.linalg.norm([x2 - x1, y2 - y1])
+            # may not need this
+            # distance = np.linalg.norm([x2 - x1, y2 - y1])
 
-            if distance <= 5:
+            # make sure we're not dealing with a disappeared object
+            if not all(x == 0.0 for x in obj.score_history[-3:]):
                 # this box could exceed the frame boundaries if velocity is high
                 # but we'll handle that in _enqueue_move() as two separate moves
                 predicted_box = [
                     round(x + camera_fps * predicted_movement_time * v)
                     for x, v in zip(obj.obj_data["box"], average_velocity)
                 ]
-            else:
-                # estimate was bad
-                predicted_box = obj.obj_data["box"]
 
-            centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
-            centroid_y = round((predicted_box[1] + predicted_box[3]) / 2)
+                centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
+                centroid_y = round((predicted_box[1] + predicted_box[3]) / 2)
 
-            # recalculate pan and tilt with new centroid
-            pan = ((centroid_x / camera_width) - 0.5) * 2
-            tilt = (0.5 - (centroid_y / camera_height)) * 2
+                # recalculate pan and tilt with new centroid
+                pan = ((centroid_x / camera_width) - 0.5) * 2
+                tilt = (0.5 - (centroid_y / camera_height)) * 2
 
             logger.debug(f'Original box: {obj.obj_data["box"]}')
-            logger.debug(f"Predicted box: {predicted_box}")
             logger.debug(f'Velocity: {obj.obj_data["estimate_velocity"]}')
+
+        zoom = self._get_zoom_amount(camera, obj, predicted_box)
+
+        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
+
+    def _autotrack_move_zoom_only(self, camera, obj):
+        zoom = self._get_zoom_amount(camera, obj, obj.obj_data["box"])
+
+        self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
+
+    def _get_zoom_amount(self, camera, obj, predicted_box):
+        camera_config = self.config.cameras[camera]
+
+        # frame width and height
+        camera_width = camera_config.frame_shape[1]
+        camera_height = camera_config.frame_shape[0]
+
+        # absolute zooming separately from pan/tilt
+        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
+            zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
+
+            if 0 < zoom_level <= 1:
+                if self._should_zoom_in(camera, obj, obj.obj_data["box"]):
+                    zoom = min(1.0, zoom_level + 0.1)
+                else:
+                    zoom = max(0.0, zoom_level - 0.1)
+
+                return zoom
 
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # relative zooming concurrently with pan/tilt
@@ -577,18 +633,15 @@ class PtzAutoTracker:
                 1,
             )
 
-            logger.debug(f"Zoom value: {zoom}")
-
             # test if we need to zoom out
             if not self._should_zoom_in(
                 camera,
+                obj,
                 predicted_box
                 if camera_config.onvif.autotracking.movement_weights
                 else obj.obj_data["box"],
-                obj.obj_data["area"],
-                average_velocity,
             ):
-                zoom = -(1 - zoom)
+                zoom = -zoom
 
             # don't make small movements to zoom in if area hasn't changed significantly
             # but always zoom out if necessary
@@ -600,28 +653,30 @@ class PtzAutoTracker:
                 and zoom > 0
             ):
                 zoom = 0
+
+            return zoom
+
+    def _lost_object_zoom(self, camera, obj):
+        if not self._should_zoom_in(
+            camera,
+            obj,
+            obj.obj_data["box"],
+        ):
+            self._enqueue_move(
+                camera,
+                self.ptz_metrics[camera]["ptz_frame_time"].value,
+                0,
+                0,
+                self.ptz_metrics[camera]["ptz_zoom_level"].value - 0.1,
+            )
         else:
-            zoom = 0
-
-        self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
-
-    def _autotrack_zoom_only(self, camera, obj):
-        camera_config = self.config.cameras[camera]
-
-        # absolute zooming separately from pan/tilt
-        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
-            zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
-
-            if 0 < zoom_level <= 1:
-                if self._should_zoom_in(
-                    camera, obj.obj_data["box"], obj.obj_data["area"], (0, 0, 0, 0)
-                ):
-                    zoom = min(1.0, zoom_level + 0.1)
-                else:
-                    zoom = max(0.0, zoom_level - 0.1)
-
-                if zoom != zoom_level:
-                    self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
+            self._enqueue_move(
+                camera,
+                self.ptz_metrics[camera]["ptz_frame_time"].value,
+                0,
+                0,
+                self.ptz_metrics[camera]["ptz_zoom_level"].value + 0.1,
+            )
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
@@ -704,8 +759,8 @@ class PtzAutoTracker:
                         f"Autotrack: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                     )
 
-                    # no need to move, but try absolute zooming
-                    self._autotrack_zoom_only(camera, obj)
+                    # no need to move, but try zooming
+                    self._autotrack_move_zoom_only(camera, obj)
 
                     return
 
@@ -715,8 +770,10 @@ class PtzAutoTracker:
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self._autotrack_move_ptz(camera, obj)
 
-                # try absolute zooming too
-                self._autotrack_zoom_only(camera, obj)
+                # if our score history shows the last 5 detections are 0, zoom to see if we can find our lost object
+                if all(x == 0.0 for x in obj.score_history[-5:]):
+                    logger.debug(f"Object {obj.obj_data['id']} is lost")
+                    self._lost_object_zoom(camera, obj)
 
                 return
 
@@ -776,6 +833,18 @@ class PtzAutoTracker:
         if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
             self.onvif.get_camera_status(camera)
 
+        if (
+            self.tracked_object[camera] is None
+            and self.tracked_object_previous[camera] is not None
+            and (
+                # might want to use a different timestamp here?
+                self.ptz_metrics[camera]["ptz_frame_time"].value
+                - self.tracked_object_previous[camera].obj_data["frame_time"]
+                < autotracker_config.timeout
+            )
+        ):
+            self._lost_object_zoom(camera, self.tracked_object_previous[camera])
+
         # return to preset if tracking is over
         if (
             self.tracked_object[camera] is None
@@ -784,7 +853,7 @@ class PtzAutoTracker:
                 # might want to use a different timestamp here?
                 self.ptz_metrics[camera]["ptz_frame_time"].value
                 - self.tracked_object_previous[camera].obj_data["frame_time"]
-                > autotracker_config.timeout
+                >= autotracker_config.timeout
             )
             and autotracker_config.return_preset
         ):
