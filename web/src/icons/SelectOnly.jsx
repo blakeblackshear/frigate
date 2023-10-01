@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 
-export function CenterFocusString({ className = 'h-6 w-6', stroke = 'currentColor', fill = 'none', onClick = () => {} }) {
+export function SelectOnly({ className = 'h-5 w-5', stroke = 'currentColor', fill = 'none', onClick = () => {} }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -18,4 +18,4 @@ export function CenterFocusString({ className = 'h-6 w-6', stroke = 'currentColo
   );
 }
 
-export default memo(CenterFocusString);
+export default memo(SelectOnly);
