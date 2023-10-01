@@ -544,7 +544,7 @@ class PtzAutoTracker:
     def _autotrack_move_ptz(self, camera, obj):
         camera_config = self.config.cameras[camera]
         average_velocity = (0,) * 4
-        predicted_box = []
+        predicted_box = obj.obj_data["box"]
 
         # # frame width and height
         camera_width = camera_config.frame_shape[1]
