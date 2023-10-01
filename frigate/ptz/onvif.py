@@ -493,7 +493,7 @@ class OnvifController:
         try:
             status = onvif.get_service("ptz").GetStatus(status_request)
         except Exception as e:
-            pass # We're unsupported, that'll be reported in the next check.
+            pass  # We're unsupported, that'll be reported in the next check.
 
         # there doesn't seem to be an onvif standard with this optional parameter
         # some cameras can report MoveStatus with or without PanTilt or Zoom attributes
