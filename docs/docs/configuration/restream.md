@@ -22,7 +22,6 @@ You can access the go2rtc webUI at `http://frigate_ip:5000/live/webrtc` which ca
 ```
 birdseye:
   enabled: True
-  mode: continuous
   restream: true
 ```
 
