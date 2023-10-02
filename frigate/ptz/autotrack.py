@@ -714,7 +714,7 @@ class PtzAutoTracker:
                     and abs(obj.obj_data["area"] - obj.previous["area"])
                     / obj.obj_data["area"]
                     < 0.3
-                    and zoom >= zoom_level
+                    and zoom <= zoom_level
                 ):
                     zoom = 0
 
