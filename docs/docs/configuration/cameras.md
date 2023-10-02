@@ -53,7 +53,7 @@ For camera model specific settings check the [camera specific](camera_specific.m
 
 :::caution
 
-Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check the [official list of ONVIF conformant products](https://www.onvif.org/conformant-products/), your camera documentation or manufacturer's website to ensure your camera supports ONVIF. If your camera supports ONVIF and you continue to have trouble, make sure your camera is running the latest firmware.
+Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check the [official list of ONVIF conformant products](https://www.onvif.org/conformant-products/), your camera documentation, or camera manufacturer's website to ensure your PTZ supports ONVIF. Also, ensure your camera is running the latest firmware.
 
 :::
 
