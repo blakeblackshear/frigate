@@ -188,12 +188,14 @@ class PtzAutoTracker:
             if cam.onvif.autotracking.enabled:
                 self._autotracker_setup(cam, camera_name)
 
-    def _autotracker_setup(self, cam, camera_name):
+    def _autotracker_setup(self, camera_config, camera_name):
         logger.debug(f"Autotracker init for cam: {camera_name}")
 
-        self.object_types[camera_name] = cam.onvif.autotracking.track
-        self.required_zones[camera_name] = cam.onvif.autotracking.required_zones
-        self.zoom_factor[camera_name] = cam.onvif.autotracking.zoom_factor
+        self.object_types[camera_name] = camera_config.onvif.autotracking.track
+        self.required_zones[
+            camera_name
+        ] = camera_config.onvif.autotracking.required_zones
+        self.zoom_factor[camera_name] = camera_config.onvif.autotracking.zoom_factor
 
         self.tracked_object[camera_name] = None
         self.tracked_object_previous[camera_name] = None
@@ -209,13 +211,13 @@ class PtzAutoTracker:
         if not self.onvif.cams[camera_name]["init"]:
             if not self.onvif._init_onvif(camera_name):
                 logger.warning(f"Unable to initialize onvif for {camera_name}")
-                cam.onvif.autotracking.enabled = False
+                camera_config.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
 
                 return
 
             if "pt-r-fov" not in self.onvif.cams[camera_name]["features"]:
-                cam.onvif.autotracking.enabled = False
+                camera_config.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
@@ -226,7 +228,7 @@ class PtzAutoTracker:
             movestatus_supported = self.onvif.get_service_capabilities(camera_name)
 
             if movestatus_supported is None or movestatus_supported.lower() != "true":
-                cam.onvif.autotracking.enabled = False
+                camera_config.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera_name}: ONVIF MoveStatus not supported"
@@ -245,13 +247,15 @@ class PtzAutoTracker:
                 self.move_threads[camera_name].daemon = True
                 self.move_threads[camera_name].start()
 
-            if cam.onvif.autotracking.movement_weights:
-                self.intercept[camera_name] = cam.onvif.autotracking.movement_weights[0]
+            if camera_config.onvif.autotracking.movement_weights:
+                self.intercept[
+                    camera_name
+                ] = camera_config.onvif.autotracking.movement_weights[0]
                 self.move_coefficients[
                     camera_name
-                ] = cam.onvif.autotracking.movement_weights[1:]
+                ] = camera_config.onvif.autotracking.movement_weights[1:]
 
-            if cam.onvif.autotracking.calibrate_on_startup:
+            if camera_config.onvif.autotracking.calibrate_on_startup:
                 self._calibrate_camera(camera_name)
 
         self.autotracker_init[camera_name] = True
@@ -724,8 +728,7 @@ class PtzAutoTracker:
                     if camera_config.onvif.autotracking.movement_weights
                     else obj.obj_data["box"],
                 ):
-                    # if we want to zoom out less, this could be -(1 - zoom)
-                    zoom = -zoom
+                    zoom = max(-zoom * (1 / self.zoom_factor[camera]), -1)
 
         return zoom
 
@@ -733,29 +736,31 @@ class PtzAutoTracker:
         # absolutely zoom if we've lost an object and are waiting for return to preset
         camera_config = self.config.cameras[camera]
         if camera_config.onvif.autotracking.zooming != ZoomingModeEnum.disabled:
-            if not self._should_zoom_in(
+            zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
+            if self._should_zoom_in(
                 camera,
                 obj,
                 obj.obj_data["box"],
             ):
-                zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value - 0.1
+                zoom = min(1.0, zoom_level + 0.1)
             else:
-                zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value + 0.1
+                zoom = max(0.0, zoom_level - 0.1)
 
-            self._enqueue_move(
-                camera,
-                self.ptz_metrics[camera]["ptz_frame_time"].value,
-                0,
-                0,
-                zoom,
-            )
+            if zoom_level != zoom:
+                self._enqueue_move(
+                    camera,
+                    self.ptz_metrics[camera]["ptz_frame_time"].value,
+                    0,
+                    0,
+                    zoom,
+                )
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
             if not self.autotracker_init[camera]:
-                self._autotracker_setup(self.config.cameras[camera], camera)
+                self._autotracker_setup(camera_config, camera)
 
             if self.calibrating[camera]:
                 logger.debug("Calibrating camera")
