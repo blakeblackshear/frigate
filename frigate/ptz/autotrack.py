@@ -549,7 +549,20 @@ class PtzAutoTracker:
         #
         # TODO: Take into account the area changing when an object is moving out of frame
         edge_threshold = 0.15
-        velocity_threshold = 0.1
+
+        # calculate a velocity threshold based on movement coefficients if available
+        if camera_config.onvif.autotracking.movement_weights:
+            predicted_movement_time = self._predict_movement_time(camera, 1, 1)
+            velocity_threshold_x = (
+                camera_width / predicted_movement_time / camera_fps * 0.7
+            )
+            velocity_threshold_y = (
+                camera_width / predicted_movement_time / camera_fps * 0.7
+            )
+        else:
+            # use a generic velocity threshold
+            velocity_threshold_x = camera_width * 0.02
+            velocity_threshold_y = camera_height * 0.02
 
         far_from_edge = (
             bb_left > edge_threshold * camera_width
@@ -570,9 +583,8 @@ class PtzAutoTracker:
         # fast moving is defined as a velocity of more than 10% of the camera's width or height
         # so an object with an x velocity of 15 pixels per second on a 1280x720 camera would trigger a zoom out
         below_velocity_threshold = (
-            abs(average_velocity[0]) * camera_fps < (camera_width * velocity_threshold)
-            and abs(average_velocity[1]) * camera_fps
-            < (camera_height * velocity_threshold)
+            abs(average_velocity[0]) < velocity_threshold_x
+            and abs(average_velocity[1]) < velocity_threshold_y
             and distance <= 10
         )
 
@@ -591,7 +603,7 @@ class PtzAutoTracker:
             f"Zoom test: below area threshold: {below_area_threshold} ratio: {obj.obj_data['area']/camera_area}, threshold value: {1-self.zoom_factor[camera]}"
         )
         logger.debug(
-            f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])* camera_fps}, x threshold: {camera_width * velocity_threshold}, velocity y: {abs(average_velocity[1])* camera_fps}, y threshold: {camera_height * velocity_threshold}"
+            f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
         )
 
         # returns True to zoom in, False to zoom out
