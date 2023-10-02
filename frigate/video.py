@@ -776,19 +776,7 @@ def process_frames(
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
-        # look for motion if enabled and ptz is not moving
-        # ptz_moving_at_frame_time() always returns False for
-        # non ptz/autotracking cameras
-        motion_boxes = (
-            motion_detector.detect(frame)
-            if motion_enabled.value
-            # and not ptz_moving_at_frame_time(
-            #     frame_time,
-            #     ptz_metrics["ptz_start_time"].value,
-            #     ptz_metrics["ptz_stop_time"].value,
-            # )
-            else []
-        )
+        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
         regions = []
         consolidated_detections = []
