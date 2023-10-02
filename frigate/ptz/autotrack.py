@@ -533,6 +533,8 @@ class PtzAutoTracker:
             (x1 + x2) / 2,
             (y1 + y2) / 2,
         )
+        # get euclidean distance of the two points, sometimes the estimate is way off
+        distance = np.linalg.norm([x2 - x1, y2 - y1])
 
         bb_left, bb_top, bb_right, bb_bottom = box
 
@@ -556,10 +558,11 @@ class PtzAutoTracker:
         # if we have a fast moving object, let's zoom out
         # fast moving is defined as a velocity of more than 10% of the camera's width or height
         # so an object with an x velocity of 15 pixels per second on a 1280x720 camera would trigger a zoom out
-        below_velocity_threshold = abs(average_velocity[0]) * camera_fps < (
-            camera_width * velocity_threshold
-        ) and abs(average_velocity[1]) * camera_fps < (
-            camera_height * velocity_threshold
+        below_velocity_threshold = (
+            abs(average_velocity[0]) * camera_fps < (camera_width * velocity_threshold)
+            and abs(average_velocity[1]) * camera_fps
+            < (camera_height * velocity_threshold)
+            and distance <= 5
         )
 
         logger.debug(f"Zoom test: left edge: {bb_left > edge_threshold * camera_width}")
@@ -574,7 +577,7 @@ class PtzAutoTracker:
             f"Zoom test: below area threshold: {below_area_threshold} ratio: {obj.obj_data['area']/camera_area}, threshold value: {1-self.zoom_factor[camera]}"
         )
         logger.debug(
-            f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])* camera_fps}, threshold value: {camera_width * velocity_threshold}"
+            f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])* camera_fps}, x threshold: {camera_width * velocity_threshold}, velocity y: {abs(average_velocity[1])* camera_fps}, y threshold: {camera_height * velocity_threshold}"
         )
 
         # returns True to zoom in, False to zoom out
