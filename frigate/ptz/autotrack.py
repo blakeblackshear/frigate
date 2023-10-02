@@ -256,7 +256,7 @@ class PtzAutoTracker:
 
         self.autotracker_init[camera_name] = True
 
-    def write_config(self, camera):
+    def _write_config(self, camera):
         config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
 
         logger.debug(
@@ -370,7 +370,7 @@ class PtzAutoTracker:
                 f"New regression parameters - intercept: {self.intercept[camera]}, coefficients: {self.move_coefficients[camera]}"
             )
 
-            self.write_config(camera)
+            self._write_config(camera)
 
     def _predict_movement_time(self, camera, pan, tilt):
         combined_movement = abs(pan) + abs(tilt)
@@ -402,6 +402,7 @@ class PtzAutoTracker:
                     if (
                         self.config.cameras[camera].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
+                        # this enables us to absolutely zoom if we lost an object
                         and self.tracked_object[camera] is not None
                     ):
                         self.onvif._move_relative(camera, pan, tilt, zoom, 1)
@@ -705,21 +706,17 @@ class PtzAutoTracker:
                 obj,
                 obj.obj_data["box"],
             ):
-                self._enqueue_move(
-                    camera,
-                    self.ptz_metrics[camera]["ptz_frame_time"].value,
-                    0,
-                    0,
-                    self.ptz_metrics[camera]["ptz_zoom_level"].value - 0.1,
-                )
+                zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value - 0.1
             else:
-                self._enqueue_move(
-                    camera,
-                    self.ptz_metrics[camera]["ptz_frame_time"].value,
-                    0,
-                    0,
-                    self.ptz_metrics[camera]["ptz_zoom_level"].value + 0.1,
-                )
+                zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value + 0.1
+
+            self._enqueue_move(
+                camera,
+                self.ptz_metrics[camera]["ptz_frame_time"].value,
+                0,
+                0,
+                zoom,
+            )
 
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
@@ -732,8 +729,8 @@ class PtzAutoTracker:
                 logger.debug("Calibrating camera")
                 return
 
-            # either this is a brand new object that's on our camera, has our label, entered the zone, is not a false positive,
-            # and is not initially motionless - or one we're already tracking, which assumes all those things are already true
+            # this is a brand new object that's on our camera, has our label, entered the zone,
+            # is not a false positive, and is not initially motionless
             if (
                 # new object
                 self.tracked_object[camera] is None
@@ -787,11 +784,6 @@ class PtzAutoTracker:
                 self._autotrack_move_ptz(camera, obj)
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self.previous_frame_time[camera] = obj.obj_data["frame_time"]
-
-                # if our score history shows the last 5 detections are 0, zoom to see if we can find our lost object
-                if all(x == 0.0 for x in obj.score_history[-5:]):
-                    logger.debug(f"Object {obj.obj_data['id']} is lost")
-                    self._lost_object_zoom(camera, obj)
 
                 return
 
