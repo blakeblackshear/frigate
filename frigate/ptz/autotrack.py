@@ -813,6 +813,11 @@ class PtzAutoTracker:
                 and self.tracked_object_previous[camera] is not None
                 and obj.obj_data["id"] == self.tracked_object[camera].obj_data["id"]
                 and obj.obj_data["frame_time"] != self.previous_frame_time
+                and not ptz_moving_at_frame_time(
+                    obj.obj_data["frame_time"],
+                    self.ptz_metrics[camera]["ptz_start_time"].value,
+                    self.ptz_metrics[camera]["ptz_stop_time"].value,
+                )
             ):
                 if (
                     self._below_distance_threshold(camera, obj)
