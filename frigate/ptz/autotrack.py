@@ -674,6 +674,16 @@ class PtzAutoTracker:
                         zoom = min(1.0, zoom_level + 0.1)
                     else:
                         zoom = max(0.0, zoom_level - 0.1)
+                # don't make small movements to zoom in if area hasn't changed significantly
+                # but always zoom out if necessary
+                if (
+                    "area" in obj.previous
+                    and abs(obj.obj_data["area"] - obj.previous["area"])
+                    / obj.obj_data["area"]
+                    < 0.3
+                    and zoom >= zoom_level
+                ):
+                    zoom = 0
 
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
