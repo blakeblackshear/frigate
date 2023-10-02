@@ -588,23 +588,29 @@ class PtzAutoTracker:
             and distance <= 10
         )
 
-        logger.debug(f"Zoom test: left edge: {bb_left > edge_threshold * camera_width}")
-        logger.debug(
-            f"Zoom test: right edge: {bb_right < (1 - edge_threshold) * camera_width}"
-        )
-        logger.debug(f"Zoom test: top edge: {bb_top > edge_threshold * camera_height}")
-        logger.debug(
-            f"Zoom test: bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
-        )
-        logger.debug(
-            f"Zoom test: below distance threshold {(below_distance_threshold or below_area_threshold)}"
-        )
-        logger.debug(
-            f"Zoom test: below area threshold: {below_area_threshold} ratio: {obj.obj_data['area']/camera_area}, threshold value: {1-self.zoom_factor[camera]}"
-        )
-        logger.debug(
-            f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
-        )
+        # debug zooming
+        if False:
+            logger.debug(
+                f"Zoom test: left edge: {bb_left > edge_threshold * camera_width}"
+            )
+            logger.debug(
+                f"Zoom test: right edge: {bb_right < (1 - edge_threshold) * camera_width}"
+            )
+            logger.debug(
+                f"Zoom test: top edge: {bb_top > edge_threshold * camera_height}"
+            )
+            logger.debug(
+                f"Zoom test: bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
+            )
+            logger.debug(
+                f"Zoom test: below distance threshold {(below_distance_threshold or below_area_threshold)}"
+            )
+            logger.debug(
+                f"Zoom test: below area threshold: {below_area_threshold} ratio: {obj.obj_data['area']/camera_area}, threshold value: {1-self.zoom_factor[camera]}"
+            )
+            logger.debug(
+                f"Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
+            )
 
         # returns True to zoom in, False to zoom out
         # Zoom in conditions
@@ -807,7 +813,6 @@ class PtzAutoTracker:
                 and self.tracked_object_previous[camera] is not None
                 and obj.obj_data["id"] == self.tracked_object[camera].obj_data["id"]
                 and obj.obj_data["frame_time"] != self.previous_frame_time
-                and not all(x == 0.0 for x in obj.score_history[-3:])
             ):
                 if (
                     self._below_distance_threshold(camera, obj)
