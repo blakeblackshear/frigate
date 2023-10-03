@@ -91,9 +91,11 @@ Calibration is optional, but will greatly assist Frigate in autotracking objects
 
 To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of 30 small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
 
-After calibration has ended, your PTZ will be moved to the preset specified by `return_preset` and you should set `calibrate_on_startup` in your config file to `False`.
+After calibration has ended, your PTZ will be moved to the preset specified by `return_preset`.
 
-Note that Frigate will refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+At this point, Frigate will be running and will continue to refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+
+Before restarting Frigate, you should set `calibrate_on_startup` in your config file to `False`, otherwise your refined `movement_weights` will be overwritten and calibration will occur when starting again.
 
 You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic. If you change your `return_preset` in any way, a recalibration is also recommended.
 

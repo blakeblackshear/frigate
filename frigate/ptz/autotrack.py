@@ -239,7 +239,7 @@ class PtzAutoTracker:
             # movement thread per camera
             if not self.move_threads or not self.move_threads[camera]:
                 self.move_threads[camera] = threading.Thread(
-                    name=f"move_thread_{camera}",
+                    name=f"ptz_move_thread_{camera}",
                     target=partial(self._process_move_queue, camera),
                 )
                 self.move_threads[camera].daemon = True
@@ -439,6 +439,9 @@ class PtzAutoTracker:
                         self.intercept[camera] is not None
                         and len(self.move_metrics[camera]) < 500
                         and (pan != 0 or tilt != 0)
+                        and self.config.cameras[
+                            camera
+                        ].onvif.autotracking.calibrate_on_startup
                     ):
                         logger.debug(f"{camera}: Adding new values to move metrics")
                         self.move_metrics[camera].append(
