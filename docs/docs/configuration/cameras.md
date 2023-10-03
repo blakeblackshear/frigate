@@ -82,9 +82,11 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | ------------------------ | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                 |
 | Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                                                                                                |
+| Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
 | Hikvision                |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
 | Reolink 511WA            |      ✅      |      ❌      | Zoom only                                                                                                                                       |
 | Reolink E1 Zoom          |      ✅      |      ❌      |                                                                                                                                                 |
+| Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
