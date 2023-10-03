@@ -170,7 +170,7 @@ class OnvifController:
 
         for preset in presets:
             self.cams[camera_name]["presets"][
-                preset.get("Name", f"preset {preset['token']}".lower())
+                preset.get("Name", f"preset {preset['token']}").lower()
             ] = preset["token"]
 
         # get list of supported features
