@@ -102,8 +102,8 @@ If available, recommended settings are:
 
 - `On, fluency first` this sets the camera to CBR (constant bit rate)
 - `Interframe Space 1x` this sets the iframe interval to the same as the frame rate
-
-According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
+- `Fixed Frame Rate` this will set a constant frame rate mode
+According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1745431533), the http video streams seem to be the most reliable for Reolink.
 
 ```yaml
 go2rtc:
@@ -125,6 +125,11 @@ cameras:
           input_args: preset-rtsp-restream
           roles:
             - detect
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub?audio
+          input_args: preset-rtsp-restream
+          roles:
+            - audio
+            
 ```
 
 ### Unifi Protect Cameras
