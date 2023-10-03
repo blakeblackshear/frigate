@@ -749,29 +749,6 @@ class PtzAutoTracker:
 
         return zoom
 
-    def _lost_object_zoom(self, camera, obj):
-        # absolutely zoom if we've lost an object and are waiting for return to preset
-        camera_config = self.config.cameras[camera]
-        if camera_config.onvif.autotracking.zooming != ZoomingModeEnum.disabled:
-            zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
-            if self._should_zoom_in(
-                camera,
-                obj,
-                obj.obj_data["box"],
-            ):
-                zoom = min(1.0, zoom_level + 0.1)
-            else:
-                zoom = max(0.0, zoom_level - 0.1)
-
-            if zoom_level != zoom:
-                self._enqueue_move(
-                    camera,
-                    self.ptz_metrics[camera]["ptz_frame_time"].value,
-                    0,
-                    0,
-                    zoom,
-                )
-
     def autotrack_object(self, camera, obj):
         camera_config = self.config.cameras[camera]
 
@@ -900,18 +877,6 @@ class PtzAutoTracker:
         # regularly update camera status
         if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
             self.onvif.get_camera_status(camera)
-
-        # if (
-        #     self.tracked_object[camera] is None
-        #     and self.tracked_object_previous[camera] is not None
-        #     and (
-        #         # might want to use a different timestamp here?
-        #         self.ptz_metrics[camera]["ptz_frame_time"].value
-        #         - self.tracked_object_previous[camera].obj_data["frame_time"]
-        #         < autotracker_config.timeout
-        #     )
-        # ):
-        #     self._lost_object_zoom(camera, self.tracked_object_previous[camera])
 
         # return to preset if tracking is over
         if (
