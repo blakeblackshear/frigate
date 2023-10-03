@@ -263,7 +263,9 @@ class OnvifController:
             logger.error(f"{camera_name} does not support ONVIF RelativeMove (FOV).")
             return
 
-        logger.debug(f"{camera_name} called RelativeMove: pan: {pan} tilt: {tilt}")
+        logger.debug(
+            f"{camera_name} called RelativeMove: pan: {pan} tilt: {tilt} zoom: {zoom}"
+        )
 
         if self.cams[camera_name]["active"]:
             logger.warning(
@@ -274,7 +276,7 @@ class OnvifController:
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
         logger.debug(
-            f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+            f"{camera_name} PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
         )
         self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
             camera_name
@@ -386,7 +388,7 @@ class OnvifController:
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
         logger.debug(
-            f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+            f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
         )
         self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
             camera_name
@@ -408,7 +410,7 @@ class OnvifController:
         move_request.Speed = {"Zoom": speed}
         move_request.Position = {"Zoom": zoom}
 
-        logger.debug(f"Absolute zoom: {zoom}")
+        logger.debug(f"{camera_name}: Absolute zoom: {zoom}")
 
         onvif.get_service("ptz").AbsoluteMove(move_request)
 
@@ -515,7 +517,7 @@ class OnvifController:
                 self.ptz_metrics[camera_name]["ptz_stopped"].set()
 
                 logger.debug(
-                    f"PTZ stop time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+                    f"{camera_name}: PTZ stop time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
                 )
 
                 self.ptz_metrics[camera_name]["ptz_stop_time"].value = self.ptz_metrics[
@@ -527,7 +529,7 @@ class OnvifController:
                 self.ptz_metrics[camera_name]["ptz_stopped"].clear()
 
                 logger.debug(
-                    f"PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+                    f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
                 )
 
                 self.ptz_metrics[camera_name][
@@ -549,5 +551,5 @@ class OnvifController:
                 ],
             )
             logger.debug(
-                f'Camera zoom level: {self.ptz_metrics[camera_name]["ptz_zoom_level"].value}'
+                f'{camera_name}: Camera zoom level: {self.ptz_metrics[camera_name]["ptz_zoom_level"].value}'
             )
