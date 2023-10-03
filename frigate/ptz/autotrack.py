@@ -772,7 +772,7 @@ class PtzAutoTracker:
                     zoom = min(1, zoom_level * (1 / self.zoom_factor[camera]) ** 1.2)
                 else:
                     # zoom out
-                    zoom = -(1 - zoom)
+                    zoom = -(1 - zoom) if zoom != 0 else 0
 
         logger.debug(f"Zoom amount: {zoom}")
 
