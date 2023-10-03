@@ -693,10 +693,6 @@ class PtzAutoTracker:
     def _get_zoom_amount(self, camera, obj, predicted_box):
         camera_config = self.config.cameras[camera]
 
-        # frame width and height
-        camera_width = camera_config.frame_shape[1]
-        camera_height = camera_config.frame_shape[0]
-
         zoom = 0
 
         # absolute zooming separately from pan/tilt
@@ -730,13 +726,7 @@ class PtzAutoTracker:
             if self.tracked_object_previous[camera] is None:
                 zoom = 0
             else:
-                zoom = min(
-                    obj.obj_data["area"]
-                    / (camera_width * camera_height)
-                    * 100
-                    * self.zoom_factor[camera],
-                    1,
-                )
+                zoom = zoom * (1 / self.zoom_factor[camera]) ** 1.5
 
                 # test if we need to zoom out
                 if not self._should_zoom_in(
@@ -746,7 +736,7 @@ class PtzAutoTracker:
                     if camera_config.onvif.autotracking.movement_weights
                     else obj.obj_data["box"],
                 ):
-                    zoom = max(-zoom * (1 / self.zoom_factor[camera]), -1)
+                    zoom = -zoom
 
         return zoom
 
@@ -902,17 +892,17 @@ class PtzAutoTracker:
         if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
             self.onvif.get_camera_status(camera)
 
-        if (
-            self.tracked_object[camera] is None
-            and self.tracked_object_previous[camera] is not None
-            and (
-                # might want to use a different timestamp here?
-                self.ptz_metrics[camera]["ptz_frame_time"].value
-                - self.tracked_object_previous[camera].obj_data["frame_time"]
-                < autotracker_config.timeout
-            )
-        ):
-            self._lost_object_zoom(camera, self.tracked_object_previous[camera])
+        # if (
+        #     self.tracked_object[camera] is None
+        #     and self.tracked_object_previous[camera] is not None
+        #     and (
+        #         # might want to use a different timestamp here?
+        #         self.ptz_metrics[camera]["ptz_frame_time"].value
+        #         - self.tracked_object_previous[camera].obj_data["frame_time"]
+        #         < autotracker_config.timeout
+        #     )
+        # ):
+        #     self._lost_object_zoom(camera, self.tracked_object_previous[camera])
 
         # return to preset if tracking is over
         if (
