@@ -693,6 +693,10 @@ class PtzAutoTracker:
     def _get_zoom_amount(self, camera, obj, predicted_box):
         camera_config = self.config.cameras[camera]
 
+        # frame width and height
+        camera_width = camera_config.frame_shape[1]
+        camera_height = camera_config.frame_shape[0]
+
         zoom = 0
 
         # absolute zooming separately from pan/tilt
@@ -712,8 +716,10 @@ class PtzAutoTracker:
                 # don't make small movements to zoom in if area hasn't changed significantly
                 # but always zoom out if necessary
                 if (
-                    "area" in obj.previous
-                    and abs(obj.obj_data["area"] - obj.previous["area"])
+                    abs(
+                        obj.obj_data["area"]
+                        - self.tracked_object_previous[camera].obj_data["area"]
+                    )
                     / obj.obj_data["area"]
                     < 0.3
                     and zoom <= zoom_level
@@ -726,7 +732,8 @@ class PtzAutoTracker:
             if self.tracked_object_previous[camera] is None:
                 zoom = 0
             else:
-                zoom = zoom * (1 / self.zoom_factor[camera]) ** 1.5
+                zoom_level = obj.obj_data["area"] / (camera_width * camera_height)
+                zoom = min(1, zoom_level * (1 / self.zoom_factor[camera]) ** 1.2)
 
                 # test if we need to zoom out
                 if not self._should_zoom_in(
@@ -737,6 +744,8 @@ class PtzAutoTracker:
                     else obj.obj_data["box"],
                 ):
                     zoom = -zoom
+
+        logger.debug(f"Zoom amount: {zoom}")
 
         return zoom
 
