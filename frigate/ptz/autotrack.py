@@ -493,7 +493,7 @@ class PtzAutoTracker:
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
-        # less than 15% of the of the larger dimension (width or height) of the frame,
+        # less than 20% of the of the larger dimension (width or height) of the frame,
         # multiplied by a scaling factor for object size.
         # Distance is increased if object is not moving to prevent small ptz moves
         # Adjusting this percentage slightly lower will effectively cause the camera to move
@@ -532,16 +532,19 @@ class PtzAutoTracker:
         obj_height = obj.obj_data["box"][3] - obj.obj_data["box"][1]
 
         max_obj = max(obj_width, obj_height)
-        max_frame = max(camera_config.detect.width, camera_config.detect.height)
+        max_frame = (
+            camera_config.detect.width
+            if max_obj == obj_width
+            else camera_config.detect.height
+        )
 
         # larger objects should lower the threshold, smaller objects should raise it
         scaling_factor = 1 - (max_obj / max_frame)
 
         # increase distance if object is stationary
-        if stationary:
-            scaling_factor *= 2
-
-        distance_threshold = 0.15 * (max_frame) * scaling_factor
+        distance_threshold = (
+            0.20 * max_frame * (scaling_factor * 2 if stationary else scaling_factor)
+        )
 
         logger.debug(f"Distance: {centroid_distance}, threshold: {distance_threshold}")
 
