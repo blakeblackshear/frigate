@@ -52,7 +52,7 @@ class PtzMotionEstimator:
         self.ptz_metrics["ptz_reset"].set()
         logger.debug(f"{config.name}: Motion estimator init")
 
-    def motion_estimator(self, detections, frame_time, camera_name):
+    def motion_estimator(self, detections, frame_time, camera):
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics["ptz_reset"].is_set():
             self.ptz_metrics["ptz_reset"].clear()
@@ -62,10 +62,10 @@ class PtzMotionEstimator:
                 self.camera_config.onvif.autotracking.zooming
                 != ZoomingModeEnum.disabled
             ):
-                logger.debug(f"{camera_name}: Motion estimator reset - homography")
+                logger.debug(f"{camera}: Motion estimator reset - homography")
                 transformation_type = HomographyTransformationGetter()
             else:
-                logger.debug(f"{camera_name}: Motion estimator reset - translation")
+                logger.debug(f"{camera}: Motion estimator reset - translation")
                 transformation_type = TranslationTransformationGetter()
 
             self.norfair_motion_estimator = MotionEstimator(
@@ -80,10 +80,10 @@ class PtzMotionEstimator:
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
         ):
             logger.debug(
-                f"{camera_name}: Motion estimator running - frame time: {frame_time}, {self.ptz_start_time.value}, {self.ptz_stop_time.value}"
+                f"{camera}: Motion estimator running - frame time: {frame_time}, {self.ptz_start_time.value}, {self.ptz_stop_time.value}"
             )
 
-            frame_id = f"{camera_name}{frame_time}"
+            frame_id = f"{camera}{frame_time}"
             yuv_frame = self.frame_manager.get(
                 frame_id, self.camera_config.frame_shape_yuv
             )
@@ -109,12 +109,12 @@ class PtzMotionEstimator:
                     frame, mask
                 )
                 logger.debug(
-                    f"{camera_name}: Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
+                    f"{camera}: Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
                 )
             except Exception:
                 # sometimes opencv can't find enough features in the image to find homography, so catch this error
                 logger.warning(
-                    f"Autotracker: motion estimator couldn't get transformations for {camera_name} at frame time {frame_time}"
+                    f"Autotracker: motion estimator couldn't get transformations for {camera} at frame time {frame_time}"
                 )
                 self.coord_transformations = None
 
@@ -139,17 +139,17 @@ class PtzAutoTrackerThread(threading.Thread):
 
     def run(self):
         while not self.stop_event.wait(1):
-            for camera_name, cam in self.config.cameras.items():
-                if not cam.enabled:
+            for camera, camera_config in self.config.cameras.items():
+                if not camera_config.enabled:
                     continue
 
-                if cam.onvif.autotracking.enabled:
-                    self.ptz_autotracker.camera_maintenance(camera_name)
+                if camera_config.onvif.autotracking.enabled:
+                    self.ptz_autotracker.camera_maintenance(camera)
                 else:
                     # disabled dynamically by mqtt
-                    if self.ptz_autotracker.tracked_object.get(camera_name):
-                        self.ptz_autotracker.tracked_object[camera_name] = None
-                        self.ptz_autotracker.tracked_object_previous[camera_name] = None
+                    if self.ptz_autotracker.tracked_object.get(camera):
+                        self.ptz_autotracker.tracked_object[camera] = None
+                        self.ptz_autotracker.tracked_object_previous[camera] = None
 
         logger.info("Exiting autotracker...")
 
@@ -180,85 +180,83 @@ class PtzAutoTracker:
         self.zoom_factor: dict[str, object] = {}
 
         # if cam is set to autotrack, onvif should be set up
-        for camera_name, cam in self.config.cameras.items():
-            if not cam.enabled:
+        for camera, camera_config in self.config.cameras.items():
+            if not camera_config.enabled:
                 continue
 
-            self.autotracker_init[camera_name] = False
-            if cam.onvif.autotracking.enabled:
-                self._autotracker_setup(cam, camera_name)
+            self.autotracker_init[camera] = False
+            if camera_config.onvif.autotracking.enabled:
+                self._autotracker_setup(camera_config, camera)
 
-    def _autotracker_setup(self, camera_config, camera_name):
-        logger.debug(f"{camera_name}: Autotracker init")
+    def _autotracker_setup(self, camera_config, camera):
+        logger.debug(f"{camera}: Autotracker init")
 
-        self.object_types[camera_name] = camera_config.onvif.autotracking.track
-        self.required_zones[
-            camera_name
-        ] = camera_config.onvif.autotracking.required_zones
-        self.zoom_factor[camera_name] = camera_config.onvif.autotracking.zoom_factor
+        self.object_types[camera] = camera_config.onvif.autotracking.track
+        self.required_zones[camera] = camera_config.onvif.autotracking.required_zones
+        self.zoom_factor[camera] = camera_config.onvif.autotracking.zoom_factor
 
-        self.tracked_object[camera_name] = None
-        self.tracked_object_previous[camera_name] = None
+        self.tracked_object[camera] = None
+        self.tracked_object_previous[camera] = None
 
-        self.calibrating[camera_name] = False
-        self.move_metrics[camera_name] = []
-        self.intercept[camera_name] = None
-        self.move_coefficients[camera_name] = []
+        self.calibrating[camera] = False
+        self.move_metrics[camera] = []
+        self.intercept[camera] = None
+        self.move_coefficients[camera] = []
 
-        self.move_queues[camera_name] = queue.Queue()
-        self.move_queue_locks[camera_name] = threading.Lock()
+        self.move_queues[camera] = queue.Queue()
+        self.move_queue_locks[camera] = threading.Lock()
 
-        if not self.onvif.cams[camera_name]["init"]:
-            if not self.onvif._init_onvif(camera_name):
-                logger.warning(f"Unable to initialize onvif for {camera_name}")
+        if not self.onvif.cams[camera]["init"]:
+            if not self.onvif._init_onvif(camera):
+                logger.warning(f"Unable to initialize onvif for {camera}")
                 camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
 
                 return
 
-            if "pt-r-fov" not in self.onvif.cams[camera_name]["features"]:
+            if "pt-r-fov" not in self.onvif.cams[camera]["features"]:
                 camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
-                    f"Disabling autotracking for {camera_name}: FOV relative movement not supported"
+                    f"Disabling autotracking for {camera}: FOV relative movement not supported"
                 )
 
                 return
 
-            movestatus_supported = self.onvif.get_service_capabilities(camera_name)
+            movestatus_supported = self.onvif.get_service_capabilities(camera)
 
             if movestatus_supported is None or movestatus_supported.lower() != "true":
                 camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
-                    f"Disabling autotracking for {camera_name}: ONVIF MoveStatus not supported"
+                    f"Disabling autotracking for {camera}: ONVIF MoveStatus not supported"
                 )
 
                 return
 
-            self.onvif.get_camera_status(camera_name)
+            self.onvif.get_camera_status(camera)
 
             # movement thread per camera
-            if not self.move_threads or not self.move_threads[camera_name]:
-                self.move_threads[camera_name] = threading.Thread(
-                    name=f"move_thread_{camera_name}",
-                    target=partial(self._process_move_queue, camera_name),
+            if not self.move_threads or not self.move_threads[camera]:
+                self.move_threads[camera] = threading.Thread(
+                    name=f"move_thread_{camera}",
+                    target=partial(self._process_move_queue, camera),
                 )
-                self.move_threads[camera_name].daemon = True
-                self.move_threads[camera_name].start()
+                self.move_threads[camera].daemon = True
+                self.move_threads[camera].start()
 
             if camera_config.onvif.autotracking.movement_weights:
                 self.intercept[
-                    camera_name
+                    camera
                 ] = camera_config.onvif.autotracking.movement_weights[0]
                 self.move_coefficients[
-                    camera_name
+                    camera
                 ] = camera_config.onvif.autotracking.movement_weights[1:]
 
             if camera_config.onvif.autotracking.calibrate_on_startup:
-                self._calibrate_camera(camera_name)
+                self._calibrate_camera(camera)
 
-        self.autotracker_init[camera_name] = True
+        self.autotracker_init[camera] = True
 
     def _write_config(self, camera):
         config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
