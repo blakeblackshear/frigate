@@ -495,13 +495,33 @@ class PtzAutoTracker:
         # Returns true if Euclidean distance from object to center of frame is
         # less than 15% of the of the larger dimension (width or height) of the frame,
         # multiplied by a scaling factor for object size.
+        # Distance is increased if object is not moving to prevent small ptz moves
         # Adjusting this percentage slightly lower will effectively cause the camera to move
         # more often to keep the object in the center. Raising the percentage will cause less
         # movement and will be more flexible with objects not quite being centered.
         # TODO: there's probably a better way to approach this
         camera_config = self.config.cameras[camera]
 
-        distance = np.linalg.norm(
+        stationary = False
+
+        # Norfair gives us two points for the velocity of an object represented as x1, y1, x2, y2
+        x1, y1, x2, y2 = obj.obj_data["estimate_velocity"]
+        average_velocity = (
+            (x1 + x2) / 2,
+            (y1 + y2) / 2,
+        )
+
+        # get euclidean distance of the two points, sometimes the estimate is way off
+        velocity_distance = np.linalg.norm([x2 - x1, y2 - y1])
+
+        if (
+            velocity_distance <= 5
+            and abs(average_velocity[0]) <= 1
+            and abs(average_velocity[1]) <= 1
+        ):
+            stationary = True
+
+        centroid_distance = np.linalg.norm(
             [
                 obj.obj_data["centroid"][0] - camera_config.detect.width / 2,
                 obj.obj_data["centroid"][1] - camera_config.detect.height / 2,
@@ -517,11 +537,15 @@ class PtzAutoTracker:
         # larger objects should lower the threshold, smaller objects should raise it
         scaling_factor = 1 - (max_obj / max_frame)
 
+        # increase distance if object is stationary
+        if stationary:
+            scaling_factor *= 2
+
         distance_threshold = 0.15 * (max_frame) * scaling_factor
 
-        logger.debug(f"Distance: {distance}, threshold: {distance_threshold}")
+        logger.debug(f"Distance: {centroid_distance}, threshold: {distance_threshold}")
 
-        return distance < distance_threshold
+        return centroid_distance < distance_threshold
 
     def _should_zoom_in(self, camera, obj, box):
         camera_config = self.config.cameras[camera]
@@ -733,17 +757,19 @@ class PtzAutoTracker:
                 zoom = 0
             else:
                 zoom_level = obj.obj_data["area"] / (camera_width * camera_height)
-                zoom = min(1, zoom_level * (1 / self.zoom_factor[camera]) ** 1.2)
 
-                # test if we need to zoom out
-                if not self._should_zoom_in(
+                if self._should_zoom_in(
                     camera,
                     obj,
                     predicted_box
                     if camera_config.onvif.autotracking.movement_weights
                     else obj.obj_data["box"],
                 ):
-                    zoom = -zoom
+                    # zoom in
+                    zoom = min(1, zoom_level * (1 / self.zoom_factor[camera]) ** 1.2)
+                else:
+                    # zoom out
+                    zoom = -(1 - zoom)
 
         logger.debug(f"Zoom amount: {zoom}")
 
