@@ -95,12 +95,10 @@ class TimelineProcessor(threading.Thread):
                 )
                 Timeline.insert(timeline_entry).execute()
             elif prev_event_data["attributes"] == {} and event_data["attributes"] != {}:
-                logger.error(f"Saving info {event_data['attributes']}")
                 timeline_entry[Timeline.class_type] = "attribute"
                 timeline_entry[Timeline.data]["attribute"] = list(
                     event_data["attributes"].keys()
                 )[0]
-                logger.error(f"The data is {timeline_entry}")
                 Timeline.insert(timeline_entry).execute()
         elif event_type == "end":
             timeline_entry[Timeline.class_type] = "gone"
