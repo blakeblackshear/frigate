@@ -169,7 +169,7 @@ function getTimelineItemDescription(config, timelineItem, event) {
         time_format: config.ui.time_format,
       })}`;
     case 'attribute':
-      return `${timelineItem.data.attribute} detected for ${event.label} at ${formatUnixTimestampToDateTime(
+      return `${timelineItem.data.attribute.replaceAll("_", " ")} detected for ${event.label} at ${formatUnixTimestampToDateTime(
         timelineItem.timestamp,
         {
           date_style: 'short',
