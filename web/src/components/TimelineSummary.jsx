@@ -8,7 +8,9 @@ import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import StationaryObjectIcon from '../icons/StationaryObject';
 import FaceIcon from '../icons/Face';
-import { Zone } from '../icons/Zone';
+import LicensePlateIcon from '../icons/LicensePlate';
+import DeliveryTruckIcon from '../icons/DeliveryTruck';
+import ZoneIcon from '../icons/Zone';
 import { useMemo, useState } from 'preact/hooks';
 import Button from './Button';
 
@@ -125,11 +127,15 @@ function getTimelineIcon(timelineItem) {
     case 'stationary':
       return <StationaryObjectIcon className="w-8" />;
     case 'entered_zone':
-      return <Zone className="w-8" />;
+      return <ZoneIcon className="w-8" />;
     case 'attribute':
       switch (timelineItem.data.attribute) {
         case 'face':
           return <FaceIcon className="w-8" />;
+        case 'license_plate':
+          return <LicensePlateIcon className="w-8" />;
+        default:
+          return <DeliveryTruckIcon className="w-8" />;
       }
   }
 }
@@ -169,7 +175,7 @@ function getTimelineItemDescription(config, timelineItem, event) {
           date_style: 'short',
           time_style: 'medium',
           time_format: config.ui.time_format,
-        },
+        }
       )}`;
     case 'gone':
       return `${event.label} left at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
