@@ -553,3 +553,22 @@ class OnvifController:
             logger.debug(
                 f'{camera_name}: Camera zoom level: {self.ptz_metrics[camera_name]["ptz_zoom_level"].value}'
             )
+
+        # some hikvision cams won't update MoveStatus, so warn if it hasn't changed
+        if (
+            not self.ptz_metrics[camera_name]["ptz_stopped"].is_set()
+            and not self.ptz_metrics[camera_name]["ptz_reset"].is_set()
+            and self.ptz_metrics[camera_name]["ptz_frame_time"].value
+            > (self.ptz_metrics[camera_name]["ptz_start_time"].value + 10)
+            and self.ptz_metrics[camera_name]["ptz_stop_time"].value == 0
+        ):
+            logger.debug(
+                f'Start time: {self.ptz_metrics[camera_name]["ptz_start_time"].value}, Stop time: {self.ptz_metrics[camera_name]["ptz_stop_time"].value}, Frame time: {self.ptz_metrics[camera_name]["ptz_frame_time"].value}'
+            )
+            # set the stop time so we don't come back into this again and spam the logs
+            self.ptz_metrics[camera_name]["ptz_stop_time"].value = self.ptz_metrics[
+                camera_name
+            ]["ptz_frame_time"].value
+            logger.warning(
+                f"Camera {camera_name} has been in ONVIF 'MOVING' status for over 10 seconds."
+            )
