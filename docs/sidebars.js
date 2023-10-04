@@ -14,7 +14,6 @@ module.exports = {
       "guides/ha_network_storage",
       "guides/stationary_objects",
       "guides/reverse_proxy",
-      "guides/motion_detection",
     ],
     Configuration: {
       "Configuration Files": [
@@ -33,6 +32,7 @@ module.exports = {
         "configuration/cameras",
         "configuration/record",
         "configuration/snapshots",
+        "configuration/motion_detection",
         "configuration/birdseye",
         "configuration/live",
         "configuration/restream",
