@@ -1,6 +1,6 @@
 ---
 id: motion_detection
-title: Tuning Motion Detection
+title: Motion Detection
 ---
 
 # Tuning Motion Detection
@@ -93,5 +93,11 @@ motion:
   # a doorbell camera.
   lightning_threshold: 0.8
 ```
+
+:::tip
+
+Some cameras like doorbell cameras may have missed detections when someone walks right by due to the motion detection being re-calibrated. In this case it may be desirable to increase the `lightning_threshold` to ensure these events are not missed.
+
+:::
 
 Larges changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
