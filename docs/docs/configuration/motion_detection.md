@@ -27,7 +27,7 @@ In Home Assistant the `Improve Contrast`, `Contour Area`, and `Threshold` config
 
 ## Tuning Motion Detection During The Day
 
-Now that things are setup, find a time to tune that represents normal circumstances. For example: If you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
+Now that things are set up, find a time to tune that represents normal circumstances. For example: If you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
 
 :::note
 
