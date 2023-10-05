@@ -270,11 +270,9 @@ def send_to_plus(id):
                 event.label,
             )
         except Exception as ex:
+            # log the exception, but dont return an error response
+            logger.warn(f"Unable to upload annotation for {event.label} to Frigate+")
             logger.exception(ex)
-            return make_response(
-                jsonify({"success": False, "message": str(ex)}),
-                400,
-            )
 
     return make_response(jsonify({"success": True, "plus_id": plus_id}), 200)
 
@@ -341,6 +339,7 @@ def false_positive(id):
             event.detector_type,
         )
     except Exception as ex:
+        logger.warn(f"Unable to upload false positive for {event.label} to Frigate+")
         logger.exception(ex)
         return make_response(
             jsonify({"success": False, "message": str(ex)}),
