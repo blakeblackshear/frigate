@@ -487,7 +487,7 @@ class PtzAutoTracker:
                 zoom, zoom_excess = split_value(zoom)
 
                 logger.debug(
-                    f"{camera}: Enqueue movement for frame time: {frame_time} pan: {pan}, enqueue tilt: {tilt}, enqueue zoom: {zoom}"
+                    f"{camera}: Enqueue movement for frame time: {frame_time} pan: {pan}, tilt: {tilt}, zoom: {zoom}"
                 )
                 move_data = (frame_time, pan, tilt, zoom)
                 self.move_queues[camera].put(move_data)
@@ -576,13 +576,8 @@ class PtzAutoTracker:
 
         bb_left, bb_top, bb_right, bb_bottom = box
 
-        # If bounding box is not within 15% of an edge, and euclidean distance to center is within threshold
-        # If object area is less than 1 - zoom_factor of frame
-        # Then zoom in, otherwise try zooming out
-        # Should we make these configurable?
-        #
         # TODO: Take into account the area changing when an object is moving out of frame
-        edge_threshold = 0.15
+        edge_threshold = 0.02
 
         # calculate a velocity threshold based on movement coefficients if available
         if camera_config.onvif.autotracking.movement_weights:
@@ -598,7 +593,7 @@ class PtzAutoTracker:
             velocity_threshold_x = camera_width * 0.02
             velocity_threshold_y = camera_height * 0.02
 
-        far_from_edge = (
+        away_from_edge = (
             bb_left > edge_threshold * camera_width
             and bb_right < (1 - edge_threshold) * camera_width
             and bb_top > edge_threshold * camera_height
@@ -609,13 +604,9 @@ class PtzAutoTracker:
         below_distance_threshold = self._below_distance_threshold(camera, obj)
 
         # if we have a big object, let's zoom out
-        below_dimension_threshold = (
-            bb_right - bb_left
-        ) / camera_width < self.zoom_factor[camera] and (
-            bb_bottom - bb_top
-        ) / camera_height < self.zoom_factor[
-            camera
-        ]
+        below_dimension_threshold = (bb_right - bb_left) / camera_width < max(
+            self.zoom_factor[camera], 0.6
+        ) and (bb_bottom - bb_top) / camera_height < max(self.zoom_factor[camera], 0.6)
 
         # if we have a fast moving object, let's zoom out
         below_velocity_threshold = (
@@ -653,7 +644,7 @@ class PtzAutoTracker:
 
         # Zoom in conditions
         if (
-            far_from_edge
+            away_from_edge
             and (below_distance_threshold or below_dimension_threshold)
             and below_velocity_threshold
             and not at_max_zoom
@@ -662,7 +653,7 @@ class PtzAutoTracker:
 
         # Zoom out conditions
         if (
-            (not far_from_edge and below_distance_threshold)
+            (not away_from_edge and below_distance_threshold)
             or not below_velocity_threshold
             or (not below_dimension_threshold and not below_distance_threshold)
             and not at_min_zoom
@@ -842,28 +833,20 @@ class PtzAutoTracker:
                     self.ptz_metrics[camera]["ptz_stop_time"].value,
                 )
             ):
-                if (
-                    self._below_distance_threshold(camera, obj)
-                    and intersection_over_union(
-                        self.tracked_object_previous[camera].obj_data["box"],
-                        obj.obj_data["box"],
-                    )
-                    > 0.2
-                ):
+                if self._below_distance_threshold(camera, obj):
                     logger.debug(
                         f"{camera}: Existing object (do NOT move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                     )
 
                     # no need to move, but try zooming
                     self._autotrack_move_zoom_only(camera, obj)
+                else:
+                    logger.debug(
+                        f"{camera}: Existing object (need to move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
+                    )
 
-                    return
+                    self._autotrack_move_ptz(camera, obj)
 
-                logger.debug(
-                    f"{camera}: Existing object (need to move ptz): {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
-                )
-
-                self._autotrack_move_ptz(camera, obj)
                 self.tracked_object_previous[camera] = copy.deepcopy(obj)
                 self.previous_frame_time[camera] = obj.obj_data["frame_time"]
 
