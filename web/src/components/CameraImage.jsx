@@ -58,7 +58,7 @@ export default function CameraImage({ camera, onload, searchParams = '', stretch
     if (!config || scaledHeight === 0 || !canvasRef.current) {
       return;
     }
-    img.src = `${apiHost}/api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;
+    img.src = `${apiHost}api/${name}/latest.jpg?h=${scaledHeight}${searchParams ? `&${searchParams}` : ''}`;
   }, [apiHost, canvasRef, name, img, searchParams, scaledHeight, config]);
 
   return (

@@ -20,7 +20,6 @@
   },
   "ignorePatterns": ["*.d.ts"],
   "rules": {
-    "indent": ["error", 2, { "SwitchCase": 1 }],
     "comma-dangle": [
       "error",
       {

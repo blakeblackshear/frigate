@@ -336,7 +336,7 @@ ${Object.keys(objectMaskPoints)
 
       <div className="space-y-4">
         <div className="relative">
-          <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <img ref={imageRef} src={`${apiHost}api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={'subkey' in editing ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}

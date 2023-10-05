@@ -155,10 +155,6 @@ cd web && npm install
 cd web && npm run dev
 ```
 
-#### 3a. Run the development server against a non-local instance
-
-To run the development server against a non-local instance, you will need to modify the API_HOST default return in `web/src/env.js`.
-
 #### 4. Making changes
 
 The Web UI is built using [Vite](https://vitejs.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).

@@ -5,6 +5,9 @@ import { WsProvider } from './ws';
 import axios from 'axios';
 
 axios.defaults.baseURL = `${baseUrl}api/`;
+axios.defaults.headers.common = {
+  'X-CSRF-TOKEN': 1,
+};
 
 export function ApiProvider({ children, options }) {
   return (

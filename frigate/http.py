@@ -75,6 +75,13 @@ def create_app(
     app = Flask(__name__)
 
     @app.before_request
+    def check_csrf():
+        if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
+            pass
+        if "origin" in request.headers and "x-csrf-token" not in request.headers:
+            return jsonify({"success": False, "message": "Missing CSRF header"}), 401
+
+    @app.before_request
     def _db_connect():
         if database.is_closed():
             database.connect()

@@ -74,7 +74,7 @@ export default function Config() {
       format: true,
       schemas: [
         {
-          uri: `${apiHost}/api/config/schema.json`,
+          uri: `${apiHost}api/config/schema.json`,
           fileMatch: [String(modelUri)],
         },
       ],
