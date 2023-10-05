@@ -87,7 +87,8 @@ def load_config_with_no_duplicates(raw_config) -> dict:
     """Get config ensuring duplicate keys are not allowed."""
 
     # https://stackoverflow.com/a/71751051
-    class PreserveDuplicatesLoader(yaml.loader.Loader):
+    # important to use SafeLoader here to avoid RCE
+    class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
         pass
 
     def map_constructor(loader, node, deep=False):
