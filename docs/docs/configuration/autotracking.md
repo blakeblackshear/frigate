@@ -123,7 +123,7 @@ Some users have found it helpful to adjust the zone `inertia` value or the camer
 
 ## Zooming
 
-Zooming is still a very experimental feature and may use significantly more CPU when tracking objects than panning/tilting only.
+Zooming is a very experimental feature and may use significantly more CPU when tracking objects than panning/tilting only.
 
 Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming. Absolute zooming was developed to be very conservative to work best with a variety of cameras and scenes. Absolute zooming usually will not occur until an object has stopped moving or is moving very slowly.
 
@@ -131,7 +131,7 @@ Relative zooming attempts to make a zoom movement concurrently with any pan/tilt
 
 You can optionally adjust the `zoom_factor` for your camera in your configuration file. Lower values will leave more space from the scene around the tracked object while higher values will cause your camera to zoom in more on the object. However, keep in mind that Frigate needs a fair amount of pixels and scene details outside of the bounding box of the tracked object to estimate the motion of your camera. If the object is taking up too much of the frame, Frigate will not be able to track the motion of the camera and your object will be lost.
 
-The range of this option is from 0.1 to 0.75. The default value of 0.5 should be sufficient for most users. If you have a powerful zoom lens on your PTZ or you find your autotracked objects are often lost, you may want to change this value. Because every PTZ and scene is different, you should experiment to determine what works best for you.
+The range of this option is from 0.1 to 0.75. The default value of 0.3 should be sufficient for most users. Because every PTZ and scene is different, you should experiment to determine what works best for you.
 
 ## Usage applications
 
@@ -141,7 +141,7 @@ In security and surveillance, it's common to use "spotter" cameras in combinatio
 
 ### The autotracker loses track of my object. Why?
 
-There are many reasons this could be the case. Camera motion might be causing Frigate to lose track of the object. The object might be traveling too quickly. The scene is too dark, motion settings are not sensitive enough or are too sensitive, or the scene is less than optimal for Frigate to maintain tracking.
+There are many reasons this could be the case. If you are using experimental zooming, your `zoom_factor` value might be too high. Camera motion might be causing Frigate to lose track of the object. The object might be traveling too quickly. The scene might be too dark, motion settings are not sensitive enough or are too sensitive, or is less than optimal for Frigate to maintain tracking.
 
 Watching Frigate's debug view can help to determine a possible cause. The autotracked object will have a thicker colored box around it.
 

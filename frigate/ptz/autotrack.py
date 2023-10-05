@@ -621,19 +621,19 @@ class PtzAutoTracker:
         # debug zooming
         if False:
             logger.debug(
-                f"{camera}: Zoom test: left edge: {bb_left > edge_threshold * camera_width}"
+                f"{camera}: Zoom test: near left edge: {bb_left > edge_threshold * camera_width}"
             )
             logger.debug(
-                f"{camera}: Zoom test: right edge: {bb_right < (1 - edge_threshold) * camera_width}"
+                f"{camera}: Zoom test: near right edge: {bb_right < (1 - edge_threshold) * camera_width}"
             )
             logger.debug(
-                f"{camera}: Zoom test: top edge: {bb_top > edge_threshold * camera_height}"
+                f"{camera}: Zoom test: near top edge: {bb_top > edge_threshold * camera_height}"
             )
             logger.debug(
-                f"{camera}: Zoom test: bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
+                f"{camera}: Zoom test: near bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below distance threshold {(below_distance_threshold or below_dimension_threshold)}"
+                f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
             )
             logger.debug(
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_width}"
