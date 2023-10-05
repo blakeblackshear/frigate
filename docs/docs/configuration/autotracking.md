@@ -131,7 +131,7 @@ Relative zooming attempts to make a zoom movement concurrently with any pan/tilt
 
 You can optionally adjust the `zoom_factor` for your camera in your configuration file. Lower values will leave more space from the scene around the tracked object while higher values will cause your camera to zoom in more on the object. However, keep in mind that Frigate needs a fair amount of pixels and scene details outside of the bounding box of the tracked object to estimate the motion of your camera. If the object is taking up too much of the frame, Frigate will not be able to track the motion of the camera and your object will be lost.
 
-The range of this option is from 0.1 to 0.75. The default value of 0.3 should be sufficient for most users. If you have a powerful zoom lens on your PTZ or you find your autotracked objects are often lost, you may want to lower this value. Because every PTZ and scene is different, you should experiment to determine what works best for you.
+The range of this option is from 0.1 to 0.75. The default value of 0.5 should be sufficient for most users. If you have a powerful zoom lens on your PTZ or you find your autotracked objects are often lost, you may want to change this value. Because every PTZ and scene is different, you should experiment to determine what works best for you.
 
 ## Usage applications
 

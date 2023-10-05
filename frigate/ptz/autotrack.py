@@ -591,7 +591,7 @@ class PtzAutoTracker:
                 camera_width / predicted_movement_time / camera_fps * 0.7
             )
             velocity_threshold_y = (
-                camera_width / predicted_movement_time / camera_fps * 0.7
+                camera_height / predicted_movement_time / camera_fps * 0.7
             )
         else:
             # use a generic velocity threshold
