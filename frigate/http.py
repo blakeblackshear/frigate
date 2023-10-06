@@ -777,6 +777,8 @@ def events():
     in_progress = request.args.get("in_progress", type=int)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
     favorites = request.args.get("favorites", type=int)
+    min_score = request.args.get("min_score", type=float)
+    max_score = request.args.get("max_score", type=float)
 
     clauses = []
 
@@ -898,6 +900,12 @@ def events():
 
     if favorites:
         clauses.append((Event.retain_indefinitely == favorites))
+
+    if max_score is not None:
+        clauses.append((Event.data["score"] <= max_score))
+
+    if min_score is not None:
+        clauses.append((Event.data["score"] >= min_score))
 
     if len(clauses) == 0:
         clauses.append((True))
