@@ -779,6 +779,7 @@ def events():
     favorites = request.args.get("favorites", type=int)
     min_score = request.args.get("min_score", type=float)
     max_score = request.args.get("max_score", type=float)
+    is_submitted = request.args.get("is_submitted", type=int)
 
     clauses = []
 
@@ -906,6 +907,12 @@ def events():
 
     if min_score is not None:
         clauses.append((Event.data["score"] >= min_score))
+
+    if is_submitted is not None:
+      if is_submitted == 0:
+        clauses.append((Event.plus_id.is_null()))
+      else:
+        clauses.append((Event.plus_id != ""))
 
     if len(clauses) == 0:
         clauses.append((True))
