@@ -909,10 +909,10 @@ def events():
         clauses.append((Event.data["score"] >= min_score))
 
     if is_submitted is not None:
-      if is_submitted == 0:
-        clauses.append((Event.plus_id.is_null()))
-      else:
-        clauses.append((Event.plus_id != ""))
+        if is_submitted == 0:
+            clauses.append((Event.plus_id.is_null()))
+        else:
+            clauses.append((Event.plus_id != ""))
 
     if len(clauses) == 0:
         clauses.append((True))
