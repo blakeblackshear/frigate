@@ -558,6 +558,7 @@ class OnvifController:
         if (
             not self.ptz_metrics[camera_name]["ptz_stopped"].is_set()
             and not self.ptz_metrics[camera_name]["ptz_reset"].is_set()
+            and self.ptz_metrics[camera_name]["ptz_start_time"].value != 0
             and self.ptz_metrics[camera_name]["ptz_frame_time"].value
             > (self.ptz_metrics[camera_name]["ptz_start_time"].value + 10)
             and self.ptz_metrics[camera_name]["ptz_stop_time"].value == 0
@@ -569,6 +570,4 @@ class OnvifController:
             self.ptz_metrics[camera_name]["ptz_stop_time"].value = self.ptz_metrics[
                 camera_name
             ]["ptz_frame_time"].value
-            logger.warning(
-                f"Camera {camera_name} has been in ONVIF 'MOVING' status for over 10 seconds."
-            )
+            logger.warning(f"Camera {camera_name} is still in ONVIF 'MOVING' status.")
