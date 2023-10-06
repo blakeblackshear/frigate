@@ -629,16 +629,16 @@ class PtzAutoTracker:
         # debug zooming
         if True:
             logger.debug(
-                f"{camera}: Zoom test: near left edge: {bb_left > edge_threshold * camera_width}"
+                f"{camera}: Zoom test: far from left edge: {bb_left > edge_threshold * camera_width}"
             )
             logger.debug(
-                f"{camera}: Zoom test: near right edge: {bb_right < (1 - edge_threshold) * camera_width}"
+                f"{camera}: Zoom test: far from right edge: {bb_right < (1 - edge_threshold) * camera_width}"
             )
             logger.debug(
-                f"{camera}: Zoom test: near top edge: {bb_top > edge_threshold * camera_height}"
+                f"{camera}: Zoom test: far from top edge: {bb_top > edge_threshold * camera_height}"
             )
             logger.debug(
-                f"{camera}: Zoom test: near bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
+                f"{camera}: Zoom test: far from bottom edge: {bb_bottom < (1 - edge_threshold) * camera_height}"
             )
             logger.debug(
                 f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
@@ -648,6 +648,12 @@ class PtzAutoTracker:
             )
             logger.debug(
                 f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
+            )
+            logger.debug(
+                f"{camera}: Zoom test: at max zoom: {(at_max_zoom)}"
+            )
+            logger.debug(
+                f"{camera}: Zoom test: at min zoom: {(at_min_zoom)}"
             )
 
         # Zoom in conditions
