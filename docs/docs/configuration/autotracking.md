@@ -5,7 +5,7 @@ title: Camera Autotracking
 
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
-![Autotracking Example](/img/frigate-autotracking-example.gif)
+![Autotracking example with zooming](/img/frigate-autotracking-example.gif)
 
 ## Autotracking behavior
 
@@ -64,6 +64,11 @@ cameras:
         #   absolute - use absolute zooming (supported by most PTZ capable cameras)
         #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
         zooming: disabled
+        # Optional: A value to change the behavior of zooming on autotracked objects. (default: shown below)
+        # A lower value will keep more of the scene in view around a tracked object.
+        # A higher value will zoom in more on a tracked object, but Frigate may lose tracking more quickly.
+        # The value should be between 0.1 and 0.75
+        zoom_factor: 0.3
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -100,15 +105,21 @@ The object tracker in Frigate estimates the motion of the PTZ so that tracked ob
 
 A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's debug viewer for your camera to see a thicker colored box around the object currently being autotracked.
 
+![Autotracking Debug View](/img/autotracking-debug.gif)
+
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
 ## Zooming
 
-Zooming is an experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
+Zooming is still a very experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
 
 Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming.
 
 Relative zooming attempts to make a zoom movement concurrently with any pan/tilt movements. It was tested to work with some Dahua and Amcrest PTZs. But the ONVIF specification indicates that there no assumption about how the generic zoom range is mapped to magnification, field of view or other physical zoom dimension when using relative zooming. So if relative zooming behavior is erratic or just doesn't work, use absolute zooming.
+
+You can optionally adjust the `zoom_factor` for your camera in your configuration file. Lower values will leave more space from the scene around the tracked object while higher values will cause your camera to zoom in more on the object. However, keep in mind that Frigate needs a fair amount of pixels and scene details outside of the bounding box of the tracked object to estimate the motion of your camera. If the object is taking up too much of the frame, Frigate will not be able to track the motion of the camera and your object will be lost.
+
+The range of this option is from 0.1 to 0.75. The default value of 0.3 should be sufficient for most users. If you have a powerful zoom lens on your PTZ or you find your autotracked objects are often lost, you may want to lower this value. Because every PTZ and scene is different, you should experiment to determine what works best for you.
 
 ## Usage applications
 

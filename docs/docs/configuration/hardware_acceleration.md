@@ -64,11 +64,10 @@ ffmpeg:
 
 ### Configuring Intel GPU Stats in Docker
 
-Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. Three possible changes can be made:
+Additional configuration is needed for the Docker container to be able to access the `intel_gpu_top` command for GPU stats. There are two options:
 
 1. Run the container as privileged.
-2. Adding the `CAP_PERFMON` capability.
-3. Setting the `perf_event_paranoid` low enough to allow access to the performance event system.
+2. Add the `CAP_PERFMON` capability (note: you might need to set the `perf_event_paranoid` low enough to allow access to the performance event system.)
 
 #### Run as privileged
 
@@ -125,7 +124,7 @@ _Note: This setting must be changed for the entire system._
 
 For more information on the various values across different distributions, see https://askubuntu.com/questions/1400874/what-does-perf-paranoia-level-four-do.
 
-Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=1 >> /etc/sysctl.d/local.conf'`
+Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=2 >> /etc/sysctl.d/local.conf'`
 
 ## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 

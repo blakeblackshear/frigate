@@ -33,7 +33,7 @@ from frigate.util.image import (
 logger = logging.getLogger(__name__)
 
 
-def get_standard_aspect_ratio(width, height) -> tuple[int, int]:
+def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     """Ensure that only standard aspect ratios are used."""
     known_aspects = [
         (16, 9),
@@ -50,6 +50,22 @@ def get_standard_aspect_ratio(width, height) -> tuple[int, int]:
         key=lambda x: abs(x - (width / height)),
     )
     return known_aspects[known_aspects_ratios.index(closest)]
+
+
+def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
+    """Get birdseye canvas shape."""
+    canvas_width = width
+    canvas_height = height
+    a_w, a_h = get_standard_aspect_ratio(width, height)
+
+    if round(a_w / a_h, 2) != round(width / height, 2):
+        canvas_width = width
+        canvas_height = (canvas_width / a_w) * a_h
+        logger.warning(
+            f"The birdseye resolution is a non-standard aspect ratio, forcing birdseye resolution to {canvas_width} x {canvas_height}"
+        )
+
+    return (canvas_width, canvas_height)
 
 
 class Canvas:
@@ -226,8 +242,7 @@ class BirdsEyeFrameManager:
         self.config = config
         self.mode = config.birdseye.mode
         self.frame_manager = frame_manager
-        width = config.birdseye.width
-        height = config.birdseye.height
+        width, height = get_canvas_shape(config.birdseye.width, config.birdseye.height)
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
