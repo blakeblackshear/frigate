@@ -521,8 +521,8 @@ class PtzAutoTracker:
         velocity_distance = np.linalg.norm([x2 - x1, y2 - y1])
 
         if (
-            0 < abs(average_velocity[0]) < (camera_width / camera_fps / 2)
-            and 0 < abs(average_velocity[1]) < (camera_height / camera_fps / 2)
+            0 <= abs(average_velocity[0]) < (camera_width / camera_fps / 2)
+            and 0 <= abs(average_velocity[1]) < (camera_height / camera_fps / 2)
             and velocity_distance <= 10
         ):
             return average_velocity, velocity_distance
