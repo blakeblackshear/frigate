@@ -61,8 +61,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
                   className="max-h-[35px] mx-2"
                   onClick={() => onSelectSingle(item)}
                 >
-                  { (title === "Labels" && config.audio.listen.includes(item)) ? ( <SpeakerIcon /> ) : ( <CameraIcon /> ) }
-                  
+                  {title === 'Labels' && config.audio.listen.includes(item) ? <SpeakerIcon /> : <CameraIcon />}
                 </Button>
               </div>
             </div>

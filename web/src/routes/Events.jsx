@@ -419,13 +419,13 @@ export default function Events({ path, ...props }) {
             downloadEvent.end_time &&
             downloadEvent.has_snapshot &&
             !downloadEvent.plus_id && (
-            <MenuItem
-              icon={UploadPlus}
-              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
-              value="plus"
-              onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
-            />
-          )}
+              <MenuItem
+                icon={UploadPlus}
+                label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
+                value="plus"
+                onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
+              />
+            )}
           {downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
