@@ -775,26 +775,24 @@ class PtzAutoTracker:
 
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
-            # don't zoom on initial move
             if self.tracked_object_previous[camera] is None:
-                zoom = 0
                 self.previous_target_box[camera] = target_box
-            else:
-                if (
-                    result := self._should_zoom_in(
-                        camera,
-                        obj,
-                        predicted_box
-                        if camera_config.onvif.autotracking.movement_weights
-                        else obj.obj_data["box"],
-                    )
-                ) is not None:
-                    # zoom in value
-                    zoom = target_box ** self.zoom_factor[camera]
 
-                    if not result:
-                        # zoom out
-                        zoom = -(1 - zoom) if zoom != 0 else 0
+            if (
+                result := self._should_zoom_in(
+                    camera,
+                    obj,
+                    predicted_box
+                    if camera_config.onvif.autotracking.movement_weights
+                    else obj.obj_data["box"],
+                )
+            ) is not None:
+                # zoom in value
+                zoom = target_box ** self.zoom_factor[camera]
+
+                if not result:
+                    # zoom out
+                    zoom = -(1 - zoom) if zoom != 0 else 0
 
         logger.debug(f"{camera}: Zooming: {result} Zoom amount: {zoom}")
 
