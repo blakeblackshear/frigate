@@ -1351,7 +1351,10 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
             Recordings.start_time,
         )
         .where(
-            ((frame_time > Recordings.start_time) & (frame_time < Recordings.end_time))
+            (
+                (frame_time >= Recordings.start_time)
+                & (frame_time <= Recordings.end_time)
+            )
         )
         .where(Recordings.camera == camera_name)
     )
