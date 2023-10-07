@@ -196,6 +196,8 @@ class AudioEventMaintainer(threading.Thread):
             model_detections = self.detector.detect(waveform)
 
             for label, score, _ in model_detections:
+                logger.debug(f"Heard {label} with a score of {score}")
+
                 if label not in self.config.audio.listen:
                     continue
 
