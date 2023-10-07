@@ -11,7 +11,6 @@ from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
-from werkzeug.utils import secure_filename
 
 import cv2
 import numpy as np
@@ -30,6 +29,7 @@ from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
+from werkzeug.utils import secure_filename
 
 from frigate.config import FrigateConfig
 from frigate.const import (
