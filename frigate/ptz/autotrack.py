@@ -636,8 +636,8 @@ class PtzAutoTracker:
         target_box = obj.obj_data["area"] / (camera_width * camera_height)
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
-        zoom_in_hysteresis = target_box > (self.previous_target_box[camera] * 1.2)
-        zoom_out_hysteresis = target_box < (self.previous_target_box[camera] * 0.9)
+        zoom_out_hysteresis = target_box > (self.previous_target_box[camera] * 1.2)
+        zoom_in_hysteresis = target_box < (self.previous_target_box[camera] * 0.9)
 
         at_max_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 1
         at_min_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 0
@@ -769,8 +769,6 @@ class PtzAutoTracker:
             # don't zoom on initial move
             if self.tracked_object_previous[camera] is None:
                 zoom = current_zoom_level
-                # start with a slightly smaller box to encourage an initial zoom
-                self.previous_target_box[camera] = target_box * 0.8
             else:
                 if (
                     result := self._should_zoom_in(camera, obj, obj.obj_data["box"])
@@ -783,7 +781,8 @@ class PtzAutoTracker:
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             if self.tracked_object_previous[camera] is None:
-                self.previous_target_box[camera] = target_box
+                # start with a slightly altered box to encourage an initial zoom
+                self.previous_target_box[camera] = target_box * 1.2
 
             if (
                 result := self._should_zoom_in(
