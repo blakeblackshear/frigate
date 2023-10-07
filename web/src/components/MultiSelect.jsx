@@ -5,7 +5,6 @@ import { ArrowDropdown } from '../icons/ArrowDropdown';
 import Heading from './Heading';
 import Button from './Button';
 import SelectOnlyIcon from '../icons/SelectOnly';
-import useSWR from 'swr';
 
 export default function MultiSelect({ className, title, options, selection, onToggle, onShowAll, onSelectSingle }) {
   const popupRef = useRef(null);
