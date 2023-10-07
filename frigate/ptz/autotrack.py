@@ -571,10 +571,8 @@ class PtzAutoTracker:
         )
 
         # larger objects should lower the threshold, smaller objects should raise it
-        scaling_factor = 1 - (max_obj / max_frame)
-
-        # increase distance if object is stationary
-        distance_threshold = 0.1 * max_frame * scaling_factor
+        scaling_factor = 1 - np.log(max_obj / max_frame)
+        distance_threshold = 0.1 * max_frame * (scaling_factor / 2)
 
         logger.debug(
             f"{camera}: Distance: {centroid_distance}, threshold: {distance_threshold}"
@@ -771,7 +769,8 @@ class PtzAutoTracker:
             # don't zoom on initial move
             if self.tracked_object_previous[camera] is None:
                 zoom = current_zoom_level
-                self.previous_target_box[camera] = target_box
+                # start with a slightly smaller box to encourage an initial zoom
+                self.previous_target_box[camera] = target_box * 0.8
             else:
                 if (
                     result := self._should_zoom_in(camera, obj, obj.obj_data["box"])
