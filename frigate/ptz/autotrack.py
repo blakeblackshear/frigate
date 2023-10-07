@@ -954,4 +954,9 @@ class PtzAutoTracker:
                 camera,
                 autotracker_config.return_preset.lower(),
             )
+
+            # update stored zoom level from preset
+            if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                self.onvif.get_camera_status(camera)
+
             self.ptz_metrics[camera]["ptz_reset"].set()
