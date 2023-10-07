@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
+from werkzeug.utils import secure_filename
 
 import cv2
 import numpy as np
@@ -1820,7 +1821,8 @@ def export_recording(camera_name: str, start_time, end_time):
 
 @bp.route("/export/<file_name>", methods=["DELETE"])
 def export_delete(file_name: str):
-    file = os.path.join(EXPORT_DIR, file_name)
+    safe_file_name = secure_filename(file_name)
+    file = os.path.join(EXPORT_DIR, safe_file_name)
 
     if not os.path.exists(file):
         return make_response(
