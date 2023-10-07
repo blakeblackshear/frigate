@@ -29,6 +29,7 @@ from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
+from werkzeug.utils import secure_filename
 
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -1820,7 +1821,8 @@ def export_recording(camera_name: str, start_time, end_time):
 
 @bp.route("/export/<file_name>", methods=["DELETE"])
 def export_delete(file_name: str):
-    file = os.path.join(EXPORT_DIR, file_name)
+    safe_file_name = secure_filename(file_name)
+    file = os.path.join(EXPORT_DIR, safe_file_name)
 
     if not os.path.exists(file):
         return make_response(
