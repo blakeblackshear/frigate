@@ -50,7 +50,7 @@ class RecordingExporter(threading.Thread):
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         """Convenience fun to get a simple date time from timestamp."""
-        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%H:%M")
+        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%H_%M")
 
     def run(self) -> None:
         logger.debug(

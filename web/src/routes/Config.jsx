@@ -34,7 +34,7 @@ export default function Config() {
       })
       .catch((error) => {
         setSuccess('');
-        
+
         if (error.response) {
           setError(error.response.data.message);
         } else {
@@ -61,9 +61,9 @@ export default function Config() {
 
     let yamlModel;
     if (editor.getModels().length > 0) {
-      yamlModel = editor.getModel(modelUri)
+      yamlModel = editor.getModel(modelUri);
     } else {
-      yamlModel = editor.createModel(config, 'yaml', modelUri)
+      yamlModel = editor.createModel(config, 'yaml', modelUri);
     }
 
     setDiagnosticsOptions({
@@ -74,7 +74,7 @@ export default function Config() {
       format: true,
       schemas: [
         {
-          uri: `${apiHost}/api/config/schema.json`,
+          uri: `${apiHost}api/config/schema.json`,
           fileMatch: [String(modelUri)],
         },
       ],
@@ -100,10 +100,10 @@ export default function Config() {
           <Button className="mx-2" onClick={(e) => handleCopyConfig(e)}>
             Copy Config
           </Button>
-          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "restart")}>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, 'restart')}>
             Save & Restart
           </Button>
-          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, "saveonly")}>
+          <Button className="mx-2" onClick={(e) => onHandleSaveConfig(e, 'saveonly')}>
             Save Only
           </Button>
         </div>

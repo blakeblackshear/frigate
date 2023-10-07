@@ -212,7 +212,7 @@ export default function Camera({ camera }) {
               key={objectType}
               header={objectType}
               href={`/events?cameras=${camera}&labels=${encodeURIComponent(objectType)}`}
-              media={<img src={`${apiHost}/api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
+              media={<img src={`${apiHost}api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
             />
           ))}
         </div>

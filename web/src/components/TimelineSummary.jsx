@@ -7,7 +7,10 @@ import ActiveObjectIcon from '../icons/ActiveObject';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
 import StationaryObjectIcon from '../icons/StationaryObject';
-import { Zone } from '../icons/Zone';
+import FaceIcon from '../icons/Face';
+import LicensePlateIcon from '../icons/LicensePlate';
+import DeliveryTruckIcon from '../icons/DeliveryTruck';
+import ZoneIcon from '../icons/Zone';
 import { useMemo, useState } from 'preact/hooks';
 import Button from './Button';
 
@@ -88,7 +91,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
               aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
               onClick={() => onSelectMoment(index)}
             >
-              {getTimelineIcon(item.class_type)}
+              {getTimelineIcon(item)}
             </Button>
           ))}
         </div>
@@ -113,8 +116,8 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   );
 }
 
-function getTimelineIcon(classType) {
-  switch (classType) {
+function getTimelineIcon(timelineItem) {
+  switch (timelineItem.class_type) {
     case 'visible':
       return <PlayIcon className="w-8" />;
     case 'gone':
@@ -124,7 +127,16 @@ function getTimelineIcon(classType) {
     case 'stationary':
       return <StationaryObjectIcon className="w-8" />;
     case 'entered_zone':
-      return <Zone className="w-8" />;
+      return <ZoneIcon className="w-8" />;
+    case 'attribute':
+      switch (timelineItem.data.attribute) {
+        case 'face':
+          return <FaceIcon className="w-8" />;
+        case 'license_plate':
+          return <LicensePlateIcon className="w-8" />;
+        default:
+          return <DeliveryTruckIcon className="w-8" />;
+      }
   }
 }
 
@@ -156,6 +168,15 @@ function getTimelineItemDescription(config, timelineItem, event) {
         time_style: 'medium',
         time_format: config.ui.time_format,
       })}`;
+    case 'attribute':
+      return `${timelineItem.data.attribute.replaceAll("_", " ")} detected for ${event.label} at ${formatUnixTimestampToDateTime(
+        timelineItem.timestamp,
+        {
+          date_style: 'short',
+          time_style: 'medium',
+          time_format: config.ui.time_format,
+        }
+      )}`;
     case 'gone':
       return `${event.label} left at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
         date_style: 'short',

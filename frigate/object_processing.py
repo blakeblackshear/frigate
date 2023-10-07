@@ -232,6 +232,9 @@ class TrackedObject:
             if self.obj_data["position_changes"] != obj_data["position_changes"]:
                 significant_change = True
 
+            if self.obj_data["attributes"] != obj_data["attributes"]:
+                significant_change = True
+
             # if the motionless_count reaches the stationary threshold
             if (
                 self.obj_data["motionless_count"]
