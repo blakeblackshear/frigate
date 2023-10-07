@@ -175,7 +175,9 @@ class OnvifController:
             presets = []
 
         for preset in presets:
-            self.cams[camera_name]["presets"][preset["Name"].lower()] = preset["token"]
+            self.cams[camera_name]["presets"][
+                preset.get("Name", f"preset {preset['token']}").lower()
+            ] = preset["token"]
 
         # get list of supported features
         ptz_config = ptz.GetConfigurationOptions(request)
