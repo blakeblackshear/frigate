@@ -387,6 +387,10 @@ class PtzAutoTracker:
         return np.dot(self.move_coefficients[camera], input_data)
 
     def _process_move_queue(self, camera):
+        camera_config = self.config.cameras[camera]
+        camera_width = camera_config.frame_shape[1]
+        camera_height = camera_config.frame_shape[0]
+
         while True:
             move_data = self.move_queues[camera].get()
 
@@ -413,7 +417,11 @@ class PtzAutoTracker:
                         # this enables us to absolutely zoom if we lost an object
                         and self.tracked_object[camera] is not None
                     ):
+                        self.previous_target_box[camera] = self.tracked_object[
+                            camera
+                        ].obj_data["area"] / (camera_width * camera_height)
                         self.onvif._move_relative(camera, pan, tilt, zoom, 1)
+
                     else:
                         if pan != 0 or tilt != 0:
                             self.onvif._move_relative(camera, pan, tilt, 0, 1)
@@ -426,6 +434,9 @@ class PtzAutoTracker:
                             zoom > 0
                             and self.ptz_metrics[camera]["ptz_zoom_level"].value != zoom
                         ):
+                            self.previous_target_box[camera] = self.tracked_object[
+                                camera
+                            ].obj_data["area"] / (camera_width * camera_height)
                             self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # Wait until the camera finishes moving
@@ -674,7 +685,6 @@ class PtzAutoTracker:
             and not at_max_zoom
             and zoom_in_hysteresis
         ):
-            self.previous_target_box[camera] = target_box
             return True
 
         # Zoom out conditions
@@ -685,7 +695,6 @@ class PtzAutoTracker:
             or (not below_dimension_threshold and not below_distance_threshold)
             and not at_min_zoom
         ):
-            self.previous_target_box[camera] = target_box
             return False
 
         # Don't zoom at all
