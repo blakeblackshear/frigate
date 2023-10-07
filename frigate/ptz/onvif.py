@@ -131,18 +131,24 @@ class OnvifController:
 
         # try setting relative zoom translation space
         try:
-            if self.config.cameras[camera_name].onvif.autotracking.zooming:
+            if (
+                self.config.cameras[camera_name].onvif.autotracking.zooming
+                == ZoomingModeEnum.relative
+            ):
                 if zoom_space_id is not None:
                     move_request.Translation.Zoom.space = ptz_config["Spaces"][
                         "RelativeZoomTranslationSpace"
                     ][0]["URI"]
         except Exception:
-            if self.config.cameras[camera_name].onvif.autotracking.zoom_relative:
+            if (
+                self.config.cameras[camera_name].onvif.autotracking.zooming
+                == ZoomingModeEnum.relative
+            ):
                 self.config.cameras[
                     camera_name
-                ].onvif.autotracking.zoom_relative = False
+                ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
                 logger.warning(
-                    f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported"
+                    f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
                 )
 
         if move_request.Speed is None:
@@ -169,7 +175,9 @@ class OnvifController:
             presets = []
 
         for preset in presets:
-            self.cams[camera_name]["presets"][preset["Name"].lower()] = preset["token"]
+            self.cams[camera_name]["presets"][
+                preset.get("Name", f"preset {preset['token']}").lower()
+            ] = preset["token"]
 
         # get list of supported features
         ptz_config = ptz.GetConfigurationOptions(request)

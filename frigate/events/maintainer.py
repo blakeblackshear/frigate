@@ -42,6 +42,9 @@ def should_update_state(prev_event: Event, current_event: Event) -> bool:
     if prev_event["stationary"] != current_event["stationary"]:
         return True
 
+    if prev_event["attributes"] != current_event["attributes"]:
+        return True
+
     return False
 
 

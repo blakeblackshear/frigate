@@ -60,7 +60,6 @@ export default function MultiSelect({ className, title, options, selection, onTo
                   onClick={() => onSelectSingle(item)}
                 >
                   { ( <SelectOnlyIcon /> ) }
-                  
                 </Button>
               </div>
             </div>

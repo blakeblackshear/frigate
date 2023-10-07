@@ -153,7 +153,7 @@ export function EventCard({ camera, event }) {
     <Link className="" href={`/recording/${camera}/${format(start, 'yyyy-MM-dd/HH/mm/ss')}`}>
       <div className="flex flex-row mb-2">
         <div className="w-28 mr-4">
-          <img className="antialiased" loading="lazy" src={`${apiHost}/api/events/${event.id}/thumbnail.jpg`} />
+          <img className="antialiased" loading="lazy" src={`${apiHost}api/events/${event.id}/thumbnail.jpg`} />
         </div>
         <div className="flex flex-row w-full border-b">
           <div className="w-full text-gray-700 font-semibold relative pt-0">

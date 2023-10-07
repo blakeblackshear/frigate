@@ -237,13 +237,12 @@ class PtzAutoTracker:
             self.onvif.get_camera_status(camera_name)
 
             # movement thread per camera
-            if not self.move_threads or not self.move_threads[camera_name]:
-                self.move_threads[camera_name] = threading.Thread(
-                    name=f"move_thread_{camera_name}",
-                    target=partial(self._process_move_queue, camera_name),
-                )
-                self.move_threads[camera_name].daemon = True
-                self.move_threads[camera_name].start()
+            self.move_threads[camera_name] = threading.Thread(
+                name=f"move_thread_{camera_name}",
+                target=partial(self._process_move_queue, camera_name),
+            )
+            self.move_threads[camera_name].daemon = True
+            self.move_threads[camera_name].start()
 
             if cam.onvif.autotracking.movement_weights:
                 self.intercept[camera_name] = cam.onvif.autotracking.movement_weights[0]

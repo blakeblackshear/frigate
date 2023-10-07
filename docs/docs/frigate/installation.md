@@ -204,6 +204,8 @@ It is recommended to run Frigate in LXC for maximum performance. See [this discu
 
 For details on running Frigate using ESXi, please see the instructions [here](https://williamlam.com/2023/05/frigate-nvr-with-coral-tpu-igpu-passthrough-using-esxi-on-intel-nuc.html).
 
+If you're running Frigate on a rack mounted server and want to passthough the Google Coral, [read this.](https://github.com/blakeblackshear/frigate/issues/305)
+
 ## Synology NAS on DSM 7
 
 These settings were tested on DSM 7.1.1-42962 Update 4
