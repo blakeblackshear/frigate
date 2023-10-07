@@ -402,7 +402,7 @@ export default function Events({ path, ...props }) {
               icon={Snapshot}
               label="Download Snapshot"
               value="snapshot"
-              href={`${apiHost}/api/events/${downloadEvent.id}/snapshot.jpg?download=true`}
+              href={`${apiHost}api/events/${downloadEvent.id}/snapshot.jpg?download=true`}
               download
             />
           )}
@@ -411,7 +411,7 @@ export default function Events({ path, ...props }) {
               icon={Clip}
               label="Download Clip"
               value="clip"
-              href={`${apiHost}/api/events/${downloadEvent.id}/clip.mp4?download=true`}
+              href={`${apiHost}api/events/${downloadEvent.id}/clip.mp4?download=true`}
               download
             />
           )}
@@ -419,13 +419,13 @@ export default function Events({ path, ...props }) {
             downloadEvent.end_time &&
             downloadEvent.has_snapshot &&
             !downloadEvent.plus_id && (
-            <MenuItem
-              icon={UploadPlus}
-              label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
-              value="plus"
-              onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
-            />
-          )}
+              <MenuItem
+                icon={UploadPlus}
+                label={uploading.includes(downloadEvent.id) ? 'Uploading...' : 'Send to Frigate+'}
+                value="plus"
+                onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
+              />
+            )}
           {downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
@@ -492,7 +492,7 @@ export default function Events({ path, ...props }) {
 
                 <img
                   className="flex-grow-0"
-                  src={`${apiHost}/api/events/${plusSubmitEvent.id}/snapshot.jpg`}
+                  src={`${apiHost}api/events/${plusSubmitEvent.id}/snapshot.jpg`}
                   alt={`${plusSubmitEvent.label}`}
                 />
 
@@ -619,7 +619,7 @@ export default function Events({ path, ...props }) {
                     <div
                       className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center"
                       style={{
-                        'background-image': `url(${apiHost}/api/events/${event.id}/thumbnail.jpg)`,
+                        'background-image': `url(${apiHost}api/events/${event.id}/thumbnail.jpg)`,
                       }}
                     >
                       <StarRecording
@@ -776,8 +776,8 @@ export default function Events({ path, ...props }) {
                                 className="flex-grow-0"
                                 src={
                                   event.has_snapshot
-                                    ? `${apiHost}/api/events/${event.id}/snapshot.jpg`
-                                    : `${apiHost}/api/events/${event.id}/thumbnail.jpg`
+                                    ? `${apiHost}api/events/${event.id}/snapshot.jpg`
+                                    : `${apiHost}api/events/${event.id}/thumbnail.jpg`
                                 }
                                 alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
                                   0

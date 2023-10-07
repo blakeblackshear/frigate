@@ -30,8 +30,8 @@ export default function CameraMasks({ camera }) {
     Array.isArray(motionMask)
       ? motionMask.map((mask) => getPolylinePoints(mask))
       : motionMask
-        ? [getPolylinePoints(motionMask)]
-        : []
+      ? [getPolylinePoints(motionMask)]
+      : []
   );
 
   const [zonePoints, setZonePoints] = useState(
@@ -45,8 +45,8 @@ export default function CameraMasks({ camera }) {
         [name]: Array.isArray(objectFilters[name].mask)
           ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
           : objectFilters[name].mask
-            ? [getPolylinePoints(objectFilters[name].mask)]
-            : [],
+          ? [getPolylinePoints(objectFilters[name].mask)]
+          : [],
       }),
       {}
     )
@@ -146,7 +146,6 @@ export default function CameraMasks({ camera }) {
     }
   }, [camera, motionMaskPoints]);
 
-
   // Zone methods
   const handleEditZone = useCallback(
     (key) => {
@@ -175,9 +174,11 @@ export default function CameraMasks({ camera }) {
   const handleCopyZones = useCallback(async () => {
     const textToCopy = `  zones:
 ${Object.keys(zonePoints)
-    .map(
-      (zoneName) => `    ${zoneName}:
-      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`).join('\n')}`;
+  .map(
+    (zoneName) => `    ${zoneName}:
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
+  )
+  .join('\n')}`;
 
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
@@ -207,7 +208,10 @@ ${Object.keys(zonePoints)
   const handleSaveZones = useCallback(async () => {
     try {
       const queryParameters = Object.keys(zonePoints)
-        .map((zoneName) => `cameras.${camera}.zones.${zoneName}.coordinates=${polylinePointsToPolyline(zonePoints[zoneName])}`)
+        .map(
+          (zoneName) =>
+            `cameras.${camera}.zones.${zoneName}.coordinates=${polylinePointsToPolyline(zonePoints[zoneName])}`
+        )
         .join('&');
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
@@ -252,21 +256,26 @@ ${Object.keys(zonePoints)
     await window.navigator.clipboard.writeText(`  objects:
     filters:
 ${Object.keys(objectMaskPoints)
-    .map((objectName) =>
-      objectMaskPoints[objectName].length
-        ? `      ${objectName}:
+  .map((objectName) =>
+    objectMaskPoints[objectName].length
+      ? `      ${objectName}:
         mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
-        : ''
-    )
-    .filter(Boolean)
-    .join('\n')}`);
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n')}`);
   }, [objectMaskPoints]);
 
   const handleSaveObjectMasks = useCallback(async () => {
     try {
       const queryParameters = Object.keys(objectMaskPoints)
         .filter((objectName) => objectMaskPoints[objectName].length > 0)
-        .map((objectName, index) => `cameras.${camera}.objects.filters.${objectName}.mask.${index}=${polylinePointsToPolyline(objectMaskPoints[objectName])}`)
+        .map(
+          (objectName, index) =>
+            `cameras.${camera}.objects.filters.${objectName}.mask.${index}=${polylinePointsToPolyline(
+              objectMaskPoints[objectName]
+            )}`
+        )
         .join('&');
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
@@ -324,8 +333,8 @@ ${Object.keys(objectMaskPoints)
       <Card
         content={
           <p>
-            When done, copy each mask configuration into your <code className="font-mono">config.yml</code> file
-            restart your Frigate instance to save your changes.
+            When done, copy each mask configuration into your <code className="font-mono">config.yml</code> file restart
+            your Frigate instance to save your changes.
           </p>
         }
         header="Warning"
@@ -336,7 +345,7 @@ ${Object.keys(objectMaskPoints)
 
       <div className="space-y-4">
         <div className="relative">
-          <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <img ref={imageRef} src={`${apiHost}api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={'subkey' in editing ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
@@ -487,16 +496,16 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-          <PolyPoint
-            key={i}
-            boundingRef={boundingRef}
-            index={i}
-            onMove={handleMovePoint}
-            onRemove={handleRemovePoint}
-            x={x + MaskInset}
-            y={y + MaskInset}
-          />
-        ))}
+            <PolyPoint
+              key={i}
+              boundingRef={boundingRef}
+              index={i}
+              onMove={handleMovePoint}
+              onRemove={handleRemovePoint}
+              x={x + MaskInset}
+              y={y + MaskInset}
+            />
+          ))}
       <div className="absolute inset-0 right-0 bottom-0" onClick={handleAddPoint} ref={boundingRef} />
       <svg
         width="100%"
@@ -568,8 +577,6 @@ function MaskValues({
     },
     [onAdd]
   );
-
-
 
   return (
     <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>
