@@ -152,3 +152,7 @@ There are two possible reasons for this: a slow PTZ motor or buggy Hikvision fir
 ### I tried calibrating my camera, but it is stuck at 0%.
 
 This is often caused by the same reason as above - the `MoveStatus` ONVIF parameter is not changing due to a bug in Hikvision firmware.
+
+### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
+
+To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high or the scene around your detected object does not have enough details (like hard edges or color variatons). Try reducing `zoom_factor` or finding a way to alter the scene around your object.
