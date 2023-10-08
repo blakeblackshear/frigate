@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import * as CameraImage from '../../components/CameraImage';
+import * as Hooks from '../../hooks';
 import * as WS from '../../api/ws';
 import Cameras from '../Cameras';
 import { fireEvent, render, screen, waitForElementToBeRemoved } from 'testing-library';
@@ -8,6 +9,7 @@ describe('Cameras Route', () => {
   beforeEach(() => {
     vi.spyOn(CameraImage, 'default').mockImplementation(() => <div data-testid="camera-image" />);
     vi.spyOn(WS, 'useWs').mockImplementation(() => ({ value: { payload: 'OFF' }, send: vi.fn() }));
+    vi.spyOn(Hooks, 'useResizeObserver').mockImplementation(() => [{ width: 1000 }]);
   });
 
   test('shows an ActivityIndicator if not yet loaded', async () => {
