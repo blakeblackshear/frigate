@@ -350,6 +350,13 @@ class OnvifController:
 
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
+        logger.debug(
+            f"{camera_name} PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+        )
+        self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
+            camera_name
+        ]["ptz_frame_time"].value
+        self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
         move_request = self.cams[camera_name]["move_request"]
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         preset_token = self.cams[camera_name]["presets"][preset]
@@ -359,7 +366,7 @@ class OnvifController:
                 "PresetToken": preset_token,
             }
         )
-        self.ptz_metrics[camera_name]["ptz_stopped"].set()
+
         self.cams[camera_name]["active"] = False
 
     def _zoom(self, camera_name: str, command: OnvifCommandEnum) -> None:

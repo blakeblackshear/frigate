@@ -80,7 +80,7 @@ class PtzMotionEstimator:
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
         ):
             logger.debug(
-                f"{camera}: Motion estimator running - frame time: {frame_time}, ptz start: {self.ptz_start_time.value}, ptz stop: {self.ptz_stop_time.value}"
+                f"{camera}: Motion estimator running - frame time: {frame_time}"
             )
 
             frame_id = f"{camera}{frame_time}"
@@ -113,6 +113,7 @@ class PtzMotionEstimator:
                 )
             except Exception:
                 # sometimes opencv can't find enough features in the image to find homography, so catch this error
+                # https://github.com/tryolabs/norfair/pull/278
                 logger.warning(
                     f"Autotracker: motion estimator couldn't get transformations for {camera} at frame time {frame_time}"
                 )
@@ -782,7 +783,7 @@ class PtzAutoTracker:
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             if self.tracked_object_previous[camera] is None:
                 # start with a slightly altered box to encourage an initial zoom
-                self.previous_target_box[camera] = target_box * 1.2
+                self.previous_target_box[camera] = target_box * 1.15
 
             if (
                 result := self._should_zoom_in(
@@ -910,10 +911,12 @@ class PtzAutoTracker:
 
     def camera_maintenance(self, camera):
         # bail and don't check anything if we're calibrating or tracking an object
-        if self.calibrating[camera] or self.tracked_object[camera] is not None:
+        if (
+            not self.autotracker_init[camera]
+            or self.calibrating[camera]
+            or self.tracked_object[camera] is not None
+        ):
             return
-
-        logger.debug(f"{camera}: Running camera maintenance")
 
         # calls get_camera_status to check/update ptz movement
         # returns camera to preset after timeout when tracking is over

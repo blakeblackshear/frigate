@@ -147,11 +147,11 @@ Watching Frigate's debug view can help to determine a possible cause. The autotr
 
 ### I'm seeing an error in the logs that my camera "is still in ONVIF 'MOVING' status." What does this mean?
 
-There are two possible reasons for this: a slow PTZ motor or buggy Hikvision firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config.
+There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware.
 
-### I tried calibrating my camera, but it is stuck at 0%.
+### I tried calibrating my camera, but the logs show that it is stuck at 0% and Frigate is not starting up.
 
-This is often caused by the same reason as above - the `MoveStatus` ONVIF parameter is not changing due to a bug in Hikvision firmware.
+This is often caused by the same reason as above - the `MoveStatus` ONVIF parameter is not changing due to a bug in your camera's firmware. Also, see the note above: Frigate's web UI and all other cameras will be unresponsive while calibration is in progress. This is expected and normal. But if you don't see log entries every few seconds for calibration progress, your camera is not compatible with autotracking.
 
 ### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
 
