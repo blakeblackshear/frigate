@@ -78,7 +78,6 @@ function Camera({ name, config, availableWidth }) {
   const icons = useMemo(
     () => (availableWidth < 448 ? [
       {
-        name: "Show Camera Toggles",
         icon: SettingsIcon,
         color: 'gray',
         onClick: () => {
@@ -129,7 +128,7 @@ function Camera({ name, config, availableWidth }) {
   );
 
   return (
-    <div>
+    <Fragment>
       {cameraOptions && (
         <Dialog>
           <div className="p-4">
@@ -175,13 +174,13 @@ function Camera({ name, config, availableWidth }) {
         </Dialog>
       )}
 
-    <Card
-      buttons={buttons}
-      href={href}
-      header={cleanName}
-      icons={icons}
-      media={<CameraImage camera={name} stretch />}
-    />
-    </div>
+      <Card
+        buttons={buttons}
+        href={href}
+        header={cleanName}
+        icons={icons}
+        media={<CameraImage camera={name} stretch />}
+      />
+    </Fragment>
   );
 }
