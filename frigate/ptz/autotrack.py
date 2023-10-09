@@ -18,7 +18,15 @@ from norfair.camera_motion import (
 )
 
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
-from frigate.const import CONFIG_DIR
+from frigate.const import (
+    AUTOTRACKING_MAX_MOVE_METRICS,
+    AUTOTRACKING_MOTION_MAX_POINTS,
+    AUTOTRACKING_MOTION_MIN_DISTANCE,
+    AUTOTRACKING_ZOOM_EDGE_THRESHOLD,
+    AUTOTRACKING_ZOOM_IN_HYSTERESIS,
+    AUTOTRACKING_ZOOM_OUT_HYSTERESIS,
+    CONFIG_DIR,
+)
 from frigate.ptz.onvif import OnvifController
 from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import update_yaml_file
@@ -70,8 +78,8 @@ class PtzMotionEstimator:
 
             self.norfair_motion_estimator = MotionEstimator(
                 transformations_getter=transformation_type,
-                min_distance=30,
-                max_points=900,
+                min_distance=AUTOTRACKING_MOTION_MIN_DISTANCE,
+                max_points=AUTOTRACKING_MOTION_MAX_POINTS,
             )
 
             self.coord_transformations = None
@@ -108,9 +116,6 @@ class PtzMotionEstimator:
                 self.coord_transformations = self.norfair_motion_estimator.update(
                     frame, mask
                 )
-                logger.debug(
-                    f"{camera}: Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
-                )
             except Exception:
                 # sometimes opencv can't find enough features in the image to find homography, so catch this error
                 # https://github.com/tryolabs/norfair/pull/278
@@ -118,6 +123,13 @@ class PtzMotionEstimator:
                     f"Autotracker: motion estimator couldn't get transformations for {camera} at frame time {frame_time}"
                 )
                 self.coord_transformations = None
+
+            try:
+                logger.debug(
+                    f"{camera}: Motion estimator transformation: {self.coord_transformations.rel_to_abs([[0,0]])}"
+                )
+            except Exception:
+                pass
 
             self.frame_manager.close(frame_id)
 
@@ -344,7 +356,7 @@ class PtzAutoTracker:
         if calibration or (
             len(self.move_metrics[camera]) % 50 == 0
             and len(self.move_metrics[camera]) != 0
-            and len(self.move_metrics[camera]) <= 500
+            and len(self.move_metrics[camera]) <= AUTOTRACKING_MAX_MOVE_METRICS
         ):
             X = np.array(
                 [abs(d["pan"]) + abs(d["tilt"]) for d in self.move_metrics[camera]]
@@ -454,7 +466,8 @@ class PtzAutoTracker:
                     # save metrics for better estimate calculations
                     if (
                         self.intercept[camera] is not None
-                        and len(self.move_metrics[camera]) < 500
+                        and len(self.move_metrics[camera])
+                        < AUTOTRACKING_MAX_MOVE_METRICS
                         and (pan != 0 or tilt != 0)
                         and self.config.cameras[
                             camera
@@ -593,7 +606,7 @@ class PtzAutoTracker:
         bb_left, bb_top, bb_right, bb_bottom = box
 
         # TODO: Take into account the area changing when an object is moving out of frame
-        edge_threshold = 0.02
+        edge_threshold = AUTOTRACKING_ZOOM_EDGE_THRESHOLD
 
         # calculate a velocity threshold based on movement coefficients if available
         if camera_config.onvif.autotracking.movement_weights:
@@ -637,8 +650,12 @@ class PtzAutoTracker:
         target_box = obj.obj_data["area"] / (camera_width * camera_height)
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
-        zoom_out_hysteresis = target_box > (self.previous_target_box[camera] * 1.2)
-        zoom_in_hysteresis = target_box < (self.previous_target_box[camera] * 0.9)
+        zoom_out_hysteresis = target_box > (
+            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
+        )
+        zoom_in_hysteresis = target_box < (
+            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
+        )
 
         at_max_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 1
         at_min_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 0
@@ -783,7 +800,9 @@ class PtzAutoTracker:
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             if self.tracked_object_previous[camera] is None:
                 # start with a slightly altered box to encourage an initial zoom
-                self.previous_target_box[camera] = target_box * 1.15
+                self.previous_target_box[camera] = target_box * (
+                    AUTOTRACKING_ZOOM_OUT_HYSTERESIS - 0.05
+                )
 
             if (
                 result := self._should_zoom_in(
