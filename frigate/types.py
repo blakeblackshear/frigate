@@ -23,6 +23,8 @@ class CameraMetricsTypes(TypedDict):
     process_fps: Synchronized
     read_start: Synchronized
     skipped_fps: Synchronized
+    audio_rms: Synchronized
+    audio_dBFS: Synchronized
 
 
 class PTZMetricsTypes(TypedDict):
