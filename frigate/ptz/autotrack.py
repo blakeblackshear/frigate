@@ -814,7 +814,7 @@ class PtzAutoTracker:
                 )
             ) is not None:
                 # zoom in value
-                zoom = target_box ** self.zoom_factor[camera]
+                zoom = target_box ** (self.zoom_factor[camera] / 1.5)
 
                 if not result:
                     # zoom out
