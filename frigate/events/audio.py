@@ -26,7 +26,7 @@ from frigate.const import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
-from frigate.types import FeatureMetricsTypes
+from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
@@ -52,6 +52,7 @@ def get_ffmpeg_command(input_args: list[str], input_path: str) -> list[str]:
 def listen_to_audio(
     config: FrigateConfig,
     recordings_info_queue: mp.Queue,
+    camera_metrics: dict[str, CameraMetricsTypes],
     process_info: dict[str, FeatureMetricsTypes],
     inter_process_communicator: InterProcessCommunicator,
 ) -> None:
@@ -80,6 +81,7 @@ def listen_to_audio(
             audio = AudioEventMaintainer(
                 camera,
                 recordings_info_queue,
+                camera_metrics,
                 process_info,
                 stop_event,
                 inter_process_communicator,
@@ -153,6 +155,7 @@ class AudioEventMaintainer(threading.Thread):
         self,
         camera: CameraConfig,
         recordings_info_queue: mp.Queue,
+        camera_metrics: dict[str, CameraMetricsTypes],
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
         inter_process_communicator: InterProcessCommunicator,
@@ -161,6 +164,7 @@ class AudioEventMaintainer(threading.Thread):
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
         self.recordings_info_queue = recordings_info_queue
+        self.camera_metrics = camera_metrics
         self.feature_metrics = feature_metrics
         self.inter_process_communicator = inter_process_communicator
         self.detections: dict[dict[str, any]] = {}
@@ -183,6 +187,9 @@ class AudioEventMaintainer(threading.Thread):
 
         audio_as_float = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
+
+        self.camera_metrics[self.config.name]["audio_rms"].value = rms
+        self.camera_metrics[self.config.name]["audio_dBFS"].value = dBFS
 
         # only run audio detection when volume is above min_volume
         if rms >= self.config.audio.min_volume:

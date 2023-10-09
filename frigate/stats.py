@@ -266,6 +266,8 @@ def stats_snapshot(
             "pid": pid,
             "capture_pid": cpid,
             "ffmpeg_pid": ffmpeg_pid,
+            "audio_rms": round(camera_stats["audio_rms"].value, 4),
+            "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),
         }
 
     stats["detectors"] = {}
