@@ -123,7 +123,7 @@ RUN apt-get -qq update \
     wget \
     # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
     && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA4285295FC7B1A81600062A9605C66F00D6C9793" | \
-    gpg --dearmor --output /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
+    gpg --dearmor > /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/debian-archive-bullseye-stable.gpg] http://deb.debian.org/debian bullseye main contrib non-free" | \
     tee /etc/apt/sources.list.d/debian-bullseye-nonfree.list \
     && apt-get -qq update \
