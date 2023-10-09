@@ -172,6 +172,8 @@ Events from the database. Accepts the following query string parameters:
 | `min_score`          | float | Minimum score of the event                            |
 | `max_score`          | float | Maximum score of the event                            |
 | `is_submitted`       | int   | Filter events that are submitted to Frigate+ (0 or 1) |
+| `min_length`         | float | Minimum length of the event                           |
+| `max_length`         | float | Maximum length of the event                           |
 
 ### `GET /api/timeline`
 
