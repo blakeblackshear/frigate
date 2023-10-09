@@ -13,8 +13,9 @@ Each role can only be assigned to one input per camera. The options for roles ar
 
 | Role     | Description                                                                              |
 | -------- | ---------------------------------------------------------------------------------------- |
-| `detect` | Main feed for object detection                                                           |
+| `detect` | Main feed for object detection. [docs](object_detectors.md)                              |
 | `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
+| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                               |
 | `rtmp`   | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
