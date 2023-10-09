@@ -37,6 +37,7 @@ from frigate.util.image import (
     yuv_region_2_rgb,
     yuv_region_2_yuv,
 )
+from frigate.util.object import get_cluster_region_from_grid
 from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
@@ -457,6 +458,7 @@ def track_camera(
     detected_objects_queue,
     process_info,
     ptz_metrics,
+    region_grid,
 ):
     stop_event = mp.Event()
 
@@ -515,6 +517,7 @@ def track_camera(
         motion_enabled,
         stop_event,
         ptz_metrics,
+        region_grid,
     )
 
     logger.info(f"{name}: exiting subprocess")
@@ -555,6 +558,14 @@ def reduce_boxes(boxes, iou_threshold=0.0):
 def intersects_any(box_a, boxes):
     for box in boxes:
         if box_overlaps(box_a, box):
+            return True
+    return False
+
+
+def inside_any(box_a, boxes):
+    for box in boxes:
+        # check if box_a is inside of box
+        if box_inside(box, box_a):
             return True
     return False
 
@@ -623,7 +634,9 @@ def get_cluster_boundary(box, min_region):
     ]
 
 
-def get_cluster_candidates(frame_shape, min_region, boxes):
+def get_cluster_candidates(
+    frame_shape, min_region, boxes, region_grid: list[list[dict[str, any]]]
+):
     # and create a cluster of other boxes using it's max region size
     # only include boxes where the region is an appropriate(except the region could possibly be smaller?)
     # size in the cluster. in order to be in the cluster, the furthest corner needs to be within x,y offset
@@ -740,6 +753,7 @@ def process_frames(
     motion_enabled: mp.Value,
     stop_event,
     ptz_metrics: PTZMetricsTypes,
+    region_grid: list[list[dict[str, any]]],
     exit_on_empty: bool = False,
 ):
     fps = process_info["process_fps"]
@@ -815,21 +829,36 @@ def process_frames(
                 if obj["id"] not in stationary_object_ids
             ]
 
-            combined_boxes = tracked_object_boxes
-            # only add in the motion boxes when not calibrating
-            if not motion_detector.is_calibrating():
-                combined_boxes += motion_boxes
-
-            cluster_candidates = get_cluster_candidates(
-                frame_shape, region_min_size, combined_boxes
-            )
-
+            # get consolidated regions for tracked objects
             regions = [
                 get_cluster_region(
-                    frame_shape, region_min_size, candidate, combined_boxes
+                    frame_shape, region_min_size, candidate, tracked_object_boxes
                 )
-                for candidate in cluster_candidates
+                for candidate in get_cluster_candidates(
+                    frame_shape, region_min_size, tracked_object_boxes, region_grid
+                )
             ]
+
+            # only add in the motion boxes when not calibrating
+            if not motion_detector.is_calibrating():
+                # find motion boxes that are not inside tracked object regions
+                standalone_motion_boxes = [b for b in motion_boxes if not inside_any(b, regions)]
+
+                if standalone_motion_boxes:
+                    motion_clusters = get_cluster_candidates(
+                        frame_shape, region_min_size, standalone_motion_boxes, region_grid
+                    )
+                    motion_regions = [
+                        get_cluster_region_from_grid(
+                            frame_shape,
+                            region_min_size,
+                            candidate,
+                            standalone_motion_boxes,
+                            region_grid,
+                        )
+                        for candidate in motion_clusters
+                    ]
+                    regions += motion_regions
 
             # if starting up, get the next startup scan region
             if startup_scan_counter < 9:
