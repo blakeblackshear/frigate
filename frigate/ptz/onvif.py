@@ -350,12 +350,7 @@ class OnvifController:
 
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
-        logger.debug(
-            f"{camera_name} PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
-        )
-        self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
-            camera_name
-        ]["ptz_frame_time"].value
+        self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
         self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
         move_request = self.cams[camera_name]["move_request"]
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
