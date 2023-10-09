@@ -805,6 +805,8 @@ def events():
     min_score = request.args.get("min_score", type=float)
     max_score = request.args.get("max_score", type=float)
     is_submitted = request.args.get("is_submitted", type=int)
+    min_length = request.args.get("min_length", type=float)
+    max_length = request.args.get("max_length", type=float)
 
     clauses = []
 
@@ -932,6 +934,12 @@ def events():
 
     if min_score is not None:
         clauses.append((Event.data["score"] >= min_score))
+
+    if min_length is not None:
+        clauses.append(((Event.end_time - Event.start_time) >= min_length))
+
+    if max_length is not None:
+        clauses.append(((Event.end_time - Event.start_time) <= max_length))
 
     if is_submitted is not None:
         if is_submitted == 0:
