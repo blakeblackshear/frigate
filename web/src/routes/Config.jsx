@@ -29,7 +29,7 @@ export default function Config() {
       .then((response) => {
         if (response.status === 200) {
           setError('');
-          setSuccess(response.data);
+          setSuccess(response.data.message);
         }
       })
       .catch((error) => {
