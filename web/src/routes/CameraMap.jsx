@@ -135,7 +135,7 @@ export default function CameraMasks({ camera }) {
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        setSuccess(response.data);
+        setSuccess(response.data.message);
       }
     } catch (error) {
       if (error.response) {
