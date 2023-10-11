@@ -530,31 +530,27 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
-        # Norfair gives us two points for the velocity of an object represented as x1, y1, x2, y2
-        x1, y1, x2, y2 = obj.obj_data["estimate_velocity"]
-        if abs(x2 - x1) > 8 or abs(y2 - y1) > 8:
+        velocities = obj.obj_data["estimate_velocity"]
+
+        vel_mags = np.linalg.norm(velocities, axis=1)
+        if np.any(vel_mags > 8):
             # invalid velocity
-            return (0,) * 4, -1
+            return np.zeros((2, 2)), -1
 
-        average_velocity = (
-            (x1 + x2) / 2,
-            (y1 + y2) / 2,
-            (x1 + x2) / 2,
-            (y1 + y2) / 2,
-        )
+        average_velocity = np.mean(velocities, axis=0)
 
-        # get euclidean distance of the two points, sometimes the estimate is way off
-        velocity_distance = np.linalg.norm([x2 - x1, y2 - y1])
+        # get euclidean distance of the points, sometimes the estimate is way off
+        velocity_distance = np.linalg.norm(velocities[0] - velocities[1])
 
         if (
-            0 <= abs(average_velocity[0]) < (camera_width / camera_fps / 2)
-            and 0 <= abs(average_velocity[1]) < (camera_height / camera_fps / 2)
+            0 <= np.abs(average_velocity[0]) < (camera_width / camera_fps / 2)
+            and 0 <= np.abs(average_velocity[1]) < (camera_height / camera_fps / 2)
             and velocity_distance <= 10
         ):
             return average_velocity, velocity_distance
         else:
             # invalid velocity
-            return (0,) * 4, -1
+            return np.zeros((2, 2)), -1
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
@@ -742,10 +738,14 @@ class PtzAutoTracker:
             if distance != -1:
                 # this box could exceed the frame boundaries if velocity is high
                 # but we'll handle that in _enqueue_move() as two separate moves
-                predicted_box = [
-                    round(x + camera_fps * predicted_movement_time * v)
-                    for x, v in zip(obj.obj_data["box"], average_velocity)
-                ]
+                current_box = np.array(obj.obj_data["box"])
+                average_velocity = np.tile(average_velocity, 2)
+                predicted_box = (
+                    current_box
+                    + camera_fps * predicted_movement_time * average_velocity
+                )
+
+                predicted_box = np.round(predicted_box).astype(int)
 
                 centroid_x = round((predicted_box[0] + predicted_box[2]) / 2)
                 centroid_y = round((predicted_box[1] + predicted_box[3]) / 2)
@@ -755,8 +755,10 @@ class PtzAutoTracker:
                 tilt = (0.5 - (centroid_y / camera_height)) * 2
 
             logger.debug(f'{camera}: Original box: {obj.obj_data["box"]}')
-            logger.debug(f"{camera}: Predicted box: {predicted_box}")
-            logger.debug(f'{camera}: Velocity: {obj.obj_data["estimate_velocity"]}')
+            logger.debug(f"{camera}: Predicted box: {tuple(predicted_box)}")
+            logger.debug(
+                f'{camera}: Velocity: {tuple(np.round(obj.obj_data["estimate_velocity"]).flatten().astype(int))}'
+            )
 
         zoom = self._get_zoom_amount(camera, obj, predicted_box)
 
