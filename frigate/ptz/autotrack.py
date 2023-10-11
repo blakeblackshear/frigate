@@ -635,11 +635,10 @@ class PtzAutoTracker:
 
         # ensure object is not moving quickly
         below_velocity_threshold = (
-            (
-                abs(average_velocity[0]) < velocity_threshold_x
-                and abs(average_velocity[1]) < velocity_threshold_y
+            np.all(
+                abs(average_velocity)
+                < np.array([velocity_threshold_x, velocity_threshold_y])
             )
-            # velocity tuple calculated to be invalid, indicate that we are below threshold
             or distance == -1
         )
 
@@ -677,7 +676,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_height}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
+                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(np.mean(average_velocity[:, 0]))}, x threshold: {velocity_threshold_x}, velocity y: {abs(np.mean(average_velocity[:, 1]))}, y threshold: {velocity_threshold_y}"
             )
             logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
             logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")
@@ -717,7 +716,7 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
-        average_velocity = (0,) * 4
+        average_velocity = np.zeros((2, 2))
         predicted_box = obj.obj_data["box"]
 
         centroid_x = obj.obj_data["centroid"][0]
