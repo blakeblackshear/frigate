@@ -633,9 +633,9 @@ class PtzAutoTracker:
         below_distance_threshold = self._below_distance_threshold(camera, obj)
 
         # ensure object isn't too big in frame
-        below_dimension_threshold = (bb_right - bb_left) / camera_width < max(
+        below_dimension_threshold = (bb_right - bb_left) / camera_width < min(
             self.zoom_factor[camera], 0.6
-        ) and (bb_bottom - bb_top) / camera_height < max(self.zoom_factor[camera], 0.6)
+        ) and (bb_bottom - bb_top) / camera_height < min(self.zoom_factor[camera], 0.6)
 
         # ensure object is not moving quickly
         below_velocity_threshold = (
@@ -678,7 +678,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_width}"
+                f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_height}"
             )
             logger.debug(
                 f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
