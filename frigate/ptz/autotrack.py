@@ -532,10 +532,10 @@ class PtzAutoTracker:
 
         velocities = obj.obj_data["estimate_velocity"]
 
-        vel_mags = np.linalg.norm(velocities, axis=1)
+        vel_mags = np.linalg.norm(np.diff(velocities, axis=0), axis=1)
         if np.any(vel_mags > 8):
             # invalid velocity
-            return np.zeros((2, 2)), -1
+            return np.zeros((1, 2)), -1
 
         average_velocity = np.mean(velocities, axis=0)
 
@@ -550,7 +550,7 @@ class PtzAutoTracker:
             return average_velocity, velocity_distance
         else:
             # invalid velocity
-            return np.zeros((2, 2)), -1
+            return np.zeros((1, 2)), -1
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
@@ -676,7 +676,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_height}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(np.mean(average_velocity[:, 0]))}, x threshold: {velocity_threshold_x}, velocity y: {abs(np.mean(average_velocity[:, 1]))}, y threshold: {velocity_threshold_y}"
+                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
             )
             logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
             logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")
