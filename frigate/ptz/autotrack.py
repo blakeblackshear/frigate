@@ -535,7 +535,7 @@ class PtzAutoTracker:
         vel_mags = np.linalg.norm(np.diff(velocities, axis=0), axis=1)
         if np.any(vel_mags > 8):
             # invalid velocity
-            return np.zeros((1, 2)), -1
+            return np.zeros(2), -1
 
         average_velocity = np.mean(velocities, axis=0)
 
@@ -543,14 +543,14 @@ class PtzAutoTracker:
         velocity_distance = np.linalg.norm(velocities[0] - velocities[1])
 
         if (
-            0 <= np.abs(average_velocity[0]) < (camera_width / camera_fps / 2)
-            and 0 <= np.abs(average_velocity[1]) < (camera_height / camera_fps / 2)
+            0 <= abs(average_velocity[0]) < (camera_width / camera_fps / 2)
+            and 0 <= abs(average_velocity[1]) < (camera_height / camera_fps / 2)
             and velocity_distance <= 10
         ):
             return average_velocity, velocity_distance
         else:
             # invalid velocity
-            return np.zeros((1, 2)), -1
+            return np.zeros(2), -1
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
