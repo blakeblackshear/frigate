@@ -39,10 +39,10 @@ go2rtc:
   streams:
     test_cam:
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
-      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
+      - "ffmpeg:test_cam#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
     test_cam_sub:
       - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
-      - "ffmpeg:rtsp_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
+      - "ffmpeg:test_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
 
 cameras:
   test_cam:
