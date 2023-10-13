@@ -30,6 +30,7 @@ from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
+from frigate.version import VERSION
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -38,10 +39,12 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
+_user_agent_audio_arg = f"-user_agent 'FFmpeg Frigate (Audio)/{VERSION}'"
+
 
 def get_ffmpeg_command(input_args: list[str], input_path: str) -> list[str]:
     return get_ffmpeg_arg_list(
-        f"ffmpeg {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}".format(
+        f"ffmpeg {{}} {_user_agent_audio_arg} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}".format(
             " ".join(input_args),
             input_path,
             "pipe:",
