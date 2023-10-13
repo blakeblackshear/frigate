@@ -29,8 +29,8 @@ from frigate.object_detection import load_labels
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.services import listen
-from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 from frigate.version import VERSION
+from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
 try:
     from tflite_runtime.interpreter import Interpreter
