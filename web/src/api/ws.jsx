@@ -3,7 +3,7 @@ import { baseUrl } from './baseUrl';
 import { produce } from 'immer';
 import { useCallback, useContext, useEffect, useRef, useReducer } from 'preact/hooks';
 
-const initialState = Object.freeze({ __connected: false, __reconnectAttempts: 0 });
+const initialState = Object.freeze({ __connected: false });
 export const WS = createContext({ state: initialState, connection: null });
 
 const defaultCreateWebsocket = (url) => new WebSocket(url);
