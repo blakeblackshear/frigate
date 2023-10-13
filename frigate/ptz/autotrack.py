@@ -554,7 +554,7 @@ class PtzAutoTracker:
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
-        # less than 20% of the of the larger dimension (width or height) of the frame,
+        # less than 10% of the of the larger dimension (width or height) of the frame,
         # multiplied by a scaling factor for object size.
         # Distance is increased if object is not moving to prevent small ptz moves
         # Adjusting this percentage slightly lower will effectively cause the camera to move
@@ -644,6 +644,8 @@ class PtzAutoTracker:
 
         target_box = obj.obj_data["area"] / (camera_width * camera_height)
 
+        below_area_threshold = target_box < 0.05
+
         # introduce some hysteresis to prevent a yo-yo zooming effect
         zoom_out_hysteresis = target_box > (
             self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
@@ -673,6 +675,9 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
             )
             logger.debug(
+                f"{camera}: Zoom test: below area threshold: {(below_area_threshold)} target box: {target_box}"
+            )
+            logger.debug(
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_height}"
             )
             logger.debug(
@@ -687,24 +692,35 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: zoom out hysteresis limit: {zoom_out_hysteresis} previous: {self.previous_target_box[camera]} target: {target_box}"
             )
 
-        # Zoom in conditions
+        # Zoom in conditions (and)
+        # object area could be larger
+        # object is away from the edge of the frame
+        # object is not moving too quickly
+        # object is centered or small in the frame
+        # camera is not fully zoomed in
         if (
-            away_from_edge
-            and (below_distance_threshold or below_dimension_threshold)
+            zoom_in_hysteresis
+            and away_from_edge
             and below_velocity_threshold
+            and (below_distance_threshold or below_dimension_threshold)
             and not at_max_zoom
-            and zoom_in_hysteresis
         ):
             return True
 
-        # Zoom out conditions
+        # Zoom out conditions (or)
+        # object area got too large, is touching an edge, and centered
+        # object area got too large and has at least one dimension that is too large
+        # object is touching an edge and either centered or has too large of an area
+        # object is moving too quickly
         if (
-            zoom_out_hysteresis
-            and (not away_from_edge and below_distance_threshold)
+            (zoom_out_hysteresis and not away_from_edge and below_distance_threshold)
+            or (zoom_out_hysteresis and not below_dimension_threshold)
+            or (
+                not away_from_edge
+                and (below_distance_threshold or not below_area_threshold)
+            )
             or not below_velocity_threshold
-            or (not below_dimension_threshold and not below_distance_threshold)
-            and not at_min_zoom
-        ):
+        ) and not at_min_zoom:
             return False
 
         # Don't zoom at all
