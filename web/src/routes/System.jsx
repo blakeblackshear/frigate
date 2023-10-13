@@ -301,12 +301,16 @@ export default function System() {
                           <Tr>
                             <Th>GPU %</Th>
                             <Th>Memory %</Th>
+                            {'dec' in gpu_usages[gpu] && (<Th>Decoder %</Th>)}
+                            {'enc' in gpu_usages[gpu] && (<Th>Encoder %</Th>)}
                           </Tr>
                         </Thead>
                         <Tbody>
                           <Tr>
                             <Td>{gpu_usages[gpu]['gpu']}</Td>
                             <Td>{gpu_usages[gpu]['mem']}</Td>
+                            {'dec' in gpu_usages[gpu] && (<Td>{gpu_usages[gpu]['dec']}</Td>)}
+                            {'enc' in gpu_usages[gpu] && (<Td>{gpu_usages[gpu]['enc']}</Td>)}
                           </Tr>
                         </Tbody>
                       </Table>
