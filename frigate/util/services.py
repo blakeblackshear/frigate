@@ -306,12 +306,12 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 gpu_mem_util = -1
 
             if enc != "N/A":
-                enc_util = enc.used / enc.total * 100
+                enc_util = enc[0]
             else:
                 enc_util = -1
 
             if dec != "N/A":
-                dec_util = dec.used / dec.total * 100
+                dec_util = dec[0]
             else:
                 dec_util = -1
 
