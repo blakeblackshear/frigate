@@ -176,6 +176,8 @@ async def set_gpu_stats(
                     stats[nvidia_usage[i]["name"]] = {
                         "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
                         "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                        "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
+                        "dec": str(round(float(nvidia_usage[i]["dec"]), 2)) + "%",
                     }
 
             else:
