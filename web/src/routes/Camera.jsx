@@ -133,7 +133,7 @@ export default function Camera({ camera }) {
         player = (
           <Fragment>
             <div className="w-5xl text-center text-sm">
-              MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+            MSE is only supported on iOS 17.1+. You'll need to update if available or use jsmpeg / webRTC streams. See the docs for more info.
             </div>
           </Fragment>
         );

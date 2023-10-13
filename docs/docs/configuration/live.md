@@ -9,11 +9,11 @@ Frigate has different live view options, some of which require the bundled `go2r
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                            |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | -------------------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                         |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | not supported on iOS, Firefox is h.264 only  |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265 |
+| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                 |
+| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------- |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                              |
+| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only  |
+| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265      |
 
 ### Audio Support
 
