@@ -322,6 +322,12 @@ Get PTZ info for the camera.
 
 Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
 
+:::caution
+
+Recording retention config still applies to manual events, if frigate is configured with `mode: motion` then the manual event will only keep recording segments when motion occurred.
+
+:::
+
 **Optional Body:**
 
 ```json
