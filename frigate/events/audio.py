@@ -47,12 +47,21 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
         or parse_preset_input(ffmpeg.input_args, 1)
         or ffmpeg.input_args
     )
-    return get_ffmpeg_arg_list(
-        f"ffmpeg -vn {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}".format(
-            " ".join(input_args),
-            ffmpeg_input.path,
+    return (
+        ["ffmpeg", "-vn"]
+        + input_args
+        + ["-i"]
+        + [ffmpeg_input.path]
+        + [
+            "-f",
+            f"{AUDIO_FORMAT}",
+            "-ar",
+            f"{AUDIO_SAMPLE_RATE}",
+            "-ac",
+            "1",
+            "-y",
             "pipe:",
-        )
+        ]
     )
 
 
