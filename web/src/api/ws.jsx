@@ -46,17 +46,14 @@ export function WsProvider({
   });
 
   useEffect(() => {
-    if (readyState === ReadyState.OPEN) {
-      Object.keys(config.cameras).forEach((camera) => {
-        const { name, record, detect, snapshots, audio } = config.cameras[camera];
-        dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
-        dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
-        dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: false });
-        dispatch({ topic: `${name}/audio/state`, payload: audio.enabled ? 'ON' : 'OFF', retain: false });
-      });
-    }
-  }, [config, readyState]);
-
+    Object.keys(config.cameras).forEach((camera) => {
+      const { name, record, detect, snapshots, audio } = config.cameras[camera];
+      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
+      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
+      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: false });
+      dispatch({ topic: `${name}/audio/state`, payload: audio.enabled ? 'ON' : 'OFF', retain: false });
+    });
+  }, [config]);
 
   return <WS.Provider value={{ state, readyState, sendJsonMessage }}>{children}</WS.Provider>;
 }
