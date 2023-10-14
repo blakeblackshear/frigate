@@ -176,6 +176,8 @@ async def set_gpu_stats(
                     stats[nvidia_usage[i]["name"]] = {
                         "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
                         "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                        "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
+                        "dec": str(round(float(nvidia_usage[i]["dec"]), 2)) + "%",
                     }
 
             else:
@@ -266,6 +268,8 @@ def stats_snapshot(
             "pid": pid,
             "capture_pid": cpid,
             "ffmpeg_pid": ffmpeg_pid,
+            "audio_rms": round(camera_stats["audio_rms"].value, 4),
+            "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),
         }
 
     stats["detectors"] = {}

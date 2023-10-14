@@ -21,7 +21,6 @@ from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.object_detection import RemoteObjectDetector
-from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
 from frigate.types import PTZMetricsTypes
@@ -777,24 +776,8 @@ def process_frames(
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
-        # always returns false if autotracking is disabled
-        ptz_moving = ptz_moving_at_frame_time(
-            frame_time,
-            ptz_metrics["ptz_start_time"].value,
-            ptz_metrics["ptz_stop_time"].value,
-        )
-
-        motion_boxes = (
-            motion_detector.detect(frame)
-            if motion_enabled.value and not ptz_moving
-            else []
-        )
-
-        # full frame motion if ptz is moving from autotracking - remove this later
-        # better to have motion detector expose property when it's calibrating
-        # but still return motion boxes for retention purposes
-        if ptz_moving:
-            motion_boxes = [(0, 0, frame_shape[1], frame_shape[0] * 3 // 2)]
+        # look for motion if enabled
+        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
         regions = []
         consolidated_detections = []
@@ -819,8 +802,10 @@ def process_frames(
                 )
                 # and it hasn't disappeared
                 and object_tracker.disappeared[obj["id"]] == 0
-                # and it doesn't overlap with any current motion boxes
-                and not intersects_any(obj["box"], motion_boxes)
+                # and it doesn't overlap with any current motion boxes when not calibrating
+                and not intersects_any(
+                    obj["box"], [] if motion_detector.is_calibrating() else motion_boxes
+                )
             ]
 
             # get tracked object boxes that aren't stationary
@@ -830,7 +815,10 @@ def process_frames(
                 if obj["id"] not in stationary_object_ids
             ]
 
-            combined_boxes = motion_boxes + tracked_object_boxes
+            combined_boxes = tracked_object_boxes
+            # only add in the motion boxes when not calibrating
+            if not motion_detector.is_calibrating():
+                combined_boxes += motion_boxes
 
             cluster_candidates = get_cluster_candidates(
                 frame_shape, region_min_size, combined_boxes

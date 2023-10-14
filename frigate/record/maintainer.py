@@ -355,6 +355,7 @@ class RecordingMaintainer(threading.Thread):
                     "+faststart",
                     file_path,
                     stderr=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.DEVNULL,
                 )
                 await p.wait()
 

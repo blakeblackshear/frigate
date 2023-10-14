@@ -172,6 +172,8 @@ Events from the database. Accepts the following query string parameters:
 | `min_score`          | float | Minimum score of the event                            |
 | `max_score`          | float | Maximum score of the event                            |
 | `is_submitted`       | int   | Filter events that are submitted to Frigate+ (0 or 1) |
+| `min_length`         | float | Minimum length of the event                           |
+| `max_length`         | float | Maximum length of the event                           |
 
 ### `GET /api/timeline`
 
@@ -319,6 +321,12 @@ Get PTZ info for the camera.
 ### `POST /api/events/<camera_name>/<label>/create`
 
 Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+
+:::caution
+
+Recording retention config still applies to manual events, if frigate is configured with `mode: motion` then the manual event will only keep recording segments when motion occurred.
+
+:::
 
 **Optional Body:**
 

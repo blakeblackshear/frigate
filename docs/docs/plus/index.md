@@ -70,10 +70,10 @@ objects:
     fedex:
       min_score: .75
     person:
-      min_score: .8
+      min_score: .65
       threshold: .85
     car:
-      min_score: .8
+      min_score: .65
       threshold: .85
 ```
 
