@@ -524,16 +524,16 @@ class PtzAutoTracker:
 
     def _get_valid_velocity(self, camera, obj):
         # returns a tuple and euclidean distance if the estimated velocity is valid
-        # if invalid, returns (0, 0, 0, 0) and -1
+        # if invalid, returns [0, 0] and -1
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
         velocities = obj.obj_data["estimate_velocity"]
+        diff = np.abs(velocities[1] - velocities[0])
 
-        vel_mags = np.linalg.norm(np.diff(velocities, axis=0), axis=1)
-        if np.any(vel_mags > 8):
+        if (diff > 8).any():
             # invalid velocity
             return np.zeros(2), -1
 
