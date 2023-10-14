@@ -2,7 +2,7 @@ import { createContext } from 'preact';
 import { baseUrl } from './baseUrl';
 import { produce } from 'immer';
 import { useCallback, useContext, useEffect, useReducer } from 'preact/hooks';
-import useWebSocket from 'react-use-websocket';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 const initialState = Object.freeze({ __connected: false });
 export const WS = createContext({ state: initialState, connection: null });
@@ -35,9 +35,8 @@ export function WsProvider({
   wsUrl = `${baseUrl.replace(/^http/, 'ws')}ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  console.log(dispatch);
 
-  const { sendJsonMessage } = useWebSocket(wsUrl, {
+  const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
 
     onMessage: (event) => {
       dispatch(event.data);
@@ -47,37 +46,37 @@ export function WsProvider({
   });
 
   useEffect(() => {
-    Object.keys(config.cameras).forEach((camera) => {
-      console.log("Setting up")
-      const { name, record, detect, snapshots, audio } = config.cameras[camera];
-      dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
-      dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
-      dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: false });
-      dispatch({ topic: `${name}/audio/state`, payload: audio.enabled ? 'ON' : 'OFF', retain: false });
-    });
-  }, [config]);
+    if (readyState === ReadyState.OPEN) {
+      Object.keys(config.cameras).forEach((camera) => {
+        const { name, record, detect, snapshots, audio } = config.cameras[camera];
+        dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
+        dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
+        dispatch({ topic: `${name}/snapshots/state`, payload: snapshots.enabled ? 'ON' : 'OFF', retain: false });
+        dispatch({ topic: `${name}/audio/state`, payload: audio.enabled ? 'ON' : 'OFF', retain: false });
+      });
+    }
+  }, [config, readyState]);
 
 
-  return <WS.Provider value={{ state, sendJsonMessage }}>{children}</WS.Provider>;
+  return <WS.Provider value={{ state, readyState, sendJsonMessage }}>{children}</WS.Provider>;
 }
 
 export function useWs(watchTopic, publishTopic) {
-  const { state, sendJsonMessage } = useContext(WS);
-
-  console.log(state);
+  const { state, readyState, sendJsonMessage } = useContext(WS);
 
   const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
     (payload, retain = false) => {
-      console.log("sending json");
-      sendJsonMessage({
-        topic: publishTopic || watchTopic,
-        payload: payload,
-        retain,
-      });
+      if (readyState === ReadyState.OPEN) {
+        sendJsonMessage({
+          topic: publishTopic || watchTopic,
+          payload,
+          retain,
+        });
+      }
     },
-    [sendJsonMessage, watchTopic, publishTopic]
+    [sendJsonMessage, readyState, watchTopic, publishTopic]
   );
 
   return { value, send, connected: state.__connected };
