@@ -39,7 +39,7 @@ export function WsProvider({
   const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
 
     onMessage: (event) => {
-      dispatch(event.data);
+      dispatch(JSON.parse(event.data));
     },
     onOpen: () => dispatch({ topic: '__CLIENT_CONNECTED' }),
     shouldReconnect: () => true,
