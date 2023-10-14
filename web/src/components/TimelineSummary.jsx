@@ -81,7 +81,7 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   return (
     <div className="flex flex-col">
       <div className="h-14 flex justify-center">
-        <div className="sm:w-1 md:w-1/4 flex flex-row flex-nowrap justify-between overflow-auto">
+        <div className="flex flex-row flex-nowrap justify-between overflow-auto">
           {eventTimeline.map((item, index) => (
             <Button
               key={index}
