@@ -249,6 +249,7 @@ class PtzAutoTracker:
 
                 return
 
+        if self.onvif.cams[camera]["init"]:
             self.onvif.get_camera_status(camera)
 
             # movement thread per camera
