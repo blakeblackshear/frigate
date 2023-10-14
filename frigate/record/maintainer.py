@@ -420,7 +420,7 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
-                    ) = self.object_recordings_info_queue.get(False)
+                    ) = self.object_recordings_info_queue.get(True, timeout=0.1)
 
                     if self.process_info[camera]["record_enabled"].value:
                         self.object_recordings_info[camera].append(
@@ -442,7 +442,7 @@ class RecordingMaintainer(threading.Thread):
                             camera,
                             frame_time,
                             dBFS,
-                        ) = self.audio_recordings_info_queue.get(False)
+                        ) = self.audio_recordings_info_queue.get(True, timeout=0.1)
 
                         if self.process_info[camera]["record_enabled"].value:
                             self.audio_recordings_info[camera].append(
