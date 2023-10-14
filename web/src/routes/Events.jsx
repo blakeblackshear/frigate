@@ -626,7 +626,7 @@ export default function Events({ path, ...props }) {
               </Button>
               <Button
                 className="rounded-full ml-auto"
-                type="text"
+                type="iconOnly"
                 color="blue"
                 onClick={() => setShowInProgress(!showInProgress)}
               >
