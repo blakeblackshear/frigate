@@ -260,6 +260,7 @@ export default function Events({ path, ...props }) {
 
   const onFilter = useCallback(
     (name, value) => {
+      setShowInProgress(false);
       const updatedParams = { ...searchParams, [name]: value };
       setSearchParams(updatedParams);
       const queryString = Object.keys(updatedParams)
