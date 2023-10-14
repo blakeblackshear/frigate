@@ -244,6 +244,7 @@ export default function Events({ path, ...props }) {
 
   const handleSelectDateRange = useCallback(
     (dates) => {
+      setShowInProgress(false);
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
       setState({ ...state, showDatePicker: false });
     },
