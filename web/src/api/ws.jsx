@@ -5,7 +5,7 @@ import { useCallback, useContext, useEffect, useReducer } from 'preact/hooks';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 const initialState = Object.freeze({ __connected: false });
-export const WS = createContext({ state: initialState, connection: null });
+export const WS = createContext({ state: initialState, readyState: null, sendJsonMessage: () => {} });
 
 function reducer(state, { topic, payload, retain }) {
   switch (topic) {
