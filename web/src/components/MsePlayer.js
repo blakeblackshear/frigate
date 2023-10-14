@@ -157,12 +157,9 @@ class VideoRTC extends HTMLElement {
     if (this.ws) this.ws.send(JSON.stringify(value));
   }
 
-  codecs(type) {
-    const test =
-      type === 'mse'
-        ? (codec) => MediaSource.isTypeSupported(`video/mp4; codecs="${codec}"`)
-        : (codec) => this.video.canPlayType(`video/mp4; codecs="${codec}"`);
-    return this.CODECS.filter(test).join();
+  /** @param {Function} isSupported */
+  codecs(isSupported) {
+    return this.CODECS.filter(codec => isSupported(`video/mp4; codecs="${codec}"`)).join();
   }
 
   /**
@@ -311,7 +308,7 @@ class VideoRTC extends HTMLElement {
 
     const modes = [];
 
-    if (this.mode.indexOf('mse') >= 0 && 'MediaSource' in window) {
+    if (this.mode.indexOf('mse') >= 0 && ('MediaSource' in window || 'ManagedMediaSource' in window)) {
       // iPhone
       modes.push('mse');
       this.onmse();
@@ -363,18 +360,29 @@ class VideoRTC extends HTMLElement {
   }
 
   onmse() {
-    const ms = new MediaSource();
-    ms.addEventListener(
-      'sourceopen',
-      () => {
-        URL.revokeObjectURL(this.video.src);
-        this.send({ type: 'mse', value: this.codecs('mse') });
-      },
-      { once: true }
-    );
+    /** @type {MediaSource} */
+    let ms;
 
-    this.video.src = URL.createObjectURL(ms);
-    this.video.srcObject = null;
+    if ('ManagedMediaSource' in window) {
+      const MediaSource = window.ManagedMediaSource;
+
+      ms = new MediaSource();
+      ms.addEventListener('sourceopen', () => {
+        this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
+      }, {once: true});
+
+      this.video.disableRemotePlayback = true;
+      this.video.srcObject = ms;
+    } else {
+      ms = new MediaSource();
+      ms.addEventListener('sourceopen', () => {
+        URL.revokeObjectURL(this.video.src);
+        this.send({type: 'mse', value: this.codecs(MediaSource.isTypeSupported)});
+      }, {once: true});
+
+      this.video.src = URL.createObjectURL(ms);
+      this.video.srcObject = null;
+    }
     this.play();
 
     this.mseCodecs = '';
@@ -580,7 +588,7 @@ class VideoRTC extends HTMLElement {
       video2.src = `data:video/mp4;base64,${VideoRTC.btoa(data)}`;
     };
 
-    this.send({ type: 'mp4', value: this.codecs('mp4') });
+    this.send({ type: 'mp4', value: this.codecs(this.video.canPlayType) });
   }
 
   static btoa(buffer) {
