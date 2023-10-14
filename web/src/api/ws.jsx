@@ -1,4 +1,4 @@
-import { createContext } from 'preact';
+import { h, createContext } from 'preact';
 import { baseUrl } from './baseUrl';
 import { produce } from 'immer';
 import { useCallback, useContext, useEffect, useReducer } from 'preact/hooks';
