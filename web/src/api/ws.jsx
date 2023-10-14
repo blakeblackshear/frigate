@@ -1,12 +1,11 @@
-import { h, createContext } from 'preact';
+import { createContext } from 'preact';
 import { baseUrl } from './baseUrl';
 import { produce } from 'immer';
-import { useCallback, useContext, useEffect, useRef, useReducer } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useReducer } from 'preact/hooks';
+import useWebSocket from 'react-use-websocket';
 
 const initialState = Object.freeze({ __connected: false });
 export const WS = createContext({ state: initialState, connection: null });
-
-const defaultCreateWebsocket = (url) => new WebSocket(url);
 
 function reducer(state, { topic, payload, retain }) {
   switch (topic) {
@@ -33,14 +32,23 @@ function reducer(state, { topic, payload, retain }) {
 export function WsProvider({
   config,
   children,
-  createWebsocket = defaultCreateWebsocket,
   wsUrl = `${baseUrl.replace(/^http/, 'ws')}ws`,
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const wsRef = useRef();
+  console.log(dispatch);
+
+  const { sendJsonMessage } = useWebSocket(wsUrl, {
+
+    onMessage: (event) => {
+      dispatch(event.data);
+    },
+    onOpen: () => dispatch({ topic: '__CLIENT_CONNECTED' }),
+    shouldReconnect: () => true,
+  });
 
   useEffect(() => {
     Object.keys(config.cameras).forEach((camera) => {
+      console.log("Setting up")
       const { name, record, detect, snapshots, audio } = config.cameras[camera];
       dispatch({ topic: `${name}/recordings/state`, payload: record.enabled ? 'ON' : 'OFF', retain: false });
       dispatch({ topic: `${name}/detect/state`, payload: detect.enabled ? 'ON' : 'OFF', retain: false });
@@ -49,46 +57,27 @@ export function WsProvider({
     });
   }, [config]);
 
-  useEffect(
-    () => {
-      const ws = createWebsocket(wsUrl);
-      ws.onopen = () => {
-        dispatch({ topic: '__CLIENT_CONNECTED' });
-      };
 
-      ws.onmessage = (event) => {
-        dispatch(JSON.parse(event.data));
-      };
-
-      wsRef.current = ws;
-
-      return () => {
-        ws.close(3000, 'Provider destroyed');
-      };
-    },
-    // Forces reconnecting
-    [state.__reconnectAttempts, wsUrl] // eslint-disable-line react-hooks/exhaustive-deps
-  );
-
-  return <WS.Provider value={{ state, ws: wsRef.current }}>{children}</WS.Provider>;
+  return <WS.Provider value={{ state, sendJsonMessage }}>{children}</WS.Provider>;
 }
 
 export function useWs(watchTopic, publishTopic) {
-  const { state, ws } = useContext(WS);
+  const { state, sendJsonMessage } = useContext(WS);
+
+  console.log(state);
 
   const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
     (payload, retain = false) => {
-      ws.send(
-        JSON.stringify({
-          topic: publishTopic || watchTopic,
-          payload: typeof payload !== 'string' ? JSON.stringify(payload) : payload,
-          retain,
-        })
-      );
+      console.log("sending json");
+      sendJsonMessage({
+        topic: publishTopic || watchTopic,
+        payload: payload,
+        retain,
+      });
     },
-    [ws, watchTopic, publishTopic]
+    [sendJsonMessage, watchTopic, publishTopic]
   );
 
   return { value, send, connected: state.__connected };

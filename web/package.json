@@ -24,6 +24,7 @@
     "preact-router": "^4.1.0",
     "react": "npm:@preact/compat@^17.1.2",
     "react-dom": "npm:@preact/compat@^17.1.2",
+    "react-use-websocket": "^3.0.0",
     "strftime": "^0.10.1",
     "swr": "^1.3.0",
     "video.js": "^8.5.2",
