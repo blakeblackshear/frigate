@@ -844,9 +844,10 @@ class PtzAutoTracker:
                         )
                         - 1
                     )
+                    logger.debug(f"{camera}: Zoom calculation: {zoom}")
                     if not result:
                         # zoom out
-                        zoom = -(1 - zoom) if zoom != 0 else 0
+                        zoom = -(1 - abs(zoom)) if zoom > 0 else zoom
 
         logger.debug(f"{camera}: Zooming: {result} Zoom amount: {zoom}")
 
