@@ -648,12 +648,18 @@ class PtzAutoTracker:
         below_area_threshold = target_box < 0.05
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
-        zoom_out_hysteresis = target_box > (
-            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
-        )
-        zoom_in_hysteresis = target_box < (
-            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
-        )
+        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
+            zoom_out_hysteresis = target_box > (
+                self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
+            )
+            zoom_in_hysteresis = target_box < (
+                self.previous_target_box[camera] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
+            )
+
+        # relative target boxes deadzone is much smaller
+        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
+            zoom_out_hysteresis = target_box > (self.previous_target_box[camera] * 1.1)
+            zoom_in_hysteresis = target_box < (self.previous_target_box[camera] * 0.9)
 
         at_max_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 1
         at_min_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 0
