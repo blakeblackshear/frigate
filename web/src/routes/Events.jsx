@@ -31,6 +31,9 @@ import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
 import TimelineEventOverlay from '../components/TimelineEventOverlay';
 import { Score } from '../icons/Score';
+import { About } from '../icons/About';
+import MenuIcon from '../icons/Menu';
+import { MenuOpen } from '../icons/MenuOpen';
 
 const API_LIMIT = 25;
 
@@ -91,13 +94,15 @@ export default function Events({ path, ...props }) {
     showDeleteFavorite: false,
   });
 
+  const [showInProgress, setShowInProgress] = useState(true);
+
   const eventsFetcher = useCallback(
     (path, params) => {
       if (searchParams.event) {
         path = `${path}/${searchParams.event}`;
         return axios.get(path).then((res) => [res.data]);
       }
-      params = { ...params, include_thumbnails: 0, limit: API_LIMIT };
+      params = { ...params, in_progress: 0, include_thumbnails: 0, limit: API_LIMIT };
       return axios.get(path, { params }).then((res) => res.data);
     },
     [searchParams]
@@ -116,6 +121,7 @@ export default function Events({ path, ...props }) {
     [searchParams]
   );
 
+  const { data: ongoingEvents } = useSWR(['events', { in_progress: 1, include_thumbnails: 0 }]);
   const { data: eventPages, mutate, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
 
   const { data: allLabels } = useSWR(['labels']);
@@ -238,6 +244,7 @@ export default function Events({ path, ...props }) {
 
   const handleSelectDateRange = useCallback(
     (dates) => {
+      setShowInProgress(false);
       setSearchParams({ ...searchParams, before: dates.before, after: dates.after });
       setState({ ...state, showDatePicker: false });
     },
@@ -253,6 +260,7 @@ export default function Events({ path, ...props }) {
 
   const onFilter = useCallback(
     (name, value) => {
+      setShowInProgress(false);
       const updatedParams = { ...searchParams, [name]: value };
       setSearchParams(updatedParams);
       const queryString = Object.keys(updatedParams)
@@ -604,192 +612,98 @@ export default function Events({ path, ...props }) {
         </Dialog>
       )}
       <div className="space-y-2">
+        {ongoingEvents ? (
+          <div>
+            <div className="flex">
+              <Heading className="py-4" size="sm">
+                Ongoing Events
+              </Heading>
+              <Button
+                className="rounded-full"
+                type="text"
+                color="gray"
+                aria-label="Events for currently tracked objects. Recordings are only saved based on your retain settings. See the recording docs for more info."
+              >
+                <About className="w-5" />
+              </Button>
+              <Button
+                className="rounded-full ml-auto"
+                type="iconOnly"
+                color="blue"
+                onClick={() => setShowInProgress(!showInProgress)}
+              >
+                {showInProgress ? <MenuOpen className="w-6" /> : <MenuIcon className="w-6" />}
+              </Button>
+            </div>
+            {showInProgress &&
+              ongoingEvents.map((event, _) => {
+                return (
+                  <Event
+                    className="my-2"
+                    key={event.id}
+                    config={config}
+                    event={event}
+                    eventDetailType={eventDetailType}
+                    eventOverlay={eventOverlay}
+                    viewEvent={viewEvent}
+                    setViewEvent={setViewEvent}
+                    uploading={uploading}
+                    handleEventDetailTabChange={handleEventDetailTabChange}
+                    onEventFrameSelected={onEventFrameSelected}
+                    onDelete={onDelete}
+                    onDispose={() => {
+                      this.player = null;
+                    }}
+                    onDownloadClick={onDownloadClick}
+                    onReady={(player) => {
+                      this.player = player;
+                      this.player.on('playing', () => {
+                        setEventOverlay(undefined);
+                      });
+                    }}
+                    onSave={onSave}
+                    showSubmitToPlus={showSubmitToPlus}
+                  />
+                );
+              })}
+          </div>
+        ) : null}
+        <Heading className="py-4" size="sm">
+          Past Events
+        </Heading>
         {eventPages ? (
           eventPages.map((page, i) => {
             const lastPage = eventPages.length === i + 1;
             return page.map((event, j) => {
               const lastEvent = lastPage && page.length === j + 1;
               return (
-                <Fragment key={event.id}>
-                  <div
-                    ref={lastEvent ? lastEventRef : false}
-                    className="flex bg-slate-100 dark:bg-slate-800 rounded cursor-pointer min-w-[330px]"
-                    onClick={() => (viewEvent === event.id ? setViewEvent(null) : setViewEvent(event.id))}
-                  >
-                    <div
-                      className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center"
-                      style={{
-                        'background-image': `url(${apiHost}api/events/${event.id}/thumbnail.jpg)`,
-                      }}
-                    >
-                      <StarRecording
-                        className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
-                        onClick={(e) => onSave(e, event.id, !event.retain_indefinitely)}
-                        fill={event.retain_indefinitely ? 'currentColor' : 'none'}
-                      />
-                      {event.end_time ? null : (
-                        <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
-                          In progress
-                        </div>
-                      )}
-                    </div>
-                    <div className="m-2 flex grow">
-                      <div className="flex flex-col grow">
-                        <div className="capitalize text-lg font-bold">
-                          {event.label.replaceAll('_', ' ')}
-                          {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
-                        </div>
-
-                        <div className="text-sm flex">
-                          <Clock className="h-5 w-5 mr-2 inline" />
-                          {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
-                          <div className="hidden md:inline">
-                            <span className="m-1">-</span>
-                            <TimeAgo time={event.start_time * 1000} dense />
-                          </div>
-                          <div className="hidden md:inline">
-                            <span className="m-1" />( {getDurationFromTimestamps(event.start_time, event.end_time)} )
-                          </div>
-                        </div>
-                        <div className="capitalize text-sm flex align-center mt-1">
-                          <Camera className="h-5 w-5 mr-2 inline" />
-                          {event.camera.replaceAll('_', ' ')}
-                        </div>
-                        {event.zones.length ? (
-                          <div className="capitalize  text-sm flex align-center">
-                            <Zone className="w-5 h-5 mr-2 inline" />
-                            {event.zones.join(', ').replaceAll('_', ' ')}
-                          </div>
-                        ) : null}
-                        <div className="capitalize  text-sm flex align-center">
-                          <Score className="w-5 h-5 mr-2 inline" />
-                          {(event?.data?.top_score || event.top_score || 0) == 0
-                            ? null
-                            : `${event.label}: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
-                          {(event?.data?.sub_label_score || 0) == 0
-                            ? null
-                            : `, ${event.sub_label}: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
-                        </div>
-                      </div>
-                      <div class="hidden sm:flex flex-col justify-end mr-2">
-                        {event.end_time && event.has_snapshot && (event?.data?.type || 'object') == 'object' && (
-                          <Fragment>
-                            {event.plus_id ? (
-                              <div className="uppercase text-xs underline">
-                                <Link
-                                  href={`https://plus.frigate.video/dashboard/edit-image/?id=${event.plus_id}`}
-                                  target="_blank"
-                                  rel="nofollow"
-                                >
-                                  Edit in Frigate+
-                                </Link>
-                              </div>
-                            ) : (
-                              <Button
-                                color="gray"
-                                disabled={uploading.includes(event.id)}
-                                onClick={(e) =>
-                                  showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)
-                                }
-                              >
-                                {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
-                              </Button>
-                            )}
-                          </Fragment>
-                        )}
-                      </div>
-                      <div class="flex flex-col">
-                        <Delete
-                          className="h-6 w-6 cursor-pointer"
-                          stroke="#f87171"
-                          onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
-                        />
-
-                        <Download
-                          className="h-6 w-6 mt-auto"
-                          stroke={event.has_clip || event.has_snapshot ? '#3b82f6' : '#cbd5e1'}
-                          onClick={(e) => onDownloadClick(e, event)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {viewEvent !== event.id ? null : (
-                    <div className="space-y-4">
-                      <div className="mx-auto max-w-7xl">
-                        <div className="flex justify-center w-full py-2">
-                          <Tabs
-                            selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
-                            onChange={handleEventDetailTabChange}
-                            className="justify"
-                          >
-                            <TextTab text="Clip" disabled={!event.has_clip} />
-                            <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
-                          </Tabs>
-                        </div>
-
-                        <div>
-                          {eventDetailType == 'clip' && event.has_clip ? (
-                            <div>
-                              <TimelineSummary
-                                event={event}
-                                onFrameSelected={(frame, seekSeconds) =>
-                                  onEventFrameSelected(event, frame, seekSeconds)
-                                }
-                              />
-                              <div>
-                                <VideoPlayer
-                                  options={{
-                                    preload: 'auto',
-                                    autoplay: true,
-                                    sources: [
-                                      {
-                                        src: `${apiHost}vod/event/${event.id}/master.m3u8`,
-                                        type: 'application/vnd.apple.mpegurl',
-                                      },
-                                    ],
-                                  }}
-                                  seekOptions={{ forward: 10, backward: 5 }}
-                                  onReady={(player) => {
-                                    this.player = player;
-                                    this.player.on('playing', () => {
-                                      setEventOverlay(undefined);
-                                    });
-                                  }}
-                                  onDispose={() => {
-                                    this.player = null;
-                                  }}
-                                >
-                                  {eventOverlay ? (
-                                    <TimelineEventOverlay
-                                      eventOverlay={eventOverlay}
-                                      cameraConfig={config.cameras[event.camera]}
-                                    />
-                                  ) : null}
-                                </VideoPlayer>
-                              </div>
-                            </div>
-                          ) : null}
-
-                          {eventDetailType == 'image' || !event.has_clip ? (
-                            <div className="flex justify-center">
-                              <img
-                                className="flex-grow-0"
-                                src={
-                                  event.has_snapshot
-                                    ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-                                    : `${apiHost}api/events/${event.id}/thumbnail.jpg`
-                                }
-                                alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
-                                  0
-                                )}% confidence`}
-                              />
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </Fragment>
+                <Event
+                  key={event.id}
+                  config={config}
+                  event={event}
+                  eventDetailType={eventDetailType}
+                  eventOverlay={eventOverlay}
+                  viewEvent={viewEvent}
+                  setViewEvent={setViewEvent}
+                  lastEvent={lastEvent}
+                  lastEventRef={lastEventRef}
+                  uploading={uploading}
+                  handleEventDetailTabChange={handleEventDetailTabChange}
+                  onEventFrameSelected={onEventFrameSelected}
+                  onDelete={onDelete}
+                  onDispose={() => {
+                    this.player = null;
+                  }}
+                  onDownloadClick={onDownloadClick}
+                  onReady={(player) => {
+                    this.player = player;
+                    this.player.on('playing', () => {
+                      setEventOverlay(undefined);
+                    });
+                  }}
+                  onSave={onSave}
+                  showSubmitToPlus={showSubmitToPlus}
+                />
               );
             });
           })
@@ -798,6 +712,198 @@ export default function Events({ path, ...props }) {
         )}
       </div>
       <div>{isDone ? null : <ActivityIndicator />}</div>
+    </div>
+  );
+}
+
+function Event({
+  className = '',
+  config,
+  event,
+  eventDetailType,
+  eventOverlay,
+  viewEvent,
+  setViewEvent,
+  lastEvent,
+  lastEventRef,
+  uploading,
+  handleEventDetailTabChange,
+  onEventFrameSelected,
+  onDelete,
+  onDispose,
+  onDownloadClick,
+  onReady,
+  onSave,
+  showSubmitToPlus,
+}) {
+  const apiHost = useApiHost();
+
+  return (
+    <div className={className}>
+      <div
+        ref={lastEvent ? lastEventRef : false}
+        className="flex bg-slate-100 dark:bg-slate-800 rounded cursor-pointer min-w-[330px]"
+        onClick={() => (viewEvent === event.id ? setViewEvent(null) : setViewEvent(event.id))}
+      >
+        <div
+          className="relative rounded-l flex-initial min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center"
+          style={{
+            'background-image': `url(${apiHost}api/events/${event.id}/thumbnail.jpg)`,
+          }}
+        >
+          <StarRecording
+            className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
+            onClick={(e) => onSave(e, event.id, !event.retain_indefinitely)}
+            fill={event.retain_indefinitely ? 'currentColor' : 'none'}
+          />
+          {event.end_time ? null : (
+            <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
+              In progress
+            </div>
+          )}
+        </div>
+        <div className="m-2 flex grow">
+          <div className="flex flex-col grow">
+            <div className="capitalize text-lg font-bold">
+              {event.label.replaceAll('_', ' ')}
+              {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
+            </div>
+
+            <div className="text-sm flex">
+              <Clock className="h-5 w-5 mr-2 inline" />
+              {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
+              <div className="hidden md:inline">
+                <span className="m-1">-</span>
+                <TimeAgo time={event.start_time * 1000} dense />
+              </div>
+              <div className="hidden md:inline">
+                <span className="m-1" />( {getDurationFromTimestamps(event.start_time, event.end_time)} )
+              </div>
+            </div>
+            <div className="capitalize text-sm flex align-center mt-1">
+              <Camera className="h-5 w-5 mr-2 inline" />
+              {event.camera.replaceAll('_', ' ')}
+            </div>
+            {event.zones.length ? (
+              <div className="capitalize  text-sm flex align-center">
+                <Zone className="w-5 h-5 mr-2 inline" />
+                {event.zones.join(', ').replaceAll('_', ' ')}
+              </div>
+            ) : null}
+            <div className="capitalize  text-sm flex align-center">
+              <Score className="w-5 h-5 mr-2 inline" />
+              {(event?.data?.top_score || event.top_score || 0) == 0
+                ? null
+                : `${event.label}: ${((event?.data?.top_score || event.top_score) * 100).toFixed(0)}%`}
+              {(event?.data?.sub_label_score || 0) == 0
+                ? null
+                : `, ${event.sub_label}: ${(event?.data?.sub_label_score * 100).toFixed(0)}%`}
+            </div>
+          </div>
+          <div class="hidden sm:flex flex-col justify-end mr-2">
+            {event.end_time && event.has_snapshot && (event?.data?.type || 'object') == 'object' && (
+              <Fragment>
+                {event.plus_id ? (
+                  <div className="uppercase text-xs underline">
+                    <Link
+                      href={`https://plus.frigate.video/dashboard/edit-image/?id=${event.plus_id}`}
+                      target="_blank"
+                      rel="nofollow"
+                    >
+                      Edit in Frigate+
+                    </Link>
+                  </div>
+                ) : (
+                  <Button
+                    color="gray"
+                    disabled={uploading.includes(event.id)}
+                    onClick={(e) => showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)}
+                  >
+                    {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                  </Button>
+                )}
+              </Fragment>
+            )}
+          </div>
+          <div class="flex flex-col">
+            <Delete
+              className="h-6 w-6 cursor-pointer"
+              stroke="#f87171"
+              onClick={(e) => onDelete(e, event.id, event.retain_indefinitely)}
+            />
+
+            <Download
+              className="h-6 w-6 mt-auto"
+              stroke={event.has_clip || event.has_snapshot ? '#3b82f6' : '#cbd5e1'}
+              onClick={(e) => onDownloadClick(e, event)}
+            />
+          </div>
+        </div>
+      </div>
+      {viewEvent !== event.id ? null : (
+        <div className="space-y-4">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex justify-center w-full py-2">
+              <Tabs
+                selectedIndex={event.has_clip && eventDetailType == 'clip' ? 0 : 1}
+                onChange={handleEventDetailTabChange}
+                className="justify"
+              >
+                <TextTab text="Clip" disabled={!event.has_clip} />
+                <TextTab text={event.has_snapshot ? 'Snapshot' : 'Thumbnail'} />
+              </Tabs>
+            </div>
+
+            <div>
+              {eventDetailType == 'clip' && event.has_clip ? (
+                <div>
+                  <TimelineSummary
+                    event={event}
+                    onFrameSelected={(frame, seekSeconds) => onEventFrameSelected(event, frame, seekSeconds)}
+                  />
+                  <div>
+                    <VideoPlayer
+                      options={{
+                        preload: 'auto',
+                        autoplay: true,
+                        sources: [
+                          {
+                            src: `${apiHost}vod/event/${event.id}/master.m3u8`,
+                            type: 'application/vnd.apple.mpegurl',
+                          },
+                        ],
+                      }}
+                      seekOptions={{ forward: 10, backward: 5 }}
+                      onReady={onReady}
+                      onDispose={onDispose}
+                    >
+                      {eventOverlay ? (
+                        <TimelineEventOverlay eventOverlay={eventOverlay} cameraConfig={config.cameras[event.camera]} />
+                      ) : null}
+                    </VideoPlayer>
+                  </div>
+                </div>
+              ) : null}
+
+              {eventDetailType == 'image' || !event.has_clip ? (
+                <div className="flex justify-center">
+                  <img
+                    className="flex-grow-0"
+                    src={
+                      event.has_snapshot
+                        ? `${apiHost}api/events/${event.id}/snapshot.jpg`
+                        : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                    }
+                    alt={`${event.label} at ${((event?.data?.top_score || event.top_score) * 100).toFixed(
+                      0
+                    )}% confidence`}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
