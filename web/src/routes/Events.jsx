@@ -622,7 +622,7 @@ export default function Events({ path, ...props }) {
                 className="rounded-full"
                 type="text"
                 color="gray"
-                aria-label="Events that are currently ongoing, this does not mean that events are always being recorded. See the recording docs for more info."
+                aria-label="Events for currently tracked objects. Recordings are only saved based on your retain settings. See the recording docs for more info."
               >
                 <About className="w-5" />
               </Button>
