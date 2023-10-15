@@ -645,14 +645,22 @@ export default function Events({ path, ...props }) {
                     event={event}
                     eventDetailType={eventDetailType}
                     eventOverlay={eventOverlay}
-                    setEventOverlay={setEventOverlay}
                     viewEvent={viewEvent}
                     setViewEvent={setViewEvent}
                     uploading={uploading}
                     handleEventDetailTabChange={handleEventDetailTabChange}
                     onEventFrameSelected={onEventFrameSelected}
                     onDelete={onDelete}
+                    onDispose={() => {
+                      this.player = null;
+                    }}
                     onDownloadClick={onDownloadClick}
+                    onReady={(player) => {
+                      this.player = player;
+                      this.player.on('playing', () => {
+                        setEventOverlay(undefined);
+                      });
+                    }}
                     onSave={onSave}
                     showSubmitToPlus={showSubmitToPlus}
                   />
@@ -675,7 +683,6 @@ export default function Events({ path, ...props }) {
                   event={event}
                   eventDetailType={eventDetailType}
                   eventOverlay={eventOverlay}
-                  setEventOverlay={setEventOverlay}
                   viewEvent={viewEvent}
                   setViewEvent={setViewEvent}
                   lastEvent={lastEvent}
@@ -684,7 +691,16 @@ export default function Events({ path, ...props }) {
                   handleEventDetailTabChange={handleEventDetailTabChange}
                   onEventFrameSelected={onEventFrameSelected}
                   onDelete={onDelete}
+                  onDispose={() => {
+                    this.player = null;
+                  }}
                   onDownloadClick={onDownloadClick}
+                  onReady={(player) => {
+                    this.player = player;
+                    this.player.on('playing', () => {
+                      setEventOverlay(undefined);
+                    });
+                  }}
                   onSave={onSave}
                   showSubmitToPlus={showSubmitToPlus}
                 />
@@ -706,7 +722,6 @@ function Event({
   event,
   eventDetailType,
   eventOverlay,
-  setEventOverlay,
   viewEvent,
   setViewEvent,
   lastEvent,
@@ -715,7 +730,9 @@ function Event({
   handleEventDetailTabChange,
   onEventFrameSelected,
   onDelete,
+  onDispose,
   onDownloadClick,
+  onReady,
   onSave,
   showSubmitToPlus,
 }) {
@@ -857,15 +874,8 @@ function Event({
                         ],
                       }}
                       seekOptions={{ forward: 10, backward: 5 }}
-                      onReady={(player) => {
-                        this.player = player;
-                        this.player.on('playing', () => {
-                          setEventOverlay(undefined);
-                        });
-                      }}
-                      onDispose={() => {
-                        this.player = null;
-                      }}
+                      onReady={onReady}
+                      onDispose={onDispose}
                     >
                       {eventOverlay ? (
                         <TimelineEventOverlay eventOverlay={eventOverlay} cameraConfig={config.cameras[event.camera]} />
