@@ -630,9 +630,9 @@ class PtzAutoTracker:
         below_distance_threshold = self._below_distance_threshold(camera, obj)
 
         # ensure object isn't too big in frame
-        below_dimension_threshold = (bb_right - bb_left) / camera_width < min(
-            self.zoom_factor[camera], 0.6
-        ) and (bb_bottom - bb_top) / camera_height < min(self.zoom_factor[camera], 0.6)
+        below_dimension_threshold = (bb_right - bb_left) / camera_width < 0.8 and (
+            bb_bottom - bb_top
+        ) / camera_height < 0.8
 
         # ensure object is not moving quickly
         below_velocity_threshold = (
@@ -703,7 +703,8 @@ class PtzAutoTracker:
             zoom_in_hysteresis
             and away_from_edge
             and below_velocity_threshold
-            and (below_distance_threshold or below_dimension_threshold)
+            and below_distance_threshold
+            and below_dimension_threshold
             and not at_max_zoom
         ):
             return True
@@ -817,26 +818,26 @@ class PtzAutoTracker:
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             if self.tracked_object_previous[camera] is None:
-                # start with a slightly altered box to encourage an initial zoom
-                self.previous_target_box[camera] = target_box * (
-                    AUTOTRACKING_ZOOM_OUT_HYSTERESIS - 0.05
-                )
-
-            if (
-                result := self._should_zoom_in(
-                    camera,
-                    obj,
-                    predicted_box
-                    if camera_config.onvif.autotracking.movement_weights
-                    else obj.obj_data["box"],
-                )
-            ) is not None:
-                # zoom in value
-                zoom = target_box ** (self.zoom_factor[camera] / 1.5)
-
-                if not result:
-                    # zoom out
-                    zoom = -(1 - zoom) if zoom != 0 else 0
+                zoom = target_box ** self.zoom_factor[camera]
+            else:
+                if (
+                    result := self._should_zoom_in(
+                        camera,
+                        obj,
+                        predicted_box
+                        if camera_config.onvif.autotracking.movement_weights
+                        else obj.obj_data["box"],
+                    )
+                ) is not None:
+                    # zoom value
+                    zoom = (
+                        2
+                        * (
+                            self.previous_target_box[camera]
+                            / (target_box + self.previous_target_box[camera])
+                        )
+                        - 1
+                    )
 
         logger.debug(f"{camera}: Zooming: {result} Zoom amount: {zoom}")
 
