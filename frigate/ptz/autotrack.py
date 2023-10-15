@@ -782,12 +782,9 @@ class PtzAutoTracker:
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
 
     def _autotrack_move_zoom_only(self, camera, obj):
-        camera_config = self.config.cameras[camera]
-
-        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
-            zoom = self._get_zoom_amount(camera, obj, obj.obj_data["box"])
-            if zoom != 0:
-                self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
+        zoom = self._get_zoom_amount(camera, obj, obj.obj_data["box"])
+        if zoom != 0:
+            self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
     def _get_zoom_amount(self, camera, obj, predicted_box):
         camera_config = self.config.cameras[camera]
