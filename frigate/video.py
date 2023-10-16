@@ -16,7 +16,6 @@ from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
 from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
-from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
@@ -33,93 +32,11 @@ from frigate.util.image import (
     draw_box_with_label,
     intersection,
     intersection_over_union,
-    yuv_region_2_bgr,
-    yuv_region_2_rgb,
-    yuv_region_2_yuv,
 )
 from frigate.util.object import get_cluster_region_from_grid
 from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
-
-
-def filtered(obj, objects_to_track, object_filters):
-    object_name = obj[0]
-    object_score = obj[1]
-    object_box = obj[2]
-    object_area = obj[3]
-    object_ratio = obj[4]
-
-    if object_name not in objects_to_track:
-        return True
-
-    if object_name in object_filters:
-        obj_settings = object_filters[object_name]
-
-        # if the min area is larger than the
-        # detected object, don't add it to detected objects
-        if obj_settings.min_area > object_area:
-            return True
-
-        # if the detected object is larger than the
-        # max area, don't add it to detected objects
-        if obj_settings.max_area < object_area:
-            return True
-
-        # if the score is lower than the min_score, skip
-        if obj_settings.min_score > object_score:
-            return True
-
-        # if the object is not proportionally wide enough
-        if obj_settings.min_ratio > object_ratio:
-            return True
-
-        # if the object is proportionally too wide
-        if obj_settings.max_ratio < object_ratio:
-            return True
-
-        if obj_settings.mask is not None:
-            # compute the coordinates of the object and make sure
-            # the location isn't outside the bounds of the image (can happen from rounding)
-            object_xmin = object_box[0]
-            object_xmax = object_box[2]
-            object_ymax = object_box[3]
-            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
-            x_location = min(
-                int((object_xmax + object_xmin) / 2.0),
-                len(obj_settings.mask[0]) - 1,
-            )
-
-            # if the object is in a masked location, don't add it to detected objects
-            if obj_settings.mask[y_location][x_location] == 0:
-                return True
-
-    return False
-
-
-def get_min_region_size(model_config: ModelConfig) -> int:
-    """Get the min region size."""
-    return max(model_config.height, model_config.width)
-
-
-def create_tensor_input(frame, model_config: ModelConfig, region):
-    if model_config.input_pixel_format == PixelFormatEnum.rgb:
-        cropped_frame = yuv_region_2_rgb(frame, region)
-    elif model_config.input_pixel_format == PixelFormatEnum.bgr:
-        cropped_frame = yuv_region_2_bgr(frame, region)
-    else:
-        cropped_frame = yuv_region_2_yuv(frame, region)
-
-    # Resize if needed
-    if cropped_frame.shape != (model_config.height, model_config.width, 3):
-        cropped_frame = cv2.resize(
-            cropped_frame,
-            dsize=(model_config.width, model_config.height),
-            interpolation=cv2.INTER_LINEAR,
-        )
-
-    # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
-    return np.expand_dims(cropped_frame, axis=0)
 
 
 def stop_ffmpeg(ffmpeg_process, logger):
@@ -842,11 +759,16 @@ def process_frames(
             # only add in the motion boxes when not calibrating
             if not motion_detector.is_calibrating():
                 # find motion boxes that are not inside tracked object regions
-                standalone_motion_boxes = [b for b in motion_boxes if not inside_any(b, regions)]
+                standalone_motion_boxes = [
+                    b for b in motion_boxes if not inside_any(b, regions)
+                ]
 
                 if standalone_motion_boxes:
                     motion_clusters = get_cluster_candidates(
-                        frame_shape, region_min_size, standalone_motion_boxes, region_grid
+                        frame_shape,
+                        region_min_size,
+                        standalone_motion_boxes,
+                        region_grid,
                     )
                     motion_regions = [
                         get_cluster_region_from_grid(

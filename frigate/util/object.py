@@ -2,11 +2,18 @@
 
 import logging
 
-import numpy
+import cv2
+import numpy as np
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, ModelConfig
+from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.models import Timeline
-from frigate.util.image import calculate_region
+from frigate.util.image import (
+    calculate_region,
+    yuv_region_2_bgr,
+    yuv_region_2_rgb,
+    yuv_region_2_yuv,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +76,9 @@ def get_camera_regions_grid(
             1.35,
         )
         # save width of region to grid as relative
-        grid[x_pos][y_pos]["sizes"].append((calculated_region[2] - calculated_region[0]) / width)
+        grid[x_pos][y_pos]["sizes"].append(
+            (calculated_region[2] - calculated_region[0]) / width
+        )
 
     for x in range(grid_size):
         for y in range(grid_size):
@@ -81,8 +90,8 @@ def get_camera_regions_grid(
             if len(cell["sizes"]) == 0:
                 continue
 
-            std_dev = numpy.std(cell["sizes"])
-            mean = numpy.mean(cell["sizes"])
+            std_dev = np.std(cell["sizes"])
+            mean = np.mean(cell["sizes"])
             logger.debug(f"std dev: {std_dev} mean: {mean}")
             cell["std_dev"] = std_dev
             cell["mean"] = mean
@@ -143,3 +152,82 @@ def get_region_from_grid(
         min_region,
     )
     return new
+
+
+def filtered(obj, objects_to_track, object_filters):
+    object_name = obj[0]
+    object_score = obj[1]
+    object_box = obj[2]
+    object_area = obj[3]
+    object_ratio = obj[4]
+
+    if object_name not in objects_to_track:
+        return True
+
+    if object_name in object_filters:
+        obj_settings = object_filters[object_name]
+
+        # if the min area is larger than the
+        # detected object, don't add it to detected objects
+        if obj_settings.min_area > object_area:
+            return True
+
+        # if the detected object is larger than the
+        # max area, don't add it to detected objects
+        if obj_settings.max_area < object_area:
+            return True
+
+        # if the score is lower than the min_score, skip
+        if obj_settings.min_score > object_score:
+            return True
+
+        # if the object is not proportionally wide enough
+        if obj_settings.min_ratio > object_ratio:
+            return True
+
+        # if the object is proportionally too wide
+        if obj_settings.max_ratio < object_ratio:
+            return True
+
+        if obj_settings.mask is not None:
+            # compute the coordinates of the object and make sure
+            # the location isn't outside the bounds of the image (can happen from rounding)
+            object_xmin = object_box[0]
+            object_xmax = object_box[2]
+            object_ymax = object_box[3]
+            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
+            x_location = min(
+                int((object_xmax + object_xmin) / 2.0),
+                len(obj_settings.mask[0]) - 1,
+            )
+
+            # if the object is in a masked location, don't add it to detected objects
+            if obj_settings.mask[y_location][x_location] == 0:
+                return True
+
+    return False
+
+
+def get_min_region_size(model_config: ModelConfig) -> int:
+    """Get the min region size."""
+    return max(model_config.height, model_config.width)
+
+
+def create_tensor_input(frame, model_config: ModelConfig, region):
+    if model_config.input_pixel_format == PixelFormatEnum.rgb:
+        cropped_frame = yuv_region_2_rgb(frame, region)
+    elif model_config.input_pixel_format == PixelFormatEnum.bgr:
+        cropped_frame = yuv_region_2_bgr(frame, region)
+    else:
+        cropped_frame = yuv_region_2_yuv(frame, region)
+
+    # Resize if needed
+    if cropped_frame.shape != (model_config.height, model_config.width, 3):
+        cropped_frame = cv2.resize(
+            cropped_frame,
+            dsize=(model_config.width, model_config.height),
+            interpolation=cv2.INTER_LINEAR,
+        )
+
+    # Expand dimensions since the model expects images to have shape: [1, height, width, 3]
+    return np.expand_dims(cropped_frame, axis=0)
