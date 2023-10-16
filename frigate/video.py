@@ -33,7 +33,12 @@ from frigate.util.image import (
     intersection,
     intersection_over_union,
 )
-from frigate.util.object import get_cluster_region_from_grid
+from frigate.util.object import (
+    create_tensor_input,
+    get_cluster_region_from_grid,
+    get_min_region_size,
+    is_object_filtered,
+)
 from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
@@ -525,7 +530,7 @@ def detect(
             region,
         )
         # apply object filters
-        if filtered(det, objects_to_track, object_filters):
+        if is_object_filtered(det, objects_to_track, object_filters):
             continue
         detections.append(det)
     return detections

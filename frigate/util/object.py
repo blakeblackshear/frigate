@@ -154,7 +154,7 @@ def get_region_from_grid(
     return new
 
 
-def filtered(obj, objects_to_track, object_filters):
+def is_object_filtered(obj, objects_to_track, object_filters):
     object_name = obj[0]
     object_score = obj[1]
     object_box = obj[2]
