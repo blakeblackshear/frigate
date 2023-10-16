@@ -591,7 +591,7 @@ class PtzAutoTracker:
 
         return centroid_distance < distance_threshold
 
-    def _should_zoom_in(self, camera, obj, box):
+    def _should_zoom_in(self, camera, obj, box, debug_zooming=False):
         # returns True if we should zoom in, False if we should zoom out, None to do nothing
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
@@ -664,7 +664,7 @@ class PtzAutoTracker:
         at_min_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 0
 
         # debug zooming
-        if True:
+        if debug_zooming:
             logger.debug(
                 f"{camera}: Zoom test: far from left edge: {bb_left > edge_threshold * camera_width}"
             )
@@ -781,7 +781,7 @@ class PtzAutoTracker:
                 f'{camera}: Velocity: {tuple(np.round(obj.obj_data["estimate_velocity"]).flatten().astype(int))}'
             )
 
-        zoom = self._get_zoom_amount(camera, obj, predicted_box)
+        zoom = self._get_zoom_amount(camera, obj, predicted_box, debug_zoom=True)
 
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
 
@@ -791,7 +791,7 @@ class PtzAutoTracker:
         if zoom != 0:
             self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
-    def _get_zoom_amount(self, camera, obj, predicted_box):
+    def _get_zoom_amount(self, camera, obj, predicted_box, debug_zoom=False):
         camera_config = self.config.cameras[camera]
 
         # frame width and height
@@ -812,7 +812,9 @@ class PtzAutoTracker:
                 zoom = current_zoom_level
             else:
                 if (
-                    result := self._should_zoom_in(camera, obj, obj.obj_data["box"])
+                    result := self._should_zoom_in(
+                        camera, obj, obj.obj_data["box"], debug_zoom
+                    )
                 ) is not None:
                     if result:
                         zoom = min(1.0, current_zoom_level + 0.1)
@@ -831,6 +833,7 @@ class PtzAutoTracker:
                         predicted_box
                         if camera_config.onvif.autotracking.movement_weights
                         else obj.obj_data["box"],
+                        debug_zoom,
                     )
                 ) is not None:
                     # zoom value
