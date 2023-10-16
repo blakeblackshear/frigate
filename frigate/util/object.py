@@ -116,12 +116,13 @@ def get_cluster_region_from_grid(frame_shape, min_region, cluster, boxes, region
 
 def get_region_from_grid(
     frame_shape: tuple[int],
-    box: list[int],
+    cluster: list[int],
     min_region: int,
     region_grid: list[list[dict[str, any]]],
 ) -> list[int]:
     """Get a region for a box based on the region grid."""
-    centroid = (box[0] - (box[2] - box[0]), box[1] - (box[3] - box[1]))
+    box = calculate_region(frame_shape, cluster[0], cluster[1], cluster[2], cluster[3], min_region)
+    centroid = (box[0] + (min(frame_shape[1], box[2]) - box[0]) / 2, box[1] + (min(frame_shape[0], box[3]) - box[1]) / 2)
     grid_x = int(centroid[0] / frame_shape[1] * len(region_grid))
     grid_y = int(centroid[1] / frame_shape[0] * len(region_grid))
 
@@ -134,16 +135,16 @@ def get_region_from_grid(
     calc_size = (box[2] - box[0]) / frame_shape[1]
 
     # if region is within expected size, don't resize
-    if (cell["mean"] - cell["std_dev"]) < calc_size < (cell["mean"] + cell["std_dev"]):
-        return calculate_region(frame_shape, box[0], box[1], box[2], box[3], min_region)
+    if (cell["mean"] - cell["std_dev"]) <= calc_size <= (cell["mean"] + cell["std_dev"]):
+        return box
     # TODO not sure how to handle case where cluster is larger than expected region
     elif calc_size > (cell["mean"] + cell["std_dev"]):
-        return calculate_region(frame_shape, box[0], box[1], box[2], box[3], min_region)
+        return box
 
     size = cell["mean"] * frame_shape[1]
 
     # get region based on grid size
-    new = calculate_region(
+    return calculate_region(
         frame_shape,
         max(0, centroid[0] - size / 2),
         max(0, centroid[1] - size / 2),
@@ -151,7 +152,6 @@ def get_region_from_grid(
         min(frame_shape[0], centroid[1] + size / 2),
         min_region,
     )
-    return new
 
 
 def is_object_filtered(obj, objects_to_track, object_filters):
