@@ -21,7 +21,7 @@ module.exports = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.7.1#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.8.1#configuration",
         },
       ],
       Detectors: [
