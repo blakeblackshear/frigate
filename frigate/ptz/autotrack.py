@@ -603,7 +603,9 @@ class PtzAutoTracker:
             self.original_target_box[camera] == 1
             and self.previous_target_box[camera] != 1
         ):
-            self.original_target_box[camera] = self.previous_target_box[camera]
+            self.original_target_box[camera] = (
+                self.previous_target_box[camera] ** self.zoom_factor[camera]
+            )
 
         average_velocity, distance = self._get_valid_velocity(camera, obj)
 
@@ -783,13 +785,6 @@ class PtzAutoTracker:
         self._enqueue_move(camera, obj.obj_data["frame_time"], pan, tilt, zoom)
 
     def _autotrack_move_zoom_only(self, camera, obj):
-        camera_config = self.config.cameras[camera]
-        camera_width = camera_config.frame_shape[1]
-        camera_height = camera_config.frame_shape[0]
-
-        target_box = obj.obj_data["area"] / (camera_width * camera_height)
-        self.previous_target_box[camera] = target_box ** self.zoom_factor[camera]
-
         zoom = self._get_zoom_amount(camera, obj, obj.obj_data["box"])
 
         if zoom != 0:
