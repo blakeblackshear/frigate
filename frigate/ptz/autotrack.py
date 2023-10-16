@@ -191,6 +191,7 @@ class PtzAutoTracker:
         self.intercept: dict[str, object] = {}
         self.move_coefficients: dict[str, object] = {}
         self.zoom_factor: dict[str, object] = {}
+        self.original_target_box: dict[str, object] = {}
         self.previous_target_box: dict[str, object] = {}
 
         # if cam is set to autotrack, onvif should be set up
@@ -216,7 +217,7 @@ class PtzAutoTracker:
         self.move_metrics[camera] = []
         self.intercept[camera] = None
         self.move_coefficients[camera] = []
-        self.previous_target_box[camera] = 0.5
+        self.previous_target_box[camera] = 1
 
         self.move_queues[camera] = queue.Queue()
         self.move_queue_locks[camera] = threading.Lock()
@@ -424,15 +425,17 @@ class PtzAutoTracker:
                     continue
 
                 else:
+                    if zoom != 0:
+                        self.previous_target_box[camera] = self.tracked_object[
+                            camera
+                        ].obj_data["area"] / (camera_width * camera_height)
+
                     if (
                         self.config.cameras[camera].onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
                         # this enables us to absolutely zoom if we lost an object
                         and self.tracked_object[camera] is not None
                     ):
-                        self.previous_target_box[camera] = self.tracked_object[
-                            camera
-                        ].obj_data["area"] / (camera_width * camera_height)
                         self.onvif._move_relative(camera, pan, tilt, zoom, 1)
 
                     else:
@@ -447,9 +450,6 @@ class PtzAutoTracker:
                             zoom > 0
                             and self.ptz_metrics[camera]["ptz_zoom_level"].value != zoom
                         ):
-                            self.previous_target_box[camera] = self.tracked_object[
-                                camera
-                            ].obj_data["area"] / (camera_width * camera_height)
                             self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # Wait until the camera finishes moving
@@ -598,6 +598,13 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
+        # save target box area of initial zoom to be a limiter for the session
+        if (
+            self.original_target_box[camera] == 1
+            and self.previous_target_box[camera] != 1
+        ):
+            self.original_target_box[camera] = self.previous_target_box[camera]
+
         average_velocity, distance = self._get_valid_velocity(camera, obj)
 
         bb_left, bb_top, bb_right, bb_bottom = box
@@ -608,12 +615,8 @@ class PtzAutoTracker:
         # calculate a velocity threshold based on movement coefficients if available
         if camera_config.onvif.autotracking.movement_weights:
             predicted_movement_time = self._predict_movement_time(camera, 1, 1)
-            velocity_threshold_x = (
-                camera_width / predicted_movement_time / camera_fps * 0.7
-            )
-            velocity_threshold_y = (
-                camera_height / predicted_movement_time / camera_fps * 0.7
-            )
+            velocity_threshold_x = camera_width / predicted_movement_time / camera_fps
+            velocity_threshold_y = camera_height / predicted_movement_time / camera_fps
         else:
             # use a generic velocity threshold
             velocity_threshold_x = camera_width * 0.02
@@ -629,7 +632,7 @@ class PtzAutoTracker:
         # make sure object is centered in the frame
         below_distance_threshold = self._below_distance_threshold(camera, obj)
 
-        # ensure object isn't too big in frame
+        # ensure object isn't taking up too much of the frame
         below_dimension_threshold = (bb_right - bb_left) / camera_width < 0.8 and (
             bb_bottom - bb_top
         ) / camera_height < 0.8
@@ -645,21 +648,15 @@ class PtzAutoTracker:
 
         target_box = obj.obj_data["area"] / (camera_width * camera_height)
 
-        below_area_threshold = target_box < 0.05
+        below_area_threshold = target_box < self.original_target_box[camera]
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
-        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
-            zoom_out_hysteresis = target_box > (
-                self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
-            )
-            zoom_in_hysteresis = target_box < (
-                self.previous_target_box[camera] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
-            )
-
-        # relative target boxes deadzone is much smaller
-        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
-            zoom_out_hysteresis = target_box > (self.previous_target_box[camera] * 1.1)
-            zoom_in_hysteresis = target_box < (self.previous_target_box[camera] * 0.9)
+        zoom_out_hysteresis = target_box > (
+            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
+        )
+        zoom_in_hysteresis = target_box < (
+            self.previous_target_box[camera] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
+        )
 
         at_max_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 1
         at_min_zoom = self.ptz_metrics[camera]["ptz_zoom_level"].value == 0
@@ -682,7 +679,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below area threshold: {(below_area_threshold)} target box: {target_box}"
+                f"{camera}: Zoom test: below area threshold: {(below_area_threshold)} original: {self.original_target_box[camera]} target box: {target_box}"
             )
             logger.debug(
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {(bb_right - bb_left) / camera_width}, height: { (bb_bottom - bb_top) / camera_height}"
@@ -703,30 +700,28 @@ class PtzAutoTracker:
         # object area could be larger
         # object is away from the edge of the frame
         # object is not moving too quickly
-        # object is centered or small in the frame
+        # object is small in the frame
+        # object area is below initial area
         # camera is not fully zoomed in
         if (
             zoom_in_hysteresis
             and away_from_edge
             and below_velocity_threshold
-            and below_distance_threshold
             and below_dimension_threshold
+            and below_area_threshold
             and not at_max_zoom
         ):
             return True
 
         # Zoom out conditions (or)
-        # object area got too large, is touching an edge, and centered
-        # object area got too large and has at least one dimension that is too large
-        # object is touching an edge and either centered or has too large of an area
+        # object area got too large
+        # object area has at least one dimension that is too large
+        # object is touching an edge and either centered
         # object is moving too quickly
         if (
-            (zoom_out_hysteresis and not away_from_edge and below_distance_threshold)
-            or (zoom_out_hysteresis and not below_dimension_threshold)
-            or (
-                not away_from_edge
-                and (below_distance_threshold or not below_area_threshold)
-            )
+            zoom_out_hysteresis
+            or not below_dimension_threshold
+            or (not away_from_edge and below_distance_threshold)
             or not below_velocity_threshold
         ) and not at_min_zoom:
             return False
@@ -792,9 +787,8 @@ class PtzAutoTracker:
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
 
-        if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
-            target_box = obj.obj_data["area"] / (camera_width * camera_height)
-            self.previous_target_box[camera] = target_box ** self.zoom_factor[camera]
+        target_box = obj.obj_data["area"] / (camera_width * camera_height)
+        self.previous_target_box[camera] = target_box ** self.zoom_factor[camera]
 
         zoom = self._get_zoom_amount(camera, obj, obj.obj_data["box"])
 
@@ -812,6 +806,8 @@ class PtzAutoTracker:
         result = None
         current_zoom_level = self.ptz_metrics[camera]["ptz_zoom_level"].value
         target_box = obj.obj_data["area"] / (camera_width * camera_height)
+        if self.tracked_object_previous[camera] is None:
+            self.original_target_box[camera] = 1
 
         # absolute zooming separately from pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
@@ -853,7 +849,7 @@ class PtzAutoTracker:
                     logger.debug(f"{camera}: Zoom calculation: {zoom}")
                     if not result:
                         # zoom out
-                        zoom = -(1 - abs(zoom)) if zoom > 0 else zoom
+                        zoom = -(1 - abs(zoom)) if zoom > 0 else -(zoom + 1)
 
         logger.debug(f"{camera}: Zooming: {result} Zoom amount: {zoom}")
 
@@ -997,7 +993,7 @@ class PtzAutoTracker:
             # clear tracked object and reset zoom level
             self.tracked_object[camera] = None
             self.tracked_object_previous[camera] = None
-            self.previous_target_box[camera] = 0.5
+            self.previous_target_box[camera] = 1
 
             # empty move queue
             while not self.move_queues[camera].empty():
