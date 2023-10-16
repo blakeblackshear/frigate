@@ -722,6 +722,7 @@ class PtzAutoTracker:
         # object is moving too quickly
         if (
             zoom_out_hysteresis
+            and not below_area_threshold
             or not below_dimension_threshold
             or (not away_from_edge and below_distance_threshold)
             or not below_velocity_threshold
