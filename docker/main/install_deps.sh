@@ -56,7 +56,7 @@ fi
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     # use debian bookworm for hwaccel packages
-    echo 'deb https://deb.debian.org/debian bookworm main contrib' >/etc/apt/sources.list.d/debian-bookworm.list
+    echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd \
