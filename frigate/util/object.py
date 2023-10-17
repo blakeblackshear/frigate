@@ -31,7 +31,6 @@ def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
     # get grid from db if available
     try:
         regions: Regions = Regions.select().where(Regions.camera == camera.name).get()
-        logger.error(f"The existing grid for  is {regions.grid}")
         grid = regions.grid
         last_update = regions.last_update
     except DoesNotExist:
