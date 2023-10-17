@@ -26,7 +26,9 @@ logger = logging.getLogger(__name__)
 GRID_SIZE = 8
 
 
-def get_camera_regions_grid(name: str, detect: DetectConfig) -> list[list[dict[str, any]]]:
+def get_camera_regions_grid(
+    name: str, detect: DetectConfig
+) -> list[list[dict[str, any]]]:
     """Build a grid of expected region sizes for a camera."""
     # get grid from db if available
     try:
