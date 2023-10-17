@@ -272,7 +272,6 @@ def stats_snapshot(
             "audio_rms": round(camera_stats["audio_rms"].value, 4),
             "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),
         }
-        stats[name] = stats["cameras"][name]  # deprecate in the future?
 
     stats["detectors"] = {}
     for name, detector in stats_tracking["detectors"].items():
