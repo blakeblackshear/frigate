@@ -441,7 +441,7 @@ def track_camera(
         motion_enabled,
         stop_event,
         ptz_metrics,
-        region_grid
+        region_grid,
     )
 
     logger.info(f"{name}: exiting subprocess")
