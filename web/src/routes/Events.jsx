@@ -94,7 +94,7 @@ export default function Events({ path, ...props }) {
     showDeleteFavorite: false,
   });
 
-  const [showInProgress, setShowInProgress] = useState(true);
+  const [showInProgress, setShowInProgress] = useState((props.event || props.camera || props.label) == null);
 
   const eventsFetcher = useCallback(
     (path, params) => {
