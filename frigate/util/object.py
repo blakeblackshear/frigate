@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from peewee import DoesNotExist
 
-from frigate.config import CameraConfig, ModelConfig
+from frigate.config import DetectConfig, ModelConfig
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.models import Event, Regions, Timeline
 from frigate.util.image import (
@@ -26,11 +26,11 @@ logger = logging.getLogger(__name__)
 GRID_SIZE = 8
 
 
-def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
+def get_camera_regions_grid(name: str, detect: DetectConfig) -> list[list[dict[str, any]]]:
     """Build a grid of expected region sizes for a camera."""
     # get grid from db if available
     try:
-        regions: Regions = Regions.select().where(Regions.camera == camera.name).get()
+        regions: Regions = Regions.select().where(Regions.camera == name).get()
         grid = regions.grid
         last_update = regions.last_update
     except DoesNotExist:
@@ -45,7 +45,7 @@ def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
     # get events for timeline entries
     events = (
         Event.select(Event.id)
-        .where(Event.camera == camera.name)
+        .where(Event.camera == name)
         .where(Event.false_positive != True)
         .where(Event.start_time > last_update)
     )
@@ -69,8 +69,8 @@ def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
         .dicts()
     )
 
-    width = camera.detect.width
-    height = camera.detect.height
+    width = detect.width
+    height = detect.height
 
     grid_coef = 1.0 / GRID_SIZE
 
@@ -119,7 +119,7 @@ def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
 
     # update db with new grid
     region = {
-        Regions.camera: camera.name,
+        Regions.camera: name,
         Regions.grid: grid,
         Regions.last_update: new_update,
     }

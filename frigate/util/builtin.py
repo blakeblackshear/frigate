@@ -262,3 +262,10 @@ def find_by_key(dictionary, target_key):
                 if result is not None:
                     return result
     return None
+
+
+def get_tomorrow_at_2() -> datetime.datetime:
+    tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+    tomorrow.hour = 2
+    return tomorrow
+
