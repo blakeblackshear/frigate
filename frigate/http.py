@@ -516,6 +516,7 @@ def delete_event(id):
         media.unlink(missing_ok=True)
 
     event.delete_instance()
+    Timeline.delete().where(Timeline.source_id == id).execute()
     return make_response(
         jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
     )
