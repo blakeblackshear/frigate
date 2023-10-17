@@ -6,7 +6,7 @@ from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 
 from frigate.util.image import intersection
-from frigate.video import (
+from frigate.util.object import (
     get_cluster_boundary,
     get_cluster_candidates,
     get_cluster_region,
