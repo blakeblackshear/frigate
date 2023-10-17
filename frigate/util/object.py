@@ -114,6 +114,8 @@ def get_camera_regions_grid(
             std_dev = np.std(cell["sizes"])
             mean = np.mean(cell["sizes"])
             logger.debug(f"std dev: {std_dev} mean: {mean}")
+            cell["x"] = x
+            cell["y"] = y
             cell["std_dev"] = std_dev
             cell["mean"] = mean
 
@@ -442,3 +444,31 @@ def get_consolidated_object_detections(detected_object_groups):
                 consolidated_detections.append(sorted_by_area[current_detection_idx])
 
     return consolidated_detections
+
+
+def get_startup_regions(frame_shape: tuple[int], region_min_size: int, region_grid: list[list[dict[str, any]]]) -> list[list[int]]:
+    """Get a list of regions to run on startup."""
+    # return 8 most popular regions for the camera
+    all_cells = np.concatenate(region_grid).flat
+    startup_cells = sorted(all_cells, key=lambda c: len(c["sizes"]), reverse=True)[0:8]
+    regions = []
+
+    for cell in startup_cells:
+        # rest of the cells are empty
+        if not cell["sizes"]:
+            break
+
+        x = frame_shape[1] / GRID_SIZE * (0.5 + cell["x"])
+        y = frame_shape[0] / GRID_SIZE * (0.5 + cell["y"])
+        size = cell["mean"] * frame_shape[1]
+        regions.append(calculate_region(
+            frame_shape,
+            x - size / 2,
+            y - size / 2,
+            x + size / 2,
+            y + size / 2,
+            region_min_size,
+            multiplier=1,
+        ))
+
+    return regions

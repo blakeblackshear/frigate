@@ -26,7 +26,6 @@ from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_2
 from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
-    calculate_region,
     draw_box_with_label,
 )
 from frigate.util.object import (
@@ -37,6 +36,7 @@ from frigate.util.object import (
     get_cluster_region_from_grid,
     get_consolidated_object_detections,
     get_min_region_size,
+    get_startup_regions,
     inside_any,
     intersects_any,
     is_object_filtered,
@@ -520,7 +520,7 @@ def process_frames(
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
 
-    startup_scan_counter = 0
+    startup_scan = True
 
     region_min_size = get_min_region_size(model_config)
 
@@ -626,23 +626,10 @@ def process_frames(
                     regions += motion_regions
 
             # if starting up, get the next startup scan region
-            if startup_scan_counter < 9:
-                ymin = int(frame_shape[0] / 3 * startup_scan_counter / 3)
-                ymax = int(frame_shape[0] / 3 + ymin)
-                xmin = int(frame_shape[1] / 3 * startup_scan_counter / 3)
-                xmax = int(frame_shape[1] / 3 + xmin)
-                regions.append(
-                    calculate_region(
-                        frame_shape,
-                        xmin,
-                        ymin,
-                        xmax,
-                        ymax,
-                        region_min_size,
-                        multiplier=1.2,
-                    )
-                )
-                startup_scan_counter += 1
+            if startup_scan:
+                for region in get_startup_regions(frame_shape, region_min_size, region_grid):
+                    regions.append(region)
+                startup_scan = False
 
             # resize regions and detect
             # seed with stationary objects
