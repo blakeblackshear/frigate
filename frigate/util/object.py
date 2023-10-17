@@ -48,7 +48,7 @@ def get_camera_regions_grid(
     events = (
         Event.select(Event.id)
         .where(Event.camera == name)
-        .where(Event.false_positive != True)
+        .where(Event.false_positive == None)
         .where(Event.start_time > last_update)
     )
     valid_event_ids = [e["id"] for e in events.dicts()]
