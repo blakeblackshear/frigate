@@ -591,7 +591,7 @@ def process_frames(
                     frame_shape, region_min_size, candidate, tracked_object_boxes
                 )
                 for candidate in get_cluster_candidates(
-                    frame_shape, region_min_size, tracked_object_boxes, region_grid
+                    frame_shape, region_min_size, tracked_object_boxes
                 )
             ]
 
@@ -607,7 +607,6 @@ def process_frames(
                         frame_shape,
                         region_min_size,
                         standalone_motion_boxes,
-                        region_grid,
                     )
                     motion_regions = [
                         get_cluster_region_from_grid(

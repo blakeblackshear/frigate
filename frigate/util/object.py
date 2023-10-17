@@ -346,9 +346,7 @@ def get_cluster_boundary(box, min_region):
     ]
 
 
-def get_cluster_candidates(
-    frame_shape, min_region, boxes, region_grid: list[list[dict[str, any]]]
-):
+def get_cluster_candidates(frame_shape, min_region, boxes):
     # and create a cluster of other boxes using it's max region size
     # only include boxes where the region is an appropriate(except the region could possibly be smaller?)
     # size in the cluster. in order to be in the cluster, the furthest corner needs to be within x,y offset

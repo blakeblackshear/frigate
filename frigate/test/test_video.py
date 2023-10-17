@@ -73,7 +73,7 @@ class TestRegion(unittest.TestCase):
         boxes = [(100, 100, 200, 200), (202, 150, 252, 200), (900, 900, 950, 950)]
 
         cluster_candidates = get_cluster_candidates(
-            self.frame_shape, self.min_region_size, boxes
+            self.frame_shape, self.min_region_size, boxes, []
         )
 
         # save_clusters_image("cluster_candidates", boxes, cluster_candidates)
