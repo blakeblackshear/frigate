@@ -32,7 +32,6 @@ from frigate.util.image import (
 from frigate.util.object import (
     box_inside,
     create_tensor_input,
-    get_camera_regions_grid,
     get_cluster_candidates,
     get_cluster_region,
     get_cluster_region_from_grid,
@@ -383,6 +382,7 @@ def track_camera(
     detected_objects_queue,
     process_info,
     ptz_metrics,
+    region_grid,
 ):
     stop_event = mp.Event()
 
@@ -422,8 +422,6 @@ def track_camera(
     object_tracker = NorfairTracker(config, ptz_metrics)
 
     frame_manager = SharedMemoryFrameManager()
-
-    region_grid = get_camera_regions_grid(config.name, config.detect)
 
     process_frames(
         name,
@@ -528,7 +526,7 @@ def process_frames(
 
     while not stop_event.is_set():
         if datetime.datetime.now() > next_region_update:
-            region_grid = get_camera_regions_grid(camera_name, detect_config)
+            # TODO signal update
             next_region_update = get_tomorrow_at_2()
 
         try:

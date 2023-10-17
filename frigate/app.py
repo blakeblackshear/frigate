@@ -70,6 +70,7 @@ class FrigateApp:
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
+        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -453,6 +454,10 @@ class FrigateApp:
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
 
+    def init_historical_regions(self) -> None:
+        for camera in self.config.cameras.values():
+            self.region_grids[camera.name] = get_camera_regions_grid(camera)
+
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
@@ -472,6 +477,7 @@ class FrigateApp:
                     self.detected_frames_queue,
                     self.camera_metrics[name],
                     self.ptz_metrics[name],
+                    self.region_grids[name],
                 ),
             )
             camera_process.daemon = True
@@ -612,6 +618,7 @@ class FrigateApp:
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
+        self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()

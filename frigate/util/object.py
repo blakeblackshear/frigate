@@ -52,6 +52,7 @@ def get_camera_regions_grid(
         .where(Event.start_time > last_update)
     )
     valid_event_ids = [e["id"] for e in events.dicts()]
+    logger.debug(f"Found {len(valid_event_ids)} new events for {name}")
 
     # no new events, return as is
     if not valid_event_ids:
@@ -70,6 +71,8 @@ def get_camera_regions_grid(
         .limit(10000)
         .dicts()
     )
+
+    logger.debug(f"Found {len(timeline)} new entries for {name}")
 
     width = detect.width
     height = detect.height
@@ -106,9 +109,6 @@ def get_camera_regions_grid(
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
             cell = grid[x][y]
-            logger.debug(
-                f"stats for cell {x * grid_coef * width},{y * grid_coef * height} -> {(x + 1) * grid_coef * width},{(y + 1) * grid_coef * height} :: {len(cell['sizes'])} objects"
-            )
 
             if len(cell["sizes"]) == 0:
                 continue
