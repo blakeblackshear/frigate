@@ -423,6 +423,8 @@ def track_camera(
 
     frame_manager = SharedMemoryFrameManager()
 
+    region_grid = get_camera_regions_grid(config.name, config.detect)
+
     process_frames(
         name,
         frame_queue,
@@ -441,6 +443,7 @@ def track_camera(
         motion_enabled,
         stop_event,
         ptz_metrics,
+        region_grid
     )
 
     logger.info(f"{name}: exiting subprocess")
@@ -508,13 +511,13 @@ def process_frames(
     motion_enabled: mp.Value,
     stop_event,
     ptz_metrics: PTZMetricsTypes,
+    region_grid,
     exit_on_empty: bool = False,
 ):
     fps = process_info["process_fps"]
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
-    region_grid = None
-    next_region_update = None
+    next_region_update = get_tomorrow_at_2()
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
@@ -524,7 +527,7 @@ def process_frames(
     region_min_size = get_min_region_size(model_config)
 
     while not stop_event.is_set():
-        if not region_grid or datetime.datetime.now() > next_region_update:
+        if datetime.datetime.now() > next_region_update:
             region_grid = get_camera_regions_grid(camera_name, detect_config)
             next_region_update = get_tomorrow_at_2()
 
