@@ -70,7 +70,7 @@ class FrigateApp:
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
-        self.region_grids: dict[str, list[list[dict[str, any]]]] = {}
+        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
