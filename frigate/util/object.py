@@ -175,6 +175,7 @@ def get_region_from_grid(
     if not cell or not cell["sizes"]:
         return calculate_region(frame_shape, box[0], box[1], box[2], box[3], min_region)
 
+    # convert the calculated region size to relative
     calc_size = (box[2] - box[0]) / frame_shape[1]
 
     # if region is within expected size, don't resize
