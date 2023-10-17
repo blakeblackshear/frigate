@@ -456,7 +456,7 @@ class FrigateApp:
 
     def init_historical_regions(self) -> None:
         for camera in self.config.cameras.values():
-            self.region_grids[camera.name] = get_camera_regions_grid(camera)
+            self.region_grids[camera.name] = get_camera_regions_grid(camera.name, camera.detect)
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():

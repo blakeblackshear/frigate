@@ -77,8 +77,6 @@ def get_camera_regions_grid(
     width = detect.width
     height = detect.height
 
-    grid_coef = 1.0 / GRID_SIZE
-
     for t in timeline:
         if t.get("source") != "tracked_object":
             continue
