@@ -1,13 +1,15 @@
 """Utils for reading and writing object detection data."""
 
+import datetime
 import logging
 
 import cv2
 import numpy as np
+from peewee import DoesNotExist
 
 from frigate.config import CameraConfig, ModelConfig
 from frigate.detectors.detector_config import PixelFormatEnum
-from frigate.models import Timeline
+from frigate.models import Event, Regions, Timeline
 from frigate.util.image import (
     calculate_region,
     yuv_region_2_bgr,
@@ -17,19 +19,40 @@ from frigate.util.image import (
 
 logger = logging.getLogger(__name__)
 
+GRID_SIZE = 8
 
-def get_camera_regions_grid(
-    camera: CameraConfig, grid_size: int = 8
-) -> list[list[dict[str, any]]]:
+
+def get_camera_regions_grid(camera: CameraConfig) -> list[list[dict[str, any]]]:
     """Build a grid of expected region sizes for a camera."""
-    # create a grid
-    grid = []
-    for x in range(grid_size):
-        row = []
-        for y in range(grid_size):
-            row.append({"sizes": []})
-        grid.append(row)
+    # get grid from db if available
+    try:
+        regions: Regions = Regions.select().where(Regions.camera == camera.name).get()
+        logger.error(f"The existing grid for  is {regions.grid}")
+        grid = regions.grid
+        last_update = regions.last_update
+    except DoesNotExist:
+        grid = []
+        for x in range(GRID_SIZE):
+            row = []
+            for y in range(GRID_SIZE):
+                row.append({"sizes": []})
+            grid.append(row)
+        last_update = 0
 
+    # get events for timeline entries
+    events = (
+        Event.select(Event.id)
+        .where(Event.camera == camera.name)
+        .where(Event.false_positive != True)
+        .where(Event.start_time > last_update)
+    )
+    valid_event_ids = [e["id"] for e in events.dicts()]
+
+    # no new events, return as is
+    if not valid_event_ids:
+        return grid
+
+    new_update = datetime.datetime.now().timestamp()
     timeline = (
         Timeline.select(
             *[
@@ -38,20 +61,15 @@ def get_camera_regions_grid(
                 Timeline.data,
             ]
         )
-        .where(Timeline.camera == camera.name)
+        .where(Timeline.source_id << valid_event_ids)
         .limit(10000)
         .dicts()
     )
 
-    if not timeline:
-        return grid
-
-    logger.debug(f"There are {len(timeline)} entries for {camera.name}")
     width = camera.detect.width
     height = camera.detect.height
 
-    logger.debug(f"The size of grid is {len(grid)} x {len(grid[grid_size - 1])}")
-    grid_coef = 1.0 / grid_size
+    grid_coef = 1.0 / GRID_SIZE
 
     for t in timeline:
         if t.get("source") != "tracked_object":
@@ -63,8 +81,8 @@ def get_camera_regions_grid(
         x = box[0] + (box[2] / 2)
         y = box[1] + (box[3] / 2)
 
-        x_pos = int(x * grid_size)
-        y_pos = int(y * grid_size)
+        x_pos = int(x * GRID_SIZE)
+        y_pos = int(y * GRID_SIZE)
 
         calculated_region = calculate_region(
             (height, width),
@@ -80,8 +98,8 @@ def get_camera_regions_grid(
             (calculated_region[2] - calculated_region[0]) / width
         )
 
-    for x in range(grid_size):
-        for y in range(grid_size):
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
             cell = grid[x][y]
             logger.debug(
                 f"stats for cell {x * grid_coef * width},{y * grid_coef * height} -> {(x + 1) * grid_coef * width},{(y + 1) * grid_coef * height} :: {len(cell['sizes'])} objects"
@@ -95,6 +113,21 @@ def get_camera_regions_grid(
             logger.debug(f"std dev: {std_dev} mean: {mean}")
             cell["std_dev"] = std_dev
             cell["mean"] = mean
+
+    # update db with new grid
+    region = {
+        Regions.camera: camera.name,
+        Regions.grid: grid,
+        Regions.last_update: new_update,
+    }
+    (
+        Regions.insert(region)
+        .on_conflict(
+            conflict_target=[Regions.camera],
+            update=region,
+        )
+        .execute()
+    )
 
     return grid
 
@@ -121,8 +154,13 @@ def get_region_from_grid(
     region_grid: list[list[dict[str, any]]],
 ) -> list[int]:
     """Get a region for a box based on the region grid."""
-    box = calculate_region(frame_shape, cluster[0], cluster[1], cluster[2], cluster[3], min_region)
-    centroid = (box[0] + (min(frame_shape[1], box[2]) - box[0]) / 2, box[1] + (min(frame_shape[0], box[3]) - box[1]) / 2)
+    box = calculate_region(
+        frame_shape, cluster[0], cluster[1], cluster[2], cluster[3], min_region
+    )
+    centroid = (
+        box[0] + (min(frame_shape[1], box[2]) - box[0]) / 2,
+        box[1] + (min(frame_shape[0], box[3]) - box[1]) / 2,
+    )
     grid_x = int(centroid[0] / frame_shape[1] * len(region_grid))
     grid_y = int(centroid[1] / frame_shape[0] * len(region_grid))
 
@@ -135,7 +173,11 @@ def get_region_from_grid(
     calc_size = (box[2] - box[0]) / frame_shape[1]
 
     # if region is within expected size, don't resize
-    if (cell["mean"] - cell["std_dev"]) <= calc_size <= (cell["mean"] + cell["std_dev"]):
+    if (
+        (cell["mean"] - cell["std_dev"])
+        <= calc_size
+        <= (cell["mean"] + cell["std_dev"])
+    ):
         return box
     # TODO not sure how to handle case where cluster is larger than expected region
     elif calc_size > (cell["mean"] + cell["std_dev"]):

@@ -27,7 +27,7 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'CREATE TABLE IF NOT EXISTS "regions" ("camera" VARCHAR(20) NOT NULL PRIMARY KEY, "last_updated" DATETIME NOT NULL, "grid" JSON)'
+        'CREATE TABLE IF NOT EXISTS "regions" ("camera" VARCHAR(20) NOT NULL PRIMARY KEY, "last_update" DATETIME NOT NULL, "grid" JSON)'
     )
 
 
