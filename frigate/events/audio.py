@@ -14,7 +14,7 @@ import requests
 from setproctitle import setproctitle
 
 from frigate.comms.inter_process import InterProcessCommunicator
-from frigate.config import CameraConfig, FrigateConfig
+from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
@@ -39,13 +39,29 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-def get_ffmpeg_command(input_args: list[str], input_path: str) -> list[str]:
-    return get_ffmpeg_arg_list(
-        f"ffmpeg {{}} -i {{}} -f {AUDIO_FORMAT} -ar {AUDIO_SAMPLE_RATE} -ac 1 -y {{}}".format(
-            " ".join(input_args),
-            input_path,
+def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
+    ffmpeg_input: CameraInput = [i for i in ffmpeg.inputs if "audio" in i.roles][0]
+    input_args = get_ffmpeg_arg_list(ffmpeg.global_args) + (
+        parse_preset_input(ffmpeg_input.input_args, 1)
+        or ffmpeg_input.input_args
+        or parse_preset_input(ffmpeg.input_args, 1)
+        or ffmpeg.input_args
+    )
+    return (
+        ["ffmpeg", "-vn"]
+        + input_args
+        + ["-i"]
+        + [ffmpeg_input.path]
+        + [
+            "-f",
+            f"{AUDIO_FORMAT}",
+            "-ar",
+            f"{AUDIO_SAMPLE_RATE}",
+            "-ac",
+            "1",
+            "-y",
             "pipe:",
-        )
+        ]
     )
 
 
@@ -173,11 +189,7 @@ class AudioEventMaintainer(threading.Thread):
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
         self.chunk_size = int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE * 2))
         self.logger = logging.getLogger(f"audio.{self.config.name}")
-        self.ffmpeg_cmd = get_ffmpeg_command(
-            get_ffmpeg_arg_list(self.config.ffmpeg.global_args)
-            + parse_preset_input("preset-rtsp-audio-only", 1),
-            [i.path for i in self.config.ffmpeg.inputs if "audio" in i.roles][0],
-        )
+        self.ffmpeg_cmd = get_ffmpeg_command(self.config.ffmpeg)
         self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
         self.audio_listener = None
 

@@ -55,24 +55,16 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    # use debian bookworm for AMD hwaccel packages
+    # use debian bookworm for hwaccel packages
     echo 'deb https://deb.debian.org/debian bookworm main contrib' >/etc/apt/sources.list.d/debian-bookworm.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        mesa-va-drivers radeontop
-    rm -f /etc/apt/sources.list.d/debian-bookworm.list
-
-    # Use debian testing repo only for intel hwaccel packages
-    echo 'deb http://deb.debian.org/debian testing main non-free' >/etc/apt/sources.list.d/debian-testing.list
-    apt-get -qq update
-    # intel-opencl-icd specifically for GPU support in OpenVino
-    apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd \
-        libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 intel-gpu-tools
+        mesa-va-drivers radeontop libva-drm2 intel-media-va-driver-non-free i965-va-driver libmfx1 intel-gpu-tools
     # something about this dependency requires it to be installed in a separate call rather than in the line above
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver-shaders
-    rm -f /etc/apt/sources.list.d/debian-testing.list
+    rm -f /etc/apt/sources.list.d/debian-bookworm.list
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then

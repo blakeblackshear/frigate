@@ -49,6 +49,9 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
 
+    def is_calibrating(self):
+        return self.calibrating
+
     def detect(self, frame):
         motion_boxes = []
 
@@ -141,7 +144,6 @@ class ImprovedMotionDetector(MotionDetector):
 
         # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
         if self.calibrating or pct_motion > self.config.lightning_threshold:
-            motion_boxes = []
             self.calibrating = True
 
         if self.save_images:

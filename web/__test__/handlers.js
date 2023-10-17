@@ -86,4 +86,19 @@ export const handlers = [
       ])
     );
   }),
+  rest.get(`api/labels`, (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json([
+        'person',
+        'car',
+      ])
+    );
+  }),
+  rest.get(`api/go2rtc`, (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({"config_path":"/dev/shm/go2rtc.yaml","host":"frigate.yourdomain.local","rtsp":{"listen":"0.0.0.0:8554","default_query":"mp4","PacketSize":0},"version":"1.7.1"})
+    );
+  }),
 ];
