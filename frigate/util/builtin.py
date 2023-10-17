@@ -266,6 +266,6 @@ def find_by_key(dictionary, target_key):
 
 def get_tomorrow_at_2() -> datetime.datetime:
     tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
-    tomorrow.hour = 2
+    tomorrow.replace(hour=2, minute=0, second=0)
     return tomorrow
 
