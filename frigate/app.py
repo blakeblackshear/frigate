@@ -574,7 +574,7 @@ class FrigateApp:
     def start(self) -> None:
         parser = argparse.ArgumentParser(
             prog="Frigate",
-            description="Frigate is a realtime object detection package that runs on Nvidia Jetson hardware."
+            description="An NVR with realtime local object detection for IP cameras.",
         )
         parser.add_argument("--validate-config", action="store_true")
         args = parser.parse_args()
