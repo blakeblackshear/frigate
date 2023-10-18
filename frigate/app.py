@@ -163,6 +163,7 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "frame_queue": mp.Queue(maxsize=2),
+                "region_grid_queue": mp.Queue(maxsize=1),
                 "capture_process": None,
                 "process": None,
                 "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
@@ -477,6 +478,7 @@ class FrigateApp:
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
+                    self.inter_process_queue,
                     self.camera_metrics[name],
                     self.ptz_metrics[name],
                     self.region_grids[name],

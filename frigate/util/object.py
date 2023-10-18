@@ -447,7 +447,11 @@ def get_consolidated_object_detections(detected_object_groups):
     return consolidated_detections
 
 
-def get_startup_regions(frame_shape: tuple[int], region_min_size: int, region_grid: list[list[dict[str, any]]]) -> list[list[int]]:
+def get_startup_regions(
+    frame_shape: tuple[int],
+    region_min_size: int,
+    region_grid: list[list[dict[str, any]]],
+) -> list[list[int]]:
     """Get a list of regions to run on startup."""
     # return 8 most popular regions for the camera
     all_cells = np.concatenate(region_grid).flat
@@ -462,14 +466,16 @@ def get_startup_regions(frame_shape: tuple[int], region_min_size: int, region_gr
         x = frame_shape[1] / GRID_SIZE * (0.5 + cell["x"])
         y = frame_shape[0] / GRID_SIZE * (0.5 + cell["y"])
         size = cell["mean"] * frame_shape[1]
-        regions.append(calculate_region(
-            frame_shape,
-            x - size / 2,
-            y - size / 2,
-            x + size / 2,
-            y + size / 2,
-            region_min_size,
-            multiplier=1,
-        ))
+        regions.append(
+            calculate_region(
+                frame_shape,
+                x - size / 2,
+                y - size / 2,
+                x + size / 2,
+                y + size / 2,
+                region_min_size,
+                multiplier=1,
+            )
+        )
 
     return regions

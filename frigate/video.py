@@ -14,7 +14,12 @@ import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
-from frigate.const import ALL_ATTRIBUTE_LABELS, ATTRIBUTE_LABEL_MAP, CACHE_DIR
+from frigate.const import (
+    ALL_ATTRIBUTE_LABELS,
+    ATTRIBUTE_LABEL_MAP,
+    CACHE_DIR,
+    REQUEST_REGION_GRID,
+)
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
@@ -380,6 +385,7 @@ def track_camera(
     detection_queue,
     result_connection,
     detected_objects_queue,
+    inter_process_queue,
     process_info,
     ptz_metrics,
     region_grid,
@@ -397,6 +403,7 @@ def track_camera(
     listen()
 
     frame_queue = process_info["frame_queue"]
+    region_grid_queue = process_info["region_grid_queue"]
     detection_enabled = process_info["detection_enabled"]
     motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
@@ -425,7 +432,9 @@ def track_camera(
 
     process_frames(
         name,
+        inter_process_queue,
         frame_queue,
+        region_grid_queue,
         frame_shape,
         model_config,
         config.detect,
@@ -493,7 +502,9 @@ def detect(
 
 def process_frames(
     camera_name: str,
+    inter_process_queue: mp.Queue,
     frame_queue: mp.Queue,
+    region_grid_queue: mp.Queue,
     frame_shape,
     model_config: ModelConfig,
     detect_config: DetectConfig,
@@ -525,8 +536,17 @@ def process_frames(
     region_min_size = get_min_region_size(model_config)
 
     while not stop_event.is_set():
-        if datetime.datetime.now() > next_region_update:
-            # TODO signal update
+        if (
+            datetime.datetime.now().astimezone(datetime.timezone.utc)
+            > next_region_update
+        ):
+            inter_process_queue.put((REQUEST_REGION_GRID, camera_name))
+
+            try:
+                region_grid = region_grid_queue.get(True, 10)
+            except queue.Empty:
+                logger.error(f"Unable to get updated region grid for {camera_name}")
+
             next_region_update = get_tomorrow_at_2()
 
         try:
@@ -627,7 +647,9 @@ def process_frames(
 
             # if starting up, get the next startup scan region
             if startup_scan:
-                for region in get_startup_regions(frame_shape, region_min_size, region_grid):
+                for region in get_startup_regions(
+                    frame_shape, region_min_size, region_grid
+                ):
                     regions.append(region)
                 startup_scan = False
 
