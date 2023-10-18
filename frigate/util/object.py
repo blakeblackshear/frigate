@@ -166,8 +166,8 @@ def get_region_from_grid(
         box[0] + (min(frame_shape[1], box[2]) - box[0]) / 2,
         box[1] + (min(frame_shape[0], box[3]) - box[1]) / 2,
     )
-    grid_x = int(centroid[0] / frame_shape[1] * len(region_grid))
-    grid_y = int(centroid[1] / frame_shape[0] * len(region_grid))
+    grid_x = int(centroid[0] / frame_shape[1] * GRID_SIZE)
+    grid_y = int(centroid[1] / frame_shape[0] * GRID_SIZE)
 
     cell = region_grid[grid_x][grid_y]
 
