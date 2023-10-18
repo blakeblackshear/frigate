@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import logging
 import multiprocessing as mp
@@ -571,6 +572,13 @@ class FrigateApp:
             )
 
     def start(self) -> None:
+        parser = argparse.ArgumentParser(
+            prog="Frigate",
+            description="Frigate is a realtime object detection package that runs on Nvidia Jetson hardware."
+        )
+        parser.add_argument("--validate-config", action="store_true")
+        args = parser.parse_args()
+
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
         try:
@@ -608,6 +616,13 @@ class FrigateApp:
             print(e)
             self.log_process.terminate()
             sys.exit(1)
+
+        if args.validate_config:
+            print("*************************************************************")
+            print("*** Your config file is valid.                            ***")
+            print("*************************************************************")
+            sys.exit(0)
+
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
