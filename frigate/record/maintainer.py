@@ -439,14 +439,14 @@ class RecordingMaintainer(threading.Thread):
                 except queue.Empty:
                     q_size = self.object_recordings_info_queue.qsize()
                     if q_size > camera_count:
-                        logger.warning(
-                            f"object_recordings_info loop queue not empty ({q_size}) - recording segments may be missing"
+                        logger.debug(
+                            f"object_recordings_info loop queue not empty ({q_size})."
                         )
                     break
 
             if stale_frame_count > 0:
-                logger.error(
-                    f"Found {stale_frame_count} old frames, segments from recordings may be missing"
+                logger.warning(
+                    f"Found {stale_frame_count} old frames, segments from recordings may be missing."
                 )
 
             # empty the audio recordings info queue if audio is enabled
@@ -474,8 +474,8 @@ class RecordingMaintainer(threading.Thread):
                     except queue.Empty:
                         q_size = self.audio_recordings_info_queue.qsize()
                         if q_size > camera_count:
-                            logger.warning(
-                                f"object_recordings_info loop audio queue not empty ({q_size}) - recording segments may be missing"
+                            logger.debug(
+                                f"object_recordings_info loop audio queue not empty ({q_size})."
                             )
                         break
 
