@@ -456,6 +456,11 @@ class FrigateApp:
         logger.info(f"Output process started: {output_processor.pid}")
 
     def init_historical_regions(self) -> None:
+        # delete region grids for removed or renamed cameras
+        cameras = list(self.config.cameras.keys())
+        Regions.delete().where(~(Regions.camera << cameras)).execute()
+
+        # create or update region grids for each camera
         for camera in self.config.cameras.values():
             self.region_grids[camera.name] = get_camera_regions_grid(
                 camera.name, camera.detect
