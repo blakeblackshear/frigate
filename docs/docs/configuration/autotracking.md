@@ -141,7 +141,9 @@ In security and surveillance, it's common to use "spotter" cameras in combinatio
 
 ### The autotracker loses track of my object. Why?
 
-There are many reasons this could be the case. If you are using experimental zooming, your `zoom_factor` value might be too high, the object might be traveling too quickly, the scene might be too dark, there are not enough details in the scene (for example, a PTZ looking down on a driveway or other monotone background without any hard lines), or the scene is otherwise less than optimal for Frigate to maintain tracking.
+There are many reasons this could be the case. If you are using experimental zooming, your `zoom_factor` value might be too high, the object might be traveling too quickly, the scene might be too dark, there are not enough details in the scene (for example, a PTZ looking down on a driveway or other monotone background without a sufficient number of hard edges or corners), or the scene is otherwise less than optimal for Frigate to maintain tracking.
+
+Your camera's shutter speed may also be set too low so that blurring occurs with motion. Check your camera's firmware to see if you can increase the shutter speed.
 
 Watching Frigate's debug view can help to determine a possible cause. The autotracked object will have a thicker colored box around it.
 
