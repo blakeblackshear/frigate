@@ -406,6 +406,7 @@ class RecordingMaintainer(threading.Thread):
         return None
 
     def run(self) -> None:
+        camera_count = len(self.config.cameras.keys())
         # Check for new files every 5 seconds
         wait_time = 0.0
         while not self.stop_event.wait(wait_time):
@@ -421,7 +422,7 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
-                    ) = self.object_recordings_info_queue.get(True, timeout=0.1)
+                    ) = self.object_recordings_info_queue.get(True, timeout=0.01)
 
                     if frame_time < run_start - stale_frame_count_threshold:
                         stale_frame_count += 1
@@ -437,7 +438,7 @@ class RecordingMaintainer(threading.Thread):
                         )
                 except queue.Empty:
                     q_size = self.object_recordings_info_queue.qsize()
-                    if q_size > 5:
+                    if q_size > camera_count:
                         logger.warning(
                             f"object_recordings_info loop queue not empty ({q_size}) - recording segments may be missing"
                         )
@@ -458,7 +459,7 @@ class RecordingMaintainer(threading.Thread):
                             camera,
                             frame_time,
                             dBFS,
-                        ) = self.audio_recordings_info_queue.get(True, timeout=0.1)
+                        ) = self.audio_recordings_info_queue.get(True, timeout=0.01)
 
                         if frame_time < run_start - stale_frame_count_threshold:
                             stale_frame_count += 1
@@ -472,7 +473,7 @@ class RecordingMaintainer(threading.Thread):
                             )
                     except queue.Empty:
                         q_size = self.audio_recordings_info_queue.qsize()
-                        if q_size > 5:
+                        if q_size > camera_count:
                             logger.warning(
                                 f"object_recordings_info loop audio queue not empty ({q_size}) - recording segments may be missing"
                             )
