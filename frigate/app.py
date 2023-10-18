@@ -36,7 +36,7 @@ from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings, RecordingsToDelete, Timeline
+from frigate.models import Event, Recordings, RecordingsToDelete, Regions, Timeline
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output import output_frames
@@ -49,6 +49,7 @@ from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
@@ -69,6 +70,7 @@ class FrigateApp:
         self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
+        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -161,6 +163,7 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "frame_queue": mp.Queue(maxsize=2),
+                "region_grid_queue": mp.Queue(maxsize=1),
                 "capture_process": None,
                 "process": None,
                 "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
@@ -327,7 +330,7 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, RecordingsToDelete, Timeline]
+        models = [Event, Recordings, RecordingsToDelete, Regions, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
@@ -452,6 +455,17 @@ class FrigateApp:
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
 
+    def init_historical_regions(self) -> None:
+        # delete region grids for removed or renamed cameras
+        cameras = list(self.config.cameras.keys())
+        Regions.delete().where(~(Regions.camera << cameras)).execute()
+
+        # create or update region grids for each camera
+        for camera in self.config.cameras.values():
+            self.region_grids[camera.name] = get_camera_regions_grid(
+                camera.name, camera.detect
+            )
+
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
@@ -469,8 +483,10 @@ class FrigateApp:
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
+                    self.inter_process_queue,
                     self.camera_metrics[name],
                     self.ptz_metrics[name],
+                    self.region_grids[name],
                 ),
             )
             camera_process.daemon = True
@@ -611,6 +627,7 @@ class FrigateApp:
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
+        self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()

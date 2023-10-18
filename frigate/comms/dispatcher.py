@@ -5,10 +5,11 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from frigate.config import FrigateConfig
-from frigate.const import INSERT_MANY_RECORDINGS
+from frigate.const import INSERT_MANY_RECORDINGS, REQUEST_REGION_GRID
 from frigate.models import Recordings
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,11 @@ class Dispatcher:
             restart_frigate()
         elif topic == INSERT_MANY_RECORDINGS:
             Recordings.insert_many(payload).execute()
+        elif topic == REQUEST_REGION_GRID:
+            camera = payload
+            self.camera_metrics[camera]["region_grid_queue"].put(
+                get_camera_regions_grid(camera, self.config.cameras[camera].detect)
+            )
         else:
             self.publish(topic, payload, retain=False)
 

@@ -6,10 +6,11 @@ from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 
 from frigate.util.image import intersection
-from frigate.video import (
+from frigate.util.object import (
     get_cluster_boundary,
     get_cluster_candidates,
     get_cluster_region,
+    get_region_from_grid,
 )
 
 
@@ -190,3 +191,36 @@ class TestObjectBoundingBoxes(unittest.TestCase):
 
         assert intersection(box_a, box_b) == None
         assert intersection(box_b, box_c) == (899, 128, 985, 151)
+
+
+class TestRegionGrid(unittest.TestCase):
+    def setUp(self) -> None:
+        pass
+
+    def test_region_in_range(self):
+        """Test that region is kept at minimal size when within std dev."""
+        frame_shape = (720, 1280)
+        box = [450, 450, 550, 550]
+        region_grid = [
+            [],
+            [],
+            [],
+            [{}, {}, {}, {}, {}, {"sizes": [0.25], "mean": 0.26, "std_dev": 0.01}],
+        ]
+
+        region = get_region_from_grid(frame_shape, box, 320, region_grid)
+        assert region[2] - region[0] == 320
+
+    def test_region_out_of_range(self):
+        """Test that region is upsized when outside of std dev."""
+        frame_shape = (720, 1280)
+        box = [450, 450, 550, 550]
+        region_grid = [
+            [],
+            [],
+            [],
+            [{}, {}, {}, {}, {}, {"sizes": [0.5], "mean": 0.5, "std_dev": 0.1}],
+        ]
+
+        region = get_region_from_grid(frame_shape, box, 320, region_grid)
+        assert region[2] - region[0] > 320
