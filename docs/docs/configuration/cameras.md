@@ -91,5 +91,6 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink E1 Pro           |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink E1 Zoom          |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
+| Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
