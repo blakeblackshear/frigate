@@ -350,33 +350,41 @@ class PtzAutoTracker:
 
                 zoom_in_values.append(self.ptz_metrics[camera]["ptz_zoom_level"].value)
 
-                # relative move to -0.01
-                self.onvif._move_relative(
-                    camera,
-                    0,
-                    0,
-                    -1e-2,
-                    1,
-                )
+                if (
+                    self.config.cameras[camera].onvif.autotracking.zooming
+                    == ZoomingModeEnum.relative
+                ):
+                    # relative move to -0.01
+                    self.onvif._move_relative(
+                        camera,
+                        0,
+                        0,
+                        -1e-2,
+                        1,
+                    )
 
-                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
-                    self.onvif.get_camera_status(camera)
+                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                        self.onvif.get_camera_status(camera)
 
-                zoom_out_values.append(self.ptz_metrics[camera]["ptz_zoom_level"].value)
+                    zoom_out_values.append(
+                        self.ptz_metrics[camera]["ptz_zoom_level"].value
+                    )
 
-                # relative move to 0.01
-                self.onvif._move_relative(
-                    camera,
-                    0,
-                    0,
-                    1e-2,
-                    1,
-                )
+                    # relative move to 0.01
+                    self.onvif._move_relative(
+                        camera,
+                        0,
+                        0,
+                        1e-2,
+                        1,
+                    )
 
-                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
-                    self.onvif.get_camera_status(camera)
+                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                        self.onvif.get_camera_status(camera)
 
-                zoom_in_values.append(self.ptz_metrics[camera]["ptz_zoom_level"].value)
+                    zoom_in_values.append(
+                        self.ptz_metrics[camera]["ptz_zoom_level"].value
+                    )
 
             self.ptz_metrics[camera]["ptz_max_zoom"].value = max(zoom_in_values)
             self.ptz_metrics[camera]["ptz_min_zoom"].value = min(zoom_out_values)
@@ -986,10 +994,14 @@ class PtzAutoTracker:
                         camera, obj, obj.obj_data["box"], debug_zoom
                     )
                 ) is not None:
+                    level = (
+                        self.ptz_metrics[camera]["ptz_max_zoom"].value
+                        - self.ptz_metrics[camera]["ptz_min_zoom"].value
+                    ) / 10
                     if result:
-                        zoom = min(1.0, current_zoom_level + 0.1)
+                        zoom = min(1.0, current_zoom_level + level)
                     else:
-                        zoom = max(0.0, current_zoom_level - 0.2)
+                        zoom = max(0.0, current_zoom_level - 2 * level)
 
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
@@ -1032,8 +1044,10 @@ class PtzAutoTracker:
                     )
                     logger.debug(f"{camera}: Zoom calculation: {zoom}")
                     if not result:
-                        zoom = -(1 - abs(zoom)) if zoom > 0 else -(zoom + 1)
+                        # zoom out with special condition if zooming out because of velocity, edges, etc.
+                        zoom = -(1 - zoom) if zoom > 0 else -(zoom + 1)
                     if result:
+                        # zoom in
                         zoom = 1 - zoom
 
         logger.debug(f"{camera}: Zooming: {result} Zoom amount: {zoom}")

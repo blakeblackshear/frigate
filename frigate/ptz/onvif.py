@@ -201,7 +201,10 @@ class OnvifController:
                     "relative_zoom_range"
                 ] = ptz_config.Spaces.RelativeZoomTranslationSpace[0]
             except Exception:
-                if self.config.cameras[camera_name].onvif.autotracking.zooming:
+                if (
+                    self.config.cameras[camera_name].onvif.autotracking.zooming
+                    == ZoomingModeEnum.relative
+                ):
                     self.config.cameras[camera_name].onvif.autotracking.zooming = False
                     logger.warning(
                         f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
@@ -296,7 +299,7 @@ class OnvifController:
         self.cams[camera_name]["active"] = True
         self.ptz_metrics[camera_name]["ptz_stopped"].clear()
         logger.debug(
-            f"{camera_name} PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
+            f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
         )
         self.ptz_metrics[camera_name]["ptz_start_time"].value = self.ptz_metrics[
             camera_name

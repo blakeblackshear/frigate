@@ -107,6 +107,8 @@ Before restarting Frigate, you should set `calibrate_on_startup` in your config 
 
 You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic. If you change your `return_preset` in any way or if you change your camera's detect `fps` value, a recalibration is also recommended.
 
+If you initially calibrate with zooming disabled and then enable zooming at a later point, you should also recalibrate.
+
 ## Best practices and considerations
 
 Every PTZ camera is different, so autotracking may not perform ideally in every situation. This experimental feature was initially developed using an EmpireTech/Dahua SD1A404XB-GNR.
@@ -119,7 +121,7 @@ A fast [detector](object_detectors.md) is recommended. CPU detectors will not pe
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
-Some users have found it helpful to adjust the zone `inertia` value or the camera's `max_disappeared` parameter as well. See the [configuration reference](index.md).
+Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](index.md).
 
 ## Zooming
 
@@ -131,7 +133,7 @@ Relative zooming attempts to make a zoom movement concurrently with any pan/tilt
 
 You can optionally adjust the `zoom_factor` for your camera in your configuration file. Lower values will leave more space from the scene around the tracked object while higher values will cause your camera to zoom in more on the object. However, keep in mind that Frigate needs a fair amount of pixels and scene details outside of the bounding box of the tracked object to estimate the motion of your camera. If the object is taking up too much of the frame, Frigate will not be able to track the motion of the camera and your object will be lost.
 
-The range of this option is from 0.1 to 0.75. The default value of 0.3 should be sufficient for most users. Because every PTZ and scene is different, you should experiment to determine what works best for you.
+The range of this option is from 0.1 to 0.75. The default value of 0.3 is conservative and should be sufficient for most users. Because every PTZ and scene is different, you should experiment to determine what works best for you.
 
 ## Usage applications
 
@@ -157,4 +159,4 @@ This is often caused by the same reason as above - the `MoveStatus` ONVIF parame
 
 ### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
 
-To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high or the scene around your detected object does not have enough details (like hard edges or color variatons). Try reducing `zoom_factor` or finding a way to alter the scene around your object.
+To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variatons), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.
