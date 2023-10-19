@@ -20,6 +20,7 @@ from norfair.camera_motion import (
 
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
 from frigate.const import (
+    AUTOTRACKING_MAX_AREA_RATIO,
     AUTOTRACKING_MAX_MOVE_METRICS,
     AUTOTRACKING_MOTION_MAX_POINTS,
     AUTOTRACKING_MOTION_MIN_DISTANCE,
@@ -42,7 +43,7 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     # ptz_start_time is initialized to 0 on startup and only changes
     # when autotracking movements are made
     return (ptz_start_time != 0.0 and frame_time > ptz_start_time) and (
-        ptz_stop_time == 0.0 or (ptz_start_time <= frame_time <= ptz_stop_time)
+        ptz_stop_time == 0.0 or (ptz_start_time <= frame_time < ptz_stop_time)
     )
 
 
@@ -213,7 +214,10 @@ class PtzAutoTracker:
         self.tracked_object_history[camera] = deque(
             maxlen=round(camera_config.detect.fps * 1.5)
         )
-        self.tracked_object_metrics[camera] = {}
+        self.tracked_object_metrics[camera] = {
+            "max_target_box": AUTOTRACKING_MAX_AREA_RATIO
+            ** (1 / self.zoom_factor[camera])
+        }
 
         self.calibrating[camera] = False
         self.move_metrics[camera] = []
@@ -408,7 +412,12 @@ class PtzAutoTracker:
             IQR = Q3 - Q1
             lower_bound = Q1 - 1.5 * IQR
             upper_bound = Q3 + 1.5 * IQR
-            return [x for x in data if lower_bound <= x <= upper_bound]
+            filtered_data = [x for x in data if lower_bound <= x <= upper_bound]
+
+            removed_values = [x for x in data if x not in filtered_data]
+            logger.debug(f"{camera}: Removed area outliers: {removed_values}")
+
+            return filtered_data
 
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
@@ -416,17 +425,19 @@ class PtzAutoTracker:
 
         # Extract areas and calculate weighted average
         areas = [obj["area"] for obj in self.tracked_object_history[camera]]
-        filtered_areas = remove_outliers(areas)
+
+        filtered_areas = (
+            remove_outliers(areas)
+            if len(areas) >= self.config.cameras[camera].detect.fps / 2
+            else areas
+        )
+
         weights = np.arange(1, len(filtered_areas) + 1)
         weighted_area = np.average(filtered_areas, weights=weights)
 
         self.tracked_object_metrics[camera]["target_box"] = (
             weighted_area / (camera_width * camera_height)
         ) ** self.zoom_factor[camera]
-
-        self.tracked_object_metrics[camera]["max_target_box"] = self.zoom_factor[
-            camera
-        ] ** (1 / self.zoom_factor[camera])
 
         # self.tracked_object_metrics[camera]["target_box"] = statistics.median(
         #     [obj["area"] for obj in self.tracked_object_history[camera]]
@@ -584,8 +595,10 @@ class PtzAutoTracker:
             valid_arrays = [array for array in arrays if is_valid(array[1] - array[0])]
             return valid_arrays
 
-        bbox_start = obj.previous["box"]
-        bbox_end = obj.obj_data["box"]
+        centroid_x = int((obj.previous["box"][0] + obj.previous["box"][2]) / 2.0)
+        centroid_y = int((obj.previous["box"][1] + obj.previous["box"][3]) / 2.0)
+        bbox_start = [centroid_x, centroid_y]
+        bbox_end = obj.obj_data["centroid"]
         start_time = obj.previous["frame_time"]
         end_time = obj.obj_data["frame_time"]
         if ptz_moving_at_frame_time(
@@ -594,7 +607,7 @@ class PtzAutoTracker:
             self.ptz_metrics[camera]["ptz_stop_time"].value,
         ):
             logger.debug(
-                f"{camera} ptz moving at velocity check start time: True {start_time}"
+                f"{camera}: ptz moving at velocity check start time: True {start_time}"
             )
         if ptz_moving_at_frame_time(
             end_time,
@@ -602,14 +615,16 @@ class PtzAutoTracker:
             self.ptz_metrics[camera]["ptz_stop_time"].value,
         ):
             logger.debug(
-                f"{camera} ptz moving at velocity check end time: True {start_time}"
+                f"{camera}: ptz moving at velocity check end time: True {start_time}"
             )
         # add small amount to avoid division by zero
         velocity = [
             round((end - start) / ((end_time - start_time) * camera_fps + 1e-6))
             for start, end in zip(bbox_start, bbox_end)
         ]
-        logger.debug(f"{camera}: Calculated velocity: {velocity}")
+        logger.debug(
+            f"{camera}: Calculated velocity: {velocity}, start: {start_time}, end: {end_time}, diff: {end_time-start_time}, frames: {int((end_time-start_time)*camera_fps)}"
+        )
 
         velocities = obj.obj_data["estimate_velocity"]
         diff = np.abs(velocities[1] - velocities[0])
@@ -726,12 +741,24 @@ class PtzAutoTracker:
         )
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
-        zoom_out_hysteresis = self.tracked_object_metrics[camera]["target_box"] > (
-            self.tracked_object_metrics[camera]["original_target_box"]
+        zoom_out_hysteresis = (
+            self.tracked_object_metrics[camera]["target_box"]
+            > (
+                self.tracked_object_metrics[camera]["original_target_box"]
+                * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
+            )
+            or self.tracked_object_metrics[camera]["target_box"]
+            > self.tracked_object_metrics[camera]["max_target_box"]
             * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
         )
-        zoom_in_hysteresis = self.tracked_object_metrics[camera]["target_box"] < (
-            self.tracked_object_metrics[camera]["original_target_box"]
+        zoom_in_hysteresis = (
+            self.tracked_object_metrics[camera]["target_box"]
+            < (
+                self.tracked_object_metrics[camera]["original_target_box"]
+                * AUTOTRACKING_ZOOM_IN_HYSTERESIS
+            )
+            or self.tracked_object_metrics[camera]["target_box"]
+            < self.tracked_object_metrics[camera]["max_target_box"]
             * AUTOTRACKING_ZOOM_IN_HYSTERESIS
         )
 
@@ -741,7 +768,7 @@ class PtzAutoTracker:
         # debug zooming
         if debug_zooming:
             logger.debug(
-                f"{camera}: Zoom test: far from edges: count: {touching_frame_edges} left: {bb_left < edge_threshold * camera_width}, right: {bb_right > (1 - edge_threshold) * camera_width}, top: {bb_top < edge_threshold * camera_height}, bottom: {bb_bottom > (1 - edge_threshold) * camera_height}"
+                f"{camera}: Zoom test: touching edges: count: {touching_frame_edges} left: {bb_left < edge_threshold * camera_width}, right: {bb_right > (1 - edge_threshold) * camera_width}, top: {bb_top < edge_threshold * camera_height}, bottom: {bb_bottom > (1 - edge_threshold) * camera_height}"
             )
             logger.debug(
                 f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
@@ -758,10 +785,10 @@ class PtzAutoTracker:
             logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
             logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")
             logger.debug(
-                f'{camera}: Zoom test: zoom in hysteresis limit: {zoom_in_hysteresis} value: {AUTOTRACKING_ZOOM_IN_HYSTERESIS} original: {self.tracked_object_metrics[camera]["original_target_box"]} target: {self.tracked_object_metrics[camera]["target_box"]}'
+                f'{camera}: Zoom test: zoom in hysteresis limit: {zoom_in_hysteresis} value: {AUTOTRACKING_ZOOM_IN_HYSTERESIS} original: {self.tracked_object_metrics[camera]["original_target_box"]} max: {self.tracked_object_metrics[camera]["max_target_box"]} target: {self.tracked_object_metrics[camera]["target_box"]}'
             )
             logger.debug(
-                f'{camera}: Zoom test: zoom out hysteresis limit: {zoom_out_hysteresis} value: {AUTOTRACKING_ZOOM_OUT_HYSTERESIS} original: {self.tracked_object_metrics[camera]["original_target_box"]} target: {self.tracked_object_metrics[camera]["target_box"]}'
+                f'{camera}: Zoom test: zoom out hysteresis limit: {zoom_out_hysteresis} value: {AUTOTRACKING_ZOOM_OUT_HYSTERESIS} original: {self.tracked_object_metrics[camera]["original_target_box"]} max: {self.tracked_object_metrics[camera]["max_target_box"]} target: {self.tracked_object_metrics[camera]["target_box"]}'
             )
 
         # Zoom in conditions (and)
@@ -888,8 +915,13 @@ class PtzAutoTracker:
         # relative zooming concurrently with pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.relative:
             # this is our initial zoom in on a new object
-            if not self.tracked_object_metrics[camera]:
+            if "target_box" not in self.tracked_object_metrics[camera]:
                 zoom = target_box ** self.zoom_factor[camera]
+                if target_box > self.tracked_object_metrics[camera]["max_target_box"]:
+                    zoom = -(1 - zoom)
+                logger.debug(
+                    f"{camera}: target box: {target_box}, max: {self.tracked_object_metrics[camera]['max_target_box']}, calc zoom: {zoom}"
+                )
             else:
                 if (
                     result := self._should_zoom_in(
@@ -902,15 +934,19 @@ class PtzAutoTracker:
                     )
                 ) is not None:
                     # zoom value
+                    limit = (
+                        self.tracked_object_metrics[camera]["original_target_box"]
+                        if self.tracked_object_metrics[camera]["target_box"]
+                        < self.tracked_object_metrics[camera]["max_target_box"]
+                        else self.tracked_object_metrics[camera]["max_target_box"]
+                    )
                     zoom = (
                         2
                         * (
-                            self.tracked_object_metrics[camera]["original_target_box"]
+                            limit
                             / (
                                 self.tracked_object_metrics[camera]["target_box"]
-                                + self.tracked_object_metrics[camera][
-                                    "original_target_box"
-                                ]
+                                + limit
                             )
                         )
                         - 1
@@ -1038,7 +1074,10 @@ class PtzAutoTracker:
                     f"{camera}: End object: {obj.obj_data['id']} {obj.obj_data['box']}"
                 )
                 self.tracked_object[camera] = None
-                self.tracked_object_metrics[camera] = {}
+                self.tracked_object_metrics[camera] = {
+                    "max_target_box": AUTOTRACKING_MAX_AREA_RATIO
+                    ** (1 / self.zoom_factor[camera])
+                }
 
     def camera_maintenance(self, camera):
         # bail and don't check anything if we're calibrating or tracking an object
