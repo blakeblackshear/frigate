@@ -600,7 +600,8 @@ def process_frames(
                     and object_tracker.disappeared[obj["id"]] == 0
                     # and it doesn't overlap with any current motion boxes when not calibrating
                     and not intersects_any(
-                        obj["box"], [] if motion_detector.is_calibrating() else motion_boxes
+                        obj["box"],
+                        [] if motion_detector.is_calibrating() else motion_boxes,
                     )
                 ]
 
