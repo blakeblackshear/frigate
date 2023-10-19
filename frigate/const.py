@@ -51,3 +51,4 @@ MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to 
 # Internal Comms Topics
 
 INSERT_MANY_RECORDINGS = "insert_many_recordings"
+REQUEST_REGION_GRID = "request_region_grid"

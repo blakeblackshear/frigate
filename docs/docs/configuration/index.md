@@ -151,6 +151,7 @@ audio:
   # Optional: Types of audio to listen for (default: shown below)
   listen:
     - bark
+    - fire_alarm
     - scream
     - speech
     - yell
@@ -323,7 +324,7 @@ motion:
   # Low values will cause things like moving shadows to be detected as motion for longer.
   # https://www.geeksforgeeks.org/background-subtraction-in-an-image-using-concept-of-running-average/
   frame_alpha: 0.01
-  # Optional: Height of the resized motion frame  (default: 50)
+  # Optional: Height of the resized motion frame  (default: 100)
   # Higher values will result in more granular motion detection at the expense of higher CPU usage.
   # Lower values result in less CPU, but small changes may not register as motion.
   frame_height: 100
@@ -361,6 +362,16 @@ record:
     #   active_objects - save all recording segments with active/moving objects
     # NOTE: this mode only applies when the days setting above is greater than 0
     mode: all
+  # Optional: Recording Export Settings
+  export:
+    # Optional: Timelapse Output Args (default: shown below).
+    # NOTE: The default args are set to fit 24 hours of recording into 1 hour playback.
+    # See https://stackoverflow.com/a/58268695 for more info on how these args work.
+    # As an example: if you wanted to go from 24 hours to 30 minutes that would be going
+    # from 86400 seconds to 1800 seconds which would be 1800 / 86400 = 0.02.
+    # The -r (framerate) dictates how smooth the output video is.
+    # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
+    timelapse_args: "-vf setpts=0.04*PTS -r 30"
   # Optional: Event recording settings
   events:
     # Optional: Number of seconds before the event to include (default: shown below)
@@ -425,7 +436,7 @@ rtmp:
   enabled: False
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.6.2)
+# Uses https://github.com/AlexxIT/go2rtc (v1.8.1)
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
@@ -516,7 +527,7 @@ cameras:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 545,1077,747,939,788,805
-        # Optional: Number of consecutive frames required for object to be considered present in the zone. Allowed values are 1-10 (default: shown below)
+        # Optional: Number of consecutive frames required for object to be considered present in the zone (default: shown below).
         inertia: 3
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
@@ -573,6 +584,23 @@ cameras:
       autotracking:
         # Optional: enable/disable object autotracking. (default: shown below)
         enabled: False
+        # Optional: calibrate the camera on startup (default: shown below)
+        # A calibration will move the PTZ in increments and measure the time it takes to move.
+        # The results are used to help estimate the position of tracked objects after a camera move.
+        # Frigate will update your config file automatically after a calibration with
+        # a "movement_weights" entry for the camera. You should then set calibrate_on_startup to False.
+        calibrate_on_startup: False
+        # Optional: the mode to use for zooming in/out on objects during autotracking. (default: shown below)
+        # Available options are: disabled, absolute, and relative
+        #   disabled - don't zoom in/out on autotracked objects, use pan/tilt only
+        #   absolute - use absolute zooming (supported by most PTZ capable cameras)
+        #   relative - use relative zooming (not supported on all PTZs, but makes concurrent pan/tilt/zoom movements)
+        zooming: disabled
+        # Optional: A value to change the behavior of zooming on autotracked objects. (default: shown below)
+        # A lower value will keep more of the scene in view around a tracked object.
+        # A higher value will zoom in more on a tracked object, but Frigate may lose tracking more quickly.
+        # The value should be between 0.1 and 0.75
+        zoom_factor: 0.3
         # Optional: list of objects to track from labelmap.txt (default: shown below)
         track:
           - person
@@ -580,9 +608,11 @@ cameras:
         required_zones:
           - zone_name
         # Required: Name of ONVIF preset in camera's firmware to return to when tracking is over. (default: shown below)
-        return_preset: preset_name
+        return_preset: home
         # Optional: Seconds to delay before returning to preset. (default: shown below)
         timeout: 10
+        # Optional: Values generated automatically by a camera calibration. Do not modify these manually. (default: shown below)
+        movement_weights: []
 
     # Optional: Configuration for how to sort the cameras in the Birdseye view.
     birdseye:
@@ -624,7 +654,7 @@ ui:
 
 # Optional: Telemetry configuration
 telemetry:
-  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: shown below)
+  # Optional: Enabled network interfaces for bandwidth stats monitoring (default: empty list, let nethogs search all)
   network_interfaces:
     - eth
     - enp
@@ -639,6 +669,7 @@ telemetry:
     # Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
     # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions

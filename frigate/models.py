@@ -57,6 +57,12 @@ class Timeline(Model):  # type: ignore[misc]
     data = JSONField()  # ex: tracked object id, region, box, etc.
 
 
+class Regions(Model):  # type: ignore[misc]
+    camera = CharField(null=False, primary_key=True, max_length=20)
+    grid = JSONField()  # json blob of grid
+    last_update = DateTimeField()
+
+
 class Recordings(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)

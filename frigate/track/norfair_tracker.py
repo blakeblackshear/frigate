@@ -106,6 +106,11 @@ class NorfairTracker(ObjectTracker):
             "ymax": self.detect_config.height,
         }
 
+        # start object with a hit count of `fps` to avoid quick detection -> loss
+        next(
+            (o for o in self.tracker.tracked_objects if o.global_id == track_id)
+        ).hit_counter = self.camera_config.detect.fps
+
     def deregister(self, id, track_id):
         del self.tracked_objects[id]
         del self.disappeared[id]
@@ -273,9 +278,11 @@ class NorfairTracker(ObjectTracker):
                 min(self.detect_config.width - 1, estimate[2]),
                 min(self.detect_config.height - 1, estimate[3]),
             )
+            estimate_velocity = tuple(t.estimate_velocity.flatten().astype(int))
             obj = {
                 **t.last_detection.data,
                 "estimate": estimate,
+                "estimate_velocity": estimate_velocity,
             }
             active_ids.append(t.global_id)
             if t.global_id not in self.track_id_map:

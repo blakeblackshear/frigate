@@ -43,6 +43,15 @@ if [[ -z ${MODEL_CONVERT} ]]; then
     exit 0
 fi
 
+# Setup ENV to select GPU for conversion
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
+    if [ ! -z ${CUDA_VISIBLE_DEVICES+x} ]; then
+        PREVIOUS_CVD="$CUDA_VISIBLE_DEVICES"
+        unset CUDA_VISIBLE_DEVICES
+    fi
+    export CUDA_VISIBLE_DEVICES="$TRT_MODEL_PREP_DEVICE"
+fi
+
 # On Jetpack 4.6, the nvidia container runtime will mount several host nvidia libraries into the
 # container which should not be present in the image - if they are, TRT model generation will
 # fail or produce invalid models. Thus we must request the user to install them on the host in
@@ -87,5 +96,14 @@ do
     echo "Generated ${model}.trt in $(($(date +%s)-start)) seconds"
 done
 
+# Restore ENV after conversion
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
+    unset CUDA_VISIBLE_DEVICES
+    if [ ! -z ${PREVIOUS_CVD+x} ]; then
+        export CUDA_VISIBLE_DEVICES="$PREVIOUS_CVD"
+    fi
+fi
+
+# Print which models exist in output folder
 echo "Available tensorrt models:"
 cd ${OUTPUT_FOLDER} && ls *.trt;

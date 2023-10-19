@@ -1027,7 +1027,12 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
-                    }
+                    },
+                    "detect": {
+                        "height": 720,
+                        "width": 1280,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1082,6 +1087,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                     "snapshots": {
                         "height": 100,
                     },
@@ -1107,7 +1117,12 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
-                    }
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1131,6 +1146,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                     "snapshots": {
                         "height": 150,
@@ -1160,6 +1180,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1181,7 +1206,12 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
-                    }
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1204,6 +1234,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect", "rtmp"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                     "rtmp": {
                         "enabled": True,
@@ -1234,6 +1269,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1257,6 +1297,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1278,7 +1323,12 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
-                    }
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1301,6 +1351,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                     "live": {
                         "quality": 7,
@@ -1329,6 +1384,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1350,7 +1410,12 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
-                    }
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1374,6 +1439,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                     "timestamp_style": {"position": "bl", "thickness": 4},
                 }
@@ -1400,6 +1470,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ]
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1422,6 +1497,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                 }
             },
@@ -1450,6 +1530,11 @@ class TestConfig(unittest.TestCase):
                             },
                         ],
                     },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
                 }
             },
         }
@@ -1474,6 +1559,11 @@ class TestConfig(unittest.TestCase):
                                 "roles": ["detect"],
                             },
                         ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
                     },
                     "zones": {
                         "steps": {
@@ -1535,6 +1625,56 @@ class TestConfig(unittest.TestCase):
         assert "dog" in runtime_config.cameras["back"].objects.filters
         assert runtime_config.cameras["back"].objects.filters["dog"].min_ratio == 0.2
         assert runtime_config.cameras["back"].objects.filters["dog"].max_ratio == 10.1
+
+    def test_valid_movement_weights(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "onvif": {"autotracking": {"movement_weights": "1.23, 2.34, 0.50"}},
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+
+        runtime_config = frigate_config.runtime_config()
+        assert runtime_config.cameras["back"].onvif.autotracking.movement_weights == [
+            1.23,
+            2.34,
+            0.50,
+        ]
+
+    def test_fails_invalid_movement_weights(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "onvif": {"autotracking": {"movement_weights": "1.234, 2.345a"}},
+                }
+            },
+        }
+
+        self.assertRaises(ValueError, lambda: FrigateConfig(**config))
 
 
 if __name__ == "__main__":

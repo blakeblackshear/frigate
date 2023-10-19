@@ -56,3 +56,27 @@ camera:
 ```
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get events for person objects that enter anywhere in the yard, and events for cars only if they enter the street.
+
+### Zone Inertia
+
+Sometimes an objects bounding box may be slightly incorrect and the bottom center of the bounding box is inside the zone while the object is not actually in the zone. Zone inertia helps guard against this by requiring an object's bounding box to be within the zone for multiple consecutive frames. This value can be configured:
+
+```yaml
+camera:
+  zones:
+    front_yard:
+      inertia: 3
+      objects:
+        - person
+```
+
+There may also be cases where you expect an object to quickly enter and exit a zone, like when a car is pulling into the driveway, and you may want to have the object be considered present in the zone immediately:
+
+```yaml
+camera:
+  zones:
+    driveway_entrance:
+      inertia: 1
+      objects:
+        - car
+```

@@ -143,6 +143,9 @@ def get_cpu_stats() -> dict[str, dict]:
 
 
 def get_physical_interfaces(interfaces) -> list:
+    if not interfaces:
+        return []
+
     with open("/proc/net/dev", "r") as file:
         lines = file.readlines()
 
@@ -171,6 +174,7 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
     )
 
     if p.returncode != 0:
+        logger.error(f"Error getting network stats :: {p.stderr}")
         return usages
     else:
         lines = p.stdout.split("\n")
@@ -289,6 +293,8 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             handle = nvml.nvmlDeviceGetHandleByIndex(i)
             meminfo = try_get_info(nvml.nvmlDeviceGetMemoryInfo, handle)
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
+            enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
+            dec = try_get_info(nvml.nvmlDeviceGetDecoderUtilization, handle)
             if util != "N/A":
                 gpu_util = util.gpu
             else:
@@ -299,10 +305,22 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             else:
                 gpu_mem_util = -1
 
+            if enc != "N/A":
+                enc_util = enc[0]
+            else:
+                enc_util = -1
+
+            if dec != "N/A":
+                dec_util = dec[0]
+            else:
+                dec_util = -1
+
             results[i] = {
                 "name": nvml.nvmlDeviceGetName(handle),
                 "gpu": gpu_util,
                 "mem": gpu_mem_util,
+                "enc": enc_util,
+                "dec": dec_util,
             }
     except Exception:
         pass

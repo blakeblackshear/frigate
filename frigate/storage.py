@@ -99,11 +99,18 @@ class StorageMaintainer(threading.Thread):
             [b["bandwidth"] for b in self.camera_storage_stats.values()]
         )
 
-        recordings: Recordings = Recordings.select().order_by(
-            Recordings.start_time.asc()
-        )
+        recordings: Recordings = Recordings.select(
+            Recordings.id,
+            Recordings.start_time,
+            Recordings.end_time,
+            Recordings.segment_size,
+            Recordings.path,
+        ).order_by(Recordings.start_time.asc())
         retained_events: Event = (
-            Event.select()
+            Event.select(
+                Event.start_time,
+                Event.end_time,
+            )
             .where(
                 Event.retain_indefinitely == True,
                 Event.has_clip,
@@ -155,7 +162,11 @@ class StorageMaintainer(threading.Thread):
             logger.error(
                 f"Could not clear {hourly_bandwidth} MB, currently {deleted_segments_size} MB have been cleared. Retained recordings must be deleted."
             )
-            recordings = Recordings.select().order_by(Recordings.start_time.asc())
+            recordings = Recordings.select(
+                Recordings.id,
+                Recordings.path,
+                Recordings.segment_size,
+            ).order_by(Recordings.start_time.asc())
 
             for recording in recordings.objects().iterator():
                 if deleted_segments_size > hourly_bandwidth:

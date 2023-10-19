@@ -9,6 +9,13 @@ export default defineConfig({
   define: {
     'import.meta.vitest': 'undefined',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000'
+      }
+    }
+  },
   plugins: [
     preact(),
     monacoEditorPlugin.default({

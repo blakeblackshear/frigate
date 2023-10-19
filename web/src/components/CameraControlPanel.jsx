@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useState } from 'preact/hooks';
+import { useEffect, useCallback, useState } from 'preact/hooks';
 import useSWR from 'swr';
 import { usePtzCommand } from '../api/ws';
 import ActivityIndicator from './ActivityIndicator';
@@ -27,29 +27,25 @@ export default function CameraControlPanel({ camera = '' }) {
     setCurrentPreset('');
   };
 
-  const onSetMove = async (e, dir) => {
+  const onSetMove = useCallback(async (e, dir) => {
     e.stopPropagation();
     sendPtz(`MOVE_${dir}`);
     setCurrentPreset('');
-  };
+  }, [sendPtz, setCurrentPreset]);
 
-  const onSetZoom = async (e, dir) => {
+  const onSetZoom = useCallback(async (e, dir) => {
     e.stopPropagation();
     sendPtz(`ZOOM_${dir}`);
     setCurrentPreset('');
-  };
+  }, [sendPtz, setCurrentPreset]);
 
-  const onSetStop = async (e) => {
+  const onSetStop = useCallback(async (e) => {
     e.stopPropagation();
     sendPtz('STOP');
-  };
+  }, [sendPtz]);
 
-  if (!ptz) {
-    return <ActivityIndicator />;
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (!e) {
+  const keydownListener = useCallback((e) => {
+    if (!ptz || !e) {
       return;
     }
 
@@ -83,9 +79,9 @@ export default function CameraControlPanel({ camera = '' }) {
         }
       }
     }
-  });
+  }, [onSetMove, onSetZoom, ptz]);
 
-  document.addEventListener('keyup', (e) => {
+  const keyupListener = useCallback((e) => {
     if (!e || e.repeat) {
       return;
     }
@@ -101,7 +97,20 @@ export default function CameraControlPanel({ camera = '' }) {
       e.preventDefault();
       onSetStop(e);
     }
-  });
+  }, [onSetStop]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', keydownListener);
+    document.addEventListener('keyup', keyupListener);
+    return () => {
+      document.removeEventListener('keydown', keydownListener);
+      document.removeEventListener('keyup', keyupListener);
+    };
+  }, [keydownListener, keyupListener, ptz]);
+
+  if (!ptz) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <div data-testid="control-panel" className="p-4 text-center sm:flex justify-start">

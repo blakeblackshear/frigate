@@ -97,8 +97,8 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-32-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
-    "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
-    "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
+    "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-nvidia-h264": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v h264_nvenc {1}",
     "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
@@ -255,13 +255,6 @@ PRESETS_INPUT = {
         "5000000",
         "-use_wallclock_as_timestamps",
         "1",
-    ],
-    "preset-rtsp-audio-only": [
-        "-rtsp_transport",
-        "tcp",
-        TIMEOUT_PARAM,
-        "5000000",
-        "-vn",
     ],
     "preset-rtsp-restream": _user_agent_args
     + [

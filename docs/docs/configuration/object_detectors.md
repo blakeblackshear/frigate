@@ -235,8 +235,16 @@ An example `docker-compose.yml` fragment that converts the `yolov4-608` and `yol
 ```yml
 frigate:
   environment:
-    - YOLO_MODELS="yolov4-608,yolov7x-640"
+    - YOLO_MODELS=yolov4-608,yolov7x-640
     - USE_FP16=false
+```
+
+If you have multiple GPUs passed through to Frigate, you can specify which one to use for the model conversion.  The conversion script will use the first visible GPU, however in systems with mixed GPU models you may not want to use the default index for object detection.  Add the `TRT_MODEL_PREP_DEVICE` environment variable to select a specific GPU.
+
+```yml
+frigate:
+  environment:
+    - TRT_MODEL_PREP_DEVICE=0 # Optionally, select which GPU is used for  model optimization
 ```
 
 ### Configuration Parameters
