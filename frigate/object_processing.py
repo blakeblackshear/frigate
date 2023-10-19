@@ -510,6 +510,7 @@ class CameraState:
                     == self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
                         self.name
                     ].obj_data["id"]
+                    and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
                     color = self.config.model.colormap[obj["label"]]
