@@ -622,9 +622,6 @@ class FrigateApp:
             print(e)
             self.log_process.terminate()
             sys.exit(1)
-
-
-
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
