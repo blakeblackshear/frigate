@@ -986,7 +986,7 @@ class PtzAutoTracker:
         # absolute zooming separately from pan/tilt
         if camera_config.onvif.autotracking.zooming == ZoomingModeEnum.absolute:
             # don't zoom on initial move
-            if not self.tracked_object_history[camera]:
+            if "target_box" not in self.tracked_object_metrics[camera]:
                 zoom = current_zoom_level
             else:
                 if (
@@ -994,6 +994,7 @@ class PtzAutoTracker:
                         camera, obj, obj.obj_data["box"], debug_zoom
                     )
                 ) is not None:
+                    # divide zoom in 10 increments and always zoom out more than in
                     level = (
                         self.ptz_metrics[camera]["ptz_max_zoom"].value
                         - self.ptz_metrics[camera]["ptz_min_zoom"].value
