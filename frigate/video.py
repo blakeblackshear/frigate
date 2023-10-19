@@ -532,6 +532,7 @@ def process_frames(
     fps_tracker.start()
 
     startup_scan = True
+    stationary_frame_counter = 0
 
     region_min_size = get_min_region_size(model_config)
 
@@ -585,23 +586,24 @@ def process_frames(
             # check every Nth frame for stationary objects
             # disappeared objects are not stationary
             # also check for overlapping motion boxes
-            stationary_object_ids = [
-                obj["id"]
-                for obj in object_tracker.tracked_objects.values()
-                # if it has exceeded the stationary threshold
-                if obj["motionless_count"] >= detect_config.stationary.threshold
-                # and it isn't due for a periodic check
-                and (
-                    detect_config.stationary.interval == 0
-                    or obj["motionless_count"] % detect_config.stationary.interval != 0
-                )
-                # and it hasn't disappeared
-                and object_tracker.disappeared[obj["id"]] == 0
-                # and it doesn't overlap with any current motion boxes when not calibrating
-                and not intersects_any(
-                    obj["box"], [] if motion_detector.is_calibrating() else motion_boxes
-                )
-            ]
+            if stationary_frame_counter == detect_config.stationary.interval:
+                stationary_frame_counter = 0
+                stationary_object_ids = []
+            else:
+                stationary_frame_counter += 1
+                stationary_object_ids = [
+                    obj["id"]
+                    for obj in object_tracker.tracked_objects.values()
+                    # if it has exceeded the stationary threshold
+                    if obj["motionless_count"] >= detect_config.stationary.threshold
+                    # and it hasn't disappeared
+                    and object_tracker.disappeared[obj["id"]] == 0
+                    # and it doesn't overlap with any current motion boxes when not calibrating
+                    and not intersects_any(
+                        obj["box"],
+                        [] if motion_detector.is_calibrating() else motion_boxes,
+                    )
+                ]
 
             # get tracked object boxes that aren't stationary
             tracked_object_boxes = [
