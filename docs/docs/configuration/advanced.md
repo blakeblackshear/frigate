@@ -131,7 +131,7 @@ To do this:
 
 ## Validating your config.yaml file updates
 
-When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have two options -- you can either leverage the config update API endpoint, or you can validate on the command line using the frigate docker container.
+When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have three options -- you can edit the config via the WebUI which has built in validation, use the config API, or you can validate on the command line using the frigate docker container.
 
 ### Via API
 
