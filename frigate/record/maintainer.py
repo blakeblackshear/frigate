@@ -406,7 +406,7 @@ class RecordingMaintainer(threading.Thread):
         return None
 
     def run(self) -> None:
-        camera_count = len(self.config.cameras.keys())
+        camera_count = sum(camera.enabled for camera in self.config.cameras.values())
         # Check for new files every 5 seconds
         wait_time = 0.0
         while not self.stop_event.wait(wait_time):
