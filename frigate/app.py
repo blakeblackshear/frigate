@@ -602,6 +602,12 @@ class FrigateApp:
                 print("*************************************************************")
                 self.log_process.terminate()
                 sys.exit(1)
+            if args.validate_config:
+                print("*************************************************************")
+                print("*** Your config file is valid.                            ***")
+                print("*************************************************************")
+                self.log_process.terminate()
+                sys.exit(0)
             self.set_environment_vars()
             self.set_log_levels()
             self.init_queues()
@@ -617,11 +623,7 @@ class FrigateApp:
             self.log_process.terminate()
             sys.exit(1)
 
-        if args.validate_config:
-            print("*************************************************************")
-            print("*** Your config file is valid.                            ***")
-            print("*************************************************************")
-            sys.exit(0)
+
 
         self.start_detectors()
         self.start_video_output_processor()
