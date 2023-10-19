@@ -77,6 +77,7 @@ class OnvifController:
 
         request = ptz.create_type("GetConfigurations")
         configs = ptz.GetConfigurations(request)[0]
+        logger.debug(f"Onvif configs for {camera_name}: {configs}")
 
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
@@ -194,6 +195,17 @@ class OnvifController:
 
         if ptz_config.Spaces and ptz_config.Spaces.RelativeZoomTranslationSpace:
             supported_features.append("zoom-r")
+            try:
+                # get camera's zoom limits from onvif config
+                self.cams[camera_name][
+                    "relative_zoom_range"
+                ] = ptz_config.Spaces.RelativeZoomTranslationSpace[0]
+            except Exception:
+                if self.config.cameras[camera_name].onvif.autotracking.zooming:
+                    self.config.cameras[camera_name].onvif.autotracking.zooming = False
+                    logger.warning(
+                        f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
+                    )
 
         if ptz_config.Spaces and ptz_config.Spaces.AbsoluteZoomPositionSpace:
             supported_features.append("zoom-a")
