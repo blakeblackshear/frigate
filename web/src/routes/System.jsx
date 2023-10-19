@@ -32,7 +32,7 @@ export default function System() {
     service = {},
     detection_fps: _,
     processes,
-    ...cameras
+    cameras,
   } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
