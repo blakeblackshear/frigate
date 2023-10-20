@@ -85,6 +85,10 @@ export default function WebRtcPlayer({ camera, width, height }) {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
     });
+
+    ws.addEventListener('close', () => {
+      pc.close();
+    })
   }, [PeerConnection, ws]);
 
   useEffect(() => {
