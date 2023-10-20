@@ -1,11 +1,11 @@
 import { h } from 'preact';
 import { baseUrl } from '../api/baseUrl';
 import { useCallback, useEffect } from 'preact/hooks';
+import { useMemo } from 'react';
 
 export default function WebRtcPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
-  const ws = new WebSocket(url);
-
+  const ws = useMemo(() => new WebSocket(url), [url])
   const PeerConnection = useCallback(async (media) => {
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
