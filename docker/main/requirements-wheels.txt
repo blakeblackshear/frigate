@@ -1,7 +1,7 @@
 click == 8.1.*
 Flask == 2.3.*
 imutils == 0.5.*
-matplotlib == 3.7.*
+matplotlib == 3.8.*
 mypy == 1.4.1
 numpy == 1.23.*
 onvif_zeep == 0.2.12
