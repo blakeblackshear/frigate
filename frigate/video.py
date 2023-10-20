@@ -607,7 +607,12 @@ def process_frames(
 
             # get tracked object boxes that aren't stationary
             tracked_object_boxes = [
-                obj["estimate"]
+                (
+                    # use existing object box for stationary objects
+                    obj["estimate"]
+                    if obj["motionless_count"] < detect_config.stationary.threshold
+                    else obj["box"]
+                )
                 for obj in object_tracker.tracked_objects.values()
                 if obj["id"] not in stationary_object_ids
             ]
