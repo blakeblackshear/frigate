@@ -1,6 +1,7 @@
+import logging
+
 import cv2
 import imutils
-import logging
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
