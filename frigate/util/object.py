@@ -9,6 +9,7 @@ import numpy as np
 from peewee import DoesNotExist
 
 from frigate.config import DetectConfig, ModelConfig
+from frigate.const import LABEL_CONSOLIDATION_DEFAULT, LABEL_CONSOLIDATION_MAP
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.models import Event, Regions, Timeline
 from frigate.util.image import (
@@ -426,18 +427,21 @@ def get_consolidated_object_detections(detected_object_groups):
         sorted_by_area = sorted(group, key=lambda g: g[3])
 
         for current_detection_idx in range(0, len(sorted_by_area)):
-            current_detection = sorted_by_area[current_detection_idx][2]
+            current_detection = sorted_by_area[current_detection_idx]
+            current_label = current_detection[0]
+            current_box = current_detection[2]
             overlap = 0
             for to_check_idx in range(
                 min(current_detection_idx + 1, len(sorted_by_area)),
                 len(sorted_by_area),
             ):
                 to_check = sorted_by_area[to_check_idx][2]
-                intersect_box = intersection(current_detection, to_check)
+                intersect_box = intersection(current_box, to_check)
                 # if 90% of smaller detection is inside of another detection, consolidate
-                if (
-                    intersect_box is not None
-                    and area(intersect_box) / area(current_detection) > 0.9
+                if intersect_box is not None and area(intersect_box) / area(
+                    current_box
+                ) > LABEL_CONSOLIDATION_MAP.get(
+                    current_label, LABEL_CONSOLIDATION_DEFAULT
                 ):
                     overlap = 1
                     break
