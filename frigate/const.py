@@ -12,7 +12,7 @@ FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 
-# Attributes
+# Attribute & Object Consts
 
 ATTRIBUTE_LABEL_MAP = {
     "person": ["face", "amazon"],
@@ -21,6 +21,11 @@ ATTRIBUTE_LABEL_MAP = {
 ALL_ATTRIBUTE_LABELS = [
     item for sublist in ATTRIBUTE_LABEL_MAP.values() for item in sublist
 ]
+LABEL_CONSOLIDATION_MAP = {
+    "car": 0.8,
+    "face": 0.5,
+}
+LABEL_CONSOLIDATION_DEFAULT = 0.9
 
 # Audio Consts
 
