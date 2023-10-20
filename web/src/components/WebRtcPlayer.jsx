@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
   const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
+  const ws = new WebSocket(url);
 
   const PeerConnection = useCallback(async (media) => {
     const pc = new RTCPeerConnection({
@@ -60,7 +61,6 @@ export default function WebRtcPlayer({ camera, width, height }) {
 
   const connect = useCallback(async () => {
     const pc = await PeerConnection('video+audio');
-    const ws = new WebSocket(url);
 
     ws.addEventListener('open', () => {
       pc.addEventListener('icecandidate', (ev) => {
@@ -85,11 +85,15 @@ export default function WebRtcPlayer({ camera, width, height }) {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
     });
-  }, [PeerConnection, url]);
+  }, [PeerConnection, ws]);
 
   useEffect(() => {
     connect();
-  }, [connect]);
+
+    return () => {
+      ws.close();
+    }
+  }, [connect, ws]);
 
   return (
     <div>
