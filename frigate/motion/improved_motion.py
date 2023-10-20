@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 import imutils
 import numpy as np
@@ -5,6 +7,8 @@ from scipy.ndimage import gaussian_filter
 
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
+
+logger = logging.getLogger(__name__)
 
 
 class ImprovedMotionDetector(MotionDetector):
@@ -138,8 +142,8 @@ class ImprovedMotionDetector(MotionDetector):
             self.motion_frame_size[0] * self.motion_frame_size[1]
         )
 
-        # once the motion drops to less than 1% for the first time, assume its calibrated
-        if pct_motion < 0.01:
+        # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
+        if pct_motion < 0.05 and len(motion_boxes) <= 4:
             self.calibrating = False
 
         # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
