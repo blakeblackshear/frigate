@@ -2,12 +2,12 @@ click == 8.1.*
 Flask == 2.3.*
 imutils == 0.5.*
 matplotlib == 3.7.*
-mypy == 1.4.1
+mypy == 1.6.1
 numpy == 1.23.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.7.0.*
 paho-mqtt == 1.6.*
-peewee == 3.16.*
+peewee == 3.17.*
 peewee_migrate == 1.12.*
 psutil == 5.9.*
 pydantic == 1.10.*
@@ -15,7 +15,7 @@ git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 PyYAML == 6.0.*
 pytz == 2023.3
 ruamel.yaml == 0.17.*
-tzlocal == 5.0.*
+tzlocal == 5.1
 types-PyYAML == 6.0.*
 requests == 2.31.*
 types-requests == 2.31.*
