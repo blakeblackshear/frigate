@@ -48,12 +48,17 @@ class RecordingCleanup(threading.Thread):
         expire_before = (
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
-        no_camera_recordings: Recordings = Recordings.select(
-            Recordings.id,
-            Recordings.path,
-        ).where(
-            Recordings.camera.not_in(list(self.config.cameras.keys())),
-            Recordings.end_time < expire_before,
+        no_camera_recordings: Recordings = (
+            Recordings.select(
+                Recordings.id,
+                Recordings.path,
+            )
+            .where(
+                Recordings.camera.not_in(list(self.config.cameras.keys())),
+                Recordings.end_time < expire_before,
+            )
+            .namedtuples()
+            .iterator()
         )
 
         deleted_recordings = set()
@@ -95,6 +100,8 @@ class RecordingCleanup(threading.Thread):
                     Recordings.end_time < expire_date,
                 )
                 .order_by(Recordings.start_time)
+                .namedtuples()
+                .iterator()
             )
 
             # Get all the events to check against
@@ -111,14 +118,14 @@ class RecordingCleanup(threading.Thread):
                     Event.has_clip,
                 )
                 .order_by(Event.start_time)
-                .objects()
+                .namedtuples()
             )
 
             # loop over recordings and see if they overlap with any non-expired events
             # TODO: expire segments based on segment stats according to config
             event_start = 0
             deleted_recordings = set()
-            for recording in recordings.objects().iterator():
+            for recording in recordings:
                 keep = False
                 # Now look for a reason to keep this recording segment
                 for idx in range(event_start, len(events)):

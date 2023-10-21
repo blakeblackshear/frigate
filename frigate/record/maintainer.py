@@ -163,6 +163,8 @@ class RecordingMaintainer(threading.Thread):
                     Event.has_clip,
                 )
                 .order_by(Event.start_time)
+                .namedtuples()
+                .iterator()
             )
 
             tasks.extend(
