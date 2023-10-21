@@ -958,9 +958,10 @@ def events():
         .order_by(Event.start_time.desc())
         .limit(limit)
         .dicts()
+        .iterator()
     )
 
-    return jsonify([e for e in events])
+    return jsonify(list(events))
 
 
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
@@ -1490,6 +1491,7 @@ def recordings_summary(camera_name):
                 ),
             ).desc()
         )
+        .namedtuples()
     )
 
     event_groups = (
@@ -1511,14 +1513,14 @@ def recordings_summary(camera_name):
                 ),
             ),
         )
-        .objects()
+        .namedtuples()
     )
 
     event_map = {g.hour: g.count for g in event_groups}
 
     days = {}
 
-    for recording_group in recording_groups.objects():
+    for recording_group in recording_groups:
         parts = recording_group.hour.split()
         hour = parts[1]
         day = parts[0]
@@ -1562,9 +1564,11 @@ def recordings(camera_name):
             Recordings.start_time <= before,
         )
         .order_by(Recordings.start_time)
+        .dicts()
+        .iterator()
     )
 
-    return jsonify([e for e in recordings.dicts()])
+    return jsonify(list(recordings))
 
 
 @bp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/clip.mp4")
@@ -1669,6 +1673,7 @@ def vod_ts(camera_name, start_ts, end_ts):
         )
         .where(Recordings.camera == camera_name)
         .order_by(Recordings.start_time.asc())
+        .iterator()
     )
 
     clips = []

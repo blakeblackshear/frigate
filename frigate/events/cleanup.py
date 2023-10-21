@@ -83,14 +83,19 @@ class EventCleanup(threading.Thread):
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
             # grab all events after specific time
-            expired_events = Event.select(
-                Event.id,
-                Event.camera,
-            ).where(
-                Event.camera.not_in(self.camera_keys),
-                Event.start_time < expire_after,
-                Event.label == event.label,
-                Event.retain_indefinitely == False,
+            expired_events = (
+                Event.select(
+                    Event.id,
+                    Event.camera,
+                )
+                .where(
+                    Event.camera.not_in(self.camera_keys),
+                    Event.start_time < expire_after,
+                    Event.label == event.label,
+                    Event.retain_indefinitely == False,
+                )
+                .namedtuples()
+                .iterator()
             )
             # delete the media from disk
             for event in expired_events:
@@ -136,14 +141,19 @@ class EventCleanup(threading.Thread):
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()
                 # grab all events after specific time
-                expired_events = Event.select(
-                    Event.id,
-                    Event.camera,
-                ).where(
-                    Event.camera == name,
-                    Event.start_time < expire_after,
-                    Event.label == event.label,
-                    Event.retain_indefinitely == False,
+                expired_events = (
+                    Event.select(
+                        Event.id,
+                        Event.camera,
+                    )
+                    .where(
+                        Event.camera == name,
+                        Event.start_time < expire_after,
+                        Event.label == event.label,
+                        Event.retain_indefinitely == False,
+                    )
+                    .namedtuples()
+                    .iterator()
                 )
 
                 # delete the grabbed clips from disk
