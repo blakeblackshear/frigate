@@ -490,7 +490,7 @@ class OnvifController:
         status_request = self.cams[camera_name]["status_request"]
         try:
             status = onvif.get_service("ptz").GetStatus(status_request)
-        except Exception as e:
+        except Exception:
             pass  # We're unsupported, that'll be reported in the next check.
 
         # there doesn't seem to be an onvif standard with this optional parameter
