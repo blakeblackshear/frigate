@@ -90,7 +90,6 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
         except ConnectionResetError:
             pass
 
-
     def stop(self) -> None:
         self.websocket_server.manager.close_all()
         self.websocket_server.manager.stop()
