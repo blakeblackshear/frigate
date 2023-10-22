@@ -163,6 +163,8 @@ class RecordingMaintainer(threading.Thread):
                     Event.has_clip,
                 )
                 .order_by(Event.start_time)
+                .namedtuples()
+                .iterator()
             )
 
             tasks.extend(
@@ -406,11 +408,13 @@ class RecordingMaintainer(threading.Thread):
         return None
 
     def run(self) -> None:
+        camera_count = sum(camera.enabled for camera in self.config.cameras.values())
         # Check for new files every 5 seconds
         wait_time = 0.0
         while not self.stop_event.wait(wait_time):
             run_start = datetime.datetime.now().timestamp()
-
+            stale_frame_count = 0
+            stale_frame_count_threshold = 10
             # empty the object recordings info queue
             while True:
                 try:
@@ -420,7 +424,10 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
-                    ) = self.object_recordings_info_queue.get(False)
+                    ) = self.object_recordings_info_queue.get(True, timeout=0.01)
+
+                    if frame_time < run_start - stale_frame_count_threshold:
+                        stale_frame_count += 1
 
                     if self.process_info[camera]["record_enabled"].value:
                         self.object_recordings_info[camera].append(
@@ -432,17 +439,32 @@ class RecordingMaintainer(threading.Thread):
                             )
                         )
                 except queue.Empty:
+                    q_size = self.object_recordings_info_queue.qsize()
+                    if q_size > camera_count:
+                        logger.debug(
+                            f"object_recordings_info loop queue not empty ({q_size})."
+                        )
                     break
+
+            if stale_frame_count > 0:
+                logger.warning(
+                    f"Found {stale_frame_count} old frames, segments from recordings may be missing."
+                )
 
             # empty the audio recordings info queue if audio is enabled
             if self.audio_recordings_info_queue:
+                stale_frame_count = 0
+
                 while True:
                     try:
                         (
                             camera,
                             frame_time,
                             dBFS,
-                        ) = self.audio_recordings_info_queue.get(False)
+                        ) = self.audio_recordings_info_queue.get(True, timeout=0.01)
+
+                        if frame_time < run_start - stale_frame_count_threshold:
+                            stale_frame_count += 1
 
                         if self.process_info[camera]["record_enabled"].value:
                             self.audio_recordings_info[camera].append(
@@ -452,7 +474,17 @@ class RecordingMaintainer(threading.Thread):
                                 )
                             )
                     except queue.Empty:
+                        q_size = self.audio_recordings_info_queue.qsize()
+                        if q_size > camera_count:
+                            logger.debug(
+                                f"object_recordings_info loop audio queue not empty ({q_size})."
+                            )
                         break
+
+                if stale_frame_count > 0:
+                    logger.error(
+                        f"Found {stale_frame_count} old audio frames, segments from recordings may be missing"
+                    )
 
             try:
                 asyncio.run(self.move_files())

@@ -14,6 +14,7 @@ import numpy as np
 import pytz
 import yaml
 from ruamel.yaml import YAML
+from tzlocal import get_localzone
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -262,3 +263,10 @@ def find_by_key(dictionary, target_key):
                 if result is not None:
                     return result
     return None
+
+
+def get_tomorrow_at_2() -> datetime.datetime:
+    tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
+    return tomorrow.replace(hour=2, minute=0, second=0).astimezone(
+        datetime.timezone.utc
+    )

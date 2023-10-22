@@ -85,7 +85,10 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
             logger.debug(f"payload for {topic} wasn't text. Skipping...")
             return
 
-        self.websocket_server.manager.broadcast(ws_message)
+        try:
+            self.websocket_server.manager.broadcast(ws_message)
+        except ConnectionResetError:
+            pass
 
     def stop(self) -> None:
         self.websocket_server.manager.close_all()

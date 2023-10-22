@@ -100,6 +100,17 @@ class OnvifController:
             None,
         )
 
+        # status request for autotracking and filling ptz-parameters
+        status_request = ptz.create_type("GetStatus")
+        status_request.ProfileToken = profile.token
+        self.cams[camera_name]["status_request"] = status_request
+        try:
+            status = ptz.GetStatus(status_request)
+            logger.debug(f"Onvif status config for {camera_name}: {status}")
+        except Exception as e:
+            logger.warning(f"Unable to get status from camera: {camera_name}: {e}")
+            status = None
+
         # autoracking relative panning/tilting needs a relative zoom value set to 0
         # if camera supports relative movement
         if self.config.cameras[camera_name].onvif.autotracking.zooming:
@@ -123,9 +134,7 @@ class OnvifController:
         move_request = ptz.create_type("RelativeMove")
         move_request.ProfileToken = profile.token
         if move_request.Translation is None and fov_space_id is not None:
-            move_request.Translation = ptz.GetStatus(
-                {"ProfileToken": profile.token}
-            ).Position
+            move_request.Translation = status.Position
             move_request.Translation.PanTilt.space = ptz_config["Spaces"][
                 "RelativePanTiltTranslationSpace"
             ][fov_space_id]["URI"]
@@ -153,20 +162,13 @@ class OnvifController:
                 )
 
         if move_request.Speed is None:
-            move_request.Speed = ptz.GetStatus({"ProfileToken": profile.token}).Position
+            move_request.Speed = status.Position if status else None
         self.cams[camera_name]["relative_move_request"] = move_request
 
         # setup absolute moving request for autotracking zooming
         move_request = ptz.create_type("AbsoluteMove")
         move_request.ProfileToken = profile.token
         self.cams[camera_name]["absolute_move_request"] = move_request
-
-        # status request for autotracking
-        status_request = ptz.create_type("GetStatus")
-        status_request.ProfileToken = profile.token
-        self.cams[camera_name]["status_request"] = status_request
-        status = ptz.GetStatus(status_request)
-        logger.debug(f"Onvif status config for {camera_name}: {status}")
 
         # setup existing presets
         try:
@@ -177,7 +179,7 @@ class OnvifController:
 
         for preset in presets:
             self.cams[camera_name]["presets"][
-                getattr(preset, "Name", f"preset {preset['token']}").lower()
+                (getattr(preset, "Name") or f"preset {preset['token']}").lower()
             ] = preset["token"]
 
         # get list of supported features
@@ -513,7 +515,10 @@ class OnvifController:
 
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         status_request = self.cams[camera_name]["status_request"]
-        status = onvif.get_service("ptz").GetStatus(status_request)
+        try:
+            status = onvif.get_service("ptz").GetStatus(status_request)
+        except Exception:
+            pass  # We're unsupported, that'll be reported in the next check.
 
         # there doesn't seem to be an onvif standard with this optional parameter
         # some cameras can report MoveStatus with or without PanTilt or Zoom attributes

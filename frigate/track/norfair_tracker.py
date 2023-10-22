@@ -77,7 +77,7 @@ class NorfairTracker(ObjectTracker):
         self.tracker = Tracker(
             distance_function=frigate_distance,
             distance_threshold=2.5,
-            initialization_delay=config.detect.fps / 2,
+            initialization_delay=0,
             hit_counter_max=self.max_disappeared,
         )
         if self.ptz_autotracker_enabled.value:
@@ -105,6 +105,11 @@ class NorfairTracker(ObjectTracker):
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
+
+        # start object with a hit count of `fps` to avoid quick detection -> loss
+        next(
+            (o for o in self.tracker.tracked_objects if o.global_id == track_id)
+        ).hit_counter = self.camera_config.detect.fps
 
     def deregister(self, id, track_id):
         del self.tracked_objects[id]

@@ -94,7 +94,7 @@ export default function Events({ path, ...props }) {
     showDeleteFavorite: false,
   });
 
-  const [showInProgress, setShowInProgress] = useState(true);
+  const [showInProgress, setShowInProgress] = useState((props.event || props.cameras || props.labels) == null);
 
   const eventsFetcher = useCallback(
     (path, params) => {
@@ -121,8 +121,12 @@ export default function Events({ path, ...props }) {
     [searchParams]
   );
 
-  const { data: ongoingEvents } = useSWR(['events', { in_progress: 1, include_thumbnails: 0 }]);
-  const { data: eventPages, mutate, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
+  const { data: ongoingEvents, mutate: refreshOngoingEvents } = useSWR(['events', { in_progress: 1, include_thumbnails: 0 }]);
+  const { data: eventPages, mutate: refreshEvents, size, setSize, isValidating } = useSWRInfinite(getKey, eventsFetcher);
+  const mutate = () => {
+    refreshEvents();
+    refreshOngoingEvents();
+  }
 
   const { data: allLabels } = useSWR(['labels']);
   const { data: allSubLabels } = useSWR(['sub_labels', { split_joined: 1 }]);
