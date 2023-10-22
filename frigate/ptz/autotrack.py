@@ -43,7 +43,7 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     # ptz_start_time is initialized to 0 on startup and only changes
     # when autotracking movements are made
     return (ptz_start_time != 0.0 and frame_time > ptz_start_time) and (
-        ptz_stop_time == 0.0 or (ptz_start_time <= frame_time < ptz_stop_time)
+        ptz_stop_time == 0.0 or (ptz_start_time <= frame_time <= ptz_stop_time)
     )
 
 
@@ -215,8 +215,8 @@ class PtzAutoTracker:
             maxlen=round(camera_config.detect.fps * 1.5)
         )
         self.tracked_object_metrics[camera] = {
-            "max_target_box": AUTOTRACKING_MAX_AREA_RATIO
-            ** (1 / self.zoom_factor[camera])
+            "max_target_box": 1
+            - (AUTOTRACKING_MAX_AREA_RATIO ** self.zoom_factor[camera])
         }
 
         self.calibrating[camera] = False
@@ -665,70 +665,67 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
-        def remove_outliers_iqr(arrays):
-            def is_valid(array):
-                Q1 = np.percentile(array, 25)
-                Q3 = np.percentile(array, 75)
-                IQR = Q3 - Q1
-                lower_bound = Q1 - 1.5 * IQR
-                upper_bound = Q3 + 1.5 * IQR
-                return (lower_bound <= array) & (array <= upper_bound)
+        velocities = obj.obj_data["estimate_velocity"]
+        logger.debug(f"{camera}: Velocities from norfair: {velocities}")
 
-            valid_arrays = [array for array in arrays if is_valid(array[1] - array[0])]
-            return valid_arrays
+        # Thresholds
+        x_mags_thresh = camera_width / camera_fps / 2
+        y_mags_thresh = camera_height / camera_fps / 2
+        dir_thresh = 0.96
+        delta_thresh = 10
+        var_thresh = 3
 
-        centroid_x = int((obj.previous["box"][0] + obj.previous["box"][2]) / 2.0)
-        centroid_y = int((obj.previous["box"][1] + obj.previous["box"][3]) / 2.0)
-        bbox_start = [centroid_x, centroid_y]
-        bbox_end = obj.obj_data["centroid"]
-        start_time = obj.previous["frame_time"]
-        end_time = obj.obj_data["frame_time"]
-        if ptz_moving_at_frame_time(
-            start_time,
-            self.ptz_metrics[camera]["ptz_start_time"].value,
-            self.ptz_metrics[camera]["ptz_stop_time"].value,
-        ):
-            logger.debug(
-                f"{camera}: ptz moving at velocity check start time: True {start_time}"
-            )
-        if ptz_moving_at_frame_time(
-            end_time,
-            self.ptz_metrics[camera]["ptz_start_time"].value,
-            self.ptz_metrics[camera]["ptz_stop_time"].value,
-        ):
-            logger.debug(
-                f"{camera}: ptz moving at velocity check end time: True {start_time}"
-            )
-        # add small amount to avoid division by zero
-        velocity = [
-            round((end - start) / ((end_time - start_time) * camera_fps + 1e-6))
-            for start, end in zip(bbox_start, bbox_end)
-        ]
-        logger.debug(
-            f"{camera}: Calculated velocity: {velocity}, start: {start_time}, end: {end_time}, diff: {end_time-start_time}, frames: {int((end_time-start_time)*camera_fps)}"
+        # Check magnitude
+        x_mags = np.abs(velocities[:, 0])
+        y_mags = np.abs(velocities[:, 1])
+        invalid_x_mags = np.any(x_mags > x_mags_thresh)
+        invalid_y_mags = np.any(y_mags > y_mags_thresh)
+
+        # Check delta
+        delta = np.abs(velocities[0] - velocities[1])
+        invalid_delta = np.any(delta > delta_thresh)
+
+        # Check variance
+        stdevs = np.std(velocities, axis=0)
+        high_variances = np.any(stdevs > var_thresh)
+
+        # Check direction difference
+        cosine_sim = np.dot(velocities[0], velocities[1]) / (
+            np.linalg.norm(velocities[0]) * np.linalg.norm(velocities[1])
+        )
+        dir_thresh = 0.6 if np.all(delta < delta_thresh / 2) else dir_thresh
+        invalid_dirs = cosine_sim < dir_thresh
+
+        # Combine
+        invalid = (
+            invalid_x_mags
+            or invalid_y_mags
+            or invalid_dirs
+            or invalid_delta
+            or high_variances
         )
 
-        velocities = obj.obj_data["estimate_velocity"]
-        diff = np.abs(velocities[1] - velocities[0])
-
-        if (diff > 8).any():
+        if invalid:
+            logger.debug(
+                f"{camera}: Invalid velocity: {tuple(np.round(velocities, 2).flatten().astype(int))}: Invalid because: "
+                + ", ".join(
+                    [
+                        var_name
+                        for var_name, is_invalid in [
+                            ("invalid_x_mags", invalid_x_mags),
+                            ("invalid_y_mags", invalid_y_mags),
+                            ("invalid_dirs", invalid_dirs),
+                            ("invalid_delta", invalid_delta),
+                            ("high_variances", high_variances),
+                        ]
+                        if is_invalid
+                    ]
+                )
+            )
             # invalid velocity
-            return np.zeros(2), -1
-
-        average_velocity = np.mean(velocities, axis=0)
-
-        # get euclidean distance of the points, sometimes the estimate is way off
-        velocity_distance = np.linalg.norm(velocities[0] - velocities[1])
-
-        if (
-            0 <= abs(average_velocity[0]) < (camera_width / camera_fps / 2)
-            and 0 <= abs(average_velocity[1]) < (camera_height / camera_fps / 2)
-            and velocity_distance <= 10
-        ):
-            return average_velocity, velocity_distance
+            return np.zeros((2, 2))
         else:
-            # invalid velocity
-            return np.zeros(2), -1
+            return np.mean(velocities, axis=0)
 
     def _below_distance_threshold(self, camera, obj):
         # Returns true if Euclidean distance from object to center of frame is
@@ -777,7 +774,7 @@ class PtzAutoTracker:
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
 
-        average_velocity, distance = self._get_valid_velocity(camera, obj)
+        average_velocity = self._get_valid_velocity(camera, obj)
 
         bb_left, bb_top, bb_right, bb_bottom = box
 
@@ -809,13 +806,10 @@ class PtzAutoTracker:
         ) and (bb_bottom - bb_top) <= camera_height * (self.zoom_factor[camera] + 0.1)
 
         # ensure object is not moving quickly
-        below_velocity_threshold = (
-            np.all(
-                abs(average_velocity)
-                < np.array([velocity_threshold_x, velocity_threshold_y])
-            )
-            or distance == -1
-        )
+        below_velocity_threshold = np.all(
+            np.abs(average_velocity)
+            < np.array([velocity_threshold_x, velocity_threshold_y])
+        ) or np.all(average_velocity == 0)
 
         below_area_threshold = (
             self.tracked_object_metrics[camera]["target_box"]
@@ -868,7 +862,7 @@ class PtzAutoTracker:
                 f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {bb_right - bb_left}, max width: {camera_width * (self.zoom_factor[camera] + 0.1)}, height: {bb_bottom - bb_top}, max height: {camera_height * (self.zoom_factor[camera] + 0.1)}"
             )
             logger.debug(
-                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[1])}, y threshold: {velocity_threshold_y}"
+                f"{camera}: Zoom test: below velocity threshold: {below_velocity_threshold} velocity x: {abs(average_velocity[0])}, x threshold: {velocity_threshold_x}, velocity y: {abs(average_velocity[0])}, y threshold: {velocity_threshold_y}"
             )
             logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
             logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")
@@ -931,9 +925,9 @@ class PtzAutoTracker:
         ):  # use estimates if we have available coefficients
             predicted_movement_time = self._predict_movement_time(camera, pan, tilt)
 
-            average_velocity, distance = self._get_valid_velocity(camera, obj)
+            average_velocity = self._get_valid_velocity(camera, obj)
 
-            if distance != -1:
+            if np.any(average_velocity):
                 # this box could exceed the frame boundaries if velocity is high
                 # but we'll handle that in _enqueue_move() as two separate moves
                 current_box = np.array(obj.obj_data["box"])
@@ -955,7 +949,7 @@ class PtzAutoTracker:
             logger.debug(f'{camera}: Original box: {obj.obj_data["box"]}')
             logger.debug(f"{camera}: Predicted box: {tuple(predicted_box)}")
             logger.debug(
-                f'{camera}: Velocity: {tuple(np.round(obj.obj_data["estimate_velocity"]).flatten().astype(int))}'
+                f"{camera}: Velocity: {tuple(np.round(average_velocity).flatten().astype(int))}"
             )
 
         zoom = self._get_zoom_amount(camera, obj, predicted_box, debug_zoom=True)
@@ -1170,8 +1164,8 @@ class PtzAutoTracker:
                 )
                 self.tracked_object[camera] = None
                 self.tracked_object_metrics[camera] = {
-                    "max_target_box": AUTOTRACKING_MAX_AREA_RATIO
-                    ** (1 / self.zoom_factor[camera])
+                    "max_target_box": 1
+                    - (AUTOTRACKING_MAX_AREA_RATIO ** self.zoom_factor[camera])
                 }
 
     def camera_maintenance(self, camera):
