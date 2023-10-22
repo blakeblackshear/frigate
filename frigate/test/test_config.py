@@ -1651,6 +1651,8 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config()
         assert runtime_config.cameras["back"].onvif.autotracking.movement_weights == [
+            0,
+            1,
             1.23,
             2.34,
             0.50,
