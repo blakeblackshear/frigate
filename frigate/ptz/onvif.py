@@ -98,7 +98,7 @@ class OnvifController:
             ),
             None,
         )
-        
+
         # status request for autotracking and filling ptz-parameters
         status_request = ptz.create_type("GetStatus")
         status_request.ProfileToken = profile.token
@@ -107,9 +107,7 @@ class OnvifController:
             status = ptz.GetStatus(status_request)
             logger.debug(f"Onvif status config for {camera_name}: {status}")
         except Exception as e:
-            logger.warning(
-                f"Unable to get status from camera: {camera_name}: {e}"
-            )
+            logger.warning(f"Unable to get status from camera: {camera_name}: {e}")
             status = None
 
         # autoracking relative panning/tilting needs a relative zoom value set to 0
