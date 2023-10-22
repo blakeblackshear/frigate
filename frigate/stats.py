@@ -303,6 +303,7 @@ def stats_snapshot(
             storage_stats = shutil.disk_usage(path)
         except FileNotFoundError:
             stats["service"]["storage"][path] = {}
+            continue
 
         stats["service"]["storage"][path] = {
             "total": round(storage_stats.total / pow(2, 20), 1),
