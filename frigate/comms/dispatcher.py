@@ -182,11 +182,13 @@ class Dispatcher:
             if not self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
                 logger.info(f"Turning on ptz autotracker for {camera_name}")
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = True
+                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
                 ptz_autotracker_settings.enabled = True
         elif payload == "OFF":
             if self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
                 logger.info(f"Turning off ptz autotracker for {camera_name}")
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
+                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
                 ptz_autotracker_settings.enabled = False
 
         self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)

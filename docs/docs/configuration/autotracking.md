@@ -23,6 +23,8 @@ Many cheaper or older PTZs may not support this standard. Frigate will report an
 
 Alternatively, you can download and run [this simple Python script](https://gist.github.com/hawkeye217/152a1d4ba80760dac95d46e143d37112), replacing the details on line 4 with your camera's IP address, ONVIF port, username, and password to check your camera.
 
+A growing list of cameras and brands that have been reported by users to work with Frigate's autotracking can be found [here](cameras.md).
+
 ## Configuration
 
 First, set up a PTZ preset in your camera's firmware and give it a name. If you're unsure how to do this, consult the documentation for your camera manufacturer's firmware. Some tutorials for common brands: [Amcrest](https://www.youtube.com/watch?v=lJlE9-krmrM), [Reolink](https://www.youtube.com/watch?v=VAnxHUY5i5w), [Dahua](https://www.youtube.com/watch?v=7sNbc5U-k54).
@@ -89,13 +91,23 @@ PTZ motors operate at different speeds. Performing a calibration will direct Fri
 
 Calibration is optional, but will greatly assist Frigate in autotracking objects that move across the camera's field of view more quickly.
 
-To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of 30 small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
+To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
 
-After calibration has ended, your PTZ will be moved to the preset specified by `return_preset` and you should set `calibrate_on_startup` in your config file to `False`.
+After calibration has ended, your PTZ will be moved to the preset specified by `return_preset`.
 
-Note that Frigate will refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+:::note
 
-You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic. If you change your `return_preset` in any way, a recalibration is also recommended.
+Frigate's web UI and all other cameras will be unresponsive while calibration is in progress. This is expected and normal to avoid excessive network traffic or CPU usage during calibration. Calibration for most PTZs will take about two minutes. The Frigate log will show calibration progress and any errors.
+
+:::
+
+At this point, Frigate will be running and will continue to refine and update the `movement_weights` parameter in your config automatically as the PTZ moves during autotracking and more measurements are obtained.
+
+Before restarting Frigate, you should set `calibrate_on_startup` in your config file to `False`, otherwise your refined `movement_weights` will be overwritten and calibration will occur when starting again.
+
+You can recalibrate at any time by removing the `movement_weights` parameter, setting `calibrate_on_startup` to `True`, and then restarting Frigate. You may need to recalibrate or remove `movement_weights` from your config altogether if autotracking is erratic. If you change your `return_preset` in any way or if you change your camera's detect `fps` value, a recalibration is also recommended.
+
+If you initially calibrate with zooming disabled and then enable zooming at a later point, you should also recalibrate.
 
 ## Best practices and considerations
 
@@ -109,18 +121,42 @@ A fast [detector](object_detectors.md) is recommended. CPU detectors will not pe
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
+Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](index.md).
+
 ## Zooming
 
-Zooming is still a very experimental feature and may use significantly more CPU when tracking objects than panning/tilting only. It may be helpful to tweak your camera's autofocus settings if you are noticing focus problems when using zooming.
+Zooming is a very experimental feature and may use significantly more CPU when tracking objects than panning/tilting only.
 
-Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming.
+Absolute zooming makes zoom movements separate from pan/tilt movements. Most PTZ cameras will support absolute zooming. Absolute zooming was developed to be very conservative to work best with a variety of cameras and scenes. Absolute zooming usually will not occur until an object has stopped moving or is moving very slowly.
 
-Relative zooming attempts to make a zoom movement concurrently with any pan/tilt movements. It was tested to work with some Dahua and Amcrest PTZs. But the ONVIF specification indicates that there no assumption about how the generic zoom range is mapped to magnification, field of view or other physical zoom dimension when using relative zooming. So if relative zooming behavior is erratic or just doesn't work, use absolute zooming.
+Relative zooming attempts to make a zoom movement concurrently with any pan/tilt movements. It was tested to work with some Dahua and Amcrest PTZs. But the ONVIF specification indicates that there no assumption about how the generic zoom range is mapped to magnification, field of view or other physical zoom dimension when using relative zooming. So if relative zooming behavior is erratic or just doesn't work, try absolute zooming.
 
 You can optionally adjust the `zoom_factor` for your camera in your configuration file. Lower values will leave more space from the scene around the tracked object while higher values will cause your camera to zoom in more on the object. However, keep in mind that Frigate needs a fair amount of pixels and scene details outside of the bounding box of the tracked object to estimate the motion of your camera. If the object is taking up too much of the frame, Frigate will not be able to track the motion of the camera and your object will be lost.
 
-The range of this option is from 0.1 to 0.75. The default value of 0.3 should be sufficient for most users. If you have a powerful zoom lens on your PTZ or you find your autotracked objects are often lost, you may want to lower this value. Because every PTZ and scene is different, you should experiment to determine what works best for you.
+The range of this option is from 0.1 to 0.75. The default value of 0.3 is conservative and should be sufficient for most users. Because every PTZ and scene is different, you should experiment to determine what works best for you.
 
 ## Usage applications
 
 In security and surveillance, it's common to use "spotter" cameras in combination with your PTZ. When your fixed spotter camera detects an object, you could use an automation platform like Home Assistant to move the PTZ to a specific preset so that Frigate can begin automatically tracking the object. For example: a residence may have fixed cameras on the east and west side of the property, capturing views up and down a street. When the spotter camera on the west side detects a person, a Home Assistant automation could move the PTZ to a camera preset aimed toward the west. When the object enters the specified zone, Frigate's autotracker could then continue to track the person as it moves out of view of any of the fixed cameras.
+
+## Troubleshooting and FAQ
+
+### The autotracker loses track of my object. Why?
+
+There are many reasons this could be the case. If you are using experimental zooming, your `zoom_factor` value might be too high, the object might be traveling too quickly, the scene might be too dark, there are not enough details in the scene (for example, a PTZ looking down on a driveway or other monotone background without a sufficient number of hard edges or corners), or the scene is otherwise less than optimal for Frigate to maintain tracking.
+
+Your camera's shutter speed may also be set too low so that blurring occurs with motion. Check your camera's firmware to see if you can increase the shutter speed.
+
+Watching Frigate's debug view can help to determine a possible cause. The autotracked object will have a thicker colored box around it.
+
+### I'm seeing an error in the logs that my camera "is still in ONVIF 'MOVING' status." What does this mean?
+
+There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware.
+
+### I tried calibrating my camera, but the logs show that it is stuck at 0% and Frigate is not starting up.
+
+This is often caused by the same reason as above - the `MoveStatus` ONVIF parameter is not changing due to a bug in your camera's firmware. Also, see the note above: Frigate's web UI and all other cameras will be unresponsive while calibration is in progress. This is expected and normal. But if you don't see log entries every few seconds for calibration progress, your camera is not compatible with autotracking.
+
+### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
+
+To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variatons), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.

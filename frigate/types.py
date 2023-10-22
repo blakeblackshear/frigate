@@ -35,6 +35,8 @@ class PTZMetricsTypes(TypedDict):
     ptz_stop_time: Synchronized
     ptz_frame_time: Synchronized
     ptz_zoom_level: Synchronized
+    ptz_max_zoom: Synchronized
+    ptz_min_zoom: Synchronized
 
 
 class FeatureMetricsTypes(TypedDict):
