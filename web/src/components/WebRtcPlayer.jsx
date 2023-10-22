@@ -56,8 +56,8 @@ export default function WebRtcPlayer({ camera, width, height }) {
     }
   }
 
-  const connect = useCallback(async (ws) => {
-    const pc = await PeerConnection('video+audio');
+  const connect = useCallback(async (ws, aPc) => {
+    const pc = await aPc;
 
     ws.addEventListener('open', () => {
       pc.addEventListener('icecandidate', (ev) => {
@@ -82,21 +82,18 @@ export default function WebRtcPlayer({ camera, width, height }) {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
     });
-
-    ws.addEventListener('close', () => {
-      pc.close();
-    })
-  }, [PeerConnection]);
+  }, []);
 
   useEffect(() => {
     const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
     const ws = new WebSocket(url);
-    connect(ws);
+    const aPc = PeerConnection('video+audio');
+    connect(ws, aPc);
 
-    return () => {
-      ws.close();
+    return async () => {
+      (await aPc).close();
     }
-  }, [camera, connect]);
+  }, [camera, connect, PeerConnection]);
 
   return (
     <div>
