@@ -89,6 +89,18 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 "OFF",
                 retain=False,
             )
+            self.publish(
+                f"{camera_name}/birdseye/state",
+                "ON" if camera.birdseye.enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/birdseye_mode/state",
+                camera.birdseye.mode.value.upper()
+                if camera.birdseye.enabled
+                else "OFF",
+                retain=True,
+            )
 
         self.publish("available", "online", retain=True)
 
@@ -160,6 +172,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "ptz_autotracker",
             "motion_threshold",
             "motion_contour_area",
+            "birdseye",
         ]
 
         for name in self.config.cameras.keys():
@@ -180,6 +193,12 @@ class MqttClient(Communicator):  # type: ignore[misc]
             if self.config.cameras[name].onvif.host:
                 self.client.message_callback_add(
                     f"{self.mqtt_config.topic_prefix}/{name}/ptz",
+                    self.on_mqtt_command,
+                )
+
+            if self.config.cameras[name].birdseye.enabled:
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/birdseye_mode",
                     self.on_mqtt_command,
                 )
 
