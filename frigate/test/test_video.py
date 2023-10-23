@@ -258,7 +258,6 @@ class TestObjectBoundingBoxes(unittest.TestCase):
         consolidated_detections = reduce_detections(frame_shape, detections)
         assert len(consolidated_detections) == len(detections)
 
-
     def test_overlapping_different_size_objects_not_reduced(self):
         """Test that overlapping objects that are significantly different in size are not reduced."""
         detections = [
