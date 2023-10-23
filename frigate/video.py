@@ -24,6 +24,7 @@ from frigate.log import LogPipe
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
 from frigate.object_detection import RemoteObjectDetector
+from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
 from frigate.types import PTZMetricsTypes
@@ -628,7 +629,11 @@ def process_frames(
             ]
 
             # only add in the motion boxes when not calibrating
-            if not motion_detector.is_calibrating():
+            if not motion_detector.is_calibrating() and not ptz_moving_at_frame_time(
+                frame_time,
+                ptz_metrics["ptz_start_time"].value,
+                ptz_metrics["ptz_stop_time"].value,
+            ):
                 # find motion boxes that are not inside tracked object regions
                 standalone_motion_boxes = [
                     b for b in motion_boxes if not inside_any(b, regions)
