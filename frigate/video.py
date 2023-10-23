@@ -7,10 +7,8 @@ import signal
 import subprocess as sp
 import threading
 import time
-from collections import defaultdict
 
 import cv2
-import numpy as np
 from setproctitle import setproctitle
 
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
@@ -39,12 +37,12 @@ from frigate.util.object import (
     get_cluster_candidates,
     get_cluster_region,
     get_cluster_region_from_grid,
-    get_consolidated_object_detections,
     get_min_region_size,
     get_startup_regions,
     inside_any,
     intersects_any,
     is_object_filtered,
+    reduce_detections,
 )
 from frigate.util.services import listen
 
@@ -688,50 +686,10 @@ def process_frames(
                     )
                 )
 
-            #########
-            # merge objects
-            #########
-            # group by name
-            detected_object_groups = defaultdict(lambda: [])
-            for detection in detections:
-                detected_object_groups[detection[0]].append(detection)
-
-            selected_objects = []
-            for group in detected_object_groups.values():
-                # apply non-maxima suppression to suppress weak, overlapping bounding boxes
-                # o[2] is the box of the object: xmin, ymin, xmax, ymax
-                # apply max/min to ensure values do not exceed the known frame size
-                boxes = [
-                    (
-                        o[2][0],
-                        o[2][1],
-                        o[2][2] - o[2][0],
-                        o[2][3] - o[2][1],
-                    )
-                    for o in group
-                ]
-                confidences = [o[1] for o in group]
-                idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-                # add objects
-                for index in idxs:
-                    index = index if isinstance(index, np.int32) else index[0]
-                    obj = group[index]
-                    selected_objects.append(obj)
-
-            # set the detections list to only include top objects
-            detections = selected_objects
+            consolidated_detections = reduce_detections(frame_shape, detections)
 
             # if detection was run on this frame, consolidate
             if len(regions) > 0:
-                # group by name
-                detected_object_groups = defaultdict(lambda: [])
-                for detection in detections:
-                    detected_object_groups[detection[0]].append(detection)
-
-                consolidated_detections = get_consolidated_object_detections(
-                    detected_object_groups
-                )
                 tracked_detections = [
                     d
                     for d in consolidated_detections
