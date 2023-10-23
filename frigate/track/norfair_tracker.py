@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 
@@ -10,6 +11,8 @@ from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
 from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
+
+logger = logging.getLogger(__name__)
 
 
 # Normalizes distance from estimate relative to object size
@@ -62,6 +65,7 @@ class NorfairTracker(ObjectTracker):
         ptz_metrics: PTZMetricsTypes,
     ):
         self.tracked_objects = {}
+        self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
         self.max_disappeared = config.detect.max_disappeared
@@ -77,7 +81,7 @@ class NorfairTracker(ObjectTracker):
         self.tracker = Tracker(
             distance_function=frigate_distance,
             distance_threshold=2.5,
-            initialization_delay=0,
+            initialization_delay=self.detect_config.fps / 2,
             hit_counter_max=self.max_disappeared,
         )
         if self.ptz_autotracker_enabled.value:
@@ -105,11 +109,6 @@ class NorfairTracker(ObjectTracker):
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
-
-        # start object with a hit count of `fps` to avoid quick detection -> loss
-        next(
-            (o for o in self.tracker.tracked_objects if o.global_id == track_id)
-        ).hit_counter = self.camera_config.detect.fps
 
     def deregister(self, id, track_id):
         del self.tracked_objects[id]
@@ -302,6 +301,12 @@ class NorfairTracker(ObjectTracker):
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
         for e_id in expired_ids:
             self.deregister(self.track_id_map[e_id], e_id)
+
+        # update list of object boxes that don't have a tracked object yet
+        tracked_object_boxes = [obj["box"] for obj in self.tracked_objects.values()]
+        self.untracked_object_boxes = [
+            o[2] for o in detections if o[2] not in tracked_object_boxes
+        ]
 
     def debug_draw(self, frame, frame_time):
         active_detections = [
