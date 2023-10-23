@@ -477,7 +477,9 @@ def reduce_detections(
             ]
 
             # reduce confidences for objects that are on edge of region
-            confidences = [o[1] / 2 if clipped(o, frame_shape) else o[1] for o in group]
+            # 0.6 should be used to ensure that the object is still considered and not dropped
+            # due to min score requirement of NMSBoxes
+            confidences = [0.6 if clipped(o, frame_shape) else o[1] for o in group]
 
             idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
@@ -516,8 +518,15 @@ def reduce_detections(
                     len(sorted_by_area),
                 ):
                     to_check = sorted_by_area[to_check_idx][2]
+
+                    # if area of current detection / area of check < 5% they should not be compared
+                    # this covers cases where a large car parked in a driveway doesn't block detections
+                    # of cars in the street behind it
+                    if area(current_box) / area(to_check) < 0.05:
+                        continue
+
                     intersect_box = intersection(current_box, to_check)
-                    # if 90% of smaller detection is inside of another detection, consolidate
+                    # if % of smaller detection is inside of another detection, consolidate
                     if intersect_box is not None and area(intersect_box) / area(
                         current_box
                     ) > LABEL_CONSOLIDATION_MAP.get(
