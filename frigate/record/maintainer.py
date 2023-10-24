@@ -303,6 +303,10 @@ class RecordingMaintainer(threading.Thread):
             if frame[0] < start_time.timestamp():
                 continue
 
+            # add active audio label count to count of active objects
+            active_count += len(frame[2])
+
+            # add sound level to audio values
             audio_values.append(frame[1])
 
         average_dBFS = 0 if not audio_values else np.average(audio_values)
@@ -461,6 +465,7 @@ class RecordingMaintainer(threading.Thread):
                             camera,
                             frame_time,
                             dBFS,
+                            audio_detections,
                         ) = self.audio_recordings_info_queue.get(True, timeout=0.01)
 
                         if frame_time < run_start - stale_frame_count_threshold:
@@ -471,6 +476,7 @@ class RecordingMaintainer(threading.Thread):
                                 (
                                     frame_time,
                                     dBFS,
+                                    audio_detections,
                                 )
                             )
                     except queue.Empty:
