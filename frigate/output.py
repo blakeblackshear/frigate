@@ -595,12 +595,8 @@ class BirdsEyeFrameManager:
 
             return False
 
-        # default the mode to the camera config at load time
-        # if we have a metric (which we always should as it is set onload)
-        # then use that value
-        birdseye_mode = camera_config.mode
-        if camera_metrics["birdseye_mode"]:
-            birdseye_mode = BirdseyeModeEnum.get(camera_metrics["birdseye_mode"].value)
+        # get the birdseye mode state from camera metrics
+        birdseye_mode = BirdseyeModeEnum.get(camera_metrics["birdseye_mode"].value)
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
