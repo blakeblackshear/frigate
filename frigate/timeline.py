@@ -85,6 +85,7 @@ class TimelineProcessor(threading.Thread):
             if (
                 prev_event_data["current_zones"] != event_data["current_zones"]
                 and len(event_data["current_zones"]) > 0
+                and not event_data["stationary"]
             ):
                 timeline_entry[Timeline.class_type] = "entered_zone"
                 timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
