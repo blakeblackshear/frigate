@@ -629,6 +629,7 @@ def process_frames(
             ]
 
             # only add in the motion boxes when not calibrating and a ptz is not moving via autotracking
+            # ptz_moving_at_frame_time() always returns False for non-autotracking cameras
             if not motion_detector.is_calibrating() and not ptz_moving_at_frame_time(
                 frame_time,
                 ptz_metrics["ptz_start_time"].value,
