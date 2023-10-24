@@ -576,6 +576,10 @@ def process_frames(
         # look for motion if enabled
         motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
+        logger.info(
+            f'{camera_name}: calibrating: {motion_detector.is_calibrating()}, frame time: {frame_time}'
+        )
+
         regions = []
         consolidated_detections = []
 
