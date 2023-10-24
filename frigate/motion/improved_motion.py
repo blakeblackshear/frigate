@@ -42,7 +42,7 @@ class ImprovedMotionDetector(MotionDetector):
             interpolation=cv2.INTER_AREA,
         )
         self.mask = np.where(resized_mask == [0])
-        self.save_images = True
+        self.save_images = False
         self.calibrating = True
         self.improve_contrast = improve_contrast
         self.threshold = threshold
@@ -128,9 +128,6 @@ class ImprovedMotionDetector(MotionDetector):
             contour_area = cv2.contourArea(c)
             total_contour_area += contour_area
             if contour_area > self.contour_area.value:
-                logger.info(
-                    f"FRAME #{self.frame_counter} - counted contour area {contour_area}"
-                )
                 x, y, w, h = cv2.boundingRect(c)
                 motion_boxes.append(
                     (
@@ -153,10 +150,6 @@ class ImprovedMotionDetector(MotionDetector):
         if self.calibrating or pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
-        logger.info(
-            f"FRAME #{self.frame_counter} - pct_motion: {pct_motion}, number of motion boxes: {len(motion_boxes)}, calibrating: {self.calibrating}"
-        )
-
         if self.save_images:
             thresh_dilated = cv2.cvtColor(thresh_dilated, cv2.COLOR_GRAY2BGR)
             for b in motion_boxes:
@@ -167,19 +160,6 @@ class ImprovedMotionDetector(MotionDetector):
                     (0, 0, 255),
                     2,
                 )
-            display_text = "{}, {}, {}".format(
-                round(pct_motion, 2), len(motion_boxes), self.calibrating
-            )
-            cv2.rectangle(thresh_dilated, (8, 8), (130, 22), (0, 128, 255), cv2.FILLED)
-            cv2.putText(
-                thresh_dilated,
-                display_text,
-                (10, 20),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=0.5,
-                color=(0, 0, 0),
-                thickness=2,
-            )
             frames = [
                 cv2.cvtColor(resized_saved, cv2.COLOR_GRAY2BGR),
                 cv2.cvtColor(contrasted_saved, cv2.COLOR_GRAY2BGR),

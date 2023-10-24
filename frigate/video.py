@@ -576,10 +576,6 @@ def process_frames(
         # look for motion if enabled
         motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
 
-        logger.info(
-            f'{camera_name}: calibrating: {motion_detector.is_calibrating()}, frame time: {frame_time}'
-        )
-
         regions = []
         consolidated_detections = []
 
@@ -632,7 +628,7 @@ def process_frames(
                 )
             ]
 
-            # only add in the motion boxes when not calibrating
+            # only add in the motion boxes when not calibrating and a ptz is not moving via autotracking
             if not motion_detector.is_calibrating() and not ptz_moving_at_frame_time(
                 frame_time,
                 ptz_metrics["ptz_start_time"].value,
