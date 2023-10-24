@@ -614,14 +614,15 @@ def process_frames(
                 for obj in object_tracker.tracked_objects.values()
                 if obj["id"] not in stationary_object_ids
             ]
+            object_boxes = tracked_object_boxes + object_tracker.untracked_object_boxes
 
             # get consolidated regions for tracked objects
             regions = [
                 get_cluster_region(
-                    frame_shape, region_min_size, candidate, tracked_object_boxes
+                    frame_shape, region_min_size, candidate, object_boxes
                 )
                 for candidate in get_cluster_candidates(
-                    frame_shape, region_min_size, tracked_object_boxes
+                    frame_shape, region_min_size, object_boxes
                 )
             ]
 
