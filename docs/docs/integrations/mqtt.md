@@ -239,7 +239,7 @@ the camera to be removed from the view._
 
 | Command      | Description                                                       |
 | ------------ | ----------------------------------------------------------------- |
-| `CONTINUOUS` | Always included included                                          |
+| `CONTINUOUS` | Always included                                                   |
 | `MOTION`     | Show when detected motion within the last 30 seconds are included |
 | `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
 
