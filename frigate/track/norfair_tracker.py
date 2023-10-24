@@ -97,6 +97,12 @@ class NorfairTracker(ObjectTracker):
         obj["start_time"] = obj["frame_time"]
         obj["motionless_count"] = 0
         obj["position_changes"] = 0
+        obj["score_history"] = [
+            p.data["score"]
+            for p in next(
+                (o for o in self.tracker.tracked_objects if o.global_id == track_id)
+            ).past_detections
+        ]
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
         self.positions[id] = {
