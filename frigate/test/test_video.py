@@ -11,6 +11,7 @@ from frigate.util.object import (
     get_cluster_candidates,
     get_cluster_region,
     get_region_from_grid,
+    reduce_detections,
 )
 
 
@@ -191,6 +192,95 @@ class TestObjectBoundingBoxes(unittest.TestCase):
 
         assert intersection(box_a, box_b) == None
         assert intersection(box_b, box_c) == (899, 128, 985, 151)
+
+    def test_overlapping_objects_reduced(self):
+        """Test that object not on edge of region is used when a higher scoring object at the edge of region is provided."""
+        detections = [
+            (
+                "car",
+                0.81,
+                (1209, 73, 1437, 163),
+                20520,
+                2.53333333,
+                (1150, 0, 1500, 200),
+            ),
+            (
+                "car",
+                0.88,
+                (1238, 73, 1401, 171),
+                15974,
+                1.663265306122449,
+                (1242, 0, 1602, 360),
+            ),
+        ]
+        frame_shape = (720, 2560)
+        consolidated_detections = reduce_detections(frame_shape, detections)
+        assert consolidated_detections == [
+            (
+                "car",
+                0.81,
+                (1209, 73, 1437, 163),
+                20520,
+                2.53333333,
+                (1150, 0, 1500, 200),
+            )
+        ]
+
+    def test_non_overlapping_objects_not_reduced(self):
+        """Test that non overlapping objects are not reduced."""
+        detections = [
+            (
+                "car",
+                0.81,
+                (1209, 73, 1437, 163),
+                20520,
+                2.53333333,
+                (1150, 0, 1500, 200),
+            ),
+            (
+                "car",
+                0.83203125,
+                (1121, 55, 1214, 100),
+                4185,
+                2.066666666666667,
+                (922, 0, 1242, 320),
+            ),
+            (
+                "car",
+                0.85546875,
+                (1414, 97, 1571, 186),
+                13973,
+                1.7640449438202248,
+                (1248, 0, 1568, 320),
+            ),
+        ]
+        frame_shape = (720, 2560)
+        consolidated_detections = reduce_detections(frame_shape, detections)
+        assert len(consolidated_detections) == len(detections)
+
+    def test_overlapping_different_size_objects_not_reduced(self):
+        """Test that overlapping objects that are significantly different in size are not reduced."""
+        detections = [
+            (
+                "car",
+                0.81,
+                (164, 279, 816, 719),
+                286880,
+                1.48,
+                (90, 0, 910, 820),
+            ),
+            (
+                "car",
+                0.83203125,
+                (248, 340, 328, 385),
+                3600,
+                1.777,
+                (0, 0, 460, 460),
+            ),
+        ]
+        frame_shape = (720, 2560)
+        consolidated_detections = reduce_detections(frame_shape, detections)
+        assert len(consolidated_detections) == len(detections)
 
 
 class TestRegionGrid(unittest.TestCase):

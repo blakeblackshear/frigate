@@ -3,6 +3,7 @@
 import datetime
 import logging
 import math
+from collections import defaultdict
 
 import cv2
 import numpy as np
@@ -15,6 +16,7 @@ from frigate.models import Event, Regions, Timeline
 from frigate.util.image import (
     area,
     calculate_region,
+    clipped,
     intersection,
     intersection_over_union,
     yuv_region_2_bgr,
@@ -414,43 +416,6 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
     )
 
 
-def get_consolidated_object_detections(detected_object_groups):
-    """Drop detections that overlap too much"""
-    consolidated_detections = []
-    for group in detected_object_groups.values():
-        # if the group only has 1 item, skip
-        if len(group) == 1:
-            consolidated_detections.append(group[0])
-            continue
-
-        # sort smallest to largest by area
-        sorted_by_area = sorted(group, key=lambda g: g[3])
-
-        for current_detection_idx in range(0, len(sorted_by_area)):
-            current_detection = sorted_by_area[current_detection_idx]
-            current_label = current_detection[0]
-            current_box = current_detection[2]
-            overlap = 0
-            for to_check_idx in range(
-                min(current_detection_idx + 1, len(sorted_by_area)),
-                len(sorted_by_area),
-            ):
-                to_check = sorted_by_area[to_check_idx][2]
-                intersect_box = intersection(current_box, to_check)
-                # if 90% of smaller detection is inside of another detection, consolidate
-                if intersect_box is not None and area(intersect_box) / area(
-                    current_box
-                ) > LABEL_CONSOLIDATION_MAP.get(
-                    current_label, LABEL_CONSOLIDATION_DEFAULT
-                ):
-                    overlap = 1
-                    break
-            if overlap == 0:
-                consolidated_detections.append(sorted_by_area[current_detection_idx])
-
-    return consolidated_detections
-
-
 def get_startup_regions(
     frame_shape: tuple[int],
     region_min_size: int,
@@ -483,3 +448,99 @@ def get_startup_regions(
         )
 
     return regions
+
+
+def reduce_detections(
+    frame_shape: tuple[int],
+    all_detections: list[tuple[any]],
+) -> list[tuple[any]]:
+    """Take a list of detections and reduce overlaps to create a list of confident detections."""
+
+    def reduce_overlapping_detections(detections: list[tuple[any]]) -> list[tuple[any]]:
+        """apply non-maxima suppression to suppress weak, overlapping bounding boxes."""
+        detected_object_groups = defaultdict(lambda: [])
+        for detection in detections:
+            detected_object_groups[detection[0]].append(detection)
+
+        selected_objects = []
+        for group in detected_object_groups.values():
+            # o[2] is the box of the object: xmin, ymin, xmax, ymax
+            # apply max/min to ensure values do not exceed the known frame size
+            boxes = [
+                (
+                    o[2][0],
+                    o[2][1],
+                    o[2][2] - o[2][0],
+                    o[2][3] - o[2][1],
+                )
+                for o in group
+            ]
+
+            # reduce confidences for objects that are on edge of region
+            # 0.6 should be used to ensure that the object is still considered and not dropped
+            # due to min score requirement of NMSBoxes
+            confidences = [0.6 if clipped(o, frame_shape) else o[1] for o in group]
+
+            idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+            # add objects
+            for index in idxs:
+                index = index if isinstance(index, np.int32) else index[0]
+                obj = group[index]
+                selected_objects.append(obj)
+
+        # set the detections list to only include top objects
+        return selected_objects
+
+    def get_consolidated_object_detections(detections: list[tuple[any]]):
+        """Drop detections that overlap too much."""
+        detected_object_groups = defaultdict(lambda: [])
+        for detection in detections:
+            detected_object_groups[detection[0]].append(detection)
+
+        consolidated_detections = []
+        for group in detected_object_groups.values():
+            # if the group only has 1 item, skip
+            if len(group) == 1:
+                consolidated_detections.append(group[0])
+                continue
+
+            # sort smallest to largest by area
+            sorted_by_area = sorted(group, key=lambda g: g[3])
+
+            for current_detection_idx in range(0, len(sorted_by_area)):
+                current_detection = sorted_by_area[current_detection_idx]
+                current_label = current_detection[0]
+                current_box = current_detection[2]
+                overlap = 0
+                for to_check_idx in range(
+                    min(current_detection_idx + 1, len(sorted_by_area)),
+                    len(sorted_by_area),
+                ):
+                    to_check = sorted_by_area[to_check_idx][2]
+
+                    # if area of current detection / area of check < 5% they should not be compared
+                    # this covers cases where a large car parked in a driveway doesn't block detections
+                    # of cars in the street behind it
+                    if area(current_box) / area(to_check) < 0.05:
+                        continue
+
+                    intersect_box = intersection(current_box, to_check)
+                    # if % of smaller detection is inside of another detection, consolidate
+                    if intersect_box is not None and area(intersect_box) / area(
+                        current_box
+                    ) > LABEL_CONSOLIDATION_MAP.get(
+                        current_label, LABEL_CONSOLIDATION_DEFAULT
+                    ):
+                        overlap = 1
+                        break
+                if overlap == 0:
+                    consolidated_detections.append(
+                        sorted_by_area[current_detection_idx]
+                    )
+
+        return consolidated_detections
+
+    return get_consolidated_object_detections(
+        reduce_overlapping_detections(all_detections)
+    )
