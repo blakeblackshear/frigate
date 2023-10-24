@@ -224,7 +224,12 @@ class AudioEventMaintainer(threading.Thread):
 
             # add audio info to recordings queue
             self.recordings_info_queue.put(
-                (self.config.name, datetime.datetime.now().timestamp(), dBFS, audio_detections)
+                (
+                    self.config.name,
+                    datetime.datetime.now().timestamp(),
+                    dBFS,
+                    audio_detections,
+                )
             )
 
         self.expire_detections()
