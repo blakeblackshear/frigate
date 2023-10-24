@@ -128,3 +128,34 @@ To do this:
 2. Rename the build to `go2rtc`.
 3. Give `go2rtc` execute permission.
 4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.
+
+## Validating your config.yaml file updates
+
+When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have three options -- you can edit the config via the WebUI which has built in validation, use the config API, or you can validate on the command line using the frigate docker container.
+
+### Via API
+
+Frigate can accept a new configuration file as JSON at the `/config/save` endpoint. When updating the config this way, Frigate will validate the config before saving it, and return a `400` if the config is not valid.
+
+```bash
+curl -X POST http://frigate_host:5000/config/save -d @config.json
+```
+
+if you'd like you can use your yaml config directly by using [`yq`](https://github.com/mikefarah/yq) to convert it to json:
+
+```bash
+yq r -j config.yml | curl -X POST http://frigate_host:5000/config/save -d @-
+```
+
+### Via Command Line
+
+You can also validate your config at the command line by using the docker container itself. In CI/CD, you leverage the return code to determine if your config is valid, Frigate will return `1` if the config is invalid, or `0` if it's valid.
+
+```bash
+docker run                                \
+  -v $(pwd)/config.yml:/config/config.yml \
+  --entrypoint python3                    \
+  ghcr.io/blakeblackshear/frigate:stable  \
+  -u -m frigate                           \
+  --validate_config
+```
