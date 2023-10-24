@@ -64,6 +64,7 @@ class Dispatcher:
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
+            "birdseye_mode": self._on_birdseye_mode_command,
         }
 
         for comm in self.comms:
@@ -97,14 +98,6 @@ class Dispatcher:
             self.camera_metrics[camera]["region_grid_queue"].put(
                 get_camera_regions_grid(camera, self.config.cameras[camera].detect)
             )
-        elif topic.endswith("birdseye_mode"):
-            try:
-                # example /cam_name/birdseye payload=CONTINUOUS|MOTION|OBJECTS
-                camera_name = topic.split("/")[-2]
-                self._on_birdseye_mode_command(camera_name, payload)
-            except IndexError:
-                logger.error(f"Received invalid birdseye_mode command: {topic}")
-                return
         else:
             self.publish(topic, payload, retain=False)
 

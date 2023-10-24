@@ -230,7 +230,7 @@ must be enabled in the configuration.
 
 Topic with current state of Birdseye for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/birdseye_mode`
+### `frigate/<camera_name>/birdseye_mode/set`
 
 Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
 
