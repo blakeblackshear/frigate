@@ -330,8 +330,6 @@ class Dispatcher:
             return
 
         new_birdseye_mode = BirdseyeModeEnum(payload.lower())
-        # birdseye_config.mode = BirdseyeModeEnum.continuous
-        # self.config.cameras[camera_name].birdseye.enabled = False
         logger.info(f"Setting birdseye mode for {camera_name} to {new_birdseye_mode}")
 
         # update the metric (need the mode converted to an int)
