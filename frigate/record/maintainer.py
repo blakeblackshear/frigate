@@ -265,10 +265,16 @@ class RecordingMaintainer(threading.Thread):
                     self.end_time_cache.pop(cache_path, None)
         # else retain days includes this segment
         else:
-            record_mode = self.config.cameras[camera].record.retain.mode
-            return await self.move_segment(
-                camera, start_time, end_time, duration, cache_path, record_mode
-            )
+            most_recently_processed_frame_time = self.object_recordings_info[camera][
+                -1
+            ][0]
+
+            # ensure delayed segment info does not lead to lost segments
+            if most_recently_processed_frame_time >= start_time:
+                record_mode = self.config.cameras[camera].record.retain.mode
+                return await self.move_segment(
+                    camera, start_time, end_time, duration, cache_path, record_mode
+                )
 
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
