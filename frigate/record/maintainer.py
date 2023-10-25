@@ -451,7 +451,7 @@ class RecordingMaintainer(threading.Thread):
                     break
 
             if stale_frame_count > 0:
-                logger.warning(
+                logger.debug(
                     f"Found {stale_frame_count} old frames, segments from recordings may be missing."
                 )
 
