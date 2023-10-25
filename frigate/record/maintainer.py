@@ -270,7 +270,7 @@ class RecordingMaintainer(threading.Thread):
             ][0]
 
             # ensure delayed segment info does not lead to lost segments
-            if most_recently_processed_frame_time >= start_time.timestamp():
+            if most_recently_processed_frame_time >= end_time.timestamp():
                 record_mode = self.config.cameras[camera].record.retain.mode
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
