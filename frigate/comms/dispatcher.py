@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
-from frigate.config import FrigateConfig
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import INSERT_MANY_RECORDINGS, REQUEST_REGION_GRID
 from frigate.models import Recordings
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
@@ -63,6 +63,8 @@ class Dispatcher:
             "motion_threshold": self._on_motion_threshold_command,
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
+            "birdseye": self._on_birdseye_command,
+            "birdseye_mode": self._on_birdseye_mode_command,
         }
 
         for comm in self.comms:
@@ -296,3 +298,43 @@ class Dispatcher:
             logger.info(f"Setting ptz command to {command} for {camera_name}")
         except KeyError as k:
             logger.error(f"Invalid PTZ command {payload}: {k}")
+
+    def _on_birdseye_command(self, camera_name: str, payload: str) -> None:
+        """Callback for birdseye topic."""
+        birdseye_settings = self.config.cameras[camera_name].birdseye
+
+        if payload == "ON":
+            if not self.camera_metrics[camera_name]["birdseye_enabled"].value:
+                logger.info(f"Turning on birdseye for {camera_name}")
+                self.camera_metrics[camera_name]["birdseye_enabled"].value = True
+                birdseye_settings.enabled = True
+
+        elif payload == "OFF":
+            if self.camera_metrics[camera_name]["birdseye_enabled"].value:
+                logger.info(f"Turning off birdseye for {camera_name}")
+                self.camera_metrics[camera_name]["birdseye_enabled"].value = False
+                birdseye_settings.enabled = False
+
+        self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
+
+    def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
+        """Callback for birdseye mode topic."""
+
+        if payload not in ["CONTINUOUS", "MOTION", "OBJECTS"]:
+            logger.info(f"Invalid birdseye_mode command: {payload}")
+            return
+
+        birdseye_config = self.config.cameras[camera_name].birdseye
+        if not birdseye_config.enabled:
+            logger.info(f"Birdseye mode not enabled for {camera_name}")
+            return
+
+        new_birdseye_mode = BirdseyeModeEnum(payload.lower())
+        logger.info(f"Setting birdseye mode for {camera_name} to {new_birdseye_mode}")
+
+        # update the metric (need the mode converted to an int)
+        self.camera_metrics[camera_name][
+            "birdseye_mode"
+        ].value = BirdseyeModeEnum.get_index(new_birdseye_mode)
+
+        self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)

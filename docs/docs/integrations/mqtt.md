@@ -220,3 +220,29 @@ Topic to turn the PTZ autotracker for a camera on and off. Expected values are `
 ### `frigate/<camera_name>/ptz_autotracker/state`
 
 Topic with current state of the PTZ autotracker for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/birdseye/set`
+
+Topic to turn Birdseye for a camera on and off. Expected values are `ON` and `OFF`. Birdseye mode
+must be enabled in the configuration.
+
+### `frigate/<camera_name>/birdseye/state`
+
+Topic with current state of Birdseye for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/birdseye_mode/set`
+
+Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
+
+_Note: Changing the value from `CONTINUOUS` -> `MOTION | OBJECTS` will take up to 30 seconds for
+the camera to be removed from the view._
+
+| Command      | Description                                                       |
+| ------------ | ----------------------------------------------------------------- |
+| `CONTINUOUS` | Always included                                                   |
+| `MOTION`     | Show when detected motion within the last 30 seconds are included |
+| `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
+
+### `frigate/<camera_name>/birdseye_mode/state`
+
+Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
