@@ -39,7 +39,9 @@ def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     known_aspects = [
         (16, 9),
         (9, 16),
-        (32, 9),
+        (2, 1),
+        (8, 3),  # reolink duo 2
+        (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
     ]  # aspects are scaled to have common relative size
