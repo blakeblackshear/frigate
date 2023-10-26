@@ -460,9 +460,7 @@ class RecordingMaintainer(threading.Thread):
                     break
 
             if stale_frame_count > 0:
-                logger.debug(
-                    f"Found {stale_frame_count} old frames, segments from recordings may be missing."
-                )
+                logger.debug(f"Found {stale_frame_count} old frames.")
 
             # empty the audio recordings info queue if audio is enabled
             if self.audio_recordings_info_queue:
