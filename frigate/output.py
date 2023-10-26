@@ -36,11 +36,12 @@ logger = logging.getLogger(__name__)
 
 def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     """Ensure that only standard aspect ratios are used."""
+    # it is imoprtant that all ratios have the same scale
     known_aspects = [
         (16, 9),
         (9, 16),
-        (2, 1),
-        (8, 3),  # reolink duo 2
+        (20, 10),
+        (16, 6),  # reolink duo 2
         (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
@@ -499,6 +500,9 @@ class BirdsEyeFrameManager:
                 y += row_height
                 candidate_layout.append(final_row)
 
+            if max_width == 0:
+                max_width = x
+
             return max_width, y, candidate_layout
 
         canvas_aspect_x, canvas_aspect_y = self.canvas.get_aspect(coefficient)
@@ -562,15 +566,18 @@ class BirdsEyeFrameManager:
         row_height = int(self.canvas.height / coefficient)
         total_width, total_height, standard_candidate_layout = map_layout(row_height)
 
+        if not standard_candidate_layout:
+            return None
+
         # layout can't be optimized more
         if total_width / self.canvas.width >= 0.99:
             return standard_candidate_layout
 
         scale_up_percent = min(
-            1 - (total_width / self.canvas.width),
-            1 - (total_height / self.canvas.height),
+            1 / (total_width / self.canvas.width),
+            1 / (total_height / self.canvas.height),
         )
-        row_height = int(row_height * (1 + round(scale_up_percent, 1)))
+        row_height = int(row_height * scale_up_percent)
         _, _, scaled_layout = map_layout(row_height)
 
         if scaled_layout:
