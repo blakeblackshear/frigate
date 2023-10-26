@@ -93,4 +93,5 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
 | Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+| Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
