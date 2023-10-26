@@ -265,9 +265,11 @@ class RecordingMaintainer(threading.Thread):
                     self.end_time_cache.pop(cache_path, None)
         # else retain days includes this segment
         else:
-            most_recently_processed_frame_time = self.object_recordings_info[camera][
-                -1
-            ][0]
+            # assume that empty means the relevant recording info has not been received yet
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
+            )
 
             # ensure delayed segment info does not lead to lost segments
             if most_recently_processed_frame_time >= end_time.timestamp():
