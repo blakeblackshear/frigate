@@ -98,8 +98,8 @@ class EventCleanup(threading.Thread):
                 .iterator()
             )
             # delete the media from disk
-            for event in expired_events:
-                media_name = f"{event.camera}-{event.id}"
+            for expired in expired_events:
+                media_name = f"{expired.camera}-{expired.id}"
                 media_path = Path(
                     f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
                 )
