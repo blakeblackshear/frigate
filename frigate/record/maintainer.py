@@ -256,9 +256,10 @@ class RecordingMaintainer(threading.Thread):
             # if it ends more than the configured pre_capture for the camera
             else:
                 pre_capture = self.config.cameras[camera].record.events.pre_capture
-                most_recently_processed_frame_time = self.object_recordings_info[
-                    camera
-                ][-1][0]
+                camera_info = self.object_recordings_info[camera]
+                most_recently_processed_frame_time = (
+                    camera_info[-1][0] if len(camera_info) > 0 else 0
+                )
                 retain_cutoff = most_recently_processed_frame_time - pre_capture
                 if end_time.timestamp() < retain_cutoff:
                     Path(cache_path).unlink(missing_ok=True)
