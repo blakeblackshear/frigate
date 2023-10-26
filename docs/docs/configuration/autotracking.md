@@ -160,3 +160,7 @@ This is often caused by the same reason as above - the `MoveStatus` ONVIF parame
 ### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
 
 To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variatons), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.
+
+### Calibration seems to have completed, but the camera is not actually moving to track my object. Why?
+
+Some cameras have firmware that reports that FOV RelativeMove, the ONVIF command that Frigate uses for autotracking, is supported. However, if the camera does not pan or tilt when an object comes into the required zone, your camera's firmware does not actually support FOV RelativeMove. One such camera is the Uniview IPC672LR-AX4DUPK. It actually moves its zoom motor instead of panning and tilting and does not follow the ONVIF standard whatsoever.
