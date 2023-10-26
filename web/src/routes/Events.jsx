@@ -776,11 +776,11 @@ function Event({
             <div className="text-sm flex">
               <Clock className="h-5 w-5 mr-2 inline" />
               {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
-              <div className="hidden md:inline">
+              <div className="hidden sm:inline">
                 <span className="m-1">-</span>
                 <TimeAgo time={event.start_time * 1000} dense />
               </div>
-              <div className="hidden md:inline">
+              <div className="hidden sm:inline">
                 <span className="m-1" />( {getDurationFromTimestamps(event.start_time, event.end_time)} )
               </div>
             </div>
