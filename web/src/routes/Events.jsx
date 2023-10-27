@@ -283,18 +283,14 @@ export default function Events({ path, ...props }) {
     [path, searchParams, setSearchParams]
   );
 
-  const onClickSubmitted = useCallback(
+  const onClickFilterSubmitted = useCallback(
     () => {
-      if (searchParams.is_submitted == -1) {
-        searchParams.is_submitted = 1;
-      } else if (searchParams.is_submitted == 1) {
-        searchParams.is_submitted = 0;
-      } else {
+      if( ++searchParams.is_submitted > 1 ) {
         searchParams.is_submitted = -1;
       }
       onFilter('is_submitted', searchParams.is_submitted);
     },
-    [path, searchParams, setSearchParams]
+    [searchParams, onFilter]
   );
 
   const isDone = (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT;
@@ -410,18 +406,22 @@ export default function Events({ path, ...props }) {
           </Button>
         )}
 
-        <Submitted
-          className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
-          onClick={() => onClickSubmitted()}
-          inner_fill={searchParams.is_submitted == 1 ? 'currentColor' : 'gray'}
-          outer_stroke={searchParams.is_submitted >= 0 ? 'currentColor' : 'gray'}
-        />
+        <div className="ml-auto flex">
+          {config.plus.enabled && (
+            <Submitted
+              className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
+              onClick={() => onClickFilterSubmitted()}
+              inner_fill={searchParams.is_submitted == 1 ? 'currentColor' : 'gray'}
+              outer_stroke={searchParams.is_submitted >= 0 ? 'currentColor' : 'gray'}
+            />
+          )}
 
-        <StarRecording
-          className="h-10 w-10 text-yellow-300 cursor-pointer ml-right"
-          onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
-          fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
-        />
+          <StarRecording
+            className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
+            onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
+            fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
+          />
+        </div>
 
         <div ref={datePicker} className="ml-right">
           <CalendarIcon
