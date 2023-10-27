@@ -501,6 +501,14 @@ class BirdseyeModeEnum(str, Enum):
     motion = "motion"
     continuous = "continuous"
 
+    @classmethod
+    def get_index(cls, type):
+        return list(cls).index(type)
+
+    @classmethod
+    def get(cls, index):
+        return list(cls)[index]
+
 
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")

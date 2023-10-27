@@ -25,6 +25,8 @@ class CameraMetricsTypes(TypedDict):
     skipped_fps: Synchronized
     audio_rms: Synchronized
     audio_dBFS: Synchronized
+    birdseye_enabled: Synchronized
+    birdseye_mode: Synchronized
 
 
 class PTZMetricsTypes(TypedDict):

@@ -256,19 +256,28 @@ class RecordingMaintainer(threading.Thread):
             # if it ends more than the configured pre_capture for the camera
             else:
                 pre_capture = self.config.cameras[camera].record.events.pre_capture
-                most_recently_processed_frame_time = self.object_recordings_info[
-                    camera
-                ][-1][0]
+                camera_info = self.object_recordings_info[camera]
+                most_recently_processed_frame_time = (
+                    camera_info[-1][0] if len(camera_info) > 0 else 0
+                )
                 retain_cutoff = most_recently_processed_frame_time - pre_capture
                 if end_time.timestamp() < retain_cutoff:
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
         # else retain days includes this segment
         else:
-            record_mode = self.config.cameras[camera].record.retain.mode
-            return await self.move_segment(
-                camera, start_time, end_time, duration, cache_path, record_mode
+            # assume that empty means the relevant recording info has not been received yet
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
             )
+
+            # ensure delayed segment info does not lead to lost segments
+            if most_recently_processed_frame_time >= end_time.timestamp():
+                record_mode = self.config.cameras[camera].record.retain.mode
+                return await self.move_segment(
+                    camera, start_time, end_time, duration, cache_path, record_mode
+                )
 
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
@@ -451,9 +460,7 @@ class RecordingMaintainer(threading.Thread):
                     break
 
             if stale_frame_count > 0:
-                logger.warning(
-                    f"Found {stale_frame_count} old frames, segments from recordings may be missing."
-                )
+                logger.debug(f"Found {stale_frame_count} old frames.")
 
             # empty the audio recordings info queue if audio is enabled
             if self.audio_recordings_info_queue:

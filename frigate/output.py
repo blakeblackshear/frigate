@@ -24,6 +24,7 @@ from ws4py.websocket import WebSocket
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
+from frigate.types import CameraMetricsTypes
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -35,10 +36,13 @@ logger = logging.getLogger(__name__)
 
 def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     """Ensure that only standard aspect ratios are used."""
+    # it is imoprtant that all ratios have the same scale
     known_aspects = [
         (16, 9),
         (9, 16),
-        (32, 9),
+        (20, 10),
+        (16, 6),  # reolink duo 2
+        (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
     ]  # aspects are scaled to have common relative size
@@ -238,6 +242,7 @@ class BirdsEyeFrameManager:
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
         stop_event: mp.Event,
+        camera_metrics: dict[str, CameraMetricsTypes],
     ):
         self.config = config
         self.mode = config.birdseye.mode
@@ -248,6 +253,7 @@ class BirdsEyeFrameManager:
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
         self.canvas = Canvas(width, height)
         self.stop_event = stop_event
+        self.camera_metrics = camera_metrics
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -494,6 +500,9 @@ class BirdsEyeFrameManager:
                 y += row_height
                 candidate_layout.append(final_row)
 
+            if max_width == 0:
+                max_width = x
+
             return max_width, y, candidate_layout
 
         canvas_aspect_x, canvas_aspect_y = self.canvas.get_aspect(coefficient)
@@ -557,15 +566,18 @@ class BirdsEyeFrameManager:
         row_height = int(self.canvas.height / coefficient)
         total_width, total_height, standard_candidate_layout = map_layout(row_height)
 
+        if not standard_candidate_layout:
+            return None
+
         # layout can't be optimized more
         if total_width / self.canvas.width >= 0.99:
             return standard_candidate_layout
 
         scale_up_percent = min(
-            1 - (total_width / self.canvas.width),
-            1 - (total_height / self.canvas.height),
+            1 / (total_width / self.canvas.width),
+            1 / (total_height / self.canvas.height),
         )
-        row_height = int(row_height * (1 + round(scale_up_percent, 1)))
+        row_height = int(row_height * scale_up_percent)
         _, _, scaled_layout = map_layout(row_height)
 
         if scaled_layout:
@@ -579,9 +591,25 @@ class BirdsEyeFrameManager:
         if not camera_config.enabled:
             return False
 
+        # get our metrics (sync'd across processes)
+        # which allows us to control it via mqtt (or any other dispatcher)
+        camera_metrics = self.camera_metrics[camera]
+
+        # disabling birdseye is a little tricky
+        if not camera_metrics["birdseye_enabled"].value:
+            # if we've rendered a frame (we have a value for last_active_frame)
+            # then we need to set it to zero
+            if self.cameras[camera]["last_active_frame"] > 0:
+                self.cameras[camera]["last_active_frame"] = 0
+
+            return False
+
+        # get the birdseye mode state from camera metrics
+        birdseye_mode = BirdseyeModeEnum.get(camera_metrics["birdseye_mode"].value)
+
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(camera_config.mode, object_count, motion_count):
+        if self.camera_active(birdseye_mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -605,7 +633,11 @@ class BirdsEyeFrameManager:
         return False
 
 
-def output_frames(config: FrigateConfig, video_output_queue):
+def output_frames(
+    config: FrigateConfig,
+    video_output_queue,
+    camera_metrics: dict[str, CameraMetricsTypes],
+):
     threading.current_thread().name = "output"
     setproctitle("frigate.output")
 
@@ -661,7 +693,10 @@ def output_frames(config: FrigateConfig, video_output_queue):
             config.birdseye.restream,
         )
         broadcasters["birdseye"] = BroadcastThread(
-            "birdseye", converters["birdseye"], websocket_server, stop_event
+            "birdseye",
+            converters["birdseye"],
+            websocket_server,
+            stop_event,
         )
 
     websocket_thread.start()
@@ -669,7 +704,9 @@ def output_frames(config: FrigateConfig, video_output_queue):
     for t in broadcasters.values():
         t.start()
 
-    birdseye_manager = BirdsEyeFrameManager(config, frame_manager, stop_event)
+    birdseye_manager = BirdsEyeFrameManager(
+        config, frame_manager, stop_event, camera_metrics
+    )
 
     if config.birdseye.restream:
         birdseye_buffer = frame_manager.create(
