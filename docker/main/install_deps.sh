@@ -72,6 +72,12 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
         libva-drm2 mesa-va-drivers
 fi
 
+# Needed for RKNN
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    apt-get -qq install --no-install-recommends --no-install-suggests -y \
+        gcc
+fi
+
 apt-get purge gnupg apt-transport-https xz-utils -y
 apt-get clean autoclean -y
 apt-get autoremove --purge -y

@@ -90,6 +90,10 @@ RUN /bin/mkdir -p '/usr/local/lib' && \
     /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
     ldconfig
 
+# Download libs needed for RKNN
+FROM wget AS rknn-deps
+RUN wget -P /rknn-lib https://github.com/rockchip-linux/rknpu2/raw/master/runtime/RK3588/Linux/librknn_api/aarch64/librknnrt.so
+
 FROM wget AS models
 
 # Get model and labels
@@ -159,6 +163,7 @@ FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
+COPY --from=rknn-deps /rknn-lib /usr/lib
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
 COPY docker/main/rootfs/ /
