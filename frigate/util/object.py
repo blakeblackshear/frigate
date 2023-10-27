@@ -27,6 +27,8 @@ from frigate.util.image import (
 logger = logging.getLogger(__name__)
 
 GRID_SIZE = 8
+MIN_OBJECT_DATA_POINTS = 5
+MIN_STD_ACCURACY = 0.5
 
 
 def get_camera_regions_grid(
@@ -36,16 +38,24 @@ def get_camera_regions_grid(
     # get grid from db if available
     try:
         regions: Regions = Regions.select().where(Regions.camera == name).get()
-        grid = regions.grid
-        last_update = regions.last_update
+
+        # check if old style grid is used and rebuild
+        if regions.grid[0][0].get("sizes") is not None:
+            grid = []
+            last_update = 0
+        else:
+            grid = regions.grid
+            last_update = regions.last_update
     except DoesNotExist:
         grid = []
+        last_update = 0
+
+    if last_update == 0:
         for x in range(GRID_SIZE):
             row = []
             for y in range(GRID_SIZE):
-                row.append({"sizes": []})
+                row.append({"region": {"sizes": []}})
             grid.append(row)
-        last_update = 0
 
     # get events for timeline entries
     events = (
@@ -86,6 +96,9 @@ def get_camera_regions_grid(
 
         box = t["data"]["box"]
 
+        ###
+        # save region to grid
+        ###
         # calculate centroid position
         x = box[0] + (box[2] / 2)
         y = box[1] + (box[3] / 2)
@@ -103,24 +116,40 @@ def get_camera_regions_grid(
             1.35,
         )
         # save width of region to grid as relative
-        grid[x_pos][y_pos]["sizes"].append(
+        grid[x_pos][y_pos]["region"]["sizes"].append(
             (calculated_region[2] - calculated_region[0]) / width
         )
+
+        ###
+        # save object size to grid
+        ###
+        label = t["data"]["label"]
+        x = box[0] + (box[2] / 2)
+        y = box[1] + box[3]
+
+        x_pos = int(x * GRID_SIZE)
+        y_pos = int(y * GRID_SIZE)
+
+        if grid[x_pos][y_pos].get(label):
+            grid[x_pos][y_pos][label]["sizes"].append(box[2] * box[3])
+        else:
+            grid[x_pos][y_pos][label] = {"sizes": [box[2] * box[3]]}
 
     for x in range(GRID_SIZE):
         for y in range(GRID_SIZE):
             cell = grid[x][y]
-
-            if len(cell["sizes"]) == 0:
-                continue
-
-            std_dev = np.std(cell["sizes"])
-            mean = np.mean(cell["sizes"])
-            logger.debug(f"std dev: {std_dev} mean: {mean}")
             cell["x"] = x
             cell["y"] = y
-            cell["std_dev"] = std_dev
-            cell["mean"] = mean
+
+            for key in cell.keys():
+                if key in ["x", "y"] or len(cell[key]["sizes"]) == 0:
+                    continue
+
+                std_dev = np.std(cell[key]["sizes"])
+                mean = np.mean(cell[key]["sizes"])
+                logger.debug(f"{x},{y} :: {key} -> std dev: {std_dev} mean: {mean}")
+                cell[key]["std_dev"] = std_dev
+                cell[key]["mean"] = mean
 
     # update db with new grid
     region = {
@@ -172,7 +201,7 @@ def get_region_from_grid(
     grid_x = int(centroid[0] / frame_shape[1] * GRID_SIZE)
     grid_y = int(centroid[1] / frame_shape[0] * GRID_SIZE)
 
-    cell = region_grid[grid_x][grid_y]
+    cell = region_grid[grid_x][grid_y]["region"]
 
     # if there is no known data, get standard region for motion box
     if not cell or not cell["sizes"]:
@@ -424,17 +453,19 @@ def get_startup_regions(
     """Get a list of regions to run on startup."""
     # return 8 most popular regions for the camera
     all_cells = np.concatenate(region_grid).flat
-    startup_cells = sorted(all_cells, key=lambda c: len(c["sizes"]), reverse=True)[0:8]
+    startup_cells = sorted(
+        all_cells, key=lambda c: len(c["region"]["sizes"]), reverse=True
+    )[0:8]
     regions = []
 
     for cell in startup_cells:
         # rest of the cells are empty
-        if not cell["sizes"]:
+        if not cell["region"]["sizes"]:
             break
 
         x = frame_shape[1] / GRID_SIZE * (0.5 + cell["x"])
         y = frame_shape[0] / GRID_SIZE * (0.5 + cell["y"])
-        size = cell["mean"] * frame_shape[1]
+        size = cell["region"]["mean"] * frame_shape[1]
         regions.append(
             calculate_region(
                 frame_shape,
@@ -544,3 +575,52 @@ def reduce_detections(
     return get_consolidated_object_detections(
         reduce_overlapping_detections(all_detections)
     )
+
+
+def validate_object_size_with_grid(
+    detect_config: DetectConfig,
+    label: str,
+    score: float,
+    box: tuple[int],
+    region_grid: list[list[dict[str, any]]],
+) -> tuple[bool, float]:
+    """Validate if the object is within expected size and return new size if not."""
+    # get object position in grid with bottom center
+    x = box[0] + ((box[2] - box[0]) / 2)
+    y = box[3]
+    x_pos = int(x / detect_config.width * GRID_SIZE)
+    y_pos = int(y / detect_config.height * GRID_SIZE)
+    cell = region_grid[x_pos][y_pos]
+
+    # get data specific for this object type
+    object_data = cell.get(label)
+
+    # check if enough data in grid to process
+    if not object_data or len(object_data["sizes"]) < MIN_OBJECT_DATA_POINTS:
+        return (False, 0.0)
+
+    # check if data is accurate enough to process
+    std_dev = object_data["std_dev"]
+    mean = object_data["mean"]
+
+    if std_dev / mean > MIN_STD_ACCURACY:
+        return (False, 0.0)
+
+    relative_area = ((box[2] - box[0]) / detect_config.width) * (
+        (box[3] - box[1]) / detect_config.height
+    )
+
+    diff = abs(mean - relative_area)
+
+    # if object area is within 1 std deviation, no changes should be made
+    if diff < std_dev:
+        return (False, 0.0)
+
+    logger.debug(f"Comparing for {x_pos},{y_pos} {label} {relative_area} vs {mean} +- {std_dev}")
+
+    # calculate how many std deviations away the area is
+    factor = relative_area / std_dev
+
+    # reduce object score by 5% for every factor
+    new_score = score - factor * 0.05
+    return (True, new_score)

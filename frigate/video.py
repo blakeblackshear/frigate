@@ -11,7 +11,7 @@ import time
 import cv2
 from setproctitle import setproctitle
 
-from frigate.config import CameraConfig, DetectConfig, ModelConfig
+from frigate.config import CameraConfig, DetectConfig, FilterConfig, ModelConfig
 from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
     ATTRIBUTE_LABEL_MAP,
@@ -44,6 +44,7 @@ from frigate.util.object import (
     intersects_any,
     is_object_filtered,
     reduce_detections,
+    validate_object_size_with_grid,
 )
 from frigate.util.services import listen
 
@@ -459,10 +460,11 @@ def detect(
     detect_config: DetectConfig,
     object_detector,
     frame,
-    model_config,
+    model_config: ModelConfig,
     region,
     objects_to_track,
-    object_filters,
+    object_filters: dict[str, FilterConfig],
+    region_grid: list[list[dict[str, any]]],
 ):
     tensor_input = create_tensor_input(frame, model_config, region)
 
@@ -484,18 +486,35 @@ def detect(
         height = y_max - y_min
         area = width * height
         ratio = width / max(1, height)
+        label = d[0]
+        score = d[1]
+        box = (x_min, y_min, x_max, y_max)
+
+        # check if object is outside range of expected sizes
+        # only check objects with scores that are > min_score
+        if score >= object_filters[label].min_score:
+            outside_expected_size, new_score = validate_object_size_with_grid(
+                detect_config, d[0], score, box, region_grid
+            )
+            if outside_expected_size:
+                logger.debug(f"{label} {box} has a new score {score} -> {new_score}")
+                score = new_score
+
         det = (
-            d[0],
-            d[1],
-            (x_min, y_min, x_max, y_max),
+            label,
+            score,
+            box,
             area,
             ratio,
             region,
         )
+
         # apply object filters
         if is_object_filtered(det, objects_to_track, object_filters):
             continue
+
         detections.append(det)
+
     return detections
 
 
@@ -690,6 +709,7 @@ def process_frames(
                         region,
                         objects_to_track,
                         object_filters,
+                        region_grid,
                     )
                 )
 
