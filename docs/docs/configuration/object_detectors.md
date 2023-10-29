@@ -5,7 +5,7 @@ title: Object Detectors
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt` and `rknn`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## CPU Detector (not recommended)
 
@@ -291,3 +291,49 @@ To verify that the integration is working correctly, start Frigate and observe t
 
 
 # Community Supported Detectors
+## Rockchip RKNN-Toolkit-Lite2
+This detector is only available if one of the following Rockchip SoCs is used:
+- RK3566/RK3568
+- RK3588/RK3588S
+- RV1103/RV1106
+- RK3562
+
+These SoCs come with a NPU that will highly speed up detection.
+
+### Setup
+All you have to do is to use the `frigate:latest-rk` docker image. Here is a minimal `docker-compose.yml`:
+```
+version: "3.9"
+services:
+  frigate:
+    container_name: frigate
+    image: frigate:latest-rk
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/config:/config
+      - ./data/media:/media/frigate
+    ports:
+      - "5000:5000"
+```
+
+## Configuration
+This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
+```
+detectors:                            # required
+  rknn:                               # required
+    type: rknn                        # required
+
+model:                                # required
+  # path to .rknn model file
+  path: /models/yolov8n-320x320.rknn
+  # width and height of detection frames
+  width: 320
+  height: 320
+  # pixel format of detection frame
+  # default value is rgb but yolov models usually use bgr format
+  input_pixel_format: bgr             # required
+  # shape of detection frame
+  input_tensor: nhwc
+```
