@@ -240,7 +240,9 @@ class CameraWatchdog(threading.Thread):
                         )
                     )
 
-                    if datetime.datetime.now().astimezone(datetime.timezone.utc) > (latest_segment_time + datetime.timedelta(seconds=120)):
+                    if datetime.datetime.now().astimezone(datetime.timezone.utc) > (
+                        latest_segment_time + datetime.timedelta(seconds=120)
+                    ):
                         self.logger.error(
                             f"No new recording segments were created for {self.camera_name} in the last 120s. restarting the ffmpeg record process..."
                         )
