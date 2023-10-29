@@ -433,6 +433,7 @@ class BirdsEyeFrameManager:
                 while calculating:
                     if self.stop_event.is_set():
                         return
+
                     layout_candidate = self.calculate_layout(
                         active_cameras_to_add,
                         coefficient,
@@ -563,7 +564,9 @@ class BirdsEyeFrameManager:
             return None
 
         row_height = int(self.canvas.height / coefficient)
-        total_width, total_height, standard_candidate_layout = map_layout(camera_layout, row_height)
+        total_width, total_height, standard_candidate_layout = map_layout(
+            camera_layout, row_height
+        )
 
         if not standard_candidate_layout:
             # if standard layout didn't work
@@ -573,7 +576,9 @@ class BirdsEyeFrameManager:
                 total_height / self.canvas.height,
             )
             row_height = int(row_height / scale_down_percent)
-            total_width, total_height, standard_candidate_layout = map_layout(camera_layout, row_height)
+            total_width, total_height, standard_candidate_layout = map_layout(
+                camera_layout, row_height
+            )
 
             if not standard_candidate_layout:
                 return None
