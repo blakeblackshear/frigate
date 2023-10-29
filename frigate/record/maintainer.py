@@ -260,8 +260,10 @@ class RecordingMaintainer(threading.Thread):
                 most_recently_processed_frame_time = (
                     camera_info[-1][0] if len(camera_info) > 0 else 0
                 )
-                retain_cutoff = most_recently_processed_frame_time - pre_capture
-                if end_time.timestamp() < retain_cutoff:
+                retain_cutoff = datetime.datetime.fromtimestamp(
+                    most_recently_processed_frame_time - pre_capture
+                ).astimezone(datetime.timezone.utc)
+                if end_time.astimezone(datetime.timezone.utc) < retain_cutoff:
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
         # else retain days includes this segment
@@ -273,7 +275,11 @@ class RecordingMaintainer(threading.Thread):
             )
 
             # ensure delayed segment info does not lead to lost segments
-            if most_recently_processed_frame_time >= end_time.timestamp():
+            if datetime.datetime.fromtimestamp(
+                most_recently_processed_frame_time
+            ).astimezone(datetime.timezone.utc) >= end_time.astimezone(
+                datetime.timezone.utc
+            ):
                 record_mode = self.config.cameras[camera].record.retain.mode
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
