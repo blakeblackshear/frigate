@@ -121,6 +121,7 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
+            Path(file_name).unlink(missing_ok=True)
             return
 
         logger.debug(f"Updating finalized export {file_name}")
