@@ -6,6 +6,7 @@ import os
 import subprocess as sp
 import threading
 from enum import Enum
+from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
