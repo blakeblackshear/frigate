@@ -79,7 +79,7 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-      - name: Build and push rk build
+      - name: Build and push RockChip build
         uses: docker/bake-action@v3
         with:
           push: true
