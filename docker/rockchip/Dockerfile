@@ -10,26 +10,21 @@ FROM ${SLIM_BASE} AS slim-base
 FROM wheels AS wheels-rk
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels-rk.txt
-# ToDo: download RKNN-Toolkit-Lite2 wheel using requirements-wheels-rk.txt
-COPY docker/rockchip/rknn_toolkit_lite2-1.5.2-cp39-cp39-linux_aarch64.whl /wheels/
+
+FROM wget as rk-libs
+RUN wget -qO librknnrt.so https://github.com/MarcA711/rknpu2/raw/master/runtime/RK3588/Linux/librknn_api/aarch64/librknnrt.so
 
 # Collect deps in a single layer
 FROM deps-rootfs AS deps-rootfs-rk
 COPY docker/rockchip/yolov8n-320x320.rknn /models/
 # ToDo: Download librknnrt.so using wget; depends on RKNN-Toolkit-Lite2 wheel
-COPY docker/rockchip/librknnrt.so /usr/lib/
+COPY --from=rk-libs /rootfs/librknnrt.so /usr/lib/
 
 # Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
 FROM slim-base AS deps
 ARG TARGETARCH
 
 ARG DEBIAN_FRONTEND
-# http://stackoverflow.com/questions/48162574/ddg#49462622
-ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-
-# https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
@@ -58,36 +53,6 @@ CMD []
 
 HEALTHCHECK --start-period=120s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
     CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
-
-# Frigate deps with Node.js and NPM for devcontainer
-FROM deps AS devcontainer
-
-# Do not start the actual Frigate service on devcontainer as it will be started by VSCode
-# But start a fake service for simulating the logs
-COPY docker/main/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
-
-# Create symbolic link to the frigate source code, as go2rtc's create_config.sh uses it
-RUN mkdir -p /opt/frigate \
-    && ln -svf /workspace/frigate/frigate /opt/frigate/frigate
-
-# Install Node 16
-RUN apt-get update \
-    && apt-get install wget -y \
-    && wget -qO- https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@9
-
-WORKDIR /workspace/frigate
-
-RUN apt-get update \
-    && apt-get install make -y \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
-    pip3 install -r requirements-dev.txt
-
-CMD ["sleep", "infinity"]
 
 # Frigate final container
 FROM deps AS frigate

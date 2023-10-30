@@ -323,7 +323,7 @@ services:
 ## Configuration
 
 This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
-```
+```yaml
 detectors:                            # required
   rknn:                               # required
     type: rknn                        # required

@@ -1,3 +1,4 @@
 hide-warnings == 0.17
-# ToDo: this would break everytime RKNN-Toolkit-Lite2 gets an update, since the link will be invalid; so for now just copy the file from the Frigate Github repo
-# rknn-toolkit-lite2 @ https://github.com/rockchip-linux/rknn-toolkit2/raw/master/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.5.2-cp39-cp39-linux_aarch64.whl
+numpy == 1.23.*
+ruamel.yaml == 0.17.*
+rknn-toolkit-lite2 @ https://github.com/MarcA711/rknn-toolkit2/raw/master/rknn_toolkit_lite2/packages/rknn_toolkit_lite2-1.5.2-cp39-cp39-linux_aarch64.whl
