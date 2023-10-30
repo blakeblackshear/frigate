@@ -68,7 +68,6 @@ class NorfairTracker(ObjectTracker):
         self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
-        self.max_disappeared = config.detect.max_disappeared
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
@@ -81,8 +80,8 @@ class NorfairTracker(ObjectTracker):
         self.tracker = Tracker(
             distance_function=frigate_distance,
             distance_threshold=2.5,
-            initialization_delay=self.detect_config.fps / 2,
-            hit_counter_max=self.max_disappeared,
+            initialization_delay=self.detect_config.min_initialized,
+            hit_counter_max=self.detect_config.max_disappeared,
         )
         if self.ptz_autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
