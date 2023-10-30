@@ -106,10 +106,10 @@ class ExternalEventProcessor:
         # write jpg snapshot with optional annotations
         if draw.get("boxes") and isinstance(draw.get("boxes"), list):
             for box in draw.get("boxes"):
-                x = box["box"][0] * camera_config.detect.width
-                y = box["box"][1] * camera_config.detect.height
-                width = box["box"][2] * camera_config.detect.width
-                height = box["box"][3] * camera_config.detect.height
+                x = int(box["box"][0] * camera_config.detect.width)
+                y = int(box["box"][1] * camera_config.detect.height)
+                width = int(box["box"][2] * camera_config.detect.width)
+                height = int(box["box"][3] * camera_config.detect.height)
 
                 draw_box_with_label(
                     img_frame,
