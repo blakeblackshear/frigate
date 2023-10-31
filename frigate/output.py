@@ -463,7 +463,7 @@ class BirdsEyeFrameManager:
     def calculate_layout(self, cameras_to_add: list[str], coefficient) -> tuple[any]:
         """Calculate the optimal layout for 2+ cameras."""
 
-        def map_layout(row_height: int):
+        def map_layout(camera_layout: list[list[any]], row_height: int):
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -492,7 +492,7 @@ class BirdsEyeFrameManager:
                         x + scaled_width > self.canvas.width
                         or y + scaled_height > self.canvas.height
                     ):
-                        return 0, 0, None
+                        return x + scaled_width, y + scaled_height, None
 
                     final_row.append((cameras[0], (x, y, scaled_width, scaled_height)))
                     x += scaled_width
@@ -564,10 +564,24 @@ class BirdsEyeFrameManager:
             return None
 
         row_height = int(self.canvas.height / coefficient)
-        total_width, total_height, standard_candidate_layout = map_layout(row_height)
+        total_width, total_height, standard_candidate_layout = map_layout(
+            camera_layout, row_height
+        )
 
         if not standard_candidate_layout:
-            return None
+            # if standard layout didn't work
+            # try reducing row_height by the % overflow
+            scale_down_percent = max(
+                total_width / self.canvas.width,
+                total_height / self.canvas.height,
+            )
+            row_height = int(row_height / scale_down_percent)
+            total_width, total_height, standard_candidate_layout = map_layout(
+                camera_layout, row_height
+            )
+
+            if not standard_candidate_layout:
+                return None
 
         # layout can't be optimized more
         if total_width / self.canvas.width >= 0.99:
@@ -578,7 +592,7 @@ class BirdsEyeFrameManager:
             1 / (total_height / self.canvas.height),
         )
         row_height = int(row_height * scale_up_percent)
-        _, _, scaled_layout = map_layout(row_height)
+        _, _, scaled_layout = map_layout(camera_layout, row_height)
 
         if scaled_layout:
             return scaled_layout
