@@ -293,6 +293,7 @@ To verify that the integration is working correctly, start Frigate and observe t
 # Community Supported Detectors
 
 ## Rockchip RKNN-Toolkit-Lite2
+
 This detector is only available if one of the following Rockchip SoCs is used:
 - RK3566/RK3568
 - RK3588/RK3588S
