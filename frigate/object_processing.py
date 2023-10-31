@@ -249,9 +249,7 @@ class TrackedObject:
                 significant_change = True
 
             # update autotrack at most 3 objects per second
-            if self.obj_data["frame_time"] - self.previous["frame_time"] >= (
-                1 / min(self.camera_config.detect.fps, 3)
-            ):
+            if self.obj_data["frame_time"] - self.previous["frame_time"] >= (1 / 3):
                 autotracker_update = True
 
         self.obj_data.update(obj_data)
