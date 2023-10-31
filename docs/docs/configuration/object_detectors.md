@@ -304,7 +304,7 @@ These SoCs come with a NPU that will highly speed up detection.
 
 ### Setup
 
-All you have to do is to use the `frigate:latest-rk` docker image. Here is a minimal `docker-compose.yml`:
+RKNN support is provided using the `-rk` suffix for the docker image.
 ```
 version: "3.9"
 services:
