@@ -352,6 +352,9 @@ class DetectConfig(FrigateBaseModel):
         default=5, title="Number of frames per second to process through detection."
     )
     enabled: bool = Field(default=True, title="Detection Enabled.")
+    min_initialized: Optional[int] = Field(
+        title="Minimum number of consecutive hits for an object to be initialized by the tracker."
+    )
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
@@ -1142,6 +1145,11 @@ class FrigateConfig(FrigateBaseModel):
                             if stream_info.get("height")
                             else DEFAULT_DETECT_DIMENSIONS["height"]
                         )
+
+            # Default min_initialized configuration
+            min_initialized = camera_config.detect.fps / 2
+            if camera_config.detect.min_initialized is None:
+                camera_config.detect.min_initialized = min_initialized
 
             # Default max_disappeared configuration
             max_disappeared = camera_config.detect.fps * 5
