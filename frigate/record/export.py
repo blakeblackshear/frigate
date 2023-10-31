@@ -6,6 +6,7 @@ import os
 import subprocess as sp
 import threading
 from enum import Enum
+from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
@@ -121,6 +122,7 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
+            Path(file_name).unlink(missing_ok=True)
             return
 
         logger.debug(f"Updating finalized export {file_name}")
