@@ -83,6 +83,7 @@ jobs:
         uses: docker/bake-action@v3
         with:
           push: true
+          platforms: linux/arm64
           targets: rk
           files: docker/rockchip/rk.hcl
           set: |
