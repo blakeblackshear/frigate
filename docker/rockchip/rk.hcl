@@ -10,16 +10,10 @@ target wheels {
   target = "wheels"
 }
 
-target deps-rootfs {
+target frigate {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/arm64"]
-  target = "deps-rootfs"
-}
-
-target rootfs {
-  dockerfile = "docker/main/Dockerfile"
-  platforms = ["linux/arm64"]
-  target = "rootfs"
+  target = "frigate"
 }
 
 target rk {
@@ -27,8 +21,7 @@ target rk {
   contexts = {
     wget = "target:wget",
     wheels = "target:wheels",
-    deps-rootfs = "target:deps-rootfs",
-    rootfs = "target:rootfs"
+    frigate = "target:frigate"
   }
   platforms = ["linux/arm64"]
 }
