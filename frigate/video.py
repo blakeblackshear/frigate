@@ -233,14 +233,15 @@ class CameraWatchdog(threading.Thread):
                 poll = p["process"].poll()
 
                 if self.config.record.enabled and "record" in p["roles"]:
-                    latest_segment_time = self.get_latest_segment_timestamp(
+                    latest_segment_time = self.get_latest_segment_datetime(
                         p.get(
-                            "latest_segment_time", datetime.datetime.now().timestamp()
+                            "latest_segment_time",
+                            datetime.datetime.now().astimezone(datetime.timezone.utc),
                         )
                     )
 
-                    if datetime.datetime.now().timestamp() > (
-                        latest_segment_time + 120
+                    if datetime.datetime.now().astimezone(datetime.timezone.utc) > (
+                        latest_segment_time + datetime.timedelta(seconds=120)
                     ):
                         self.logger.error(
                             f"No new recording segments were created for {self.camera_name} in the last 120s. restarting the ffmpeg record process..."
@@ -288,7 +289,7 @@ class CameraWatchdog(threading.Thread):
         )
         self.capture_thread.start()
 
-    def get_latest_segment_timestamp(self, latest_timestamp) -> int:
+    def get_latest_segment_datetime(self, latest_segment: datetime.datetime) -> int:
         """Checks if ffmpeg is still writing recording segments to cache."""
         cache_files = sorted(
             [
@@ -299,13 +300,15 @@ class CameraWatchdog(threading.Thread):
                 and not d.startswith("clip_")
             ]
         )
-        newest_segment_timestamp = latest_timestamp
+        newest_segment_timestamp = latest_segment
 
         for file in cache_files:
             if self.camera_name in file:
                 basename = os.path.splitext(file)[0]
                 _, date = basename.rsplit("-", maxsplit=1)
-                ts = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").timestamp()
+                ts = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").astimezone(
+                    datetime.timezone.utc
+                )
                 if ts > newest_segment_timestamp:
                     newest_segment_timestamp = ts
 
