@@ -85,7 +85,6 @@ class PtzMotionEstimator:
             )
 
             self.coord_transformations = None
-            self.last_update = 0
 
         if ptz_moving_at_frame_time(
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
