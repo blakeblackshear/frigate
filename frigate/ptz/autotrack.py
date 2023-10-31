@@ -58,8 +58,6 @@ class PtzMotionEstimator:
         self.ptz_metrics = ptz_metrics
         self.ptz_start_time = self.ptz_metrics["ptz_start_time"]
         self.ptz_stop_time = self.ptz_metrics["ptz_stop_time"]
-        self.last_update = 0
-        self.update_interval = 1 / (self.camera_config.detect.fps / 3)
 
         self.ptz_metrics["ptz_reset"].set()
         logger.debug(f"{config.name}: Motion estimator init")
@@ -89,25 +87,12 @@ class PtzMotionEstimator:
             self.coord_transformations = None
             self.last_update = 0
 
-        ptz_moving = ptz_moving_at_frame_time(
+        if ptz_moving_at_frame_time(
             frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
-        )
-
-        if (
-            self.camera_config.onvif.autotracking.zooming != ZoomingModeEnum.disabled
-            and (
-                (frame_time - self.last_update > self.update_interval and ptz_moving)
-                or frame_time == self.ptz_start_time.value
-                or frame_time == self.ptz_stop_time.value
-            )
-        ) or (
-            self.camera_config.onvif.autotracking.zooming == ZoomingModeEnum.disabled
-            and ptz_moving
         ):
             logger.debug(
                 f"{camera}: Motion estimator running - frame time: {frame_time}"
             )
-            self.last_update = frame_time
 
             frame_id = f"{camera}{frame_time}"
             yuv_frame = self.frame_manager.get(
@@ -284,6 +269,10 @@ class PtzAutoTracker:
 
             if camera_config.onvif.autotracking.movement_weights:
                 if len(camera_config.onvif.autotracking.movement_weights) == 5:
+                    camera_config.onvif.autotracking.movement_weights = [
+                        float(val)
+                        for val in camera_config.onvif.autotracking.movement_weights
+                    ]
                     self.ptz_metrics[camera][
                         "ptz_min_zoom"
                     ].value = camera_config.onvif.autotracking.movement_weights[0]
