@@ -520,6 +520,9 @@ cameras:
     # to be replaced by a newer image. (default: shown below)
     best_image_timeout: 60
 
+    # Optional: URL to visit the camera directly from system page (default: shown below)
+    visit_url: ""
+
     # Optional: zones for this camera
     zones:
       # Required: name of the zone

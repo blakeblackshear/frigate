@@ -347,7 +347,19 @@ export default function System() {
                     >
                       <div className="capitalize text-lg flex justify-between p-4">
                         <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                        <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
+                        <div className="flex">
+                          {(config.cameras[camera]['visit_url'] != "") && (
+                            <Link
+                              className="text-blue-500 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href={config.cameras[camera]['visit_url']}
+                            >
+                              visit
+                            </Link>
+                          )}
+                          <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
+                        </div>
                       </div>
                       <div className="p-2">
                         <Table className="w-full">
