@@ -304,22 +304,7 @@ These SoCs come with a NPU that will highly speed up detection.
 
 ### Setup
 
-RKNN support is provided using the `-rk` suffix for the docker image.
-```
-version: "3.9"
-services:
-  frigate:
-    container_name: frigate
-    image: frigate:latest-rk
-    privileged: true
-    restart: unless-stopped
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./data/config:/config
-      - ./data/media:/media/frigate
-    ports:
-      - "5000:5000"
-```
+RKNN support is provided using the `-rk` suffix for the docker image. Moreover, privileged mode must be enabled by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
 
 ## Configuration
 
