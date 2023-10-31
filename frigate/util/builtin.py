@@ -114,10 +114,8 @@ def load_config_with_no_duplicates(raw_config) -> dict:
 
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
-    if "rtsp://" in line:
-        return re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
-    else:
-        return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", line)
+    rtsp_cleaned = re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
+    return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", rtsp_cleaned)
 
 
 def escape_special_characters(path: str) -> str:
