@@ -159,9 +159,13 @@ class StorageMaintainer(threading.Thread):
 
             # Delete recordings not retained indefinitely
             if not keep:
-                deleted_segments_size += recording.segment_size
-                Path(recording.path).unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
+                try:
+                    Path(recording.path).unlink(missing_ok=False)
+                    deleted_recordings.add(recording.id)
+                    deleted_segments_size += recording.segment_size
+                except FileNotFoundError:
+                    # this file was not found so we must assume no space was cleaned up
+                    pass
 
         # check if need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
@@ -183,9 +187,15 @@ class StorageMaintainer(threading.Thread):
                 if deleted_segments_size > hourly_bandwidth:
                     break
 
-                deleted_segments_size += recording.segment_size
-                Path(recording.path).unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
+                try:
+                    Path(recording.path).unlink(missing_ok=False)
+                    deleted_segments_size += recording.segment_size
+                    deleted_recordings.add(recording.id)
+                except FileNotFoundError:
+                    # this file was not found so we must assume no space was cleaned up
+                    pass
+        else:
+            logger.info(f"Cleaned up {deleted_segments_size} MB of recordings")
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
