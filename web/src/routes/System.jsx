@@ -12,6 +12,7 @@ import Dialog from '../components/Dialog';
 import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
 import { About } from '../icons/About';
+import { WebUI } from '../icons/WebUI';
 
 const emptyObject = Object.freeze({});
 
@@ -348,15 +349,13 @@ export default function System() {
                       <div className="capitalize text-lg flex justify-between p-4">
                         <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                         <div className="flex">
-                          {(config.cameras[camera]['visit_url'] != "") && (
-                            <Link
-                              className="text-blue-500 hover:underline"
+                          {config.cameras[camera]['webui_url'] && (
+                            <Button 
+                              href={config.cameras[camera]['webui_url']}
                               target="_blank"
-                              rel="noopener noreferrer"
-                              href={config.cameras[camera]['visit_url']}
                             >
-                              visit
-                            </Link>
+                             visit<WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
+                            </Button>
                           )}
                           <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
                         </div>
