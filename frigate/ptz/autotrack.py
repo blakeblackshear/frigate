@@ -298,6 +298,8 @@ class PtzAutoTracker:
             if camera_config.onvif.autotracking.calibrate_on_startup:
                 self._calibrate_camera(camera)
 
+        self.ptz_metrics[camera]["ptz_tracking_active"].clear()
+        self.dispatcher.publish(f"{camera}/ptz_autotracker/active", "OFF", retain=False)
         self.autotracker_init[camera] = True
 
     def _write_config(self, camera):
