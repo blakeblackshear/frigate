@@ -299,7 +299,7 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.ptz_metrics[camera_name]["ptz_stopped"].clear()
+        self.ptz_metrics[camera_name]["ptz_motor_stopped"].clear()
         logger.debug(
             f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
         )
@@ -366,7 +366,7 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.ptz_metrics[camera_name]["ptz_stopped"].clear()
+        self.ptz_metrics[camera_name]["ptz_motor_stopped"].clear()
         self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
         self.ptz_metrics[camera_name]["ptz_stop_time"].value = 0
         move_request = self.cams[camera_name]["move_request"]
@@ -413,7 +413,7 @@ class OnvifController:
             return
 
         self.cams[camera_name]["active"] = True
-        self.ptz_metrics[camera_name]["ptz_stopped"].clear()
+        self.ptz_metrics[camera_name]["ptz_motor_stopped"].clear()
         logger.debug(
             f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
         )
@@ -543,8 +543,8 @@ class OnvifController:
             zoom_status is None or zoom_status.lower() == "idle"
         ):
             self.cams[camera_name]["active"] = False
-            if not self.ptz_metrics[camera_name]["ptz_stopped"].is_set():
-                self.ptz_metrics[camera_name]["ptz_stopped"].set()
+            if not self.ptz_metrics[camera_name]["ptz_motor_stopped"].is_set():
+                self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
 
                 logger.debug(
                     f"{camera_name}: PTZ stop time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
@@ -555,8 +555,8 @@ class OnvifController:
                 ]["ptz_frame_time"].value
         else:
             self.cams[camera_name]["active"] = True
-            if self.ptz_metrics[camera_name]["ptz_stopped"].is_set():
-                self.ptz_metrics[camera_name]["ptz_stopped"].clear()
+            if self.ptz_metrics[camera_name]["ptz_motor_stopped"].is_set():
+                self.ptz_metrics[camera_name]["ptz_motor_stopped"].clear()
 
                 logger.debug(
                     f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name]['ptz_frame_time'].value}"
@@ -586,7 +586,7 @@ class OnvifController:
 
         # some hikvision cams won't update MoveStatus, so warn if it hasn't changed
         if (
-            not self.ptz_metrics[camera_name]["ptz_stopped"].is_set()
+            not self.ptz_metrics[camera_name]["ptz_motor_stopped"].is_set()
             and not self.ptz_metrics[camera_name]["ptz_reset"].is_set()
             and self.ptz_metrics[camera_name]["ptz_start_time"].value != 0
             and self.ptz_metrics[camera_name]["ptz_frame_time"].value

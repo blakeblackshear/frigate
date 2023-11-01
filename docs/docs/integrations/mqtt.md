@@ -221,6 +221,10 @@ Topic to turn the PTZ autotracker for a camera on and off. Expected values are `
 
 Topic with current state of the PTZ autotracker for a camera. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/ptz_autotracker/active`
+
+Topic to determine if PTZ autotracker is actively tracking an object. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/birdseye/set`
 
 Topic to turn Birdseye for a camera on and off. Expected values are `ON` and `OFF`. Birdseye mode

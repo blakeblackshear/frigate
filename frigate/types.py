@@ -31,7 +31,8 @@ class CameraMetricsTypes(TypedDict):
 
 class PTZMetricsTypes(TypedDict):
     ptz_autotracker_enabled: Synchronized
-    ptz_stopped: Event
+    ptz_tracking_active: Event
+    ptz_motor_stopped: Event
     ptz_reset: Event
     ptz_start_time: Synchronized
     ptz_stop_time: Synchronized

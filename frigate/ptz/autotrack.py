@@ -18,6 +18,7 @@ from norfair.camera_motion import (
     TranslationTransformationGetter,
 )
 
+from frigate.comms.dispatcher import Dispatcher
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
 from frigate.const import (
     AUTOTRACKING_MAX_AREA_RATIO,
@@ -144,11 +145,12 @@ class PtzAutoTrackerThread(threading.Thread):
         config: FrigateConfig,
         onvif: OnvifController,
         ptz_metrics: dict[str, PTZMetricsTypes],
+        dispatcher: Dispatcher,
         stop_event: MpEvent,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = "ptz_autotracker"
-        self.ptz_autotracker = PtzAutoTracker(config, onvif, ptz_metrics)
+        self.ptz_autotracker = PtzAutoTracker(config, onvif, ptz_metrics, dispatcher)
         self.stop_event = stop_event
         self.config = config
 
@@ -175,10 +177,12 @@ class PtzAutoTracker:
         config: FrigateConfig,
         onvif: OnvifController,
         ptz_metrics: PTZMetricsTypes,
+        dispatcher: Dispatcher,
     ) -> None:
         self.config = config
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
+        self.dispatcher = dispatcher
         self.tracked_object: dict[str, object] = {}
         self.tracked_object_history: dict[str, object] = {}
         self.tracked_object_metrics: dict[str, object] = {}
@@ -294,6 +298,8 @@ class PtzAutoTracker:
             if camera_config.onvif.autotracking.calibrate_on_startup:
                 self._calibrate_camera(camera)
 
+        self.ptz_metrics[camera]["ptz_tracking_active"].clear()
+        self.dispatcher.publish(f"{camera}/ptz_autotracker/active", "OFF", retain=False)
         self.autotracker_init[camera] = True
 
     def _write_config(self, camera):
@@ -338,7 +344,7 @@ class PtzAutoTracker:
                     1,
                 )
 
-                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                     self.onvif.get_camera_status(camera)
 
                 zoom_out_values.append(self.ptz_metrics[camera]["ptz_zoom_level"].value)
@@ -349,7 +355,7 @@ class PtzAutoTracker:
                     1,
                 )
 
-                while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                     self.onvif.get_camera_status(camera)
 
                 zoom_in_values.append(self.ptz_metrics[camera]["ptz_zoom_level"].value)
@@ -367,7 +373,7 @@ class PtzAutoTracker:
                         1,
                     )
 
-                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                    while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                         self.onvif.get_camera_status(camera)
 
                     zoom_out_values.append(
@@ -383,7 +389,7 @@ class PtzAutoTracker:
                         1,
                     )
 
-                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                    while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                         self.onvif.get_camera_status(camera)
 
                     zoom_in_values.append(
@@ -406,10 +412,10 @@ class PtzAutoTracker:
             self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
         )
         self.ptz_metrics[camera]["ptz_reset"].set()
-        self.ptz_metrics[camera]["ptz_stopped"].clear()
+        self.ptz_metrics[camera]["ptz_motor_stopped"].clear()
 
         # Wait until the camera finishes moving
-        while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+        while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
             self.onvif.get_camera_status(camera)
 
         for step in range(num_steps):
@@ -420,7 +426,7 @@ class PtzAutoTracker:
             self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
             # Wait until the camera finishes moving
-            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+            while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                 self.onvif.get_camera_status(camera)
             stop_time = time.time()
 
@@ -438,10 +444,10 @@ class PtzAutoTracker:
                 self.config.cameras[camera].onvif.autotracking.return_preset.lower(),
             )
             self.ptz_metrics[camera]["ptz_reset"].set()
-            self.ptz_metrics[camera]["ptz_stopped"].clear()
+            self.ptz_metrics[camera]["ptz_motor_stopped"].clear()
 
             # Wait until the camera finishes moving
-            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+            while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                 self.onvif.get_camera_status(camera)
 
             logger.info(
@@ -606,7 +612,9 @@ class PtzAutoTracker:
                             self.onvif._move_relative(camera, pan, tilt, 0, 1)
 
                             # Wait until the camera finishes moving
-                            while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                            while not self.ptz_metrics[camera][
+                                "ptz_motor_stopped"
+                            ].is_set():
                                 self.onvif.get_camera_status(camera)
 
                         if (
@@ -616,7 +624,7 @@ class PtzAutoTracker:
                             self.onvif._zoom_absolute(camera, zoom, 1)
 
                     # Wait until the camera finishes moving
-                    while not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+                    while not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                         self.onvif.get_camera_status(camera)
 
                     if self.config.cameras[camera].onvif.autotracking.movement_weights:
@@ -1118,6 +1126,10 @@ class PtzAutoTracker:
                 logger.debug(
                     f"{camera}: New object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                 )
+                self.ptz_metrics[camera]["ptz_tracking_active"].set()
+                self.dispatcher.publish(
+                    f"{camera}/ptz_autotracker/active", "ON", retain=False
+                )
                 self.tracked_object[camera] = obj
 
                 self.tracked_object_history[camera].append(copy.deepcopy(obj.obj_data))
@@ -1220,7 +1232,7 @@ class PtzAutoTracker:
         if not self.autotracker_init[camera]:
             self._autotracker_setup(self.config.cameras[camera], camera)
         # regularly update camera status
-        if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+        if not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
             self.onvif.get_camera_status(camera)
 
         # return to preset if tracking is over
@@ -1243,7 +1255,7 @@ class PtzAutoTracker:
             while not self.move_queues[camera].empty():
                 self.move_queues[camera].get()
 
-            self.ptz_metrics[camera]["ptz_stopped"].wait()
+            self.ptz_metrics[camera]["ptz_motor_stopped"].wait()
             logger.debug(
                 f"{camera}: Time is {self.ptz_metrics[camera]['ptz_frame_time'].value}, returning to preset: {autotracker_config.return_preset}"
             )
@@ -1253,7 +1265,11 @@ class PtzAutoTracker:
             )
 
             # update stored zoom level from preset
-            if not self.ptz_metrics[camera]["ptz_stopped"].is_set():
+            if not self.ptz_metrics[camera]["ptz_motor_stopped"].is_set():
                 self.onvif.get_camera_status(camera)
 
+            self.ptz_metrics[camera]["ptz_tracking_active"].clear()
+            self.dispatcher.publish(
+                f"{camera}/ptz_autotracker/active", "OFF", retain=False
+            )
             self.ptz_metrics[camera]["ptz_reset"].set()
