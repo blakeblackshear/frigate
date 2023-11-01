@@ -1388,6 +1388,8 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
             )
         )
         .where(Recordings.camera == camera_name)
+        .order_by(Recordings.start_time.desc())
+        .limit(1)
     )
 
     try:
