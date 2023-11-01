@@ -749,7 +749,10 @@ def grid_snapshot(camera_name):
 
         try:
             grid = (
-                Regions.select(Regions.grid).where(Regions.camera == camera_name).get().grid
+                Regions.select(Regions.grid)
+                .where(Regions.camera == camera_name)
+                .get()
+                .grid
             )
         except DoesNotExist:
             return make_response(
