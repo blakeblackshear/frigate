@@ -22,8 +22,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create tag variables
         run: |
+          BRANCH=$([[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "master" || echo "dev")
           echo "BASE=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}" >> $GITHUB_ENV
-          echo "BUILD_TAG=${{ github.ref_name }}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          echo "BUILD_TAG=${BRANCH}-${GITHUB_SHA::7}" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/^[v]//')" >> $GITHUB_ENV
       - name: Tag and push the main image
         run: |
