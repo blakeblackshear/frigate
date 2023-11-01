@@ -263,6 +263,10 @@ Returns the snapshot image from the latest event for the given camera and label 
 
 Returns the snapshot image from the specific point in that cameras recordings.
 
+### `GET /api/<camera_name>/grid.jpg`
+
+Returns the latest camera image with the regions grid overlaid.
+
 ### `GET /clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
