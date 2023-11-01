@@ -306,7 +306,7 @@ These SoCs come with a NPU that will highly speed up detection.
 
 RKNN support is provided using the `-rk` suffix for the docker image. Moreover, privileged mode must be enabled by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
 
-## Configuration
+### Configuration
 
 This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
 ```yaml
