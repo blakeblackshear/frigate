@@ -946,7 +946,7 @@ def events():
     if is_submitted is not None:
         if is_submitted == 0:
             clauses.append((Event.plus_id.is_null()))
-        else:
+        elif is_submitted > 0:
             clauses.append((Event.plus_id != ""))
 
     if len(clauses) == 0:

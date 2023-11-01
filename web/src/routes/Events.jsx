@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useState, useRef, useCallback, useMemo } from 'preact/hooks';
 import VideoPlayer from '../components/VideoPlayer';
 import { StarRecording } from '../icons/StarRecording';
+import { Submitted } from '../icons/Submitted';
 import { Snapshot } from '../icons/Snapshot';
 import { UploadPlus } from '../icons/UploadPlus';
 import { Clip } from '../icons/Clip';
@@ -63,6 +64,7 @@ export default function Events({ path, ...props }) {
     time_range: '00:00,24:00',
     timezone,
     favorites: props.favorites ?? 0,
+    is_submitted: props.is_submitted ?? -1,
     event: props.event,
   });
   const [state, setState] = useState({
@@ -281,6 +283,16 @@ export default function Events({ path, ...props }) {
     [path, searchParams, setSearchParams]
   );
 
+  const onClickFilterSubmitted = useCallback(
+    () => {
+      if( ++searchParams.is_submitted > 1 ) {
+        searchParams.is_submitted = -1;
+      }
+      onFilter('is_submitted', searchParams.is_submitted);
+    },
+    [searchParams, onFilter]
+  );
+
   const isDone = (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT;
 
   // hooks for infinite scroll
@@ -394,11 +406,22 @@ export default function Events({ path, ...props }) {
           </Button>
         )}
 
-        <StarRecording
-          className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
-          onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
-          fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
-        />
+        <div className="ml-auto flex">
+          {config.plus.enabled && (
+            <Submitted
+              className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
+              onClick={() => onClickFilterSubmitted()}
+              inner_fill={searchParams.is_submitted == 1 ? 'currentColor' : 'gray'}
+              outer_stroke={searchParams.is_submitted >= 0 ? 'currentColor' : 'gray'}
+            />
+          )}
+
+          <StarRecording
+            className="h-10 w-10 text-yellow-300 cursor-pointer ml-auto"
+            onClick={() => onFilter('favorites', searchParams.favorites ? 0 : 1)}
+            fill={searchParams.favorites == 1 ? 'currentColor' : 'none'}
+          />
+        </div>
 
         <div ref={datePicker} className="ml-right">
           <CalendarIcon
