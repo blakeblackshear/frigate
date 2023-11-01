@@ -55,11 +55,7 @@ def distance(detection: np.array, estimate: np.array) -> float:
 
 
 def frigate_distance(detection: Detection, tracked_object) -> float:
-    # if we're actively autotracking an object
-    if tracked_object.autotracking_estimate is not None:
-        return distance(detection.points, tracked_object.autotracking_estimate)
-    else:
-        return distance(detection.points, tracked_object.estimate)
+    return distance(detection.points, tracked_object.estimate)
 
 
 class NorfairTracker(ObjectTracker):
@@ -76,7 +72,6 @@ class NorfairTracker(ObjectTracker):
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
         self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
-        self.ptz_tracking_active = ptz_metrics["ptz_tracking_active"]
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
@@ -280,9 +275,6 @@ class NorfairTracker(ObjectTracker):
         active_ids = []
         for t in tracked_objects:
             estimate = tuple(t.estimate.flatten().astype(int))
-            autotracking_estimate = (
-                estimate if not self.ptz_tracking_active.is_set() else None
-            )
             # keep the estimate within the bounds of the image
             estimate = (
                 max(0, estimate[0]),
@@ -293,7 +285,6 @@ class NorfairTracker(ObjectTracker):
             obj = {
                 **t.last_detection.data,
                 "estimate": estimate,
-                "autotracking_estimate": autotracking_estimate,
                 "estimate_velocity": t.estimate_velocity,
             }
             active_ids.append(t.global_id)
