@@ -288,8 +288,6 @@ def _insert_mock_recording(
     seg_dur=10,
 ) -> Event:
     """Inserts a basic recording model with a given id."""
-    file = f"/recordings/{id}.tmp"
-
     # we must open the file so storage maintainer will delete it
     with open(file, "w"):
         pass
