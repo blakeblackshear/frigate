@@ -354,7 +354,7 @@ export default function System() {
                               href={config.cameras[camera]['webui_url']}
                               target="_blank"
                             >
-                             visit<WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
+                             Web UI<WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
                             </Button>
                           )}
                           <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
