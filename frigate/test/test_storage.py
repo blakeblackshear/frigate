@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock
 
@@ -26,6 +27,7 @@ class TestHttp(unittest.TestCase):
         self.db = SqliteQueueDatabase(TEST_DB)
         models = [Event, Recordings]
         self.db.bind(models)
+        self.test_dir = tempfile.mkdtemp()
 
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},
@@ -94,6 +96,7 @@ class TestHttp(unittest.TestCase):
         rec_bd_id = "1234568.backdoor"
         _insert_mock_recording(
             rec_fd_id,
+            os.path.join(self.test_dir, f"{rec_fd_id}.tmp"),
             time_keep,
             time_keep + 10,
             camera="front_door",
@@ -102,6 +105,7 @@ class TestHttp(unittest.TestCase):
         )
         _insert_mock_recording(
             rec_bd_id,
+            os.path.join(self.test_dir, f"{rec_bd_id}.tmp"),
             time_keep + 10,
             time_keep + 20,
             camera="back_door",
@@ -123,6 +127,7 @@ class TestHttp(unittest.TestCase):
         rec_fd_id = "1234567.frontdoor"
         _insert_mock_recording(
             rec_fd_id,
+            os.path.join(self.test_dir, f"{rec_fd_id}.tmp"),
             time_keep,
             time_keep + 10,
             camera="front_door",
@@ -141,13 +146,33 @@ class TestHttp(unittest.TestCase):
 
         id = "123456.keep"
         time_keep = datetime.datetime.now().timestamp()
-        _insert_mock_event(id, time_keep, time_keep + 30, True)
+        _insert_mock_event(
+            id,
+            time_keep,
+            time_keep + 30,
+            True,
+        )
         rec_k_id = "1234567.keep"
         rec_k2_id = "1234568.keep"
         rec_k3_id = "1234569.keep"
-        _insert_mock_recording(rec_k_id, time_keep, time_keep + 10)
-        _insert_mock_recording(rec_k2_id, time_keep + 10, time_keep + 20)
-        _insert_mock_recording(rec_k3_id, time_keep + 20, time_keep + 30)
+        _insert_mock_recording(
+            rec_k_id,
+            os.path.join(self.test_dir, f"{rec_k_id}.tmp"),
+            time_keep,
+            time_keep + 10,
+        )
+        _insert_mock_recording(
+            rec_k2_id,
+            os.path.join(self.test_dir, f"{rec_k2_id}.tmp"),
+            time_keep + 10,
+            time_keep + 20,
+        )
+        _insert_mock_recording(
+            rec_k3_id,
+            os.path.join(self.test_dir, f"{rec_k3_id}.tmp"),
+            time_keep + 20,
+            time_keep + 30,
+        )
 
         id2 = "7890.delete"
         time_delete = datetime.datetime.now().timestamp() - 360
@@ -155,9 +180,24 @@ class TestHttp(unittest.TestCase):
         rec_d_id = "78901.delete"
         rec_d2_id = "78902.delete"
         rec_d3_id = "78903.delete"
-        _insert_mock_recording(rec_d_id, time_delete, time_delete + 10)
-        _insert_mock_recording(rec_d2_id, time_delete + 10, time_delete + 20)
-        _insert_mock_recording(rec_d3_id, time_delete + 20, time_delete + 30)
+        _insert_mock_recording(
+            rec_d_id,
+            os.path.join(self.test_dir, f"{rec_d_id}.tmp"),
+            time_delete,
+            time_delete + 10,
+        )
+        _insert_mock_recording(
+            rec_d2_id,
+            os.path.join(self.test_dir, f"{rec_d2_id}.tmp"),
+            time_delete + 10,
+            time_delete + 20,
+        )
+        _insert_mock_recording(
+            rec_d3_id,
+            os.path.join(self.test_dir, f"{rec_d3_id}.tmp"),
+            time_delete + 20,
+            time_delete + 30,
+        )
 
         storage.calculate_camera_bandwidth()
         storage.reduce_storage_consumption()
@@ -176,18 +216,42 @@ class TestHttp(unittest.TestCase):
 
         id = "123456.keep"
         time_keep = datetime.datetime.now().timestamp()
-        _insert_mock_event(id, time_keep, time_keep + 30, True)
+        _insert_mock_event(
+            id,
+            time_keep,
+            time_keep + 30,
+            True,
+        )
         rec_k_id = "1234567.keep"
         rec_k2_id = "1234568.keep"
         rec_k3_id = "1234569.keep"
-        _insert_mock_recording(rec_k_id, time_keep, time_keep + 10)
-        _insert_mock_recording(rec_k2_id, time_keep + 10, time_keep + 20)
-        _insert_mock_recording(rec_k3_id, time_keep + 20, time_keep + 30)
+        _insert_mock_recording(
+            rec_k_id,
+            os.path.join(self.test_dir, f"{rec_k_id}.tmp"),
+            time_keep,
+            time_keep + 10,
+        )
+        _insert_mock_recording(
+            rec_k2_id,
+            os.path.join(self.test_dir, f"{rec_k2_id}.tmp"),
+            time_keep + 10,
+            time_keep + 20,
+        )
+        _insert_mock_recording(
+            rec_k3_id,
+            os.path.join(self.test_dir, f"{rec_k3_id}.tmp"),
+            time_keep + 20,
+            time_keep + 30,
+        )
 
         time_delete = datetime.datetime.now().timestamp() - 7200
         for i in range(0, 59):
+            id = f"{123456 + i}.delete"
             _insert_mock_recording(
-                f"{123456 + i}.delete", time_delete, time_delete + 600
+                id,
+                os.path.join(self.test_dir, f"{id}.tmp"),
+                time_delete,
+                time_delete + 600,
             )
 
         storage.calculate_camera_bandwidth()
@@ -219,13 +283,23 @@ def _insert_mock_event(id: str, start: int, end: int, retain: bool) -> Event:
 
 
 def _insert_mock_recording(
-    id: str, start: int, end: int, camera="front_door", seg_size=8, seg_dur=10
+    id: str,
+    file: str,
+    start: int,
+    end: int,
+    camera="front_door",
+    seg_size=8,
+    seg_dur=10,
 ) -> Event:
     """Inserts a basic recording model with a given id."""
+    # we must open the file so storage maintainer will delete it
+    with open(file, "w"):
+        pass
+
     return Recordings.insert(
         id=id,
         camera=camera,
-        path=f"/recordings/{id}",
+        path=file,
         start_time=start,
         end_time=end,
         duration=seg_dur,
