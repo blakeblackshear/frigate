@@ -72,6 +72,7 @@ class NorfairTracker(ObjectTracker):
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
         self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
+        self.ptz_tracking_active = ptz_metrics["ptz_tracking_active"]
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
@@ -275,13 +276,16 @@ class NorfairTracker(ObjectTracker):
         active_ids = []
         for t in tracked_objects:
             estimate = tuple(t.estimate.flatten().astype(int))
-            # keep the estimate within the bounds of the image
-            estimate = (
-                max(0, estimate[0]),
-                max(0, estimate[1]),
-                min(self.detect_config.width - 1, estimate[2]),
-                min(self.detect_config.height - 1, estimate[3]),
-            )
+            if not self.ptz_tracking_active.is_set():
+                # keep the estimate within the bounds of the image
+                # always for non-autotracking cams
+                # and only for autotracking cams when not actively autotracking
+                estimate = (
+                    max(0, estimate[0]),
+                    max(0, estimate[1]),
+                    min(self.detect_config.width - 1, estimate[2]),
+                    min(self.detect_config.height - 1, estimate[3]),
+                )
             obj = {
                 **t.last_detection.data,
                 "estimate": estimate,

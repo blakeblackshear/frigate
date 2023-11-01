@@ -191,7 +191,8 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].onvif.autotracking.enabled,
                 ),
-                "ptz_stopped": mp.Event(),
+                "ptz_tracking_active": mp.Event(),
+                "ptz_motor_stopped": mp.Event(),
                 "ptz_reset": mp.Event(),
                 "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
@@ -212,7 +213,7 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
             }
-            self.ptz_metrics[camera_name]["ptz_stopped"].set()
+            self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
             self.feature_metrics[camera_name] = {
                 "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
@@ -444,6 +445,7 @@ class FrigateApp:
             self.config,
             self.onvif_controller,
             self.ptz_metrics,
+            self.dispatcher,
             self.stop_event,
         )
         self.ptz_autotracker_thread.start()
