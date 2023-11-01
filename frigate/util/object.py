@@ -174,7 +174,7 @@ def get_region_from_grid(
 
     cell = region_grid[grid_x][grid_y]
 
-    # if there is no known data, get standard region for motion box
+    # if there is no known data, use original region calculation
     if not cell or not cell["sizes"]:
         return box
 
