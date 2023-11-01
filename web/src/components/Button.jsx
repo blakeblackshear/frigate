@@ -67,6 +67,7 @@ export default function Button({
   disabled = false,
   ariaCapitalize = false,
   href,
+  target,
   type = 'contained',
   ...attrs
 }) {
@@ -101,6 +102,7 @@ export default function Button({
         tabindex="0"
         className={classes}
         href={href}
+        target={target}
         ref={ref}
         onmouseenter={handleMousenter}
         onmouseleave={handleMouseleave}

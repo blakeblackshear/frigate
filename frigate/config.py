@@ -731,6 +731,9 @@ class CameraConfig(FrigateBaseModel):
         default=60,
         title="How long to wait for the image with the highest confidence score.",
     )
+    webui_url: Optional[str] = Field(
+        title="URL to visit the camera directly from system page",
+    )
     zones: Dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
     )
