@@ -248,10 +248,8 @@ class TrackedObject:
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
                 significant_change = True
 
-            # update autotrack at half fps
-            if self.obj_data["frame_time"] - self.previous["frame_time"] > (
-                1 / (self.camera_config.detect.fps / 2)
-            ):
+            # update autotrack at most 3 objects per second
+            if self.obj_data["frame_time"] - self.previous["frame_time"] >= (1 / 3):
                 autotracker_update = True
 
         self.obj_data.update(obj_data)

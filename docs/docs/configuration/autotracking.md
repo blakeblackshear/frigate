@@ -113,7 +113,7 @@ If you initially calibrate with zooming disabled and then enable zooming at a la
 
 Every PTZ camera is different, so autotracking may not perform ideally in every situation. This experimental feature was initially developed using an EmpireTech/Dahua SD1A404XB-GNR.
 
-The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases (especially for faster moving objects), the default 5 fps is insufficient for the motion estimator to perform accurately. 10 fps is the current recommendation. Higher frame rates will likely not be more performant and will only slow down Frigate and the motion estimator. Adjust your camera to output at least 10 frames per second and change the `fps` parameter in the [detect configuration](index.md) of your configuration file.
+The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases 5 fps is sufficient, but if you plan to track faster moving objects, you may want to increase this slightly. Higher frame rates (> 10fps) will only slow down Frigate and the motion estimator and may lead to dropped frames, especially if you are using experimental zooming.
 
 A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's debug viewer for your camera to see a thicker colored box around the object currently being autotracked.
 
