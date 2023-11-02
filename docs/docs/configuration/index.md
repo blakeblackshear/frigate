@@ -75,11 +75,11 @@ mqtt:
   # NOTE: must be unique if you are running multiple instances
   client_id: frigate
   # Optional: user
-  # NOTE: MQTT user can be specified with an environment variables that must begin with 'FRIGATE_'.
+  # NOTE: MQTT user can be specified with an environment variables or docker secrets that must begin with 'FRIGATE_'.
   #       e.g. user: '{FRIGATE_MQTT_USER}'
   user: mqtt_user
   # Optional: password
-  # NOTE: MQTT password can be specified with an environment variables that must begin with 'FRIGATE_'.
+  # NOTE: MQTT password can be specified with an environment variables or docker secrets that must begin with 'FRIGATE_'.
   #       e.g. password: '{FRIGATE_MQTT_PASSWORD}'
   password: password
   # Optional: tls_ca_certs for enabling TLS using self-signed certs (default: None)
@@ -491,7 +491,7 @@ cameras:
       # Required: A list of input streams for the camera. See documentation for more information.
       inputs:
         # Required: the path to the stream
-        # NOTE: path may include environment variables, which must begin with 'FRIGATE_' and be referenced in {}
+        # NOTE: path may include environment variables or docker secrets, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           # Required: list of roles for this stream. valid values are: audio,detect,record,rtmp
           # NOTICE: In addition to assigning the audio, record, and rtmp roles,

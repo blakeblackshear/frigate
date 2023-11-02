@@ -19,7 +19,7 @@ Once logged in, you can generate an API key for Frigate in Settings.
 
 ### Set your API key
 
-In Frigate, you can set the `PLUS_API_KEY` environment variable to enable the `SEND TO FRIGATE+` buttons on the events page. You can set it in your Docker Compose file or in your Docker run command. Home Assistant Addon users can set it under Settings > Addons > Frigate NVR > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
+In Frigate, you can use an environment variable or a docker secret named `PLUS_API_KEY` to enable the `SEND TO FRIGATE+` buttons on the events page. Home Assistant Addon users can set it under Settings > Addons > Frigate NVR > Configuration > Options (be sure to toggle the "Show unused optional configuration options" switch).
 
 :::caution
 

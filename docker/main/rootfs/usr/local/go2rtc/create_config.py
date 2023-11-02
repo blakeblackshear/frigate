@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 
 import yaml
 
@@ -16,6 +17,14 @@ sys.path.remove("/opt/frigate")
 
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+# read docker secret files as env vars too
+if os.path.isdir("/run/secrets"):
+    for secret_file in os.listdir("/run/secrets"):
+        if secret_file.startswith("FRIGATE_"):
+            FRIGATE_ENV_VARS[secret_file] = Path(
+                os.path.join("/run/secrets", secret_file)
+            ).read_text()
+
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
 # Check if we can use .yaml instead of .yml
