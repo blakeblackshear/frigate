@@ -83,11 +83,10 @@ jobs:
         uses: docker/bake-action@v3
         with:
           push: true
-          platforms: linux/arm64
           targets: rk
           files: docker/rockchip/rk.hcl
           set: |
-            rk.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-rk
+            rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
   jetson_jp4_build:
     runs-on: ubuntu-latest
