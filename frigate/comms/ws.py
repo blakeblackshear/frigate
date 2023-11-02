@@ -1,5 +1,6 @@
 """Websocket communicator."""
 
+import errno
 import json
 import logging
 import threading
@@ -12,12 +13,24 @@ from ws4py.server.wsgirefserver import (
     WSGIServer,
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
-from ws4py.websocket import WebSocket
+from ws4py.websocket import WebSocket as WebSocket_
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
 
 logger = logging.getLogger(__name__)
+
+
+class WebSocket(WebSocket_):
+    def unhandled_error(self, error):
+        """
+        Handles the unfriendly socket closures on the server side
+        without showing a confusing error message
+        """
+        if hasattr(error, "errno") and error.errno == errno.ECONNRESET:
+            pass
+        else:
+            logging.getLogger("ws4py").exception("Failed to receive data")
 
 
 class WebSocketClient(Communicator):  # type: ignore[misc]
