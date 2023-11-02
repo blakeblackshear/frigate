@@ -150,7 +150,7 @@ jobs:
       - arm64_build
     steps:
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository }}
       - name: Log in to the Container registry
