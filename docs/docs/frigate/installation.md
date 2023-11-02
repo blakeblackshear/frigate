@@ -95,6 +95,7 @@ The following community supported builds are available:
 
 `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
 `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
+`ghcr.io/blakeblackshear/frigate:stable-rk` - Frigate build for SBCs with Rockchip SoC
 
 :::
 
