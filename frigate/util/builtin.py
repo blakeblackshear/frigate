@@ -264,7 +264,17 @@ def find_by_key(dictionary, target_key):
 
 
 def get_tomorrow_at_2() -> datetime.datetime:
+    """Returns the datetime of the following day at 2am."""
     tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
     return tomorrow.replace(hour=2, minute=0, second=0).astimezone(
         datetime.timezone.utc
     )
+
+
+def get_next_sunday_at_3() -> datetime.datetime:
+    """Returns the datetime of the next Sunday at 3am."""
+    # adapted from https://stackoverflow.com/a/16770463
+    now = datetime.datetime.now(get_localzone())
+    diff = datetime.timedelta((13 - now.weekday()) % 7)
+    sunday = now + diff
+    return sunday.replace(hour=3, minute=0, second=0).astimezone(datetime.timezone.utc)
