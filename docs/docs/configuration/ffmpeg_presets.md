@@ -13,7 +13,6 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 
 | Preset                | Usage                          | Other Notes                                           |
 | --------------------- | ------------------------------ | ----------------------------------------------------- |
-| preset-rpi-32-h264    | 32 bit Rpi with h264 stream    |                                                       |
 | preset-rpi-64-h264    | 64 bit Rpi with h264 stream    |                                                       |
 | preset-vaapi          | Intel & AMD VAAPI              | Check hwaccel docs to ensure correct driver is chosen |
 | preset-intel-qsv-h264 | Intel QSV with h264 stream     | If issues occur recommend using vaapi preset instead  |
