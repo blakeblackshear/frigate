@@ -79,6 +79,7 @@ PRESETS_HW_ACCEL_SCALE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
+    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
@@ -90,7 +91,7 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
 }
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
-    # "preset-rpi-64-h264" will use software encoding due to hardware encoder missing pixel format
+    "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -pix_fmt yuv420p {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
