@@ -6,7 +6,6 @@ import cv2.dnn
 import numpy as np
 from hide_warnings import hide_warnings
 from pydantic import Field
-from rknnlite.api import RKNNLite
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -36,6 +35,8 @@ class Rknn(DetectionApi):
         self.nms_thresh = config.nms_thresh
 
         self.model_path = config.model.path or "/models/yolov8n-320x320.rknn"
+
+        from rknnlite.api import RKNNLite
 
         self.rknn = RKNNLite(verbose=False)
         if self.rknn.load_rknn(self.model_path) != 0:
