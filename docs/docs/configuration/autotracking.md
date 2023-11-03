@@ -31,7 +31,7 @@ First, set up a PTZ preset in your camera's firmware and give it a name. If you'
 
 Edit your Frigate configuration file and enter the ONVIF parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
 
-An [ONVIF connection](cameras.md) is required for autotracking to function.
+An [ONVIF connection](cameras.md) is required for autotracking to function. Also, a [motion mask](masks.md) over your camera's timestamp and any overlay text is recommended to ensure they are completely excluded from scene change calculations when the camera is moving.
 
 Note that `autotracking` is disabled by default but can be enabled in the configuration or by MQTT.
 
