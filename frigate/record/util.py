@@ -1,5 +1,6 @@
 """Recordings Utilities."""
 
+import datetime
 import logging
 import os
 
@@ -27,13 +28,21 @@ def remove_empty_directories(directory: str) -> None:
             os.rmdir(path)
 
 
-def sync_recordings() -> None:
+def sync_recordings(limited: bool) -> None:
     """Check the db for stale recordings entries that don't exist in the filesystem."""
 
     def delete_db_entries_without_file(files_on_disk: list[str]) -> bool:
         """Delete db entries where file was deleted outside of frigate."""
-        # get all recordings in the db
-        recordings = Recordings.select(Recordings.id, Recordings.path)
+
+        if limited:
+            recordings = Recordings.select(Recordings.id, Recordings.path).where(
+                Recordings.start_time
+                >= (datetime.datetime.now() - datetime.timedelta(hours=36)).timestamp()
+            )
+        else:
+            # get all recordings in the db
+            recordings = Recordings.select(Recordings.id, Recordings.path)
+
         # Use pagination to process records in chunks
         page_size = 1000
         num_pages = (recordings.count() + page_size - 1) // page_size
@@ -97,12 +106,26 @@ def sync_recordings() -> None:
 
     logger.debug("Start sync recordings.")
 
-    # get all recordings files on disk and put them in a set
-    files_on_disk = {
-        os.path.join(root, file)
-        for root, _, files in os.walk(RECORD_DIR)
-        for file in files
-    }
+    if limited:
+        # get recording files from last 36 hours
+        hour_check = (
+            datetime.datetime.now().astimezone(datetime.timezone.utc)
+            - datetime.timedelta(hours=36)
+        ).strftime("%Y-%m-%d/%H")
+        files_on_disk = {
+            os.path.join(root, file)
+            for root, _, files in os.walk(RECORD_DIR)
+            for file in files
+            if file > hour_check
+        }
+    else:
+        # get all recordings files on disk and put them in a set
+        files_on_disk = {
+            os.path.join(root, file)
+            for root, _, files in os.walk(RECORD_DIR)
+            for file in files
+        }
+
     db_success = delete_db_entries_without_file(files_on_disk)
 
     # only try to cleanup files if db cleanup was successful

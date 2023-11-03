@@ -11,7 +11,7 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.record.util import remove_empty_directories, sync_recordings
-from frigate.util.builtin import get_next_sunday_at_3
+from frigate.util.builtin import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 
@@ -181,9 +181,9 @@ class RecordingCleanup(threading.Thread):
     def run(self) -> None:
         # on startup sync recordings with disk if enabled
         if self.config.record.sync_on_startup:
-            sync_recordings()
+            sync_recordings(limited=False)
 
-        next_sync = get_next_sunday_at_3()
+        next_sync = get_tomorrow_at_time(3)
 
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
@@ -194,8 +194,8 @@ class RecordingCleanup(threading.Thread):
             self.clean_tmp_clips()
 
             if datetime.datetime.now().astimezone(datetime.timezone.utc) > next_sync:
-                sync_recordings()
-                next_sync = get_next_sunday_at_3()
+                sync_recordings(limited=True)
+                next_sync = get_tomorrow_at_time(3)
 
             if counter == 0:
                 self.expire_recordings()
