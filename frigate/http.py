@@ -2103,3 +2103,30 @@ def logs(service: str):
             jsonify({"success": False, "message": "Could not find log file"}),
             500,
         )
+
+
+@bp.route("/restart", methods=["POST"])
+def restart():
+    try:
+        restart_frigate()
+    except Exception as e:
+        logging.error(f"Error restarting Frigate: {e}")
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Unable to restart Frigate.",
+                }
+            ),
+            500,
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Restarting (this can take up to one minute)...",
+            }
+        ),
+        200,
+    )
