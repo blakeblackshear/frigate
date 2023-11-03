@@ -299,7 +299,7 @@ class TensorRtDetector(DetectionApi):
             if r[5] >= 0:
                 valid_detections.append(r)
             else:
-                logger.debug(f"Found TensorRT detection with invalid class id {r}")
+                logger.warning(f"Found TensorRT detection with invalid class id {r}")
 
         raw_detections = valid_detections
 
