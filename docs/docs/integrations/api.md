@@ -366,7 +366,6 @@ Recording retention config still applies to manual events, if frigate is configu
 
 End a specific manual event without a predetermined length.
 
-
 ### `POST /api/restart`
 
 Restarts Frigate process.
