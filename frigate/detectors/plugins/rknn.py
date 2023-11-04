@@ -4,7 +4,15 @@ from typing import Literal
 import cv2
 import cv2.dnn
 import numpy as np
-from hide_warnings import hide_warnings
+
+try:
+    from hide_warnings import hide_warnings
+except:  # noqa: E722
+
+    def hide_warnings(func):
+        pass
+
+
 from pydantic import Field
 
 from frigate.detectors.detection_api import DetectionApi
