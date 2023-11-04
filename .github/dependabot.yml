@@ -18,6 +18,12 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     target-branch: dev
+  - package-ecosystem: "pip"
+    directory: "/docker/tensorrt"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    target-branch: dev
   - package-ecosystem: "npm"
     directory: "/web"
     schedule:
