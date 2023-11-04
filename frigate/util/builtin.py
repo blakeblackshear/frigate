@@ -263,8 +263,9 @@ def find_by_key(dictionary, target_key):
     return None
 
 
-def get_tomorrow_at_2() -> datetime.datetime:
+def get_tomorrow_at_time(hour: int) -> datetime.datetime:
+    """Returns the datetime of the following day at 2am."""
     tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
-    return tomorrow.replace(hour=2, minute=0, second=0).astimezone(
+    return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
         datetime.timezone.utc
     )
