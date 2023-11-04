@@ -7,7 +7,7 @@ import numpy as np
 
 try:
     from hide_warnings import hide_warnings
-except:
+except:  # noqa: E722
 
     def hide_warnings(func):
         pass
