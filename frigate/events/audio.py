@@ -240,7 +240,10 @@ class AudioEventMaintainer(threading.Thread):
         rms = np.sqrt(np.mean(np.absolute(np.square(audio_as_float))))
 
         # Transform RMS to dBFS (decibels relative to full scale)
-        dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
+        if rms > 0:
+            dBFS = 20 * np.log10(np.abs(rms) / AUDIO_MAX_BIT_RANGE)
+        else:
+            dBFS = 0
 
         self.inter_process_communicator.queue.put(
             (f"{self.config.name}/audio/dBFS", float(dBFS))
