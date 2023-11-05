@@ -306,7 +306,7 @@ class CameraWatchdog(threading.Thread):
         for file in cache_files:
             if self.camera_name in file:
                 basename = os.path.splitext(file)[0]
-                _, date = basename.rsplit("-", maxsplit=1)
+                _, date = basename.rsplit("@", maxsplit=1)
                 segment_time = datetime.datetime.strptime(
                     date, CACHE_SEGMENT_FORMAT
                 ).astimezone(datetime.timezone.utc)

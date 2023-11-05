@@ -105,7 +105,7 @@ class RecordingMaintainer(threading.Thread):
 
             cache_path = os.path.join(CACHE_DIR, cache)
             basename = os.path.splitext(cache)[0]
-            camera, date = basename.rsplit("-", maxsplit=1)
+            camera, date = basename.rsplit("@", maxsplit=1)
 
             # important that start_time is utc because recordings are stored and compared in utc
             start_time = datetime.datetime.strptime(
