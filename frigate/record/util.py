@@ -108,15 +108,12 @@ def sync_recordings(limited: bool) -> None:
 
     if limited:
         # get recording files from last 36 hours
-        hour_check = (
-            datetime.datetime.now().astimezone(datetime.timezone.utc)
-            - datetime.timedelta(hours=36)
-        ).strftime("%Y-%m-%d/%H")
+        hour_check = f"{RECORD_DIR}/{(datetime.datetime.now().astimezone(datetime.timezone.utc) - datetime.timedelta(hours=36)).strftime('%Y-%m-%d/%H')}"
         files_on_disk = {
             os.path.join(root, file)
             for root, _, files in os.walk(RECORD_DIR)
             for file in files
-            if file > hour_check
+            if root > hour_check
         }
     else:
         # get all recordings files on disk and put them in a set
