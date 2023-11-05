@@ -64,7 +64,7 @@ if not go2rtc_config.get("webrtc"):
 
 # go2rtc should listen on 5000 tcp & udp by default
 if not go2rtc_config["webrtc"].get("listen"):
-    go2rtc_config["webrtc"]["listen"] = ":5000"
+    go2rtc_config["webrtc"]["listen"] = ":8555"
 
 if not go2rtc_config["webrtc"].get("candidates", []):
     default_candidates = []
