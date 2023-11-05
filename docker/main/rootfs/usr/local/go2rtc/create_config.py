@@ -59,7 +59,7 @@ elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
 # ensure there is a default webrtc config
-if not go2rtc_config.get("webrtc", {}).get("candidates", []):
+if not go2rtc_config.get("webrtc"):
     go2rtc_config["webrtc"] = {}
 
 # go2rtc should listen on 5000 tcp & udp by default
