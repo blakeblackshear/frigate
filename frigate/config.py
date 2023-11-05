@@ -17,6 +17,7 @@ from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
     AUDIO_MIN_CONFIDENCE,
     CACHE_DIR,
+    CACHE_SEGMENT_FORMAT,
     DEFAULT_DB_PATH,
     REGEX_CAMERA_NAME,
     YAML_EXT,
@@ -865,7 +866,7 @@ class CameraConfig(FrigateBaseModel):
 
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}@{CACHE_SEGMENT_FORMAT}.mp4"]
                 + ffmpeg_output_args
             )
 

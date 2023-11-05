@@ -16,6 +16,7 @@ from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
     ATTRIBUTE_LABEL_MAP,
     CACHE_DIR,
+    CACHE_SEGMENT_FORMAT,
     REQUEST_REGION_GRID,
 )
 from frigate.log import LogPipe
@@ -300,19 +301,19 @@ class CameraWatchdog(threading.Thread):
                 and not d.startswith("clip_")
             ]
         )
-        newest_segment_timestamp = latest_segment
+        newest_segment_time = latest_segment
 
         for file in cache_files:
             if self.camera_name in file:
                 basename = os.path.splitext(file)[0]
-                _, date = basename.rsplit("-", maxsplit=1)
-                ts = datetime.datetime.strptime(date, "%Y%m%d%H%M%S").astimezone(
-                    datetime.timezone.utc
-                )
-                if ts > newest_segment_timestamp:
-                    newest_segment_timestamp = ts
+                _, date = basename.rsplit("@", maxsplit=1)
+                segment_time = datetime.datetime.strptime(
+                    date, CACHE_SEGMENT_FORMAT
+                ).astimezone(datetime.timezone.utc)
+                if segment_time > newest_segment_time:
+                    newest_segment_time = segment_time
 
-        return newest_segment_timestamp
+        return newest_segment_time
 
 
 class CameraCapture(threading.Thread):
