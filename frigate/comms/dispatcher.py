@@ -96,7 +96,11 @@ class Dispatcher:
         elif topic == REQUEST_REGION_GRID:
             camera = payload
             self.camera_metrics[camera]["region_grid_queue"].put(
-                get_camera_regions_grid(camera, self.config.cameras[camera].detect)
+                get_camera_regions_grid(
+                    camera,
+                    self.config.cameras[camera].detect,
+                    max(self.config.model.width, self.config.model.height),
+                )
             )
         else:
             self.publish(topic, payload, retain=False)
