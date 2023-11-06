@@ -13,6 +13,12 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5000'
+      },
+      '/vod': {
+        target: 'http://localhost:5000'
+      },
+      '/exports': {
+        target: 'http://localhost:5000'
       }
     }
   },
