@@ -280,7 +280,9 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save DB state")
 
         def cleanup_timeline_db(db: SqliteExtDatabase) -> None:
-            db.execute_sql("DELETE FROM timeline WHERE source_id NOT IN (SELECT id FROM event);")
+            db.execute_sql(
+                "DELETE FROM timeline WHERE source_id NOT IN (SELECT id FROM event);"
+            )
 
             try:
                 with open(f"{CONFIG_DIR}/.timeline", "w") as f:
@@ -303,8 +305,8 @@ class FrigateApp:
         router = Router(migrate_db)
         router.run()
 
-         # this is a temporary check to clean up user DB from beta
-         # will be removed before final release
+        # this is a temporary check to clean up user DB from beta
+        # will be removed before final release
         if not os.path.exists(f"{CONFIG_DIR}/.timeline"):
             cleanup_timeline_db(migrate_db)
 
