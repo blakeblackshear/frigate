@@ -487,7 +487,9 @@ class FrigateApp:
         # create or update region grids for each camera
         for camera in self.config.cameras.values():
             self.region_grids[camera.name] = get_camera_regions_grid(
-                camera.name, camera.detect
+                camera.name,
+                camera.detect,
+                max(self.config.model.width, self.config.model.height),
             )
 
     def start_camera_processors(self) -> None:

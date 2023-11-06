@@ -30,7 +30,9 @@ GRID_SIZE = 8
 
 
 def get_camera_regions_grid(
-    name: str, detect: DetectConfig
+    name: str,
+    detect: DetectConfig,
+    min_region_size: int,
 ) -> list[list[dict[str, any]]]:
     """Build a grid of expected region sizes for a camera."""
     # get grid from db if available
@@ -99,7 +101,7 @@ def get_camera_regions_grid(
             box[1] * height,
             (box[0] + box[2]) * width,
             (box[1] + box[3]) * height,
-            320,
+            min_region_size,
             1.35,
         )
         # save width of region to grid as relative
