@@ -62,7 +62,7 @@ elif go2rtc_config["log"].get("format") is None:
 if not go2rtc_config.get("webrtc"):
     go2rtc_config["webrtc"] = {}
 
-# go2rtc should listen on 5000 tcp & udp by default
+# go2rtc should listen on 8555 tcp & udp by default
 if not go2rtc_config["webrtc"].get("listen"):
     go2rtc_config["webrtc"]["listen"] = ":8555"
 
