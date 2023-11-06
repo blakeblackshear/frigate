@@ -7,7 +7,7 @@ title: Restream
 
 Frigate can restream your video feed as an RTSP feed for other applications such as Home Assistant to utilize it at `rtsp://<frigate_host>:8554/<camera_name>`. Port 8554 must be open. [This allows you to use a video feed for detection in Frigate and Home Assistant live view at the same time without having to make two separate connections to the camera](#reduce-connections-to-camera). The video feed is copied from the original video feed directly to avoid re-encoding. This feed does not include any annotation by Frigate.
 
-Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.8.1) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `go2rtc` in the config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.1#configuration) for more advanced configurations and features.
+Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.8.2) to provide its restream and MSE/WebRTC capabilities. The go2rtc config is hosted at the `go2rtc` in the config, see [go2rtc docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.2#configuration) for more advanced configurations and features.
 
 :::note
 
@@ -18,6 +18,7 @@ You can access the go2rtc webUI at `http://frigate_ip:5000/live/webrtc` which ca
 ### Birdseye Restream
 
 Birdseye RTSP restream can be accessed at `rtsp://<frigate_host>:8554/birdseye`. Enabling the birdseye restream will cause birdseye to run 24/7 which may increase CPU usage somewhat.
+
 ```yaml
 birdseye:
   restream: true
@@ -32,8 +33,7 @@ go2rtc:
   rtsp:
     username: "admin"
     password: "pass"
-  streams:
-    ...
+  streams: ...
 ```
 
 **NOTE:** This does not apply to localhost requests, there is no need to provide credentials when using the restream as a source for frigate cameras.
@@ -138,7 +138,7 @@ cameras:
 
 ## Advanced Restream Configurations
 
-The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.8.1#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
+The [exec](https://github.com/AlexxIT/go2rtc/tree/v1.8.2#source-exec) source in go2rtc can be used for custom ffmpeg commands. An example is below:
 
 NOTE: The output will need to be passed with two curly braces `{{output}}`
 
