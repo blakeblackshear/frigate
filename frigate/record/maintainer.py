@@ -452,7 +452,7 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
-                    ) = self.object_recordings_info_queue.get(True, timeout=0.01)
+                    ) = self.object_recordings_info_queue.get(True, timeout=0.001)
 
                     if frame_time < run_start - stale_frame_count_threshold:
                         stale_frame_count += 1
@@ -488,7 +488,7 @@ class RecordingMaintainer(threading.Thread):
                             frame_time,
                             dBFS,
                             audio_detections,
-                        ) = self.audio_recordings_info_queue.get(True, timeout=0.01)
+                        ) = self.audio_recordings_info_queue.get(True, timeout=0.001)
 
                         if frame_time < run_start - stale_frame_count_threshold:
                             stale_frame_count += 1
