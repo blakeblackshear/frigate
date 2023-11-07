@@ -35,7 +35,7 @@ class StorageMaintainer(threading.Thread):
             if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
-                        Recordings.select(fn.COUNT(Recordings.id))
+                        Recordings.select(fn.COUNT("*"))
                         .where(Recordings.camera == camera, Recordings.segment_size > 0)
                         .scalar()
                         < 50

@@ -115,7 +115,7 @@ def is_healthy():
 @bp.route("/events/summary")
 def events_summary():
     tz_name = request.args.get("timezone", default="utc", type=str)
-    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     has_clip = request.args.get("has_clip", type=int)
     has_snapshot = request.args.get("has_snapshot", type=int)
 
@@ -149,12 +149,7 @@ def events_summary():
             Event.camera,
             Event.label,
             Event.sub_label,
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ),
+            (Event.start_time + seconds_offset).cast("int") / (3600 * 24),
             Event.zones,
         )
     )
@@ -995,7 +990,7 @@ def events():
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
         tz_name = request.args.get("timezone", default="utc", type=str)
-        hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
+        hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
 
         times = time_range.split(",")
         time_after = times[0]
@@ -1569,7 +1564,7 @@ def get_recordings_storage_usage():
 @bp.route("/<camera_name>/recordings/summary")
 def recordings_summary(camera_name):
     tz_name = request.args.get("timezone", default="utc", type=str)
-    hour_modifier, minute_modifier = get_tz_modifiers(tz_name)
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     recording_groups = (
         Recordings.select(
             fn.strftime(
@@ -1583,22 +1578,8 @@ def recordings_summary(camera_name):
             fn.SUM(Recordings.objects).alias("objects"),
         )
         .where(Recordings.camera == camera_name)
-        .group_by(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            )
-        )
-        .order_by(
-            fn.strftime(
-                "%Y-%m-%d H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).desc()
-        )
+        .group_by((Recordings.start_time + seconds_offset).cast("int") / 3600)
+        .order_by(Recordings.start_time.desc())
         .namedtuples()
     )
 
@@ -1613,14 +1594,7 @@ def recordings_summary(camera_name):
             fn.COUNT(Event.id).alias("count"),
         )
         .where(Event.camera == camera_name, Event.has_clip)
-        .group_by(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ),
-        )
+        .group_by((Event.start_time + seconds_offset).cast("int") / 3600)
         .namedtuples()
     )
 
