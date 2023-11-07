@@ -32,12 +32,12 @@ def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
         'CREATE INDEX "recordings_camera_start_time_end_time" ON "recordings" ("camera", "start_time" DESC, "end_time" DESC)'
     )
-   migrator.sql(
+    migrator.sql(
         'CREATE INDEX "recordings_api_recordings_summary" ON "recordings" ("camera", "start_time" DESC, "duration", "motion", "objects")'
-   )
-   migrator.sql(
+    )
+    migrator.sql(
         'CREATE INDEX "recordings_start_time" ON "recordings" ("start_time")'
-   )
+    )
 
 
 def rollback(migrator, database, fake=False, **kwargs):
