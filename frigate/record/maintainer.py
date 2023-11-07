@@ -32,6 +32,8 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
+QUEUE_READ_TIMEOUT = 0.00001  # seconds
+
 
 class SegmentInfo:
     def __init__(
@@ -452,7 +454,9 @@ class RecordingMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                         regions,
-                    ) = self.object_recordings_info_queue.get(True, timeout=0.01)
+                    ) = self.object_recordings_info_queue.get(
+                        True, timeout=QUEUE_READ_TIMEOUT
+                    )
 
                     if frame_time < run_start - stale_frame_count_threshold:
                         stale_frame_count += 1
@@ -488,7 +492,9 @@ class RecordingMaintainer(threading.Thread):
                             frame_time,
                             dBFS,
                             audio_detections,
-                        ) = self.audio_recordings_info_queue.get(True, timeout=0.01)
+                        ) = self.audio_recordings_info_queue.get(
+                            True, timeout=QUEUE_READ_TIMEOUT
+                        )
 
                         if frame_time < run_start - stale_frame_count_threshold:
                             stale_frame_count += 1
