@@ -26,7 +26,7 @@ SQL = pw.SQL
 
 
 def migrate(migrator, database, fake=False, **kwargs):
-    migrator.sql('DROP INDEX recordings_end_time_start_time')
+    migrator.sql("DROP INDEX recordings_end_time_start_time")
     migrator.sql(
         'CREATE INDEX "recordings_camera_start_time_end_time" ON "recordings" ("camera", "start_time" DESC, "end_time" DESC)'
     )
