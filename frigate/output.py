@@ -707,7 +707,7 @@ def output_frames(
     broadcasters = {}
 
     for camera, cam_config in config.cameras.items():
-        inputs[camera] = queue.Queue(maxsize=10)
+        inputs[camera] = queue.Queue(maxsize=cam_config.detect.fps)
         width = int(
             cam_config.live.height
             * (cam_config.frame_shape[1] / cam_config.frame_shape[0])
