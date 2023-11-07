@@ -990,7 +990,7 @@ def events():
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
         tz_name = request.args.get("timezone", default="utc", type=str)
-        hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
+        hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
 
         times = time_range.split(",")
         time_after = times[0]
