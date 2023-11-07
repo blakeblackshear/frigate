@@ -272,7 +272,7 @@ class RecordingMaintainer(threading.Thread):
                 )
                 retain_cutoff = datetime.datetime.fromtimestamp(
                     most_recently_processed_frame_time - pre_capture
-                )
+                ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
                     Path(cache_path).unlink(missing_ok=True)
                     self.end_time_cache.pop(cache_path, None)
