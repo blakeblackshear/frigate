@@ -863,21 +863,11 @@ class PtzAutoTracker:
         # introduce some hysteresis to prevent a yo-yo zooming effect
         zoom_out_hysteresis = (
             self.tracked_object_metrics[camera]["target_box"]
-            > (
-                self.tracked_object_metrics[camera]["original_target_box"]
-                * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
-            )
-            or self.tracked_object_metrics[camera]["target_box"]
             > self.tracked_object_metrics[camera]["max_target_box"]
             * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
         )
         zoom_in_hysteresis = (
             self.tracked_object_metrics[camera]["target_box"]
-            < (
-                self.tracked_object_metrics[camera]["original_target_box"]
-                * AUTOTRACKING_ZOOM_IN_HYSTERESIS
-            )
-            or self.tracked_object_metrics[camera]["target_box"]
             < self.tracked_object_metrics[camera]["max_target_box"]
             * AUTOTRACKING_ZOOM_IN_HYSTERESIS
         )
@@ -1073,15 +1063,14 @@ class PtzAutoTracker:
                     )
                 ) is not None:
                     # zoom value
-                    limit = (
-                        self.tracked_object_metrics[camera]["original_target_box"]
-                        if self.tracked_object_metrics[camera]["target_box"]
-                        < self.tracked_object_metrics[camera]["max_target_box"]
-                        else self.tracked_object_metrics[camera]["max_target_box"]
+                    ratio = (
+                        self.tracked_object_metrics[camera]["max_target_box"]
+                        / self.tracked_object_metrics[camera]["target_box"]
                     )
-                    ratio = limit / self.tracked_object_metrics[camera]["target_box"]
                     zoom = (ratio - 1) / (ratio + 1)
-                    logger.debug(f"{camera}: Zoom calculation: {zoom}")
+                    logger.debug(
+                        f'{camera}: limit: {self.tracked_object_metrics[camera]["max_target_box"]}, ratio: {ratio} zoom calculation: {zoom}'
+                    )
                     if not result:
                         # zoom out with special condition if zooming out because of velocity, edges, etc.
                         zoom = -(1 - zoom) if zoom > 0 else -(zoom * 2 + 1)
