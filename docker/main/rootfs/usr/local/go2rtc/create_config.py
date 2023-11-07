@@ -58,7 +58,15 @@ if go2rtc_config.get("log") is None:
 elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
-if not go2rtc_config.get("webrtc", {}).get("candidates", []):
+# ensure there is a default webrtc config
+if not go2rtc_config.get("webrtc"):
+    go2rtc_config["webrtc"] = {}
+
+# go2rtc should listen on 8555 tcp & udp by default
+if not go2rtc_config["webrtc"].get("listen"):
+    go2rtc_config["webrtc"]["listen"] = ":8555"
+
+if not go2rtc_config["webrtc"].get("candidates", []):
     default_candidates = []
     # use internal candidate if it was discovered when running through the add-on
     internal_candidate = os.environ.get(
