@@ -20,8 +20,8 @@ from ws4py.server.wsgirefserver import (
     WSGIServer,
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
-from ws4py.websocket import WebSocket
 
+from frigate.comms.ws import WebSocket
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
 from frigate.types import CameraMetricsTypes
@@ -175,7 +175,7 @@ class FFMpegConverter(threading.Thread):
         os.close(stdin)
         self.reading_birdseye = False
 
-    def _write(self, b) -> None:
+    def __write(self, b) -> None:
         self.process.stdin.write(b)
 
         if self.bd_pipe:
@@ -215,7 +215,7 @@ class FFMpegConverter(threading.Thread):
         while not self.stop_event.is_set():
             try:
                 frame = self.input_queue.get(True, timeout=1)
-                self._write(frame)
+                self.__write(frame)
             except queue.Empty:
                 pass
 
