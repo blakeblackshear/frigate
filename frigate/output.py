@@ -224,11 +224,11 @@ class FFMpegConverter(threading.Thread):
 
 class BroadcastThread(threading.Thread):
     def __init__(
-            self,
-            camera: str,
-            converter: FFMpegConverter,
-            websocket_server,
-            stop_event: mp.Event,
+        self,
+        camera: str,
+        converter: FFMpegConverter,
+        websocket_server,
+        stop_event: mp.Event,
     ):
         super(BroadcastThread, self).__init__()
         self.camera = camera
