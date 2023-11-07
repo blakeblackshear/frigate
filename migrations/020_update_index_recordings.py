@@ -1,4 +1,4 @@
-"""Peewee migrations -- 011_update_indexes.py.
+"""Peewee migrations -- 020_update_index_recordings.py.
 
 Some examples (model - class or model name)::
 
@@ -34,10 +34,10 @@ def migrate(migrator, database, fake=False, **kwargs):
     )
    migrator.sql(
         'CREATE INDEX "recordings_api_recordings_summary" ON "recordings" ("camera", "start_time" DESC, "duration", "motion", "objects")'
-    )
+   )
    migrator.sql(
         'CREATE INDEX "recordings_start_time" ON "recordings" ("start_time")'
-    )
+   )
 
 
 def rollback(migrator, database, fake=False, **kwargs):
