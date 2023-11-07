@@ -1584,20 +1584,10 @@ def recordings_summary(camera_name):
         )
         .where(Recordings.camera == camera_name)
         .group_by(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            )
+            Recordings.start_time.cast("int") / 3600
         )
         .order_by(
-            fn.strftime(
-                "%Y-%m-%d H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).desc()
+            Recordings.start_time.desc()
         )
         .namedtuples()
     )
@@ -1614,12 +1604,7 @@ def recordings_summary(camera_name):
         )
         .where(Event.camera == camera_name, Event.has_clip)
         .group_by(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ),
+            Event.start_time.cast("int") / 3600
         )
         .namedtuples()
     )
