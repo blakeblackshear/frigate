@@ -11,7 +11,7 @@ from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, RECORD_DIR
 from frigate.models import Event, Recordings
 from frigate.record.util import remove_empty_directories, sync_recordings
-from frigate.util.builtin import get_tomorrow_at_time
+from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,7 @@ class RecordingCleanup(threading.Thread):
             logger.debug(f"Checking tmp clip {p}.")
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
-
-                # empty contents of file before unlinking https://github.com/blakeblackshear/frigate/issues/4769
-                with open(p, "w"):
-                    pass
-                p.unlink(missing_ok=True)
+                clear_and_unlink(p)
 
     def expire_recordings(self) -> None:
         """Delete recordings based on retention config."""

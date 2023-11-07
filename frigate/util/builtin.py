@@ -8,6 +8,7 @@ import shlex
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Tuple
 
 import numpy as np
@@ -269,3 +270,15 @@ def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
         datetime.timezone.utc
     )
+
+
+def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
+    """clear file then unlink to avoid space retained by file descriptors."""
+    if not missing_ok and not file.exists():
+        raise FileNotFoundError()
+
+    # empty contents of file before unlinking https://github.com/blakeblackshear/frigate/issues/4769
+    with open(file, "w"):
+        pass
+
+    file.unlink(missing_ok=missing_ok)

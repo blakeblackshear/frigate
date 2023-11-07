@@ -10,6 +10,7 @@ from peewee import fn
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.util.builtin import clear_and_unlink
 
 logger = logging.getLogger(__name__)
 bandwidth_equation = Recordings.segment_size / (
@@ -160,7 +161,7 @@ class StorageMaintainer(threading.Thread):
             # Delete recordings not retained indefinitely
             if not keep:
                 try:
-                    Path(recording.path).unlink(missing_ok=False)
+                    clear_and_unlink(Path(recording.path), missing_ok=False)
                     deleted_recordings.add(recording.id)
                     deleted_segments_size += recording.segment_size
                 except FileNotFoundError:
@@ -188,7 +189,7 @@ class StorageMaintainer(threading.Thread):
                     break
 
                 try:
-                    Path(recording.path).unlink(missing_ok=False)
+                    clear_and_unlink(Path(recording.path), missing_ok=False)
                     deleted_segments_size += recording.segment_size
                     deleted_recordings.add(recording.id)
                 except FileNotFoundError:
