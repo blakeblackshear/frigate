@@ -32,6 +32,7 @@ module.exports = {
         "configuration/cameras",
         "configuration/record",
         "configuration/snapshots",
+        "configuration/motion_detection",
         "configuration/birdseye",
         "configuration/live",
         "configuration/restream",
