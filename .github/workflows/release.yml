@@ -1,6 +1,7 @@
 name: On release
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -30,34 +31,7 @@ jobs:
         run: |
           VERSION_TAG=${BASE}:${CLEAN_VERSION}
           PULL_TAG=${BASE}:${BUILD_TAG}
-          docker pull ${PULL_TAG}
-          docker tag ${PULL_TAG} ${VERSION_TAG}
-          docker push ${VERSION_TAG}
-      - name: Tag and push standard arm64
-        run: |
-          VERSION_TAG=${BASE}:${CLEAN_VERSION}-standard-arm64
-          PULL_TAG=${BASE}:${BUILD_TAG}-standard-arm64
-          docker pull ${PULL_TAG}
-          docker tag ${PULL_TAG} ${VERSION_TAG}
-          docker push ${VERSION_TAG}
-      - name: Tag and push tensorrt
-        run: |
-          VERSION_TAG=${BASE}:${CLEAN_VERSION}-tensorrt
-          PULL_TAG=${BASE}:${BUILD_TAG}-tensorrt
-          docker pull ${PULL_TAG}
-          docker tag ${PULL_TAG} ${VERSION_TAG}
-          docker push ${VERSION_TAG}
-      - name: Tag and push tensorrt-jp4
-        run: |
-          VERSION_TAG=${BASE}:${CLEAN_VERSION}-tensorrt-jp4
-          PULL_TAG=${BASE}:${BUILD_TAG}-tensorrt-jp4
-          docker pull ${PULL_TAG}
-          docker tag ${PULL_TAG} ${VERSION_TAG}
-          docker push ${VERSION_TAG}
-      - name: Tag and push tensorrt-jp5
-        run: |
-          VERSION_TAG=${BASE}:${CLEAN_VERSION}-tensorrt-jp5
-          PULL_TAG=${BASE}:${BUILD_TAG}-tensorrt-jp5
-          docker pull ${PULL_TAG}
-          docker tag ${PULL_TAG} ${VERSION_TAG}
-          docker push ${VERSION_TAG}
+          docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
+          for variant in standard-amd64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
+            docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
+          done
