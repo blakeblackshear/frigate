@@ -13,11 +13,11 @@ Once motion is detected, it tries to group up nearby areas of motion together in
 
 The default motion settings should work well for the majority of cameras, however there are cases where tuning motion detection can lead to better and more optimal results. Each camera has its own environment with different variables that affect motion, this means that the same motion settings will not fit all of your cameras.
 
-Before tuning motion it is important to understand the goal. The optimal setup for motion detection would be that desired motion like people walking and cars driving but not detecting undesirable motion like grass moving, lighting changes, timestamps, etc.
+Before tuning motion it is important to understand the goal. In an optimal configuration, motion from people and cars would be detected, but not grass moving, lighting changes, timestamps, etc. If your motion detection is too sensitive, you will experience higher CPU loads and greater false positives from the increased rate of object detection. If it is not sensitive enough, you will miss events.
 
-## Masking Out Known Motion Causes
+## Create Motion Masks
 
-The first step would be to mask out causes of motion that are known to not be objects. This includes things like timestamps, tree limbs, larger bushes, etc. More details can be found [in the masks docs.](/configuration/masks.md).
+First, mask areas with regular motion not caused by the objects you want to detect. The best way to find candidates for motion masks is by watching the debug stream with motion boxes enabled. Good use cases for motion masks are timestamps or tree limbs and large bushes that regularly move due to wind. When possible, avoid creating motion masks that would block motion detection for objects you want to track **even if they are in locations where you don't want events**. Motion masks should not be used to avoid detecting objects in specific areas. More details can be found [in the masks docs.](/configuration/masks.md). 
 
 ## Prepare For Testing
 
@@ -27,11 +27,11 @@ In Home Assistant the `Improve Contrast`, `Contour Area`, and `Threshold` config
 
 ## Tuning Motion Detection During The Day
 
-Now that things are set up, find a time to tune that represents normal circumstances. For example: If you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
+Now that things are set up, find a time to tune that represents normal circumstances. For example, if you tune your motion on a day that is sunny and windy you may find later that the motion settings are not sensitive enough on a cloudy and still day.
 
 :::note
 
-It is very unlikely to find motion detection settings that only detect desired motion and never detect undesired motion. Realistically, the goal is to find a balance that detects the desired motion without too much undesired motion being detected.
+Remember that motion detection is just used to determine when object detection should be used. You should aim to have motion detection sensitive enough that you won't miss events from objects you want to detect with object detection. The goal is to prevent object detection from running constantly for every small pixel change in the image. Windy days are still going to result in lots of motion being detected.
 
 :::
 
@@ -50,7 +50,7 @@ motion:
 
 Lower values mean motion detection is more sensitive to changes in color, making it more likely for example to detect motion when a brown dogs blends in with a brown fence or a person wearing a red shirt blends in with a red car. If the threshold is too low however, it may detect things like grass blowing in the wind, shadows, etc. to be detected as motion.
 
-Watching the motion boxes in the debug view, adjust the threshold until the undesired motion is not detected. Once this is done, it is important to test and ensure that desired motion is still detected.
+Watching the motion boxes in the debug view, increase the threshold until you only see motion that is visible to the eye. Once this is done, it is important to test and ensure that desired motion is still detected.
 
 ### Contour Area
 
@@ -96,8 +96,8 @@ motion:
 
 :::tip
 
-Some cameras like doorbell cameras may have missed detections when someone walks right by due to the motion detection being re-calibrated. In this case it may be desirable to increase the `lightning_threshold` to ensure these events are not missed.
+Some cameras like doorbell cameras may have missed detections when someone walks directly in front of the camera and the lightning_threshold causes motion detection to be re-calibrated. In this case, it may be desirable to increase the `lightning_threshold` to ensure these events are not missed.
 
 :::
 
-Larges changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
+Large changes in motion like PTZ moves and camera switches between Color and IR mode should result in no motion detection. This is done via the `lightning_threshold` configuration. It is defined as the percentage of the image used to detect lightning or other substantial changes where motion detection needs to recalibrate. Increasing this value will make motion detection more likely to consider lightning or IR mode changes as valid motion. Decreasing this value will make motion detection more likely to ignore large amounts of motion such as a person approaching a doorbell camera.
