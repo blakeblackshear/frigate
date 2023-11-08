@@ -353,6 +353,7 @@ ${Object.keys(objectMaskPoints)
             snap={snap}
             width={width}
             height={height}
+            setError={setError}
           />
         </div>
         <div className="max-w-xs">
@@ -434,7 +435,7 @@ function boundedSize(value, maxValue, snap) {
   return newValue;
 }
 
-function EditableMask({ onChange, points, scale, snap, width, height }) {
+function EditableMask({ onChange, points, scale, snap, width, height, setError }) {
   const boundingRef = useRef(null);
 
   const handleMovePoint = useCallback(
@@ -455,6 +456,11 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
   // Add a new point between the closest two other points
   const handleAddPoint = useCallback(
     (event) => {
+      if (!points) {
+        setError('You must choose an item to edit or add a new item before adding a point.');
+        return
+      }
+
       const { offsetX, offsetY } = event;
       const scaledX = boundedSize((offsetX - MaskInset) / scale, width, snap);
       const scaledY = boundedSize((offsetY - MaskInset) / scale, height, snap);
@@ -474,7 +480,7 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       newPoints.splice(index, 0, newPoint);
       onChange(newPoints);
     },
-    [height, width, scale, points, onChange, snap]
+    [height, width, scale, points, onChange, snap, setError]
   );
 
   const handleRemovePoint = useCallback(
