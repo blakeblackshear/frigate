@@ -9,11 +9,11 @@ Frigate has different live view options, some of which require the bundled `go2r
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                 |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                              |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only  |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265      |
+| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                |
+| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------ |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                             |
+| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only |
+| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265     |
 
 ### Audio Support
 
@@ -104,6 +104,7 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 If not running in host mode, port 8555 will need to be mapped for the container:
 
 docker-compose.yml
+
 ```yaml
 services:
   frigate:
@@ -115,4 +116,4 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.1#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.2#module-webrtc) for more information about this.
