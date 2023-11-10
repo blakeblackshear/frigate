@@ -227,8 +227,8 @@ const getUTCOffset = (date: Date, timezone: string): number => {
 
   // safari doesn't like the default format
   if (isNaN(target.getTime())) {
-    iso = iso.replace("T", " ").replace(".", "+");
-    target = new Date(`${iso}`);
+    iso = iso.replace("T", " ").split(".")[0];
+    target = new Date(`${iso}+000`);
   }
 
   return (target.getTime() - utcDate.getTime()) / 60 / 1000;
