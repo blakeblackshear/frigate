@@ -32,6 +32,6 @@ jobs:
           VERSION_TAG=${BASE}:${CLEAN_VERSION}
           PULL_TAG=${BASE}:${BUILD_TAG}
           docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
-          for variant in standard-amd64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
+          for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
             docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
           done
