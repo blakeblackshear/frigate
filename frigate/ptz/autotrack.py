@@ -150,7 +150,9 @@ class PtzAutoTrackerThread(threading.Thread):
     ) -> None:
         threading.Thread.__init__(self)
         self.name = "ptz_autotracker"
-        self.ptz_autotracker = PtzAutoTracker(config, onvif, ptz_metrics, dispatcher)
+        self.ptz_autotracker = PtzAutoTracker(
+            config, onvif, ptz_metrics, dispatcher, stop_event
+        )
         self.stop_event = stop_event
         self.config = config
 
@@ -178,11 +180,13 @@ class PtzAutoTracker:
         onvif: OnvifController,
         ptz_metrics: PTZMetricsTypes,
         dispatcher: Dispatcher,
+        stop_event: MpEvent,
     ) -> None:
         self.config = config
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
         self.dispatcher = dispatcher
+        self.stop_event = stop_event
         self.tracked_object: dict[str, object] = {}
         self.tracked_object_history: dict[str, object] = {}
         self.tracked_object_metrics: dict[str, object] = {}
@@ -581,7 +585,7 @@ class PtzAutoTracker:
         camera_config.frame_shape[1]
         camera_config.frame_shape[0]
 
-        while True:
+        while not self.stop_event.is_set():
             move_data = self.move_queues[camera].get()
 
             with self.move_queue_locks[camera]:
