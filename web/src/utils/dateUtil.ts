@@ -223,6 +223,13 @@ const getUTCOffset = (date: Date, timezone: string): number => {
   // locale of en-CA is required for proper locale format
   let iso = utcDate.toLocaleString('en-CA', { timeZone: timezone, hour12: false }).replace(', ', 'T');
   iso += `.${utcDate.getMilliseconds().toString().padStart(3, '0')}`;
-  const target = new Date(`${iso}Z`);
+  let target = new Date(`${iso}Z`);
+
+  // safari doesn't like the default format
+  if (isNaN(target.getTime())) {
+    iso = iso.replace("T", " ").split(".")[0];
+    target = new Date(`${iso}+000`);
+  }
+
   return (target.getTime() - utcDate.getTime()) / 60 / 1000;
 };
