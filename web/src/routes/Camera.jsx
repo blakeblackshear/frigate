@@ -119,7 +119,7 @@ export default function Camera({ camera }) {
       if ('MediaSource' in window || 'ManagedMediaSource' in window) {
         player = (
           <Fragment>
-            <div className="max-w-5xl">
+            <div>
               <video-stream
                 mode="mse"
                 src={
@@ -141,7 +141,7 @@ export default function Camera({ camera }) {
     } else if (viewSource == 'webrtc' && restreamEnabled) {
       player = (
         <Fragment>
-          <div className="max-w-5xl">
+          <div>
             <WebRtcPlayer camera={cameraConfig.live.stream_name} />
           </div>
         </Fragment>
