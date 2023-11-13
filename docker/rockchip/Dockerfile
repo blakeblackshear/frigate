@@ -28,3 +28,5 @@ RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
 COPY --from=rk-libs /rootfs/ffmpeg /usr/lib/btbn-ffmpeg/bin/
 COPY --from=rk-libs /rootfs/ffprobe /usr/lib/btbn-ffmpeg/bin/
+RUN chmod +x /usr/lib/btbn-ffmpeg/bin/ffmpeg
+RUN chmod +x /usr/lib/btbn-ffmpeg/bin/ffprobe
