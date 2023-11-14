@@ -208,7 +208,10 @@ class PtzAutoTracker:
                 continue
 
             self.autotracker_init[camera] = False
-            if camera_config.onvif.autotracking.enabled:
+            if (
+                camera_config.onvif.autotracking.enabled
+                and camera_config.onvif.autotracking.enabled_in_config
+            ):
                 self._autotracker_setup(camera_config, camera)
 
     def _autotracker_setup(self, camera_config, camera):

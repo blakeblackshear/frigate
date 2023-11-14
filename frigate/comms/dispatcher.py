@@ -185,6 +185,13 @@ class Dispatcher:
         ptz_autotracker_settings = self.config.cameras[camera_name].onvif.autotracking
 
         if payload == "ON":
+            if not self.config.cameras[
+                camera_name
+            ].onvif.autotracking.enabled_in_config:
+                logger.error(
+                    "Autotracking must be enabled in the config to be turned on via MQTT."
+                )
+                return
             if not self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
                 logger.info(f"Turning on ptz autotracker for {camera_name}")
                 self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = True
