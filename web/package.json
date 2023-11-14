@@ -19,7 +19,7 @@
     "idb-keyval": "^6.2.0",
     "immer": "^10.0.1",
     "monaco-yaml": "^4.0.4",
-    "preact": "^10.17.1",
+    "preact": "^10.19.2",
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.1.0",
     "react": "npm:@preact/compat@^17.1.2",
