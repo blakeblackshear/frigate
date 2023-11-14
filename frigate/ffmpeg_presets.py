@@ -77,8 +77,8 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
-    "preset-rk-h264": "-r {0} -width {1} -height {2}",
-    "preset-rk-h265": "-r {0} -width {1} -height {2}",
+    "preset-rk-h264": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-rk-h265": "-r {0} -vf fps={0},scale={1}:{2}",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 
