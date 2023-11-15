@@ -341,3 +341,9 @@ ffmpeg:
 ffmpeg:
   hwaccel_args: preset-rk-h265
 ```
+
+:::note
+
+Make sure that your SoC supports hardware acceleration for your input stream. For example, if your camera streams with h265 encoding and a 4k resolution, your SoC must be able to de- and encode h265 with a 4k resolution or higher. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
+
+:::
