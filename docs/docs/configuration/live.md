@@ -116,4 +116,4 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.2#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.3#module-webrtc) for more information about this.
