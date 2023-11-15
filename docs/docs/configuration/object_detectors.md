@@ -337,10 +337,11 @@ model:                                # required
 ```
 
 Explanation for rknn specific options:
-- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit coresponds to core0, the second last to core1, etc. Examples:
+- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit coresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
   - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used. Default and recommended value.
-  - `core_mask: 0b001` use only core0
-  - `core_mask: 0b110` use core1 and core2
+  - `core_mask: 0b001` use only core0.
+  - `core_mask: 0b011` use core0 and core1.
+  - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
 - **yolov8_rknn_model** see section below.
 - **min_score** sets the minimal detection confidence. Should have the same value as min_score in the object block. See also [Reducing false positives](/guides/false_positives.md).
 - **nms_thresh** is the IoU threshold for Non-maximum Suppression (NMS). Enable "bounding boxes" in the debug viewer.
@@ -378,6 +379,7 @@ $ cat /sys/kernel/debug/rknpu/load
     2. Download the rknn model.
       - If your server has an internet connection, it will download the model.
       - Otherwise, you can download the model from [this Github repository](https://github.com/MarcA711/rknn-models/releases/tag/latest) on another device and place it in the `rknn-models` folder that you mounted to your system.
+    3. Check the inference speeds in the frigate WebUI under System. If you use bigger models the inference speed will increase. If it gets too high, consider enabling more NPU cores using `core_mask` option.
 - Finally, you can also provide your own model. Note, that you will need to convert your model to the rknn format using `rknn-toolkit2` on a x86 machine. Afterwards, you can mount a directory to the image (docker run flag: `-v /model/custom:./data/my-rknn-models` or docker compose: add `/model/custom:./data/my-rknn-models` to the `volumes` block) and place your model file in that directory. Then you need to pass the path to your model using the `path` option of your `model` block like this:
 ```yaml
 model:
