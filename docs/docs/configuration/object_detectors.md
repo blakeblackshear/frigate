@@ -309,14 +309,23 @@ RKNN support is provided using the `-rk` suffix for the docker image. Moreover, 
 ### Configuration
 
 This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
+
 ```yaml
 detectors:                            # required
   rknn:                               # required
     type: rknn                        # required
+    # core mask for npu
+    core_mask: 0
+    # yolov8 model in rknn format to use; allowed calues: n, s, m, l, x
+    yolov8_rknn_model: n
+    # minimal confidence for detection
+    min_score: 0.5
+    # determines whether two overlapping boxes should be combined
+    nms_thresh: 0.45
 
 model:                                # required
   # path to .rknn model file
-  path: /models/yolov8n-320x320.rknn
+  path:
   # width and height of detection frames
   width: 320
   height: 320
@@ -326,3 +335,57 @@ model:                                # required
   # shape of detection frame
   input_tensor: nhwc
 ```
+
+Explanation for rknn specific options:
+- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit coresponds to core0, the second last to core1, etc. Examples:
+  - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used. Default and recommended value.
+  - `core_mask: 0b001` use only core0
+  - `core_mask: 0b110` use core1 and core2
+- **yolov8_rknn_model** see section below.
+- **min_score** sets the minimal detection confidence. Should have the same value as min_score in the object block. See also [Reducing false positives](/guides/false_positives.md).
+- **nms_thresh** is the IoU threshold for Non-maximum Suppression (NMS). Enable "bounding boxes" in the debug viewer.
+  - *Decrease* if two overlapping objects (for example one person in front of another) are detected as one object.
+  - *Increase* if there are multiple boxes around one object.
+
+### Choosing a model
+
+There are 5 yolov8 models that differ in size and therefore load the NPU more or less. In ascending order, with the top one being the smallest and least computationally intensive model:
+
+| Model   | Size in mb |
+| ------- | ---------- |
+| yolov8n | 9          |
+| yolov8s | 25         |
+| yolov8m | 54         |
+| yolov8l | 90         |
+| yolov8x | 136        |
+
+:::tip
+
+You can get the load of your NPU with the following command:
+
+```bash
+$ cat /sys/kernel/debug/rknpu/load
+>> NPU load:  Core0:  0%, Core1:  0%, Core2:  0%,
+```
+
+:::
+
+- By default the rknn detector uses the yolov8**n** model (`yolov8_rknn_model: n`). This model comes with the image, so no further steps than those mentioned above are necessary.
+- If you want to use are more precise model, you can set `yolov8_rknn_model:` to `s`, `m`, `l` or `x`. But additional steps are required:
+    1. Mount the directory `/model/download/` to your system using one of the below methods. Of course, you can change to destination folder.
+      - If you start frigate with docker run, append this flag to your command: `-v /model/download:./data/rknn-models`
+      - If you use docker compose, append this to your `volumes` block: `/model/download:./data/rknn-models`
+    2. Download the rknn model.
+      - If your server has an internet connection, it will download the model.
+      - Otherwise, you can download the model from [this Github repository](https://github.com/MarcA711/rknn-models/releases/tag/latest) on another device and place it in the `rknn-models` folder that you mounted to your system.
+- Finally, you can also provide your own model. Note, that you will need to convert your model to the rknn format using `rknn-toolkit2` on a x86 machine. Afterwards, you can mount a directory to the image (docker run flag: `-v /model/custom:./data/my-rknn-models` or docker compose: add `/model/custom:./data/my-rknn-models` to the `volumes` block) and place your model file in that directory. Then you need to pass the path to your model using the `path` option of your `model` block like this:
+```yaml
+model:
+  path: /model/custom/my-rknn-model.rknn
+```
+
+:::caution
+
+The `path` option of the `model` block will overwrite the `yolov8_rknn_model` option of the `detectors` block. So if you want to use one of the provided yolov8 models, make sure to not specify the `path` option.
+
+:::
