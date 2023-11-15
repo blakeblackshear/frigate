@@ -90,6 +90,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink 511WA            |      ✅      |      ❌      | Zoom only                                                                                                                                       |
 | Reolink E1 Pro           |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink E1 Zoom          |      ✅      |      ❌      |                                                                                                                                                 |
+| Reolink RLC-823A 16x     |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
 | Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
