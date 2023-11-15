@@ -38,11 +38,11 @@ flowchart TD
     RecStore[(Recording\nstore)]
     SnapStore[(Snapshot\nstore)]
 
-    subgraph Aquisition
+    subgraph Acquisition
         Cam["Camera"] -->|FFmpeg supported| Stream
         Cam -->|"Other streaming\nprotocols"| go2rtc
         go2rtc("go2rtc") --> Stream
-        Stream[Capture main & Sub\nstreams] --> |detect stream|Decode(Decode & Downscale)
+        Stream[Capture main and\nsub streams] --> |detect stream|Decode(Decode and\ndownscale)
     end
     subgraph Motion
         Decode --> MotionM(Apply\nmotion masks)
@@ -54,9 +54,9 @@ flowchart TD
         ObjectD --> ObjectFilter(Apply object filters & zones)
         ObjectFilter --> ObjectZ(Track objects)
     end
-    Stream --> |decoded frames|BirdsEye
-    MotionD --> |motion event|BirdsEye
-    ObjectZ --> |object event|BirdsEye
+    Decode --> |decoded frames|Birdseye
+    MotionD --> |motion event|Birdseye
+    ObjectZ --> |object event|Birdseye
 
     MotionD --> |"video segments\n(retain motion)"|RecStore
     ObjectZ --> |detection clip|RecStore
