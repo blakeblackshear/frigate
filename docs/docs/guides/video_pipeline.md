@@ -14,10 +14,10 @@ At a high level, there are five processing steps that could be applied to a came
 %%{init: {"themeVariables": {"edgeLabelBackground": "transparent"}}}%%
 
 flowchart LR
-    Feed(Feed\nAcquisition) --> Decode(Video\ndecoding)
-    Decode --> Motion(Motion\nDetection)
-    Motion --> Object(Object\nDetection)
-    Feed --> Recording(Recording\n&\nVisualization)
+    Feed(Feed\nacquisition) --> Decode(Video\ndecoding)
+    Decode --> Motion(Motion\ndetection)
+    Motion --> Object(Object\ndetection)
+    Feed --> Recording(Recording\nand\nvisualization)
     Motion --> Recording
     Object --> Recording
 ```
