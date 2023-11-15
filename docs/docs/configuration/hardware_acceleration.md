@@ -319,3 +319,31 @@ ffmpeg:
 If everything is working correctly, you should see a significant reduction in ffmpeg CPU load and power consumption.
 Verify that hardware decoding is working by running `jtop` (`sudo pip3 install -U jetson-stats`), which should show
 that NVDEC/NVDEC1 are in use.
+
+## Rockchip platform
+
+Hardware accelerated video de-/encoding is supported on all Rockchip SoCs.
+
+### Setup
+
+Use a frigate docker image with `-rk` suffix and enable privileged mode by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
+
+### Configuration
+
+Add one of the following ffmpeg presets to your `config.yaml` to enable hardware acceleration:
+
+```yaml
+# if you try to decode a h264 encoded stream
+ffmpeg:
+  hwaccel_args: preset-rk-h264
+
+# if you try to decode a h265 (hevc) encoded stream
+ffmpeg:
+  hwaccel_args: preset-rk-h265
+```
+
+:::note
+
+Make sure that your SoC supports hardware acceleration for your input stream. For example, if your camera streams with h265 encoding and a 4k resolution, your SoC must be able to de- and encode h265 with a 4k resolution or higher. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
+
+:::

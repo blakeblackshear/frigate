@@ -64,6 +64,8 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-nvidia-mjpeg": "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
+    "preset-rk-h264": "-c:v h264_rkmpp_decoder",
+    "preset-rk-h265": "-c:v hevc_rkmpp_decoder",
 }
 
 PRESETS_HW_ACCEL_SCALE = {
@@ -75,6 +77,8 @@ PRESETS_HW_ACCEL_SCALE = {
     "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
+    "preset-rk-h264": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-rk-h265": "-r {0} -vf fps={0},scale={1}:{2}",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 
@@ -87,6 +91,8 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-nvidia-h265": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
+    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp_encoder -profile high {1}",
+    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
 
@@ -99,6 +105,8 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v hevc_nvmpi -profile high {1}",
+    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp_encoder -profile high {1}",
+    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
 

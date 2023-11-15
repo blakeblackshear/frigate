@@ -22,6 +22,8 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 | preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream   | Recommend restreaming mjpeg and using nvidia-h264     |
 | preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
 | preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
+| preset-rk-h264        | Rockchip MPP with h264 stream  | Use image with *-rk suffix and privileged mode        |
+| preset-rk-h265        | Rockchip MPP with h265 stream  | Use image with *-rk suffix and privileged mode        |
 
 ### Input Args Presets
 
