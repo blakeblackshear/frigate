@@ -7,7 +7,7 @@ from typing import Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import requests
-from pydantic import ConfigDict, BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.plus import PlusApi

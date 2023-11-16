@@ -11,11 +11,11 @@ from typing import Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 from pydantic import (
-    field_validator,
-    ConfigDict,
     BaseModel,
-    ValidationInfo,
+    ConfigDict,
     Field,
+    ValidationInfo,
+    field_validator,
     parse_obj_as,
 )
 from pydantic.fields import PrivateAttr
@@ -141,7 +141,9 @@ class MqttConfig(FrigateBaseModel):
     client_id: str = Field(default="frigate", title="MQTT Client ID")
     stats_interval: int = Field(default=60, title="MQTT Camera Stats Interval")
     user: Optional[str] = Field(default=None, title="MQTT Username")
-    password: Optional[str] = Field(default=None, title="MQTT Password", validate_default=True)
+    password: Optional[str] = Field(
+        default=None, title="MQTT Password", validate_default=True
+    )
     tls_ca_certs: Optional[str] = Field(default=None, title="MQTT TLS CA Certificates")
     tls_client_cert: Optional[str] = Field(
         default=None, title="MQTT TLS Client Certificate"
@@ -194,7 +196,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
         title="Internal value used for PTZ movements based on the speed of your camera's motor.",
     )
     enabled_in_config: Optional[bool] = Field(
-        title="Keep track of original state of autotracking."
+        default=None, title="Keep track of original state of autotracking."
     )
 
     @field_validator("movement_weights", mode="before")
