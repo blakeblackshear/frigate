@@ -154,7 +154,7 @@ class MqttConfig(FrigateBaseModel):
     @field_validator("password", mode="before")
     @classmethod
     def validate_password(cls, v, info: ValidationInfo):
-        if (v is None) != (info.config.get("user") is None):
+        if (v is None) != (info.data.get("user") is None):
             raise ValueError("Password must be provided with username.")
         return v
 
