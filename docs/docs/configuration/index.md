@@ -25,7 +25,7 @@ cameras:
 
 VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
 
-### Full configuration reference:
+### Full configuration reference
 
 :::caution
 
