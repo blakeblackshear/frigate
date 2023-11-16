@@ -56,6 +56,7 @@ _user_agent_args = [
 
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
+    "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     "preset-vaapi": f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
     "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
     "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv",
@@ -70,6 +71,7 @@ PRESETS_HW_ACCEL_DECODE = {
 
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
@@ -84,6 +86,7 @@ PRESETS_HW_ACCEL_SCALE = {
 
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
+    "preset-rpi-64-h265": "ffmpeg -hide_banner {0} -c:v hevc_v4l2m2m {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
@@ -98,6 +101,7 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -pix_fmt yuv420p {1}",
+    "preset-rpi-64-h265": "ffmpeg -hide_banner {0} -c:v hevc_v4l2m2m -pix_fmt yuv420p {1}",
     "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
