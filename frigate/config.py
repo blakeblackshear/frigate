@@ -14,9 +14,9 @@ from pydantic import (
     field_validator,
     ConfigDict,
     BaseModel,
+    ValidationInfo,
     Field,
     parse_obj_as,
-    validator,
 )
 from pydantic.fields import PrivateAttr
 
@@ -141,7 +141,7 @@ class MqttConfig(FrigateBaseModel):
     client_id: str = Field(default="frigate", title="MQTT Client ID")
     stats_interval: int = Field(default=60, title="MQTT Camera Stats Interval")
     user: Optional[str] = Field(default=None, title="MQTT Username")
-    password: Optional[str] = Field(default=None, title="MQTT Password")
+    password: Optional[str] = Field(default=None, title="MQTT Password", validate_default=True)
     tls_ca_certs: Optional[str] = Field(default=None, title="MQTT TLS CA Certificates")
     tls_client_cert: Optional[str] = Field(
         default=None, title="MQTT TLS Client Certificate"
@@ -149,11 +149,10 @@ class MqttConfig(FrigateBaseModel):
     tls_client_key: Optional[str] = Field(default=None, title="MQTT TLS Client Key")
     tls_insecure: Optional[bool] = Field(default=None, title="MQTT TLS Insecure")
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("password", pre=True, always=True)
-    def validate_password(cls, v, values):
-        if (v is None) != (values["user"] is None):
+    @field_validator("password", mode="before")
+    @classmethod
+    def validate_password(cls, v, info: ValidationInfo):
+        if (v is None) != (info.config.get("user") is None):
             raise ValueError("Password must be provided with username.")
         return v
 
