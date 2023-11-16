@@ -3,8 +3,6 @@ import os.path
 import urllib.request
 from typing import Literal
 
-import cv2
-import cv2.dnn
 import numpy as np
 
 try:
@@ -24,43 +22,46 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rknn"
 
+yolov8_rknn_models = {
+    "default-yolov8n": "n",
+    "default-yolov8s": "s",
+    "default-yolov8m": "m",
+    "default-yolov8l": "l",
+    "default-yolov8x": "x",
+}
+
 
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    yolov8_rknn_model: Literal["n", "s", "m", "l", "x"] = "n"
     core_mask: int = Field(default=0, ge=0, le=7, title="Core mask for NPU.")
+
 
 class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
-        self.model_path = config.model.path or "/models/yolov8n-320x320.rknn"
+        self.model_path = config.model.path or "default-yolov8n"
+        self.core_mask = config.core_mask
+        self.height = config.model.height
+        self.width = config.model.width
 
-        if config.model.path != None:
-            self.model_path = config.model.path
-        else:
-            if config.yolov8_rknn_model == "n":
+        if self.model_path in yolov8_rknn_models:
+            if self.model_path == "default-yolov8n":
                 self.model_path = "/models/yolov8n-320x320.rknn"
             else:
-                # check if user mounted /models/download/
-                if not os.path.isdir("/models/download/"):
-                    logger.error(
-                        'Make sure to mount the directory "/models/download/" to your system. Otherwise the file will be downloaded at every restart.'
+                model_suffix = yolov8_rknn_models[self.model_path]
+                self.model_path = (
+                    "/config/model_cache/rknn/yolov8{}-320x320.rknn".format(
+                        model_suffix
                     )
-                    raise Exception(
-                        'Make sure to mount the directory "/models/download/" to your system. Otherwise the file will be downloaded at every restart.'
-                    )
-
-                self.model_path = "/models/download/yolov8{}-320x320.rknn".format(
-                    config.yolov8_rknn_model
                 )
-                if os.path.isfile(self.model_path) == False:
-                    logger.info(
-                        "Downloading yolov8{} model.".format(config.yolov8_rknn_model)
-                    )
+
+                os.makedirs("/config/model_cache/rknn", exist_ok=True)
+                if not os.path.isfile(self.model_path):
+                    logger.info("Downloading yolov8{} model.".format(model_suffix))
                     urllib.request.urlretrieve(
                         "https://github.com/MarcA711/rknn-models/releases/download/latest/yolov8{}-320x320.rknn".format(
-                            config.yolov8_rknn_model
+                            model_suffix
                         ),
                         self.model_path,
                     )
@@ -89,10 +90,6 @@ class Rknn(DetectionApi):
                     'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
                 )
 
-        self.height = config.model.height
-        self.width = config.model.width
-        self.core_mask = config.core_mask
-
         from rknnlite.api import RKNNLite
 
         self.rknn = RKNNLite(verbose=False)
@@ -117,19 +114,25 @@ class Rknn(DetectionApi):
         detections: array with shape (20, 6) with 20 rows of (class, confidence, y_min, x_min, y_max, x_max)
         """
 
-        results = np.transpose(results[0, :, :, 0]) # array shape (2100, 84)
+        results = np.transpose(results[0, :, :, 0])  # array shape (2100, 84)
         scores = np.max(
             results[:, 4:], axis=1
         )  # array shape (2100,); max confidence of each row
-        results = [np.where(scores > 0.4)]
-        
-        detections = np.zeros((20, 6), np.float32)
+
+        # remove lines with score scores < 0.4
+        filtered_arg = np.argwhere(scores > 0.4)
+        results = results[filtered_arg[:, 0]]
+        scores = scores[filtered_arg[:, 0]]
+
         num_detections = len(scores)
 
+        if num_detections == 0:
+            return np.zeros((20, 6), np.float32)
+
         if num_detections > 20:
-            max_ind =  np.argpartition(scores, -20)[:-20]
-            results = results[max_ind]
-            scores = scores[max_ind]
+            top_arg = np.argpartition(scores, -20)[-20:]
+            results = results[top_arg]
+            scores = scores[top_arg]
             num_detections = 20
 
         classes = np.argmax(results[:, 4:], axis=1)
@@ -145,6 +148,7 @@ class Rknn(DetectionApi):
             )
         )
 
+        detections = np.zeros((20, 6), np.float32)
         detections[:num_detections, 0] = classes
         detections[:num_detections, 1] = scores
         detections[:num_detections, 2:] = boxes

@@ -316,12 +316,12 @@ detectors:                            # required
     type: rknn                        # required
     # core mask for npu
     core_mask: 0
-    # yolov8 model in rknn format to use; allowed calues: n, s, m, l, x
-    yolov8_rknn_model: n
 
 model:                                # required
-  # path to .rknn model file
-  path:
+  # name of yolov8 model or path to your own .rknn model file
+  # possible names of yolov8 models are: default-yolov8n,
+  # default-yolov8s, default-yolov8m, default-yolov8l, default-yolov8x"
+  path: default-yolov8n
   # width and height of detection frames
   width: 320
   height: 320
@@ -338,7 +338,6 @@ Explanation for rknn specific options:
   - `core_mask: 0b001` use only core0.
   - `core_mask: 0b011` use core0 and core1.
   - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
-- **yolov8_rknn_model** see section below.
 
 ### Choosing a model
 
@@ -363,23 +362,12 @@ $ cat /sys/kernel/debug/rknpu/load
 
 :::
 
-- By default the rknn detector uses the yolov8**n** model (`yolov8_rknn_model: n`). This model comes with the image, so no further steps than those mentioned above are necessary.
-- If you want to use are more precise model, you can set `yolov8_rknn_model:` to `s`, `m`, `l` or `x`. But additional steps are required:
-    1. Mount the directory `/model/download/` to your system using one of the below methods. Of course, you can change to destination folder.
-      - If you start frigate with docker run, append this flag to your command: `-v /model/download:./data/rknn-models`
-      - If you use docker compose, append this to your `volumes` block: `/model/download:./data/rknn-models`
-    2. Download the rknn model.
-      - If your server has an internet connection, it will download the model.
-      - Otherwise, you can download the model from [this Github repository](https://github.com/MarcA711/rknn-models/releases/tag/latest) on another device and place it in the `rknn-models` folder that you mounted to your system.
-    3. Check the inference speeds in the frigate WebUI under System. If you use bigger models the inference speed will increase. If it gets too high, consider enabling more NPU cores using `core_mask` option.
-- Finally, you can also provide your own model. Note, that you will need to convert your model to the rknn format using `rknn-toolkit2` on a x86 machine. Afterwards, you can mount a directory to the image (docker run flag: `-v /model/custom:./data/my-rknn-models` or docker compose: add `/model/custom:./data/my-rknn-models` to the `volumes` block) and place your model file in that directory. Then you need to pass the path to your model using the `path` option of your `model` block like this:
+- By default the rknn detector uses the yolov8n model (`model: path: default-yolov8n`). This model comes with the image, so no further steps than those mentioned above are necessary.
+- If you want to use a more precise model, you can pass `default-yolov8s`, `default-yolov8m`, `default-yolov8l` or `default-yolov8x` as `model: path:` option.
+  - If the model does not exist, it will be automatically downloaded to `/config/model_cache/rknn`.
+  - If your server has no internet connection, you can download the model from [this Github repository](https://github.com/MarcA711/rknn-models/releases/tag/latest) using another device and place it in the `config/model_cache/rknn` on your system.
+- Finally, you can also provide your own model. Note that only yolov8 models are currently supported. Moreover, you will need to convert your model to the rknn format using `rknn-toolkit2` on a x86 machine. Afterwards, you can place your `.rknn` model file in the `config/model_cache/rknn` directory on your system. Then you need to pass the path to your model using the `path` option of your `model` block like this:
 ```yaml
 model:
-  path: /model/custom/my-rknn-model.rknn
+  path: /config/model_cache/rknn/my-rknn-model.rknn
 ```
-
-:::caution
-
-The `path` option of the `model` block will overwrite the `yolov8_rknn_model` option of the `detectors` block. So if you want to use one of the provided yolov8 models, make sure to not specify the `path` option.
-
-:::
