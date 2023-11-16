@@ -72,7 +72,6 @@ $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576)
 
 The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
 
-
 ### Raspberry Pi 3/4
 
 By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
@@ -81,23 +80,7 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 ## Docker
 
-Running in Docker with compose is the recommended install method:
-
-:::note
-
-The following officially supported builds are available:
-
-`ghcr.io/blakeblackshear/frigate:stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64
-`ghcr.io/blakeblackshear/frigate:stable-standard-arm64` - Standard Frigate build for arm64
-`ghcr.io/blakeblackshear/frigate:stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
-
-The following community supported builds are available:
-
-`ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
-`ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
-`ghcr.io/blakeblackshear/frigate:stable-rk` - Frigate build for SBCs with Rockchip SoC
-
-:::
+Running in Docker with compose is the recommended install method.
 
 ```yaml
 version: "3.9"
@@ -150,6 +133,18 @@ docker run -d \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
+The official docker image tags for the current stable version are:
+
+- `stable` - Standard Frigate build for amd64 & RPi Optimized Frigate build for arm64
+- `stable-standard-arm64` - Standard Frigate build for arm64
+- `stable-tensorrt` - Frigate build specific for amd64 devices running an nvidia GPU
+
+The community supported docker image tags for the current stable version are:
+
+- `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
+- `stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
+- `stable-rk` - Frigate build for SBCs with Rockchip SoC
+
 ## Home Assistant Addon
 
 :::caution
@@ -157,6 +152,7 @@ docker run -d \
 As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
 
 There are important limitations in Home Assistant Operating System to be aware of:
+
 - Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
 - Nvidia GPUs are not supported because addons do not support the nvidia runtime.
@@ -211,7 +207,6 @@ If you're running Frigate on a rack mounted server and want to passthough the Go
 
 These settings were tested on DSM 7.1.1-42962 Update 4
 
-
 **General:**
 
 The `Execute container using high privilege` option needs to be enabled in order to give the frigate container the elevated privileges it may need.
@@ -220,13 +215,11 @@ The `Enable auto-restart` option can be enabled if you want the container to aut
 
 ![image](https://user-images.githubusercontent.com/4516296/232586790-0b659a82-561d-4bc5-899b-0f5b39c6b11d.png)
 
-
 **Advanced Settings:**
 
 If you want to use the password template feature, you should add the "FRIGATE_RTSP_PASSWORD" environment variable and set it to your preferred password under advanced settings. The rest of the environment variables should be left as default for now.
 
 ![image](https://user-images.githubusercontent.com/4516296/232587163-0eb662d4-5e28-4914-852f-9db1ec4b9c3d.png)
-
 
 **Port Settings:**
 
@@ -235,7 +228,6 @@ The network mode should be set to `bridge`. You need to map the default frigate 
 There may be other services running on your NAS that are using the same ports that frigate uses. In that instance you can set the ports to auto or a specific port.
 
 ![image](https://user-images.githubusercontent.com/4516296/232582642-773c0e37-7ef5-4373-8ce3-41401b1626e6.png)
-
 
 **Volume Settings:**
 
@@ -250,14 +242,15 @@ You need to configure 2 paths:
 
 These instructions were tested on a QNAP with an Intel J3455 CPU and 16G RAM, running QTS 4.5.4.2117.
 
-QNAP has a graphic tool named Container Station to install and manage docker containers.  However, there are two limitations with Container Station that make it unsuitable to install Frigate:
+QNAP has a graphic tool named Container Station to install and manage docker containers. However, there are two limitations with Container Station that make it unsuitable to install Frigate:
 
 1. Container Station does not incorporate GitHub Container Registry (ghcr), which hosts Frigate docker image version 0.12.0 and above.
-2. Container Station uses default 64 Mb shared memory size (shm-size), and does not have a mechanism to adjust it.  Frigate requires a larger shm-size to be able to work properly with more than two high resolution cameras.
+2. Container Station uses default 64 Mb shared memory size (shm-size), and does not have a mechanism to adjust it. Frigate requires a larger shm-size to be able to work properly with more than two high resolution cameras.
 
-Because of above limitations, the installation has to be done from command line.  Here are the steps:
+Because of above limitations, the installation has to be done from command line. Here are the steps:
 
 **Preparation**
+
 1. Install Container Station from QNAP App Center if it is not installed.
 2. Enable ssh on your QNAP (please do an Internet search on how to do this).
 3. Prepare Frigate config file, name it `config.yml`.
@@ -268,7 +261,8 @@ Because of above limitations, the installation has to be done from command line.
 **Installation**
 
 Run the following commands to install Frigate (using `stable` version as example):
-```bash
+
+```shell
 # Download Frigate image
 docker pull ghcr.io/blakeblackshear/frigate:stable
 # Create directory to host Frigate config file on QNAP file system.
@@ -309,6 +303,4 @@ docker run \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
-Log into QNAP, open Container Station.  Frigate docker container should be listed under 'Overview' and running.  Visit Frigate Web UI by clicking Frigate docker, and then clicking the URL shown at the top of the detail page.
-
-
+Log into QNAP, open Container Station. Frigate docker container should be listed under 'Overview' and running. Visit Frigate Web UI by clicking Frigate docker, and then clicking the URL shown at the top of the detail page.

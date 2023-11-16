@@ -95,7 +95,7 @@ The following commands are used inside the container to ensure hardware accelera
 
 **Raspberry Pi (64bit)**
 
-This should show <50% CPU in top, and ~80% CPU without `-c:v h264_v4l2m2m`.
+This should show less than 50% CPU in top, and ~80% CPU without `-c:v h264_v4l2m2m`.
 
 ```shell
 ffmpeg -c:v h264_v4l2m2m -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/incoming/720p60.mp4 -f rawvideo -pix_fmt yuv420p pipe: > /dev/null
@@ -131,7 +131,7 @@ ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/
 
 - [Frigate source code](#frigate-core-web-and-docs)
 - All [core](#core) prerequisites _or_ another running Frigate instance locally available
-- Node.js 16
+- Node.js 20
 
 ### Making changes
 
@@ -183,7 +183,7 @@ npm run test
 ### Prerequisites
 
 - [Frigate source code](#frigate-core-web-and-docs)
-- Node.js 16
+- Node.js 20
 
 ### Making changes
 
@@ -201,7 +201,7 @@ npm run start
 
 This command starts a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
 
-The docs are built using [Docusaurus v2](https://v2.docusaurus.io). Please refer to the Docusaurus docs for more information on how to modify Frigate's documentation.
+The docs are built using [Docusaurus v3](https://docusaurus.io). Please refer to the Docusaurus docs for more information on how to modify Frigate's documentation.
 
 #### 3. Build (optional)
 
