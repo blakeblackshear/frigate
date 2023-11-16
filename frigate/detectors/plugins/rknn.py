@@ -29,13 +29,6 @@ class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     yolov8_rknn_model: Literal["n", "s", "m", "l", "x"] = "n"
     core_mask: int = Field(default=0, ge=0, le=7, title="Core mask for NPU.")
-    min_score: float = Field(
-        default=0.5, ge=0, le=1, title="Minimal confidence for detection."
-    )
-    nms_thresh: float = Field(
-        default=0.45, ge=0, le=1, title="IoU threshold for non-maximum suppression."
-    )
-
 
 class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
@@ -99,8 +92,6 @@ class Rknn(DetectionApi):
         self.height = config.model.height
         self.width = config.model.width
         self.core_mask = config.core_mask
-        self.min_score = config.min_score
-        self.nms_thresh = config.nms_thresh
 
         from rknnlite.api import RKNNLite
 
@@ -126,46 +117,37 @@ class Rknn(DetectionApi):
         detections: array with shape (20, 6) with 20 rows of (class, confidence, y_min, x_min, y_max, x_max)
         """
 
-        results = np.transpose(results[0, :, :, 0])  # array shape (2100, 84)
-        classes = np.argmax(
-            results[:, 4:], axis=1
-        )  # array shape (2100,); index of class with max confidence of each row
+        results = np.transpose(results[0, :, :, 0]) # array shape (2100, 84)
         scores = np.max(
             results[:, 4:], axis=1
         )  # array shape (2100,); max confidence of each row
+        results = [np.where(scores > 0.4)]
+        
+        detections = np.zeros((20, 6), np.float32)
+        num_detections = len(scores)
 
-        # array shape (2100, 4); bounding box of each row
+        if num_detections > 20:
+            max_ind =  np.argpartition(scores, -20)[:-20]
+            results = results[max_ind]
+            scores = scores[max_ind]
+            num_detections = 20
+
+        classes = np.argmax(results[:, 4:], axis=1)
+
         boxes = np.transpose(
             np.vstack(
                 (
-                    results[:, 0] - 0.5 * results[:, 2],
                     results[:, 1] - 0.5 * results[:, 3],
-                    results[:, 2],
-                    results[:, 3],
+                    results[:, 0] - 0.5 * results[:, 2],
+                    results[:, 3] + 0.5 * results[:, 3],
+                    results[:, 2] + 0.5 * results[:, 2],
                 )
             )
         )
 
-        # indices of rows with confidence > min_score with Non-maximum Suppression (NMS)
-        result_boxes = cv2.dnn.NMSBoxes(
-            boxes, scores, self.min_score, self.nms_thresh, 0.5
-        )
-
-        detections = np.zeros((20, 6), np.float32)
-
-        for i in range(len(result_boxes)):
-            if i >= 20:
-                break
-
-            index = result_boxes[i]
-            detections[i] = [
-                classes[index],
-                scores[index],
-                (boxes[index][1]) / self.height,
-                (boxes[index][0]) / self.width,
-                (boxes[index][1] + boxes[index][3]) / self.height,
-                (boxes[index][0] + boxes[index][2]) / self.width,
-            ]
+        detections[:num_detections, 0] = classes
+        detections[:num_detections, 1] = scores
+        detections[:num_detections, 2:] = boxes
 
         return detections
 

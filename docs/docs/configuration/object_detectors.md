@@ -318,10 +318,6 @@ detectors:                            # required
     core_mask: 0
     # yolov8 model in rknn format to use; allowed calues: n, s, m, l, x
     yolov8_rknn_model: n
-    # minimal confidence for detection
-    min_score: 0.5
-    # determines whether two overlapping boxes should be combined
-    nms_thresh: 0.45
 
 model:                                # required
   # path to .rknn model file
@@ -343,10 +339,6 @@ Explanation for rknn specific options:
   - `core_mask: 0b011` use core0 and core1.
   - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
 - **yolov8_rknn_model** see section below.
-- **min_score** sets the minimal detection confidence. Should have the same value as min_score in the object block. See also [Reducing false positives](/guides/false_positives.md).
-- **nms_thresh** is the IoU threshold for Non-maximum Suppression (NMS). Enable "bounding boxes" in the debug viewer.
-  - *Decrease* if two overlapping objects (for example one person in front of another) are detected as one object.
-  - *Increase* if there are multiple boxes around one object.
 
 ### Choosing a model
 
