@@ -319,8 +319,13 @@ detectors:                            # required
 
 model:                                # required
   # name of yolov8 model or path to your own .rknn model file
-  # possible names of yolov8 models are: default-yolov8n,
-  # default-yolov8s, default-yolov8m, default-yolov8l, default-yolov8x"
+  # possible values are:
+  # - default-yolov8n
+  # - default-yolov8s
+  # - default-yolov8m
+  # - default-yolov8l
+  # - default-yolov8x
+  # - /config/model_cache/rknn/your_custom_model.rknn
   path: default-yolov8n
   # width and height of detection frames
   width: 320
@@ -341,7 +346,7 @@ Explanation for rknn specific options:
 
 ### Choosing a model
 
-There are 5 yolov8 models that differ in size and therefore load the NPU more or less. In ascending order, with the top one being the smallest and least computationally intensive model:
+There are 5 default yolov8 models that differ in size and therefore load the NPU more or less. In ascending order, with the top one being the smallest and least computationally intensive model:
 
 | Model   | Size in mb |
 | ------- | ---------- |
