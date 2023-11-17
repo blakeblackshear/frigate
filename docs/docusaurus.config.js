@@ -10,7 +10,11 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'blakeblackshear',
   projectName: 'frigate',
-  themeConfig: {
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
+  themeConfig: {  
     algolia: {
       appId: 'WIURGBNBPY',
       apiKey: 'd02cc0a6a61178b25da550212925226b',

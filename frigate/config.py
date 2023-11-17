@@ -184,6 +184,9 @@ class PtzAutotrackConfig(FrigateBaseModel):
         default=[],
         title="Internal value used for PTZ movements based on the speed of your camera's motor.",
     )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of autotracking."
+    )
 
     @validator("movement_weights", pre=True)
     def validate_weights(cls, v):
@@ -1191,6 +1194,9 @@ class FrigateConfig(FrigateBaseModel):
             # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
+            camera_config.onvif.autotracking.enabled_in_config = (
+                camera_config.onvif.autotracking.enabled
+            )
 
             # Add default filters
             object_keys = camera_config.objects.track
