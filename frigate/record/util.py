@@ -52,6 +52,13 @@ def sync_recordings(limited: bool) -> None:
                 if not os.path.exists(recording.path):
                     recordings_to_delete.add(recording.id)
 
+        if len(recordings_to_delete) == 0:
+            return True
+
+        logger.info(
+            f"Deleting {len(recordings_to_delete)} recording DB entries with missing files"
+        )
+
         # convert back to list of dictionaries for insertion
         recordings_to_delete = [
             {"id": recording_id} for recording_id in recordings_to_delete
@@ -62,10 +69,6 @@ def sync_recordings(limited: bool) -> None:
                 f"Deleting {(float(len(recordings_to_delete)) / recordings.count()):2f}% of recordings DB entries, could be due to configuration error. Aborting..."
             )
             return False
-
-        logger.debug(
-            f"Deleting {len(recordings_to_delete)} recording DB entries with missing files"
-        )
 
         # create a temporary table for deletion
         RecordingsToDelete.create_table(temporary=True)
@@ -94,14 +97,21 @@ def sync_recordings(limited: bool) -> None:
             if not Recordings.select().where(Recordings.path == file).exists():
                 files_to_delete.append(file)
 
+        if len(files_to_delete) == 0:
+            return True
+
+        logger.info(f"Deleting {len(files_to_delete)} recordings files that are missing DB entries.")
+
         if float(len(files_to_delete)) / max(1, len(files_on_disk)) > 0.5:
             logger.debug(
                 f"Deleting {(float(len(files_to_delete)) / len(files_on_disk)):2f}% of recordings DB entries, could be due to configuration error. Aborting..."
             )
-            return
+            return False
 
         for file in files_to_delete:
             os.unlink(file)
+
+        return True
 
     logger.debug("Start sync recordings.")
 
@@ -130,6 +140,6 @@ def sync_recordings(limited: bool) -> None:
                 for file in files
             }
 
-            delete_files_without_db_entry(files_on_disk)
+        delete_files_without_db_entry(files_on_disk)
 
     logger.debug("End sync recordings.")
