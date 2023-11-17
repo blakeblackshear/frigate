@@ -3,28 +3,92 @@ id: getting_started
 title: Getting started
 ---
 
-# Setting up hardware
+# Getting Started
 
-## Install debian bullseye
+## Setting up hardware
 
-## Install Docker
+This section guides you through setting up a server with Debian Bullseye and Docker If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
-# Installing Frigate
+### Install Debian 12 (Bookworm)
 
-## Setup directories
+There are many guides on how to install Debian Server, so this will be an abbreviated guide.
 
-1. Config
-1. Storage
+1. Download the small installation image from the [Debian website](https://www.debian.org/distrib/netinst)
+1. Flash the ISO to a USB device
+1. Boot your device from USB
+1. Install the minimum
+   1. SSH server
+1. Login as root to add user to sudoers
+1. Log back into the server with your non-root user
+1. Setup automatic security updates for the OS
 
-## Create Minimal Config
+### Install Docker
 
-1. Basic Frigate config
-1. Docker compose file
-1. Start Frigate
+1. Install Docker Engine (not Docker Desktop) using the [official docs](https://docs.docker.com/engine/install/debian/)
+   1. Specifically, follow the steps in the [Install using the apt repository](https://docs.docker.com/engine/install/debian/#install-using-the-repository) section
+2. Add your user to the docker group as described in the [Linux postinstall steps](https://docs.docker.com/engine/install/linux-postinstall/)
 
-# Configuring Frigate
+## Installing Frigate
 
-This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/frigate/camera_setup). Pay particular attention to the section on choosing a detect resolution.
+### Setup directories
+
+Frigate requires a valid config file to start. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor with validation.
+
+```
+.
+├── docker-compose.yml
+├── config/
+│   └── config.yml
+└── storage/
+```
+
+:::note
+
+This `docker-compose.yml` file is just a starter for amd64 devices. You will need to customize it for your setup as detailed in the [Installation docs](/frigate/installation#docker).
+
+:::
+`docker-compose.yml`
+
+```yaml
+version: "3.9"
+services:
+  frigate:
+    container_name: frigate
+    restart: unless-stopped
+    image: ghcr.io/blakeblackshear/frigate:stable
+    volumes:
+      - ./config:/config
+      - ./storage:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "5000:5000"
+      - "8554:8554" # RTSP feeds
+```
+
+`config.yml`
+
+```yaml
+mqtt:
+  enabled: False
+
+cameras:
+  dummy_camera: # <--- this will be changed to your actual camera later
+    enabled: False
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:554/rtsp
+          roles:
+            - detect
+```
+
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
+
+## Configuring Frigate
+
+This section assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/frigate/camera_setup). Pay particular attention to the section on choosing a detect resolution.
 
 ### Step 1: Add a detect stream
 
@@ -36,6 +100,7 @@ mqtt:
 
 cameras:
   name_of_your_camera: # <------ Name the camera
+    enabled: True
     ffmpeg:
       inputs:
         - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
@@ -57,7 +122,21 @@ FFmpeg arguments for other types of cameras can be found [here](../configuration
 
 Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration.md) config reference for examples applicable to your hardware.
 
-Here is an example configuration with hardware acceleration configured for Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
+Here is an example configuration with hardware acceleration configured to work with most Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
+
+`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+
+```yaml
+version: "3.9"
+services:
+  frigate:
+    ...
+    devices:
+      - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+    ...
+```
+
+`config.yml`
 
 ```yaml
 mqtt: ...
@@ -73,6 +152,19 @@ cameras:
 ### Step 4: Configure detectors
 
 By default, Frigate will use a single CPU detector. If you have a USB Coral, you will need to add a detectors section to your config.
+
+`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+
+```yaml
+version: "3.9"
+services:
+  frigate:
+    ...
+    devices:
+      - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+    ...
+```
 
 ```yaml
 mqtt: ...
