@@ -101,7 +101,7 @@ def sync_recordings(limited: bool) -> None:
             return True
 
         logger.info(
-            f"Deleting {len(files_to_delete)} recordings files that are missing DB entries."
+            f"Deleting {len(files_to_delete)} recordings files with missing DB entries"
         )
 
         if float(len(files_to_delete)) / max(1, len(files_on_disk)) > 0.5:
