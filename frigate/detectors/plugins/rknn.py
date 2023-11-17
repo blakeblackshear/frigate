@@ -1,8 +1,8 @@
 import logging
+import os.path
+import urllib.request
 from typing import Literal
 
-import cv2
-import cv2.dnn
 import numpy as np
 
 try:
@@ -22,35 +22,83 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rknn"
 
+yolov8_rknn_models = {
+    "default-yolov8n": "n",
+    "default-yolov8s": "s",
+    "default-yolov8m": "m",
+    "default-yolov8l": "l",
+    "default-yolov8x": "x",
+}
+
 
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    score_thresh: float = Field(
-        default=0.5, ge=0, le=1, title="Minimal confidence for detection."
-    )
-    nms_thresh: float = Field(
-        default=0.45, ge=0, le=1, title="IoU threshold for non-maximum suppression."
-    )
+    core_mask: int = Field(default=0, ge=0, le=7, title="Core mask for NPU.")
 
 
 class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
+        self.model_path = config.model.path or "default-yolov8n"
+        self.core_mask = config.core_mask
         self.height = config.model.height
         self.width = config.model.width
-        self.score_thresh = config.score_thresh
-        self.nms_thresh = config.nms_thresh
 
-        self.model_path = config.model.path or "/models/yolov8n-320x320.rknn"
+        if self.model_path in yolov8_rknn_models:
+            if self.model_path == "default-yolov8n":
+                self.model_path = "/models/yolov8n-320x320.rknn"
+            else:
+                model_suffix = yolov8_rknn_models[self.model_path]
+                self.model_path = (
+                    "/config/model_cache/rknn/yolov8{}-320x320.rknn".format(
+                        model_suffix
+                    )
+                )
+
+                os.makedirs("/config/model_cache/rknn", exist_ok=True)
+                if not os.path.isfile(self.model_path):
+                    logger.info("Downloading yolov8{} model.".format(model_suffix))
+                    urllib.request.urlretrieve(
+                        "https://github.com/MarcA711/rknn-models/releases/download/latest/yolov8{}-320x320.rknn".format(
+                            model_suffix
+                        ),
+                        self.model_path,
+                    )
+
+            if (config.model.width != 320) or (config.model.height != 320):
+                logger.error(
+                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                )
+                raise Exception(
+                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                )
+
+            if config.model.input_pixel_format != "bgr":
+                logger.error(
+                    'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+                )
+                raise Exception(
+                    'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+                )
+
+            if config.model.input_tensor != "nhwc":
+                logger.error(
+                    'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+                )
+                raise Exception(
+                    'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+                )
 
         from rknnlite.api import RKNNLite
 
         self.rknn = RKNNLite(verbose=False)
         if self.rknn.load_rknn(self.model_path) != 0:
             logger.error("Error initializing rknn model.")
-        if self.rknn.init_runtime() != 0:
-            logger.error("Error initializing rknn runtime.")
+        if self.rknn.init_runtime(core_mask=self.core_mask) != 0:
+            logger.error(
+                "Error initializing rknn runtime. Do you run docker in privileged mode?"
+            )
 
     def __del__(self):
         self.rknn.release()
@@ -67,45 +115,43 @@ class Rknn(DetectionApi):
         """
 
         results = np.transpose(results[0, :, :, 0])  # array shape (2100, 84)
-        classes = np.argmax(
-            results[:, 4:], axis=1
-        )  # array shape (2100,); index of class with max confidence of each row
         scores = np.max(
             results[:, 4:], axis=1
         )  # array shape (2100,); max confidence of each row
 
-        # array shape (2100, 4); bounding box of each row
+        # remove lines with score scores < 0.4
+        filtered_arg = np.argwhere(scores > 0.4)
+        results = results[filtered_arg[:, 0]]
+        scores = scores[filtered_arg[:, 0]]
+
+        num_detections = len(scores)
+
+        if num_detections == 0:
+            return np.zeros((20, 6), np.float32)
+
+        if num_detections > 20:
+            top_arg = np.argpartition(scores, -20)[-20:]
+            results = results[top_arg]
+            scores = scores[top_arg]
+            num_detections = 20
+
+        classes = np.argmax(results[:, 4:], axis=1)
+
         boxes = np.transpose(
             np.vstack(
                 (
-                    results[:, 0] - 0.5 * results[:, 2],
                     results[:, 1] - 0.5 * results[:, 3],
-                    results[:, 2],
-                    results[:, 3],
+                    results[:, 0] - 0.5 * results[:, 2],
+                    results[:, 3] + 0.5 * results[:, 3],
+                    results[:, 2] + 0.5 * results[:, 2],
                 )
             )
         )
 
-        # indices of rows with confidence > SCORE_THRESH with Non-maximum Suppression (NMS)
-        result_boxes = cv2.dnn.NMSBoxes(
-            boxes, scores, self.score_thresh, self.nms_thresh, 0.5
-        )
-
         detections = np.zeros((20, 6), np.float32)
-
-        for i in range(len(result_boxes)):
-            if i >= 20:
-                break
-
-            index = result_boxes[i]
-            detections[i] = [
-                classes[index],
-                scores[index],
-                (boxes[index][1]) / self.height,
-                (boxes[index][0]) / self.width,
-                (boxes[index][1] + boxes[index][3]) / self.height,
-                (boxes[index][0] + boxes[index][2]) / self.width,
-            ]
+        detections[:num_detections, 0] = classes
+        detections[:num_detections, 1] = scores
+        detections[:num_detections, 2:] = boxes
 
         return detections
 
