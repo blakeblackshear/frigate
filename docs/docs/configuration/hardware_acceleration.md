@@ -13,8 +13,13 @@ Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config
 **NOTICE**: If you are using the addon, you may need to turn off `Protection mode` for hardware acceleration.
 
 ```yaml
+# if you want to decode a h264 stream
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
+
+# if you want to decode a h265 (hevc) stream
+ffmpeg:
+  hwaccel_args: preset-rpi-64-h265
 ```
 
 :::note
