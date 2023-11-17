@@ -31,13 +31,12 @@ def remove_empty_directories(directory: str) -> None:
 def sync_recordings(limited: bool) -> None:
     """Check the db for stale recordings entries that don't exist in the filesystem."""
 
-    def delete_db_entries_without_file(files_on_disk: list[str]) -> bool:
+    def delete_db_entries_without_file(check_timestamp: float) -> bool:
         """Delete db entries where file was deleted outside of frigate."""
 
         if limited:
             recordings = Recordings.select(Recordings.id, Recordings.path).where(
-                Recordings.start_time
-                >= (datetime.datetime.now() - datetime.timedelta(hours=36)).timestamp()
+                Recordings.start_time >= check_timestamp
             )
         else:
             # get all recordings in the db
@@ -50,7 +49,7 @@ def sync_recordings(limited: bool) -> None:
 
         for page in range(num_pages):
             for recording in recordings.paginate(page, page_size):
-                if recording.path not in files_on_disk:
+                if not os.path.exists(recording.path):
                     recordings_to_delete.add(recording.id)
 
         # convert back to list of dictionaries for insertion
@@ -106,27 +105,31 @@ def sync_recordings(limited: bool) -> None:
 
     logger.debug("Start sync recordings.")
 
-    if limited:
-        # get recording files from last 36 hours
-        hour_check = f"{RECORD_DIR}/{(datetime.datetime.now().astimezone(datetime.timezone.utc) - datetime.timedelta(hours=36)).strftime('%Y-%m-%d/%H')}"
-        files_on_disk = {
-            os.path.join(root, file)
-            for root, _, files in os.walk(RECORD_DIR)
-            for file in files
-            if root > hour_check
-        }
-    else:
-        # get all recordings files on disk and put them in a set
-        files_on_disk = {
-            os.path.join(root, file)
-            for root, _, files in os.walk(RECORD_DIR)
-            for file in files
-        }
-
-    db_success = delete_db_entries_without_file(files_on_disk)
+    # start checking on the hour 36 hours ago
+    check_point = datetime.datetime.now().replace(
+        minute=0, second=0, microsecond=0
+    ).astimezone(datetime.timezone.utc) - datetime.timedelta(hours=36)
+    db_success = delete_db_entries_without_file(check_point.timestamp())
 
     # only try to cleanup files if db cleanup was successful
     if db_success:
-        delete_files_without_db_entry(files_on_disk)
+        if limited:
+            # get recording files from last 36 hours
+            hour_check = f"{RECORD_DIR}/{check_point.strftime('%Y-%m-%d/%H')}"
+            files_on_disk = {
+                os.path.join(root, file)
+                for root, _, files in os.walk(RECORD_DIR)
+                for file in files
+                if root > hour_check
+            }
+        else:
+            # get all recordings files on disk and put them in a set
+            files_on_disk = {
+                os.path.join(root, file)
+                for root, _, files in os.walk(RECORD_DIR)
+                for file in files
+            }
+
+            delete_files_without_db_entry(files_on_disk)
 
     logger.debug("End sync recordings.")
