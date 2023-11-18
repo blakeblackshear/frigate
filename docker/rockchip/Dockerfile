@@ -9,11 +9,6 @@ COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN sed -i "/https:\/\//d" /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
 
-FROM wget as rk-downloads
-RUN wget -qO librknnrt.so https://github.com/MarcA711/rknpu2/raw/master/runtime/RK3588/Linux/librknn_api/aarch64/librknnrt.so
-RUN wget -qO ffmpeg https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/latest/ffmpeg
-RUN wget -qO ffprobe https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/latest/ffprobe
-RUN wget -qO yolov8n-320x320.rknn https://github.com/MarcA711/rknn-models/releases/download/latest/yolov8n-320x320.rknn
 FROM deps AS rk-deps
 ARG TARGETARCH
 
@@ -22,12 +17,16 @@ RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
-COPY --from=rk-downloads /rootfs/librknnrt.so /usr/lib/
-COPY --from=rk-downloads /rootfs/yolov8n-320x320.rknn /models/
+
+ADD https://github.com/MarcA711/rknpu2/releases/download/v1.5.2/librknnrt_rk356x.so /usr/lib/
+ADD https://github.com/MarcA711/rknpu2/releases/download/v1.5.2/librknnrt_rk3588.so /usr/lib/
+
+ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3562/yolov8n-320x320-rk3562.rknn /models/rknn/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3566/yolov8n-320x320-rk3566.rknn /models/rknn/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3568/yolov8n-320x320-rk3568.rknn /models/rknn/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3588/yolov8n-320x320-rk3588.rknn /models/rknn/
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
-COPY --from=rk-downloads /rootfs/ffmpeg /usr/lib/btbn-ffmpeg/bin/
-COPY --from=rk-downloads /rootfs/ffprobe /usr/lib/btbn-ffmpeg/bin/
-RUN chmod +x /usr/lib/btbn-ffmpeg/bin/ffmpeg
-RUN chmod +x /usr/lib/btbn-ffmpeg/bin/ffprobe
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/latest/ffmpeg /usr/lib/btbn-ffmpeg/bin/
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/latest/ffprobe /usr/lib/btbn-ffmpeg/bin/
