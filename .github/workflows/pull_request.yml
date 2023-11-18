@@ -72,13 +72,10 @@ jobs:
         run: |
           python3 -m pip install -U pip
           python3 -m pip install -r docker/main/requirements-dev.txt
-      - name: Check black
+      - name: Check formatting
         run: |
-          black --check --diff frigate migrations docker *.py
-      - name: Check isort
-        run: |
-          isort --check --diff frigate migrations docker *.py
-      - name: Check ruff
+          ruff format --check --diff frigate migrations docker *.py
+      - name: Check lint
         run: |
           ruff check frigate migrations docker *.py
 

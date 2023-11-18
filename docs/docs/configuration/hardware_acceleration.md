@@ -3,6 +3,8 @@ id: hardware_acceleration
 title: Hardware Acceleration
 ---
 
+# Hardware Acceleration
+
 It is recommended to update your configuration to enable hardware accelerated decoding in ffmpeg. Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
 # Officially Supported
@@ -28,10 +30,10 @@ If running Frigate in docker, you either need to run in priviliged mode or be su
 
 ```yaml
 docker run -d \
-  --name frigate \
-  ...
-  --device /dev/video10 \
-  ghcr.io/blakeblackshear/frigate:stable
+--name frigate \
+...
+--device /dev/video10 \
+ghcr.io/blakeblackshear/frigate:stable
 ```
 
 :::
@@ -251,7 +253,7 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 
 # Community Supported
 
-## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
+## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano\*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
 
 A separate set of docker images is available that is based on Jetpack/L4T. They comes with an `ffmpeg` build
 with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 4.6, use the

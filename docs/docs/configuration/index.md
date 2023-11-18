@@ -25,22 +25,9 @@ cameras:
 
 VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
 
-### Full configuration reference
+### Environment Variable Substitution
 
-:::caution
-
-It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
-
-:::
-
-**Note:** The following values will be replaced at runtime by using environment variables
-
-- `{FRIGATE_MQTT_USER}`
-- `{FRIGATE_MQTT_PASSWORD}`
-- `{FRIGATE_RTSP_USER}`
-- `{FRIGATE_RTSP_PASSWORD}`
-
-for example:
+Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the configuration reference below. For example, the following values can be replaced at runtime by using environment variables:
 
 ```yaml
 mqtt:
@@ -59,6 +46,14 @@ onvif:
   user: "{FRIGATE_RTSP_USER}"
   password: "{FRIGATE_RTSP_PASSWORD}"
 ```
+
+### Full configuration reference:
+
+:::caution
+
+It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
+
+:::
 
 ```yaml
 mqtt:

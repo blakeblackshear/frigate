@@ -1,5 +1,3 @@
-[tool.isort]
-profile = "black"
-
 [tool.ruff]
 ignore = ["E501","E711","E712"]
+extend-select = ["I"]

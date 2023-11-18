@@ -1,0 +1,7 @@
+[build]
+  base = "docs/"
+  publish = "build"
+  command = "npm run build"
+  environment = { NODE_VERSION = "20" }
+
+

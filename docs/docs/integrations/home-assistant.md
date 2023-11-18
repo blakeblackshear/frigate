@@ -177,7 +177,7 @@ The Frigate integration seamlessly supports the use of multiple Frigate servers.
 In order for multiple Frigate instances to function correctly, the
 `topic_prefix` and `client_id` parameters must be set differently per server.
 See [MQTT
-configuration](mqtt.md)
+configuration](mqtt)
 for how to set these.
 
 #### API URLs

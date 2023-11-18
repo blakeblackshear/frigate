@@ -14,13 +14,14 @@ services:
       dockerfile: docker/main/Dockerfile
       # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
-    deploy:
-          resources:
-              reservations:
-                  devices:
-                      - driver: nvidia
-                        count: 1
-                        capabilities: [gpu]
+    ## Uncomment this block for nvidia gpu support
+    # deploy:
+    #       resources:
+    #           reservations:
+    #               devices:
+    #                   - driver: nvidia
+    #                     count: 1
+    #                     capabilities: [gpu]
     environment:
       YOLO_MODELS: yolov7-320
     devices:

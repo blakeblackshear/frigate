@@ -225,12 +225,8 @@ class RecordingMaintainer(threading.Thread):
 
         # if cached file's start_time is earlier than the retain days for the camera
         if start_time <= (
-            (
-                datetime.datetime.now().astimezone(datetime.timezone.utc)
-                - datetime.timedelta(
-                    days=self.config.cameras[camera].record.retain.days
-                )
-            )
+            datetime.datetime.now().astimezone(datetime.timezone.utc)
+            - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
         ):
             # if the cached segment overlaps with the events:
             overlaps = False
