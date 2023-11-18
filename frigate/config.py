@@ -19,6 +19,7 @@ from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
     DEFAULT_DB_PATH,
+    MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
@@ -232,7 +233,9 @@ class RetainConfig(FrigateBaseModel):
 
 
 class EventsConfig(FrigateBaseModel):
-    pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
+    pre_capture: int = Field(
+        default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
+    )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
         default_factory=list,
