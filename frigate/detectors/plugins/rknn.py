@@ -62,10 +62,11 @@ class Rknn(DetectionApi):
                 )
             )
 
-        if "rk356" in soc:
-            os.rename("/usr/lib/librknnrt_rk356x.so", "/usr/lib/librknnrt.so")
-        elif "rk3588" in soc:
-            os.rename("/usr/lib/librknnrt_rk3588.so", "/usr/lib/librknnrt.so")
+        if not os.path.isfile("/usr/lib/librknnrt.so"):
+            if "rk356" in soc:
+                os.rename("/usr/lib/librknnrt_rk356x.so", "/usr/lib/librknnrt.so")
+            elif "rk3588" in soc:
+                os.rename("/usr/lib/librknnrt_rk3588.so", "/usr/lib/librknnrt.so")
 
         self.model_path = config.model.path or "default-yolov8n"
         self.core_mask = config.core_mask
