@@ -88,7 +88,7 @@ Frigate requires a valid config file to start. The following directory structure
 This will create the above structure:
 
 ```bash
-mkdir storage config && touch docker-compose.yml && touch config/config.yml
+mkdir storage config && touch docker-compose.yml config/config.yml
 ```
 
 :::note
