@@ -379,7 +379,7 @@ model:
 
 :::tip
 
-When you have a multicore NPU, you can enable all cores to reduce inference times. You should consider activating all cores if you use a larger model like yolov8l. If your NPU has 3 cores (like rk3588/S SoCs), you can enable all 3 using:
+When you have a multicore NPU, you can enable all cores to reduce inference times. You should consider activating all cores if you use a larger model like yolov8l. If your NPU has 3 cores (like rk3588/S SoCs), you can enable all 3 cores using:
 
 ```yaml
 detectors:
