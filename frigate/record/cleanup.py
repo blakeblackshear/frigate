@@ -176,10 +176,9 @@ class RecordingCleanup(threading.Thread):
 
     def run(self) -> None:
         # on startup sync recordings with disk if enabled
-        if self.config.record.sync_on_startup:
+        if self.config.record.sync_recordings:
             sync_recordings(limited=False)
-
-        next_sync = get_tomorrow_at_time(3)
+            next_sync = get_tomorrow_at_time(3)
 
         # Expire tmp clips every minute, recordings and clean directories every hour.
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
@@ -189,7 +188,11 @@ class RecordingCleanup(threading.Thread):
 
             self.clean_tmp_clips()
 
-            if datetime.datetime.now().astimezone(datetime.timezone.utc) > next_sync:
+            if (
+                self.config.record.sync_recordings
+                and datetime.datetime.now().astimezone(datetime.timezone.utc)
+                > next_sync
+            ):
                 sync_recordings(limited=True)
                 next_sync = get_tomorrow_at_time(3)
 

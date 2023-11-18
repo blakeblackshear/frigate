@@ -259,8 +259,8 @@ class RecordExportConfig(FrigateBaseModel):
 
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
-    sync_on_startup: bool = Field(
-        default=False, title="Sync recordings with disk on startup."
+    sync_recordings: bool = Field(
+        default=False, title="Sync recordings with disk on startup and once a day."
     )
     expire_interval: int = Field(
         default=60,
