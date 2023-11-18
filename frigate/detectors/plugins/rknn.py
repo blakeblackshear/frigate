@@ -32,6 +32,7 @@ yolov8_suffix = {
     "default-yolov8x": "x",
 }
 
+
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     core_mask: int = Field(default=0, ge=0, le=7, title="Core mask for NPU.")
@@ -44,7 +45,7 @@ class Rknn(DetectionApi):
         # find out SoC
         try:
             with open("/proc/device-tree/compatible") as file:
-                soc = file.read().split(",")[-1].strip('\x00')
+                soc = file.read().split(",")[-1].strip("\x00")
         except FileNotFoundError:
             logger.error("Make sure to run docker in privileged mode.")
             raise Exception("Make sure to run docker in privileged mode.")
@@ -60,12 +61,12 @@ class Rknn(DetectionApi):
                     soc, supported_socs
                 )
             )
-        
+
         if "rk356" in soc:
             os.rename("/usr/lib/librknnrt_rk356x.so", "/usr/lib/librknnrt.so")
         elif "rk3588" in soc:
             os.rename("/usr/lib/librknnrt_rk3588.so", "/usr/lib/librknnrt.so")
-        
+
         self.model_path = config.model.path or "default-yolov8n"
         self.core_mask = config.core_mask
         self.height = config.model.height
@@ -73,7 +74,9 @@ class Rknn(DetectionApi):
 
         if self.model_path in yolov8_suffix:
             if self.model_path == "default-yolov8n":
-                self.model_path = "/models/rknn/yolov8n-320x320-{soc}.rknn".format(soc=soc)
+                self.model_path = "/models/rknn/yolov8n-320x320-{soc}.rknn".format(
+                    soc=soc
+                )
             else:
                 model_suffix = yolov8_suffix[self.model_path]
                 self.model_path = (
