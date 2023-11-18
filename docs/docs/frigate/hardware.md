@@ -103,7 +103,7 @@ Frigate supports SBCs with the following Rockchip SoCs:
 - RV1103/RV1106
 - RK3562
 
-Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 25-40 ms.
+Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 20 - 25 ms.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

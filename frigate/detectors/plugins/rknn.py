@@ -24,14 +24,13 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3588"]
 
-yolov8_rknn_models = {
+yolov8_suffix = {
     "default-yolov8n": "n",
     "default-yolov8s": "s",
     "default-yolov8m": "m",
     "default-yolov8l": "l",
     "default-yolov8x": "x",
 }
-
 
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -45,9 +44,7 @@ class Rknn(DetectionApi):
         # find out SoC
         try:
             with open("/proc/device-tree/compatible") as file:
-                device_string = file.read()
-                device_string_parts = device_string.split(",")
-                soc = device_string_parts[-1]
+                soc = file.read().split(",")[-1].strip('\x00')
         except FileNotFoundError:
             logger.error("Make sure to run docker in privileged mode.")
             raise Exception("Make sure to run docker in privileged mode.")
@@ -63,17 +60,22 @@ class Rknn(DetectionApi):
                     soc, supported_socs
                 )
             )
-
+        
+        if "rk356" in soc:
+            os.rename("/usr/lib/librknnrt_rk356x.so", "/usr/lib/librknnrt.so")
+        elif "rk3588" in soc:
+            os.rename("/usr/lib/librknnrt_rk3588.so", "/usr/lib/librknnrt.so")
+        
         self.model_path = config.model.path or "default-yolov8n"
         self.core_mask = config.core_mask
         self.height = config.model.height
         self.width = config.model.width
 
-        if self.model_path in yolov8_rknn_models:
+        if self.model_path in yolov8_suffix:
             if self.model_path == "default-yolov8n":
-                self.model_path = "/models/yolov8n-320x320-{soc}.rknn".format(soc=soc)
+                self.model_path = "/models/rknn/yolov8n-320x320-{soc}.rknn".format(soc=soc)
             else:
-                model_suffix = yolov8_rknn_models[self.model_path]
+                model_suffix = yolov8_suffix[self.model_path]
                 self.model_path = (
                     "/config/model_cache/rknn/yolov8{suffix}-320x320-{soc}.rknn".format(
                         suffix=model_suffix, soc=soc
@@ -166,10 +168,10 @@ class Rknn(DetectionApi):
         boxes = np.transpose(
             np.vstack(
                 (
-                    results[:, 1] - 0.5 * results[:, 3],
-                    results[:, 0] - 0.5 * results[:, 2],
-                    results[:, 3] + 0.5 * results[:, 3],
-                    results[:, 2] + 0.5 * results[:, 2],
+                    (results[:, 1] - 0.5 * results[:, 3]) / self.height,
+                    (results[:, 0] - 0.5 * results[:, 2]) / self.width,
+                    (results[:, 1] + 0.5 * results[:, 3]) / self.height,
+                    (results[:, 0] + 0.5 * results[:, 2]) / self.width,
                 )
             )
         )
