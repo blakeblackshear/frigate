@@ -7,20 +7,61 @@ title: Getting started
 
 ## Setting up hardware
 
-This section guides you through setting up a server with Debian Bullseye and Docker If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+This section guides you through setting up a server with Debian Bookworm and Docker. If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
 ### Install Debian 12 (Bookworm)
 
-There are many guides on how to install Debian Server, so this will be an abbreviated guide.
+There are many guides on how to install Debian Server, so this will be an abbreviated guide. Connect a temporary monitor and keyboard to your device so you can install a minimal server without a desktop environment.
+
+#### Prepare installation media
 
 1. Download the small installation image from the [Debian website](https://www.debian.org/distrib/netinst)
 1. Flash the ISO to a USB device
 1. Boot your device from USB
-1. Install the minimum
-   1. SSH server
-1. Login as root to add user to sudoers
-1. Log back into the server with your non-root user
-1. Setup automatic security updates for the OS
+
+#### Install and setup Debian for remote access
+
+1. You will be prompted to set the root user password and create a user with a password
+1. Install the minimum software. Fewer dependencies result in less maintenance.
+   1. Uncheck "Debian desktop environment" and "GNOME"
+   1. Check "SSH server"
+   1. Keep "standard system utilities" checked
+1. After reboot, login as root at the command prompt to add user to sudoers
+   1. Install sudo
+      ```bash
+      apt update && apt install -y sudo
+      ```
+   1. Add the user you created to the sudo group (change `blake` to your own user)
+      ```bash
+      usermod -aG sudo blake
+      ```
+1. Shutdown by running `poweroff`
+
+At this point, you can install the device in a permanent location. The remaining steps can be performed via SSH.
+
+#### Finish setup via SSH
+
+1. Connect via SSH and login with your non-root user
+1. Setup passwordless sudo so you don't have to type your password for each sudo command
+
+   ```bash
+   echo 'blake    ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/user
+   ```
+
+1. Logout and login again to activate passwordless sudo
+1. Setup automatic security updates for the OS (optional)
+   1. Ensure everything is up to date by running
+      ```bash
+      sudo apt update && sudo apt upgrade -y
+      ```
+   1. Install unattended upgrades
+      ```bash
+      sudo apt install -y unattended-upgrades
+      echo unattended-upgrades unattended-upgrades/enable_auto_updates boolean true | sudo debconf-set-selections
+      sudo dpkg-reconfigure -f noninteractive unattended-upgrades
+      ```
+
+Now you have a minimal Debian server that requires very little maintenance.
 
 ### Install Docker
 
@@ -30,9 +71,11 @@ There are many guides on how to install Debian Server, so this will be an abbrev
 
 ## Installing Frigate
 
+This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant addon or another way, you can continue to [Configuring Frigate](#configuring-frigate).
+
 ### Setup directories
 
-Frigate requires a valid config file to start. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor with validation.
+Frigate requires a valid config file to start. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
 
 ```
 .
@@ -40,6 +83,12 @@ Frigate requires a valid config file to start. The following directory structure
 ├── config/
 │   └── config.yml
 └── storage/
+```
+
+This will create the above structure:
+
+```bash
+mkdir storage config && touch docker-compose.yml && touch config/config.yml
 ```
 
 :::note
