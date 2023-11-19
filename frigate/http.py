@@ -800,7 +800,7 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.02) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
+                    fontScale=draw_font_scale,
                     color=draw_color,
                     thickness=2,
                 )
@@ -812,7 +812,7 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.05) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
+                    fontScale=draw_font_scale,
                     color=draw_color,
                     thickness=2,
                 )
@@ -824,7 +824,7 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.08) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
+                    fontScale=draw_font_scale,
                     color=draw_color,
                     thickness=2,
                 )
