@@ -755,6 +755,20 @@ def grid_snapshot(camera_name):
                 500,
             )
 
+        color_arg = request.args.get("color", default="", type=str).lower()
+        draw_font_scale = request.args.get("font_scale", default=0.5, type=float)
+
+        if color_arg == "red":
+            draw_color = (0, 0, 255)
+        elif color_arg == "blue":
+            draw_color = (255, 0, 0)
+        elif color_arg == "black":
+            draw_color = (0, 0, 0)
+        elif color_arg == "white":
+            draw_color = (255, 255, 255)
+        else:
+            draw_color = (0, 255, 0)
+
         grid_size = len(grid)
         grid_coef = 1.0 / grid_size
         width = detect.width
@@ -775,7 +789,7 @@ def grid_snapshot(camera_name):
                         int((x + 1) * grid_coef * width),
                         int((y + 1) * grid_coef * height),
                     ),
-                    (0, 255, 0),
+                    draw_color,
                     2,
                 )
                 cv2.putText(
@@ -786,8 +800,8 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.02) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
-                    color=(0, 255, 0),
+                    fontScale=draw_font_scale,
+                    color=draw_color,
                     thickness=2,
                 )
                 cv2.putText(
@@ -798,8 +812,8 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.05) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
-                    color=(0, 255, 0),
+                    fontScale=draw_font_scale,
+                    color=draw_color,
                     thickness=2,
                 )
                 cv2.putText(
@@ -810,8 +824,8 @@ def grid_snapshot(camera_name):
                         int((y * grid_coef + 0.08) * height),
                     ),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    fontScale=0.5,
-                    color=(0, 255, 0),
+                    fontScale=draw_font_scale,
+                    color=draw_color,
                     thickness=2,
                 )
 
