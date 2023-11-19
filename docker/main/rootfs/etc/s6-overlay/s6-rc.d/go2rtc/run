@@ -45,8 +45,12 @@ function get_ip_and_port_from_supervisor() {
 
 export LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po 'libavformat\W+\K\d+')
 
+if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
+    echo "[INFO] Removing stale config from last run..."
+    rm /dev/shm/go2rtc.yaml
+
 if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
-    echo "[INFO] Preparing go2rtc config..."
+    echo "[INFO] Preparing new go2rtc config..."
 
     if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
         # Running as a Home Assistant add-on, infer the IP address and port
@@ -54,6 +58,8 @@ if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
     fi
 
     python3 /usr/local/go2rtc/create_config.py
+else
+    echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
 fi
 
 readonly config_path="/config"
