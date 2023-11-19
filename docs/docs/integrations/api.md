@@ -267,6 +267,11 @@ Returns the snapshot image from the specific point in that cameras recordings.
 
 Returns the latest camera image with the regions grid overlaid.
 
+| param        | Type  | Description                                                                                |
+| ------------ | ----- | ------------------------------------------------------------------------------------------ |
+| `color`      | str   | The color of the grid (red,green,blue,black,white). Defaults to "green".                   |
+| `font_scale` | float | Font scale. Can be used to increase font size on high resolution cameras. Defaults to 0.5. |
+
 ### `GET /clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
