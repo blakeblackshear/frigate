@@ -4,10 +4,10 @@ import glob
 import json
 import logging
 import os
+import re
 import subprocess as sp
 import time
 import traceback
-import re
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
