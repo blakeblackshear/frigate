@@ -1956,15 +1956,14 @@ def export_recording(camera_name: str, start_time, end_time):
 
 
 def export_filename_check_extension(filename: str):
-    filename_split = os.path.splitext(filename)
-    if filename_split[1] == ".mp4":
+    if filename.endswith(".mp4"):
         return filename
     else:
         return filename + ".mp4"
 
 
 def export_filename_is_valid(filename: str):
-    if re.search(r'[^.:_A-Za-z0-9]', filename) or filename.startswith('in_progress.'):
+    if re.search(r"[^:_A-Za-z0-9]", filename) or filename.startswith("in_progress."):
         return False
     else:
         return True
@@ -1972,7 +1971,9 @@ def export_filename_is_valid(filename: str):
 
 @bp.route("/export/<file_name_current>/<file_name_new>", methods=["PATCH"])
 def export_rename(file_name_current, file_name_new: str):
-    safe_file_name_current = secure_filename(export_filename_check_extension(file_name_current))
+    safe_file_name_current = secure_filename(
+        export_filename_check_extension(file_name_current)
+    )
     file_current = os.path.join(EXPORT_DIR, safe_file_name_current)
 
     if not os.path.exists(file_current):
@@ -1983,10 +1984,15 @@ def export_rename(file_name_current, file_name_new: str):
 
     if not export_filename_is_valid(file_name_new):
         return make_response(
-            jsonify({"success": False, "message": f"{file_name_new} contains illegal characters."}),
+            jsonify(
+                {
+                    "success": False, 
+                    "message": f"{file_name_new} contains illegal characters.",
+                }
+            ),
             400,
         )
-    
+
     safe_file_name_new = secure_filename(export_filename_check_extension(file_name_new))
     file_new = os.path.join(EXPORT_DIR, safe_file_name_new)
 
