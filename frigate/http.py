@@ -1986,7 +1986,7 @@ def export_rename(file_name_current, file_name_new: str):
         return make_response(
             jsonify(
                 {
-                    "success": False, 
+                    "success": False,
                     "message": f"{file_name_new} contains illegal characters.",
                 }
             ),
