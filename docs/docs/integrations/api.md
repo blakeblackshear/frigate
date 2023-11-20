@@ -302,6 +302,14 @@ It is also possible to export this recording as a timelapse.
 }
 ```
 
+### `DELETE /api/export/<export_name>`
+
+Delete an export from disk.
+
+### `PATCH /api/export/<export_name_current>/<export_name_new>`
+
+Renames an export.
+
 ### `GET /api/<camera_name>/recordings/summary`
 
 Hourly summary of recordings data for a camera.
