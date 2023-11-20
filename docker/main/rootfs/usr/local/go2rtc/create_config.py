@@ -118,7 +118,7 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
 if go2rtc_config.get("ffmpeg") is None:
     go2rtc_config["ffmpeg"] = {
         "h264/rk": "-c:v h264_rkmpp_encoder -g 50 -bf 0",
-        "h265/rk": "-c:v hevc_rkmpp_encoder -g 50 -bf 0"
+        "h265/rk": "-c:v hevc_rkmpp_encoder -g 50 -bf 0",
     }
 else:
     if go2rtc_config["ffmpeg"].get("h264/rk") is None:
