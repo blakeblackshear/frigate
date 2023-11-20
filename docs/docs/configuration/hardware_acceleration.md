@@ -354,3 +354,29 @@ ffmpeg:
 Make sure that your SoC supports hardware acceleration for your input stream. For example, if your camera streams with h265 encoding and a 4k resolution, your SoC must be able to de- and encode h265 with a 4k resolution or higher. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
 
 :::
+
+### go2rtc presets for hardware accelerated transcoding
+
+If your input stream is to be transcoded using hardware acceleration, there are these presets for go2rtc: `h264/rk` and `h265/rk`. You can use them this way:
+
+```
+go2rtc:
+  streams:
+    Cam_h264: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h264/rk
+    Cam_h265: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h265/rk
+```
+
+:::warning
+
+The go2rtc docs may suggest the following configuration:
+
+```
+go2rtc:
+  streams:
+    Cam_h264: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h264#hardware=rk
+    Cam_h265: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h265#hardware=rk
+```
+
+However, this does not currently work.
+
+:::
