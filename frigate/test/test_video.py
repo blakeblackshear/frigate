@@ -5,7 +5,7 @@ import numpy as np
 from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 
-from frigate.util.image import intersection
+from frigate.util.image import intersection, transliterate_to_latin
 from frigate.util.object import (
     get_cluster_boundary,
     get_cluster_candidates,
@@ -81,6 +81,11 @@ class TestRegion(unittest.TestCase):
         # save_clusters_image("cluster_candidates", boxes, cluster_candidates)
 
         assert len(cluster_candidates) == 2
+
+    def test_transliterate_to_latin(self):
+        self.assertEqual(transliterate_to_latin("frégate"), "fregate")
+        self.assertEqual(transliterate_to_latin("utilité"), "utilite")
+        self.assertEqual(transliterate_to_latin("imágé"), "image")
 
     def test_cluster_boundary(self):
         boxes = [(100, 100, 200, 200), (215, 215, 325, 325)]
