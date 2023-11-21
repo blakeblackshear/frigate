@@ -4,6 +4,7 @@ import glob
 import json
 import logging
 import os
+import re
 import subprocess as sp
 import time
 import traceback
@@ -1954,9 +1955,68 @@ def export_recording(camera_name: str, start_time, end_time):
     )
 
 
+def export_filename_check_extension(filename: str):
+    if filename.endswith(".mp4"):
+        return filename
+    else:
+        return filename + ".mp4"
+
+
+def export_filename_is_valid(filename: str):
+    if re.search(r"[^:_A-Za-z0-9]", filename) or filename.startswith("in_progress."):
+        return False
+    else:
+        return True
+
+
+@bp.route("/export/<file_name_current>/<file_name_new>", methods=["PATCH"])
+def export_rename(file_name_current, file_name_new: str):
+    safe_file_name_current = secure_filename(
+        export_filename_check_extension(file_name_current)
+    )
+    file_current = os.path.join(EXPORT_DIR, safe_file_name_current)
+
+    if not os.path.exists(file_current):
+        return make_response(
+            jsonify({"success": False, "message": f"{file_name_current} not found."}),
+            404,
+        )
+
+    if not export_filename_is_valid(file_name_new):
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"{file_name_new} contains illegal characters.",
+                }
+            ),
+            400,
+        )
+
+    safe_file_name_new = secure_filename(export_filename_check_extension(file_name_new))
+    file_new = os.path.join(EXPORT_DIR, safe_file_name_new)
+
+    if os.path.exists(file_new):
+        return make_response(
+            jsonify({"success": False, "message": f"{file_name_new} already exists."}),
+            400,
+        )
+
+    os.rename(file_current, file_new)
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Successfully renamed file.",
+            }
+        ),
+        200,
+    )
+
+
 @bp.route("/export/<file_name>", methods=["DELETE"])
 def export_delete(file_name: str):
-    safe_file_name = secure_filename(file_name)
+    safe_file_name = secure_filename(export_filename_check_extension(file_name))
     file = os.path.join(EXPORT_DIR, safe_file_name)
 
     if not os.path.exists(file):
