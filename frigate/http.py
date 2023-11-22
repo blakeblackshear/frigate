@@ -1753,7 +1753,7 @@ def recording_clip(camera_name, start_ts, end_ts):
     response.headers["Content-Length"] = os.path.getsize(path)
     response.headers[
         "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+    ] = f"/cache/{file_name}"  # nginx: https://www.nginx.com/resources/wiki/start/topics/examples/xsendfile/
 
     return response
 
