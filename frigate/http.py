@@ -62,7 +62,10 @@ logger = logging.getLogger(__name__)
 DEFAULT_TIME_RANGE = "00:00,24:00"
 
 bp = Blueprint("frigate", __name__)
-
+def clear_message():
+    # Your code to clear the message goes here
+    # This could involve updating a variable, hiding in a GUI, or clearing the console
+    return jsonify({"success": True, "message": ""}), 200
 
 def create_app(
     frigate_config,
@@ -1212,7 +1215,6 @@ def config_save():
             400,
         )
 
-    # Validate the config schema
     try:
         FrigateConfig.parse_raw(new_config)
     except Exception:
@@ -1226,11 +1228,10 @@ def config_save():
             400,
         )
 
-    # Save the config to file
+
     try:
         config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
-        # Check if we can use .yaml instead of .yml
         config_file_yaml = config_file.replace(".yml", ".yaml")
 
         if os.path.isfile(config_file_yaml):
@@ -1238,7 +1239,6 @@ def config_save():
 
         with open(config_file, "w") as f:
             f.write(new_config)
-            f.close()
     except Exception:
         return make_response(
             jsonify(
@@ -1255,6 +1255,7 @@ def config_save():
             restart_frigate()
         except Exception as e:
             logging.error(f"Error restarting Frigate: {e}")
+            clear_message() 
             return make_response(
                 jsonify(
                     {
@@ -1265,21 +1266,24 @@ def config_save():
                 200,
             )
 
+        timer = 60
+        clear_message() 
         return make_response(
             jsonify(
                 {
                     "success": True,
-                    "message": "Config successfully saved, restarting (this can take up to one minute)...",
+                    "message": f"Config successfully saved, restarting (this can take up to {timer} seconds)...",
                 }
             ),
             200,
         )
     else:
+
+        timer = 5
         return make_response(
-            jsonify({"success": True, "message": "Config successfully saved."}),
+            jsonify({"success": True, "message": f"Config successfully saved. Message will clear in {timer} seconds."}),
             200,
         )
-
 
 @bp.route("/config/set", methods=["PUT"])
 def config_set():
