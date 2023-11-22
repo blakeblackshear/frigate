@@ -876,7 +876,7 @@ def event_clip(id):
     response.headers["Content-Length"] = os.path.getsize(clip_path)
     response.headers[
         "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: http://wiki.nginx.org/NginxXSendfile
+    ] = f"/clips/{file_name}"  # nginx: https://www.nginx.com/resources/wiki/start/topics/examples/xsendfile/
 
     return response
 
