@@ -10,6 +10,7 @@ from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Tuple
+from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
 import pytz
@@ -266,7 +267,16 @@ def find_by_key(dictionary, target_key):
 
 def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
-    tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
+    try:
+        tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
+    except ZoneInfoNotFoundError:
+        tomorrow = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+            days=1
+        )
+        logger.warning(
+            "Using utc for maintenance due to missing or incorrect timezone set"
+        )
+
     return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
         datetime.timezone.utc
     )
