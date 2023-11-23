@@ -16,11 +16,13 @@ There are many guides on how to install Debian Server, so this will be an abbrev
 #### Prepare installation media
 
 1. Download the small installation image from the [Debian website](https://www.debian.org/distrib/netinst)
-1. Flash the ISO to a USB device
+1. Flash the ISO to a USB device (popular tool is [balena Etcher](https://etcher.balena.io/))
 1. Boot your device from USB
 
 #### Install and setup Debian for remote access
 
+1. Ensure your device is connected to the network so updates and software options can be installed
+1. Choose the non-graphical install option if you don't have a mouse connected, but either install method works fine
 1. You will be prompted to set the root user password and create a user with a password
 1. Install the minimum software. Fewer dependencies result in less maintenance.
    1. Uncheck "Debian desktop environment" and "GNOME"
@@ -37,12 +39,12 @@ There are many guides on how to install Debian Server, so this will be an abbrev
       ```
 1. Shutdown by running `poweroff`
 
-At this point, you can install the device in a permanent location. The remaining steps can be performed via SSH.
+At this point, you can install the device in a permanent location. The remaining steps can be performed via SSH from another device. If you don't have an SSH client, you can install one of the options listed in the [Visual Studio Code documentation](https://code.visualstudio.com/docs/remote/troubleshooting#_installing-a-supported-ssh-client).
 
 #### Finish setup via SSH
 
-1. Connect via SSH and login with your non-root user
-1. Setup passwordless sudo so you don't have to type your password for each sudo command
+1. Connect via SSH and login with your non-root user created during install
+1. Setup passwordless sudo so you don't have to type your password for each sudo command (change `blake` in the command below to your user)
 
    ```bash
    echo 'blake    ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/user
@@ -90,6 +92,8 @@ This will create the above structure:
 ```bash
 mkdir storage config && touch docker-compose.yml config/config.yml
 ```
+
+If you are setting up Frigate on a Linux device via SSH, you can use [nano](https://itsfoss.com/nano-editor-guide/) to edit the following files. If you prefer to edit remote files with a full editor instead of a terminal, I recommend using [Visual Studio Code](https://code.visualstudio.com/) with the [Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh-tutorial).
 
 :::note
 
