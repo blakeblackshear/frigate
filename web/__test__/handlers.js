@@ -1,8 +1,8 @@
 import { rest } from 'msw';
-import { API_HOST } from '../src/env';
+// import { API_HOST } from '../src/env';
 
 export const handlers = [
-  rest.get(`${API_HOST}api/config`, (req, res, ctx) => {
+  rest.get(`api/config`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -37,7 +37,7 @@ export const handlers = [
       })
     );
   }),
-  rest.get(`${API_HOST}api/stats`, (req, res, ctx) => {
+  rest.get(`api/stats`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -58,7 +58,7 @@ export const handlers = [
       })
     );
   }),
-  rest.get(`${API_HOST}api/events`, (req, res, ctx) => {
+  rest.get(`api/events`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json(
@@ -77,13 +77,28 @@ export const handlers = [
       )
     );
   }),
-  rest.get(`${API_HOST}api/sub_labels`, (req, res, ctx) => {
+  rest.get(`api/sub_labels`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json([
         'one',
         'two',
       ])
+    );
+  }),
+  rest.get(`api/labels`, (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json([
+        'person',
+        'car',
+      ])
+    );
+  }),
+  rest.get(`api/go2rtc`, (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({"config_path":"/dev/shm/go2rtc.yaml","host":"frigate.yourdomain.local","rtsp":{"listen":"0.0.0.0:8554","default_query":"mp4","PacketSize":0},"version":"1.7.1"})
     );
   }),
 ];

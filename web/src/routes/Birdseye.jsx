@@ -26,16 +26,19 @@ export default function Birdseye() {
       .map(([_, camera]) => camera.name);
   }, [config]);
 
+  const [isMaxWidth, setIsMaxWidth] = usePersistence('birdseye-width', false);
+
   if (!config || !sourceIsLoaded) {
     return <ActivityIndicator />;
   }
 
   let player;
+  const playerClass = ptzCameras.length || isMaxWidth ? 'w-full' : 'max-w-5xl xl:w-1/2';
   if (viewSource == 'mse' && config.birdseye.restream) {
-    if ('MediaSource' in window) {
+    if ('MediaSource' in window || 'ManagedMediaSource' in window) {
       player = (
         <Fragment>
-          <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+          <div className={playerClass}>
             <video-stream
               mode="mse"
               src={new URL(`${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=birdseye`)}
@@ -47,15 +50,15 @@ export default function Birdseye() {
       player = (
         <Fragment>
           <div className="w-5xl text-center text-sm">
-            MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+            MSE is only supported on iOS 17.1+. You'll need to update if available or use jsmpeg / webRTC streams. See the docs for more info.
           </div>
         </Fragment>
       );
     }
-  } else if (viewSource == 'webrtc' && config.birdseye.restream) {
+  } else if (viewSource == 'webrtc') {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={playerClass}>
           <WebRtcPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -63,7 +66,7 @@ export default function Birdseye() {
   } else {
     player = (
       <Fragment>
-        <div className={ptzCameras.length ? 'max-w-5xl xl:w-1/2' : 'max-w-5xl'}>
+        <div className={playerClass}>
           <JSMpegPlayer camera="birdseye" />
         </div>
       </Fragment>
@@ -77,11 +80,21 @@ export default function Birdseye() {
           Birdseye
         </Heading>
 
+        {!ptzCameras.length && (
+          <button
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded hidden md:inline"
+            onClick={() => setIsMaxWidth(!isMaxWidth)}
+          >
+            Toggle width
+          </button>
+        )}
+
         {config.birdseye.restream && (
           <select
             className="basis-1/8 cursor-pointer rounded dark:bg-slate-800"
             value={viewSource}
             onChange={(e) => setViewSource(e.target.value)}
+            key="width-changer"
           >
             {sourceValues.map((item) => (
               <option key={item} value={item}>
@@ -93,7 +106,11 @@ export default function Birdseye() {
       </div>
 
       <div className="xl:flex justify-between">
-        {player}
+        <div className={playerClass}>
+          {' '}
+          {/* Use dynamic class */}
+          {player}
+        </div>
 
         {ptzCameras.length ? (
           <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow p-4 w-full sm:w-min xl:h-min xl:w-1/2">

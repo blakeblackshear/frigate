@@ -102,9 +102,8 @@ const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
       ...prev,
       selectedDay: todayTimestamp,
       monthDetails: getMonthDetails(year, month),
-      timeRange: { ...dateRange },
     }));
-  }, [year, month, getMonthDetails, dateRange]);
+  }, [year, month, getMonthDetails]);
 
   useEffect(() => {
     // add refs for keyboard navigation

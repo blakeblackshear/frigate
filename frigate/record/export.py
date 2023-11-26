@@ -6,6 +6,7 @@ import os
 import subprocess as sp
 import threading
 from enum import Enum
+from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
@@ -13,8 +14,16 @@ from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
+from frigate.models import Recordings
 
 logger = logging.getLogger(__name__)
+
+
+TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
+
+
+def lower_priority():
+    os.nice(10)
 
 
 class PlaybackFactorEnum(str, Enum):
@@ -42,7 +51,7 @@ class RecordingExporter(threading.Thread):
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         """Convenience fun to get a simple date time from timestamp."""
-        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%I:%M")
+        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%H_%M")
 
     def run(self) -> None:
         logger.debug(
@@ -58,13 +67,31 @@ class RecordingExporter(threading.Thread):
             )
         else:
             playlist_lines = []
-            playlist_start = self.start_time
 
-            while playlist_start < self.end_time:
-                playlist_lines.append(
-                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{playlist_start}/end/{min(playlist_start + MAX_PLAYLIST_SECONDS, self.end_time)}/index.m3u8'"
+            # get full set of recordings
+            export_recordings = (
+                Recordings.select()
+                .where(
+                    Recordings.start_time.between(self.start_time, self.end_time)
+                    | Recordings.end_time.between(self.start_time, self.end_time)
+                    | (
+                        (self.start_time > Recordings.start_time)
+                        & (self.end_time < Recordings.end_time)
+                    )
                 )
-                playlist_start += MAX_PLAYLIST_SECONDS
+                .where(Recordings.camera == self.camera)
+                .order_by(Recordings.start_time.asc())
+            )
+
+            # Use pagination to process records in chunks
+            page_size = 1000
+            num_pages = (export_recordings.count() + page_size - 1) // page_size
+
+            for page in range(1, num_pages + 1):
+                playlist = export_recordings.paginate(page, page_size)
+                playlist_lines.append(
+                    f"file 'http://127.0.0.1:5000/vod/{self.camera}/start/{float(playlist[0].start_time)}/end/{float(playlist[-1].end_time)}/index.m3u8'"
+                )
 
             ffmpeg_input = "-y -protocol_whitelist pipe,file,http,tcp -f concat -safe 0 -i /dev/stdin"
 
@@ -76,8 +103,8 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.hwaccel_args,
-                    ffmpeg_input,
-                    f"-vf setpts=0.04*PTS -r 30 -an {file_name}",
+                    f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} {file_name}",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
@@ -86,6 +113,7 @@ class RecordingExporter(threading.Thread):
             ffmpeg_cmd,
             input="\n".join(playlist_lines),
             encoding="ascii",
+            preexec_fn=lower_priority,
             capture_output=True,
         )
 
@@ -94,6 +122,7 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
+            Path(file_name).unlink(missing_ok=True)
             return
 
         logger.debug(f"Updating finalized export {file_name}")

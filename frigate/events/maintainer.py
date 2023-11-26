@@ -3,10 +3,9 @@ import logging
 import queue
 import threading
 from enum import Enum
+from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
-
-from faster_fifo import Queue
 
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.models import Event
@@ -35,6 +34,17 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
             or prev_event["end_time"] != current_event["end_time"]
         ):
             return True
+    return False
+
+
+def should_update_state(prev_event: Event, current_event: Event) -> bool:
+    """If current event should update state, but not necessarily update the db."""
+    if prev_event["stationary"] != current_event["stationary"]:
+        return True
+
+    if prev_event["attributes"] != current_event["attributes"]:
+        return True
+
     return False
 
 
@@ -108,8 +118,11 @@ class EventProcessor(threading.Thread):
         event_data: Event,
     ) -> None:
         """handle tracked object event updates."""
+        updated_db = False
+
         # if this is the first message, just store it and continue, its not time to insert it in the db
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
+            updated_db = True
             camera_config = self.config.cameras[camera]
             event_config: EventsConfig = camera_config.record.events
             width = camera_config.detect.width
@@ -199,7 +212,8 @@ class EventProcessor(threading.Thread):
 
             # only overwrite the sub_label in the database if it's set
             if event_data.get("sub_label") is not None:
-                event[Event.sub_label] = event_data["sub_label"]
+                event[Event.sub_label] = event_data["sub_label"][0]
+                event[Event.data]["sub_label_score"] = event_data["sub_label"][1]
 
             (
                 Event.insert(event)
@@ -210,6 +224,10 @@ class EventProcessor(threading.Thread):
                 .execute()
             )
 
+        # check if the stored event_data should be updated
+        if updated_db or should_update_state(
+            self.events_in_process[event_data["id"]], event_data
+        ):
             # update the stored copy for comparison on future update messages
             self.events_in_process[event_data["id"]] = event_data
 
@@ -230,7 +248,11 @@ class EventProcessor(threading.Thread):
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
                 Event.zones: [],
-                Event.data: {"type": event_data["type"]},
+                Event.data: {
+                    "type": event_data["type"],
+                    "score": event_data["score"],
+                    "top_score": event_data["score"],
+                },
             }
             Event.insert(event).execute()
         elif event_type == "end":

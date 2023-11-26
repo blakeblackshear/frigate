@@ -3,9 +3,14 @@ import useSWR from 'swr';
 import ActivityIndicator from './ActivityIndicator';
 import { formatUnixTimestampToDateTime } from '../utils/dateUtil';
 import About from '../icons/About';
+import ActiveObjectIcon from '../icons/ActiveObject';
 import PlayIcon from '../icons/Play';
 import ExitIcon from '../icons/Exit';
-import { Zone } from '../icons/Zone';
+import StationaryObjectIcon from '../icons/StationaryObject';
+import FaceIcon from '../icons/Face';
+import LicensePlateIcon from '../icons/LicensePlate';
+import DeliveryTruckIcon from '../icons/DeliveryTruck';
+import ZoneIcon from '../icons/Zone';
 import { useMemo, useState } from 'preact/hooks';
 import Button from './Button';
 
@@ -76,32 +81,19 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   return (
     <div className="flex flex-col">
       <div className="h-14 flex justify-center">
-        <div className="sm:w-1 md:w-1/4 flex flex-row flex-nowrap justify-between overflow-auto">
-          {eventTimeline.map((item, index) =>
-            item.class_type == 'visible' || item.class_type == 'gone' ? (
-              <Button
-                key={index}
-                className="rounded-full"
-                type="iconOnly"
-                color={index == timeIndex ? 'blue' : 'gray'}
-                aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
-                onClick={() => onSelectMoment(index)}
-              >
-                {item.class_type == 'visible' ? <PlayIcon className="w-8" /> : <ExitIcon className="w-8" />}
-              </Button>
-            ) : (
-              <Button
-                key={index}
-                className="rounded-full"
-                type="iconOnly"
-                color={index == timeIndex ? 'blue' : 'gray'}
-                aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
-                onClick={() => onSelectMoment(index)}
-              >
-                <Zone className="w-8" />
-              </Button>
-            )
-          )}
+        <div className="flex flex-row flex-nowrap justify-between overflow-auto">
+          {eventTimeline.map((item, index) => (
+            <Button
+              key={index}
+              className="rounded-full"
+              type="iconOnly"
+              color={index == timeIndex ? 'blue' : 'gray'}
+              aria-label={window.innerWidth > 640 ? getTimelineItemDescription(config, item, event) : ''}
+              onClick={() => onSelectMoment(index)}
+            >
+              {getTimelineIcon(item)}
+            </Button>
+          ))}
         </div>
       </div>
       {timeIndex >= 0 ? (
@@ -124,26 +116,72 @@ export default function TimelineSummary({ event, onFrameSelected }) {
   );
 }
 
-function getTimelineItemDescription(config, timelineItem, event) {
-  if (timelineItem.class_type == 'visible') {
-    return `${event.label} detected at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
-      date_style: 'short',
-      time_style: 'medium',
-      time_format: config.ui.time_format,
-    })}`;
-  } else if (timelineItem.class_type == 'entered_zone') {
-    return `${event.label.replaceAll('_', ' ')} entered ${timelineItem.data.zones
-      .join(' and ')
-      .replaceAll('_', ' ')} at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
-      date_style: 'short',
-      time_style: 'medium',
-      time_format: config.ui.time_format,
-    })}`;
+function getTimelineIcon(timelineItem) {
+  switch (timelineItem.class_type) {
+    case 'visible':
+      return <PlayIcon className="w-8" />;
+    case 'gone':
+      return <ExitIcon className="w-8" />;
+    case 'active':
+      return <ActiveObjectIcon className="w-8" />;
+    case 'stationary':
+      return <StationaryObjectIcon className="w-8" />;
+    case 'entered_zone':
+      return <ZoneIcon className="w-8" />;
+    case 'attribute':
+      switch (timelineItem.data.attribute) {
+        case 'face':
+          return <FaceIcon className="w-8" />;
+        case 'license_plate':
+          return <LicensePlateIcon className="w-8" />;
+        default:
+          return <DeliveryTruckIcon className="w-8" />;
+      }
   }
+}
 
-  return `${event.label} left at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
-    date_style: 'short',
-    time_style: 'medium',
-    time_format: config.ui.time_format,
-  })}`;
+function getTimelineItemDescription(config, timelineItem, event) {
+  switch (timelineItem.class_type) {
+    case 'visible':
+      return `${event.label} detected at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+        date_style: 'short',
+        time_style: 'medium',
+        time_format: config.ui.time_format,
+      })}`;
+    case 'entered_zone':
+      return `${event.label.replaceAll('_', ' ')} entered ${timelineItem.data.zones
+        .join(' and ')
+        .replaceAll('_', ' ')} at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+        date_style: 'short',
+        time_style: 'medium',
+        time_format: config.ui.time_format,
+      })}`;
+    case 'active':
+      return `${event.label} became active at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+        date_style: 'short',
+        time_style: 'medium',
+        time_format: config.ui.time_format,
+      })}`;
+    case 'stationary':
+      return `${event.label} became stationary at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+        date_style: 'short',
+        time_style: 'medium',
+        time_format: config.ui.time_format,
+      })}`;
+    case 'attribute':
+      return `${timelineItem.data.attribute.replaceAll("_", " ")} detected for ${event.label} at ${formatUnixTimestampToDateTime(
+        timelineItem.timestamp,
+        {
+          date_style: 'short',
+          time_style: 'medium',
+          time_format: config.ui.time_format,
+        }
+      )}`;
+    case 'gone':
+      return `${event.label} left at ${formatUnixTimestampToDateTime(timelineItem.timestamp, {
+        date_style: 'short',
+        time_style: 'medium',
+        time_format: config.ui.time_format,
+      })}`;
+  }
 }

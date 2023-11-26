@@ -13,6 +13,7 @@ from frigate.util import intersection_over_union
 class CentroidTracker(ObjectTracker):
     def __init__(self, config: DetectConfig):
         self.tracked_objects = {}
+        self.untracked_object_boxes = []
         self.disappeared = {}
         self.positions = {}
         self.max_disappeared = config.max_disappeared

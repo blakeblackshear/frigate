@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 
@@ -5,9 +6,13 @@ import numpy as np
 from norfair import Detection, Drawable, Tracker, draw_boxes
 from norfair.drawing.drawer import Drawer
 
-from frigate.config import DetectConfig
+from frigate.config import CameraConfig
+from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
+from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
+
+logger = logging.getLogger(__name__)
 
 
 # Normalizes distance from estimate relative to object size
@@ -54,21 +59,34 @@ def frigate_distance(detection: Detection, tracked_object) -> float:
 
 
 class NorfairTracker(ObjectTracker):
-    def __init__(self, config: DetectConfig):
+    def __init__(
+        self,
+        config: CameraConfig,
+        ptz_metrics: PTZMetricsTypes,
+    ):
         self.tracked_objects = {}
+        self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
-        self.max_disappeared = config.max_disappeared
-        self.detect_config = config
+        self.camera_config = config
+        self.detect_config = config.detect
+        self.ptz_metrics = ptz_metrics
+        self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
+        self.ptz_motion_estimator = {}
+        self.camera_name = config.name
         self.track_id_map = {}
         # TODO: could also initialize a tracker per object class if there
         #       was a good reason to have different distance calculations
         self.tracker = Tracker(
             distance_function=frigate_distance,
             distance_threshold=2.5,
-            initialization_delay=0,
-            hit_counter_max=self.max_disappeared,
+            initialization_delay=self.detect_config.min_initialized,
+            hit_counter_max=self.detect_config.max_disappeared,
         )
+        if self.ptz_autotracker_enabled.value:
+            self.ptz_motion_estimator = PtzMotionEstimator(
+                self.camera_config, self.ptz_metrics
+            )
 
     def register(self, track_id, obj):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -78,6 +96,12 @@ class NorfairTracker(ObjectTracker):
         obj["start_time"] = obj["frame_time"]
         obj["motionless_count"] = 0
         obj["position_changes"] = 0
+        obj["score_history"] = [
+            p.data["score"]
+            for p in next(
+                (o for o in self.tracker.tracked_objects if o.global_id == track_id)
+            ).past_detections
+        ]
         self.tracked_objects[id] = obj
         self.disappeared[id] = 0
         self.positions[id] = {
@@ -230,7 +254,22 @@ class NorfairTracker(ObjectTracker):
                 )
             )
 
-        tracked_objects = self.tracker.update(detections=norfair_detections)
+        coord_transformations = None
+
+        if self.ptz_autotracker_enabled.value:
+            # we must have been enabled by mqtt, so set up the estimator
+            if not self.ptz_motion_estimator:
+                self.ptz_motion_estimator = PtzMotionEstimator(
+                    self.camera_config, self.ptz_metrics
+                )
+
+            coord_transformations = self.ptz_motion_estimator.motion_estimator(
+                detections, frame_time, self.camera_name
+            )
+
+        tracked_objects = self.tracker.update(
+            detections=norfair_detections, coord_transformations=coord_transformations
+        )
 
         # update or create new tracks
         active_ids = []
@@ -246,6 +285,7 @@ class NorfairTracker(ObjectTracker):
             obj = {
                 **t.last_detection.data,
                 "estimate": estimate,
+                "estimate_velocity": t.estimate_velocity,
             }
             active_ids.append(t.global_id)
             if t.global_id not in self.track_id_map:
@@ -266,6 +306,12 @@ class NorfairTracker(ObjectTracker):
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
         for e_id in expired_ids:
             self.deregister(self.track_id_map[e_id], e_id)
+
+        # update list of object boxes that don't have a tracked object yet
+        tracked_object_boxes = [obj["box"] for obj in self.tracked_objects.values()]
+        self.untracked_object_boxes = [
+            o[2] for o in detections if o[2] not in tracked_object_boxes
+        ]
 
     def debug_draw(self, frame, frame_time):
         active_detections = [

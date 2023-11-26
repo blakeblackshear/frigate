@@ -3,8 +3,6 @@ import { baseUrl } from '../api/baseUrl';
 import { useCallback, useEffect } from 'preact/hooks';
 
 export default function WebRtcPlayer({ camera, width, height }) {
-  const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
-
   const PeerConnection = useCallback(async (media) => {
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -58,9 +56,8 @@ export default function WebRtcPlayer({ camera, width, height }) {
     }
   }
 
-  const connect = useCallback(async () => {
-    const pc = await PeerConnection('video+audio');
-    const ws = new WebSocket(url);
+  const connect = useCallback(async (ws, aPc) => {
+    const pc = await aPc;
 
     ws.addEventListener('open', () => {
       pc.addEventListener('icecandidate', (ev) => {
@@ -85,11 +82,18 @@ export default function WebRtcPlayer({ camera, width, height }) {
         pc.setRemoteDescription({ type: 'answer', sdp: msg.value });
       }
     });
-  }, [PeerConnection, url]);
+  }, []);
 
   useEffect(() => {
-    connect();
-  }, [connect]);
+    const url = `${baseUrl.replace(/^http/, 'ws')}live/webrtc/api/ws?src=${camera}`;
+    const ws = new WebSocket(url);
+    const aPc = PeerConnection('video+audio');
+    connect(ws, aPc);
+
+    return async () => {
+      (await aPc).close();
+    }
+  }, [camera, connect, PeerConnection]);
 
   return (
     <div>

@@ -10,6 +10,7 @@ from peewee import fn
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR
 from frigate.models import Event, Recordings
+from frigate.util.builtin import clear_and_unlink
 
 logger = logging.getLogger(__name__)
 bandwidth_equation = Recordings.segment_size / (
@@ -35,28 +36,28 @@ class StorageMaintainer(threading.Thread):
             if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
                 self.camera_storage_stats[camera] = {
                     "needs_refresh": (
-                        Recordings.select(fn.COUNT(Recordings.id))
+                        Recordings.select(fn.COUNT("*"))
                         .where(Recordings.camera == camera, Recordings.segment_size > 0)
                         .scalar()
                         < 50
                     )
                 }
 
-            # calculate MB/hr
-            try:
-                bandwidth = round(
-                    Recordings.select(fn.AVG(bandwidth_equation))
-                    .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                    .limit(100)
-                    .scalar()
-                    * 3600,
-                    2,
-                )
-            except TypeError:
-                bandwidth = 0
+                # calculate MB/hr
+                try:
+                    bandwidth = round(
+                        Recordings.select(fn.AVG(bandwidth_equation))
+                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
+                        .limit(100)
+                        .scalar()
+                        * 3600,
+                        2,
+                    )
+                except TypeError:
+                    bandwidth = 0
 
-            self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
+                self.camera_storage_stats[camera]["bandwidth"] = bandwidth
+                logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
@@ -99,22 +100,35 @@ class StorageMaintainer(threading.Thread):
             [b["bandwidth"] for b in self.camera_storage_stats.values()]
         )
 
-        recordings: Recordings = Recordings.select().order_by(
-            Recordings.start_time.asc()
+        recordings: Recordings = (
+            Recordings.select(
+                Recordings.id,
+                Recordings.start_time,
+                Recordings.end_time,
+                Recordings.segment_size,
+                Recordings.path,
+            )
+            .order_by(Recordings.start_time.asc())
+            .namedtuples()
+            .iterator()
         )
+
         retained_events: Event = (
-            Event.select()
+            Event.select(
+                Event.start_time,
+                Event.end_time,
+            )
             .where(
                 Event.retain_indefinitely == True,
                 Event.has_clip,
             )
             .order_by(Event.start_time.asc())
-            .objects()
+            .namedtuples()
         )
 
         event_start = 0
         deleted_recordings = set()
-        for recording in recordings.objects().iterator():
+        for recording in recordings:
             # check if 1 hour of storage has been reclaimed
             if deleted_segments_size > hourly_bandwidth:
                 break
@@ -146,24 +160,43 @@ class StorageMaintainer(threading.Thread):
 
             # Delete recordings not retained indefinitely
             if not keep:
-                deleted_segments_size += recording.segment_size
-                Path(recording.path).unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
+                try:
+                    clear_and_unlink(Path(recording.path), missing_ok=False)
+                    deleted_recordings.add(recording.id)
+                    deleted_segments_size += recording.segment_size
+                except FileNotFoundError:
+                    # this file was not found so we must assume no space was cleaned up
+                    pass
 
         # check if need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
             logger.error(
-                f"Could not clear {hourly_bandwidth} currently {deleted_segments_size}, retained recordings must be deleted."
+                f"Could not clear {hourly_bandwidth} MB, currently {deleted_segments_size} MB have been cleared. Retained recordings must be deleted."
             )
-            recordings = Recordings.select().order_by(Recordings.start_time.asc())
+            recordings = (
+                Recordings.select(
+                    Recordings.id,
+                    Recordings.path,
+                    Recordings.segment_size,
+                )
+                .order_by(Recordings.start_time.asc())
+                .namedtuples()
+                .iterator()
+            )
 
-            for recording in recordings.objects().iterator():
+            for recording in recordings:
                 if deleted_segments_size > hourly_bandwidth:
                     break
 
-                deleted_segments_size += recording.segment_size
-                Path(recording.path).unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
+                try:
+                    clear_and_unlink(Path(recording.path), missing_ok=False)
+                    deleted_segments_size += recording.segment_size
+                    deleted_recordings.add(recording.id)
+                except FileNotFoundError:
+                    # this file was not found so we must assume no space was cleaned up
+                    pass
+        else:
+            logger.info(f"Cleaned up {deleted_segments_size} MB of recordings")
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
@@ -185,6 +218,9 @@ class StorageMaintainer(threading.Thread):
                 logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
 
             if self.check_storage_needs_cleanup():
+                logger.info(
+                    "Less than 1 hour of recording space left, running storage maintenance..."
+                )
                 self.reduce_storage_consumption()
 
         logger.info("Exiting storage maintainer...")

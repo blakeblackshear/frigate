@@ -30,8 +30,8 @@ export default function CameraMasks({ camera }) {
     Array.isArray(motionMask)
       ? motionMask.map((mask) => getPolylinePoints(mask))
       : motionMask
-        ? [getPolylinePoints(motionMask)]
-        : []
+      ? [getPolylinePoints(motionMask)]
+      : []
   );
 
   const [zonePoints, setZonePoints] = useState(
@@ -45,14 +45,16 @@ export default function CameraMasks({ camera }) {
         [name]: Array.isArray(objectFilters[name].mask)
           ? objectFilters[name].mask.map((mask) => getPolylinePoints(mask))
           : objectFilters[name].mask
-            ? [getPolylinePoints(objectFilters[name].mask)]
-            : [],
+          ? [getPolylinePoints(objectFilters[name].mask)]
+          : [],
       }),
       {}
     )
   );
 
   const [editing, setEditing] = useState({ set: motionMaskPoints, key: 0, fn: setMotionMaskPoints });
+  const [success, setSuccess] = useState();
+  const [error, setError] = useState();
 
   const handleUpdateEditable = useCallback(
     (newPoints) => {
@@ -99,7 +101,7 @@ export default function CameraMasks({ camera }) {
     const textToCopy = `  motion:
       mask:
   ${motionMaskPoints.map((mask) => `      - ${polylinePointsToPolyline(mask)}`).join('\n')}`;
-  
+
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
       window.navigator.clipboard.writeText(textToCopy).catch((err) => {
@@ -111,7 +113,7 @@ export default function CameraMasks({ camera }) {
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
       textarea.select();
-  
+
       try {
         const successful = document.execCommand('copy');
         if (!successful) {
@@ -120,7 +122,7 @@ export default function CameraMasks({ camera }) {
       } catch (err) {
         throw new Error('Failed to copy text: ', err);
       }
-  
+
       document.body.removeChild(textarea);
     }
   }, [motionMaskPoints]);
@@ -133,14 +135,16 @@ export default function CameraMasks({ camera }) {
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data.message);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, motionMaskPoints]);
-  
 
   // Zone methods
   const handleEditZone = useCallback(
@@ -170,9 +174,11 @@ export default function CameraMasks({ camera }) {
   const handleCopyZones = useCallback(async () => {
     const textToCopy = `  zones:
 ${Object.keys(zonePoints)
-    .map(
-      (zoneName) => `    ${zoneName}:
-      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`).join('\n')}`;
+  .map(
+    (zoneName) => `    ${zoneName}:
+      coordinates: ${polylinePointsToPolyline(zonePoints[zoneName])}`
+  )
+  .join('\n')}`;
 
     if (window.navigator.clipboard && window.navigator.clipboard.writeText) {
       // Use Clipboard API if available
@@ -185,7 +191,7 @@ ${Object.keys(zonePoints)
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
       textarea.select();
-    
+
       try {
         const successful = document.execCommand('copy');
         if (!successful) {
@@ -194,7 +200,7 @@ ${Object.keys(zonePoints)
       } catch (err) {
         throw new Error('Failed to copy text: ', err);
       }
-    
+
       document.body.removeChild(textarea);
     }
   }, [zonePoints]);
@@ -202,16 +208,22 @@ ${Object.keys(zonePoints)
   const handleSaveZones = useCallback(async () => {
     try {
       const queryParameters = Object.keys(zonePoints)
-        .map((zoneName) => `cameras.${camera}.zones.${zoneName}.coordinates=${polylinePointsToPolyline(zonePoints[zoneName])}`)
+        .map(
+          (zoneName) =>
+            `cameras.${camera}.zones.${zoneName}.coordinates=${polylinePointsToPolyline(zonePoints[zoneName])}`
+        )
         .join('&');
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, zonePoints]);
 
@@ -244,30 +256,38 @@ ${Object.keys(zonePoints)
     await window.navigator.clipboard.writeText(`  objects:
     filters:
 ${Object.keys(objectMaskPoints)
-    .map((objectName) =>
-      objectMaskPoints[objectName].length
-        ? `      ${objectName}:
+  .map((objectName) =>
+    objectMaskPoints[objectName].length
+      ? `      ${objectName}:
         mask: ${polylinePointsToPolyline(objectMaskPoints[objectName])}`
-        : ''
-    )
-    .filter(Boolean)
-    .join('\n')}`);
+      : ''
+  )
+  .filter(Boolean)
+  .join('\n')}`);
   }, [objectMaskPoints]);
 
   const handleSaveObjectMasks = useCallback(async () => {
     try {
       const queryParameters = Object.keys(objectMaskPoints)
         .filter((objectName) => objectMaskPoints[objectName].length > 0)
-        .map((objectName, index) => `cameras.${camera}.objects.filters.${objectName}.mask.${index}=${polylinePointsToPolyline(objectMaskPoints[objectName])}`)
+        .map(
+          (objectName, index) =>
+            `cameras.${camera}.objects.filters.${objectName}.mask.${index}=${polylinePointsToPolyline(
+              objectMaskPoints[objectName]
+            )}`
+        )
         .join('&');
       const endpoint = `config/set?${queryParameters}`;
       const response = await axios.put(endpoint);
       if (response.status === 200) {
-        // handle successful response
+        setSuccess(response.data);
       }
     } catch (error) {
-      // handle error
-      //console.error(error);
+      if (error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError(error.message);
+      }
     }
   }, [camera, objectMaskPoints]);
 
@@ -313,16 +333,19 @@ ${Object.keys(objectMaskPoints)
       <Card
         content={
           <p>
-            When done, copy each mask configuration into your <code className="font-mono">config.yml</code> file
-            restart your Frigate instance to save your changes.
+            When done, copy each mask configuration into your <code className="font-mono">config.yml</code> file restart
+            your Frigate instance to save your changes.
           </p>
         }
         header="Warning"
       />
 
+      {success && <div className="max-h-20 text-green-500">{success}</div>}
+      {error && <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">{error}</div>}
+
       <div className="space-y-4">
         <div className="relative">
-          <img ref={imageRef} src={`${apiHost}/api/${camera}/latest.jpg`} />
+          <img ref={imageRef} src={`${apiHost}api/${camera}/latest.jpg`} />
           <EditableMask
             onChange={handleUpdateEditable}
             points={'subkey' in editing ? editing.set[editing.key][editing.subkey] : editing.set[editing.key]}
@@ -330,6 +353,7 @@ ${Object.keys(objectMaskPoints)
             snap={snap}
             width={width}
             height={height}
+            setError={setError}
           />
         </div>
         <div className="max-w-xs">
@@ -411,7 +435,7 @@ function boundedSize(value, maxValue, snap) {
   return newValue;
 }
 
-function EditableMask({ onChange, points, scale, snap, width, height }) {
+function EditableMask({ onChange, points, scale, snap, width, height, setError }) {
   const boundingRef = useRef(null);
 
   const handleMovePoint = useCallback(
@@ -432,6 +456,11 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
   // Add a new point between the closest two other points
   const handleAddPoint = useCallback(
     (event) => {
+      if (!points) {
+        setError('You must choose an item to edit or add a new item before adding a point.');
+        return
+      }
+
       const { offsetX, offsetY } = event;
       const scaledX = boundedSize((offsetX - MaskInset) / scale, width, snap);
       const scaledY = boundedSize((offsetY - MaskInset) / scale, height, snap);
@@ -451,7 +480,7 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       newPoints.splice(index, 0, newPoint);
       onChange(newPoints);
     },
-    [height, width, scale, points, onChange, snap]
+    [height, width, scale, points, onChange, snap, setError]
   );
 
   const handleRemovePoint = useCallback(
@@ -473,16 +502,16 @@ function EditableMask({ onChange, points, scale, snap, width, height }) {
       {!scaledPoints
         ? null
         : scaledPoints.map(([x, y], i) => (
-          <PolyPoint
-            key={i}
-            boundingRef={boundingRef}
-            index={i}
-            onMove={handleMovePoint}
-            onRemove={handleRemovePoint}
-            x={x + MaskInset}
-            y={y + MaskInset}
-          />
-        ))}
+            <PolyPoint
+              key={i}
+              boundingRef={boundingRef}
+              index={i}
+              onMove={handleMovePoint}
+              onRemove={handleRemovePoint}
+              x={x + MaskInset}
+              y={y + MaskInset}
+            />
+          ))}
       <div className="absolute inset-0 right-0 bottom-0" onClick={handleAddPoint} ref={boundingRef} />
       <svg
         width="100%"
@@ -554,8 +583,6 @@ function MaskValues({
     },
     [onAdd]
   );
-
-
 
   return (
     <div className="overflow-hidden" onMouseOver={handleMousein} onMouseOut={handleMouseout}>

@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1.6
+
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.03-py3
+
+# Build TensorRT-specific library
+FROM ${TRT_BASE} AS trt-deps
+
+RUN apt-get update \
+    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
+    /tensorrt_libyolo.sh
+
+# Frigate w/ TensorRT Support as separate image
+FROM deps AS tensorrt-base
+
+#Disable S6 Global timeout
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY docker/tensorrt/detector/rootfs/ /
+ENV YOLO_MODELS="yolov7-320"
+
+HEALTHCHECK --start-period=600s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
+    CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1

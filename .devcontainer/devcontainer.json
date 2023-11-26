@@ -42,7 +42,6 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.black-formatter",
         "visualstudioexptteam.vscodeintellicode",
         "mhutchie.git-graph",
         "ms-azuretools.vscode-docker",
@@ -53,13 +52,10 @@
         "csstools.postcss",
         "blanu.vscode-styled-jsx",
         "bradlc.vscode-tailwindcss",
-        "ms-python.isort",
         "charliermarsh.ruff"
       ],
       "settings": {
         "remote.autoForwardPorts": false,
-        "python.linting.pylintEnabled": true,
-        "python.linting.enabled": true,
         "python.formatting.provider": "none",
         "python.languageServer": "Pylance",
         "editor.formatOnPaste": false,
@@ -72,7 +68,7 @@
         "eslint.workingDirectories": ["./web"],
         "isort.args": ["--settings-path=./pyproject.toml"],
         "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.formatOnSave": true,
           "editor.codeActionsOnSave": {
             "source.fixAll": true,
