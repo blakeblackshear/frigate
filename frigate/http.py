@@ -1154,6 +1154,9 @@ def end_event(event_id):
 def config():
     config = current_app.frigate_config.dict()
 
+    # remove the mqtt password
+    config["mqtt"].pop("password", None)
+
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 
