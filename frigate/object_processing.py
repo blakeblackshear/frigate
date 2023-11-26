@@ -22,12 +22,14 @@ from frigate.config import (
 )
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
+from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
     SharedMemoryFrameManager,
     area,
     calculate_region,
     draw_box_with_label,
     draw_timestamp,
+    is_label_printable,
 )
 
 logger = logging.getLogger(__name__)
@@ -103,6 +105,10 @@ class TrackedObject:
     def __init__(
         self, camera, colormap, camera_config: CameraConfig, frame_cache, obj_data
     ):
+        # set the score history then remove as it is not part of object state
+        self.score_history = obj_data["score_history"]
+        del obj_data["score_history"]
+
         self.obj_data = obj_data
         self.camera = camera
         self.colormap = colormap
@@ -111,7 +117,7 @@ class TrackedObject:
         self.zone_presence = {}
         self.current_zones = []
         self.entered_zones = []
-        self.attributes = set()
+        self.attributes = defaultdict(float)
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
@@ -134,20 +140,19 @@ class TrackedObject:
         return self.computed_score < threshold
 
     def compute_score(self):
-        scores = self.score_history[:]
-        # pad with zeros if you dont have at least 3 scores
-        if len(scores) < 3:
-            scores += [0.0] * (3 - len(scores))
-        return median(scores)
+        """get median of scores for object."""
+        return median(self.score_history)
 
     def update(self, current_frame_time, obj_data):
         thumb_update = False
         significant_change = False
+        autotracker_update = False
         # if the object is not in the current frame, add a 0.0 to the score history
         if obj_data["frame_time"] != current_frame_time:
             self.score_history.append(0.0)
         else:
             self.score_history.append(obj_data["score"])
+
         # only keep the last 10 scores
         if len(self.score_history) > 10:
             self.score_history = self.score_history[-10:]
@@ -167,7 +172,7 @@ class TrackedObject:
                 self.camera_config.frame_shape,
             ):
                 self.thumbnail_data = {
-                    "frame_time": obj_data["frame_time"],
+                    "frame_time": current_frame_time,
                     "box": obj_data["box"],
                     "area": obj_data["area"],
                     "region": obj_data["region"],
@@ -205,15 +210,19 @@ class TrackedObject:
 
         # maintain attributes
         for attr in obj_data["attributes"]:
-            self.attributes.add(attr["label"])
+            if self.attributes[attr["label"]] < attr["score"]:
+                self.attributes[attr["label"]] = attr["score"]
 
-        # populate the sub_label for car with first logo if it exists
-        if self.obj_data["label"] == "car" and "sub_label" not in self.obj_data:
-            recognized_logos = self.attributes.intersection(
-                set(["ups", "fedex", "amazon"])
-            )
+        # populate the sub_label for car with highest scoring logo
+        if self.obj_data["label"] == "car":
+            recognized_logos = {
+                k: self.attributes[k]
+                for k in ["ups", "fedex", "amazon"]
+                if k in self.attributes
+            }
             if len(recognized_logos) > 0:
-                self.obj_data["sub_label"] = recognized_logos.pop()
+                max_logo = max(recognized_logos, key=recognized_logos.get)
+                self.obj_data["sub_label"] = (max_logo, recognized_logos[max_logo])
 
         # check for significant change
         if not self.false_positive:
@@ -223,6 +232,9 @@ class TrackedObject:
 
             # if the position changed, signal an update
             if self.obj_data["position_changes"] != obj_data["position_changes"]:
+                significant_change = True
+
+            if self.obj_data["attributes"] != obj_data["attributes"]:
                 significant_change = True
 
             # if the motionless_count reaches the stationary threshold
@@ -236,12 +248,15 @@ class TrackedObject:
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
                 significant_change = True
 
+            # update autotrack at most 3 objects per second
+            if self.obj_data["frame_time"] - self.previous["frame_time"] >= (1 / 3):
+                autotracker_update = True
+
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
-        return (thumb_update, significant_change)
+        return (thumb_update, significant_change, autotracker_update)
 
     def to_dict(self, include_thumbnail: bool = False):
-        (self.thumbnail_data["frame_time"] if self.thumbnail_data is not None else 0.0)
         event = {
             "id": self.obj_data["id"],
             "camera": self.camera,
@@ -266,7 +281,7 @@ class TrackedObject:
             "entered_zones": self.entered_zones.copy(),
             "has_clip": self.has_clip,
             "has_snapshot": self.has_snapshot,
-            "attributes": list(self.attributes),
+            "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
         }
 
@@ -437,7 +452,11 @@ def zone_filtered(obj: TrackedObject, object_config):
 # Maintains the state of a camera
 class CameraState:
     def __init__(
-        self, name, config: FrigateConfig, frame_manager: SharedMemoryFrameManager
+        self,
+        name,
+        config: FrigateConfig,
+        frame_manager: SharedMemoryFrameManager,
+        ptz_autotracker_thread: PtzAutoTrackerThread,
     ):
         self.name = name
         self.config = config
@@ -455,6 +474,7 @@ class CameraState:
         self.regions = []
         self.previous_frame_id = None
         self.callbacks = defaultdict(list)
+        self.ptz_autotracker_thread = ptz_autotracker_thread
 
     def get_current_frame(self, draw_options={}):
         with self.current_frame_lock:
@@ -476,15 +496,42 @@ class CameraState:
                     thickness = 1
                     color = (255, 0, 0)
 
+                # draw thicker box around ptz autotracked object
+                if (
+                    self.camera_config.onvif.autotracking.enabled
+                    and self.ptz_autotracker_thread.ptz_autotracker.autotracker_init[
+                        self.name
+                    ]
+                    and self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
+                        self.name
+                    ]
+                    is not None
+                    and obj["id"]
+                    == self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
+                        self.name
+                    ].obj_data["id"]
+                    and obj["frame_time"] == frame_time
+                ):
+                    thickness = 5
+                    color = self.config.model.colormap[obj["label"]]
+
                 # draw the bounding boxes on the frame
                 box = obj["box"]
+                text = (
+                    obj["label"]
+                    if (
+                        not obj.get("sub_label")
+                        or not is_label_printable(obj["sub_label"][0])
+                    )
+                    else obj["sub_label"][0]
+                )
                 draw_box_with_label(
                     frame_copy,
                     box[0],
                     box[1],
                     box[2],
                     box[3],
-                    obj["label"],
+                    text,
                     f"{obj['score']:.0%} {int(obj['area'])}",
                     thickness=thickness,
                     color=color,
@@ -589,9 +636,13 @@ class CameraState:
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
-            thumb_update, significant_update = updated_obj.update(
+            thumb_update, significant_update, autotracker_update = updated_obj.update(
                 frame_time, current_detections[id]
             )
+
+            if autotracker_update or significant_update:
+                for c in self.callbacks["autotrack"]:
+                    c(self.name, updated_obj, frame_time)
 
             if thumb_update:
                 # ensure this frame is stored in the cache
@@ -733,6 +784,7 @@ class TrackedObjectProcessor(threading.Thread):
         event_processed_queue,
         video_output_queue,
         recordings_info_queue,
+        ptz_autotracker_thread,
         stop_event,
     ):
         threading.Thread.__init__(self)
@@ -748,6 +800,7 @@ class TrackedObjectProcessor(threading.Thread):
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
+        self.ptz_autotracker_thread = ptz_autotracker_thread
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(
@@ -773,6 +826,9 @@ class TrackedObjectProcessor(threading.Thread):
                     obj.to_dict(include_thumbnail=True),
                 )
             )
+
+        def autotrack(camera, obj: TrackedObject, current_frame_time):
+            self.ptz_autotracker_thread.ptz_autotracker.autotrack_object(camera, obj)
 
         def end(camera, obj: TrackedObject, current_frame_time):
             # populate has_snapshot
@@ -822,6 +878,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "type": "end",
                 }
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
+                self.ptz_autotracker_thread.ptz_autotracker.end_object(camera, obj)
 
             self.event_queue.put(
                 (
@@ -858,8 +915,11 @@ class TrackedObjectProcessor(threading.Thread):
             self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
 
         for camera in self.config.cameras.keys():
-            camera_state = CameraState(camera, self.config, self.frame_manager)
+            camera_state = CameraState(
+                camera, self.config, self.frame_manager, self.ptz_autotracker_thread
+            )
             camera_state.on("start", start)
+            camera_state.on("autotrack", autotrack)
             camera_state.on("update", update)
             camera_state.on("end", end)
             camera_state.on("snapshot", snapshot)

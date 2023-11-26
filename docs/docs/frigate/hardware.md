@@ -9,7 +9,7 @@ Cameras that output H.264 video and AAC audio will offer the most compatibility 
 
 I recommend Dahua, Hikvision, and Amcrest in that order. Dahua edges out Hikvision because they are easier to find and order, not because they are better cameras. I personally use Dahua cameras because they are easier to purchase directly. In my experience Dahua and Hikvision both have multiple streams with configurable resolutions and frame rates and rock solid streams. They also both have models with large sensors well known for excellent image quality at night. Not all the models are equal. Larger sensors are better than higher resolutions; especially at night. Amcrest is the fallback recommendation because they are rebranded Dahuas. They are rebranding the lower end models with smaller sensors or less configuration options.
 
-Many users have reported various issues with Reolink cameras, so I do not recommend them. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-410520-possibly-others). Wifi cameras are also not recommended. Their streams are less reliable and cause connection loss and/or lost video data.
+Many users have reported various issues with Reolink cameras, so I do not recommend them. If you are using Reolink, I suggest the [Reolink specific configuration](../configuration/camera_specific.md#reolink-cameras). Wifi cameras are also not recommended. Their streams are less reliable and cause connection loss and/or lost video data.
 
 Here are some of the camera's I recommend:
 
@@ -31,7 +31,7 @@ My current favorite is the Minisforum GK41 because of the dual NICs that allow y
 
 ## Detectors
 
-A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the epectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically. As of 0.12, Frigate supports a handful of different detector types with varying inference speeds and performance.
+A detector is a device which is optimized for running inferences efficiently to detect objects. Using a recommended detector means there will be less latency between detections and more detections can be run per second. Frigate is designed around the expectation that a detector is used to achieve very low inference speeds. Offloading TensorFlow to a detector is an order of magnitude faster and will reduce your CPU load dramatically. As of 0.12, Frigate supports a handful of different detector types with varying inference speeds and performance.
 
 ### Google Coral TPU
 
@@ -70,9 +70,9 @@ Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known
 | Intel i5 1135G7      | 10 - 15 ms      |                                                                       |
 | Intel i5 12600K      | ~ 15 ms         | Inference speeds on CPU were ~ 35 ms                                  |
 
-### TensorRT
+### TensorRT - Nvidia GPU
 
-The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which supports the 11.x series of CUDA libraries. The minimum driver version on the host system must be `>=450.80.02`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the [TensorRT docs for more info](/configuration/object_detectors#nvidia-tensorrt-detector).
+The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which supports the 12.x series of CUDA libraries. The minimum driver version on the host system must be `>=525.60.13`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the [TensorRT docs for more info](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
@@ -86,6 +86,24 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | RTX 3070 Mobile | ~ 5 ms          |
 | Quadro P400 2GB | 20 - 25 ms      |
 | Quadro P2000    | ~ 12 ms         |
+
+### Community Supported:
+
+#### Nvidia Jetson
+
+Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+
+Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
+
+#### Rockchip SoC
+
+Frigate supports SBCs with the following Rockchip SoCs:
+- RK3566/RK3568
+- RK3588/RK3588S
+- RV1103/RV1106
+- RK3562
+
+Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 20 - 25 ms.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

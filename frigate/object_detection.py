@@ -7,7 +7,6 @@ import signal
 import threading
 from abc import ABC, abstractmethod
 
-import faster_fifo as ff
 import numpy as np
 from setproctitle import setproctitle
 
@@ -59,6 +58,9 @@ class LocalObjectDetector(ObjectDetector):
         raw_detections = self.detect_raw(tensor_input)
 
         for d in raw_detections:
+            if int(d[0]) < 0 or int(d[0]) >= len(self.labels):
+                logger.warning(f"Raw Detect returned invalid label: {d}")
+                continue
             if d[1] < threshold:
                 break
             detections.append(
@@ -75,7 +77,7 @@ class LocalObjectDetector(ObjectDetector):
 
 def run_detector(
     name: str,
-    detection_queue: ff.Queue,
+    detection_queue: mp.Queue,
     out_events: dict[str, mp.Event],
     avg_speed,
     start,

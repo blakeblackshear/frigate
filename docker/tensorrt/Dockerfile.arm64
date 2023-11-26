@@ -1,0 +1,79 @@
+# syntax=docker/dockerfile:1.4
+
+# https://askubuntu.com/questions/972516/debian-frontend-environment-variable
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} AS build-wheels
+ARG DEBIAN_FRONTEND
+
+# Use a separate container to build wheels to prevent build dependencies in final image
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+       python3.9 python3.9-dev \
+       wget build-essential cmake git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ensure python3 defaults to python3.9
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip"
+
+
+FROM build-wheels AS trt-wheels
+ARG DEBIAN_FRONTEND
+ARG TARGETARCH
+
+# python-tensorrt build deps are 3.4 GB!
+RUN apt-get update \
+    && apt-get install -y ccache cuda-cudart-dev-* cuda-nvcc-* libnvonnxparsers-dev libnvparsers-dev libnvinfer-plugin-dev \
+    && ([ -e /usr/local/cuda ] || ln -s /usr/local/cuda-* /usr/local/cuda) \
+    && rm -rf /var/lib/apt/lists/*;
+
+# Determine version of tensorrt already installed in base image, e.g. "Version: 8.4.1-1+cuda11.4"
+RUN NVINFER_VER=$(dpkg -s libnvinfer8 | grep -Po "Version: \K.*") \
+    && echo $NVINFER_VER | grep -Po "^\d+\.\d+\.\d+" > /etc/TENSORRT_VER
+
+RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,target=/deps/build_python_tensorrt.sh \
+    --mount=type=cache,target=/root/.ccache \
+    export PATH="/usr/lib/ccache:$PATH" CCACHE_DIR=/root/.ccache CCACHE_MAXSIZE=2G \
+    && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
+
+COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
+RUN pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
+
+FROM build-wheels AS trt-model-wheels
+ARG DEBIAN_FRONTEND
+
+RUN apt-get update \
+    && apt-get install -y protobuf-compiler libprotobuf-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=bind,source=docker/tensorrt/requirements-models-arm64.txt,target=/requirements-tensorrt-models.txt \
+    pip3 wheel --wheel-dir=/trt-model-wheels -r /requirements-tensorrt-models.txt
+
+FROM wget AS jetson-ffmpeg
+ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
+RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps/build_jetson_ffmpeg.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/build_jetson_ffmpeg.sh
+
+# Frigate w/ TensorRT for NVIDIA Jetson platforms
+FROM tensorrt-base AS frigate-tensorrt
+RUN apt-get update \
+    && apt-get install -y python-is-python3 libprotobuf17  \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rm -rf /usr/lib/btbn-ffmpeg/
+COPY --from=jetson-ffmpeg /rootfs /
+
+COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
+RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
+    --mount=type=bind,from=trt-model-wheels,source=/trt-model-wheels,target=/deps/trt-model-wheels \
+    pip3 install -U /deps/trt-wheels/*.whl /deps/trt-model-wheels/*.whl \
+    && ldconfig
+
+WORKDIR /opt/frigate/
+COPY --from=rootfs / /

@@ -27,14 +27,17 @@ class EdgeTpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: EdgeTpuDetectorConfig):
-        device_config = {"device": "usb"}
+        device_config = {}
         if detector_config.device is not None:
             device_config = {"device": detector_config.device}
 
         edge_tpu_delegate = None
 
         try:
-            logger.info(f"Attempting to load TPU as {device_config['device']}")
+            device_type = (
+                device_config["device"] if "device" in device_config else "auto"
+            )
+            logger.info(f"Attempting to load TPU as {device_type}")
             edge_tpu_delegate = load_delegate("libedgetpu.so.1.0", device_config)
             logger.info("TPU found")
             self.interpreter = Interpreter(

@@ -78,7 +78,7 @@ class TensorRtDetector(DetectionApi):
         try:
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
-            ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")
+            ctypes.cdll.LoadLibrary("/usr/local/lib/libyolo_layer.so")
         except OSError as e:
             logger.error(
                 "ERROR: failed to load libraries. %s",
@@ -303,6 +303,7 @@ class TensorRtDetector(DetectionApi):
         ordered[:, 3] = np.clip(ordered[:, 3] + ordered[:, 1], 0, 1)
         # put result into the correct order and limit to top 20
         detections = ordered[:, [5, 4, 1, 0, 3, 2]][:20]
+
         # pad to 20x6 shape
         append_cnt = 20 - len(detections)
         if append_cnt > 0:

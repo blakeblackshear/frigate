@@ -3,9 +3,8 @@
 import logging
 import queue
 import threading
+from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-
-from faster_fifo import Queue
 
 from frigate.config import FrigateConfig
 from frigate.events.maintainer import EventTypeEnum
@@ -75,19 +74,39 @@ class TimelineProcessor(threading.Thread):
                     camera_config.detect.height,
                     event_data["region"],
                 ),
+                "attribute": "",
             },
         }
         if event_type == "start":
             timeline_entry[Timeline.class_type] = "visible"
             Timeline.insert(timeline_entry).execute()
-        elif (
-            event_type == "update"
-            and prev_event_data["current_zones"] != event_data["current_zones"]
-            and len(event_data["current_zones"]) > 0
-        ):
-            timeline_entry[Timeline.class_type] = "entered_zone"
-            timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
-            Timeline.insert(timeline_entry).execute()
+        elif event_type == "update":
+            # zones have been updated
+            if (
+                prev_event_data["current_zones"] != event_data["current_zones"]
+                and len(event_data["current_zones"]) > 0
+                and not event_data["stationary"]
+            ):
+                timeline_entry[Timeline.class_type] = "entered_zone"
+                timeline_entry[Timeline.data]["zones"] = event_data["current_zones"]
+                Timeline.insert(timeline_entry).execute()
+            elif prev_event_data["stationary"] != event_data["stationary"]:
+                timeline_entry[Timeline.class_type] = (
+                    "stationary" if event_data["stationary"] else "active"
+                )
+                Timeline.insert(timeline_entry).execute()
+            elif prev_event_data["attributes"] == {} and event_data["attributes"] != {}:
+                timeline_entry[Timeline.class_type] = "attribute"
+                timeline_entry[Timeline.data]["attribute"] = list(
+                    event_data["attributes"].keys()
+                )[0]
+                Timeline.insert(timeline_entry).execute()
         elif event_type == "end":
-            timeline_entry[Timeline.class_type] = "gone"
-            Timeline.insert(timeline_entry).execute()
+            if event_data["has_clip"] or event_data["has_snapshot"]:
+                timeline_entry[Timeline.class_type] = "gone"
+                Timeline.insert(timeline_entry).execute()
+            else:
+                # if event was not saved then the timeline entries should be deleted
+                Timeline.delete().where(
+                    Timeline.source_id == event_data["id"]
+                ).execute()

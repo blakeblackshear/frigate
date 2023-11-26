@@ -1,70 +1,77 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  title: 'Frigate',
-  tagline: 'NVR With Realtime Object Detection for IP Cameras',
-  url: 'https://docs.frigate.video',
-  baseUrl: '/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
-  organizationName: 'blakeblackshear',
-  projectName: 'frigate',
+  title: "Frigate",
+  tagline: "NVR With Realtime Object Detection for IP Cameras",
+  url: "https://docs.frigate.video",
+  baseUrl: "/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.ico",
+  organizationName: "blakeblackshear",
+  projectName: "frigate",
+  themes: ["@docusaurus/theme-mermaid"],
+  markdown: {
+    mermaid: true,
+  },
   themeConfig: {
     algolia: {
-      appId: 'WIURGBNBPY',
-      apiKey: 'd02cc0a6a61178b25da550212925226b',
-      indexName: 'frigate',
+      appId: "WIURGBNBPY",
+      apiKey: "d02cc0a6a61178b25da550212925226b",
+      indexName: "frigate",
     },
     docs: {
       sidebar: {
         hideable: true,
-      }
+      },
+    },
+    prism: {
+      additionalLanguages: ["bash", "json"],
     },
     navbar: {
-      title: 'Frigate',
+      title: "Frigate",
       logo: {
-        alt: 'Frigate',
-        src: 'img/logo.svg',
-        srcDark: 'img/logo-dark.svg',
+        alt: "Frigate",
+        src: "img/logo.svg",
+        srcDark: "img/logo-dark.svg",
       },
       items: [
         {
-          to: '/',
-          activeBasePath: 'docs',
-          label: 'Docs',
-          position: 'left',
+          to: "/",
+          activeBasePath: "docs",
+          label: "Docs",
+          position: "left",
         },
         {
-          href: 'https://frigate.video',
-          label: 'Website',
-          position: 'right',
+          href: "https://frigate.video",
+          label: "Website",
+          position: "right",
         },
         {
-          href: 'http://demo.frigate.video',
-          label: 'Demo',
-          position: 'right',
+          href: "http://demo.frigate.video",
+          label: "Demo",
+          position: "right",
         },
         {
-          href: 'https://github.com/blakeblackshear/frigate',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/blakeblackshear/frigate",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Community',
+          title: "Community",
           items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/blakeblackshear/frigate',
+              label: "GitHub",
+              href: "https://github.com/blakeblackshear/frigate",
             },
             {
-              label: 'Discussions',
-              href: 'https://github.com/blakeblackshear/frigate/discussions',
+              label: "Discussions",
+              href: "https://github.com/blakeblackshear/frigate/discussions",
             },
           ],
         },
@@ -72,21 +79,22 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Blake Blackshear`,
     },
   },
-  plugins: [path.resolve(__dirname, 'plugins', 'raw-loader')],
+  plugins: [path.resolve(__dirname, "plugins", "raw-loader")],
   presets: [
     [
-      '@docusaurus/preset-classic',
+      "@docusaurus/preset-classic",
       {
         docs: {
-          routeBasePath: '/',
-          sidebarPath: require.resolve('./sidebars.js'),
+          routeBasePath: "/",
+          sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: 'https://github.com/blakeblackshear/frigate/edit/master/docs/',
-          sidebarCollapsible: false
+          editUrl:
+            "https://github.com/blakeblackshear/frigate/edit/master/docs/",
+          sidebarCollapsible: false,
         },
 
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       },
     ],

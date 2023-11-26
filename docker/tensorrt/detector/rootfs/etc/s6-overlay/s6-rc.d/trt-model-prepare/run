@@ -1,0 +1,109 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Generate models for the TensorRT detector
+
+# One or more comma-separated models may be specified via the YOLO_MODELS env.
+# Append "-dla" to the model name to generate a DLA model with GPU fallback;
+# otherwise a GPU-only model will be generated.
+
+set -o errexit -o nounset -o pipefail
+
+MODEL_CACHE_DIR=${MODEL_CACHE_DIR:-"/config/model_cache/tensorrt"}
+TRT_VER=${TRT_VER:-$(cat /etc/TENSORRT_VER)}
+OUTPUT_FOLDER="${MODEL_CACHE_DIR}/${TRT_VER}"
+
+# Create output folder
+mkdir -p ${OUTPUT_FOLDER}
+
+FIRST_MODEL=true
+MODEL_DOWNLOAD=""
+MODEL_CONVERT=""
+
+for model in ${YOLO_MODELS//,/ }
+do
+    # Remove old link in case path/version changed
+    rm -f ${MODEL_CACHE_DIR}/${model}.trt
+
+    if [[ ! -f ${OUTPUT_FOLDER}/${model}.trt ]]; then
+        if [[ ${FIRST_MODEL} = true ]]; then
+            MODEL_DOWNLOAD="${model%-dla}";
+            MODEL_CONVERT="${model}"
+            FIRST_MODEL=false;
+        else
+            MODEL_DOWNLOAD+=",${model%-dla}";
+            MODEL_CONVERT+=",${model}";
+        fi
+    else
+        ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
+    fi
+done
+
+if [[ -z ${MODEL_CONVERT} ]]; then
+    echo "No models to convert."
+    exit 0
+fi
+
+# Setup ENV to select GPU for conversion
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
+    if [ ! -z ${CUDA_VISIBLE_DEVICES+x} ]; then
+        PREVIOUS_CVD="$CUDA_VISIBLE_DEVICES"
+        unset CUDA_VISIBLE_DEVICES
+    fi
+    export CUDA_VISIBLE_DEVICES="$TRT_MODEL_PREP_DEVICE"
+fi
+
+# On Jetpack 4.6, the nvidia container runtime will mount several host nvidia libraries into the
+# container which should not be present in the image - if they are, TRT model generation will
+# fail or produce invalid models. Thus we must request the user to install them on the host in
+# order to run libyolo here.
+# On Jetpack 5.0, these libraries are not mounted by the runtime and are supplied by the image.
+if [[ "$(arch)" == "aarch64" ]]; then
+    if [[ ! -e /usr/lib/aarch64-linux-gnu/tegra ]]; then
+        echo "ERROR: Container must be launched with nvidia runtime"
+        exit 1
+    elif [[ ! -e /usr/lib/aarch64-linux-gnu/libnvinfer.so.8 ||
+            ! -e /usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so.8 ||
+            ! -e /usr/lib/aarch64-linux-gnu/libnvparsers.so.8 ||
+            ! -e /usr/lib/aarch64-linux-gnu/libnvonnxparser.so.8 ]]; then
+        echo "ERROR: Please run the following on the HOST:"
+        echo "  sudo apt install libnvinfer8 libnvinfer-plugin8 libnvparsers8 libnvonnxparsers8 nvidia-container"
+        exit 1
+    fi
+fi
+
+echo "Generating the following TRT Models: ${MODEL_CONVERT}"
+
+# Build trt engine
+cd /usr/local/src/tensorrt_demos/yolo
+
+echo "Downloading yolo weights"
+./download_yolo.sh $MODEL_DOWNLOAD 2> /dev/null
+
+for model in ${MODEL_CONVERT//,/ }
+do
+    python3 yolo_to_onnx.py -m ${model%-dla} > /dev/null
+
+    echo -e "\nGenerating ${model}.trt. This may take a few minutes.\n"; start=$(date +%s)
+    if [[ $model == *-dla ]]; then
+        cmd="python3 onnx_to_tensorrt.py -m ${model%-dla} --dla_core 0"
+    else
+        cmd="python3 onnx_to_tensorrt.py -m ${model}"
+    fi
+    $cmd > /tmp/onnx_to_tensorrt.log || { cat /tmp/onnx_to_tensorrt.log && continue; }
+
+    mv ${model%-dla}.trt ${OUTPUT_FOLDER}/${model}.trt;
+    ln -s ${OUTPUT_FOLDER}/${model}.trt ${MODEL_CACHE_DIR}/${model}.trt
+    echo "Generated ${model}.trt in $(($(date +%s)-start)) seconds"
+done
+
+# Restore ENV after conversion
+if [ ! -z ${TRT_MODEL_PREP_DEVICE+x} ]; then
+    unset CUDA_VISIBLE_DEVICES
+    if [ ! -z ${PREVIOUS_CVD+x} ]; then
+        export CUDA_VISIBLE_DEVICES="$PREVIOUS_CVD"
+    fi
+fi
+
+# Print which models exist in output folder
+echo "Available tensorrt models:"
+cd ${OUTPUT_FOLDER} && ls *.trt;

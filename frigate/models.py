@@ -38,7 +38,9 @@ class Event(Model):  # type: ignore[misc]
         IntegerField()
     )  # TODO remove when columns can be dropped without rebuilding table
     retain_indefinitely = BooleanField(default=False)
-    ratio = FloatField(default=1.0)
+    ratio = FloatField(
+        default=1.0
+    )  # TODO remove when columns can be dropped without rebuilding table
     plus_id = CharField(max_length=30)
     model_hash = CharField(max_length=32)
     detector_type = CharField(max_length=32)
@@ -55,6 +57,12 @@ class Timeline(Model):  # type: ignore[misc]
     data = JSONField()  # ex: tracked object id, region, box, etc.
 
 
+class Regions(Model):  # type: ignore[misc]
+    camera = CharField(null=False, primary_key=True, max_length=20)
+    grid = JSONField()  # json blob of grid
+    last_update = DateTimeField()
+
+
 class Recordings(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)
@@ -64,6 +72,7 @@ class Recordings(Model):  # type: ignore[misc]
     duration = FloatField()
     motion = IntegerField(null=True)
     objects = IntegerField(null=True)
+    dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
 
 

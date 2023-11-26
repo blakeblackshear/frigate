@@ -116,7 +116,7 @@ export default function Camera({ camera }) {
   let player;
   if (viewMode === 'live') {
     if (viewSource == 'mse' && restreamEnabled) {
-      if ('MediaSource' in window) {
+      if ('MediaSource' in window || 'ManagedMediaSource' in window) {
         player = (
           <Fragment>
             <div className="max-w-5xl">
@@ -133,7 +133,7 @@ export default function Camera({ camera }) {
         player = (
           <Fragment>
             <div className="w-5xl text-center text-sm">
-              MSE is not supported on iOS devices. You'll need to use jsmpeg or webRTC. See the docs for more info.
+            MSE is only supported on iOS 17.1+. You'll need to update if available or use jsmpeg / webRTC streams. See the docs for more info.
             </div>
           </Fragment>
         );
@@ -212,7 +212,7 @@ export default function Camera({ camera }) {
               key={objectType}
               header={objectType}
               href={`/events?cameras=${camera}&labels=${encodeURIComponent(objectType)}`}
-              media={<img src={`${apiHost}/api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
+              media={<img src={`${apiHost}api/${camera}/${encodeURIComponent(objectType)}/thumbnail.jpg`} />}
             />
           ))}
         </div>

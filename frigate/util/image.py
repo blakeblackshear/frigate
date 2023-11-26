@@ -4,13 +4,36 @@ import datetime
 import logging
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
+from string import printable
 from typing import AnyStr, Optional
 
 import cv2
 import numpy as np
 from PIL import Image
+from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
+
+
+def transliterate_to_latin(text: str) -> str:
+    """
+    Transliterate a given text to Latin.
+
+    This function uses the unidecode library to transliterate the input text to Latin.
+    It is useful for converting texts with diacritics or non-Latin characters to a
+    Latin equivalent.
+
+    Args:
+        text (str): The text to be transliterated.
+
+    Returns:
+        str: The transliterated text.
+
+    Example:
+        >>> transliterate_to_latin('frégate')
+        'fregate'
+    """
+    return unidecode(text)
 
 
 def draw_timestamp(
@@ -116,7 +139,10 @@ def draw_box_with_label(
 ):
     if color is None:
         color = (0, 0, 255)
-    display_text = "{}: {}".format(label, info)
+    try:
+        display_text = transliterate_to_latin("{}: {}".format(label, info))
+    except Exception:
+        display_text = "{}: {}".format(label, info)
     cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, thickness)
     font_scale = 0.5
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -153,6 +179,11 @@ def draw_box_with_label(
         color=(0, 0, 0),
         thickness=2,
     )
+
+
+def is_label_printable(label) -> bool:
+    """Check if label is printable."""
+    return not bool(set(label) - set(printable))
 
 
 def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier=2):
@@ -282,17 +313,14 @@ def yuv_crop_and_resize(frame, region, height=None):
     # copy u2
     yuv_cropped_frame[
         size + uv_channel_y_offset : size + uv_channel_y_offset + uv_crop_height,
-        size // 2
-        + uv_channel_x_offset : size // 2
+        size // 2 + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[u2[1] : u2[3], u2[0] : u2[2]]
 
     # copy v1
     yuv_cropped_frame[
-        size
-        + size // 4
-        + uv_channel_y_offset : size
+        size + size // 4 + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
@@ -301,14 +329,11 @@ def yuv_crop_and_resize(frame, region, height=None):
 
     # copy v2
     yuv_cropped_frame[
-        size
-        + size // 4
-        + uv_channel_y_offset : size
+        size + size // 4 + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
-        size // 2
-        + uv_channel_x_offset : size // 2
+        size // 2 + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[v2[1] : v2[3], v2[0] : v2[2]]

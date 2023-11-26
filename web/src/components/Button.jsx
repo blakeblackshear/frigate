@@ -65,7 +65,9 @@ export default function Button({
   className = '',
   color = 'blue',
   disabled = false,
+  ariaCapitalize = false,
   href,
+  target,
   type = 'contained',
   ...attrs
 }) {
@@ -100,6 +102,7 @@ export default function Button({
         tabindex="0"
         className={classes}
         href={href}
+        target={target}
         ref={ref}
         onmouseenter={handleMousenter}
         onmouseleave={handleMouseleave}
@@ -107,7 +110,7 @@ export default function Button({
       >
         {children}
       </Element>
-      {hovered && attrs['aria-label'] ? <Tooltip text={attrs['aria-label']} relativeTo={ref} /> : null}
+      {hovered && attrs['aria-label'] ? <Tooltip text={attrs['aria-label']} relativeTo={ref} capitalize={ariaCapitalize} /> : null}
     </Fragment>
   );
 }

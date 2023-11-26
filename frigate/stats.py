@@ -22,6 +22,7 @@ from frigate.util.services import (
     get_bandwidth_stats,
     get_cpu_stats,
     get_intel_gpu_stats,
+    get_jetson_stats,
     get_nvidia_gpu_stats,
 )
 from frigate.version import VERSION
@@ -175,10 +176,21 @@ async def set_gpu_stats(
                     stats[nvidia_usage[i]["name"]] = {
                         "gpu": str(round(float(nvidia_usage[i]["gpu"]), 2)) + "%",
                         "mem": str(round(float(nvidia_usage[i]["mem"]), 2)) + "%",
+                        "enc": str(round(float(nvidia_usage[i]["enc"]), 2)) + "%",
+                        "dec": str(round(float(nvidia_usage[i]["dec"]), 2)) + "%",
                     }
 
             else:
                 stats["nvidia-gpu"] = {"gpu": -1, "mem": -1}
+                hwaccel_errors.append(args)
+        elif "nvmpi" in args or "jetson" in args:
+            # nvidia Jetson
+            jetson_usage = get_jetson_stats()
+
+            if jetson_usage:
+                stats["jetson-gpu"] = jetson_usage
+            else:
+                stats["jetson-gpu"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
         elif "qsv" in args:
             if not config.telemetry.stats.intel_gpu_stats:
@@ -236,6 +248,7 @@ def stats_snapshot(
 
     total_detection_fps = 0
 
+    stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
         total_detection_fps += camera_stats["detection_fps"].value
         pid = camera_stats["process"].pid if camera_stats["process"] else None
@@ -247,7 +260,7 @@ def stats_snapshot(
             if camera_stats["capture_process"]
             else None
         )
-        stats[name] = {
+        stats["cameras"][name] = {
             "camera_fps": round(camera_stats["camera_fps"].value, 2),
             "process_fps": round(camera_stats["process_fps"].value, 2),
             "skipped_fps": round(camera_stats["skipped_fps"].value, 2),
@@ -256,6 +269,8 @@ def stats_snapshot(
             "pid": pid,
             "capture_pid": cpid,
             "ffmpeg_pid": ffmpeg_pid,
+            "audio_rms": round(camera_stats["audio_rms"].value, 4),
+            "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),
         }
 
     stats["detectors"] = {}
@@ -288,6 +303,7 @@ def stats_snapshot(
             storage_stats = shutil.disk_usage(path)
         except FileNotFoundError:
             stats["service"]["storage"][path] = {}
+            continue
 
         stats["service"]["storage"][path] = {
             "total": round(storage_stats.total / pow(2, 20), 1),
