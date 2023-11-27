@@ -42,7 +42,6 @@ class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
-
         # create symlink for Home Assistant add on
         if not os.path.isfile("/proc/device-tree/compatible"):
             if os.path.isfile("/device-tree/compatible"):
