@@ -46,7 +46,7 @@ class Rknn(DetectionApi):
         # create symlink for Home Assistant add on
         if not os.path.isfile("/proc/device-tree/compatible"):
             if os.path.isfile("/device-tree/compatible"):
-                os.symlink("/proc/device-tree/compatible", "/device-tree/compatible")
+                os.symlink("/device-tree/compatible", "/proc/device-tree/compatible")
 
         # find out SoC
         try:
