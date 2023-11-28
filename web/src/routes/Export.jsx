@@ -213,7 +213,7 @@ export default function Export() {
         </div>
 
         {exports && (
-          <div className="p-4 bg-gray-800 xl:w-1/2">
+          <div className="p-4 bg-gray-200 dark:bg-gray-800 xl:w-1/2">
             <Heading size="md">Exports</Heading>
             <Exports
               exports={exports}
@@ -231,7 +231,7 @@ function Exports({ exports, onSetClip, onDeleteClip }) {
   return (
     <Fragment>
       {exports.map((item) => (
-        <div className="my-4 p-4 bg-gray-700" key={item.name}>
+        <div className="my-4 p-4 bg-gray-100 dark:bg-gray-700" key={item.name}>
           {item.name.startsWith('in_progress') ? (
             <div className="flex justify-start text-center items-center">
               <div>
