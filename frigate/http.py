@@ -16,6 +16,7 @@ from urllib.parse import unquote
 import cv2
 import numpy as np
 import pytz
+import requests
 from flask import (
     Blueprint,
     Flask,
@@ -1343,6 +1344,22 @@ def config_schema():
     return current_app.response_class(
         current_app.frigate_config.schema_json(), mimetype="application/json"
     )
+
+
+@bp.route("/go2rtc/streams")
+def go2rtc_streams():
+    r = requests.get("http://127.0.0.1:1984/api/streams")
+    if not r.ok:
+        logger.error("Failed to fetch streams from go2rtc")
+        return make_response(
+            jsonify({"success": False, "message": "Error fetching stream data"}),
+            500,
+        )
+    stream_data = r.json()
+    for data in stream_data.values():
+        for producer in data["producers"]:
+            producer["url"] = clean_camera_user_pass(producer["url"])
+    return jsonify(stream_data)
 
 
 @bp.route("/version")
