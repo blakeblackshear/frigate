@@ -1,5 +1,6 @@
 """Handle outputting low res / fps preview segments from decoded frames."""
 
+import datetime
 import logging
 import multiprocessing as mp
 import os
@@ -144,6 +145,13 @@ class PreviewRecorder:
             "v2": v2,
         }
 
+        # end segment at end of hour
+        self.segment_end = (
+            (datetime.datetime.now() + datetime.timedelta(hours=1))
+            .replace(minute=0, second=0, microsecond=0)
+            .timestamp()
+        )
+
         Path(os.path.join(CACHE_DIR, "preview_frames")).mkdir(exist_ok=True)
         Path(os.path.join(CLIPS_DIR, f"previews/{config.name}")).mkdir(
             parents=True, exist_ok=True
@@ -216,7 +224,7 @@ class PreviewRecorder:
             self.write_frame_to_cache(frame_time, frame)
 
         # check if PREVIEW clip should be generated and cached frames reset
-        if frame_time - self.start_time >= PREVIEW_SEGMENT_DURATION:
+        if frame_time >= self.segment_end:
             # save last frame to ensure consistent duration
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
@@ -227,6 +235,11 @@ class PreviewRecorder:
             ).start()
 
             # reset frame cache
+            self.segment_end = (
+                (datetime.datetime.now() + datetime.timedelta(hours=1))
+                .replace(minute=0, second=0, microsecond=0)
+                .timestamp()
+            )
             self.start_time = frame_time
             self.last_output_time = frame_time
             self.output_frames = []
