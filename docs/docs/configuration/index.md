@@ -408,7 +408,7 @@ snapshots:
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
   # Optional: draw bounding box on the snapshots (default: shown below)
-  bounding_box: False
+  bounding_box: True
   # Optional: crop the snapshot (default: shown below)
   crop: False
   # Optional: height to resize the snapshot to (default: original size)
