@@ -97,7 +97,7 @@ class FFMpegConverter(threading.Thread):
         end = self.frame_times[-1]
 
         if p.returncode == 0:
-            logger.info("successfully saved preview")
+            logger.debug("successfully saved preview")
             self.inter_process_queue.put_nowait(
                 (
                     INSERT_PREVIEW,
@@ -128,8 +128,8 @@ class PreviewRecorder:
         self.last_output_time = 0
         self.output_frames = []
         self.out_height = 160
-        self.out_width = int(
-            (config.detect.width / config.detect.height) * self.out_height
+        self.out_width = (
+            int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
         )
 
         y, u1, u2, v1, v2 = get_yuv_crop(
@@ -252,4 +252,7 @@ class PreviewRecorder:
             self.write_frame_to_cache(frame_time, frame)
 
     def stop(self) -> None:
-        shutil.rmtree(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))
+        try:
+            shutil.rmtree(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))
+        except FileNotFoundError:
+            pass
