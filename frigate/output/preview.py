@@ -27,9 +27,8 @@ logger = logging.getLogger(__name__)
 FOLDER_PREVIEW_FRAMES = "preview_frames"
 PREVIEW_OUTPUT_FPS = 1
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
-PREVIEW_KEYFRAME_INTERVAL = (
-    PREVIEW_SEGMENT_DURATION / 10
-)  # maximum of 8 keyframes per segment
+# important to have lower keyframe to maintain scrubbing performance
+PREVIEW_KEYFRAME_INTERVAL = 60
 
 
 def get_cache_image_name(camera: str, frame_time: float) -> str:
@@ -50,7 +49,7 @@ class FFMpegConverter(threading.Thread):
         inter_process_queue: mp.Queue,
     ):
         threading.Thread.__init__(self)
-        self.name = f"{config.name}_output_converter"
+        self.name = f"{config.name}_preview_converter"
         self.camera = config.name
         self.frame_times = frame_times
         self.inter_process_queue = inter_process_queue
@@ -69,18 +68,23 @@ class FFMpegConverter(threading.Thread):
 
     def run(self) -> None:
         # generate input list
-        last = self.frame_times[0]
+        item_count = len(self.frame_times)
         playlist = []
 
-        for t in self.frame_times:
-            playlist.append(f"file '{get_cache_image_name(self.camera, t)}'")
-            playlist.append(f"duration {t - last}")
-            last = t
+        for t_idx in range(0, item_count):
+            if t_idx == item_count - 1:
+                # last frame does not get a duration
+                playlist.append(
+                    f"file '{get_cache_image_name(self.camera, self.frame_times[t_idx])}'"
+                )
+                continue
 
-        # last frame must be included again with no duration
-        playlist.append(
-            f"file '{get_cache_image_name(self.camera, self.frame_times[-1])}'"
-        )
+            playlist.append(
+                f"file '{get_cache_image_name(self.camera, self.frame_times[t_idx])}'"
+            )
+            playlist.append(
+                f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
+            )
 
         p = sp.run(
             self.ffmpeg_cmd.split(" "),
@@ -98,7 +102,7 @@ class FFMpegConverter(threading.Thread):
                 (
                     INSERT_PREVIEW,
                     {
-                        Previews.id: f"{end}-{start}",
+                        Previews.id: f"{self.camera}_{end}",
                         Previews.camera: self.camera,
                         Previews.path: self.path,
                         Previews.start_time: start,
@@ -176,8 +180,7 @@ class PreviewRecorder:
             self.last_output_time = frame_time
             return True
 
-        # TODO think of real motion box logic to use
-        if len(motion_boxes) % 2 == 1:
+        if len(motion_boxes) > 0:
             self.last_output_time = frame_time
             return True
 
