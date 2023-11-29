@@ -128,9 +128,6 @@ class TrackedObject:
         self.frame = None
         self.previous = self.to_dict()
 
-        # start the score history
-        self.score_history = [self.obj_data["score"]]
-
     def _is_false_positive(self):
         # once a true positive, always a true positive
         if not self.false_positive:
