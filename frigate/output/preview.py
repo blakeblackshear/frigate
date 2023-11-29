@@ -12,7 +12,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW
 from frigate.ffmpeg_presets import (
     FPS_VFR_PARAM,
@@ -29,6 +29,13 @@ PREVIEW_OUTPUT_FPS = 1
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 60
+PREVIEW_BIT_RATES = {
+    RecordQualityEnum.very_low: 4096,
+    RecordQualityEnum.low: 6144,
+    RecordQualityEnum.medium: 8192,
+    RecordQualityEnum.high: 12288,
+    RecordQualityEnum.very_high: 16384,
+}
 
 
 def get_cache_image_name(camera: str, frame_time: float) -> str:
@@ -50,19 +57,19 @@ class FFMpegConverter(threading.Thread):
     ):
         threading.Thread.__init__(self)
         self.name = f"{config.name}_preview_converter"
-        self.camera = config.name
+        self.config = config
         self.frame_times = frame_times
         self.inter_process_queue = inter_process_queue
         self.path = os.path.join(
             CLIPS_DIR,
-            f"previews/{self.camera}/{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
+            f"previews/{self.config.name}/{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
         )
 
         # write a PREVIEW at fps and 1 key frame per clip
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
             config.ffmpeg.hwaccel_args,
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -i /dev/stdin",
-            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax {PREVIEW_OUTPUT_FPS} -bf 0 -b:v 9820 {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax {PREVIEW_OUTPUT_FPS} -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
@@ -75,12 +82,12 @@ class FFMpegConverter(threading.Thread):
             if t_idx == item_count - 1:
                 # last frame does not get a duration
                 playlist.append(
-                    f"file '{get_cache_image_name(self.camera, self.frame_times[t_idx])}'"
+                    f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
                 )
                 continue
 
             playlist.append(
-                f"file '{get_cache_image_name(self.camera, self.frame_times[t_idx])}'"
+                f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
             )
             playlist.append(
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
@@ -102,8 +109,8 @@ class FFMpegConverter(threading.Thread):
                 (
                     INSERT_PREVIEW,
                     {
-                        Previews.id: f"{self.camera}_{end}",
-                        Previews.camera: self.camera,
+                        Previews.id: f"{self.config.name}_{end}",
+                        Previews.camera: self.config.name,
                         Previews.path: self.path,
                         Previews.start_time: start,
                         Previews.end_time: end,
@@ -112,12 +119,12 @@ class FFMpegConverter(threading.Thread):
                 )
             )
         else:
-            logger.error(f"Error saving preview for {self.camera} :: {p.stderr}")
+            logger.error(f"Error saving preview for {self.config.name} :: {p.stderr}")
 
         # unlink files from cache
         # don't delete last frame as it will be used as first frame in next segment
         for t in self.frame_times[0:-1]:
-            Path(get_cache_image_name(self.camera, t)).unlink(missing_ok=True)
+            Path(get_cache_image_name(self.config.name, t)).unlink(missing_ok=True)
 
 
 class PreviewRecorder:
