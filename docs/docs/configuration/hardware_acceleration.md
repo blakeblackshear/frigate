@@ -137,7 +137,11 @@ Depending on your OS and kernel configuration, you may need to change the `/proc
 
 VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
-**Note:** You also need to set `LIBVA_DRIVER_NAME=radeonsi` as an environment variable on the container.
+:::note
+
+You need to change the driver to `radeonsi` by adding the following environment variable `LIBVA_DRIVER_NAME=radeonsi` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
+
+:::
 
 ```yaml
 ffmpeg:
