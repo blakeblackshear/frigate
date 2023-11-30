@@ -128,6 +128,7 @@ class RecordingCleanup(threading.Thread):
             )
             .order_by(Previews.start_time)
             .namedtuples()
+            .iterator()
         )
 
         # expire previews
