@@ -50,7 +50,7 @@
     "eslint-plugin-vitest-globals": "^1.4.0",
     "fake-indexeddb": "^4.0.1",
     "jest-websocket-mock": "^2.5.0",
-    "jsdom": "^22.0.0",
+    "jsdom": "^23.0.1",
     "msw": "^1.2.1",
     "postcss": "^8.4.29",
     "prettier": "^3.0.3",
