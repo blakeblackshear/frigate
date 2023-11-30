@@ -62,6 +62,7 @@ class RecordingCleanup(threading.Thread):
         # TODO: expire segments based on segment stats according to config
         event_start = 0
         deleted_recordings = set()
+        kept_recordings: list[tuple[float, float]] = []
         for recording in recordings:
             keep = False
             # Now look for a reason to keep this recording segment
@@ -101,7 +102,10 @@ class RecordingCleanup(threading.Thread):
             ):
                 Path(recording.path).unlink(missing_ok=True)
                 deleted_recordings.add(recording.id)
+            else:
+                kept_recordings.append((recording.start_time, recording.end_time))
 
+        # expire recordings
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
         max_deletes = 100000
@@ -111,11 +115,6 @@ class RecordingCleanup(threading.Thread):
                 Recordings.id << deleted_recordings_list[i : i + max_deletes]
             ).execute()
 
-    def expire_existing_camera_previews(
-        self, expire_date: float, config: CameraConfig, events: Event
-    ) -> None:
-        """Delete previews for existing camera based on record retention config."""
-        # Get previews to check for expiration
         previews: Previews = (
             Previews.select(
                 Previews.id,
@@ -129,44 +128,43 @@ class RecordingCleanup(threading.Thread):
             )
             .order_by(Previews.start_time)
             .namedtuples()
-            .iterator()
         )
 
-        # loop over previews and see if they overlap with any non-expired events
-        # TODO: expire segments based on segment stats according to config
-        event_start = 0
+        # expire previews
+        recording_start = 0
         deleted_previews = set()
         for preview in previews:
             keep = False
-            # Now look for a reason to keep this previews segment
-            for idx in range(event_start, len(events)):
-                event: Event = events[idx]
+            # look for a reason to keep this preview
+            for idx in range(recording_start, len(kept_recordings)):
+                start_time, end_time = kept_recordings[idx]
 
-                # if the event starts in the future, stop checking events
+                # if the recording starts in the future, stop checking recordings
                 # and let this preview expire
-                if event.start_time > preview.end_time:
+                if start_time > preview.end_time:
                     keep = False
                     break
 
-                # if the event is in progress or ends after the preview starts, keep it
-                # and stop looking at events
-                if event.end_time is None or event.end_time >= preview.start_time:
+                # if the recording ends after the preview starts, keep it
+                # and stop looking at recordings
+                if end_time >= preview.start_time:
                     keep = True
                     break
 
-                # if the event ends before this preview starts, skip
-                # this event and check the next event for an overlap.
-                # since the events and recordings are sorted, we can skip events
-                # that end before the previous preview started on future previews
-                if event.end_time < preview.start_time:
-                    event_start = idx
+                # if the recording ends before this preview starts, skip
+                # this recording and check the next recording for an overlap.
+                # since the kept recordings and previews are sorted, we can skip recordings
+                # that end before the current preview started
+                if end_time < preview.start_time:
+                    recording_start = idx
 
-            # Delete previews outside of the retention window or based on the retention mode
+            # Delete previews without any relevant recordings
             if not keep:
                 Path(preview.path).unlink(missing_ok=True)
                 deleted_previews.add(preview.id)
 
-        logger.debug(f"Expiring {len(deleted_previews)} recordings")
+        # expire previews
+        logger.debug(f"Expiring {len(deleted_previews)} previews")
         # delete up to 100,000 at a time
         max_deletes = 100000
         deleted_previews_list = list(deleted_previews)
@@ -240,7 +238,6 @@ class RecordingCleanup(threading.Thread):
             )
 
             self.expire_existing_camera_recordings(expire_date, config, events)
-            self.expire_existing_camera_previews(expire_date, config, events)
             logger.debug(f"End camera: {camera}.")
 
         logger.debug("End all cameras.")
