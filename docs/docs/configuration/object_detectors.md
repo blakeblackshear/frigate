@@ -37,6 +37,12 @@ The EdgeTPU device can be specified using the `"device"` attribute according to 
 
 A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
 
+:::tip
+
+See [common Edge-TPU troubleshooting steps](/troubleshooting/edgetpu) if the EdgeTPu is not detected.
+
+:::
+
 ### Single USB Coral
 
 ```yaml
