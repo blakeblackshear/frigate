@@ -60,7 +60,11 @@ module.exports = {
       "integrations/third_party_extensions",
     ],
     "Frigate+": ["plus/index"],
-    Troubleshooting: ["troubleshooting/faqs", "troubleshooting/recordings"],
+    Troubleshooting: [
+      "troubleshooting/faqs", 
+      "troubleshooting/recordings",
+      "troubleshooting/edgetpu",
+    ],
     Development: [
       "development/contributing",
       "development/contributing-boards",
