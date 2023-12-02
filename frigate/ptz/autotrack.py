@@ -241,7 +241,7 @@ class PtzAutoTracker:
         # handle onvif constructor failing due to no connection
         if camera not in self.onvif.cams:
             logger.warning(
-                f"onvif connection to {camera} failed. Disabling autotracking."
+                f" Disabling autotracking for {camera}: onvif connection failed"
             )
             camera_config.onvif.autotracking.enabled = False
             self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
