@@ -238,6 +238,16 @@ class PtzAutoTracker:
         self.move_queues[camera] = queue.Queue()
         self.move_queue_locks[camera] = threading.Lock()
 
+        # handle onvif constructor failing due to no connection
+        if camera not in self.onvif.cams:
+            logger.warning(
+                f"onvif connection to {camera} failed. Disabling autotracking."
+            )
+            camera_config.onvif.autotracking.enabled = False
+            self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
+
+            return
+
         if not self.onvif.cams[camera]["init"]:
             if not self.onvif._init_onvif(camera):
                 logger.warning(f"Unable to initialize onvif for {camera}")
