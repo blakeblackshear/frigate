@@ -245,7 +245,6 @@ class PtzAutoTracker:
             )
             camera_config.onvif.autotracking.enabled = False
             self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
-
             return
 
         if not self.onvif.cams[camera]["init"]:
@@ -253,27 +252,24 @@ class PtzAutoTracker:
                 logger.warning(f"Unable to initialize onvif for {camera}")
                 camera_config.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
-
                 return
 
             if "pt-r-fov" not in self.onvif.cams[camera]["features"]:
-                camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera}: FOV relative movement not supported"
                 )
-
+                camera_config.onvif.autotracking.enabled = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 return
 
             movestatus_supported = self.onvif.get_service_capabilities(camera)
 
             if movestatus_supported is None or movestatus_supported.lower() != "true":
-                camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera}: ONVIF MoveStatus not supported"
                 )
-
+                camera_config.onvif.autotracking.enabled = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 return
 
         if self.onvif.cams[camera]["init"]:
