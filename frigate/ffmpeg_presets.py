@@ -42,6 +42,11 @@ class LibvaGpuSelector:
         return ""
 
 
+FPS_VFR_PARAM = (
+    "-fps_mode vfr"
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    else "-vsync 2"
+)
 TIMEOUT_PARAM = (
     "-timeout"
     if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
@@ -114,6 +119,11 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
 
+# encoding of previews is only done on CPU due to comparable encode times and better quality from libx264
+PRESETS_HW_ACCEL_ENCODE_PREVIEW = {
+    "default": "ffmpeg -hide_banner {0} -c:v libx264 -profile:v baseline -preset:v ultrafast {1}",
+}
+
 
 def parse_preset_hardware_acceleration_decode(
     arg: Any,
@@ -153,6 +163,7 @@ def parse_preset_hardware_acceleration_scale(
 
 class EncodeTypeEnum(str, Enum):
     birdseye = "birdseye"
+    preview = "preview"
     timelapse = "timelapse"
 
 
@@ -162,6 +173,8 @@ def parse_preset_hardware_acceleration_encode(
     """Return the correct scaling preset or default preset if none is set."""
     if type == EncodeTypeEnum.birdseye:
         arg_map = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE
+    elif type == EncodeTypeEnum.preview:
+        arg_map = PRESETS_HW_ACCEL_ENCODE_PREVIEW
     elif type == EncodeTypeEnum.timelapse:
         arg_map = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE
 
