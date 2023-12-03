@@ -325,6 +325,11 @@ record:
     # The -r (framerate) dictates how smooth the output video is.
     # So the args would be -vf setpts=0.02*PTS -r 30 in that case.
     timelapse_args: "-vf setpts=0.04*PTS -r 30"
+  # Optional: Recording Preview Settings
+  preview:
+    # Optional: Quality of recording preview (default: shown below).
+    # Options are: very_low, low, medium, high, very_high
+    quality: medium
   # Optional: Event recording settings
   events:
     # Optional: Number of seconds before the event to include (default: shown below)
