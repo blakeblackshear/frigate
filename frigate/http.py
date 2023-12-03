@@ -43,7 +43,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Recordings, Regions, Timeline
+from frigate.models import Event, Previews, Recordings, Regions, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
@@ -1845,7 +1845,6 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
     )
 
 
-# TODO make this nicer when vod module is removed
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
 def vod_hour(year_month, day, hour, camera_name, tz_name):
     parts = year_month.split("-")
@@ -1858,6 +1857,66 @@ def vod_hour(year_month, day, hour, camera_name, tz_name):
     end_ts = end_date.timestamp()
 
     return vod_ts(camera_name, start_ts, end_ts)
+
+
+@bp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
+@bp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
+def preview_ts(camera_name, start_ts, end_ts):
+    """Get all mp4 previews relevant for time period."""
+    previews = (
+        Previews.select(
+            Previews.path, Previews.duration, Previews.start_time, Previews.end_time
+        )
+        .where(
+            Previews.start_time.between(start_ts, end_ts)
+            | Previews.end_time.between(start_ts, end_ts)
+            | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+        )
+        .where(Previews.camera == camera_name)
+        .order_by(Previews.start_time.asc())
+        .iterator()
+    )
+
+    clips = []
+
+    preview: Previews
+    for preview in previews:
+        clips.append(
+            {
+                "src": preview.path.replace("/media/frigate", ""),
+                "type": "video/mp4",
+                "start": preview.start_time,
+                "end": preview.end_time,
+            }
+        )
+
+    if not clips:
+        logger.error("No previews found for the requested time range")
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "No previews found.",
+                }
+            ),
+            404,
+        )
+
+    return make_response(jsonify(clips), 200)
+
+
+@bp.route("/preview/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+def preview_hour(year_month, day, hour, camera_name, tz_name):
+    parts = year_month.split("-")
+    start_date = (
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+    )
+    end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
+    start_ts = start_date.timestamp()
+    end_ts = end_date.timestamp()
+
+    return preview_ts(camera_name, start_ts, end_ts)
 
 
 @bp.route("/vod/event/<id>")
