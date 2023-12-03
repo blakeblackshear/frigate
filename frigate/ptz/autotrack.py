@@ -238,32 +238,40 @@ class PtzAutoTracker:
         self.move_queues[camera] = queue.Queue()
         self.move_queue_locks[camera] = threading.Lock()
 
+        # handle onvif constructor failing due to no connection
+        if camera not in self.onvif.cams:
+            logger.warning(
+                f"Disabling autotracking for {camera}: onvif connection failed"
+            )
+            camera_config.onvif.autotracking.enabled = False
+            self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
+            return
+
         if not self.onvif.cams[camera]["init"]:
             if not self.onvif._init_onvif(camera):
-                logger.warning(f"Unable to initialize onvif for {camera}")
+                logger.warning(
+                    f"Disabling autotracking for {camera}: Unable to initialize onvif"
+                )
                 camera_config.onvif.autotracking.enabled = False
                 self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
-
                 return
 
             if "pt-r-fov" not in self.onvif.cams[camera]["features"]:
-                camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera}: FOV relative movement not supported"
                 )
-
+                camera_config.onvif.autotracking.enabled = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 return
 
             movestatus_supported = self.onvif.get_service_capabilities(camera)
 
             if movestatus_supported is None or movestatus_supported.lower() != "true":
-                camera_config.onvif.autotracking.enabled = False
-                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 logger.warning(
                     f"Disabling autotracking for {camera}: ONVIF MoveStatus not supported"
                 )
-
+                camera_config.onvif.autotracking.enabled = False
+                self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 return
 
         if self.onvif.cams[camera]["init"]:
