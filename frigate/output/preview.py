@@ -229,10 +229,6 @@ class PreviewRecorder:
             self.write_frame_to_cache(frame_time, frame)
             return
 
-        if self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
-
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
             # save last frame to ensure consistent duration
@@ -255,6 +251,9 @@ class PreviewRecorder:
             self.output_frames = []
 
             # include first frame to ensure consistent duration
+            self.output_frames.append(frame_time)
+            self.write_frame_to_cache(frame_time, frame)
+        elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
 
