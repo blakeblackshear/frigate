@@ -34,10 +34,18 @@ export default function TimelineSummary({ event, onFrameSelected }) {
 
   const [timeIndex, setTimeIndex] = useState(-1);
 
-  const recordingParams = {
-    before: event.end_time || Date.now(),
-    after: event.start_time,
-  };
+  const recordingParams = useMemo(() => {
+    if (!event.end_time) {
+      return {
+        after: event.start_time,
+      };
+    }
+
+    return {
+      before: event.end_time,
+      after: event.start_time,
+    };
+  }, [event]);
   const { data: recordings } = useSWR([`${event.camera}/recordings`, recordingParams], { revalidateOnFocus: false });
 
   // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
