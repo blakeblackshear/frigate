@@ -137,6 +137,13 @@ function getTimelineIcon(timelineItem) {
         default:
           return <DeliveryTruckIcon className="w-8" />;
       }
+    case 'sub_label':
+      switch (timelineItem.data.label) {
+        case 'person':
+          return <FaceIcon className="w-8" />;
+        case 'car':
+          return <LicensePlateIcon className="w-8" />;
+      }
   }
 }
 

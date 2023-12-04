@@ -106,7 +106,7 @@ class TimelineProcessor(threading.Thread):
                 prev_event_data.get("sub_label") is None
                 and event_data.get("sub_label") is not None
             ):
-                sub_label = event_data["sub_label"]
+                sub_label = event_data["sub_label"][0]
 
                 if sub_label not in ALL_ATTRIBUTE_LABELS:
                     timeline_entry[Timeline.class_type] = "sub_label"
