@@ -19,16 +19,7 @@ export default defineConfig({
       },
       '/exports': {
         target: 'http://localhost:5000'
-      },
-      '/ws': {
-        target: 'ws://localhost:5000',
-        ws: true,
-      },
-      '/live': {
-        target: 'ws://localhost:5000',
-        changeOrigin: true,
-        ws: true,
-      },
+      }
     }
   },
   plugins: [
