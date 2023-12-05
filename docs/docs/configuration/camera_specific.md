@@ -127,6 +127,20 @@ cameras:
             - detect
 ```
 
+#### Reolink Doorbell
+
+The reolink doorbell supports 2-way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
+
+```yaml
+go2rtc:
+  streams:
+    your_reolink_doorbell:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
+      - rtsp://reolink_ip/Preview_01_sub
+    your_reolink_doorbell_sub:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+```
+
 ### Unifi Protect Cameras
 
 Unifi protect cameras require the rtspx stream to be used with go2rtc.
