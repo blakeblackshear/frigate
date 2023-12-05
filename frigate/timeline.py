@@ -103,8 +103,8 @@ class TimelineProcessor(threading.Thread):
                 )[0]
                 Timeline.insert(timeline_entry).execute()
             elif (
-                prev_event_data.get("sub_label") is None
-                and event_data.get("sub_label") is not None
+                not prev_event_data.get("sub_label")
+                and event_data.get("sub_label")
             ):
                 sub_label = event_data["sub_label"][0]
 
