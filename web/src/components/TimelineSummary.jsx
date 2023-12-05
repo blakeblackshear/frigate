@@ -145,6 +145,13 @@ function getTimelineIcon(timelineItem) {
         default:
           return <DeliveryTruckIcon className="w-8" />;
       }
+    case 'sub_label':
+      switch (timelineItem.data.label) {
+        case 'person':
+          return <FaceIcon className="w-8" />;
+        case 'car':
+          return <LicensePlateIcon className="w-8" />;
+      }
   }
 }
 
@@ -176,8 +183,24 @@ function getTimelineItemDescription(config, timelineItem, event) {
         time_style: 'medium',
         time_format: config.ui.time_format,
       })}`;
-    case 'attribute':
-      return `${timelineItem.data.attribute.replaceAll("_", " ")} detected for ${event.label} at ${formatUnixTimestampToDateTime(
+    case 'attribute': {
+      let title = "";
+      if (timelineItem.data.attribute == 'face' || timelineItem.data.attribute == 'license_plate') {
+        title = `${timelineItem.data.attribute.replaceAll("_", " ")} detected for ${event.label}`;
+      } else {
+        title = `${event.label} recognized as ${timelineItem.data.attribute.replaceAll("_", " ")}`
+      }
+      return `${title} at ${formatUnixTimestampToDateTime(
+        timelineItem.timestamp,
+        {
+          date_style: 'short',
+          time_style: 'medium',
+          time_format: config.ui.time_format,
+        }
+      )}`;
+    }
+    case 'sub_label':
+      return `${event.label} recognized as ${timelineItem.data.sub_label} at ${formatUnixTimestampToDateTime(
         timelineItem.timestamp,
         {
           date_style: 'short',

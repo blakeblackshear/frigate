@@ -7,6 +7,7 @@ from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
+from frigate.const import ALL_ATTRIBUTE_LABELS
 from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Timeline
 from frigate.util.builtin import to_relative_box
@@ -101,6 +102,13 @@ class TimelineProcessor(threading.Thread):
                     event_data["attributes"].keys()
                 )[0]
                 Timeline.insert(timeline_entry).execute()
+            elif not prev_event_data.get("sub_label") and event_data.get("sub_label"):
+                sub_label = event_data["sub_label"][0]
+
+                if sub_label not in ALL_ATTRIBUTE_LABELS:
+                    timeline_entry[Timeline.class_type] = "sub_label"
+                    timeline_entry[Timeline.data]["sub_label"] = sub_label
+                    Timeline.insert(timeline_entry).execute()
         elif event_type == "end":
             if event_data["has_clip"] or event_data["has_snapshot"]:
                 timeline_entry[Timeline.class_type] = "gone"
