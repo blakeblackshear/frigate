@@ -102,10 +102,7 @@ class TimelineProcessor(threading.Thread):
                     event_data["attributes"].keys()
                 )[0]
                 Timeline.insert(timeline_entry).execute()
-            elif (
-                not prev_event_data.get("sub_label")
-                and event_data.get("sub_label")
-            ):
+            elif not prev_event_data.get("sub_label") and event_data.get("sub_label"):
                 sub_label = event_data["sub_label"][0]
 
                 if sub_label not in ALL_ATTRIBUTE_LABELS:
