@@ -20,8 +20,10 @@ export function ApiProvider({ children, options }: ApiProviderType) {
   return (
     <SWRConfig
       value={{
-        fetcher: (path, params) =>
-          axios.get(path, { params }).then((res) => res.data),
+        fetcher: (key) => {
+          const [path, params] = Array.isArray(key) ? key : [key, undefined];
+          return axios.get(path, { params }).then((res) => res.data);
+        },
         ...options,
       }}
     >
