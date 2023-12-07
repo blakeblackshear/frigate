@@ -12,7 +12,7 @@ export function Review() {
     const timezone = useMemo(() => config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
     const start = useMemo(() => new Date().getTime() / 1000, []);
     const { data: hourlyTimeline } = useSWR<HourlyTimeline>(['timeline/hourly', { timezone }]);
-    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${Object.keys(hourlyTimeline || [0])[0]}/end/${start}`);
+    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${Object.keys(hourlyTimeline || [0])[0]}/end/${start}`, { revalidateOnFocus: false });
 
     // detail levels can be normal, extra, full
     const [detailLevel, setDetailLevel] = useState('normal');
@@ -103,13 +103,17 @@ export function Review() {
             <div className="text-xs mb-4">Dates and times are based on the timezone {timezone}</div>
 
             <div>
-                {Object.keys(timelineCards).reverse().map((day) => {
+                {Object.entries(timelineCards).reverse().map(([day, timelineDay]) => {
                     return (
                         <div key={day}>
                             <Heading as="h3">
                                 {formatUnixTimestampToDateTime(parseInt(day), { strftime_fmt: '%A %b %d' })}
                             </Heading>
-                            {Object.entries(timelineCards[day]).map(([hour, timelineHour]) => {
+                            {Object.entries(timelineDay).map(([hour, timelineHour]) => {
+                                if (Object.values(timelineHour).length == 0) {
+                                    return <></>;
+                                }
+
                                 return (
                                     <div key={hour}>
                                         <Heading as="h4">
