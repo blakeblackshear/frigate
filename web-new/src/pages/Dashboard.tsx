@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useDetectState } from "@/api/ws";
 import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig.ts";
+import { FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 
 export function Dashboard() {
