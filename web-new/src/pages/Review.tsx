@@ -10,12 +10,10 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 export function Review() {
     const { data: config } = useSWR<FrigateConfig>("config");
     const timezone = useMemo(() => config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
-    const start = useMemo(() => new Date().getTime() / 1000, []);
     const { data: hourlyTimeline } = useSWR<HourlyTimeline>(['timeline/hourly', { timezone }]);
-    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${Object.keys(hourlyTimeline || [0])[0]}/end/${start}`, { revalidateOnFocus: false });
+    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${hourlyTimeline?.start}/end/${hourlyTimeline?.end}`, { revalidateOnFocus: false });
 
-    // detail levels can be normal, extra, full
-    const [detailLevel, setDetailLevel] = useState('normal');
+    const [detailLevel, setDetailLevel] = useState<'normal' | 'extra' | 'full'>('normal');
 
     const timelineCards: CardsData | never[] = useMemo(() => {
         if (!hourlyTimeline) {
