@@ -1,11 +1,11 @@
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, ReactElement } from "react";
 import videojs from 'video.js';
 import 'videojs-playlist';
 import 'video.js/dist/video-js.css';
 import Player from "video.js/dist/types/player";
 
 type VideoPlayerProps = {
-    children?: ReactNode[],
+    children?: ReactElement | ReactElement[],
     options?: {
         [key: string]: any
     },
