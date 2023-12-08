@@ -9,8 +9,7 @@ import {
 } from "react";
 import { produce, Draft } from "immer";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-
-type FrigateConfig = Record<string, any>;
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type ReducerState = {
   [topic: string]: {
