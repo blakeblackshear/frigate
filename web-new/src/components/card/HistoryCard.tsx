@@ -1,7 +1,6 @@
 import useSWR from "swr";
-import PreviewPlayer from "../player/PreviewPlayer";
+import PreviewThumbnailPlayer from "../player/PreviewThumbnailPlayer";
 import { Card } from "../ui/card";
-import Heading from "../ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "../ui/activity-indicator";
 import { LuCircle, LuClock, LuPlay, LuPlayCircle, LuTruck } from "react-icons/lu";
@@ -10,12 +9,12 @@ import { MdFaceUnlock, MdOutlineLocationOn, MdOutlinePictureInPictureAlt } from 
 import { HiOutlineVideoCamera } from "react-icons/hi";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
-type ReviewCardProps = {
+type HistoryCardProps = {
     timeline: Card,
     allPreviews?: Preview[],
 }
 
-export default function ReviewCard({ allPreviews, timeline }: ReviewCardProps) {
+export default function HistoryCard({ allPreviews, timeline }: HistoryCardProps) {
     const { data: config } = useSWR<FrigateConfig>("config");
 
     if (!config) {
@@ -24,7 +23,7 @@ export default function ReviewCard({ allPreviews, timeline }: ReviewCardProps) {
 
     return (
         <Card className="my-2 mr-2 bg-secondary">
-            <PreviewPlayer
+            <PreviewThumbnailPlayer
                 camera={timeline.camera}
                 allPreviews={allPreviews || []}
                 startTs={Object.values(timeline.entries)[0].timestamp}

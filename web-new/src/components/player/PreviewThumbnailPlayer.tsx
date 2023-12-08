@@ -9,7 +9,6 @@ type PreviewPlayerProps = {
     camera: string,
     allPreviews: Preview[],
     startTs: number,
-    mode: string,
 }
 
 type Preview = {
@@ -20,7 +19,7 @@ type Preview = {
     end: number,
 }
 
-export default function PreviewPlayer({ camera, allPreviews, startTs, mode }: PreviewPlayerProps) {
+export default function PreviewThumbnailPlayer({ camera, allPreviews, startTs }: PreviewPlayerProps) {
     const { data: config } = useSWR('config');
     const playerRef = useRef<Player | null>(null);
     const apiHost = useApiHost();
@@ -54,7 +53,7 @@ export default function PreviewPlayer({ camera, allPreviews, startTs, mode }: Pr
 
     return (
       <div
-        className={mode == 'thumbnail' ? getThumbWidth(camera, config) : ''}
+        className={getThumbWidth(camera, config)}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >

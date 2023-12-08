@@ -1,6 +1,5 @@
 import { IconType } from "react-icons";
 import { LuFileUp, LuFilm, LuLayoutDashboard, LuVideo } from "react-icons/lu";
-import { MdOutlinePreview } from "react-icons/md"
 import { NavLink } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import Logo from "./Logo";
@@ -26,12 +25,6 @@ const navbarLinks = [
   },
   {
     id: 4,
-    icon: MdOutlinePreview,
-    title: "Review",
-    url: "/review",
-  },
-  {
-    id: 5,
     icon: LuFileUp,
     title: "Export",
     url: "/export",

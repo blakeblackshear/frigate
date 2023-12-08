@@ -7,7 +7,6 @@ import Header from "@/components/Header";
 import Dashboard from "@/pages/Dashboard";
 import Live from "@/pages/Live";
 import History from "@/pages/History";
-import Review from "@/pages/Review";
 import Export from "@/pages/Export";
 import Storage from "@/pages/Storage";
 import System from "@/pages/System";
@@ -35,7 +34,6 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/live" element={<Live />} />
                 <Route path="/history" element={<History />} />
-                <Route path="/review" element={<Review />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />
                 <Route path="/system" element={<System />} />
