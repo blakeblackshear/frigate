@@ -195,7 +195,7 @@ class TrackedObject:
                     self.zone_presence[name] = zone_score + 1
 
                     # an object is only considered present in a zone if it has a zone inertia of 3+
-                    if zone_score >= zone.inertia:
+                    if self.zone_presence[name] >= zone.inertia:
                         current_zones.append(name)
 
                         if name not in self.entered_zones:
