@@ -647,9 +647,19 @@ def hourly_timeline():
         .iterator()
     )
 
+    count = 0
+    start = 0
+    end = 0
     hours: dict[str, list[dict[str, any]]] = {}
 
     for t in timeline:
+        if count == 0:
+            start = t["timestamp"]
+        else:
+            end = t["timestamp"]
+
+        count += 1
+
         hour = (
             datetime.fromtimestamp(t["timestamp"]).replace(
                 minute=0, second=0, microsecond=0
@@ -665,9 +675,9 @@ def hourly_timeline():
 
     return jsonify(
         {
-            "start": timeline[0].timestamp,
-            "end": timeline[-1].timestamp,
-            "count": timeline.count(),
+            "start": start,
+            "end": end,
+            "count": count,
             "hours": hours,
         }
     )

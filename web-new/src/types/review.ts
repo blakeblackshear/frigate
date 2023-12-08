@@ -32,5 +32,8 @@ type Timeline = {
 }
 
 type HourlyTimeline = {
-    [key: string]: Timeline[];
+    start: number,
+    end: number,
+    count: number,
+    hours: { [key: string]: Timeline[] };
 }

@@ -23,14 +23,14 @@ export function Review() {
         }
 
         const cards: CardsData = {};
-        Object.keys(hourlyTimeline)
+        Object.keys(hourlyTimeline["hours"])
           .reverse()
           .forEach((hour) => {
             const day = new Date(parseInt(hour) * 1000);
             day.setHours(0, 0, 0, 0);
             const dayKey = (day.getTime() / 1000).toString();
             const source_to_types: {[key: string]: string[]} = {};
-            Object.values(hourlyTimeline[hour]).forEach((i) => {
+            Object.values(hourlyTimeline["hours"][hour]).forEach((i) => {
               const time = new Date(i.timestamp * 1000);
               time.setSeconds(0);
               time.setMilliseconds(0);
@@ -46,7 +46,7 @@ export function Review() {
                 cards[dayKey] = {};
             }
             cards[dayKey][hour] = {};
-            Object.values(hourlyTimeline[hour]).forEach((i) => {
+            Object.values(hourlyTimeline["hours"][hour]).forEach((i) => {
               const time = new Date(i.timestamp * 1000);
               time.setSeconds(0);
               time.setMilliseconds(0);
