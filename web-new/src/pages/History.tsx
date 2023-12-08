@@ -46,8 +46,6 @@ function History() {
           cards[dayKey][hour] = {};
           Object.values(hourlyTimeline["hours"][hour]).forEach((i) => {
             const time = new Date(i.timestamp * 1000);
-            time.setSeconds(0);
-            time.setMilliseconds(0);
             const key = `${i.camera}-${time.getMinutes()}`;
 
             // detail level for saving items

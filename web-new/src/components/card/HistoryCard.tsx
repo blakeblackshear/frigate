@@ -27,7 +27,6 @@ export default function HistoryCard({ allPreviews, timeline }: HistoryCardProps)
                 camera={timeline.camera}
                 allPreviews={allPreviews || []}
                 startTs={Object.values(timeline.entries)[0].timestamp}
-                mode="thumbnail"
             />
             <div className="p-2">
                 <div className="text-sm flex">
