@@ -1,0 +1,24 @@
+@import "/themes/theme-default.css";
+@import "/themes/theme-blue.css";
+@import "/themes/theme-gold.css";
+@import "/themes/theme-green.css";
+@import "/themes/theme-nature.css";
+@import "/themes/theme-netflix.css";
+@import "/themes/theme-nord.css";
+@import "/themes/theme-orange.css";
+@import "/themes/theme-red.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Duplicated var names with color space modifiers for swatches in vscode. See https://github.com/tailwindlabs/tailwindcss/discussions/10619 */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
