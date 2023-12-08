@@ -1,0 +1,61 @@
+.theme-netflix.light {
+  --background: 0, 0%, 100%;
+  --foreground: 0, 0%, 0%;
+
+  --muted: 0, 0%, 68%;
+  --muted-foreground: 0, 0%, 0%;
+
+  --popover: 0, 0%, 95%;
+  --popover-foreground: 0, 0%, 0%;
+
+  --border: 0, 68%, 39%;
+  --input: 0, 68%, 39%;
+
+  --card: 0, 0%, 95%;
+  --card-foreground: 0, 0%, 0%;
+
+  --primary: 0, 100%, 44%;
+  --primary-foreground: 0, 0%, 100%;
+
+  --secondary: 0, 0%, 0%;
+  --secondary-foreground: 0, 0%, 100%;
+
+  --accent: 0, 100%, 50%;
+  --accent-foreground: 0, 0%, 0%;
+
+  --destructive: 0, 68%, 39%;
+  --destructive-foreground: 0, 0%, 100%;
+
+  --ring: 0, 100%, 44%;
+}
+
+.theme-netflix.dark {
+  --background: 0, 0%, 0%;
+  --foreground: 0, 0%, 100%;
+
+  --muted: 0, 0%, 50%;
+  --muted-foreground: 0, 0%, 100%;
+
+  --popover: 0, 0%, 5%;
+  --popover-foreground: 0, 0%, 100%;
+
+  --border: 0, 68%, 39%;
+  --input: 0, 68%, 39%;
+
+  --card: 0, 0%, 5%;
+  --card-foreground: 0, 0%, 100%;
+
+  --primary: 0, 100%, 44%;
+  --primary-foreground: 0, 0%, 0%;
+
+  --secondary: 0, 0%, 100%;
+  --secondary-foreground: 0, 0%, 0%;
+
+  --accent: 0, 100%, 50%;
+  --accent-foreground: 0, 0%, 100%;
+
+  --destructive: 0, 68%, 39%;
+  --destructive-foreground: 0, 0%, 100%;
+
+  --ring: 0, 100%, 44%;
+}
