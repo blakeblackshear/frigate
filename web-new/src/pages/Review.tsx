@@ -11,7 +11,7 @@ export function Review() {
     const { data: config } = useSWR<FrigateConfig>("config");
     const timezone = useMemo(() => config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone, [config]);
     const { data: hourlyTimeline } = useSWR<HourlyTimeline>(['timeline/hourly', { timezone }]);
-    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${hourlyTimeline?.start}/end/${hourlyTimeline?.end}`, { revalidateOnFocus: false });
+    const { data: allPreviews } = useSWR<Preview[]>(`preview/all/start/${hourlyTimeline?.start || 0}/end/${hourlyTimeline?.end || 0}`, { revalidateOnFocus: false });
 
     const [detailLevel, setDetailLevel] = useState<'normal' | 'extra' | 'full'>('normal');
 

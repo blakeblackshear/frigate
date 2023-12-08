@@ -39,12 +39,12 @@ export default function ReviewCard({ allPreviews, timeline }: ReviewCardProps) {
                     <HiOutlineVideoCamera className="h-5 w-5 mr-2 inline" />
                     {timeline.camera.replaceAll('_', ' ')}
                 </div>
-                <Heading as="h4" className="my-2">
+                <div className="my-2 text-sm font-medium">
                     Activity:
-                </Heading>
+                </div>
                 {Object.entries(timeline.entries).map(([_, entry]) => {
                     return (
-                    <div key={entry.timestamp} className="flex text-xs my-1">
+                    <div key={entry.timestamp} className="flex text-xs capitalize my-1 items-center">
                         {getTimelineIcon(entry)}
                         {getTimelineItemDescription(entry)}
                     </div>
