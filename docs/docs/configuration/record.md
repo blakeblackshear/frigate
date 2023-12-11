@@ -17,9 +17,15 @@ As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 h
 
 Frigate supports both 24/7 and event based recordings with separate retention modes and retention periods.
 
+:::tip
+
+Retention configs support decimals meaning they can be configured to retain `0.5` days, for example.
+
+:::
+
 ### 24/7 Recording
 
-The number of days to retain 24/7 recordings can be set via the following config, by default 24/7 recording is disabled.
+The number of days to retain 24/7 recordings can be set via the following config where X is a number, by default 24/7 recording is disabled.
 
 ```yaml
 record:
