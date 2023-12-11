@@ -46,6 +46,7 @@ services:
           size: 1000000000
     ...
 ```
+
 :::caution
 
 Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder. 
