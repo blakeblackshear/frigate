@@ -371,7 +371,7 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-async def get_video_properties(url, get_duration=False):
+async def get_video_properties(url, get_duration=False) -> dict[str, any]:
     async def calculate_duration(video: Optional[any]) -> float:
         duration = None
 
@@ -405,7 +405,10 @@ async def get_video_properties(url, get_duration=False):
                 result = None
 
             if result:
-                duration = float(result.strip())
+                try:
+                    duration = float(result.strip())
+                except ValueError:
+                    duration = -1
             else:
                 duration = -1
 
