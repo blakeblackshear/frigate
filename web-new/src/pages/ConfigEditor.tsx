@@ -1,22 +1,28 @@
 import useSWR from "swr";
 import * as monaco from "monaco-editor";
 import { configureMonacoYaml } from "monaco-yaml";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import copy from "copy-to-clipboard";
+import { useTheme } from "@/context/theme-provider";
 
 type SaveOptions = "saveonly" | "restart";
 
 function ConfigEditor() {
   const apiHost = useApiHost();
+
   const { data: config } = useSWR<string>("config/raw");
+
+  const { theme } = useTheme();
   const [success, setSuccess] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
-  const editorRef = useRef<any | null>();
+
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>();
+  const modelRef = useRef<monaco.editor.IEditorModel | null>();
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -64,18 +70,17 @@ function ConfigEditor() {
       return;
     }
 
-    if ((document?.getElementById("container")?.children || []).length > 0) {
+    if (modelRef.current != null) {
       // we don't need to recreate the editor if it already exists
       return;
     }
 
     const modelUri = monaco.Uri.parse("a://b/api/config/schema.json");
 
-    let yamlModel;
     if (monaco.editor.getModels().length > 0) {
-      yamlModel = monaco.editor.getModel(modelUri);
+      modelRef.current = monaco.editor.getModel(modelUri);
     } else {
-      yamlModel = monaco.editor.createModel(config, "yaml", modelUri);
+      modelRef.current = monaco.editor.createModel(config, "yaml", modelUri);
     }
 
     configureMonacoYaml(monaco, {
@@ -97,9 +102,9 @@ function ConfigEditor() {
     if (container != undefined) {
       editorRef.current = monaco.editor.create(container, {
         language: "yaml",
-        model: yamlModel,
+        model: modelRef.current,
         scrollBeyondLastLine: false,
-        theme: "vs-dark",
+        theme: theme == "dark" ? "vs-dark" : "vs-light",
       });
     }
   });
