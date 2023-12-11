@@ -43,9 +43,9 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     ffmpeg_input: CameraInput = [i for i in ffmpeg.inputs if "audio" in i.roles][0]
     input_args = get_ffmpeg_arg_list(ffmpeg.global_args) + (
         parse_preset_input(ffmpeg_input.input_args, 1)
-        or ffmpeg_input.input_args
+        or get_ffmpeg_arg_list(ffmpeg_input.input_args)
         or parse_preset_input(ffmpeg.input_args, 1)
-        or ffmpeg.input_args
+        or get_ffmpeg_arg_list(ffmpeg.input_args)
     )
     return (
         ["ffmpeg", "-vn"]
