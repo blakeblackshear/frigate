@@ -31,7 +31,7 @@ The number of days to retain 24/7 recordings can be set via the following config
 record:
   enabled: True
   retain:
-    days: X
+    days: 1 # <- number of days to keep 24/7 recordings
 ```
 
 24/7 recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
@@ -45,7 +45,7 @@ record:
   enabled: True
   events:
     retain:
-      default: X
+      default: 10 # <- number of days to keep event recordings
 ```
 
 This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
