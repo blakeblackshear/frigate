@@ -1,5 +1,6 @@
 import { useWs } from "@/api/ws";
 import ActivityIndicator from "@/components/ui/activity-indicator";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Heading from "@/components/ui/heading";
 import {
@@ -10,7 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useMemo } from "react";
+import { LuAlertCircle } from "react-icons/lu";
 import useSWR from "swr";
 
 type CameraStorage = {
@@ -61,7 +69,21 @@ function Storage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Data</CardTitle>
+          <div className="flex bg-center snap-center text-center items-center">
+              <CardTitle>Data</CardTitle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <LuAlertCircle />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Overview of total used storage and total capacity of the drives that hold the recordings and snapshots directories.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -110,7 +132,21 @@ function Storage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Memory</CardTitle>
+            <div className="flex bg-center snap-center text-center items-center">
+              <CardTitle>Memory</CardTitle>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <LuAlertCircle />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Overview of used and total memory in frigate process.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
