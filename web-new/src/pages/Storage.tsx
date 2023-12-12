@@ -65,11 +65,13 @@ function Storage() {
     <>
       <Heading as="h2">Storage</Heading>
 
-      <Heading as="h3">Overview</Heading>
+      <Heading className="my-4" as="h3">
+        Overview
+      </Heading>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-          <div className="flex bg-center snap-center text-center items-center">
+            <div className="flex bg-center snap-center text-center items-center">
               <CardTitle>Data</CardTitle>
               <TooltipProvider>
                 <Tooltip>
@@ -79,7 +81,10 @@ function Storage() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Overview of total used storage and total capacity of the drives that hold the recordings and snapshots directories.</p>
+                    <p>
+                      Overview of total used storage and total capacity of the
+                      drives that hold the recordings and snapshots directories.
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -180,6 +185,58 @@ function Storage() {
             </Table>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="flex bg-center snap-center text-center items-center my-4">
+        <Heading as="h4">Cameras</Heading>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost">
+                <LuAlertCircle />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Overview of per-camera storage usage and bandwidth.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+        {Object.entries(storage).map(([name, camera]) => (
+          <Card key={name}>
+            <div className="capitalize text-lg flex justify-between">
+              <Button variant="link">
+                <a className="capitalize" href={`/cameras/${name}`}>
+                  {name.replaceAll("_", " ")}
+                </a>
+              </Button>
+            </div>
+            <div className="p-2">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableCell>Usage</TableCell>
+                    <TableCell>Stream Bandwidth</TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      {Math.round(camera["usage_percent"] ?? 0)}%
+                    </TableCell>
+                    <TableCell>
+                      {camera["bandwidth"]
+                        ? `${getUnitSize(camera["bandwidth"])}/hr`
+                        : "Calculating..."}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        ))}
       </div>
     </>
   );
