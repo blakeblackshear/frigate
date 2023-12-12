@@ -124,10 +124,6 @@ https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
 
 <a name="streams"></a>
 
-## RTMP stream
-
-RTMP is deprecated and it is recommended to switch to use RTSP restreams.
-
 ## RTSP stream
 
 In order for the live streams to function they need to be accessible on the RTSP
