@@ -38,10 +38,6 @@ go2rtc:
 
 **NOTE:** This does not apply to localhost requests, there is no need to provide credentials when using the restream as a source for frigate cameras.
 
-## RTMP (Deprecated)
-
-In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvantages however including being incompatible with H.265, high bitrates, and certain audio codecs. RTMP is deprecated and it is recommended to move to the new restream role.
-
 ## Reduce Connections To Camera
 
 Some cameras only support one active connection or you may just want to have a single connection open to the camera. The RTSP restream allows this to be possible.

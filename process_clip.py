@@ -262,7 +262,6 @@ def process(path, label, output, debug_path):
                         }
                     ]
                 },
-                "rtmp": {"enabled": False},
                 "record": {"enabled": False},
             }
         },
