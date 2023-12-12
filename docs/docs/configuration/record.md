@@ -13,7 +13,30 @@ H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other br
 
 As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 hours of recordings will be deleted.
 
-## What if I don't want 24/7 recordings?
+## Configuring Recording Retention
+
+Frigate supports both 24/7 and event based recordings with separate retention modes and retention periods.
+
+:::tip
+
+Retention configs support decimals meaning they can be configured to retain `0.5` days, for example.
+
+:::
+
+### 24/7 Recording
+
+The number of days to retain 24/7 recordings can be set via the following config where X is a number, by default 24/7 recording is disabled.
+
+```yaml
+record:
+  enabled: True
+  retain:
+    days: 1 # <- number of days to keep 24/7 recordings
+```
+
+24/7 recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+
+### Event Recording
 
 If you only used clips in previous versions with recordings disabled, you can use the following config to get the same behavior. This is also the default behavior when recordings are enabled.
 
@@ -22,16 +45,10 @@ record:
   enabled: True
   events:
     retain:
-      default: 10
+      default: 10 # <- number of days to keep event recordings
 ```
 
 This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
-
-When `retain -> days` is set to `0`, segments will be deleted from the cache if no events are in progress.
-
-## Can I have "24/7" recordings, but only at certain times?
-
-Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
 **WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
 
@@ -81,9 +98,13 @@ record:
         car: 7
 ```
 
+## Can I have "24/7" recordings, but only at certain times?
+
+Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
+
 ## How do I export recordings?
 
-The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a timelapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.
+The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a time-lapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.
 
 ## Syncing Recordings With Disk
 
