@@ -930,6 +930,7 @@ class TestConfig(unittest.TestCase):
                         "width": 1920,
                         "fps": 5,
                     },
+                    "audio": {"enabled": True},
                 }
             },
         }
