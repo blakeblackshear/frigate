@@ -69,16 +69,12 @@ cameras:
     ffmpeg:
       output_args:
         record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v copy -tag:v hvc1 -bsf:v hevc_mp4toannexb -c:a aac
-        rtmp: -c:v copy -c:a aac -f flv
 
       inputs:
         - path: rtsp://user:password@camera-ip:554/H264/ch1/main/av_stream # <----- Update for your camera
           roles:
             - detect
             - record
-            - rtmp
-    rtmp:
-      enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
       width: # <- optional, by default Frigate tries to automatically detect resolution
       height: # <- optional, by default Frigate tries to automatically detect resolution
@@ -181,13 +177,12 @@ go2rtc:
 
 [See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.8.4#source-rtsp)
 
-In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp if used directly with unifi protect.
+In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record if used directly with unifi protect.
 
 ```yaml
 ffmpeg:
   output_args:
     record: preset-record-ubiquiti
-    rtmp: preset-rtmp-ubiquiti # recommend using go2rtc instead
 ```
 
 ### TP-Link VIGI Cameras
