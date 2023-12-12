@@ -162,8 +162,6 @@ ffmpeg:
     detect: -threads 2 -f rawvideo -pix_fmt yuv420p
     # Optional: output args for record streams (default: shown below)
     record: preset-record-generic
-    # Optional: output args for rtmp streams (default: shown below)
-    rtmp: preset-rtmp-generic
   # Optional: Time in seconds to wait before ffmpeg retries connecting to the camera. (default: shown below)
   # If set too low, frigate will retry a connection to the camera's stream too frequently, using up the limited streams some cameras can allow at once
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
@@ -386,13 +384,6 @@ snapshots:
   # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
   quality: 70
 
-# Optional: RTMP configuration
-# NOTE: RTMP is deprecated in favor of restream
-# NOTE: Can be overridden at the camera level
-rtmp:
-  # Optional: Enable the RTMP stream (default: False)
-  enabled: False
-
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.8.3)
 go2rtc:
@@ -449,14 +440,13 @@ cameras:
         # Required: the path to the stream
         # NOTE: path may include environment variables or docker secrets, which must begin with 'FRIGATE_' and be referenced in {}
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          # Required: list of roles for this stream. valid values are: audio,detect,record,rtmp
-          # NOTICE: In addition to assigning the audio, record, and rtmp roles,
+          # Required: list of roles for this stream. valid values are: audio,detect,record
+          # NOTICE: In addition to assigning the audio, detect, and record roles
           # they must also be enabled in the camera config.
           roles:
             - audio
             - detect
             - record
-            - rtmp
           # Optional: stream specific global args (default: inherit)
           # global_args:
           # Optional: stream specific hwaccel args (default: inherit)
