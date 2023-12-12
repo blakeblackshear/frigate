@@ -35,6 +35,7 @@
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.3",
     "lucide-react": "^0.294.0",
+    "monaco-yaml": "^5.1.0",
     "react": "^18.2.0",
     "react-day-picker": "^8.9.1",
     "react-dom": "^18.2.0",
