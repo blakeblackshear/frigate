@@ -446,28 +446,3 @@ def parse_preset_output_record(arg: Any) -> list[str]:
         return None
 
     return PRESETS_RECORD_OUTPUT.get(arg, None)
-
-
-PRESETS_RTMP_OUTPUT = {
-    "preset-rtmp-generic": ["-c", "copy", "-f", "flv"],
-    "preset-rtmp-mjpeg": ["-c:v", "libx264", "-an", "-f", "flv"],
-    "preset-rtmp-jpeg": ["-c:v", "libx264", "-an", "-f", "flv"],
-    "preset-rtmp-ubiquiti": [
-        "-c:v",
-        "copy",
-        "-f",
-        "flv",
-        "-ar",
-        "44100",
-        "-c:a",
-        "aac",
-    ],
-}
-
-
-def parse_preset_output_rtmp(arg: Any) -> list[str]:
-    """Return the correct preset if in preset format otherwise return None."""
-    if not isinstance(arg, str):
-        return None
-
-    return PRESETS_RTMP_OUTPUT.get(arg, None)
