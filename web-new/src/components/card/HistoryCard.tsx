@@ -21,11 +21,11 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type HistoryCardProps = {
   timeline: Card;
-  allPreviews?: Preview[];
+  relevantPreview?: Preview;
 };
 
 export default function HistoryCard({
-  allPreviews,
+  relevantPreview,
   timeline,
 }: HistoryCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -38,7 +38,7 @@ export default function HistoryCard({
     <Card className="my-2 mr-2 bg-secondary w-[284px]">
       <PreviewThumbnailPlayer
         camera={timeline.camera}
-        allPreviews={allPreviews || []}
+        relevantPreview={relevantPreview}
         startTs={Object.values(timeline.entries)[0].timestamp}
       />
       <div className="p-2">

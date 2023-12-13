@@ -1,14 +1,14 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
 
 type PreviewPlayerProps = {
   camera: string;
-  allPreviews: Preview[];
+  relevantPreview?: Preview;
   startTs: number;
 };
 
@@ -22,21 +22,12 @@ type Preview = {
 
 export default function PreviewThumbnailPlayer({
   camera,
-  allPreviews,
+  relevantPreview,
   startTs,
 }: PreviewPlayerProps) {
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
-
-  const relevantPreview = useMemo(() => {
-    return Object.values(allPreviews || []).find(
-      (preview) =>
-        preview.camera == camera &&
-        preview.start < startTs &&
-        preview.end > startTs
-    );
-  }, [allPreviews, camera, startTs]);
 
   const onHover = useCallback(
     (isHovered: Boolean) => {
