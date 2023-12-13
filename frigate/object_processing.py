@@ -616,7 +616,6 @@ class CameraState:
         previous_ids = set(tracked_objects.keys())
         removed_ids = previous_ids.difference(current_ids)
         new_ids = current_ids.difference(previous_ids)
-        updated_ids = current_ids.intersection(previous_ids)
 
         for id in new_ids:
             new_obj = tracked_objects[id] = TrackedObject(
@@ -631,7 +630,7 @@ class CameraState:
             for c in self.callbacks["start"]:
                 c(self.name, new_obj, frame_time)
 
-        for id in updated_ids:
+        for id in current_ids:
             updated_obj = tracked_objects[id]
             thumb_update, significant_update, autotracker_update = updated_obj.update(
                 frame_time, current_detections[id]
