@@ -611,6 +611,78 @@ def timeline():
     return jsonify([t for t in timeline])
 
 
+@bp.route("/timeline/hourly")
+def hourly_timeline():
+    """Get hourly summary for timeline."""
+    camera = request.args.get("camera", "all")
+    before = request.args.get("before", type=float)
+    limit = request.args.get("limit", 200)
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    _, minute_modifier, _ = get_tz_modifiers(tz_name)
+
+    clauses = []
+
+    if camera != "all":
+        clauses.append((Timeline.camera == camera))
+
+    if before:
+        clauses.append((Timeline.timestamp < before))
+
+    if len(clauses) == 0:
+        clauses.append((True))
+
+    timeline = (
+        Timeline.select(
+            Timeline.camera,
+            Timeline.timestamp,
+            Timeline.data,
+            Timeline.class_type,
+            Timeline.source_id,
+            Timeline.source,
+        )
+        .where(reduce(operator.and_, clauses))
+        .order_by(Timeline.timestamp.desc())
+        .limit(limit)
+        .dicts()
+        .iterator()
+    )
+
+    count = 0
+    start = 0
+    end = 0
+    hours: dict[str, list[dict[str, any]]] = {}
+
+    for t in timeline:
+        if count == 0:
+            start = t["timestamp"]
+        else:
+            end = t["timestamp"]
+
+        count += 1
+
+        hour = (
+            datetime.fromtimestamp(t["timestamp"]).replace(
+                minute=0, second=0, microsecond=0
+            )
+            + timedelta(
+                minutes=int(minute_modifier.split(" ")[0]),
+            )
+        ).timestamp()
+        if hour not in hours:
+            hours[hour] = [t]
+        else:
+            hours[hour].insert(0, t)
+
+    return jsonify(
+        {
+            "start": start,
+            "end": end,
+            "count": count,
+            "hours": hours,
+        }
+    )
+
+
 @bp.route("/<camera_name>/<label>/best.jpg")
 @bp.route("/<camera_name>/<label>/thumbnail.jpg")
 def label_thumbnail(camera_name, label):
@@ -1863,17 +1935,27 @@ def vod_hour(year_month, day, hour, camera_name, tz_name):
 @bp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
 def preview_ts(camera_name, start_ts, end_ts):
     """Get all mp4 previews relevant for time period."""
+    if camera_name != "all":
+        camera_clause = Previews.camera == camera_name
+    else:
+        camera_clause = True
+
     previews = (
         Previews.select(
-            Previews.path, Previews.duration, Previews.start_time, Previews.end_time
+            Previews.camera,
+            Previews.path,
+            Previews.duration,
+            Previews.start_time,
+            Previews.end_time,
         )
         .where(
             Previews.start_time.between(start_ts, end_ts)
             | Previews.end_time.between(start_ts, end_ts)
             | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
         )
-        .where(Previews.camera == camera_name)
+        .where(camera_clause)
         .order_by(Previews.start_time.asc())
+        .dicts()
         .iterator()
     )
 
@@ -1883,15 +1965,15 @@ def preview_ts(camera_name, start_ts, end_ts):
     for preview in previews:
         clips.append(
             {
-                "src": preview.path.replace("/media/frigate", ""),
+                "camera": preview["camera"],
+                "src": preview["path"].replace("/media/frigate", ""),
                 "type": "video/mp4",
-                "start": preview.start_time,
-                "end": preview.end_time,
+                "start": preview["start_time"],
+                "end": preview["end_time"],
             }
         )
 
     if not clips:
-        logger.error("No previews found for the requested time range")
         return make_response(
             jsonify(
                 {
@@ -1917,6 +1999,40 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
     end_ts = end_date.timestamp()
 
     return preview_ts(camera_name, start_ts, end_ts)
+
+
+@bp.route("/preview/<camera_name>/<frame_time>/thumbnail.jpg")
+def preview_thumbnail(camera_name, frame_time):
+    """Get a thumbnail from the cached preview jpgs."""
+    preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+    file_start = f"preview_{camera_name}"
+    file_check = f"{file_start}-{frame_time}.jpg"
+    selected_preview = None
+
+    for file in os.listdir(preview_dir):
+        if file.startswith(file_start):
+            if file < file_check:
+                selected_preview = file
+                break
+
+    if selected_preview is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Could not find valid preview jpg.",
+                }
+            ),
+            404,
+        )
+
+    with open(os.path.join(preview_dir, selected_preview), "rb") as image_file:
+        jpg_bytes = image_file.read()
+
+    response = make_response(jpg_bytes)
+    response.headers["Content-Type"] = "image/jpeg"
+    response.headers["Cache-Control"] = "private, max-age=31536000"
+    return response
 
 
 @bp.route("/vod/event/<id>")
