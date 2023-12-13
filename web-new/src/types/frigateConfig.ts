@@ -1,3 +1,13 @@
+interface UiConfig {
+  timezone: string;
+  time_format: 'browser' | '12hour' | '24hour';
+  date_style: 'full' | 'long' | 'medium' | 'short';
+  time_style: 'full' | 'long' | 'medium' | 'short';
+  strftime_fmt: string;
+  live_mode: string;
+  use_experimental: boolean;
+}
+
 export interface FrigateConfig {
   audio: {
     enabled: boolean;
@@ -389,14 +399,6 @@ export interface FrigateConfig {
     thickness: number;
   };
 
-  ui: {
-    date_style: string;
-    live_mode: string;
-    strftime_fmt: string | null;
-    time_format: string;
-    time_style: string;
-    timezone: string | null;
-    use_experimental: boolean;
-  };
+  ui: UiConfig;
 
 }

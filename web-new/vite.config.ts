@@ -18,6 +18,9 @@ export default defineConfig({
       '/vod': {
         target: 'http://localhost:5000'
       },
+      '/clips': {
+        target: 'http://localhost:5000'
+      },
       '/exports': {
         target: 'http://localhost:5000'
       },
