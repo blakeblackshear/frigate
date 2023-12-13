@@ -4,62 +4,78 @@ import useSWR from "swr";
 import { useCallback, useMemo, useRef } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
+import { AspectRatio } from "../ui/aspect-ratio";
 
 type PreviewPlayerProps = {
-    camera: string,
-    allPreviews: Preview[],
-    startTs: number,
-}
+  camera: string;
+  allPreviews: Preview[];
+  startTs: number;
+};
 
 type Preview = {
-    camera: string,
-    src: string,
-    type: string,
-    start: number,
-    end: number,
-}
+  camera: string;
+  src: string;
+  type: string;
+  start: number;
+  end: number;
+};
 
-export default function PreviewThumbnailPlayer({ camera, allPreviews, startTs }: PreviewPlayerProps) {
-    const { data: config } = useSWR('config');
-    const playerRef = useRef<Player | null>(null);
-    const apiHost = useApiHost();
+export default function PreviewThumbnailPlayer({
+  camera,
+  allPreviews,
+  startTs,
+}: PreviewPlayerProps) {
+  const { data: config } = useSWR("config");
+  const playerRef = useRef<Player | null>(null);
+  const apiHost = useApiHost();
 
-    const relevantPreview = useMemo(() => {
-      return Object.values(allPreviews || []).find(
-        (preview) => preview.camera == camera && preview.start < startTs && preview.end > startTs
-      );
-    }, [allPreviews, camera, startTs]);
-
-    const onHover = useCallback((isHovered: Boolean) => {
-        if (!relevantPreview || !playerRef.current) {
-            return;
-        }
-
-        if (isHovered) {
-          playerRef.current.play();
-        } else {
-          playerRef.current.pause();
-          playerRef.current.currentTime(startTs - relevantPreview.start);
-        }
-      },
-      [relevantPreview, startTs]
+  const relevantPreview = useMemo(() => {
+    return Object.values(allPreviews || []).find(
+      (preview) =>
+        preview.camera == camera &&
+        preview.start < startTs &&
+        preview.end > startTs
     );
+  }, [allPreviews, camera, startTs]);
 
-    if (!relevantPreview) {
-      return (
-        <img className={getThumbWidth(camera, config)} src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`} />
-      );
-    }
+  const onHover = useCallback(
+    (isHovered: Boolean) => {
+      if (!relevantPreview || !playerRef.current) {
+        return;
+      }
 
+      if (isHovered) {
+        playerRef.current.play();
+      } else {
+        playerRef.current.pause();
+        playerRef.current.currentTime(startTs - relevantPreview.start);
+      }
+    },
+    [relevantPreview, startTs]
+  );
+
+  if (!relevantPreview) {
     return (
-      <div
-        className={getThumbWidth(camera, config)}
-        onMouseEnter={() => onHover(true)}
-        onMouseLeave={() => onHover(false)}
+      <AspectRatio
+        ratio={16 / 9}
+        className="bg-black flex justify-center items-center"
       >
+        <img src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`} />
+      </AspectRatio>
+    );
+  }
+
+  return (
+    <AspectRatio
+      ratio={16 / 9}
+      className="bg-black flex justify-center items-center"
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+    >
+      <div className={`${getThumbWidth(camera, config)}`}>
         <VideoPlayer
           options={{
-            preload: 'auto',
+            preload: "auto",
             autoplay: false,
             controls: false,
             muted: true,
@@ -67,7 +83,7 @@ export default function PreviewThumbnailPlayer({ camera, allPreviews, startTs }:
             sources: [
               {
                 src: `${relevantPreview.src}`,
-                type: 'video/mp4',
+                type: "video/mp4",
               },
             ],
           }}
@@ -82,18 +98,16 @@ export default function PreviewThumbnailPlayer({ camera, allPreviews, startTs }:
           }}
         />
       </div>
-    );
-  }
+    </AspectRatio>
+  );
+}
 
 function getThumbWidth(camera: string, config: FrigateConfig) {
-const detect = config.cameras[camera].detect;
-if (detect.width / detect.height > 2) {
-    return 'w-[320px]';
-}
+  const detect = config.cameras[camera].detect;
 
-if (detect.width / detect.height < 1.4) {
-    return 'w-[200px]';
-}
+  if (detect.width / detect.height < 1.4) {
+    return "w-[200px]";
+  }
 
-return 'w-[240px]';
+  return "w-full";
 }

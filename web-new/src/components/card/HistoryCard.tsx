@@ -35,7 +35,7 @@ export default function HistoryCard({
   }
 
   return (
-    <Card className="my-2 mr-2 bg-secondary">
+    <Card className="my-2 mr-2 bg-secondary w-[284px]">
       <PreviewThumbnailPlayer
         camera={timeline.camera}
         allPreviews={allPreviews || []}
