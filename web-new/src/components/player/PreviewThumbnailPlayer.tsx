@@ -11,6 +11,7 @@ type PreviewPlayerProps = {
   relevantPreview?: Preview;
   startTs: number;
   eventId: string;
+  shouldAutoPlay: boolean;
 };
 
 type Preview = {
@@ -26,12 +27,13 @@ export default function PreviewThumbnailPlayer({
   relevantPreview,
   startTs,
   eventId,
+  shouldAutoPlay,
 }: PreviewPlayerProps) {
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
 
-  const onHover = useCallback(
+  const onPlayback = useCallback(
     (isHovered: Boolean) => {
       if (!relevantPreview || !playerRef.current) {
         return;
@@ -47,6 +49,32 @@ export default function PreviewThumbnailPlayer({
     [relevantPreview, startTs]
   );
 
+  const observer = useRef<IntersectionObserver | null>();
+  const inViewRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!shouldAutoPlay || observer.current) {
+        return;
+      }
+
+      try {
+        observer.current = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting) {
+              onPlayback(true);
+            } else {
+              onPlayback(false);
+            }
+          },
+          { threshold: 1.0 }
+        );
+        if (node) observer.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [observer, onPlayback]
+  );
+
   if (!relevantPreview) {
     if (isCurrentHour(startTs)) {
       return (
@@ -56,6 +84,7 @@ export default function PreviewThumbnailPlayer({
         >
           <img
             className={`${getPreviewWidth(camera, config)}`}
+            loading="lazy"
             src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
           />
         </AspectRatio>
@@ -69,6 +98,7 @@ export default function PreviewThumbnailPlayer({
       >
         <img
           className="w-[160px]"
+          loading="lazy"
           src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
         />
       </AspectRatio>
@@ -77,10 +107,11 @@ export default function PreviewThumbnailPlayer({
 
   return (
     <AspectRatio
+      ref={shouldAutoPlay ? inViewRef : null}
       ratio={16 / 9}
       className="bg-black flex justify-center items-center"
-      onMouseEnter={() => onHover(true)}
-      onMouseLeave={() => onHover(false)}
+      onMouseEnter={() => onPlayback(true)}
+      onMouseLeave={() => onPlayback(false)}
     >
       <div className={`${getPreviewWidth(camera, config)}`}>
         <VideoPlayer

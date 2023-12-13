@@ -5,11 +5,10 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import HistoryCard from "@/components/card/HistoryCard";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
 
-const API_LIMIT = 200;
+const API_LIMIT = 100;
 
 function History() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -26,11 +25,15 @@ function History() {
   const getKey = useCallback((index: number, prevData: HourlyTimeline) => {
     if (index > 0) {
       const lastDate = prevData.end;
-      const pagedParams = { before: lastDate, timezone };
+      const pagedParams = { before: lastDate, timezone, limit: API_LIMIT };
       return ["timeline/hourly", pagedParams];
     }
 
-    return ["timeline/hourly", { timezone }];
+    return ["timeline/hourly", { timezone, limit: API_LIMIT }];
+  }, []);
+
+  const shouldAutoPlay = useMemo(() => {
+    return window.innerWidth < 480;
   }, []);
 
   const {
@@ -207,6 +210,7 @@ function History() {
                                 <HistoryCard
                                   key={key}
                                   timeline={timeline}
+                                  shouldAutoPlay={shouldAutoPlay}
                                   relevantPreview={Object.values(
                                     allPreviews || []
                                   ).find(

@@ -22,11 +22,13 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 type HistoryCardProps = {
   timeline: Card;
   relevantPreview?: Preview;
+  shouldAutoPlay: boolean;
 };
 
 export default function HistoryCard({
   relevantPreview,
   timeline,
+  shouldAutoPlay,
 }: HistoryCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -41,6 +43,7 @@ export default function HistoryCard({
         relevantPreview={relevantPreview}
         startTs={Object.values(timeline.entries)[0].timestamp}
         eventId={Object.values(timeline.entries)[0].source_id}
+        shouldAutoPlay={shouldAutoPlay}
       />
       <div className="p-2">
         <div className="text-sm flex">
