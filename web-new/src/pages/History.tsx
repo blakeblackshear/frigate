@@ -197,32 +197,29 @@ function History() {
                             strftime_fmt: "%I:00",
                           })}
                         </Heading>
-                        <ScrollArea>
-                          <div className="flex">
-                            {Object.entries(timelineHour).map(
-                              ([key, timeline]) => {
-                                const startTs = Object.values(
-                                  timeline.entries
-                                )[0].timestamp;
-                                return (
-                                  <HistoryCard
-                                    key={key}
-                                    timeline={timeline}
-                                    relevantPreview={Object.values(
-                                      allPreviews || []
-                                    ).find(
-                                      (preview) =>
-                                        preview.camera == timeline.camera &&
-                                        preview.start < startTs &&
-                                        preview.end > startTs
-                                    )}
-                                  />
-                                );
-                              }
-                            )}
-                          </div>
-                          <ScrollBar className="m-2" orientation="horizontal" />
-                        </ScrollArea>
+
+                        <div className="flex flex-wrap">
+                          {Object.entries(timelineHour).map(
+                            ([key, timeline]) => {
+                              const startTs = Object.values(timeline.entries)[0]
+                                .timestamp;
+                              return (
+                                <HistoryCard
+                                  key={key}
+                                  timeline={timeline}
+                                  relevantPreview={Object.values(
+                                    allPreviews || []
+                                  ).find(
+                                    (preview) =>
+                                      preview.camera == timeline.camera &&
+                                      preview.start < startTs &&
+                                      preview.end > startTs
+                                  )}
+                                />
+                              );
+                            }
+                          )}
+                        </div>
                         {lastRow && <ActivityIndicator />}
                       </div>
                     );

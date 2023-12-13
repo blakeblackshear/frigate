@@ -35,11 +35,12 @@ export default function HistoryCard({
   }
 
   return (
-    <Card className="my-2 mr-2 bg-secondary w-[284px]">
+    <Card className="my-2 xs:mr-2 bg-secondary w-full xs:w-[48%] sm:w-[284px]">
       <PreviewThumbnailPlayer
         camera={timeline.camera}
         relevantPreview={relevantPreview}
         startTs={Object.values(timeline.entries)[0].timestamp}
+        eventId={Object.values(timeline.entries)[0].source_id}
       />
       <div className="p-2">
         <div className="text-sm flex">

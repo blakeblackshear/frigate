@@ -10,6 +10,7 @@ type PreviewPlayerProps = {
   camera: string;
   relevantPreview?: Preview;
   startTs: number;
+  eventId: string;
 };
 
 type Preview = {
@@ -24,6 +25,7 @@ export default function PreviewThumbnailPlayer({
   camera,
   relevantPreview,
   startTs,
+  eventId,
 }: PreviewPlayerProps) {
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
@@ -46,12 +48,29 @@ export default function PreviewThumbnailPlayer({
   );
 
   if (!relevantPreview) {
+    if (isCurrentHour(startTs)) {
+      return (
+        <AspectRatio
+          ratio={16 / 9}
+          className="bg-black flex justify-center items-center"
+        >
+          <img
+            className={`${getPreviewWidth(camera, config)}`}
+            src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
+          />
+        </AspectRatio>
+      );
+    }
+
     return (
       <AspectRatio
         ratio={16 / 9}
         className="bg-black flex justify-center items-center"
       >
-        <img src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`} />
+        <img
+          className="w-[160px]"
+          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+        />
       </AspectRatio>
     );
   }
@@ -63,7 +82,7 @@ export default function PreviewThumbnailPlayer({
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
     >
-      <div className={`${getThumbWidth(camera, config)}`}>
+      <div className={`${getPreviewWidth(camera, config)}`}>
         <VideoPlayer
           options={{
             preload: "auto",
@@ -93,11 +112,17 @@ export default function PreviewThumbnailPlayer({
   );
 }
 
-function getThumbWidth(camera: string, config: FrigateConfig) {
+function isCurrentHour(timestamp: number) {
+  const now = new Date();
+  now.setMinutes(0, 0, 0);
+  return timestamp > now.getTime() / 1000;
+}
+
+function getPreviewWidth(camera: string, config: FrigateConfig) {
   const detect = config.cameras[camera].detect;
 
   if (detect.width / detect.height < 1.4) {
-    return "w-[200px]";
+    return "w-[208px]";
   }
 
   return "w-full";
