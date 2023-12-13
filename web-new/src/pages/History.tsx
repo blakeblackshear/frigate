@@ -161,7 +161,7 @@ function History() {
     [size, setSize, isValidating, isDone]
   );
 
-  if (!config || !timelineCards) {
+  if (!config || !timelineCards ||timelineCards.length == 0) {
     return <ActivityIndicator />;
   }
 
@@ -186,12 +186,14 @@ function History() {
                 {Object.entries(timelineDay).map(
                   ([hour, timelineHour], hourIdx) => {
                     if (Object.values(timelineHour).length == 0) {
-                      return <></>;
+                      return <div key={hour}></div>;
                     }
 
                     const lastRow =
                       dayIdx == Object.values(timelineCards).length - 1 &&
                       hourIdx == Object.values(timelineDay).length - 1;
+                    const previewMap: { [key: string]: Preview | undefined } =
+                      {};
 
                     return (
                       <div key={hour} ref={lastRow ? lastTimelineRef : null}>
@@ -206,19 +208,23 @@ function History() {
                             ([key, timeline]) => {
                               const startTs = Object.values(timeline.entries)[0]
                                 .timestamp;
+                              let relevantPreview = previewMap[timeline.camera];
+
+                              if (relevantPreview == undefined) {
+                                relevantPreview = previewMap[timeline.camera] =
+                                  Object.values(allPreviews || []).find(
+                                    (preview) =>
+                                      preview.camera == timeline.camera &&
+                                      preview.start < startTs &&
+                                      preview.end > startTs
+                                  );
+                              }
                               return (
                                 <HistoryCard
                                   key={key}
                                   timeline={timeline}
                                   shouldAutoPlay={shouldAutoPlay}
-                                  relevantPreview={Object.values(
-                                    allPreviews || []
-                                  ).find(
-                                    (preview) =>
-                                      preview.camera == timeline.camera &&
-                                      preview.start < startTs &&
-                                      preview.end > startTs
-                                  )}
+                                  relevantPreview={relevantPreview}
                                 />
                               );
                             }
