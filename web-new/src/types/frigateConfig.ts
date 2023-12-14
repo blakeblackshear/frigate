@@ -1,4 +1,4 @@
-interface UiConfig {
+export interface UiConfig {
   timezone: string;
   time_format: "browser" | "12hour" | "24hour";
   date_style: "full" | "long" | "medium" | "short";

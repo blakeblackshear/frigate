@@ -80,7 +80,7 @@ export default function WebRtcPlayer({
   }
 
   const connect = useCallback(
-    async (ws: WebSocket, aPc: Promise<RTCPeerConnection> | undefined) => {
+    async (ws: WebSocket, aPc: Promise<RTCPeerConnection | undefined>) => {
       if (!aPc) {
         return;
       }
