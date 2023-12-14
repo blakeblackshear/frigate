@@ -63,12 +63,10 @@ class GeminiProcessor(threading.Thread):
             )
 
             sub_label = response.text.strip()
-            Event.update(sub_label=sub_label).where(
-                Event.id == event_data["id"]
-                and (
-                    camera_config.gemini.override_existing or Event.sub_label.is_null()
-                )
-            ).execute()
+            event = Event.get(Event.id == event_data["id"])
+            if camera_config.gemini.override_existing or not event.sub_label:
+                event.sub_label = sub_label
+                event.save()
 
             logger.info(
                 "Generated sub label for %s on %s in %.4f seconds: %s",
