@@ -382,6 +382,26 @@ class DetectConfig(FrigateBaseModel):
     )
 
 
+class GeminiConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable Google Gemini captioning.")
+    override_existing: bool = Field(
+        default=False, title="Override existing sub labels."
+    )
+    api_key: str = Field(default="", title="Google AI Studio API Key.")
+    model: str = Field(default="gemini-pro-vision", title="Google AI Studio Model.")
+    prompt: str = Field(
+        default="Caption this image with as much detail as possible. Make sure the response is under 90 characters.",
+        title="Default caption prompt.",
+    )
+    object_prompts: Dict[str, str] = Field(
+        default={
+            "person": "Describe the main person in the image (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc). If delivering a package, include the company the package is from. Make sure the response is under 90 characters.",
+            "car": "Label the primary vehicle in the image with just the name of the company if it is a delivery vehicle, or the color make and model.",
+        },
+        title="Object specific prompts.",
+    )
+
+
 class FilterConfig(FrigateBaseModel):
     min_area: int = Field(
         default=0, title="Minimum area of bounding box for object to be counted."
@@ -780,6 +800,9 @@ class CameraConfig(FrigateBaseModel):
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
+    gemini: GeminiConfig = Field(
+        default_factory=GeminiConfig, title="Google Gemini Configuration."
+    )
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )
@@ -1092,6 +1115,9 @@ class FrigateConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
+    gemini: GeminiConfig = Field(
+        default_factory=GeminiConfig, title="Global Google Gemini Configuration."
+    )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
@@ -1106,6 +1132,10 @@ class FrigateConfig(FrigateBaseModel):
         if config.mqtt.user or config.mqtt.password:
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+
+        # Gemini API Key substitutions
+        if config.gemini.api_key:
+            config.gemini.api_key = config.gemini.api_key.format(**FRIGATE_ENV_VARS)
 
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
@@ -1128,6 +1158,7 @@ class FrigateConfig(FrigateBaseModel):
                 "detect": ...,
                 "ffmpeg": ...,
                 "timestamp_style": ...,
+                "gemini": ...,
             },
             exclude_unset=True,
         )
@@ -1194,6 +1225,13 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.onvif.password = camera_config.onvif.password.format(
                     **FRIGATE_ENV_VARS
                 )
+
+            # Gemini substitution
+            if camera_config.gemini.api_key:
+                camera_config.gemini.api_key = camera_config.gemini.api_key.format(
+                    **FRIGATE_ENV_VARS
+                )
+
             # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled

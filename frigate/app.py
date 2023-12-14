@@ -35,6 +35,7 @@ from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
+from frigate.gemini import GeminiProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import Event, Recordings, RecordingsToDelete, Regions, Timeline
@@ -265,6 +266,9 @@ class FrigateApp:
 
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
+
+        # Queue for Google Gemini events
+        self.gemini_queue: Queue = mp.Queue()
 
         # Queue for inter process communication
         self.inter_process_queue: Queue = mp.Queue()
@@ -576,6 +580,12 @@ class FrigateApp:
         )
         self.timeline_processor.start()
 
+    def start_gemini_processor(self) -> None:
+        self.gemini_processor = GeminiProcessor(
+            self.config, self.gemini_queue, self.stop_event
+        )
+        self.gemini_processor.start()
+
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
@@ -583,6 +593,7 @@ class FrigateApp:
             self.event_queue,
             self.event_processed_queue,
             self.timeline_queue,
+            self.gemini_queue,
             self.stop_event,
         )
         self.event_processor.start()
@@ -692,6 +703,7 @@ class FrigateApp:
         self.init_external_event_processor()
         self.init_web_server()
         self.start_timeline_processor()
+        self.start_gemini_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_record_cleanup()
@@ -734,6 +746,7 @@ class FrigateApp:
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
+        self.gemini_processor.join()
         self.db.stop()
 
         while len(self.detection_shms) > 0:

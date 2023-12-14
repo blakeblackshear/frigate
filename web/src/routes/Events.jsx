@@ -797,11 +797,10 @@ function Event({
         </div>
         <div className="m-2 flex grow">
           <div className="flex flex-col grow">
-            <div className="capitalize text-lg font-bold">
-              {event.label.replaceAll('_', ' ')}
-              {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
+            <div className="capitalize text-lg font-bold">{event.label.replaceAll('_', ' ')}</div>
+            <div className="text-sm flex pb-2">
+              {event.sub_label ? `${event.sub_label.replaceAll('_', ' ')}` : null}
             </div>
-
             <div className="text-sm flex">
               <Clock className="h-5 w-5 mr-2 inline" />
               {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}

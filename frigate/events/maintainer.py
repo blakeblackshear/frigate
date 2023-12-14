@@ -32,6 +32,7 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
             or prev_event["entered_zones"] != current_event["entered_zones"]
             or prev_event["thumbnail"] != current_event["thumbnail"]
             or prev_event["end_time"] != current_event["end_time"]
+            or prev_event["sub_label"] != current_event["sub_label"]
         ):
             return True
     return False
@@ -56,6 +57,7 @@ class EventProcessor(threading.Thread):
         event_queue: Queue,
         event_processed_queue: Queue,
         timeline_queue: Queue,
+        gemini_queue: Queue,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -65,6 +67,7 @@ class EventProcessor(threading.Thread):
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.timeline_queue = timeline_queue
+        self.gemini_queue = gemini_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
 
@@ -102,6 +105,14 @@ class EventProcessor(threading.Thread):
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
+
+                if event_type == "end" and self.config.cameras[camera].gemini.enabled:
+                    self.gemini_queue.put(
+                        (
+                            camera,
+                            event_data,
+                        )
+                    )
             elif source_type == EventTypeEnum.api:
                 self.handle_external_detection(event_type, event_data)
 
