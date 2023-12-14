@@ -9,9 +9,9 @@ The best way to integrate with Home Assistant is to use the [official integratio
 
 ### Preparation
 
-The Frigate integration requires the [Frigate Addon](https://docs.frigate.video/frigate/installation). The `mqtt` integration must be installed and manually configured first.
+The Frigate integration requires a running instance of Frigate to connect to. The [Frigate Addon](https://docs.frigate.video/frigate/installation) is available for Home Assistant.
 
-See the [MQTT integration
+The Frigate integration also requires the `mqtt` integration to be installed and manually configured first. See the [MQTT integration
 documentation](https://www.home-assistant.io/integrations/mqtt/) for more
 details.
 
