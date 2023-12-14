@@ -33,10 +33,6 @@ function History() {
     return ["timeline/hourly", { timezone, limit: API_LIMIT }];
   }, []);
 
-  const shouldAutoPlay = useMemo(() => {
-    return window.innerWidth < 480;
-  }, []);
-
   const {
     data: timelinePages,
     size,
@@ -51,10 +47,12 @@ function History() {
     { revalidateOnFocus: false }
   );
 
-  const [detailLevel, _] = useState<"normal" | "extra" | "full">(
-    "normal"
-  );
+  const [detailLevel, _] = useState<"normal" | "extra" | "full">("normal");
   const [playback, setPlayback] = useState<Card | undefined>();
+
+  const shouldAutoPlay = useMemo(() => {
+    return playback == undefined && window.innerWidth < 480;
+  }, [playback]);
 
   const timelineCards: CardsData | never[] = useMemo(() => {
     if (!timelinePages) {
