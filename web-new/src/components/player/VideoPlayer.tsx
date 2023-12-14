@@ -44,7 +44,7 @@ export default function VideoPlayer({ children, options, seekOptions = {forward:
         videoElement.classList.add('small-player');
         videoElement.classList.add('video-js');
         videoElement.classList.add('vjs-default-skin');
-        videoRef.current.appendChild(videoElement);
+        videoRef.current?.appendChild(videoElement);
 
         const player = playerRef.current = videojs(videoElement, { ...defaultOptions, ...options }, () => {
           onReady && onReady(player);
