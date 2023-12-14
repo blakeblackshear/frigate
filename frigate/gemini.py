@@ -7,9 +7,9 @@ import threading
 import time
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from peewee import DoesNotExist
 
 import google.generativeai as genai
+from peewee import DoesNotExist
 
 from frigate.config import FrigateConfig
 from frigate.models import Event
