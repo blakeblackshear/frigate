@@ -39,7 +39,6 @@ function History() {
 
   const {
     data: timelinePages,
-    mutate,
     size,
     setSize,
     isValidating,
@@ -52,7 +51,7 @@ function History() {
     { revalidateOnFocus: false }
   );
 
-  const [detailLevel, setDetailLevel] = useState<"normal" | "extra" | "full">(
+  const [detailLevel, _] = useState<"normal" | "extra" | "full">(
     "normal"
   );
   const [playback, setPlayback] = useState<Card | undefined>();
