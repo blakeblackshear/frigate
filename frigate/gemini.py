@@ -7,6 +7,7 @@ import threading
 import time
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
+from peewee import DoesNotExist
 
 import google.generativeai as genai
 
@@ -63,7 +64,12 @@ class GeminiProcessor(threading.Thread):
             )
 
             sub_label = response.text.strip()
-            event = Event.get(Event.id == event_data["id"])
+
+            try:
+                event = Event.get(Event.id == event_data["id"])
+            except DoesNotExist:
+                continue
+
             if camera_config.gemini.override_existing or not event.sub_label:
                 event.sub_label = sub_label
                 event.save()
