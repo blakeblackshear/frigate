@@ -23,12 +23,14 @@ type HistoryCardProps = {
   timeline: Card;
   relevantPreview?: Preview;
   shouldAutoPlay: boolean;
+  onClick?: () => void;
 };
 
 export default function HistoryCard({
   relevantPreview,
   timeline,
   shouldAutoPlay,
+  onClick,
 }: HistoryCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -37,7 +39,10 @@ export default function HistoryCard({
   }
 
   return (
-    <Card className="my-2 xs:mr-2 bg-secondary w-full xs:w-[48%] sm:w-[284px]">
+    <Card
+      className="cursor-pointer my-2 xs:mr-2 bg-secondary w-full xs:w-[48%] sm:w-[284px]"
+      onClick={onClick}
+    >
       <PreviewThumbnailPlayer
         camera={timeline.camera}
         relevantPreview={relevantPreview}

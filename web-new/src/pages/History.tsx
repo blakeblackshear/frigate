@@ -7,6 +7,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import HistoryCard from "@/components/card/HistoryCard";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
+import TimelinePlayerCard from "@/components/card/TimelineCardPlayer";
 
 const API_LIMIT = 100;
 
@@ -44,15 +45,17 @@ function History() {
     isValidating,
   } = useSWRInfinite<HourlyTimeline>(getKey, timelineFetcher);
   const { data: allPreviews } = useSWR<Preview[]>(
-    `preview/all/start/${(timelinePages ?? [])?.at(0)?.start ?? 0}/end/${
-      (timelinePages ?? [])?.at(-1)?.end ?? 0
-    }`,
+    timelinePages
+      ? `preview/all/start/${timelinePages?.at(0)
+          ?.start}/end/${timelinePages?.at(-1)?.end}`
+      : null,
     { revalidateOnFocus: false }
   );
 
   const [detailLevel, setDetailLevel] = useState<"normal" | "extra" | "full">(
     "normal"
   );
+  const [playback, setPlayback] = useState<Card | undefined>();
 
   const timelineCards: CardsData | never[] = useMemo(() => {
     if (!timelinePages) {
@@ -161,7 +164,7 @@ function History() {
     [size, setSize, isValidating, isDone]
   );
 
-  if (!config || !timelineCards ||timelineCards.length == 0) {
+  if (!config || !timelineCards || timelineCards.length == 0) {
     return <ActivityIndicator />;
   }
 
@@ -171,6 +174,11 @@ function History() {
       <div className="text-xs mb-4">
         Dates and times are based on the timezone {timezone}
       </div>
+
+      <TimelinePlayerCard
+        timeline={playback}
+        onDismiss={() => setPlayback(undefined)}
+      />
 
       <div>
         {Object.entries(timelineCards)
@@ -225,6 +233,9 @@ function History() {
                                   timeline={timeline}
                                   shouldAutoPlay={shouldAutoPlay}
                                   relevantPreview={relevantPreview}
+                                  onClick={() => {
+                                    setPlayback(timeline);
+                                  }}
                                 />
                               );
                             }

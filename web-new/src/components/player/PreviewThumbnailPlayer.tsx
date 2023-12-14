@@ -152,6 +152,10 @@ function isCurrentHour(timestamp: number) {
 function getPreviewWidth(camera: string, config: FrigateConfig) {
   const detect = config.cameras[camera].detect;
 
+  if (detect.width / detect.height < 1.0) {
+    return "w-[120px]";
+  }
+
   if (detect.width / detect.height < 1.4) {
     return "w-[208px]";
   }
