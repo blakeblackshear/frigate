@@ -5,7 +5,7 @@ import 'video.js/dist/video-js.css';
 import Player from "video.js/dist/types/player";
 
 type VideoPlayerProps = {
-    children?: ReactElement | ReactElement[],
+  children?: ReactElement | ReactElement[],
     options?: {
         [key: string]: any
     },

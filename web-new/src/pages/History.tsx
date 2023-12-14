@@ -9,7 +9,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
 import TimelinePlayerCard from "@/components/card/TimelineCardPlayer";
 
-const API_LIMIT = 100;
+const API_LIMIT = 120;
 
 function History() {
   const { data: config } = useSWR<FrigateConfig>("config");
