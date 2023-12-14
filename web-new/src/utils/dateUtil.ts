@@ -105,7 +105,7 @@ const getResolvedTimeZone = () => {
  */
 export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: UiConfig): string => {
   const { timezone, time_format, date_style, time_style, strftime_fmt } = config;
-  const locale = window.navigator?.language || 'en-us';
+  const locale = window.navigator?.language || 'en-US';
   if (isNaN(unixTimestamp)) {
     return 'Invalid time';
   }
@@ -117,7 +117,7 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: UiC
     // use strftime_fmt if defined in config
     if (strftime_fmt) {
       const offset = getUTCOffset(date, timezone || resolvedTimeZone);
-      const strftime_locale = strftime.timezone(offset).localizeByIdentifier(locale);
+      const strftime_locale = strftime.timezone(offset);
       return strftime_locale(strftime_fmt, date);
     }
 

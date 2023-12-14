@@ -12,24 +12,24 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://192.168.50.106:5000',
         ws: true,
       },
       '/vod': {
-        target: 'http://localhost:5000'
+        target: 'http://192.168.50.106:5000'
       },
       '/clips': {
-        target: 'http://localhost:5000'
+        target: 'http://192.168.50.106:5000'
       },
       '/exports': {
-        target: 'http://localhost:5000'
+        target: 'http://192.168.50.106:5000'
       },
       '/ws': {
-        target: 'ws://localhost:5000',
+        target: 'ws://192.168.50.106:5000',
         ws: true,
       },
       '/live': {
-        target: 'ws://localhost:5000',
+        target: 'ws://192.168.50.106:5000',
         changeOrigin: true,
         ws: true,
       },
