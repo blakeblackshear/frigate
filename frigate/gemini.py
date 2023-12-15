@@ -46,7 +46,6 @@ class GeminiProcessor(threading.Thread):
 
             camera_config = self.config.cameras[camera]
 
-            st = time.time()
             thumbnail = {
                 "mime_type": "image/jpeg",
                 "data": base64.b64decode(event_data["thumbnail"]),
@@ -54,6 +53,8 @@ class GeminiProcessor(threading.Thread):
             prompt = camera_config.gemini.object_prompts.get(
                 event_data["label"], camera_config.gemini.prompt
             )
+
+            st = time.time()
 
             response = self.model.generate_content(
                 [thumbnail, prompt],
@@ -63,11 +64,25 @@ class GeminiProcessor(threading.Thread):
                 ),
             )
 
-            sub_label = response.text.strip()
+            logger.info("Generated sub label API took %.4f seconds", time.time() - st)
+
+            try:
+                sub_label = response.text.split(".")[0].strip()
+            except ValueError:
+                logger.warning(
+                    "Failed to generate sub label for %s on %s",
+                    event_data["id"],
+                    camera,
+                )
+                continue
 
             try:
                 event = Event.get(Event.id == event_data["id"])
             except DoesNotExist:
+                logger.warning(
+                    "Failed to find event %s",
+                    event_data["id"],
+                )
                 continue
 
             if camera_config.gemini.override_existing or not event.sub_label:

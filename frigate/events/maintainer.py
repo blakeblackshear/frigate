@@ -106,7 +106,11 @@ class EventProcessor(threading.Thread):
 
                 self.handle_object_detection(event_type, camera, event_data)
 
-                if event_type == "end" and self.config.cameras[camera].gemini.enabled:
+                if (
+                    event_type == "end"
+                    and not event_data["false_positive"]
+                    and self.config.cameras[camera].gemini.enabled
+                ):
                     self.gemini_queue.put(
                         (
                             camera,
