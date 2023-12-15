@@ -79,6 +79,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
             <div>
               <Button
                 variant="ghost"
+                size="sm"
                 className={`${
                   detectValue == "ON" ? "text-primary" : "text-gray-400"
                 }`}
@@ -88,6 +89,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
               </Button>
               <Button
                 variant="ghost"
+                size="sm"
                 className={
                   camera.record.enabled_in_config
                     ? recordValue == "ON"
@@ -105,6 +107,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
               </Button>
               <Button
                 variant="ghost"
+                size="sm"
                 className={`${
                   snapshotValue == "ON" ? "text-primary" : "text-gray-400"
                 }`}
@@ -115,6 +118,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
               {camera.audio.enabled_in_config && (
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={`${
                     audioValue == "ON" ? "text-primary" : "text-gray-400"
                   }`}

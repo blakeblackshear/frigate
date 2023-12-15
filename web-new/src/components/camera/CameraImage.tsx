@@ -45,9 +45,11 @@ export default function CameraImage({
   const aspectRatio = width / height;
 
   const scaledHeight = useMemo(() => {
-    const scaledHeight = (aspectRatio < (fitAspect ?? 0)) ? Math.floor(containerHeight) : Math.floor(availableWidth / aspectRatio);
+    const scaledHeight =
+      aspectRatio < (fitAspect ?? 0)
+        ? Math.floor(containerHeight)
+        : Math.floor(availableWidth / aspectRatio);
     const finalHeight = stretch ? scaledHeight : Math.min(scaledHeight, height);
-    console.log("returning " + containerHeight + " for " + camera)
 
     if (finalHeight > 0) {
       return finalHeight;
@@ -83,7 +85,12 @@ export default function CameraImage({
   }, [apiHost, canvasRef, name, img, searchParams, scaledHeight, config]);
 
   return (
-    <div className={`relative w-full ${fitAspect && aspectRatio < fitAspect ? 'h-full flex justify-center' : ''}`} ref={containerRef}>
+    <div
+      className={`relative w-full ${
+        fitAspect && aspectRatio < fitAspect ? "h-full flex justify-center" : ""
+      }`}
+      ref={containerRef}
+    >
       {enabled ? (
         <canvas
           data-testid="cameraimage-canvas"
