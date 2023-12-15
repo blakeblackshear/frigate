@@ -1,7 +1,7 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -33,6 +33,8 @@ export default function PreviewThumbnailPlayer({
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
 
+  const [visible, setVisible] = useState(false);
+
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
       if (!relevantPreview || !playerRef.current) {
@@ -52,7 +54,7 @@ export default function PreviewThumbnailPlayer({
   const observer = useRef<IntersectionObserver | null>();
   const inViewRef = useCallback(
     (node: HTMLElement | null) => {
-      if (!shouldAutoPlay || observer.current) {
+      if (observer.current) {
         return;
       }
 
@@ -60,12 +62,22 @@ export default function PreviewThumbnailPlayer({
         observer.current = new IntersectionObserver(
           (entries) => {
             if (entries[0].isIntersecting) {
-              onPlayback(true);
+              if (entries[0].intersectionRatio == 1.0) {
+                if (shouldAutoPlay) {
+                  onPlayback(true);
+                }
+              } else {
+                setVisible(true);
+              }
             } else {
-              onPlayback(false);
+              if (shouldAutoPlay) {
+                onPlayback(false);
+              }
+
+              setVisible(false);
             }
           },
-          { threshold: 1.0 }
+          { threshold: [0.0, 1.0], rootMargin: "25% 0% 25% 0%" }
         );
         if (node) observer.current.observe(node);
       } catch (e) {
@@ -75,44 +87,27 @@ export default function PreviewThumbnailPlayer({
     [observer, onPlayback]
   );
 
-  if (!relevantPreview) {
+  let content;
+  if (!relevantPreview || !visible) {
     if (isCurrentHour(startTs)) {
-      return (
-        <AspectRatio
-          ratio={16 / 9}
-          className="bg-black flex justify-center items-center"
-        >
-          <img
-            className={`${getPreviewWidth(camera, config)}`}
-            loading="lazy"
-            src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
-          />
-        </AspectRatio>
+      content = (
+        <img
+          className={`${getPreviewWidth(camera, config)}`}
+          loading="lazy"
+          src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
+        />
       );
     }
 
-    return (
-      <AspectRatio
-        ratio={16 / 9}
-        className="bg-black flex justify-center items-center"
-      >
-        <img
-          className="w-[160px]"
-          loading="lazy"
-          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-        />
-      </AspectRatio>
+    content = (
+      <img
+        className="w-[160px]"
+        loading="lazy"
+        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+      />
     );
-  }
-
-  return (
-    <AspectRatio
-      ref={shouldAutoPlay ? inViewRef : null}
-      ratio={16 / 9}
-      className="bg-black flex justify-center items-center"
-      onMouseEnter={() => onPlayback(true)}
-      onMouseLeave={() => onPlayback(false)}
-    >
+  } else {
+    content = (
       <div className={`${getPreviewWidth(camera, config)}`}>
         <VideoPlayer
           options={{
@@ -139,6 +134,18 @@ export default function PreviewThumbnailPlayer({
           }}
         />
       </div>
+    );
+  }
+
+  return (
+    <AspectRatio
+      ref={inViewRef}
+      ratio={16 / 9}
+      className="bg-black flex justify-center items-center"
+      onMouseEnter={() => onPlayback(true)}
+      onMouseLeave={() => onPlayback(false)}
+    >
+      {content}
     </AspectRatio>
   );
 }
