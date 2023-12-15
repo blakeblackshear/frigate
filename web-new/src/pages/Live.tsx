@@ -26,6 +26,14 @@ function Live() {
   const cameraConfig = useMemo(() => {
     return config?.cameras[camera];
   }, [camera, config]);
+  const sortedCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
   const restreamEnabled = useMemo(() => {
     return (
       config &&
@@ -66,7 +74,7 @@ function Live() {
               <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={camera} onValueChange={setCamera}>
-                {Object.keys(config?.cameras || {}).map((item) => (
+                {Object.keys(sortedCameras).map((item) => (
                   <DropdownMenuRadioItem
                     className="capitalize"
                     key={item}
