@@ -209,7 +209,7 @@ function History() {
                         </Heading>
 
                         <div className="flex flex-wrap">
-                          {Object.entries(timelineHour).map(
+                          {Object.entries(timelineHour).reverse().map(
                             ([key, timeline]) => {
                               const startTs = Object.values(timeline.entries)[0]
                                 .timestamp;
