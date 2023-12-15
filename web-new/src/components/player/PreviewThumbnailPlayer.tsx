@@ -77,7 +77,7 @@ export default function PreviewThumbnailPlayer({
               setVisible(false);
             }
           },
-          { threshold: [0.0, 1.0], rootMargin: "25% 0% 25% 0%" }
+          { threshold: [0.0, 1.0], rootMargin: "25% 0% 50% 0%" }
         );
         if (node) observer.current.observe(node);
       } catch (e) {
@@ -93,7 +93,6 @@ export default function PreviewThumbnailPlayer({
       content = (
         <img
           className={`${getPreviewWidth(camera, config)}`}
-          loading="lazy"
           src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
         />
       );
@@ -102,7 +101,6 @@ export default function PreviewThumbnailPlayer({
     content = (
       <img
         className="w-[160px]"
-        loading="lazy"
         src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
       />
     );
