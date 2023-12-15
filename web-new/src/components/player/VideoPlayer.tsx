@@ -18,7 +18,7 @@ type VideoPlayerProps = {
 }
 
 export default function VideoPlayer({ children, options, seekOptions = {forward:30, backward: 10}, onReady = (_) => {}, onDispose = () => {} }: VideoPlayerProps) {
-    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const videoRef = useRef<HTMLDivElement | null>(null);
     const playerRef = useRef<Player | null>(null);
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import strftime from 'strftime';
 import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
-import { FrigateConfig, UiConfig } from "@/types/frigateConfig";
+import { UiConfig } from "@/types/frigateConfig";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());

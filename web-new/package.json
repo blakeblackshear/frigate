@@ -63,6 +63,7 @@
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@types/react-icons": "^3.0.0",
+    "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
