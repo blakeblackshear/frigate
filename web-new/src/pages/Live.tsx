@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Heading from "@/components/ui/heading";
-import { usePersistence } from "@/context/use-persistence";
+import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useMemo, useState } from "react";
 import useSWR from "swr";
