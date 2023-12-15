@@ -27,9 +27,9 @@ function App() {
       <BrowserRouter>
         <Wrapper>
           <Header onToggleNavbar={toggleNavbar} />
-          <div className="grid grid-cols-[auto,1fr] flex-grow-1 md:overflow-auto">
+          <div className="grid grid-cols-[auto,1fr] flex-grow-1 overflow-auto">
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
-            <div className="overflow-x-hidden px-4 py-2 w-screen md:w-full">
+            <div id="pageRoot" className="overflow-x-hidden px-4 py-2 md:w-full">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/live" element={<Live />} />

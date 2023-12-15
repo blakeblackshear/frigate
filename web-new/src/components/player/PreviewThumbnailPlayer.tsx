@@ -48,43 +48,52 @@ export default function PreviewThumbnailPlayer({
         playerRef.current.currentTime(startTs - relevantPreview.start);
       }
     },
-    [relevantPreview, startTs]
+    [relevantPreview, startTs, playerRef]
   );
 
-  const observer = useRef<IntersectionObserver | null>();
+  const autoPlayObserver = useRef<IntersectionObserver | null>();
+  const preloadObserver = useRef<IntersectionObserver | null>();
   const inViewRef = useCallback(
     (node: HTMLElement | null) => {
-      if (observer.current) {
-        return;
+      if (!preloadObserver.current) {
+        try {
+          preloadObserver.current = new IntersectionObserver(
+            (entries) => {
+              const [{ isIntersecting }] = entries;
+              setVisible(isIntersecting);
+            },
+            {
+              threshold: 0,
+              root: document.getElementById("pageRoot"),
+              rootMargin: "10% 0px 25% 0px",
+            }
+          );
+          if (node) preloadObserver.current.observe(node);
+        } catch (e) {
+          // no op
+        }
       }
 
-      try {
-        observer.current = new IntersectionObserver(
-          (entries) => {
-            if (entries[0].isIntersecting) {
-              if (entries[0].intersectionRatio == 1.0) {
-                if (shouldAutoPlay) {
-                  onPlayback(true);
-                }
+      if (shouldAutoPlay && !autoPlayObserver.current) {
+        try {
+          autoPlayObserver.current = new IntersectionObserver(
+            (entries) => {
+              const [{ isIntersecting }] = entries;
+              if (isIntersecting) {
+                onPlayback(true);
               } else {
-                setVisible(true);
-              }
-            } else {
-              if (shouldAutoPlay) {
                 onPlayback(false);
               }
-
-              setVisible(false);
-            }
-          },
-          { threshold: [0.0, 1.0], rootMargin: "10% 0% 25% 0%" }
-        );
-        if (node) observer.current.observe(node);
-      } catch (e) {
-        // no op
+            },
+            { threshold: 1.0 }
+          );
+          if (node) autoPlayObserver.current.observe(node);
+        } catch (e) {
+          // no op
+        }
       }
     },
-    [observer, onPlayback]
+    [preloadObserver, autoPlayObserver, onPlayback]
   );
 
   let content;
@@ -137,7 +146,7 @@ export default function PreviewThumbnailPlayer({
 
   return (
     <AspectRatio
-      ref={inViewRef}
+      ref={relevantPreview ? inViewRef : null}
       ratio={16 / 9}
       className="bg-black flex justify-center items-center"
       onMouseEnter={() => onPlayback(true)}
