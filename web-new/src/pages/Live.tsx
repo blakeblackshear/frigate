@@ -13,12 +13,16 @@ import Heading from "@/components/ui/heading";
 import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { camera: openedCamera } = useParams();
 
-  const [camera, setCamera] = useState<string>("Select A Camera");
+  const [camera, setCamera] = useState<string>(
+    openedCamera ?? "Select A Camera"
+  );
   const cameraConfig = useMemo(() => {
     return config?.cameras[camera];
   }, [camera, config]);

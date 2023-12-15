@@ -1,79 +1,125 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import ActivityIndicator from "@/components/ui/activity-indicator";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useDetectState } from "@/api/ws";
+  useAudioState,
+  useDetectState,
+  useRecordingsState,
+  useSnapshotsState,
+} from "@/api/ws";
 import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
+import { Card } from "@/components/ui/card";
+import CameraImage from "@/components/camera/CameraImage";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Button } from "@/components/ui/button";
+import { AiOutlinePicture } from "react-icons/ai";
+import { FaWalking } from "react-icons/fa";
+import { LuEar } from "react-icons/lu";
+import { TbMovie } from "react-icons/tb";
 
 export function Dashboard() {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const [selectedCamera, setSelectedCamera] = useState<string | undefined>(
-    undefined
-  );
 
-  let cameras;
-  if (config?.cameras) {
-    cameras = Object.keys(config.cameras).map((name) => (
-      <div key={name}>
-        <SelectItem value={name} onClick={() => setSelectedCamera(name)}>
-          {name}
-        </SelectItem>
-      </div>
-    ));
-  }
+  const sortedCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
 
   return (
     <>
+      <Heading as="h2">Dashboard</Heading>
+
       {!config && <ActivityIndicator />}
 
-      <Heading as="h2">Components testing</Heading>
-
-      <div className="flex items-center space-x-2 mt-5">
-        <Select
-          value={selectedCamera}
-          onValueChange={(val) => setSelectedCamera(val as string)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Choose camera" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>{cameras}</SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      {selectedCamera && <Camera cameraName={selectedCamera} />}
+      {config && (
+        <div>
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {sortedCameras.map((camera) => {
+              return <Camera key={camera.name} camera={camera} />;
+            })}
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
-function Camera({ cameraName }: { cameraName: string }) {
-  const { payload: detectValue, send: sendDetect } = useDetectState(cameraName);
+function Camera({ camera }: { camera: CameraConfig }) {
+  const { payload: detectValue, send: sendDetect } = useDetectState(
+    camera.name
+  );
+  const { payload: recordValue, send: sendRecord } = useRecordingsState(
+    camera.name
+  );
+  const { payload: snapshotValue, send: sendSnapshot } = useSnapshotsState(
+    camera.name
+  );
+  const { payload: audioValue, send: sendAudio } = useAudioState(camera.name);
 
   return (
     <>
-      <Heading as="h3" className="mt-5">
-        {cameraName}
-      </Heading>
-      <div className="flex items-center space-x-2 mt-5">
-        <Switch
-          id={`detect-${cameraName}`}
-          checked={detectValue === "ON"}
-          onCheckedChange={() =>
-            sendDetect(detectValue === "ON" ? "OFF" : "ON", true)
-          }
-        />
-        <Label htmlFor={`detect-${cameraName}`}>Detect</Label>
-      </div>
+      <Card className="">
+        <a href={`/live/${camera.name}`}>
+          <AspectRatio
+            ratio={16 / 9}
+            className="bg-black flex justify-center items-center"
+          >
+            <CameraImage camera={camera.name} fitAspect={16 / 9} />
+          </AspectRatio>
+          <div className="flex justify-between items-center">
+            <Heading className="capitalize p-2" as="h4">
+              {camera.name.replaceAll("_", " ")}
+            </Heading>
+            <div>
+              <Button
+                variant="ghost"
+                className={`${
+                  detectValue == "ON" ? "text-primary" : "text-gray-400"
+                }`}
+                onClick={() => sendDetect(detectValue == "ON" ? "OFF" : "ON")}
+              >
+                <FaWalking />
+              </Button>
+              <Button
+                variant="ghost"
+                className={
+                  camera.record.enabled_in_config
+                    ? recordValue == "ON"
+                      ? "text-primary"
+                      : "text-gray-400"
+                    : "text-red-500"
+                }
+              >
+                <TbMovie />
+              </Button>
+              <Button
+                variant="ghost"
+                className={`${
+                  snapshotValue == "ON" ? "text-primary" : "text-gray-400"
+                }`}
+              >
+                <AiOutlinePicture />
+              </Button>
+              {camera.audio.enabled_in_config && (
+                <Button
+                  variant="ghost"
+                  className={`${
+                    audioValue == "ON" ? "text-primary" : "text-gray-400"
+                  }`}
+                >
+                  <LuEar />
+                </Button>
+              )}
+            </div>
+          </div>
+        </a>
+      </Card>
     </>
   );
 }
