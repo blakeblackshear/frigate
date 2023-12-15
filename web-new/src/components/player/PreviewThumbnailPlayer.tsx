@@ -77,7 +77,7 @@ export default function PreviewThumbnailPlayer({
               setVisible(false);
             }
           },
-          { threshold: [0.0, 1.0], rootMargin: "25% 0% 50% 0%" }
+          { threshold: [0.0, 1.0], rootMargin: "10% 0% 25% 0%" }
         );
         if (node) observer.current.observe(node);
       } catch (e) {
