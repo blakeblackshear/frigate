@@ -74,13 +74,13 @@ function Live() {
               <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={camera} onValueChange={setCamera}>
-                {Object.keys(sortedCameras).map((item) => (
+                {(sortedCameras).map((item) => (
                   <DropdownMenuRadioItem
                     className="capitalize"
-                    key={item}
-                    value={item}
+                    key={item.name}
+                    value={item.name}
                   >
-                    {item.replaceAll("_", " ")}
+                    {item.name.replaceAll("_", " ")}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
