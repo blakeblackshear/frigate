@@ -49,12 +49,18 @@ class DeepStack(DetectionApi):
             image.save(output, format="JPEG")
             image_bytes = output.getvalue()
         data = {"api_key": self.api_key}
-        response = requests.post(
-            self.api_url,
-            data=data,
-            files={"image": image_bytes},
-            timeout=self.api_timeout,
-        )
+
+        try:
+            response = requests.post(
+                self.api_url,
+                data=data,
+                files={"image": image_bytes},
+                timeout=self.api_timeout,
+            )
+        except requests.exceptions.RequestException:
+            logger.error("Error calling deepstack API")
+            return np.zeros((20, 6), np.float32)
+
         response_json = response.json()
         detections = np.zeros((20, 6), np.float32)
         if response_json.get("predictions") is None:
