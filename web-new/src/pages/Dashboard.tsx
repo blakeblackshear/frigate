@@ -95,6 +95,11 @@ function Camera({ camera }: { camera: CameraConfig }) {
                       : "text-gray-400"
                     : "text-red-500"
                 }
+                onClick={() =>
+                  camera.record.enabled_in_config
+                    ? sendRecord(recordValue == "ON" ? "OFF" : "ON")
+                    : {}
+                }
               >
                 <TbMovie />
               </Button>
@@ -103,6 +108,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 className={`${
                   snapshotValue == "ON" ? "text-primary" : "text-gray-400"
                 }`}
+                onClick={() => sendSnapshot(detectValue == "ON" ? "OFF" : "ON")}
               >
                 <AiOutlinePicture />
               </Button>
@@ -112,6 +118,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                   className={`${
                     audioValue == "ON" ? "text-primary" : "text-gray-400"
                   }`}
+                  onClick={() => sendAudio(detectValue == "ON" ? "OFF" : "ON")}
                 >
                   <LuEar />
                 </Button>
