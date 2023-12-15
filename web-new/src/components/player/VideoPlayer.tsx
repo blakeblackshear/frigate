@@ -13,6 +13,7 @@ type VideoPlayerProps = {
     forward?: number;
     backward?: number;
   };
+  remotePlayback?: boolean;
   onReady?: (player: Player) => void;
   onDispose?: () => void;
 };
@@ -21,6 +22,7 @@ export default function VideoPlayer({
   children,
   options,
   seekOptions = { forward: 30, backward: 10 },
+  remotePlayback = false,
   onReady = (_) => {},
   onDispose = () => {},
 }: VideoPlayerProps) {
@@ -49,6 +51,8 @@ export default function VideoPlayer({
       videoElement.controls = true;
       // @ts-ignore
       videoElement.playsInline = true;
+      // @ts-ignore
+      videoElement.disableRemotePlayback = remotePlayback;
       videoElement.classList.add("small-player");
       videoElement.classList.add("video-js");
       videoElement.classList.add("vjs-default-skin");
