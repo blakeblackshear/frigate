@@ -1,11 +1,194 @@
-interface UiConfig {
+export interface UiConfig {
   timezone: string;
-  time_format: 'browser' | '12hour' | '24hour';
-  date_style: 'full' | 'long' | 'medium' | 'short';
-  time_style: 'full' | 'long' | 'medium' | 'short';
+  time_format: "browser" | "12hour" | "24hour";
+  date_style: "full" | "long" | "medium" | "short";
+  time_style: "full" | "long" | "medium" | "short";
   strftime_fmt: string;
   live_mode: string;
   use_experimental: boolean;
+}
+
+export interface CameraConfig {
+  audio: {
+    enabled: boolean;
+    enabled_in_config: boolean;
+    filters: string[] | null;
+    listen: string[];
+    max_not_heard: number;
+    min_volume: number;
+    num_threads: number;
+  };
+  best_image_timeout: number;
+  birdseye: {
+    enabled: boolean;
+    mode: "objects";
+    order: number;
+  };
+  detect: {
+    annotation_offset: number;
+    enabled: boolean;
+    fps: number;
+    height: number;
+    max_disappeared: number;
+    min_initialized: number;
+    stationary: {
+      interval: number;
+      max_frames: {
+        default: number | null;
+        objects: Record<string, unknown>;
+      };
+      threshold: number;
+    };
+    width: number;
+  };
+  enabled: boolean;
+  ffmpeg: {
+    global_args: string[];
+    hwaccel_args: string;
+    input_args: string;
+    inputs: {
+      global_args: string[];
+      hwaccel_args: string[];
+      input_args: string;
+      path: string;
+      roles: string[];
+    }[];
+    output_args: {
+      detect: string[];
+      record: string;
+      rtmp: string;
+    };
+    retry_interval: number;
+  };
+  ffmpeg_cmds: {
+    cmd: string;
+    roles: string[];
+  }[];
+  live: {
+    height: number;
+    quality: number;
+    stream_name: string;
+  };
+  motion: {
+    contour_area: number;
+    delta_alpha: number;
+    frame_alpha: number;
+    frame_height: number;
+    improve_contrast: boolean;
+    lightning_threshold: number;
+    mask: string[];
+    mqtt_off_delay: number;
+    threshold: number;
+  };
+  mqtt: {
+    bounding_box: boolean;
+    crop: boolean;
+    enabled: boolean;
+    height: number;
+    quality: number;
+    required_zones: string[];
+    timestamp: boolean;
+  };
+  name: string;
+  objects: {
+    filters: {
+      [objectName: string]: {
+        mask: string | null;
+        max_area: number;
+        max_ratio: number;
+        min_area: number;
+        min_ratio: number;
+        min_score: number;
+        threshold: number;
+      };
+    };
+    mask: string;
+    track: string[];
+  };
+  onvif: {
+    autotracking: {
+      calibrate_on_startup: boolean;
+      enabled: boolean;
+      enabled_in_config: boolean;
+      movement_weights: string[];
+      required_zones: string[];
+      return_preset: string;
+      timeout: number;
+      track: string[];
+      zoom_factor: number;
+      zooming: string;
+    };
+    host: string;
+    password: string | null;
+    port: number;
+    user: string | null;
+  };
+  record: {
+    enabled: boolean;
+    enabled_in_config: boolean;
+    events: {
+      objects: string[] | null;
+      post_capture: number;
+      pre_capture: number;
+      required_zones: string[];
+      retain: {
+        default: number;
+        mode: string;
+        objects: Record<string, unknown>;
+      };
+    };
+    expire_interval: number;
+    export: {
+      timelapse_args: string;
+    };
+    preview: {
+      quality: string;
+    };
+    retain: {
+      days: number;
+      mode: string;
+    };
+    sync_recordings: boolean;
+  };
+  rtmp: {
+    enabled: boolean;
+  };
+  snapshots: {
+    bounding_box: boolean;
+    clean_copy: boolean;
+    crop: boolean;
+    enabled: boolean;
+    height: number | null;
+    quality: number;
+    required_zones: string[];
+    retain: {
+      default: number;
+      mode: string;
+      objects: Record<string, unknown>;
+    };
+    timestamp: boolean;
+  };
+  timestamp_style: {
+    color: {
+      blue: number;
+      green: number;
+      red: number;
+    };
+    effect: string | null;
+    format: string;
+    position: string;
+    thickness: number;
+  };
+  ui: UiConfig;
+  webui_url: string | null;
+  zones: {
+    [zoneName: string]: {
+      coordinates: string;
+      filters: Record<string, unknown>;
+      inertia: number;
+      objects: any[];
+    };
+  };
 }
 
 export interface FrigateConfig {
@@ -29,191 +212,7 @@ export interface FrigateConfig {
   };
 
   cameras: {
-    [cameraName: string]: {
-      audio: {
-        enabled: boolean;
-        enabled_in_config: boolean;
-        filters: string[] | null;
-        listen: string[];
-        max_not_heard: number;
-        min_volume: number;
-        num_threads: number;
-      };
-      best_image_timeout: number;
-      birdseye: {
-        enabled: boolean;
-        mode: "objects";
-        order: number;
-      };
-      detect: {
-        annotation_offset: number;
-        enabled: boolean;
-        fps: number;
-        height: number;
-        max_disappeared: number;
-        min_initialized: number;
-        stationary: {
-          interval: number;
-          max_frames: {
-            default: number | null;
-            objects: Record<string, unknown>;
-          };
-          threshold: number;
-        };
-        width: number;
-      };
-      enabled: boolean;
-      ffmpeg: {
-        global_args: string[];
-        hwaccel_args: string;
-        input_args: string;
-        inputs: {
-          global_args: string[];
-          hwaccel_args: string[];
-          input_args: string;
-          path: string;
-          roles: string[];
-        }[];
-        output_args: {
-          detect: string[];
-          record: string;
-          rtmp: string;
-        };
-        retry_interval: number;
-      };
-      ffmpeg_cmds: {
-        cmd: string;
-        roles: string[];
-      }[];
-      live: {
-        height: number;
-        quality: number;
-        stream_name: string;
-      };
-      motion: {
-        contour_area: number;
-        delta_alpha: number;
-        frame_alpha: number;
-        frame_height: number;
-        improve_contrast: boolean;
-        lightning_threshold: number;
-        mask: string[];
-        mqtt_off_delay: number;
-        threshold: number;
-      };
-      mqtt: {
-        bounding_box: boolean;
-        crop: boolean;
-        enabled: boolean;
-        height: number;
-        quality: number;
-        required_zones: string[];
-        timestamp: boolean;
-      };
-      name: string;
-      objects: {
-        filters: {
-          [objectName: string]: {
-            mask: string | null;
-            max_area: number;
-            max_ratio: number;
-            min_area: number;
-            min_ratio: number;
-            min_score: number;
-            threshold: number;
-          };
-        };
-        mask: string;
-        track: string[];
-      };
-      onvif: {
-        autotracking: {
-          calibrate_on_startup: boolean,
-          enabled: boolean;
-          enabled_in_config: boolean;
-          movement_weights: string[];
-          required_zones: string[];
-          return_preset: string;
-          timeout: number;
-          track: string[];
-          zoom_factor: number;
-          zooming: string;
-        };
-        host: string;
-        password: string | null;
-        port: number;
-        user: string | null;
-      };
-      record: {
-        enabled: boolean;
-        enabled_in_config: boolean;
-        events: {
-          objects: string[] | null;
-          post_capture: number;
-          pre_capture: number;
-          required_zones: string[];
-          retain: {
-            default: number;
-            mode: string;
-            objects: Record<string, unknown>;
-          };
-        };
-        expire_interval: number;
-        export: {
-          timelapse_args: string;
-        };
-        preview: {
-          quality: string;
-        };
-        retain: {
-          days: number;
-          mode: string;
-        };
-        sync_recordings: boolean;
-      };
-      rtmp: {
-        enabled: boolean;
-      };
-      snapshots: {
-        bounding_box: boolean;
-        clean_copy: boolean;
-        crop: boolean;
-        enabled: boolean;
-        height: number | null;
-        quality: number;
-        required_zones: string[];
-        retain: {
-          default: number;
-          mode: string;
-          objects: Record<string, unknown>;
-        };
-        timestamp: boolean;
-      };
-      timestamp_style: {
-        color: {
-          blue: number;
-          green: number;
-          red: number;
-        };
-        effect: string | null;
-        format: string;
-        position: string;
-        thickness: number;
-      };
-      ui: {
-        dashboard: boolean;
-        order: number;
-      };
-      webui_url: string | null;
-      zones: {
-        [zoneName: string]: {
-          coordinates: string;
-          filters: Record<string, unknown>;
-          inertia: number;
-          objects: any[];
-        };
-      };
-    };
+    [cameraName: string]: CameraConfig;
   };
 
   database: {
@@ -400,5 +399,4 @@ export interface FrigateConfig {
   };
 
   ui: UiConfig;
-
 }

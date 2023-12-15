@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import * as monaco from "monaco-editor";
 import { configureMonacoYaml } from "monaco-yaml";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/ui/activity-indicator";
