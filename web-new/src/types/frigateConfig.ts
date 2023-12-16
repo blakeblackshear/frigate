@@ -6,6 +6,8 @@ export interface UiConfig {
   strftime_fmt?: string;
   live_mode?: string;
   use_experimental?: boolean;
+  dashboard: boolean;
+  order: number;
 }
 
 export interface CameraConfig {
