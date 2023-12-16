@@ -1,11 +1,11 @@
 export interface UiConfig {
-  timezone: string;
-  time_format: "browser" | "12hour" | "24hour";
-  date_style: "full" | "long" | "medium" | "short";
-  time_style: "full" | "long" | "medium" | "short";
-  strftime_fmt: string;
-  live_mode: string;
-  use_experimental: boolean;
+  timezone?: string;
+  time_format?: 'browser' | '12hour' | '24hour';
+  date_style?: 'full' | 'long' | 'medium' | 'short';
+  time_style?: 'full' | 'long' | 'medium' | 'short';
+  strftime_fmt?: string;
+  live_mode?: string;
+  use_experimental?: boolean;
 }
 
 export interface CameraConfig {
