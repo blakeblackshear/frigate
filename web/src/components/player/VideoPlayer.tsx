@@ -46,12 +46,11 @@ export default function VideoPlayer({
     // Make sure Video.js player is only initialized once
     if (!playerRef.current) {
       // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
-      const videoElement = document.createElement("video-js");
-      // @ts-ignore we know this is a video element
+      const videoElement = document.createElement(
+        "video-js"
+      ) as HTMLVideoElement;
       videoElement.controls = true;
-      // @ts-ignore
       videoElement.playsInline = true;
-      // @ts-ignore
       videoElement.disableRemotePlayback = remotePlayback;
       videoElement.classList.add("small-player");
       videoElement.classList.add("video-js");
