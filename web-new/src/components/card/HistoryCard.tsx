@@ -32,7 +32,7 @@ export default function HistoryCard({
 
   return (
     <Card
-      className="cursor-pointer my-2 xs:mr-2 bg-secondary w-full xs:w-[48%] sm:w-[284px]"
+      className="cursor-pointer my-2 xs:mr-2 w-full xs:w-[48%] sm:w-[284px]"
       onClick={onClick}
     >
       <PreviewThumbnailPlayer
