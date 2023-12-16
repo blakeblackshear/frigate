@@ -71,7 +71,7 @@ function Storage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <div className="flex bg-center snap-center text-center items-center">
+            <div className="flex items-center">
               <CardTitle>Data</CardTitle>
               <TooltipProvider>
                 <Tooltip>
@@ -137,7 +137,7 @@ function Storage() {
 
         <Card>
           <CardHeader>
-            <div className="flex bg-center snap-center text-center items-center">
+            <div className="flex items-center">
               <CardTitle>Memory</CardTitle>
               <TooltipProvider>
                 <Tooltip>
@@ -187,7 +187,7 @@ function Storage() {
         </Card>
       </div>
 
-      <div className="flex bg-center snap-center text-center items-center my-4">
+      <div className="flex items-center my-4">
         <Heading as="h4">Cameras</Heading>
         <TooltipProvider>
           <Tooltip>
