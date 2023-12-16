@@ -61,7 +61,7 @@ export default function MiniEventCard({ event, onUpdate }: MiniEventCardProps) {
           <div>
             <div className="text-sm flex">
               <LuClock className="h-4 w-4 mr-2 inline" />
-              <div className="hidden sm:inline">
+              <div>
                 <TimeAgo time={event.start_time * 1000} dense />
               </div>
             </div>
