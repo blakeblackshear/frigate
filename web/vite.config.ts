@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
-import path from 'path';
-import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
+import path from "path"
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 // https://vitejs.dev/config/
@@ -12,9 +12,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000'
+        target: 'http://localhost:5000',
+        ws: true,
       },
       '/vod': {
+        target: 'http://localhost:5000'
+      },
+      '/clips': {
         target: 'http://localhost:5000'
       },
       '/exports': {
@@ -32,12 +36,17 @@ export default defineConfig({
     }
   },
   plugins: [
-    preact(),
+    react(),
     monacoEditorPlugin.default({
       customWorkers: [{ label: 'yaml', entry: 'monaco-yaml/yaml.worker' }],
       languageWorkers: ['editorWorkerService'], // we don't use any of the default languages
     }),
   ],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   test: {
     environment: 'jsdom',
     alias: {
@@ -52,4 +61,4 @@ export default defineConfig({
     restoreMocks: true,
     globals: true,
   },
-});
+})

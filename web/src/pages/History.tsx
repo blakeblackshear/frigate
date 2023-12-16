@@ -186,6 +186,8 @@ function History() {
                 <Heading as="h3">
                   {formatUnixTimestampToDateTime(parseInt(day), {
                     strftime_fmt: "%A %b %d",
+                    time_style: "medium",
+                    date_style: "medium",
                   })}
                 </Heading>
                 {Object.entries(timelineDay).map(
@@ -205,12 +207,15 @@ function History() {
                         <Heading as="h4">
                           {formatUnixTimestampToDateTime(parseInt(hour), {
                             strftime_fmt: "%I:00",
+                            time_style: "medium",
+                            date_style: "medium",
                           })}
                         </Heading>
 
                         <div className="flex flex-wrap">
-                          {Object.entries(timelineHour).reverse().map(
-                            ([key, timeline]) => {
+                          {Object.entries(timelineHour)
+                            .reverse()
+                            .map(([key, timeline]) => {
                               const startTs = Object.values(timeline.entries)[0]
                                 .timestamp;
                               let relevantPreview = previewMap[timeline.camera];
@@ -235,8 +240,7 @@ function History() {
                                   }}
                                 />
                               );
-                            }
-                          )}
+                            })}
                         </div>
                         {lastRow && <ActivityIndicator />}
                       </div>
