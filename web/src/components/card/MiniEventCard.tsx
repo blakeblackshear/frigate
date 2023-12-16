@@ -70,7 +70,7 @@ export default function MiniEventCard({ event, onUpdate }: MiniEventCardProps) {
               {event.camera.replaceAll("_", " ")}
             </div>
             {event.zones.length ? (
-              <div className="capitalize  text-sm flex align-center">
+              <div className="capitalize whitespace-nowrap text-sm flex align-center">
                 <MdOutlineLocationOn className="w-4 h-4 mr-2 inline" />
                 {event.zones.join(", ").replaceAll("_", " ")}
               </div>

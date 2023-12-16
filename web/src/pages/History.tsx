@@ -7,7 +7,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import HistoryCard from "@/components/card/HistoryCard";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
-import TimelinePlayerCard from "@/components/card/TimelineCardPlayer";
+import TimelinePlayerCard from "@/components/card/TimelinePlayerCard";
 
 const API_LIMIT = 120;
 

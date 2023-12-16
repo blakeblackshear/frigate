@@ -1,7 +1,7 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -32,6 +32,9 @@ export default function PreviewThumbnailPlayer({
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
+  const isSafari = useMemo(() => {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  }, []);
 
   const [visible, setVisible] = useState(false);
 
@@ -133,7 +136,7 @@ export default function PreviewThumbnailPlayer({
           seekOptions={{}}
           onReady={(player) => {
             playerRef.current = player;
-            player.playbackRate(8);
+            player.playbackRate(isSafari ? 2 : 8);
             player.currentTime(startTs - relevantPreview.start);
           }}
           onDispose={() => {
