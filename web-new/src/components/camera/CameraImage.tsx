@@ -7,8 +7,9 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 type CameraImageProps = {
   camera: string;
   onload?: (event: Event) => void;
-  searchParams: {};
-  stretch?: boolean;
+  searchParams?: {};
+  stretch?: boolean; // stretch to fit width
+  fitAspect?: number; // shrink to fit height
 };
 
 export default function CameraImage({
@@ -16,13 +17,15 @@ export default function CameraImage({
   onload,
   searchParams = "",
   stretch = false,
+  fitAspect,
 }: CameraImageProps) {
   const { data: config } = useSWR("config");
   const apiHost = useApiHost();
   const [hasLoaded, setHasLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [{ width: containerWidth }] = useResizeObserver(containerRef);
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
 
   // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
   // https://github.com/blakeblackshear/frigate/issues/1657
@@ -42,7 +45,10 @@ export default function CameraImage({
   const aspectRatio = width / height;
 
   const scaledHeight = useMemo(() => {
-    const scaledHeight = Math.floor(availableWidth / aspectRatio);
+    const scaledHeight =
+      aspectRatio < (fitAspect ?? 0)
+        ? Math.floor(containerHeight)
+        : Math.floor(availableWidth / aspectRatio);
     const finalHeight = stretch ? scaledHeight : Math.min(scaledHeight, height);
 
     if (finalHeight > 0) {
@@ -79,7 +85,12 @@ export default function CameraImage({
   }, [apiHost, canvasRef, name, img, searchParams, scaledHeight, config]);
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div
+      className={`relative w-full ${
+        fitAspect && aspectRatio < fitAspect ? "h-full flex justify-center" : ""
+      }`}
+      ref={containerRef}
+    >
       {enabled ? (
         <canvas
           data-testid="cameraimage-canvas"

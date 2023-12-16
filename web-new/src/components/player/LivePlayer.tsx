@@ -8,7 +8,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import { usePersistence } from "@/context/use-persistence";
+import { usePersistence } from "@/hooks/use-persistence";
 
 const emptyObject = Object.freeze({});
 
