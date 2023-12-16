@@ -13,15 +13,27 @@ import Heading from "@/components/ui/heading";
 import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { camera: openedCamera } = useParams();
 
-  const [camera, setCamera] = useState<string>("Select A Camera");
+  const [camera, setCamera] = useState<string>(
+    openedCamera ?? "Select A Camera"
+  );
   const cameraConfig = useMemo(() => {
     return config?.cameras[camera];
   }, [camera, config]);
+  const sortedCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
   const restreamEnabled = useMemo(() => {
     return (
       config &&
@@ -62,13 +74,13 @@ function Live() {
               <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={camera} onValueChange={setCamera}>
-                {Object.keys(config?.cameras || {}).map((item) => (
+                {(sortedCameras).map((item) => (
                   <DropdownMenuRadioItem
                     className="capitalize"
-                    key={item}
-                    value={item}
+                    key={item.name}
+                    value={item.name}
                   >
-                    {item.replaceAll("_", " ")}
+                    {item.name.replaceAll("_", " ")}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
