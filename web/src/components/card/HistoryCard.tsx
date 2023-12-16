@@ -48,6 +48,8 @@ export default function HistoryCard({
           {formatUnixTimestampToDateTime(timeline.time, {
             strftime_fmt:
               config.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S",
+            time_style: "medium",
+            date_style: "medium",
           })}
         </div>
         <div className="capitalize text-sm flex align-center mt-1">
