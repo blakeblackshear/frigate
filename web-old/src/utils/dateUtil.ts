@@ -1,5 +1,5 @@
-import strftime from "strftime";
-import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
+import strftime from 'strftime';
+import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -35,49 +35,34 @@ export const getNowYesterdayInLong = (): number => {
  * @param config An object containing the configuration options for date/time display
  * @returns The formatted date/time string, or "Invalid time" if the Unix timestamp is not provided or invalid.
  */
+interface DateTimeStyle {
+  timezone: string;
+  time_format: 'browser' | '12hour' | '24hour';
+  date_style: 'full' | 'long' | 'medium' | 'short';
+  time_style: 'full' | 'long' | 'medium' | 'short';
+  strftime_fmt: string;
+}
 
 // only used as a fallback if the browser does not support dateStyle/timeStyle in Intl.DateTimeFormat
 const formatMap: {
   [k: string]: {
-    date: {
-      year: "numeric" | "2-digit";
-      month: "long" | "short" | "2-digit";
-      day: "numeric" | "2-digit";
-    };
-    time: {
-      hour: "numeric";
-      minute: "numeric";
-      second?: "numeric";
-      timeZoneName?: "short" | "long";
-    };
+    date: { year: 'numeric' | '2-digit'; month: 'long' | 'short' | '2-digit'; day: 'numeric' | '2-digit' };
+    time: { hour: 'numeric'; minute: 'numeric'; second?: 'numeric'; timeZoneName?: 'short' | 'long' };
   };
 } = {
   full: {
-    date: { year: "numeric", month: "long", day: "numeric" },
-    time: {
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZoneName: "long",
-    },
+    date: { year: 'numeric', month: 'long', day: 'numeric' },
+    time: { hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'long' },
   },
   long: {
-    date: { year: "numeric", month: "long", day: "numeric" },
-    time: {
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZoneName: "long",
-    },
+    date: { year: 'numeric', month: 'long', day: 'numeric' },
+    time: { hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'long' },
   },
   medium: {
-    date: { year: "numeric", month: "short", day: "numeric" },
-    time: { hour: "numeric", minute: "numeric", second: "numeric" },
+    date: { year: 'numeric', month: 'short', day: 'numeric' },
+    time: { hour: 'numeric', minute: 'numeric', second: 'numeric' },
   },
-  short: {
-    date: { year: "2-digit", month: "2-digit", day: "2-digit" },
-    time: { hour: "numeric", minute: "numeric" },
-  },
+  short: { date: { year: '2-digit', month: '2-digit', day: '2-digit' }, time: { hour: 'numeric', minute: 'numeric' } },
 };
 
 /**
@@ -100,11 +85,11 @@ const getResolvedTimeZone = () => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   } catch (error) {
     const offsetMinutes = new Date().getTimezoneOffset();
-    return `UTC${offsetMinutes < 0 ? "+" : "-"}${Math.abs(offsetMinutes / 60)
+    return `UTC${offsetMinutes < 0 ? '+' : '-'}${Math.abs(offsetMinutes / 60)
       .toString()
-      .padStart(2, "0")}:${Math.abs(offsetMinutes % 60)
+      .padStart(2, '0')}:${Math.abs(offsetMinutes % 60)
       .toString()
-      .padStart(2, "0")}`;
+      .padStart(2, '0')}`;
   }
 };
 
@@ -124,21 +109,11 @@ const getResolvedTimeZone = () => {
  *
  * @throws {Error} If the given unixTimestamp is not a valid number, the function will return 'Invalid time'.
  */
-export const formatUnixTimestampToDateTime = (
-  unixTimestamp: number,
-  config: {
-    timezone?: string;
-    time_format?: "browser" | "12hour" | "24hour";
-    date_style?: "full" | "long" | "medium" | "short";
-    time_style?: "full" | "long" | "medium" | "short";
-    strftime_fmt?: string;
-  }
-): string => {
-  const { timezone, time_format, date_style, time_style, strftime_fmt } =
-    config;
-  const locale = window.navigator?.language || "en-US";
+export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: DateTimeStyle): string => {
+  const { timezone, time_format, date_style, time_style, strftime_fmt } = config;
+  const locale = window.navigator?.language || 'en-us';
   if (isNaN(unixTimestamp)) {
-    return "Invalid time";
+    return 'Invalid time';
   }
 
   try {
@@ -148,7 +123,7 @@ export const formatUnixTimestampToDateTime = (
     // use strftime_fmt if defined in config
     if (strftime_fmt) {
       const offset = getUTCOffset(date, timezone || resolvedTimeZone);
-      const strftime_locale = strftime.timezone(offset);
+      const strftime_locale = strftime.timezone(offset).localizeByIdentifier(locale);
       return strftime_locale(strftime_fmt, date);
     }
 
@@ -156,7 +131,7 @@ export const formatUnixTimestampToDateTime = (
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: date_style,
       timeStyle: time_style,
-      hour12: time_format !== "browser" ? time_format == "12hour" : undefined,
+      hour12: time_format !== 'browser' ? time_format == '12hour' : undefined,
     };
 
     // Only set timeZone option when resolvedTimeZone does not match UTC±HH:MM format, or when timezone is set in config
@@ -174,26 +149,15 @@ export const formatUnixTimestampToDateTime = (
     // fallback if the browser does not support dateStyle/timeStyle in Intl.DateTimeFormat
     // This works even tough the timezone is undefined, it will use the runtime's default time zone
     if (!containsTime) {
-      const dateOptions = {
-        ...formatMap[date_style ?? ""]?.date,
-        timeZone: options.timeZone,
-        hour12: options.hour12,
-      };
-      const timeOptions = {
-        ...formatMap[time_style ?? ""]?.time,
-        timeZone: options.timeZone,
-        hour12: options.hour12,
-      };
+      const dateOptions = { ...formatMap[date_style]?.date, timeZone: options.timeZone, hour12: options.hour12 };
+      const timeOptions = { ...formatMap[time_style]?.time, timeZone: options.timeZone, hour12: options.hour12 };
 
-      return `${date.toLocaleDateString(
-        locale,
-        dateOptions
-      )} ${date.toLocaleTimeString(locale, timeOptions)}`;
+      return `${date.toLocaleDateString(locale, dateOptions)} ${date.toLocaleTimeString(locale, timeOptions)}`;
     }
 
     return formattedDateTime;
   } catch (error) {
-    return "Invalid time";
+    return 'Invalid time';
   }
 };
 
@@ -211,31 +175,28 @@ interface DurationToken {
  * @param end_time: number|null - Unix timestamp for end time
  * @returns string - duration or 'In Progress' if end time is not provided
  */
-export const getDurationFromTimestamps = (
-  start_time: number,
-  end_time: number | null
-): string => {
+export const getDurationFromTimestamps = (start_time: number, end_time: number | null): string => {
   if (isNaN(start_time)) {
-    return "Invalid start time";
+    return 'Invalid start time';
   }
-  let duration = "In Progress";
+  let duration = 'In Progress';
   if (end_time !== null) {
     if (isNaN(end_time)) {
-      return "Invalid end time";
+      return 'Invalid end time';
     }
     const start = fromUnixTime(start_time);
     const end = fromUnixTime(end_time);
     const formatDistanceLocale: DurationToken = {
-      xSeconds: "{{count}}s",
-      xMinutes: "{{count}}m",
-      xHours: "{{count}}h",
+      xSeconds: '{{count}}s',
+      xMinutes: '{{count}}m',
+      xHours: '{{count}}h',
     };
     const shortEnLocale = {
       formatDistance: (token: keyof DurationToken, count: number) =>
-        formatDistanceLocale[token].replace("{{count}}", count.toString()),
+        formatDistanceLocale[token].replace('{{count}}', count.toString()),
     };
     duration = formatDuration(intervalToDuration({ start, end }), {
-      format: ["hours", "minutes", "seconds"],
+      format: ['hours', 'minutes', 'seconds'],
       locale: shortEnLocale,
     });
   }
@@ -254,18 +215,14 @@ const getUTCOffset = (date: Date, timezone: string): number => {
   if (utcOffsetMatch) {
     const hours = parseInt(utcOffsetMatch[2], 10);
     const minutes = parseInt(utcOffsetMatch[3], 10);
-    return (utcOffsetMatch[1] === "+" ? 1 : -1) * (hours * 60 + minutes);
+    return (utcOffsetMatch[1] === '+' ? 1 : -1) * (hours * 60 + minutes);
   }
 
   // Otherwise, calculate offset using provided timezone
-  const utcDate = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60 * 1000
-  );
+  const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
   // locale of en-CA is required for proper locale format
-  let iso = utcDate
-    .toLocaleString("en-CA", { timeZone: timezone, hour12: false })
-    .replace(", ", "T");
-  iso += `.${utcDate.getMilliseconds().toString().padStart(3, "0")}`;
+  let iso = utcDate.toLocaleString('en-CA', { timeZone: timezone, hour12: false }).replace(', ', 'T');
+  iso += `.${utcDate.getMilliseconds().toString().padStart(3, '0')}`;
   let target = new Date(`${iso}Z`);
 
   // safari doesn't like the default format
