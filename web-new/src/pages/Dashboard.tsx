@@ -17,9 +17,22 @@ import { AiOutlinePicture } from "react-icons/ai";
 import { FaWalking } from "react-icons/fa";
 import { LuEar } from "react-icons/lu";
 import { TbMovie } from "react-icons/tb";
+import MiniEventCard from "@/components/card/MiniEventCard";
+import { Event } from "@/types/event";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function Dashboard() {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const recentTimestamp = useMemo(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 30);
+    return now.getTime() / 1000;
+  }, []);
+  const { data: events, mutate: updateEvents } = useSWR<Event[]>([
+    "events",
+    { limit: 10, after: recentTimestamp },
+  ]);
 
   const sortedCameras = useMemo(() => {
     if (!config) {
@@ -39,7 +52,27 @@ export function Dashboard() {
 
       {config && (
         <div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {events && events.length > 0 && (
+            <>
+              <Heading as="h4">Recent Events</Heading>
+              <ScrollArea>
+                <div className="flex">
+                  {events.map((event) => {
+                    return (
+                      <MiniEventCard
+                        key={event.id}
+                        event={event}
+                        onUpdate={() => updateEvents()}
+                      />
+                    );
+                  })}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </>
+          )}
+          <Heading as="h4">Cameras</Heading>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {sortedCameras.map((camera) => {
               return <Camera key={camera.name} camera={camera} />;
             })}
@@ -73,9 +106,9 @@ function Camera({ camera }: { camera: CameraConfig }) {
             <CameraImage camera={camera.name} fitAspect={16 / 9} />
           </AspectRatio>
           <div className="flex justify-between items-center">
-            <Heading className="capitalize p-2" as="h4">
+            <div className="text-lg capitalize p-2">
               {camera.name.replaceAll("_", " ")}
-            </Heading>
+            </div>
             <div>
               <Button
                 variant="ghost"
