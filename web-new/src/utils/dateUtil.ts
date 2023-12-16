@@ -143,8 +143,8 @@ export const formatUnixTimestampToDateTime = (unixTimestamp: number, config: UiC
     // fallback if the browser does not support dateStyle/timeStyle in Intl.DateTimeFormat
     // This works even tough the timezone is undefined, it will use the runtime's default time zone
     if (!containsTime) {
-      const dateOptions = { ...formatMap[date_style]?.date, timeZone: options.timeZone, hour12: options.hour12 };
-      const timeOptions = { ...formatMap[time_style]?.time, timeZone: options.timeZone, hour12: options.hour12 };
+      const dateOptions = { ...formatMap[date_style ?? ""]?.date, timeZone: options.timeZone, hour12: options.hour12 };
+      const timeOptions = { ...formatMap[time_style ?? ""]?.time, timeZone: options.timeZone, hour12: options.hour12 };
 
       return `${date.toLocaleDateString(locale, dateOptions)} ${date.toLocaleTimeString(locale, timeOptions)}`;
     }
