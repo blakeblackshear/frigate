@@ -1,7 +1,7 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -33,6 +33,8 @@ export default function PreviewThumbnailPlayer({
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
 
+  const [visible, setVisible] = useState(false);
+
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
       if (!relevantPreview || !playerRef.current) {
@@ -46,73 +48,73 @@ export default function PreviewThumbnailPlayer({
         playerRef.current.currentTime(startTs - relevantPreview.start);
       }
     },
-    [relevantPreview, startTs]
+    [relevantPreview, startTs, playerRef]
   );
 
-  const observer = useRef<IntersectionObserver | null>();
+  const autoPlayObserver = useRef<IntersectionObserver | null>();
+  const preloadObserver = useRef<IntersectionObserver | null>();
   const inViewRef = useCallback(
     (node: HTMLElement | null) => {
-      if (!shouldAutoPlay || observer.current) {
-        return;
+      if (!preloadObserver.current) {
+        try {
+          preloadObserver.current = new IntersectionObserver(
+            (entries) => {
+              const [{ isIntersecting }] = entries;
+              setVisible(isIntersecting);
+            },
+            {
+              threshold: 0,
+              root: document.getElementById("pageRoot"),
+              rootMargin: "10% 0px 25% 0px",
+            }
+          );
+          if (node) preloadObserver.current.observe(node);
+        } catch (e) {
+          // no op
+        }
       }
 
-      try {
-        observer.current = new IntersectionObserver(
-          (entries) => {
-            if (entries[0].isIntersecting) {
-              onPlayback(true);
-            } else {
-              onPlayback(false);
-            }
-          },
-          { threshold: 1.0 }
-        );
-        if (node) observer.current.observe(node);
-      } catch (e) {
-        // no op
+      if (shouldAutoPlay && !autoPlayObserver.current) {
+        try {
+          autoPlayObserver.current = new IntersectionObserver(
+            (entries) => {
+              const [{ isIntersecting }] = entries;
+              if (isIntersecting) {
+                onPlayback(true);
+              } else {
+                onPlayback(false);
+              }
+            },
+            { threshold: 1.0 }
+          );
+          if (node) autoPlayObserver.current.observe(node);
+        } catch (e) {
+          // no op
+        }
       }
     },
-    [observer, onPlayback]
+    [preloadObserver, autoPlayObserver, onPlayback]
   );
 
-  if (!relevantPreview) {
+  let content;
+  if (!relevantPreview || !visible) {
     if (isCurrentHour(startTs)) {
-      return (
-        <AspectRatio
-          ratio={16 / 9}
-          className="bg-black flex justify-center items-center"
-        >
-          <img
-            className={`${getPreviewWidth(camera, config)}`}
-            loading="lazy"
-            src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
-          />
-        </AspectRatio>
+      content = (
+        <img
+          className={`${getPreviewWidth(camera, config)}`}
+          src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
+        />
       );
     }
 
-    return (
-      <AspectRatio
-        ratio={16 / 9}
-        className="bg-black flex justify-center items-center"
-      >
-        <img
-          className="w-[160px]"
-          loading="lazy"
-          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-        />
-      </AspectRatio>
+    content = (
+      <img
+        className="w-[160px]"
+        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+      />
     );
-  }
-
-  return (
-    <AspectRatio
-      ref={shouldAutoPlay ? inViewRef : null}
-      ratio={16 / 9}
-      className="bg-black flex justify-center items-center"
-      onMouseEnter={() => onPlayback(true)}
-      onMouseLeave={() => onPlayback(false)}
-    >
+  } else {
+    content = (
       <div className={`${getPreviewWidth(camera, config)}`}>
         <VideoPlayer
           options={{
@@ -139,6 +141,18 @@ export default function PreviewThumbnailPlayer({
           }}
         />
       </div>
+    );
+  }
+
+  return (
+    <AspectRatio
+      ref={relevantPreview ? inViewRef : null}
+      ratio={16 / 9}
+      className="bg-black flex justify-center items-center"
+      onMouseEnter={() => onPlayback(true)}
+      onMouseLeave={() => onPlayback(false)}
+    >
+      {content}
     </AspectRatio>
   );
 }
@@ -151,6 +165,10 @@ function isCurrentHour(timestamp: number) {
 
 function getPreviewWidth(camera: string, config: FrigateConfig) {
   const detect = config.cameras[camera].detect;
+
+  if (detect.width / detect.height < 1.0) {
+    return "w-[120px]";
+  }
 
   if (detect.width / detect.height < 1.4) {
     return "w-[208px]";
