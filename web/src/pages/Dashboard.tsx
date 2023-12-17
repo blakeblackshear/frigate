@@ -23,12 +23,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function Dashboard() {
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  const recentTimestamp = useMemo(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - 30);
-    return now.getTime() / 1000;
-  }, []);
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - 30, 0, 0);
+  const recentTimestamp = now.getTime() / 1000;
   const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
     "events",
     { limit: 10, after: recentTimestamp },
