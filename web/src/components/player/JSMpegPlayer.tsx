@@ -86,7 +86,7 @@ export default function JSMpegPlayer({
         className={`jsmpeg`}
         style={{
           height: `${scaledHeight}px`,
-          width: `${scaledWidth} px`,
+          width: `${scaledWidth}px`,
         }}
       />
     </div>
