@@ -9,6 +9,16 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
 import TimelinePlayerCard from "@/components/card/TimelinePlayerCard";
 import { getHourlyTimelineData } from "@/utils/historyUtil";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const API_LIMIT = 200;
 
@@ -36,6 +46,7 @@ function History() {
 
   const {
     data: timelinePages,
+    mutate: updateHistory,
     size,
     setSize,
     isValidating,
@@ -86,6 +97,40 @@ function History() {
     [size, setSize, isValidating, isDone]
   );
 
+  const [itemsToDelete, setItemsToDelete] = useState<string[] | null>(null);
+  const onDelete = useCallback(
+    async (timeline: Card) => {
+      if (timeline.entries.length > 1) {
+        const uniqueEvents = new Set(
+          timeline.entries.map((entry) => entry.source_id)
+        );
+        setItemsToDelete(new Array(...uniqueEvents));
+      } else {
+        const response = await axios.delete(
+          `events/${timeline.entries[0].source_id}`
+        );
+        if (response.status === 200) {
+          updateHistory();
+        }
+      }
+    },
+    [updateHistory]
+  );
+  const onDeleteMulti = useCallback(async () => {
+    if (!itemsToDelete) {
+      return;
+    }
+
+    const responses = itemsToDelete.map(async (id) => {
+      return axios.delete(`events/${id}`);
+    });
+
+    if ((await responses[0]).status == 200) {
+      updateHistory();
+      setItemsToDelete(null);
+    }
+  }, [itemsToDelete, updateHistory]);
+
   if (!config || !timelineCards || timelineCards.length == 0) {
     return <ActivityIndicator />;
   }
@@ -93,6 +138,31 @@ function History() {
   return (
     <>
       <Heading as="h2">Review</Heading>
+
+      <AlertDialog
+        open={itemsToDelete != null}
+        onOpenChange={(_) => setItemsToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{`Delete ${itemsToDelete?.length} events?`}</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete all events associated with these objects.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setItemsToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500"
+              onClick={() => onDeleteMulti()}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <TimelinePlayerCard
         timeline={playback}
@@ -167,6 +237,7 @@ function History() {
                                   onClick={() => {
                                     setPlayback(timeline);
                                   }}
+                                  onDelete={() => onDelete(timeline)}
                                 />
                               );
                             })}
