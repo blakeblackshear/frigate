@@ -88,7 +88,7 @@ export default function PreviewThumbnailPlayer({
                 onPlayback(false);
               }
             },
-            { threshold: 1.0 }
+            { root: document.getElementById("pageRoot"), threshold: 1.0 }
           );
           if (node) autoPlayObserver.current.observe(node);
         } catch (e) {
