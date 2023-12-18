@@ -108,14 +108,14 @@ export default function PreviewThumbnailPlayer({
           src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
         />
       );
+    } else {
+      content = (
+        <img
+          className="w-[160px]"
+          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+        />
+      );
     }
-
-    content = (
-      <img
-        className="w-[160px]"
-        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-      />
-    );
   } else {
     content = (
       <div className={`${getPreviewWidth(camera, config)}`}>
