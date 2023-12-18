@@ -38,3 +38,8 @@ type HourlyTimeline = {
     count: number,
     hours: { [key: string]: Timeline[] };
 }
+
+type HistoryFilter = {
+    cameras: string[],
+    labels: string[],
+}

@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 
 const API_LIMIT = 200;
 
@@ -29,6 +30,12 @@ function History() {
       config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     [config]
   );
+
+  const [searchFilter, setSearchFilter] = useState<HistoryFilter>({
+    cameras: [],
+    labels: [],
+  });
+
   const timelineFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
     return axios.get(path, { params }).then((res) => res.data);
@@ -137,7 +144,13 @@ function History() {
 
   return (
     <>
-      <Heading as="h2">Review</Heading>
+      <div className="flex justify-between">
+        <Heading as="h2">History</Heading>
+        <HistoryFilterPopover
+          filter={searchFilter}
+          onUpdateFilter={(filter) => setSearchFilter(filter)}
+        />
+      </div>
 
       <AlertDialog
         open={itemsToDelete != null}
