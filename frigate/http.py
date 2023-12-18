@@ -17,6 +17,9 @@ import cv2
 import numpy as np
 import pytz
 import requests
+from chromadb import Collection, QueryResult
+from chromadb import HttpClient as ChromaClient
+from chromadb.config import Settings
 from flask import (
     Blueprint,
     Flask,
@@ -42,6 +45,8 @@ from frigate.const import (
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
 )
+from frigate.embeddings.functions.clip import ClipEmbedding
+from frigate.embeddings.functions.minilm_l6_v2 import MiniLMEmbedding
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Previews, Recordings, Regions, Timeline
 from frigate.object_processing import TrackedObject
@@ -103,6 +108,13 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
+    app.chroma = ChromaClient(settings=Settings(anonymized_telemetry=False))
+    app.thumbnail_collection = app.chroma.get_or_create_collection(
+        name="event_thumbnail", embedding_function=ClipEmbedding()
+    )
+    app.description_collection = app.chroma.get_or_create_collection(
+        name="event_description", embedding_function=MiniLMEmbedding()
+    )
 
     app.register_blueprint(bp)
 
@@ -998,6 +1010,7 @@ def events():
     is_submitted = request.args.get("is_submitted", type=int)
     min_length = request.args.get("min_length", type=float)
     max_length = request.args.get("max_length", type=float)
+    search = request.args.get("search", type=str) or None
 
     clauses = []
 
@@ -1019,16 +1032,24 @@ def events():
         Event.data,
     ]
 
+    # Start collecting filters for the embeddings metadata.
+    # We won't be able to do all the filters like we do against the DB
+    # because the table might have been modified after, but we should
+    # do what we can.
+    embeddings_filters = []
+
     if camera != "all":
         clauses.append((Event.camera == camera))
 
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Event.camera << camera_list))
+        embeddings_filters.append({"camera": {"$in": camera_list}})
 
     if labels != "all":
         label_list = labels.split(",")
         clauses.append((Event.label << label_list))
+        embeddings_filters.append({"label": {"$in": label_list}})
 
     if sub_labels != "all":
         # use matching so joined sub labels are included
@@ -1071,9 +1092,11 @@ def events():
 
     if after:
         clauses.append((Event.start_time > after))
+        embeddings_filters.append({"start_time": {"$gt": after}})
 
     if before:
         clauses.append((Event.start_time < before))
+        embeddings_filters.append({"start_time": {"$lt": before}})
 
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
@@ -1141,6 +1164,40 @@ def events():
     if len(clauses) == 0:
         clauses.append((True))
 
+    # Handle semantic search
+    event_order = None
+    if search is not None:
+        where = None
+        if len(embeddings_filters) > 1:
+            where = {"$and": embeddings_filters}
+        elif len(embeddings_filters) == 1:
+            where = embeddings_filters[0]
+
+        # Grab the ids of the events that match based on CLIP embeddings
+        thumbnails: Collection = current_app.thumbnail_collection
+        thumb_result: QueryResult = thumbnails.query(
+            query_texts=[search],
+            n_results=int(limit),
+            where=where,
+        )
+        thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
+
+        # Grab the ids of the events that match based on MiniLM embeddings
+        descriptions: Collection = current_app.description_collection
+        desc_result: QueryResult = descriptions.query(
+            query_texts=[search],
+            n_results=int(limit),
+            where=where,
+        )
+        desc_ids = dict(zip(desc_result["ids"][0], desc_result["distances"][0]))
+
+        event_order = {
+            k: min(i for i in (thumb_ids.get(k), desc_ids.get(k)) if i is not None)
+            for k in thumb_ids.keys() | desc_ids
+        }
+
+        clauses.append((Event.id << list(event_order.keys())))
+
     events = (
         Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
@@ -1149,8 +1206,16 @@ def events():
         .dicts()
         .iterator()
     )
+    events = list(events)
 
-    return jsonify(list(events))
+    if event_order is not None:
+        events = [
+            {**events, "search_similarity": event_order[events["id"]]}
+            for events in events
+        ]
+        events = sorted(events, key=lambda x: x["search_similarity"])
+
+    return jsonify(events)
 
 
 @bp.route("/events/<camera_name>/<label>/create", methods=["POST"])
@@ -2326,6 +2391,7 @@ def logs(service: str):
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
         "nginx": "/dev/shm/logs/nginx/current",
+        "chroma": "/dev/shm/logs/chroma/current",
     }
     service_location = log_locations.get(service)
 

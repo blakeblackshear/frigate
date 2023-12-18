@@ -680,6 +680,23 @@ class SnapshotsConfig(FrigateBaseModel):
     )
 
 
+class SemanticSearchConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable semantic search.")
+
+
+class GeminiConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable Google Gemini captioning.")
+    override_existing: bool = Field(
+        default=False, title="Override existing sub labels."
+    )
+    api_key: str = Field(default="", title="Google AI Studio API Key.")
+    prompt: str = Field(
+        default="Describe the {label} in this image with as much detail as possible. Do not describe the background.",
+        title="Default caption prompt.",
+    )
+    object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
+
+
 class ColorConfig(FrigateBaseModel):
     red: int = Field(default=255, ge=0, le=255, title="Red")
     green: int = Field(default=255, ge=0, le=255, title="Green")
@@ -782,6 +799,9 @@ class CameraConfig(FrigateBaseModel):
     )
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
+    )
+    gemini: GeminiConfig = Field(
+        default_factory=GeminiConfig, title="Google Gemini Configuration."
     )
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
@@ -1051,6 +1071,12 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
+    semantic_search: SemanticSearchConfig = Field(
+        default_factory=SemanticSearchConfig, title="Semantic Search configuration."
+    )
+    gemini: GeminiConfig = Field(
+        default_factory=GeminiConfig, title="Global Google Gemini Configuration."
+    )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )
@@ -1090,6 +1116,10 @@ class FrigateConfig(FrigateBaseModel):
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
+        # Gemini API Key substitutions
+        if config.gemini.api_key:
+            config.gemini.api_key = config.gemini.api_key.format(**FRIGATE_ENV_VARS)
+
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
             if not config.objects.filters.get(attribute):
@@ -1110,6 +1140,7 @@ class FrigateConfig(FrigateBaseModel):
                 "detect": ...,
                 "ffmpeg": ...,
                 "timestamp_style": ...,
+                "gemini": ...,
             },
             exclude_unset=True,
         )
@@ -1176,6 +1207,13 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.onvif.password = camera_config.onvif.password.format(
                     **FRIGATE_ENV_VARS
                 )
+
+            # Gemini substitution
+            if camera_config.gemini.api_key:
+                camera_config.gemini.api_key = camera_config.gemini.api_key.format(
+                    **FRIGATE_ENV_VARS
+                )
+
             # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled

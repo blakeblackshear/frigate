@@ -1,6 +1,7 @@
 CONFIG_DIR = "/config"
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
+DEFAULT_CHROMA_DB_PATH = f"{CONFIG_DIR}/chroma"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 RECORD_DIR = f"{BASE_DIR}/recordings"

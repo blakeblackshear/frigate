@@ -8,7 +8,7 @@ ARG SLIM_BASE=debian:11-slim
 
 FROM ${BASE_IMAGE} AS base
 
-FROM --platform=${BUILDPLATFORM} debian:11 AS base_host
+FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS base_host
 
 FROM ${SLIM_BASE} AS slim-base
 
@@ -175,6 +175,9 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 # https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
+
+# Turn off Chroma Telemetry: https://docs.trychroma.com/telemetry#opting-out
+ENV ANONYMIZED_TELEMETRY=False
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 

@@ -71,7 +71,7 @@ export default function TextField({
           ) : null}
           <div className="relative w-full">
             <input
-              className="h-6 mt-6 w-full bg-transparent focus:outline-none focus:ring-0"
+              className="h-6 mt-6 w-full bg-transparent border-0 focus:outline-none focus:ring-0"
               onBlur={handleBlur}
               onFocus={handleFocus}
               onInput={handleChange}

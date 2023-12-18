@@ -62,6 +62,7 @@ class EventProcessor(threading.Thread):
         event_queue: Queue,
         event_processed_queue: Queue,
         timeline_queue: Queue,
+        embeddings_queue: Queue,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -71,6 +72,7 @@ class EventProcessor(threading.Thread):
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.timeline_queue = timeline_queue
+        self.embeddings_queue = embeddings_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
 
@@ -240,6 +242,7 @@ class EventProcessor(threading.Thread):
         if event_type == "end":
             del self.events_in_process[event_data["id"]]
             self.event_processed_queue.put((event_data["id"], camera))
+            self.embeddings_queue.put((event_data["id"], camera))
 
     def handle_external_detection(self, event_type: str, event_data: Event) -> None:
         if event_type == "new":

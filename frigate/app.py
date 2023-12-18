@@ -31,6 +31,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.embeddings.processor import EmbeddingProcessor
 from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
@@ -272,6 +273,9 @@ class FrigateApp:
 
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
+
+        # Queue for embeddings process
+        self.embeddings_queue: Queue = mp.Queue()
 
         # Queue for inter process communication
         self.inter_process_queue: Queue = mp.Queue()
@@ -584,6 +588,12 @@ class FrigateApp:
         )
         self.timeline_processor.start()
 
+    def start_embeddings_processor(self) -> None:
+        self.embeddings_processor = EmbeddingProcessor(
+            self.config, self.embeddings_queue, self.stop_event
+        )
+        self.embeddings_processor.start()
+
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
@@ -591,6 +601,7 @@ class FrigateApp:
             self.event_queue,
             self.event_processed_queue,
             self.timeline_queue,
+            self.embeddings_queue,
             self.stop_event,
         )
         self.event_processor.start()
@@ -700,6 +711,7 @@ class FrigateApp:
         self.init_external_event_processor()
         self.init_web_server()
         self.start_timeline_processor()
+        self.start_embeddings_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_record_cleanup()
@@ -742,6 +754,7 @@ class FrigateApp:
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
+        self.embeddings_processor.join()
         self.db.stop()
 
         while len(self.detection_shms) > 0:
@@ -758,6 +771,7 @@ class FrigateApp:
             self.audio_recordings_info_queue,
             self.log_queue,
             self.inter_process_queue,
+            self.embeddings_queue,
         ]:
             if queue is not None:
                 while not queue.empty():

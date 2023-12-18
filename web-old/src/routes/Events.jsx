@@ -27,6 +27,7 @@ import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
+import TextField from '../components/TextField';
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
@@ -184,6 +185,17 @@ export default function Events({ path, ...props }) {
         mutate();
       }
     }
+  };
+
+  let searchTimeout;
+  const onChangeSearchText = (text) => {
+    if (searchParams?.search == text) {
+      return;
+    }
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      onFilter('search', text);
+    }, 500);
   };
 
   const onToggleNamedFilter = (name, item) => {
@@ -367,6 +379,9 @@ export default function Events({ path, ...props }) {
   return (
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
+      <div className="flex flex-wrap gap-2 items-center">
+        <TextField label="Search" onChangeText={(text) => onChangeSearchText(text)} />
+      </div>
       <div className="flex flex-wrap gap-2 items-center">
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
@@ -801,7 +816,9 @@ function Event({
               {event.label.replaceAll('_', ' ')}
               {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
             </div>
-
+            {event?.data?.description ? (
+              <div className="text-sm flex flex-col grow pb-2">{event.data.description}</div>
+            ) : null}
             <div className="text-sm flex">
               <Clock className="h-5 w-5 mr-2 inline" />
               {formatUnixTimestampToDateTime(event.start_time, { ...config.ui })}
