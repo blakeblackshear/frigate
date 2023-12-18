@@ -53,7 +53,9 @@ class EmbeddingProcessor(threading.Thread):
             return
 
         # Create the database
-        self.chroma = ChromaClient(settings=Settings(anonymized_telemetry=False))
+        self.chroma = ChromaClient(
+            host="127.0.0.1", settings=Settings(anonymized_telemetry=False)
+        )
 
         # Create/Load the collection(s)
         self.thumbnail = self.chroma.get_or_create_collection(

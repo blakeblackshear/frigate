@@ -108,7 +108,9 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
-    app.chroma = ChromaClient(settings=Settings(anonymized_telemetry=False))
+    app.chroma = ChromaClient(
+        host="127.0.0.1", settings=Settings(anonymized_telemetry=False)
+    )
     app.thumbnail_collection = app.chroma.get_or_create_collection(
         name="event_thumbnail", embedding_function=ClipEmbedding()
     )
