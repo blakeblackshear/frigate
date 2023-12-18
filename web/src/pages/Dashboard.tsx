@@ -94,7 +94,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
 
   return (
     <>
-      <Card className="">
+      <Card>
         <a href={`/live/${camera.name}`}>
           <AspectRatio
             ratio={16 / 9}
@@ -115,6 +115,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   sendDetect(detectValue == "ON" ? "OFF" : "ON");
                 }}
               >
@@ -132,6 +133,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 }
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   camera.record.enabled_in_config
                     ? sendRecord(recordValue == "ON" ? "OFF" : "ON")
                     : {};
@@ -147,6 +149,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   sendSnapshot(detectValue == "ON" ? "OFF" : "ON");
                 }}
               >
@@ -161,6 +164,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     sendAudio(detectValue == "ON" ? "OFF" : "ON");
                   }}
                 >
