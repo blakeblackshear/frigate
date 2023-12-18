@@ -168,9 +168,6 @@ function History() {
   return (
     <>
       <Heading as="h2">Review</Heading>
-      <div className="text-xs mb-4">
-        Dates and times are based on the timezone {timezone}
-      </div>
 
       <TimelinePlayerCard
         timeline={playback}
@@ -183,7 +180,10 @@ function History() {
           .map(([day, timelineDay], dayIdx) => {
             return (
               <div key={day}>
-                <Heading as="h3">
+                <Heading
+                  className="sticky py-2 -top-4 left-0 bg-background w-full z-10"
+                  as="h3"
+                >
                   {formatUnixTimestampToDateTime(parseInt(day), {
                     strftime_fmt: "%A %b %d",
                     time_style: "medium",
