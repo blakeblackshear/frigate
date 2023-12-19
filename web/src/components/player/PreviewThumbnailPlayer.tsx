@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
+import { LuPlayCircle } from "react-icons/lu";
 
 type PreviewPlayerProps = {
   camera: string;
@@ -126,32 +127,35 @@ export default function PreviewThumbnailPlayer({
     }
   } else {
     content = (
-      <div className={`${getPreviewWidth(camera, config)}`}>
-        <VideoPlayer
-          options={{
-            preload: "auto",
-            autoplay: false,
-            controls: false,
-            muted: true,
-            loadingSpinner: false,
-            sources: [
-              {
-                src: `${relevantPreview.src}`,
-                type: "video/mp4",
-              },
-            ],
-          }}
-          seekOptions={{}}
-          onReady={(player) => {
-            playerRef.current = player;
-            player.playbackRate(isSafari ? 2 : 8);
-            player.currentTime(startTs - relevantPreview.start);
-          }}
-          onDispose={() => {
-            playerRef.current = null;
-          }}
-        />
-      </div>
+      <>
+        <div className={`${getPreviewWidth(camera, config)}`}>
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: false,
+              controls: false,
+              muted: true,
+              loadingSpinner: false,
+              sources: [
+                {
+                  src: `${relevantPreview.src}`,
+                  type: "video/mp4",
+                },
+              ],
+            }}
+            seekOptions={{}}
+            onReady={(player) => {
+              playerRef.current = player;
+              player.playbackRate(isSafari ? 2 : 8);
+              player.currentTime(startTs - relevantPreview.start);
+            }}
+            onDispose={() => {
+              playerRef.current = null;
+            }}
+          />
+        </div>
+        <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
+      </>
     );
   }
 
