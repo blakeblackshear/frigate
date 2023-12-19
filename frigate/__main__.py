@@ -1,9 +1,9 @@
-import faulthandler  # noqa: E402
-import threading  # noqa: E402
+import faulthandler
+import threading
 
-from flask import cli  # noqa: E402
+from flask import cli
 
-from frigate.app import FrigateApp  # noqa: E402
+from frigate.app import FrigateApp
 
 faulthandler.enable()
 
