@@ -271,7 +271,7 @@ function History() {
                               );
                             })}
                         </div>
-                        {lastRow && <ActivityIndicator />}
+                        {lastRow && !isDone && <ActivityIndicator />}
                       </div>
                     );
                   }
