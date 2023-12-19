@@ -393,9 +393,11 @@ export default function Events({ path, ...props }) {
   return (
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
-      <div className="flex flex-wrap gap-2 items-center">
-        <TextField label="Search" onChangeText={(text) => onChangeSearchText(text)} />
-      </div>
+      {config.semantic_search.enabled && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <TextField label="Search" onChangeText={(text) => onChangeSearchText(text)} />
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 items-center">
         <MultiSelect
           className="basis-1/5 cursor-pointer rounded dark:bg-slate-800"
@@ -869,7 +871,7 @@ function Event({
             </div>
           </div>
           <div class="hidden sm:flex flex-col justify-end mr-2">
-            {event.id && (
+            {config.semantic_search.enabled && event.id && (
               <Button color="gray" onClick={(e) => showSimilarEvents(event.id, e)}>
                 Find Similar
               </Button>
