@@ -14,6 +14,7 @@ import ConfigEditor from "@/pages/ConfigEditor";
 import Logs from "@/pages/Logs";
 import NoMatch from "@/pages/NoMatch";
 import Settings from "@/pages/Settings";
+import UIPlayground from "./pages/UIPlayground";
 
 function App() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -29,7 +30,10 @@ function App() {
           <Header onToggleNavbar={toggleNavbar} />
           <div className="grid grid-cols-[auto,1fr] flex-grow-1 overflow-auto">
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
-            <div id="pageRoot" className="overflow-x-hidden px-4 py-2 w-screen md:w-full">
+            <div
+              id="pageRoot"
+              className="overflow-x-hidden px-4 py-2 w-screen md:w-full"
+            >
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/live/:camera?" element={<Live />} />
@@ -40,6 +44,7 @@ function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/config" element={<ConfigEditor />} />
                 <Route path="/logs" element={<Logs />} />
+                <Route path="/playground" element={<UIPlayground />} />
                 <Route path="*" element={<NoMatch />} />
               </Routes>
             </div>
