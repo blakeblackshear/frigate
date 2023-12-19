@@ -855,6 +855,7 @@ function Event({
                   <TextArea
                     label=""
                     value={event.data.description}
+                    placeholder="Write the description for this event here..."
                     onChangeText={(value) => onUpdateDescription(event, value)}
                     onClick={(e) => e.stopPropagation()}
                   />

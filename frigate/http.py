@@ -477,7 +477,8 @@ def set_description(id):
 
     # If semantic search is enabled, update the index
     if current_app.embeddings is not None:
-        current_app.embeddings.description.upsert(
+        description: Collection = current_app.embeddings.description
+        description.upsert(
             documents=[new_description],
             metadatas=[get_metadata(event)],
             ids=[id],
@@ -1039,7 +1040,7 @@ def events():
     if zones == "all" and zone != "all":
         zones = zone
 
-    limit = request.args.get("limit", 100)
+    limit = request.args.get("limit", 100, type=int)
     after = request.args.get("after", type=float)
     before = request.args.get("before", type=float)
     time_range = request.args.get("time_range", DEFAULT_TIME_RANGE)
@@ -1209,7 +1210,7 @@ def events():
         clauses.append((True))
 
     # Handle semantic search
-    event_order = None
+    event_order = {}
     if current_app.embeddings is not None:
         where = None
         if len(embeddings_filters) > 1:
@@ -1266,18 +1267,18 @@ def events():
         Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
         .order_by(Event.start_time.desc())
-        .limit(limit)
+        .limit(len(event_order) or limit)
         .dicts()
         .iterator()
     )
     events = list(events)
 
-    if event_order is not None:
+    if event_order:
         events = [
             {**events, "search_similarity": event_order[events["id"]]}
             for events in events
         ]
-        events = sorted(events, key=lambda x: x["search_similarity"])
+        events = sorted(events, key=lambda x: x["search_similarity"])[:limit]
 
     return jsonify(events)
 
