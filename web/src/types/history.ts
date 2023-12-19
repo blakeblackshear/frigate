@@ -10,6 +10,7 @@ type Card = {
     camera: string,
     time: number,
     entries: Timeline[],
+    uniqueKeys: string[],
 }
 
 type Preview = {

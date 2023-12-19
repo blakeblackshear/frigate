@@ -105,7 +105,10 @@ export default function PreviewThumbnailPlayer({
   );
 
   let content;
-  if (!relevantPreview || !visible) {
+
+  if (relevantPreview && !visible) {
+    content = <div />;
+  } else if (!relevantPreview) {
     if (isCurrentHour(startTs)) {
       content = (
         <img
