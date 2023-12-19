@@ -849,7 +849,7 @@ function Event({
               {event.label.replaceAll('_', ' ')}
               {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
             </div>
-            {event?.data?.description ? (
+            {event?.data?.description || viewEvent === event.id ? (
               <div className="flex flex-col pb-2">
                 {viewEvent === event.id ? (
                   <TextArea
