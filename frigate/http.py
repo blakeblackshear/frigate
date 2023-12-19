@@ -46,7 +46,7 @@ from frigate.const import (
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
 )
-from frigate.embeddings import Embeddings
+from frigate.embeddings import Embeddings, get_metadata
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Previews, Recordings, Regions, Timeline
 from frigate.object_processing import TrackedObject
@@ -443,6 +443,51 @@ def set_sub_label(id):
             {
                 "success": True,
                 "message": "Event " + id + " sub label set to " + new_sub_label,
+            }
+        ),
+        200,
+    )
+
+
+@bp.route("/events/<id>/description", methods=("POST",))
+def set_description(id):
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    new_description = json.get("description")
+
+    if new_description is None or len(new_description) == 0:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "description cannot be empty",
+                }
+            ),
+            400,
+        )
+
+    event.data["description"] = new_description
+    event.save()
+
+    # If semantic search is enabled, update the index
+    if current_app.embeddings is not None:
+        current_app.embeddings.description.upsert(
+            documents=[new_description],
+            metadatas=[get_metadata(event)],
+            ids=[id],
+        )
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Event " + id + " description set to " + new_description,
             }
         ),
         200,

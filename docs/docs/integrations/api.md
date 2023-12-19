@@ -174,6 +174,8 @@ Events from the database. Accepts the following query string parameters:
 | `is_submitted`       | int   | Filter events that are submitted to Frigate+ (0 or 1) |
 | `min_length`         | float | Minimum length of the event                           |
 | `max_length`         | float | Maximum length of the event                           |
+| `search`             | str   | Search query for semantic search                      |
+| `like`               | str   | Event ID for thumbnail similarity search              |
 
 ### `GET /api/timeline`
 
@@ -225,7 +227,17 @@ Sub labels must be 100 characters or shorter.
 ```json
 {
   "subLabel": "some_string",
-  "subLabelScore": 0.79,
+  "subLabelScore": 0.79
+}
+```
+
+### `POST /api/events/<id>/description`
+
+Set a description for an event to add details about what is occurring. Used during semantic search.
+
+```json
+{
+  "description": "This is a black and white dog walking on the sidewalk."
 }
 ```
 
@@ -298,7 +310,7 @@ It is also possible to export this recording as a timelapse.
 
 ```json
 {
-  "playback": "realtime", // playback factor: realtime or timelapse_25x
+  "playback": "realtime" // playback factor: realtime or timelapse_25x
 }
 ```
 

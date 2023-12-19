@@ -28,6 +28,7 @@ import Dialog from '../components/Dialog';
 import MultiSelect from '../components/MultiSelect';
 import { formatUnixTimestampToDateTime, getDurationFromTimestamps } from '../utils/dateUtil';
 import TextField from '../components/TextField';
+import TextArea from '../components/TextArea';
 import TimeAgo from '../components/TimeAgo';
 import Timepicker from '../components/TimePicker';
 import TimelineSummary from '../components/TimelineSummary';
@@ -257,6 +258,15 @@ export default function Events({ path, ...props }) {
     }));
     downloadButton.current = e.target;
     setState({ ...state, showDownloadMenu: true });
+  };
+
+  let descriptionTimeout;
+  const onUpdateDescription = async (event, description) => {
+    clearTimeout(descriptionTimeout);
+    descriptionTimeout = setTimeout(async () => {
+      event.data.description = description;
+      await axios.post(`events/${event.id}/description`, { description });
+    }, 500);
   };
 
   const showSimilarEvents = (event_id, e) => {
@@ -727,6 +737,7 @@ export default function Events({ path, ...props }) {
                       });
                     }}
                     onSave={onSave}
+                    onUpdateDescription={onUpdateDescription}
                     showSimilarEvents={showSimilarEvents}
                     showSubmitToPlus={showSubmitToPlus}
                   />
@@ -768,6 +779,7 @@ export default function Events({ path, ...props }) {
                     });
                   }}
                   onSave={onSave}
+                  onUpdateDescription={onUpdateDescription}
                   showSimilarEvents={showSimilarEvents}
                   showSubmitToPlus={showSubmitToPlus}
                 />
@@ -801,6 +813,7 @@ function Event({
   onDownloadClick,
   onReady,
   onSave,
+  onUpdateDescription,
   showSimilarEvents,
   showSubmitToPlus,
 }) {
@@ -837,7 +850,18 @@ function Event({
               {event.sub_label ? `: ${event.sub_label.replaceAll('_', ' ')}` : null}
             </div>
             {event?.data?.description ? (
-              <div className="text-sm flex flex-col grow pb-2">{event.data.description}</div>
+              <div className="flex flex-col pb-2">
+                {viewEvent === event.id ? (
+                  <TextArea
+                    label=""
+                    value={event.data.description}
+                    onChangeText={(value) => onUpdateDescription(event, value)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ) : (
+                  <div class="text-sm line-clamp-2">{event.data.description}</div>
+                )}
+              </div>
             ) : null}
             <div className="text-sm flex">
               <Clock className="h-5 w-5 mr-2 inline" />
