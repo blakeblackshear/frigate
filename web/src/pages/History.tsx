@@ -10,7 +10,7 @@ import axios from "axios";
 import TimelinePlayerCard from "@/components/card/TimelinePlayerCard";
 import { getHourlyTimelineData } from "@/utils/historyUtil";
 
-const API_LIMIT = 120;
+const API_LIMIT = 200;
 
 function History() {
   const { data: config } = useSWR<FrigateConfig>("config");
