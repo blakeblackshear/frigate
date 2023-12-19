@@ -178,6 +178,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
 # Turn off Chroma Telemetry: https://docs.trychroma.com/telemetry#opting-out
 ENV ANONYMIZED_TELEMETRY=False
+# Allow resetting the chroma database
+ENV ALLOW_RESET=True
+# Disable tokenizer parallelism warning
+ENV TOKENIZERS_PARALLELISM=true
 
 ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
 
@@ -243,10 +247,10 @@ CMD ["sleep", "infinity"]
 FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
-COPY web/package.json web/package-lock.json ./
+COPY web-old/package.json web-old/package-lock.json ./
 RUN npm install
 
-COPY web/ ./
+COPY web-old/ ./
 RUN npm run build \
     && mv dist/BASE_PATH/monacoeditorwork/* dist/assets/ \
     && rm -rf dist/BASE_PATH

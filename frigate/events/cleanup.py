@@ -10,6 +10,7 @@ from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
+from frigate.embeddings import Embeddings
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
@@ -21,10 +22,13 @@ class EventCleanupType(str, Enum):
 
 
 class EventCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event: MpEvent):
+    def __init__(
+        self, config: FrigateConfig, embeddings: Embeddings, stop_event: MpEvent
+    ):
         threading.Thread.__init__(self)
         self.name = "event_cleanup"
         self.config = config
+        self.embeddings = embeddings
         self.stop_event = stop_event
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
@@ -204,11 +208,12 @@ class EventCleanup(threading.Thread):
             media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
             media_path.unlink(missing_ok=True)
 
-        (
-            Event.delete()
-            .where(Event.id << [event.id for event in duplicate_events])
-            .execute()
-        )
+        duplicate_ids = [event.id for event in duplicate_events]
+        Event.delete().where(Event.id << duplicate_ids).execute()
+        # Also remove from embeddings database
+        if self.embeddings is not None and len(duplicate_ids) > 0:
+            self.embeddings.thumbnail.delete(duplicate_ids)
+            self.embeddings.description.delete(duplicate_ids)
 
     def run(self) -> None:
         # only expire events every 5 minutes
@@ -223,10 +228,20 @@ class EventCleanup(threading.Thread):
             self.expire(EventCleanupType.snapshots)
             self.purge_duplicates()
 
-            # drop events from db where has_clip and has_snapshot are false
-            delete_query = Event.delete().where(
-                Event.has_clip == False, Event.has_snapshot == False
+            # get list of ids that have both expired clips and snapshots
+            # so we can delete them from the embeddings db (and the events table)
+            events = (
+                Event.select(Event.id)
+                .where(Event.has_clip == False, Event.has_snapshot == False)
+                .iterator()
             )
-            delete_query.execute()
+            events_to_delete = [e.id for e in events]
+
+            if self.embeddings is not None and len(events_to_delete) > 0:
+                self.embeddings.thumbnail.delete(events_to_delete)
+                self.embeddings.description.delete(events_to_delete)
+
+            # drop events from db where has_clip and has_snapshot are false
+            Event.delete().where(Event.id << events_to_delete).execute()
 
         logger.info("Exiting event cleanup...")

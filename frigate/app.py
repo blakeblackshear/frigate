@@ -31,6 +31,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.embeddings import Embeddings
 from frigate.embeddings.processor import EmbeddingProcessor
 from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
@@ -341,6 +342,13 @@ class FrigateApp:
 
         migrate_db.close()
 
+    def init_embeddings(self) -> None:
+        self.embeddings: Embeddings = None
+        try:
+            self.embeddings = Embeddings(self.config)
+        except ValueError:
+            pass
+
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
             if proc.info["name"] == "go2rtc":
@@ -407,6 +415,7 @@ class FrigateApp:
             self.onvif_controller,
             self.external_event_processor,
             self.plus_api,
+            self.embeddings,
         )
 
     def init_onvif(self) -> None:
@@ -590,7 +599,7 @@ class FrigateApp:
 
     def start_embeddings_processor(self) -> None:
         self.embeddings_processor = EmbeddingProcessor(
-            self.config, self.embeddings_queue, self.stop_event
+            self.config, self.embeddings, self.embeddings_queue, self.stop_event
         )
         self.embeddings_processor.start()
 
@@ -607,7 +616,7 @@ class FrigateApp:
         self.event_processor.start()
 
     def start_event_cleanup(self) -> None:
-        self.event_cleanup = EventCleanup(self.config, self.stop_event)
+        self.event_cleanup = EventCleanup(self.config, self.embeddings, self.stop_event)
         self.event_cleanup.start()
 
     def start_record_cleanup(self) -> None:
@@ -688,10 +697,11 @@ class FrigateApp:
             self.set_log_levels()
             self.init_queues()
             self.init_database()
+            self.bind_database()
+            self.init_embeddings()
             self.init_onvif()
             self.init_recording_manager()
             self.init_go2rtc()
-            self.bind_database()
             self.init_inter_process_communicator()
             self.init_dispatcher()
         except Exception as e:

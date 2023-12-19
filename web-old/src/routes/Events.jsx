@@ -259,6 +259,16 @@ export default function Events({ path, ...props }) {
     setState({ ...state, showDownloadMenu: true });
   };
 
+  const showSimilarEvents = (event_id, e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (searchParams?.like == event_id) {
+      return;
+    }
+    onFilter('like', event_id);
+  };
+
   const showSubmitToPlus = (event_id, label, box, e) => {
     if (e) {
       e.stopPropagation();
@@ -289,6 +299,7 @@ export default function Events({ path, ...props }) {
     (name, value) => {
       setShowInProgress(false);
       const updatedParams = { ...searchParams, [name]: value };
+      if (name !== 'like') delete updatedParams['like'];
       setSearchParams(updatedParams);
       const queryString = Object.keys(updatedParams)
         .map((key) => {
@@ -311,7 +322,10 @@ export default function Events({ path, ...props }) {
     onFilter('is_submitted', searchParams.is_submitted);
   }, [searchParams, onFilter]);
 
-  const isDone = (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT;
+  const isDone =
+    (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT ||
+    (searchParams?.search?.length ?? 0) > 0 ||
+    (searchParams?.like?.length ?? 0) > 0;
 
   // hooks for infinite scroll
   const observer = useRef();
@@ -471,7 +485,8 @@ export default function Events({ path, ...props }) {
               download
             />
           )}
-          {(event?.data?.type || 'object') == 'object' &&
+          {config.plus.enabled &&
+            (event?.data?.type || 'object') == 'object' &&
             downloadEvent.end_time &&
             downloadEvent.has_snapshot &&
             !downloadEvent.plus_id && (
@@ -482,7 +497,7 @@ export default function Events({ path, ...props }) {
                 onSelect={() => showSubmitToPlus(downloadEvent.id, downloadEvent.label, downloadEvent.box)}
               />
             )}
-          {downloadEvent.plus_id && (
+          {config.plus.enabled && downloadEvent.plus_id && (
             <MenuItem
               icon={UploadPlus}
               label={'Sent to Frigate+'}
@@ -710,6 +725,7 @@ export default function Events({ path, ...props }) {
                       });
                     }}
                     onSave={onSave}
+                    showSimilarEvents={showSimilarEvents}
                     showSubmitToPlus={showSubmitToPlus}
                   />
                 );
@@ -750,6 +766,7 @@ export default function Events({ path, ...props }) {
                     });
                   }}
                   onSave={onSave}
+                  showSimilarEvents={showSimilarEvents}
                   showSubmitToPlus={showSubmitToPlus}
                 />
               );
@@ -782,6 +799,7 @@ function Event({
   onDownloadClick,
   onReady,
   onSave,
+  showSimilarEvents,
   showSubmitToPlus,
 }) {
   const apiHost = useApiHost();
@@ -851,30 +869,39 @@ function Event({
             </div>
           </div>
           <div class="hidden sm:flex flex-col justify-end mr-2">
-            {event.end_time && event.has_snapshot && (event?.data?.type || 'object') == 'object' && (
-              <Fragment>
-                {event.plus_id ? (
-                  <div className="uppercase text-xs underline">
-                    <Link
-                      href={`https://plus.frigate.video/dashboard/edit-image/?id=${event.plus_id}`}
-                      target="_blank"
-                      rel="nofollow"
-                    >
-                      Edit in Frigate+
-                    </Link>
-                  </div>
-                ) : (
-                  <Button
-                    color="gray"
-                    disabled={uploading.includes(event.id)}
-                    onClick={(e) => showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)}
-                  >
-                    {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
-                  </Button>
-                )}
-              </Fragment>
+            {event.id && (
+              <Button color="gray" onClick={(e) => showSimilarEvents(event.id, e)}>
+                Find Similar
+              </Button>
             )}
           </div>
+          {config.plus.enabled && (
+            <div class="hidden sm:flex flex-col justify-end mr-2">
+              {event.end_time && event.has_snapshot && (event?.data?.type || 'object') == 'object' && (
+                <Fragment>
+                  {event.plus_id ? (
+                    <div className="uppercase text-xs underline">
+                      <Link
+                        href={`https://plus.frigate.video/dashboard/edit-image/?id=${event.plus_id}`}
+                        target="_blank"
+                        rel="nofollow"
+                      >
+                        Edit in Frigate+
+                      </Link>
+                    </div>
+                  ) : (
+                    <Button
+                      color="gray"
+                      disabled={uploading.includes(event.id)}
+                      onClick={(e) => showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)}
+                    >
+                      {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                    </Button>
+                  )}
+                </Fragment>
+              )}
+            </div>
+          )}
           <div class="flex flex-col">
             <Delete
               className="h-6 w-6 cursor-pointer"

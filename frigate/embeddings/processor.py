@@ -10,18 +10,13 @@ from multiprocessing.synchronize import Event as MpEvent
 
 import google.generativeai as genai
 import numpy as np
-from chromadb import Collection
-from chromadb import HttpClient as ChromaClient
-from chromadb.config import Settings
 from peewee import DoesNotExist
 from PIL import Image
-from playhouse.shortcuts import model_to_dict
 
 from frigate.config import FrigateConfig
 from frigate.models import Event
 
-from .functions.clip import ClipEmbedding
-from .functions.minilm_l6_v2 import MiniLMEmbedding
+from . import Embeddings, get_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -32,38 +27,24 @@ class EmbeddingProcessor(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
+        embeddings: Embeddings,
         queue: Queue,
         stop_event: MpEvent,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = "chroma"
         self.config = config
+        self.embeddings = embeddings
         self.queue = queue
         self.stop_event = stop_event
-        self.chroma: ChromaClient = None
-        self.thumbnail: Collection = None
-        self.description: Collection = None
         self.gemini: genai.GenerativeModel = None
 
     def run(self) -> None:
         """Maintain a Chroma vector database for semantic search."""
 
         # Exit if disabled
-        if not self.config.semantic_search.enabled:
+        if self.embeddings is None:
             return
-
-        # Create the database
-        self.chroma = ChromaClient(
-            host="127.0.0.1", settings=Settings(anonymized_telemetry=False)
-        )
-
-        # Create/Load the collection(s)
-        self.thumbnail = self.chroma.get_or_create_collection(
-            name="event_thumbnail", embedding_function=ClipEmbedding()
-        )
-        self.description = self.chroma.get_or_create_collection(
-            name="event_description", embedding_function=MiniLMEmbedding()
-        )
 
         ## Initialize Gemini
         if self.config.gemini.enabled:
@@ -88,13 +69,7 @@ class EmbeddingProcessor(threading.Thread):
                 continue
 
             # Extract valid event metadata
-            metadata = {
-                k: v
-                for k, v in model_to_dict(event).items()
-                if k not in ["id", "thumbnail"]
-                and v is not None
-                and isinstance(v, (str, int, float, bool))
-            }
+            metadata = get_metadata(event)
             thumbnail = base64.b64decode(event.thumbnail)
 
             # Encode the thumbnail
@@ -124,7 +99,7 @@ class EmbeddingProcessor(threading.Thread):
 
         # Encode the thumbnail
         img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
-        self.thumbnail.add(
+        self.embeddings.thumbnail.upsert(
             images=[img],
             metadatas=[metadata],
             ids=[event_id],
@@ -163,7 +138,7 @@ class EmbeddingProcessor(threading.Thread):
         event.save()
 
         # Encode the description
-        self.description.add(
+        self.embeddings.description.upsert(
             documents=[description],
             metadatas=[metadata],
             ids=[event.id],

@@ -1,6 +1,7 @@
 import base64
 import copy
 import glob
+import io
 import json
 import logging
 import os
@@ -18,8 +19,6 @@ import numpy as np
 import pytz
 import requests
 from chromadb import Collection, QueryResult
-from chromadb import HttpClient as ChromaClient
-from chromadb.config import Settings
 from flask import (
     Blueprint,
     Flask,
@@ -31,6 +30,7 @@ from flask import (
     request,
 )
 from peewee import DoesNotExist, fn, operator
+from PIL import Image
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 from tzlocal import get_localzone_name
@@ -45,8 +45,7 @@ from frigate.const import (
     MAX_SEGMENT_DURATION,
     RECORD_DIR,
 )
-from frigate.embeddings.functions.clip import ClipEmbedding
-from frigate.embeddings.functions.minilm_l6_v2 import MiniLMEmbedding
+from frigate.embeddings import Embeddings
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Previews, Recordings, Regions, Timeline
 from frigate.object_processing import TrackedObject
@@ -79,6 +78,7 @@ def create_app(
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
+    embeddings: Embeddings,
 ):
     app = Flask(__name__)
 
@@ -108,15 +108,7 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.hwaccel_errors = []
-    app.chroma = ChromaClient(
-        host="127.0.0.1", settings=Settings(anonymized_telemetry=False)
-    )
-    app.thumbnail_collection = app.chroma.get_or_create_collection(
-        name="event_thumbnail", embedding_function=ClipEmbedding()
-    )
-    app.description_collection = app.chroma.get_or_create_collection(
-        name="event_description", embedding_function=MiniLMEmbedding()
-    )
+    app.embeddings = embeddings
 
     app.register_blueprint(bp)
 
@@ -529,6 +521,9 @@ def delete_event(id):
 
     event.delete_instance()
     Timeline.delete().where(Timeline.source_id == id).execute()
+    if current_app.embeddings is not None:
+        current_app.embeddings.thumbnail.delete(ids=[id])
+        current_app.embeddings.description.delete(ids=[id])
     return make_response(
         jsonify({"success": True, "message": "Event " + id + " deleted"}), 200
     )
@@ -1013,6 +1008,7 @@ def events():
     min_length = request.args.get("min_length", type=float)
     max_length = request.args.get("max_length", type=float)
     search = request.args.get("search", type=str) or None
+    like = request.args.get("like", type=str) or None
 
     clauses = []
 
@@ -1168,37 +1164,57 @@ def events():
 
     # Handle semantic search
     event_order = None
-    if search is not None:
+    if current_app.embeddings is not None:
         where = None
         if len(embeddings_filters) > 1:
             where = {"$and": embeddings_filters}
         elif len(embeddings_filters) == 1:
             where = embeddings_filters[0]
 
-        # Grab the ids of the events that match based on CLIP embeddings
-        thumbnails: Collection = current_app.thumbnail_collection
-        thumb_result: QueryResult = thumbnails.query(
-            query_texts=[search],
-            n_results=int(limit),
-            where=where,
-        )
-        thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
+        if like is not None:
+            # Grab the ids of events that match the thumbnail image embeddings
+            thumbnails: Collection = current_app.embeddings.thumbnail
+            search_event = Event.get(Event.id == like)
+            thumbnail = base64.b64decode(search_event.thumbnail)
+            img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
+            thumb_result: QueryResult = thumbnails.query(
+                query_images=[img],
+                n_results=int(limit),
+                where=where,
+            )
+            event_order = dict(
+                zip(thumb_result["ids"][0], thumb_result["distances"][0])
+            )
 
-        # Grab the ids of the events that match based on MiniLM embeddings
-        descriptions: Collection = current_app.description_collection
-        desc_result: QueryResult = descriptions.query(
-            query_texts=[search],
-            n_results=int(limit),
-            where=where,
-        )
-        desc_ids = dict(zip(desc_result["ids"][0], desc_result["distances"][0]))
+            # For like, we want to remove all other filters
+            clauses = [(Event.id << list(event_order.keys()))]
 
-        event_order = {
-            k: min(i for i in (thumb_ids.get(k), desc_ids.get(k)) if i is not None)
-            for k in thumb_ids.keys() | desc_ids
-        }
+        elif search is not None:
+            # Grab the ids of the events that match based on CLIP embeddings
+            thumbnails: Collection = current_app.embeddings.thumbnail
+            thumb_result: QueryResult = thumbnails.query(
+                query_texts=[search],
+                n_results=int(limit),
+                where=where,
+            )
+            thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
 
-        clauses.append((Event.id << list(event_order.keys())))
+            # Grab the ids of the events that match based on MiniLM embeddings
+            descriptions: Collection = current_app.embeddings.description
+            desc_result: QueryResult = descriptions.query(
+                query_texts=[search],
+                n_results=int(limit),
+                where=where,
+            )
+            desc_ids = dict(zip(desc_result["ids"][0], desc_result["distances"][0]))
+
+            event_order = {
+                k: min(i for i in (thumb_ids.get(k), desc_ids.get(k)) if i is not None)
+                for k in thumb_ids.keys() | desc_ids
+            }
+
+            # For search, we want to keep all the other clauses and filters
+            clauses.append((Event.id << list(event_order.keys())))
 
     events = (
         Event.select(*selected_columns)
