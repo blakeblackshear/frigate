@@ -3,12 +3,22 @@ import base64
 import io
 import logging
 import os
+import sys
 import time
 
 import numpy as np
-from chromadb import Collection
-from chromadb import HttpClient as ChromaClient
-from chromadb.config import Settings
+
+try:
+    from chromadb import Collection
+    from chromadb import HttpClient as ChromaClient
+    from chromadb.config import Settings
+except RuntimeError:
+    __import__("pysqlite3")
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+    from chromadb import Collection
+    from chromadb import HttpClient as ChromaClient
+    from chromadb.config import Settings
+
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
