@@ -343,7 +343,7 @@ class FrigateApp:
         migrate_db.close()
 
     def init_embeddings(self) -> None:
-        self.embeddings: Embeddings = None
+        self.embeddings = None
         try:
             self.embeddings = Embeddings(self.config)
         except ValueError:
