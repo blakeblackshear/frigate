@@ -239,7 +239,7 @@ yolov7x-320
 
 The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpu) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
-The TensorRT detector uses `.trt` model files that are located in `/trt-models/` by default. These model file path and dimensions used will depend on which model you have generated.
+The TensorRT detector uses `.trt` model files that are located in a versioned subdirectory of `${MODEL_CACHE_DIR}`. You can set `MODEL_CACHE_DIR` as an environment variable to change it from the default `/config/model_cache/tensorrt`. These model file path and dimensions used will depend on which model you have generated.
 
 ```yaml
 detectors:
@@ -248,6 +248,8 @@ detectors:
     device: 0 #This is the default, select the first GPU
 
 model:
+  # Be sure to set MODEL_CACHE_DIR environment variable to customize the model path from the default
+  # In this example, MODEL_CACHE_DIR = '/trt-models'
   path: /trt-models/yolov7-tiny-416.trt
   input_tensor: nchw
   input_pixel_format: rgb
