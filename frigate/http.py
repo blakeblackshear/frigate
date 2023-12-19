@@ -12,6 +12,7 @@ import traceback
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
+from typing import Optional
 from urllib.parse import unquote
 
 import cv2
@@ -78,7 +79,7 @@ def create_app(
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
-    embeddings: Embeddings,
+    embeddings: Optional[Embeddings],
 ):
     app = Flask(__name__)
 

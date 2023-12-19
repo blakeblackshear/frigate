@@ -7,6 +7,7 @@ import threading
 from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Optional
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
@@ -23,7 +24,10 @@ class EventCleanupType(str, Enum):
 
 class EventCleanup(threading.Thread):
     def __init__(
-        self, config: FrigateConfig, embeddings: Embeddings, stop_event: MpEvent
+        self,
+        config: FrigateConfig,
+        embeddings: Optional[Embeddings],
+        stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "event_cleanup"

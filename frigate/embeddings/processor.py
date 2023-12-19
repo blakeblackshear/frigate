@@ -7,6 +7,7 @@ import queue
 import threading
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Optional
 
 import google.generativeai as genai
 import numpy as np
@@ -27,7 +28,7 @@ class EmbeddingProcessor(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        embeddings: Embeddings,
+        embeddings: Optional[Embeddings],
         queue: Queue,
         stop_event: MpEvent,
     ) -> None:
