@@ -88,7 +88,12 @@ export default function PreviewThumbnailPlayer({
                 onPlayback(false);
               }
             },
-            { root: document.getElementById("pageRoot"), threshold: 1.0 }
+            {
+              threshold: 1.0,
+              root: document.getElementById("pageRoot"),
+              // iOS has bug where poster is empty frame until video starts playing so playback needs to begin earlier
+              rootMargin: isSafari ? "10% 0px 25% 0px" : "0px",
+            }
           );
           if (node) autoPlayObserver.current.observe(node);
         } catch (e) {
