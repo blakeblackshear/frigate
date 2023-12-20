@@ -14,6 +14,12 @@ semantic_search:
   enabled: True
 ```
 
+:::tip
+
+The embeddings database can be re-indexed from the existing events in your database by adding an empty file named `.reindex_events` to the root of your configuration directory. This will delay the startup of Frigate on the next boot while events are being indexed. Depending on the number of events you have, it can take up to 30 minutes to complete and will max out your CPU while indexing.
+
+:::
+
 ### OpenAI CLIP
 
 This model is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on completed events to encode the thumbnail image and store it in Chroma. When searching events via text in the search box, frigate will perform a `text -> image` similarity search against this embedding. When clicking "FIND SIMILAR" next to an event, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
