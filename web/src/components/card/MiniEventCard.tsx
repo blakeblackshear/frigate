@@ -61,7 +61,7 @@ export default function MiniEventCard({ event, onUpdate }: MiniEventCardProps) {
           <div>
             <div className="text-sm flex">
               <LuClock className="h-4 w-4 mr-2 inline" />
-              <div className="hidden sm:inline">
+              <div>
                 <TimeAgo time={event.start_time * 1000} dense />
               </div>
             </div>
@@ -70,7 +70,7 @@ export default function MiniEventCard({ event, onUpdate }: MiniEventCardProps) {
               {event.camera.replaceAll("_", " ")}
             </div>
             {event.zones.length ? (
-              <div className="capitalize  text-sm flex align-center">
+              <div className="capitalize whitespace-nowrap text-sm flex align-center">
                 <MdOutlineLocationOn className="w-4 h-4 mr-2 inline" />
                 {event.zones.join(", ").replaceAll("_", " ")}
               </div>
