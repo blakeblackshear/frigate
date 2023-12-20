@@ -37,6 +37,7 @@ import { Score } from '../icons/Score';
 import { About } from '../icons/About';
 import MenuIcon from '../icons/Menu';
 import { MenuOpen } from '../icons/MenuOpen';
+import Select from '../components/Select';
 
 const API_LIMIT = 25;
 
@@ -404,8 +405,23 @@ export default function Events({ path, ...props }) {
     <div className="space-y-4 p-2 px-4 w-full">
       <Heading>Events</Heading>
       {config.semantic_search.enabled && (
-        <div className="flex flex-wrap gap-2 items-center">
-          <TextField label="Search" onChangeText={(text) => onChangeSearchText(text)} />
+        <div className="flex gap-2">
+          <div className="basis-4/5">
+            <TextField label="Search" onChangeText={(text) => onChangeSearchText(text)} />
+          </div>
+          <div className="basis-1/5">
+            <Select
+              label="Search Type"
+              selected={searchParams?.search_type ?? 'all'}
+              paramName="search_type"
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'thumbnail', label: 'Thumbnails' },
+                { value: 'description', label: 'Descriptions' },
+              ]}
+              onChange={(value) => onFilter('search_type', value.search_type)}
+            />
+          </div>
         </div>
       )}
       <div className="flex flex-wrap gap-2 items-center">

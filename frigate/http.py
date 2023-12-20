@@ -1055,6 +1055,7 @@ def events():
     min_length = request.args.get("min_length", type=float)
     max_length = request.args.get("max_length", type=float)
     search = request.args.get("search", type=str) or None
+    search_type = request.args.get("search_type", "all")
     like = request.args.get("like", type=str) or None
 
     clauses = []
@@ -1229,36 +1230,57 @@ def events():
                 n_results=int(limit),
                 where=where,
             )
-            event_order = dict(
-                zip(thumb_result["ids"][0], thumb_result["distances"][0])
-            )
+
+            for i, event_id in enumerate(thumb_result["ids"][0]):
+                event_order[event_id] = {
+                    "distance": thumb_result["distances"][0][i],
+                    "source": "thumbnail",
+                }
 
             # For like, we want to remove all other filters
             clauses = [(Event.id << list(event_order.keys()))]
 
         elif search is not None:
             # Grab the ids of the events that match based on CLIP embeddings
-            thumbnails: Collection = current_app.embeddings.thumbnail
-            thumb_result: QueryResult = thumbnails.query(
-                query_texts=[search],
-                n_results=int(limit),
-                where=where,
-            )
-            thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
+            thumb_ids = {}
+            if search_type in ["all", "thumbnail"]:
+                thumbnails: Collection = current_app.embeddings.thumbnail
+                thumb_result: QueryResult = thumbnails.query(
+                    query_texts=[search],
+                    n_results=int(limit),
+                    where=where,
+                )
+                # Do a rudimentary normalization of the difference in distances returned by CLIP and MiniLM.
+                thumb_ids = dict(
+                    zip(
+                        thumb_result["ids"][0],
+                        [d / 100 for d in thumb_result["distances"][0]],
+                    )
+                )
 
             # Grab the ids of the events that match based on MiniLM embeddings
-            descriptions: Collection = current_app.embeddings.description
-            desc_result: QueryResult = descriptions.query(
-                query_texts=[search],
-                n_results=int(limit),
-                where=where,
-            )
-            desc_ids = dict(zip(desc_result["ids"][0], desc_result["distances"][0]))
+            desc_ids = {}
+            if search_type in ["all", "description"]:
+                descriptions: Collection = current_app.embeddings.description
+                desc_result: QueryResult = descriptions.query(
+                    query_texts=[search],
+                    n_results=int(limit),
+                    where=where,
+                )
+                desc_ids = dict(zip(desc_result["ids"][0], desc_result["distances"][0]))
 
-            event_order = {
-                k: min(i for i in (thumb_ids.get(k), desc_ids.get(k)) if i is not None)
-                for k in thumb_ids.keys() | desc_ids
-            }
+            for event_id in thumb_ids.keys() | desc_ids:
+                min_distance = min(
+                    i
+                    for i in (thumb_ids.get(event_id), desc_ids.get(event_id))
+                    if i is not None
+                )
+                event_order[event_id] = {
+                    "distance": min_distance,
+                    "source": "thumbnail"
+                    if min_distance == thumb_ids.get(event_id)
+                    else "description",
+                }
 
             # For search, we want to keep all the other clauses and filters
             clauses.append((Event.id << list(event_order.keys())))
@@ -1275,10 +1297,14 @@ def events():
 
     if event_order:
         events = [
-            {**events, "search_similarity": event_order[events["id"]]}
+            {
+                **events,
+                "search_distance": event_order[events["id"]]["distance"],
+                "search_source": event_order[events["id"]]["source"],
+            }
             for events in events
         ]
-        events = sorted(events, key=lambda x: x["search_similarity"])[:limit]
+        events = sorted(events, key=lambda x: x["search_distance"])[:limit]
 
     return jsonify(events)
 
