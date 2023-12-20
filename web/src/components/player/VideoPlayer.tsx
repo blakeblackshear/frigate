@@ -51,7 +51,7 @@ export default function VideoPlayer({
       ) as HTMLVideoElement;
       videoElement.controls = true;
       videoElement.playsInline = true;
-      videoElement.disableRemotePlayback = remotePlayback;
+      videoElement.disableRemotePlayback = !remotePlayback;
       videoElement.classList.add("small-player");
       videoElement.classList.add("video-js");
       videoElement.classList.add("vjs-default-skin");

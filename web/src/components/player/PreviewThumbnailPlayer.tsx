@@ -1,10 +1,11 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
+import { LuPlayCircle } from "react-icons/lu";
 
 type PreviewPlayerProps = {
   camera: string;
@@ -32,6 +33,9 @@ export default function PreviewThumbnailPlayer({
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
   const apiHost = useApiHost();
+  const isSafari = useMemo(() => {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  }, []);
 
   const [visible, setVisible] = useState(false);
 
@@ -85,7 +89,12 @@ export default function PreviewThumbnailPlayer({
                 onPlayback(false);
               }
             },
-            { threshold: 1.0 }
+            {
+              threshold: 1.0,
+              root: document.getElementById("pageRoot"),
+              // iOS has bug where poster is empty frame until video starts playing so playback needs to begin earlier
+              rootMargin: isSafari ? "10% 0px 25% 0px" : "0px",
+            }
           );
           if (node) autoPlayObserver.current.observe(node);
         } catch (e) {
@@ -97,7 +106,10 @@ export default function PreviewThumbnailPlayer({
   );
 
   let content;
-  if (!relevantPreview || !visible) {
+
+  if (relevantPreview && !visible) {
+    content = <div />;
+  } else if (!relevantPreview) {
     if (isCurrentHour(startTs)) {
       content = (
         <img
@@ -105,42 +117,45 @@ export default function PreviewThumbnailPlayer({
           src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
         />
       );
+    } else {
+      content = (
+        <img
+          className="w-[160px]"
+          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+        />
+      );
     }
-
-    content = (
-      <img
-        className="w-[160px]"
-        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-      />
-    );
   } else {
     content = (
-      <div className={`${getPreviewWidth(camera, config)}`}>
-        <VideoPlayer
-          options={{
-            preload: "auto",
-            autoplay: false,
-            controls: false,
-            muted: true,
-            loadingSpinner: false,
-            sources: [
-              {
-                src: `${relevantPreview.src}`,
-                type: "video/mp4",
-              },
-            ],
-          }}
-          seekOptions={{}}
-          onReady={(player) => {
-            playerRef.current = player;
-            player.playbackRate(8);
-            player.currentTime(startTs - relevantPreview.start);
-          }}
-          onDispose={() => {
-            playerRef.current = null;
-          }}
-        />
-      </div>
+      <>
+        <div className={`${getPreviewWidth(camera, config)}`}>
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: false,
+              controls: false,
+              muted: true,
+              loadingSpinner: false,
+              sources: [
+                {
+                  src: `${relevantPreview.src}`,
+                  type: "video/mp4",
+                },
+              ],
+            }}
+            seekOptions={{}}
+            onReady={(player) => {
+              playerRef.current = player;
+              player.playbackRate(isSafari ? 2 : 8);
+              player.currentTime(startTs - relevantPreview.start);
+            }}
+            onDispose={() => {
+              playerRef.current = null;
+            }}
+          />
+        </div>
+        <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
+      </>
     );
   }
 

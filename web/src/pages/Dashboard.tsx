@@ -18,18 +18,15 @@ import { FaWalking } from "react-icons/fa";
 import { LuEar } from "react-icons/lu";
 import { TbMovie } from "react-icons/tb";
 import MiniEventCard from "@/components/card/MiniEventCard";
-import { Event } from "@/types/event";
+import { Event as FrigateEvent } from "@/types/event";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function Dashboard() {
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  const recentTimestamp = useMemo(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - 30);
-    return now.getTime() / 1000;
-  }, []);
-  const { data: events, mutate: updateEvents } = useSWR<Event[]>([
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - 30, 0, 0);
+  const recentTimestamp = now.getTime() / 1000;
+  const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
     "events",
     { limit: 10, after: recentTimestamp },
   ]);
@@ -97,7 +94,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
 
   return (
     <>
-      <Card className="">
+      <Card>
         <a href={`/live/${camera.name}`}>
           <AspectRatio
             ratio={16 / 9}
@@ -116,7 +113,11 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 className={`${
                   detectValue == "ON" ? "text-primary" : "text-gray-400"
                 }`}
-                onClick={() => sendDetect(detectValue == "ON" ? "OFF" : "ON")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  sendDetect(detectValue == "ON" ? "OFF" : "ON");
+                }}
               >
                 <FaWalking />
               </Button>
@@ -130,11 +131,13 @@ function Camera({ camera }: { camera: CameraConfig }) {
                       : "text-gray-400"
                     : "text-red-500"
                 }
-                onClick={() =>
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
                   camera.record.enabled_in_config
                     ? sendRecord(recordValue == "ON" ? "OFF" : "ON")
-                    : {}
-                }
+                    : {};
+                }}
               >
                 <TbMovie />
               </Button>
@@ -144,7 +147,11 @@ function Camera({ camera }: { camera: CameraConfig }) {
                 className={`${
                   snapshotValue == "ON" ? "text-primary" : "text-gray-400"
                 }`}
-                onClick={() => sendSnapshot(detectValue == "ON" ? "OFF" : "ON")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  sendSnapshot(detectValue == "ON" ? "OFF" : "ON");
+                }}
               >
                 <AiOutlinePicture />
               </Button>
@@ -155,7 +162,11 @@ function Camera({ camera }: { camera: CameraConfig }) {
                   className={`${
                     audioValue == "ON" ? "text-primary" : "text-gray-400"
                   }`}
-                  onClick={() => sendAudio(detectValue == "ON" ? "OFF" : "ON")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    sendAudio(detectValue == "ON" ? "OFF" : "ON");
+                  }}
                 >
                   <LuEar />
                 </Button>

@@ -21,8 +21,9 @@ function ConfigEditor() {
   const [success, setSuccess] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
 
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>();
-  const modelRef = useRef<monaco.editor.IEditorModel | null>();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const modelRef = useRef<monaco.editor.IEditorModel | null>(null);
+  const configRef = useRef<HTMLDivElement | null>(null);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -72,6 +73,7 @@ function ConfigEditor() {
 
     if (modelRef.current != null) {
       // we don't need to recreate the editor if it already exists
+      editorRef.current?.layout();
       return;
     }
 
@@ -97,9 +99,9 @@ function ConfigEditor() {
       ],
     });
 
-    const container = document.getElementById("container");
+    const container = configRef.current;
 
-    if (container != undefined) {
+    if (container != null) {
       editorRef.current = monaco.editor.create(container, {
         language: "yaml",
         model: modelRef.current,
@@ -107,6 +109,12 @@ function ConfigEditor() {
         theme: theme == "dark" ? "vs-dark" : "vs-light",
       });
     }
+
+    return () => {
+      configRef.current = null;
+      editorRef.current = null;
+      modelRef.current = null;
+    };
   });
 
   if (!config) {
@@ -149,7 +157,7 @@ function ConfigEditor() {
         </div>
       )}
 
-      <div id="container" className="h-full mt-2" />
+      <div ref={configRef} className="h-full mt-2" />
     </div>
   );
 }
