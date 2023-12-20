@@ -40,15 +40,30 @@ function History() {
     return axios.get(path, { params }).then((res) => res.data);
   }, []);
 
-  const getKey = useCallback((index: number, prevData: HourlyTimeline) => {
-    if (index > 0) {
-      const lastDate = prevData.end;
-      const pagedParams = { before: lastDate, timezone, limit: API_LIMIT };
-      return ["timeline/hourly", pagedParams];
-    }
+  const getKey = useCallback(
+    (index: number, prevData: HourlyTimeline) => {
+      if (index > 0) {
+        const lastDate = prevData.end;
+        const pagedParams =
+          historySearchParams == undefined
+            ? { before: lastDate, timezone, limit: API_LIMIT }
+            : {
+                ...historySearchParams,
+                before: lastDate,
+                timezone,
+                limit: API_LIMIT,
+              };
+        return ["timeline/hourly", pagedParams];
+      }
 
-    return ["timeline/hourly", { timezone, limit: API_LIMIT }];
-  }, []);
+      const params =
+        historySearchParams == undefined
+          ? { timezone, limit: API_LIMIT }
+          : { ...historySearchParams, timezone, limit: API_LIMIT };
+      return ["timeline/hourly", params];
+    },
+    [historySearchParams]
+  );
 
   const {
     data: timelinePages,
@@ -188,7 +203,7 @@ function History() {
             return (
               <div key={day}>
                 <Heading
-                  className="sticky py-2 -top-4 left-0 bg-background w-full z-10"
+                  className="sticky py-2 -top-4 left-0 bg-background w-full z-20"
                   as="h3"
                 >
                   {formatUnixTimestampToDateTime(parseInt(day), {

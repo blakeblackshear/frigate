@@ -23,6 +23,16 @@ export default function HistoryFilterPopover({
   onUpdateFilter,
 }: HistoryFilterPopoverProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const [open, setOpen] = useState(false);
+  const disabledDates = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
+    const future = new Date();
+    future.setFullYear(2032);
+    return { from: tomorrow, to: future };
+  }, []);
+
   const { data: allLabels } = useSWR<string[]>(["labels"], {
     revalidateOnFocus: false,
   });
@@ -42,10 +52,21 @@ export default function HistoryFilterPopover({
   const [selectedFilters, setSelectedFilters] = useState({
     cameras: filter == undefined ? [] : filter.cameras,
     labels: filter == undefined ? [] : filter.labels,
+    before: filter?.before,
+    after: filter?.after,
   });
+  const dateRange = useMemo(() => {
+    return selectedFilters?.before == undefined ||
+      selectedFilters?.after == undefined
+      ? undefined
+      : {
+          from: new Date(selectedFilters.after * 1000),
+          to: new Date(selectedFilters.before * 1000),
+        };
+  }, [selectedFilters]);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={(open) => setOpen(open)}>
       <PopoverTrigger asChild>
         <Button>
           <LuFilter className="mx-1" />
@@ -57,7 +78,9 @@ export default function HistoryFilterPopover({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="capitalize" variant="outline">
-                {""?.replaceAll("_", " ") || "All Cameras"}
+                {selectedFilters.cameras.length == 0
+                  ? "All Cameras"
+                  : `${selectedFilters.cameras.length} Cameras`}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -107,7 +130,9 @@ export default function HistoryFilterPopover({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="capitalize" variant="outline">
-                {""?.replaceAll("_", " ") || "All Labels"}
+                {selectedFilters.labels.length == 0
+                  ? "All Labels"
+                  : `${selectedFilters.labels.length} Labels`}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -155,10 +180,35 @@ export default function HistoryFilterPopover({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <Calendar mode="range" />
+        <Calendar
+          mode="range"
+          disabled={disabledDates}
+          selected={dateRange}
+          onSelect={(range) => {
+            let afterTime = undefined;
+            if (range?.from != undefined) {
+              afterTime = range.from.getTime() / 1000;
+            }
+
+            // need to make sure the day selected for before covers the entire day
+            let beforeTime = undefined;
+            if (range?.from != undefined) {
+              const beforeDate = range.to ?? range.from;
+              beforeDate.setHours(beforeDate.getHours() + 24, -1, 0, 0);
+              beforeTime = beforeDate.getTime() / 1000;
+            }
+
+            setSelectedFilters({
+              ...selectedFilters,
+              after: afterTime,
+              before: beforeTime,
+            });
+          }}
+        />
         <Button
           onClick={() => {
             onUpdateFilter(selectedFilters);
+            setOpen(false);
           }}
         >
           Save
