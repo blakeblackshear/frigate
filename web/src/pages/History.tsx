@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
+import useApiFilter from "@/hooks/use-api-filter";
 
 const API_LIMIT = 200;
 
@@ -31,10 +32,8 @@ function History() {
     [config]
   );
 
-  const [searchFilter, setSearchFilter] = useState<HistoryFilter>({
-    cameras: [],
-    labels: [],
-  });
+  const [historyFilter, setHistoryFilter, historySearchParams] =
+    useApiFilter<HistoryFilter>();
 
   const timelineFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
@@ -147,8 +146,8 @@ function History() {
       <div className="flex justify-between">
         <Heading as="h2">History</Heading>
         <HistoryFilterPopover
-          filter={searchFilter}
-          onUpdateFilter={(filter) => setSearchFilter(filter)}
+          filter={historyFilter}
+          onUpdateFilter={(filter) => setHistoryFilter(filter)}
         />
       </div>
 

@@ -39,7 +39,7 @@ type HourlyTimeline = {
     hours: { [key: string]: Timeline[] };
 }
 
-type HistoryFilter = {
+interface HistoryFilter extends FilterType {
     cameras: string[],
     labels: string[],
 }
