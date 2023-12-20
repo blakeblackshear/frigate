@@ -247,10 +247,10 @@ CMD ["sleep", "infinity"]
 FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
-COPY web-old/package.json web-old/package-lock.json ./
+COPY web/package.json web/package-lock.json ./
 RUN npm install
 
-COPY web-old/ ./
+COPY web/ ./
 RUN npm run build \
     && mv dist/BASE_PATH/monacoeditorwork/* dist/assets/ \
     && rm -rf dist/BASE_PATH
