@@ -84,7 +84,7 @@ export default function HistoryFilterPopover({
           Filter
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-screen md:w-[340px]">
+      <PopoverContent className="w-screen sm:w-[340px]">
         <div className="flex justify-around">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
