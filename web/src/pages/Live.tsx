@@ -1,3 +1,4 @@
+import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,18 +22,19 @@ function Live() {
   const { camera: openedCamera } = useParams();
 
   const [camera, setCamera] = useState<string>(
-    openedCamera ?? "Select A Camera"
+    openedCamera ?? (config?.birdseye.enabled ? "birdseye" : "Select A Camera")
   );
   const cameraConfig = useMemo(() => {
-    return config?.cameras[camera];
+    return camera == "birdseye" ? undefined : config?.cameras[camera];
   }, [camera, config]);
   const sortedCameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
-    return Object.values(config.cameras)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+    return Object.values(config.cameras).sort(
+      (aConf, bConf) => aConf.ui.order - bConf.ui.order
+    );
   }, [config]);
   const restreamEnabled = useMemo(() => {
     return (
@@ -56,7 +58,7 @@ function Live() {
   }, [cameraConfig, restreamEnabled]);
   const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
     `${camera}-source`,
-    defaultLiveMode
+    camera == "birdseye" ? "jsmpeg" : defaultLiveMode
   );
 
   return (
@@ -74,7 +76,7 @@ function Live() {
               <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={camera} onValueChange={setCamera}>
-                {(sortedCameras).map((item) => (
+                {sortedCameras.map((item) => (
                   <DropdownMenuRadioItem
                     className="capitalize"
                     key={item.name}
@@ -114,6 +116,12 @@ function Live() {
           </DropdownMenu>
         </div>
       </div>
+      {config && camera == "birdseye" && sourceIsLoaded && (
+        <BirdseyeLivePlayer
+          birdseyeConfig={config?.birdseye}
+          liveMode={`${viewSource ?? defaultLiveMode}`}
+        />
+      )}
       {cameraConfig && sourceIsLoaded && (
         <LivePlayer
           liveMode={`${viewSource ?? defaultLiveMode}`}
