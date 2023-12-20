@@ -71,7 +71,9 @@ def output_frames(
         preview_recorders[camera] = PreviewRecorder(cam_config, inter_process_queue)
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(config, camera_metrics, stop_event, websocket_server)
+        birdseye = Birdseye(
+            config, frame_manager, camera_metrics, stop_event, websocket_server
+        )
 
     websocket_thread.start()
 

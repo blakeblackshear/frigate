@@ -668,6 +668,7 @@ class Birdseye:
     def __init__(
         self,
         config: FrigateConfig,
+        frame_manager: SharedMemoryFrameManager,
         camera_metrics: dict[str, CameraMetricsTypes],
         stop_event: mp.Event,
         websocket_server,
@@ -688,7 +689,6 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        frame_manager = SharedMemoryFrameManager()
         self.birdseye_manager = BirdsEyeFrameManager(
             config, frame_manager, stop_event, camera_metrics
         )
