@@ -16,7 +16,6 @@ type HistoryCardProps = {
   relevantPreview?: Preview;
   shouldAutoPlay: boolean;
   onClick?: () => void;
-  onFavorite?: () => void;
   onDelete?: () => void;
 };
 
