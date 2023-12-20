@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
+import JSMpegPlayer from "./JSMpegPlayer";
 
 const emptyObject = Object.freeze({});
 
@@ -66,7 +67,11 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     return (
       <div className={`max-w-[${cameraConfig.detect.width}px]`}>
-        Not Yet Implemented
+        <JSMpegPlayer
+          camera={cameraConfig.name}
+          width={cameraConfig.detect.width}
+          height={cameraConfig.detect.height}
+        />
       </div>
     );
   } else if (liveMode == "debug") {
