@@ -47,7 +47,7 @@ export default function HistoryCard({
           <LuClock className="h-5 w-5 mr-2 inline" />
           {formatUnixTimestampToDateTime(timeline.time, {
             strftime_fmt:
-              config.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S",
+              config.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S %p",
             time_style: "medium",
             date_style: "medium",
           })}
