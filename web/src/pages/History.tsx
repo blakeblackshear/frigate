@@ -80,7 +80,6 @@ function History() {
     { revalidateOnFocus: false }
   );
 
-  const [detailLevel, _] = useState<"normal" | "extra" | "full">("normal");
   const [playback, setPlayback] = useState<Card | undefined>();
 
   const shouldAutoPlay = useMemo(() => {
@@ -92,8 +91,11 @@ function History() {
       return [];
     }
 
-    return getHourlyTimelineData(timelinePages, detailLevel);
-  }, [detailLevel, timelinePages]);
+    return getHourlyTimelineData(
+      timelinePages,
+      historyFilter?.detailLevel ?? "normal"
+    );
+  }, [historyFilter, timelinePages]);
 
   const isDone =
     (timelinePages?.[timelinePages.length - 1]?.count ?? 0) < API_LIMIT;

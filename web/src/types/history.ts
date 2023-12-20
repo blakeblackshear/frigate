@@ -44,4 +44,5 @@ interface HistoryFilter extends FilterType {
   labels: string[];
   before: number | undefined;
   after: number | undefined;
+  detailLevel: "normal" | "extra" | "full";
 }

@@ -1,4 +1,4 @@
-import { LuCheck, LuFilter, LuFocus } from "react-icons/lu";
+import { LuCheck, LuFilter } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
@@ -8,6 +8,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
@@ -50,10 +52,11 @@ export default function HistoryFilterPopover({
     [config, allLabels, allSubLabels]
   );
   const [selectedFilters, setSelectedFilters] = useState({
-    cameras: filter == undefined ? [] : filter.cameras,
-    labels: filter == undefined ? [] : filter.labels,
+    cameras: filter == undefined ? ["all"] : filter.cameras,
+    labels: filter == undefined ? ["all"] : filter.labels,
     before: filter?.before,
     after: filter?.after,
+    detailLevel: filter?.detailLevel ?? "normal",
   });
   const dateRange = useMemo(() => {
     return selectedFilters?.before == undefined ||
@@ -63,6 +66,14 @@ export default function HistoryFilterPopover({
           from: new Date(selectedFilters.after * 1000),
           to: new Date(selectedFilters.before * 1000),
         };
+  }, [selectedFilters]);
+
+  const allItems = useMemo(() => {
+    return {
+      cameras:
+        JSON.stringify(selectedFilters.cameras) == JSON.stringify(["all"]),
+      labels: JSON.stringify(selectedFilters.labels) == JSON.stringify(["all"]),
+    };
   }, [selectedFilters]);
 
   return (
@@ -78,7 +89,7 @@ export default function HistoryFilterPopover({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="capitalize" variant="outline">
-                {selectedFilters.cameras.length == 0
+                {allItems.cameras
                   ? "All Cameras"
                   : `${selectedFilters.cameras.length} Cameras`}
               </Button>
@@ -86,42 +97,49 @@ export default function HistoryFilterPopover({
             <DropdownMenuContent>
               <DropdownMenuLabel>Filter Cameras</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <FilterCheckBox
+                isChecked={allItems.cameras}
+                label="All Cameras"
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    setSelectedFilters({
+                      ...selectedFilters,
+                      cameras: ["all"],
+                    });
+                  }
+                }}
+              />
+              <DropdownMenuSeparator />
               {filterValues.cameras.map((item) => (
                 <FilterCheckBox
                   key={item}
-                  isChecked={
-                    selectedFilters.cameras.length == 0 ||
-                    selectedFilters.cameras.includes(item)
-                  }
+                  isChecked={selectedFilters.cameras.includes(item)}
                   label={item.replaceAll("_", " ")}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {
-                      const selectedCameras = [...selectedFilters.cameras];
+                      const selectedCameras = allItems.cameras
+                        ? []
+                        : [...selectedFilters.cameras];
                       selectedCameras.push(item);
                       setSelectedFilters({
                         ...selectedFilters,
                         cameras: selectedCameras,
                       });
                     } else {
-                      const selectedCameraList =
-                        selectedFilters.cameras.length == 0
-                          ? [...filterValues.cameras]
-                          : [...selectedFilters.cameras];
-                      selectedCameraList.splice(
-                        selectedCameraList.indexOf(item),
-                        1
-                      );
-                      setSelectedFilters({
-                        ...selectedFilters,
-                        cameras: selectedCameraList,
-                      });
+                      const selectedCameraList = [...selectedFilters.cameras];
+
+                      // can not deselect the last item
+                      if (selectedCameraList.length > 1) {
+                        selectedCameraList.splice(
+                          selectedCameraList.indexOf(item),
+                          1
+                        );
+                        setSelectedFilters({
+                          ...selectedFilters,
+                          cameras: selectedCameraList,
+                        });
+                      }
                     }
-                  }}
-                  onSingleSelect={() => {
-                    setSelectedFilters({
-                      ...selectedFilters,
-                      cameras: [item],
-                    });
                   }}
                 />
               ))}
@@ -130,13 +148,26 @@ export default function HistoryFilterPopover({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="capitalize" variant="outline">
-                {selectedFilters.labels.length == 0
+                {allItems.labels
                   ? "All Labels"
                   : `${selectedFilters.labels.length} Labels`}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Filter Labels</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <FilterCheckBox
+                isChecked={allItems.labels}
+                label="All Labels"
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    setSelectedFilters({
+                      ...selectedFilters,
+                      labels: ["all"],
+                    });
+                  }
+                }}
+              />
               <DropdownMenuSeparator />
               {filterValues.labels.map((item) => (
                 <FilterCheckBox
@@ -148,35 +179,63 @@ export default function HistoryFilterPopover({
                   label={item.replaceAll("_", " ")}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {
-                      const selectedLabels = [...selectedFilters.labels];
+                      const selectedLabels = allItems.labels
+                        ? []
+                        : [...selectedFilters.labels];
                       selectedLabels.push(item);
                       setSelectedFilters({
                         ...selectedFilters,
                         labels: selectedLabels,
                       });
                     } else {
-                      const selectedLabelList =
-                        selectedFilters.labels.length == 0
-                          ? [...filterValues.labels]
-                          : selectedFilters.labels;
-                      selectedLabelList.splice(
-                        selectedLabelList.indexOf(item),
-                        1
-                      );
-                      setSelectedFilters({
-                        ...selectedFilters,
-                        labels: selectedLabelList,
-                      });
+                      const selectedLabelList = [...selectedFilters.labels];
+
+                      // can not deselect the last item
+                      if (selectedLabelList.length > 1) {
+                        selectedLabelList.splice(
+                          selectedLabelList.indexOf(item),
+                          1
+                        );
+                        setSelectedFilters({
+                          ...selectedFilters,
+                          labels: selectedLabelList,
+                        });
+                      }
                     }
-                  }}
-                  onSingleSelect={() => {
-                    setSelectedFilters({
-                      ...selectedFilters,
-                      labels: [item],
-                    });
                   }}
                 />
               ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="capitalize" variant="outline">
+                {selectedFilters.detailLevel}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>
+                Detail Level
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={selectedFilters.detailLevel}
+                onValueChange={(value) => {
+                  setSelectedFilters({
+                    ...selectedFilters,
+                    // @ts-ignore we know that value is one of the detailLevel
+                    detailLevel: value,
+                  });
+                }}
+              >
+                <DropdownMenuRadioItem value="normal">
+                  Normal
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="extra">
+                  Extra
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="full">Full</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -222,36 +281,25 @@ type FilterCheckBoxProps = {
   label: string;
   isChecked: boolean;
   onCheckedChange: (isChecked: boolean) => void;
-  onSingleSelect: () => void;
 };
 
 function FilterCheckBox({
   label,
   isChecked,
   onCheckedChange,
-  onSingleSelect,
 }: FilterCheckBoxProps) {
   return (
-    <div
-      className="capitalize flex justify-between items-center cursor-pointer"
+    <Button
+      className="capitalize flex justify-between items-center cursor-pointer w-full"
+      variant="ghost"
       onClick={(_) => onCheckedChange(!isChecked)}
     >
       {isChecked ? (
-        <LuCheck className="w-8 h-8" />
+        <LuCheck className="w-6 h-6" />
       ) : (
-        <div className="w-8 h-8" />
+        <div className="w-6 h-6" />
       )}
       <div className="ml-1 w-full flex justify-start">{label}</div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          onSingleSelect();
-        }}
-      >
-        <LuFocus className="text-primary w-6 h-6" />
-      </Button>
-    </div>
+    </Button>
   );
 }
