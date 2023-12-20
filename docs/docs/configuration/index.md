@@ -47,6 +47,11 @@ onvif:
   password: "{FRIGATE_RTSP_PASSWORD}"
 ```
 
+```yaml
+gemini:
+  api_key: "{FRIGATE_GEMINI_API_KEY}"
+```
+
 ### Full configuration reference:
 
 :::caution
@@ -427,6 +432,30 @@ snapshots:
       person: 15
   # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
   quality: 70
+
+# Optional: Configuration for semantic search capability
+semantic_search:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
+
+# Optional: Configuration for Google Gemini generated event descriptions
+# NOTE: This will send thumbnails over the internet to Google's LLM to generate
+# descriptions. It can be overridden at the camera level to enhance privacy for
+# indoor cameras.
+gemini:
+  # Optional: Enable Google Gemini description generation (default: shown below)
+  enabled: False
+  # Optional: Override existing descriptions on events (default: shown below)
+  override_existing: False
+  # Required if enabled: API key can be generated at https://makersuite.google.com
+  api_key: "{FRIGATE_GEMINI_API_KEY}"
+  # Optional: The default prompt for generating descriptions. Can use replacement
+  # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+  prompt: "Describe the {label} in this image with as much detail as possible. Do not describe the background."
+  # Optional: Object specific prompts to customize description results
+  # Format: {label}: {prompt}
+  object_prompts:
+    person: "My special person prompt."
 
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.8.3)

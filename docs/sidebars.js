@@ -29,6 +29,10 @@ module.exports = {
         "configuration/object_detectors",
         "configuration/audio_detectors",
       ],
+      "Semantic Search": [
+        "configuration/semantic_search",
+        "configuration/gemini",
+      ],
       Cameras: [
         "configuration/cameras",
         "configuration/record",
@@ -61,7 +65,7 @@ module.exports = {
     ],
     "Frigate+": ["plus/index"],
     Troubleshooting: [
-      "troubleshooting/faqs", 
+      "troubleshooting/faqs",
       "troubleshooting/recordings",
       "troubleshooting/edgetpu",
     ],

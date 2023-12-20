@@ -687,7 +687,7 @@ class SemanticSearchConfig(FrigateBaseModel):
 class GeminiConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable Google Gemini captioning.")
     override_existing: bool = Field(
-        default=False, title="Override existing sub labels."
+        default=False, title="Override existing descriptions."
     )
     api_key: str = Field(default="", title="Google AI Studio API Key.")
     prompt: str = Field(
