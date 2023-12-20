@@ -1,13 +1,22 @@
 export interface UiConfig {
   timezone?: string;
-  time_format?: 'browser' | '12hour' | '24hour';
-  date_style?: 'full' | 'long' | 'medium' | 'short';
-  time_style?: 'full' | 'long' | 'medium' | 'short';
+  time_format?: "browser" | "12hour" | "24hour";
+  date_style?: "full" | "long" | "medium" | "short";
+  time_style?: "full" | "long" | "medium" | "short";
   strftime_fmt?: string;
   live_mode?: string;
   use_experimental?: boolean;
   dashboard: boolean;
   order: number;
+}
+
+export interface BirdseyeConfig {
+  enabled: boolean;
+  height: number;
+  mode: "objects" | "continuous" | "motion";
+  quality: number;
+  restream: boolean;
+  width: number;
 }
 
 export interface CameraConfig {
@@ -23,7 +32,7 @@ export interface CameraConfig {
   best_image_timeout: number;
   birdseye: {
     enabled: boolean;
-    mode: "objects";
+    mode: "objects" | "continuous" | "motion";
     order: number;
   };
   detect: {
@@ -204,14 +213,7 @@ export interface FrigateConfig {
     num_threads: number;
   };
 
-  birdseye: {
-    enabled: boolean;
-    height: number;
-    mode: "objects";
-    quality: number;
-    restream: boolean;
-    width: number;
-  };
+  birdseye: BirdseyeConfig;
 
   cameras: {
     [cameraName: string]: CameraConfig;
