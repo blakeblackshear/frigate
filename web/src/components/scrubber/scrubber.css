@@ -14,10 +14,10 @@
   @apply absolute invisible mx-0 px-0;
 }
 .vis-time-axis .vis-grid.vis-vertical {
-  @apply absolute border-l border-solid;
+  @apply absolute border-l border-dashed border-muted-foreground;
 }
 .vis-time-axis .vis-grid.vis-vertical-rtl {
-  @apply absolute border-r border-solid;
+  @apply absolute border-r border-dashed border-muted-foreground;
 }
 .vis-time-axis .vis-grid.vis-minor {
   @apply border-foreground;
@@ -170,16 +170,16 @@
   @apply min-h-0 w-auto;
 }
 .vis-item {
-  @apply bg-[#d5ddf6] border text-[#1a1a1a] inline-block absolute z-[1] border-[#97b0f8];
+  @apply bg-accent border text-foreground inline-block absolute z-[1] border-border;
 }
 .vis-item.vis-selected {
-  @apply bg-[#fff785] z-[2] border-[#ffc200];
+  @apply bg-muted-foreground z-[2] border-muted text-muted;
 }
 .vis-editable.vis-selected {
   @apply cursor-move;
 }
 .vis-item.vis-point.vis-selected {
-  @apply bg-[#fff785];
+  @apply bg-muted-foreground;
 }
 .vis-item.vis-box {
   @apply text-center rounded-sm border-solid;
@@ -209,8 +209,7 @@
   @apply inline-block absolute;
 }
 .vis-item.vis-line {
-  @apply absolute w-0 p-0 border-l;
-  border-left-style: solid;
+  @apply absolute w-0 p-0 border-l border-solid text-muted;
 }
 .vis-item .vis-item-content {
   @apply box-border whitespace-nowrap p-[5px];

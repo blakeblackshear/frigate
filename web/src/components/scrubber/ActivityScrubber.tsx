@@ -1,39 +1,116 @@
-import { useRef, useEffect, useState } from "react";
-import { Timeline } from "vis-timeline";
-import { TimelineOptions } from "vis-timeline/standalone";
+import { useEffect, useRef, useState } from "react";
+import {
+  Timeline as VisTimeline,
+  TimelineGroup,
+  TimelineItem,
+  TimelineOptions,
+} from "vis-timeline";
+import type { DataGroup, DataItem, TimelineEvents } from "vis-timeline/types";
 import "./scrubber.css";
 
-export type ScrubberItem = {
-  id: string;
-  content: string;
-  start: Date;
-  end?: Date;
-  type?: "box" | "point";
+export type TimelineEventsWithMissing =
+  | TimelineEvents
+  | "dragover"
+  | "markerchange"
+  | "markerchanged";
+
+export type TimelineEventHandler =
+  | "currentTimeTickHandler"
+  | "clickHandler"
+  | "contextmenuHandler"
+  | "doubleClickHandler"
+  | "dragoverHandler"
+  | "dropHandler"
+  | "mouseOverHandler"
+  | "mouseDownHandler"
+  | "mouseUpHandler"
+  | "mouseMoveHandler"
+  | "groupDraggedHandler"
+  | "changedHandler"
+  | "rangechangeHandler"
+  | "rangechangedHandler"
+  | "selectHandler"
+  | "itemoverHandler"
+  | "itemoutHandler"
+  | "timechangeHandler"
+  | "timechangedHandler"
+  | "markerchangeHandler"
+  | "markerchangedHandler";
+
+type EventHandler = {
+  (properties: any): void;
 };
 
-export type ScrubberSelectProps = {
-  nodes: ScrubberItem[];
-};
+export type TimelineEventsHandlers = Partial<
+  Record<TimelineEventHandler, EventHandler>
+>;
 
-type ScrubberChartProps = {
-  items: ScrubberItem[];
+export type ScrubberItem = TimelineItem;
+
+const domEvents: TimelineEventsWithMissing[] = [
+  "currentTimeTick",
+  "click",
+  "contextmenu",
+  "doubleClick",
+  "dragover",
+  "drop",
+  "mouseOver",
+  "mouseDown",
+  "mouseUp",
+  "mouseMove",
+  "groupDragged",
+  "changed",
+  "rangechange",
+  "rangechanged",
+  "select",
+  "itemover",
+  "itemout",
+  "timechange",
+  "timechanged",
+  "markerchange",
+  "markerchanged",
+];
+
+type ActivityScrubberProps = {
+  items: TimelineItem[];
+  groups?: TimelineGroup[];
   options?: TimelineOptions;
-  onSelect?: (props: ScrubberSelectProps) => void;
-};
+} & TimelineEventsHandlers;
 
-export function ActivityScrubber({
+function ActivityScrubber({
   items,
+  groups,
   options,
-  onSelect,
-}: ScrubberChartProps) {
-  const container = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<Timeline | null>(null);
+  ...eventHandlers
+}: ActivityScrubberProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<{ timeline: VisTimeline | null }>({
+    timeline: null,
+  });
   const [currentTime, setCurrentTime] = useState(Date.now());
+
+  const defaultOptions: TimelineOptions = {
+    width: "100%",
+    maxHeight: "350px",
+    stack: true,
+    showMajorLabels: true,
+    showCurrentTime: false,
+    zoomMin: 10 * 1000, // 10 seconds
+    // start: new Date(currentTime - 60 * 1 * 60 * 1000), // 1 hour ago
+    end: currentTime,
+    max: currentTime,
+    format: {
+      minorLabels: {
+        minute: "h:mma",
+        hour: "ha",
+      },
+    },
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       setCurrentTime(Date.now());
-    }, 10000);
+    }, 60000); // Update every minute
 
     return () => {
       clearInterval(intervalId);
@@ -41,54 +118,63 @@ export function ActivityScrubber({
   }, []);
 
   useEffect(() => {
-    const defaultOptions: TimelineOptions = {
-      width: "100%",
-      stack: true,
-      showMajorLabels: true,
-      showCurrentTime: true,
-      zoomMin: 10 * 1000, // 10 seconds
-      end: currentTime,
-      max: currentTime,
-      format: {
-        minorLabels: {
-          minute: "h:mma",
-          hour: "ha",
-        },
-      },
-    };
+    const divElement = containerRef.current;
+    if (!divElement) {
+      return;
+    }
+
+    const timelineInstance = new VisTimeline(
+      divElement,
+      items as DataItem[],
+      groups as DataGroup[],
+      options
+    );
+
+    domEvents.forEach((event) => {
+      const eventHandler = eventHandlers[`${event}Handler`];
+      if (typeof eventHandler === "function") {
+        timelineInstance.on(event, eventHandler);
+      }
+    });
+
+    timelineRef.current.timeline = timelineInstance;
 
     const timelineOptions: TimelineOptions = {
       ...defaultOptions,
       ...options,
     };
 
-    if (!timelineRef.current) {
-      timelineRef.current = new Timeline(
-        container.current as HTMLDivElement,
-        items,
-        timelineOptions
-      );
+    timelineInstance.setOptions(timelineOptions);
 
-      const updateRange = () => {
-        timelineRef.current?.setOptions(timelineOptions);
-      };
+    return () => {
+      timelineInstance.destroy();
+    };
+  }, []);
 
-      timelineRef.current.on("rangechanged", updateRange);
-      if (onSelect) {
-        timelineRef.current.on("select", onSelect);
-      }
-
-      return () => {
-        timelineRef.current?.off("rangechanged", updateRange);
-      };
-    } else {
-      // Update existing timeline
-      timelineRef.current.setItems(items);
-      timelineRef.current.setOptions(timelineOptions);
+  useEffect(() => {
+    if (!timelineRef.current.timeline) {
+      return;
     }
-  }, [items, options, currentTime]);
 
-  return <div ref={container}></div>;
+    // If the currentTime updates, adjust the scrubber's end date and max
+    // May not be applicable to all scrubbers, might want to just pass this in
+    // for any scrubbers that we want to dynamically move based on time
+    // const updatedTimeOptions: TimelineOptions = {
+    //   end: currentTime,
+    //   max: currentTime,
+    // };
+
+    const timelineOptions: TimelineOptions = {
+      ...defaultOptions,
+      // ...updatedTimeOptions,
+      ...options,
+    };
+
+    timelineRef.current.timeline.setOptions(timelineOptions);
+    if (items) timelineRef.current.timeline.setItems(items);
+  }, [items, groups, options, currentTime, eventHandlers]);
+
+  return <div ref={containerRef} />;
 }
 
 export default ActivityScrubber;

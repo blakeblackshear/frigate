@@ -1,14 +1,14 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Heading from "@/components/ui/heading";
-import {
-  ScrubberSelectProps,
-  ActivityScrubber,
+import ActivityScrubber, {
   ScrubberItem,
 } from "@/components/scrubber/ActivityScrubber";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
+import { useApiHost } from "@/api";
+import TimelineScrubber from "@/components/playground/TimelineScrubber";
 
 // Color data
 const colors = [
@@ -45,24 +45,25 @@ function ColorSwatch({ name, value }: { name: string; value: string }) {
   );
 }
 
-function onSelect(props: ScrubberSelectProps) {
-  console.log(props);
-}
-
 function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
-  return events.map((event) => {
-    return {
-      id: event.id,
-      content: event.label,
-      start: new Date(event.start_time * 1000),
-      end: event.end_time ? new Date(event.end_time * 1000) : undefined,
-      type: "box",
-    };
-  });
+  const apiHost = useApiHost();
+
+  return events.map((event: Event) => ({
+    id: event.id,
+    content: `<div class="flex"><img class="" src="${apiHost}api/events/${event.id}/thumbnail.jpg" /><span>${event.label}</span></div>`,
+    start: new Date(event.start_time * 1000),
+    end: event.end_time ? new Date(event.end_time * 1000) : undefined,
+    type: "box",
+  }));
 }
 
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [timeline, setTimeline] = useState<string | undefined>(undefined);
+
+  const onSelect = useCallback(({ items }: { items: string[] }) => {
+    setTimeline(items[0]);
+  }, []);
 
   const recentTimestamp = useMemo(() => {
     const now = new Date();
@@ -93,8 +94,18 @@ function UIPlayground() {
             <>
               <ActivityScrubber
                 items={eventsToScrubberItems(events)}
-                onSelect={onSelect}
+                selectHandler={onSelect}
               />
+            </>
+          )}
+        </div>
+      )}
+
+      {config && (
+        <div>
+          {timeline && (
+            <>
+              <TimelineScrubber eventID={timeline} />
             </>
           )}
         </div>
