@@ -22,7 +22,6 @@ import useApiFilter from "@/hooks/use-api-filter";
 import HistoryCardView from "@/views/history/HistoryCardView";
 import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 import { Button } from "@/components/ui/button";
-import { LuStepBack } from "react-icons/lu";
 import { IoMdArrowBack } from "react-icons/io";
 
 const API_LIMIT = 200;
@@ -145,13 +144,15 @@ function History() {
     <>
       <div className="flex justify-between">
         <div className="flex">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setPlayback(undefined)}
-          >
-            <IoMdArrowBack className="w-6 h-6" />
-          </Button>
+          {playback != undefined && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setPlayback(undefined)}
+            >
+              <IoMdArrowBack className="w-6 h-6" />
+            </Button>
+          )}
           <Heading as="h2">History</Heading>
         </div>
         {!playback && (

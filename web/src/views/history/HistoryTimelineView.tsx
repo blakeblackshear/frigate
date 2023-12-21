@@ -1,9 +1,12 @@
 import { useApiHost } from "@/api";
+import TimelineEventOverlay from "@/components/overlay/TimelineDataOverlay";
 import VideoPlayer from "@/components/player/VideoPlayer";
 import ActivityScrubber from "@/components/scrubber/ActivityScrubber";
-import { Button } from "@/components/ui/button";
+import ActivityIndicator from "@/components/ui/activity-indicator";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { getTimelineItemDescription } from "@/utils/timelineUtil";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 
 type HistoryTimelineViewProps = {
@@ -16,10 +19,30 @@ export default function HistoryTimelineView({
   isMobile,
 }: HistoryTimelineViewProps) {
   const apiHost = useApiHost();
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useMemo(
+    () =>
+      config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    [config]
+  );
+
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
 
   const [scrubbing, setScrubbing] = useState(false);
+  const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
+    undefined
+  );
+
+  const annotationOffset = useMemo(() => {
+    if (!config) {
+      return 0;
+    }
+
+    return (
+      (config.cameras[playback.camera]?.detect?.annotation_offset || 0) / 1000
+    );
+  }, [config, playback]);
 
   const timelineTime = useMemo(() => {
     if (!playback) {
@@ -37,13 +60,69 @@ export default function HistoryTimelineView({
     return { start: startTime.toFixed(1), end: endTime.toFixed(1) };
   }, [timelineTime]);
 
+  const recordingParams = useMemo(() => {
+    return {
+      before: playbackTimes.end,
+      after: playbackTimes.start,
+    };
+  }, [playbackTimes]);
+  const { data: recordings } = useSWR<Recording[]>(
+    playback ? [`${playback.camera}/recordings`, recordingParams] : null,
+    { revalidateOnFocus: false }
+  );
+
   const playbackUri = useMemo(() => {
     if (!playback) {
       return "";
     }
 
-    return `${apiHost}vod/${playback.camera}/start/${playbackTimes.start}/end/${playbackTimes.end}/master.m3u8`;
-  }, [playback, playbackTimes]);
+    const date = new Date(parseInt(playbackTimes.start) * 1000);
+    return `${apiHost}vod/${date.getFullYear()}-${
+      date.getMonth() + 1
+    }/${date.getDate()}/${date.getHours()}/${
+      playback.camera
+    }/${timezone.replaceAll("/", ",")}/master.m3u8`;
+  }, [playbackTimes]);
+
+  const onSelectItem = useCallback(
+    (data: { items: number[] }) => {
+      if (data.items.length > 0) {
+        const selected = data.items[0];
+        setFocusedItem(
+          playback.timelineItems.find(
+            (timeline) => timeline.timestamp == selected
+          )
+        );
+        playerRef.current?.pause();
+
+        let seekSeconds = 0;
+        console.log("recordings are " + recordings?.length);
+        (recordings || []).every((segment) => {
+          // if the next segment is past the desired time, stop calculating
+          if (segment.start_time > selected) {
+            return false;
+          }
+
+          if (segment.end_time < selected) {
+            seekSeconds += segment.end_time - segment.start_time;
+            return true;
+          }
+
+          seekSeconds +=
+            segment.end_time -
+            segment.start_time -
+            (segment.end_time - selected);
+          return true;
+        });
+        playerRef.current?.currentTime(seekSeconds);
+      }
+    },
+    [annotationOffset, recordings, playerRef]
+  );
+
+  if (!config || !recordings) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <>
@@ -53,7 +132,7 @@ export default function HistoryTimelineView({
         }
       >
         <div className={`w-screen 2xl:w-[1280px]`}>
-          <div className={`${scrubbing ? "hidden" : "visible"}`}>
+          <div className={`relative ${scrubbing ? "hidden" : "visible"}`}>
             <VideoPlayer
               options={{
                 preload: "auto",
@@ -72,13 +151,20 @@ export default function HistoryTimelineView({
                   timelineTime - parseInt(playbackTimes.start)
                 );
                 player.on("playing", () => {
-                  //setSelectedItem(undefined);
+                  setFocusedItem(undefined);
                 });
               }}
               onDispose={() => {
                 playerRef.current = undefined;
               }}
-            />
+            >
+              {config && focusedItem ? (
+                <TimelineEventOverlay
+                  timeline={focusedItem}
+                  cameraConfig={config.cameras[playback.camera]}
+                />
+              ) : undefined}
+            </VideoPlayer>
           </div>
           <div className={`${scrubbing ? "visible" : "hidden"}`}>
             <VideoPlayer
@@ -105,6 +191,7 @@ export default function HistoryTimelineView({
             />
           </div>
           <ActivityScrubber
+            // @ts-ignore
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
@@ -131,6 +218,7 @@ export default function HistoryTimelineView({
               setScrubbing(false);
               playerRef.current?.play();
             }}
+            selectHandler={onSelectItem}
           />
         </div>
       </div>
