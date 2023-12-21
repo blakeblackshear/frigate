@@ -1,8 +1,15 @@
 import { IconType } from "react-icons";
-import { LuFileUp, LuFilm, LuLayoutDashboard, LuVideo } from "react-icons/lu";
+import {
+  LuConstruction,
+  LuFileUp,
+  LuFilm,
+  LuLayoutDashboard,
+  LuVideo,
+} from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import Logo from "./Logo";
+import { ENV } from "@/env";
 
 const navbarLinks = [
   {
@@ -29,6 +36,13 @@ const navbarLinks = [
     title: "Export",
     url: "/export",
   },
+  {
+    id: 5,
+    icon: LuConstruction,
+    title: "UI Playground",
+    url: "/playground",
+    dev: true,
+  },
 ];
 
 function Sidebar({
@@ -46,6 +60,7 @@ function Sidebar({
           Icon={item.icon}
           title={item.title}
           url={item.url}
+          dev={item.dev}
           onClick={() => setSheetOpen(false)}
         />
       ))}
@@ -78,23 +93,28 @@ type SidebarItemProps = {
   Icon: IconType;
   title: string;
   url: string;
+  dev?: boolean;
   onClick?: () => void;
 };
 
-function SidebarItem({ Icon, title, url, onClick }: SidebarItemProps) {
+function SidebarItem({ Icon, title, url, dev, onClick }: SidebarItemProps) {
+  const shouldRender = dev ? ENV !== "production" : true;
+
   return (
-    <NavLink
-      to={url}
-      onClick={onClick}
-      className={({ isActive }) =>
-        `py-4 px-2 flex flex-col lg:flex-row items-center rounded-lg gap-2 lg:w-full hover:bg-border ${
-          isActive ? "font-bold bg-popover text-popover-foreground" : ""
-        }`
-      }
-    >
-      <Icon className="w-6 h-6 mr-1" />
-      <div className="text-sm">{title}</div>
-    </NavLink>
+    shouldRender && (
+      <NavLink
+        to={url}
+        onClick={onClick}
+        className={({ isActive }) =>
+          `py-4 px-2 flex flex-col lg:flex-row items-center rounded-lg gap-2 lg:w-full hover:bg-border ${
+            isActive ? "font-bold bg-popover text-popover-foreground" : ""
+          }`
+        }
+      >
+        <Icon className="w-6 h-6 mr-1" />
+        <div className="text-sm text-center">{title}</div>
+      </NavLink>
+    )
   );
 }
 
