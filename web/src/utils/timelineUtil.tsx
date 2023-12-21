@@ -1,4 +1,11 @@
-import { LuCircle, LuPlay, LuPlayCircle, LuTruck } from "react-icons/lu";
+import {
+  LuCircle,
+  LuCircleDot,
+  LuEar,
+  LuPlay,
+  LuPlayCircle,
+  LuTruck,
+} from "react-icons/lu";
 import { IoMdExit } from "react-icons/io";
 import {
   MdFaceUnlock,
@@ -33,7 +40,13 @@ export function getTimelineIcon(timelineItem: Timeline) {
           return <MdFaceUnlock className="w-4 mr-1" />;
         case "car":
           return <MdOutlinePictureInPictureAlt className="w-4 mr-1" />;
+        default:
+          return <LuCircleDot className="w-4 mr-1" />;
       }
+    case "heard":
+      return <LuEar className="w-4 mr-1" />;
+    case "external":
+      return <LuCircleDot className="w-4 mr-1" />;
   }
 }
 
@@ -76,5 +89,9 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
       return `${timelineItem.data.label} recognized as ${timelineItem.data.sub_label}`;
     case "gone":
       return `${label} left`;
+    case "heard":
+      return `${label} heard`;
+    case "external":
+      return `${label} detected`;
   }
 }

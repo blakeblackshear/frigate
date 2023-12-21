@@ -19,6 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
+import useApiFilter from "@/hooks/use-api-filter";
 
 const API_LIMIT = 200;
 
@@ -29,20 +31,39 @@ function History() {
       config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     [config]
   );
+
+  const [historyFilter, setHistoryFilter, historySearchParams] =
+    useApiFilter<HistoryFilter>();
+
   const timelineFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
     return axios.get(path, { params }).then((res) => res.data);
   }, []);
 
-  const getKey = useCallback((index: number, prevData: HourlyTimeline) => {
-    if (index > 0) {
-      const lastDate = prevData.end;
-      const pagedParams = { before: lastDate, timezone, limit: API_LIMIT };
-      return ["timeline/hourly", pagedParams];
-    }
+  const getKey = useCallback(
+    (index: number, prevData: HourlyTimeline) => {
+      if (index > 0) {
+        const lastDate = prevData.end;
+        const pagedParams =
+          historySearchParams == undefined
+            ? { before: lastDate, timezone, limit: API_LIMIT }
+            : {
+                ...historySearchParams,
+                before: lastDate,
+                timezone,
+                limit: API_LIMIT,
+              };
+        return ["timeline/hourly", pagedParams];
+      }
 
-    return ["timeline/hourly", { timezone, limit: API_LIMIT }];
-  }, []);
+      const params =
+        historySearchParams == undefined
+          ? { timezone, limit: API_LIMIT }
+          : { ...historySearchParams, timezone, limit: API_LIMIT };
+      return ["timeline/hourly", params];
+    },
+    [historySearchParams]
+  );
 
   const {
     data: timelinePages,
@@ -59,7 +80,6 @@ function History() {
     { revalidateOnFocus: false }
   );
 
-  const [detailLevel, _] = useState<"normal" | "extra" | "full">("normal");
   const [playback, setPlayback] = useState<Card | undefined>();
 
   const shouldAutoPlay = useMemo(() => {
@@ -71,8 +91,11 @@ function History() {
       return [];
     }
 
-    return getHourlyTimelineData(timelinePages, detailLevel);
-  }, [detailLevel, timelinePages]);
+    return getHourlyTimelineData(
+      timelinePages,
+      historyFilter?.detailLevel ?? "normal"
+    );
+  }, [historyFilter, timelinePages]);
 
   const isDone =
     (timelinePages?.[timelinePages.length - 1]?.count ?? 0) < API_LIMIT;
@@ -137,7 +160,13 @@ function History() {
 
   return (
     <>
-      <Heading as="h2">Review</Heading>
+      <div className="flex justify-between">
+        <Heading as="h2">History</Heading>
+        <HistoryFilterPopover
+          filter={historyFilter}
+          onUpdateFilter={(filter) => setHistoryFilter(filter)}
+        />
+      </div>
 
       <AlertDialog
         open={itemsToDelete != null}
@@ -176,7 +205,7 @@ function History() {
             return (
               <div key={day}>
                 <Heading
-                  className="sticky py-2 -top-4 left-0 bg-background w-full z-10"
+                  className="sticky py-2 -top-4 left-0 bg-background w-full z-20"
                   as="h3"
                 >
                   {formatUnixTimestampToDateTime(parseInt(day), {
@@ -242,7 +271,7 @@ function History() {
                               );
                             })}
                         </div>
-                        {lastRow && <ActivityIndicator />}
+                        {lastRow && !isDone && <ActivityIndicator />}
                       </div>
                     );
                   }
