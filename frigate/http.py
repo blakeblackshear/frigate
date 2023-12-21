@@ -614,19 +614,29 @@ def timeline():
 @bp.route("/timeline/hourly")
 def hourly_timeline():
     """Get hourly summary for timeline."""
-    camera = request.args.get("camera", "all")
+    cameras = request.args.get("cameras", "all")
+    labels = request.args.get("labels", "all")
     before = request.args.get("before", type=float)
+    after = request.args.get("after", type=float)
     limit = request.args.get("limit", 200)
     tz_name = request.args.get("timezone", default="utc", type=str)
     _, minute_modifier, _ = get_tz_modifiers(tz_name)
 
     clauses = []
 
-    if camera != "all":
-        clauses.append((Timeline.camera == camera))
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Timeline.camera << camera_list))
+
+    if labels != "all":
+        label_list = labels.split(",")
+        clauses.append((Timeline.data["label"] << label_list))
 
     if before:
         clauses.append((Timeline.timestamp < before))
+
+    if after:
+        clauses.append((Timeline.timestamp > after))
 
     if len(clauses) == 0:
         clauses.append((True))

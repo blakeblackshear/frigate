@@ -48,6 +48,8 @@ class TimelineProcessor(threading.Thread):
                 self.handle_object_detection(
                     camera, event_type, prev_event_data, event_data
                 )
+            elif input_type == EventTypeEnum.api:
+                self.handle_api_entry(camera, event_type, event_data)
 
     def insert_or_save(
         self,
@@ -140,3 +142,40 @@ class TimelineProcessor(threading.Thread):
 
         if save:
             self.insert_or_save(timeline_entry, prev_event_data, event_data)
+
+    def handle_api_entry(
+        self,
+        camera: str,
+        event_type: str,
+        event_data: dict[any, any],
+    ) -> bool:
+        if event_type != "new":
+            return False
+
+        if event_data.get("type", "api") == "audio":
+            timeline_entry = {
+                Timeline.class_type: "heard",
+                Timeline.timestamp: event_data["start_time"],
+                Timeline.camera: camera,
+                Timeline.source: "audio",
+                Timeline.source_id: event_data["id"],
+                Timeline.data: {
+                    "label": event_data["label"],
+                    "sub_label": event_data.get("sub_label"),
+                },
+            }
+        else:
+            timeline_entry = {
+                Timeline.class_type: "external",
+                Timeline.timestamp: event_data["start_time"],
+                Timeline.camera: camera,
+                Timeline.source: "api",
+                Timeline.source_id: event_data["id"],
+                Timeline.data: {
+                    "label": event_data["label"],
+                    "sub_label": event_data.get("sub_label"),
+                },
+            }
+
+        Timeline.insert(timeline_entry).execute()
+        return True
