@@ -195,7 +195,7 @@ function History() {
             onItemSelected={(card) => setPlayback(card)}
           />
         )}
-        {playback != undefined && <HistoryTimelineView card={playback} />}
+        {playback != undefined && <HistoryTimelineView card={playback} isMobile={shouldAutoPlay} />}
       </>
     </>
   );

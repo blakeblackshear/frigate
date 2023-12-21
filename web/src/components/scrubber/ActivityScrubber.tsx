@@ -185,12 +185,7 @@ function ActivityScrubber({
     if (items) timelineRef.current.timeline.setItems(items);
   }, [items, groups, options, currentTime, eventHandlers]);
 
-  return (
-    <div>
-      <div ref={containerRef} />
-      <div className="absolute bg-red-500 w-[2px]" />
-    </div>
-  );
+  return <div ref={containerRef} />;
 }
 
 export default ActivityScrubber;

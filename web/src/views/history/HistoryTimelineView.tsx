@@ -11,10 +11,12 @@ import Player from "video.js/dist/types/player";
 
 type HistoryTimelineViewProps = {
   card: Card;
+  isMobile: boolean;
 };
 
 export default function HistoryTimelineView({
   card,
+  isMobile,
 }: HistoryTimelineViewProps) {
   const apiHost = useApiHost();
   const playerRef = useRef<Player | undefined>(undefined);
@@ -47,8 +49,12 @@ export default function HistoryTimelineView({
 
   return (
     <>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -mr-[640px]">
-        <div className={`2xl:w-[1280px]`}>
+      <div
+        className={
+          isMobile ? "" : "absolute left-1/2 -translate-x-1/2 -mr-[640px]"
+        }
+      >
+        <div className={`w-screen 2xl:w-[1280px]`}>
           <div className={`${scrubbing ? "hidden" : "visible"}`}>
             <VideoPlayer
               options={{
@@ -100,25 +106,26 @@ export default function HistoryTimelineView({
               }}
             />
           </div>
-                  <ActivityScrubber
-                      midBar={true}
+          <ActivityScrubber
             items={timelineItemsToScrubber(card.entries)}
+            timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
               min: new Date(parseInt(playbackTimes.start) * 1000),
               max: new Date(parseInt(playbackTimes.end) * 1000),
+              snap: null,
             }}
-            rangechangeHandler={(time) => {
+            timechangeHandler={(data) => {
               if (!scrubbing) {
                 playerRef.current?.pause();
                 setScrubbing(true);
               }
 
-              const rangeStart = time.start.getTime() / 1000;
-              const midTime =
-                rangeStart + (time.end.getTime() / 1000 - rangeStart / 2);
-              previewRef.current?.currentTime(midTime - relevantPreview.start);
+              const seekTimestamp = data.time.getTime() / 1000;
+              previewRef.current?.currentTime(
+                seekTimestamp - relevantPreview.start
+              );
             }}
-            rangechangedHandler={(data) => {
+            timechangedHandler={(data) => {
               const playbackTime = data.time.getTime() / 1000;
               playerRef.current?.currentTime(
                 playbackTime - parseInt(playbackTimes.start)
