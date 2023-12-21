@@ -1,7 +1,11 @@
 import {
   LuCircle,
   LuCircleDot,
+  LuDog,
   LuEar,
+  LuFocus,
+  LuPackage,
+  LuPersonStanding,
   LuPlay,
   LuPlayCircle,
   LuTruck,
@@ -47,6 +51,24 @@ export function getTimelineIcon(timelineItem: Timeline) {
       return <LuEar className="w-4 mr-1" />;
     case "external":
       return <LuCircleDot className="w-4 mr-1" />;
+  }
+}
+
+/**
+ * Get icon representing detection, either label specific or generic detection icon
+ * @param timelineItem timeline item
+ * @returns icon for label
+ */
+export function getTimelineDetectionIcon(timelineItem: Timeline) {
+  switch (timelineItem.data.label) {
+    case "person":
+      return <LuPersonStanding className="w-4 mr-1" />;
+    case "dog":
+      return <LuDog className="w-4 mr-1" />;
+    case "package":
+      return <LuPackage className="w-4 mr-1" />;
+    default:
+      return <LuFocus className="w-4 mr-1" />;
   }
 }
 

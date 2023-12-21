@@ -1,10 +1,16 @@
 import { useApiHost } from "@/api";
 import TimelineEventOverlay from "@/components/overlay/TimelineDataOverlay";
 import VideoPlayer from "@/components/player/VideoPlayer";
-import ActivityScrubber from "@/components/scrubber/ActivityScrubber";
+import ActivityScrubber, {
+  ScrubberItem,
+} from "@/components/scrubber/ActivityScrubber";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { getTimelineItemDescription } from "@/utils/timelineUtil";
+import {
+  getTimelineDetectionIcon,
+  getTimelineIcon,
+} from "@/utils/timelineUtil";
+import { renderToStaticMarkup } from "react-dom/server";
 import { useCallback, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
@@ -26,6 +32,8 @@ export default function HistoryTimelineView({
     [config]
   );
 
+  const hasRelevantPreview = playback.relevantPreview != undefined;
+
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
 
@@ -33,6 +41,7 @@ export default function HistoryTimelineView({
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined
   );
+  const [timeToSeek, setTimeToSeek] = useState<number | undefined>(undefined);
 
   const annotationOffset = useMemo(() => {
     if (!config) {
@@ -120,52 +129,78 @@ export default function HistoryTimelineView({
     [annotationOffset, recordings, playerRef]
   );
 
+  const onScrubTime = (data: { time: Date }) => {
+    if (!hasRelevantPreview) {
+      return;
+    }
+
+    if (!scrubbing) {
+      playerRef.current?.pause();
+      setScrubbing(true);
+    }
+
+    const seekTimestamp = data.time.getTime() / 1000;
+    const seekTime = seekTimestamp - playback.relevantPreview!!.start;
+    if (timeToSeek != undefined) {
+      setTimeToSeek(seekTime);
+    } else {
+      setTimeToSeek(seekTime);
+      previewRef.current?.currentTime(seekTime);
+    }
+  };
+
+  const onSeeked = () => {
+    if (timeToSeek && playerRef.current?.currentTime() != timeToSeek) {
+      playerRef.current?.currentTime(timeToSeek);
+    }
+
+    setTimeToSeek(undefined);
+  };
+
   if (!config || !recordings) {
     return <ActivityIndicator />;
   }
 
   return (
     <>
-      <div
-        className={
-          isMobile ? "" : "absolute left-1/2 -translate-x-1/2 -mr-[640px]"
-        }
-      >
-        <div className={`w-screen 2xl:w-[1280px]`}>
-          <div className={`relative ${scrubbing ? "hidden" : "visible"}`}>
-            <VideoPlayer
-              options={{
-                preload: "auto",
-                autoplay: true,
-                sources: [
-                  {
-                    src: playbackUri,
-                    type: "application/vnd.apple.mpegurl",
-                  },
-                ],
-              }}
-              seekOptions={{ forward: 10, backward: 5 }}
-              onReady={(player) => {
-                playerRef.current = player;
-                player.currentTime(
-                  timelineTime - parseInt(playbackTimes.start)
-                );
-                player.on("playing", () => {
-                  setFocusedItem(undefined);
-                });
-              }}
-              onDispose={() => {
-                playerRef.current = undefined;
-              }}
-            >
-              {config && focusedItem ? (
-                <TimelineEventOverlay
-                  timeline={focusedItem}
-                  cameraConfig={config.cameras[playback.camera]}
-                />
-              ) : undefined}
-            </VideoPlayer>
-          </div>
+      <div>
+        <div
+          className={`relative ${
+            hasRelevantPreview && scrubbing ? "hidden" : "visible"
+          }`}
+        >
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: true,
+              sources: [
+                {
+                  src: playbackUri,
+                  type: "application/vnd.apple.mpegurl",
+                },
+              ],
+            }}
+            seekOptions={{ forward: 10, backward: 5 }}
+            onReady={(player) => {
+              playerRef.current = player;
+              player.currentTime(timelineTime - parseInt(playbackTimes.start));
+              player.on("playing", () => {
+                setFocusedItem(undefined);
+              });
+            }}
+            onDispose={() => {
+              playerRef.current = undefined;
+            }}
+          >
+            {config && focusedItem ? (
+              <TimelineEventOverlay
+                timeline={focusedItem}
+                cameraConfig={config.cameras[playback.camera]}
+              />
+            ) : undefined}
+          </VideoPlayer>
+        </div>
+        {hasRelevantPreview && (
           <div className={`${scrubbing ? "visible" : "hidden"}`}>
             <VideoPlayer
               options={{
@@ -176,7 +211,7 @@ export default function HistoryTimelineView({
                 loadingSpinner: false,
                 sources: [
                   {
-                    src: `${playback.relevantPreview!!.src}`,
+                    src: `${playback.relevantPreview?.src}`,
                     type: "video/mp4",
                   },
                 ],
@@ -184,32 +219,31 @@ export default function HistoryTimelineView({
               seekOptions={{}}
               onReady={(player) => {
                 previewRef.current = player;
+                player.on("seeked", onSeeked);
               }}
               onDispose={() => {
                 previewRef.current = undefined;
               }}
             />
           </div>
+        )}
+      </div>
+      <div className="m-1">
+        {playback != undefined && (
           <ActivityScrubber
-            // @ts-ignore
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
+              ...(isMobile && {
+                start: new Date((timelineTime - 300) * 1000),
+                end: new Date((timelineTime + 300) * 1000),
+              }),
+              snap: null,
               min: new Date(parseInt(playbackTimes.start) * 1000),
               max: new Date(parseInt(playbackTimes.end) * 1000),
-              snap: null,
+              timeAxis: isMobile ? { scale: "minute" } : {},
             }}
-            timechangeHandler={(data) => {
-              if (!scrubbing) {
-                playerRef.current?.pause();
-                setScrubbing(true);
-              }
-
-              const seekTimestamp = data.time.getTime() / 1000;
-              previewRef.current?.currentTime(
-                seekTimestamp - playback.relevantPreview!!.start
-              );
-            }}
+            timechangeHandler={onScrubTime}
             timechangedHandler={(data) => {
               const playbackTime = data.time.getTime() / 1000;
               playerRef.current?.currentTime(
@@ -220,22 +254,30 @@ export default function HistoryTimelineView({
             }}
             selectHandler={onSelectItem}
           />
-        </div>
+        )}
       </div>
     </>
   );
 }
 
-function timelineItemsToScrubber(items: Timeline[]) {
+function timelineItemsToScrubber(items: Timeline[]): ScrubberItem[] {
   return items.map((item) => {
     return {
       id: item.timestamp,
-      content: `<div class="flex"><span>${getTimelineItemDescription(
-        item
-      )}</span></div>`,
+      content: getTimelineContentElement(item),
       start: new Date(item.timestamp * 1000),
       end: new Date(item.timestamp * 1000),
       type: "box",
     };
   });
+}
+
+function getTimelineContentElement(item: Timeline): HTMLElement {
+  const output = document.createElement(`div-${item.timestamp}`);
+  output.innerHTML = renderToStaticMarkup(
+    <div className="flex items-center">
+      {getTimelineDetectionIcon(item)} : {getTimelineIcon(item)}
+    </div>
+  );
+  return output;
 }

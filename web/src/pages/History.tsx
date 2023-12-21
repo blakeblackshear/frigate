@@ -5,7 +5,6 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import axios from "axios";
-import TimelinePlayerCard from "@/components/card/TimelinePlayerCard";
 import { getHourlyTimelineData } from "@/utils/historyUtil";
 import {
   AlertDialog,
@@ -187,12 +186,6 @@ function History() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <TimelinePlayerCard
-        timeline={undefined}
-        onDismiss={() => setPlayback(undefined)}
-      />
-
       <>
         {playback == undefined && (
           <HistoryCardView

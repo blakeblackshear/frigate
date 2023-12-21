@@ -9,7 +9,7 @@ import useSWR from "swr";
 type HistoryCardViewProps = {
   timelineCards: CardsData | never[];
   allPreviews: Preview[] | undefined;
-  isMobileView: boolean;
+  isMobile: boolean;
   isValidating: boolean;
   isDone: boolean;
   onNextPage: () => void;
@@ -20,7 +20,7 @@ type HistoryCardViewProps = {
 export default function HistoryCardView({
   timelineCards,
   allPreviews,
-  isMobileView,
+  isMobile,
   isValidating,
   isDone,
   onNextPage,
@@ -112,7 +112,7 @@ export default function HistoryCardView({
                               <HistoryCard
                                 key={key}
                                 timeline={timeline}
-                                shouldAutoPlay={isMobileView}
+                                shouldAutoPlay={isMobile}
                                 relevantPreview={relevantPreview}
                                 onClick={() => {
                                   onItemSelected({

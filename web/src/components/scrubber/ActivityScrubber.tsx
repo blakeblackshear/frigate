@@ -74,7 +74,7 @@ const domEvents: TimelineEventsWithMissing[] = [
 ];
 
 type ActivityScrubberProps = {
-  items: TimelineItem[];
+  items?: TimelineItem[];
   timeBars?: { time: DateType; id?: IdType | undefined }[];
   groups?: TimelineGroup[];
   options?: TimelineOptions;
