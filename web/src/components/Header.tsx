@@ -119,7 +119,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
               <LuMoreVertical />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-72 mr-5">
+          <DropdownMenuContent className="md:w-72 mr-5">
             <DropdownMenuLabel>System</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
