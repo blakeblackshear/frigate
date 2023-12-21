@@ -4,6 +4,8 @@ import {
   TimelineGroup,
   TimelineItem,
   TimelineOptions,
+  DateType,
+  IdType,
 } from "vis-timeline";
 import type { DataGroup, DataItem, TimelineEvents } from "vis-timeline/types";
 import "./scrubber.css";
@@ -73,12 +75,15 @@ const domEvents: TimelineEventsWithMissing[] = [
 
 type ActivityScrubberProps = {
   items: TimelineItem[];
+  midBar: boolean;
+  timeBars: { time: DateType; id?: IdType | undefined }[];
   groups?: TimelineGroup[];
   options?: TimelineOptions;
 } & TimelineEventsHandlers;
 
 function ActivityScrubber({
   items,
+  timeBars,
   groups,
   options,
   ...eventHandlers
@@ -130,6 +135,12 @@ function ActivityScrubber({
       options
     );
 
+    if (timeBars) {
+      timeBars.forEach((bar) => {
+        timelineInstance.addCustomTime(bar.time, bar.id);
+      });
+    }
+
     domEvents.forEach((event) => {
       const eventHandler = eventHandlers[`${event}Handler`];
       if (typeof eventHandler === "function") {
@@ -174,7 +185,12 @@ function ActivityScrubber({
     if (items) timelineRef.current.timeline.setItems(items);
   }, [items, groups, options, currentTime, eventHandlers]);
 
-  return <div ref={containerRef} />;
+  return (
+    <div>
+      <div ref={containerRef} />
+      <div className="absolute bg-red-500 w-[2px]" />
+    </div>
+  );
 }
 
 export default ActivityScrubber;

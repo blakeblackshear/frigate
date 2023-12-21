@@ -1,11 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 import ActivityIndicator from "@/components/ui/activity-indicator";
-import HistoryCard from "@/components/card/HistoryCard";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
 import TimelinePlayerCard from "@/components/card/TimelinePlayerCard";
 import { getHourlyTimelineData } from "@/utils/historyUtil";
@@ -21,6 +19,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 import useApiFilter from "@/hooks/use-api-filter";
+import HistoryCardView from "@/views/history/HistoryCardView";
+import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 
 const API_LIMIT = 200;
 
@@ -100,26 +100,6 @@ function History() {
   const isDone =
     (timelinePages?.[timelinePages.length - 1]?.count ?? 0) < API_LIMIT;
 
-  // hooks for infinite scroll
-  const observer = useRef<IntersectionObserver | null>();
-  const lastTimelineRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (isValidating) return;
-      if (observer.current) observer.current.disconnect();
-      try {
-        observer.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !isDone) {
-            setSize(size + 1);
-          }
-        });
-        if (node) observer.current.observe(node);
-      } catch (e) {
-        // no op
-      }
-    },
-    [size, setSize, isValidating, isDone]
-  );
-
   const [itemsToDelete, setItemsToDelete] = useState<string[] | null>(null);
   const onDelete = useCallback(
     async (timeline: Card) => {
@@ -162,10 +142,12 @@ function History() {
     <>
       <div className="flex justify-between">
         <Heading as="h2">History</Heading>
-        <HistoryFilterPopover
-          filter={historyFilter}
-          onUpdateFilter={(filter) => setHistoryFilter(filter)}
-        />
+        {!playback && (
+          <HistoryFilterPopover
+            filter={historyFilter}
+            onUpdateFilter={(filter) => setHistoryFilter(filter)}
+          />
+        )}
       </div>
 
       <AlertDialog
@@ -194,92 +176,27 @@ function History() {
       </AlertDialog>
 
       <TimelinePlayerCard
-        timeline={playback}
+        timeline={undefined}
         onDismiss={() => setPlayback(undefined)}
       />
 
-      <div>
-        {Object.entries(timelineCards)
-          .reverse()
-          .map(([day, timelineDay], dayIdx) => {
-            return (
-              <div key={day}>
-                <Heading
-                  className="sticky py-2 -top-4 left-0 bg-background w-full z-20"
-                  as="h3"
-                >
-                  {formatUnixTimestampToDateTime(parseInt(day), {
-                    strftime_fmt: "%A %b %d",
-                    time_style: "medium",
-                    date_style: "medium",
-                  })}
-                </Heading>
-                {Object.entries(timelineDay).map(
-                  ([hour, timelineHour], hourIdx) => {
-                    if (Object.values(timelineHour).length == 0) {
-                      return <div key={hour}></div>;
-                    }
-
-                    const lastRow =
-                      dayIdx == Object.values(timelineCards).length - 1 &&
-                      hourIdx == Object.values(timelineDay).length - 1;
-                    const previewMap: { [key: string]: Preview | undefined } =
-                      {};
-
-                    return (
-                      <div key={hour} ref={lastRow ? lastTimelineRef : null}>
-                        <Heading as="h4">
-                          {formatUnixTimestampToDateTime(parseInt(hour), {
-                            strftime_fmt:
-                              config.ui.time_format == "24hour"
-                                ? "%H:00"
-                                : "%I:00 %p",
-                            time_style: "medium",
-                            date_style: "medium",
-                          })}
-                        </Heading>
-
-                        <div className="flex flex-wrap">
-                          {Object.entries(timelineHour)
-                            .reverse()
-                            .map(([key, timeline]) => {
-                              const startTs = Object.values(timeline.entries)[0]
-                                .timestamp;
-                              let relevantPreview = previewMap[timeline.camera];
-
-                              if (relevantPreview == undefined) {
-                                relevantPreview = previewMap[timeline.camera] =
-                                  Object.values(allPreviews || []).find(
-                                    (preview) =>
-                                      preview.camera == timeline.camera &&
-                                      preview.start < startTs &&
-                                      preview.end > startTs
-                                  );
-                              }
-
-                              return (
-                                <HistoryCard
-                                  key={key}
-                                  timeline={timeline}
-                                  shouldAutoPlay={shouldAutoPlay}
-                                  relevantPreview={relevantPreview}
-                                  onClick={() => {
-                                    setPlayback(timeline);
-                                  }}
-                                  onDelete={() => onDelete(timeline)}
-                                />
-                              );
-                            })}
-                        </div>
-                        {lastRow && !isDone && <ActivityIndicator />}
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            );
-          })}
-      </div>
+      <>
+        {playback == undefined && (
+          <HistoryCardView
+            timelineCards={timelineCards}
+            allPreviews={allPreviews}
+            isMobileView={shouldAutoPlay}
+            isValidating={isValidating}
+            isDone={isDone}
+            onNextPage={() => {
+              setSize(size + 1);
+            }}
+            onDelete={onDelete}
+            onItemSelected={(card) => setPlayback(card)}
+          />
+        )}
+        {playback != undefined && <HistoryTimelineView card={playback} />}
+      </>
     </>
   );
 }
