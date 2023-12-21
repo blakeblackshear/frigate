@@ -109,6 +109,16 @@ class EventProcessor(threading.Thread):
 
                 self.handle_object_detection(event_type, camera, event_data)
             elif source_type == EventTypeEnum.api:
+                self.timeline_queue.put(
+                    (
+                        camera,
+                        source_type,
+                        event_type,
+                        {},
+                        event_data,
+                    )
+                )
+
                 self.handle_external_detection(event_type, event_data)
 
         # set an end_time on events without an end_time before exiting
