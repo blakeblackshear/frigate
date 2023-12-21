@@ -3,7 +3,7 @@ import PreviewThumbnailPlayer from "../player/PreviewThumbnailPlayer";
 import { Card } from "../ui/card";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "../ui/activity-indicator";
-import { LuClock } from "react-icons/lu";
+import { LuClock, LuTrash } from "react-icons/lu";
 import { HiOutlineVideoCamera } from "react-icons/hi";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import {
@@ -16,6 +16,7 @@ type HistoryCardProps = {
   relevantPreview?: Preview;
   shouldAutoPlay: boolean;
   onClick?: () => void;
+  onDelete?: () => void;
 };
 
 export default function HistoryCard({
@@ -23,6 +24,7 @@ export default function HistoryCard({
   timeline,
   shouldAutoPlay,
   onClick,
+  onDelete,
 }: HistoryCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -43,16 +45,29 @@ export default function HistoryCard({
         shouldAutoPlay={shouldAutoPlay}
       />
       <div className="p-2">
-        <div className="text-sm flex">
-          <LuClock className="h-5 w-5 mr-2 inline" />
-          {formatUnixTimestampToDateTime(timeline.time, {
-            strftime_fmt:
-              config.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S %p",
-            time_style: "medium",
-            date_style: "medium",
-          })}
+        <div className="text-sm flex justify-between items-center">
+          <div>
+            <LuClock className="h-5 w-5 mr-2 inline" />
+            {formatUnixTimestampToDateTime(timeline.time, {
+              strftime_fmt:
+                config.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S %p",
+              time_style: "medium",
+              date_style: "medium",
+            })}
+          </div>
+          <LuTrash
+            className="w-5 h-5 m-1 cursor-pointer"
+            stroke="#f87171"
+            onClick={(e: Event) => {
+              e.stopPropagation();
+
+              if (onDelete) {
+                onDelete();
+              }
+            }}
+          />
         </div>
-        <div className="capitalize text-sm flex align-center mt-1">
+        <div className="capitalize text-sm flex items-center mt-1">
           <HiOutlineVideoCamera className="h-5 w-5 mr-2 inline" />
           {timeline.camera.replaceAll("_", " ")}
         </div>
