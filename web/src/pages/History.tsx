@@ -21,6 +21,9 @@ import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 import useApiFilter from "@/hooks/use-api-filter";
 import HistoryCardView from "@/views/history/HistoryCardView";
 import HistoryTimelineView from "@/views/history/HistoryTimelineView";
+import { Button } from "@/components/ui/button";
+import { LuStepBack } from "react-icons/lu";
+import { IoMdArrowBack } from "react-icons/io";
 
 const API_LIMIT = 200;
 
@@ -80,7 +83,7 @@ function History() {
     { revalidateOnFocus: false }
   );
 
-  const [playback, setPlayback] = useState<Card | undefined>();
+  const [playback, setPlayback] = useState<TimelinePlayback | undefined>();
 
   const shouldAutoPlay = useMemo(() => {
     return playback == undefined && window.innerWidth < 480;
@@ -141,7 +144,16 @@ function History() {
   return (
     <>
       <div className="flex justify-between">
-        <Heading as="h2">History</Heading>
+        <div className="flex">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setPlayback(undefined)}
+          >
+            <IoMdArrowBack className="w-6 h-6" />
+          </Button>
+          <Heading as="h2">History</Heading>
+        </div>
         {!playback && (
           <HistoryFilterPopover
             filter={historyFilter}
@@ -192,10 +204,12 @@ function History() {
               setSize(size + 1);
             }}
             onDelete={onDelete}
-            onItemSelected={(card) => setPlayback(card)}
+            onItemSelected={(item) => setPlayback(item)}
           />
         )}
-        {playback != undefined && <HistoryTimelineView card={playback} isMobile={shouldAutoPlay} />}
+        {playback != undefined && (
+          <HistoryTimelineView playback={playback} isMobile={shouldAutoPlay} />
+        )}
       </>
     </>
   );

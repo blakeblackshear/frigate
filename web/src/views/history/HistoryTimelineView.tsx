@@ -1,21 +1,18 @@
 import { useApiHost } from "@/api";
 import VideoPlayer from "@/components/player/VideoPlayer";
 import ActivityScrubber from "@/components/scrubber/ActivityScrubber";
-import {
-  getTimelineIcon,
-  getTimelineItemDescription,
-} from "@/utils/timelineUtil";
+import { Button } from "@/components/ui/button";
+import { getTimelineItemDescription } from "@/utils/timelineUtil";
 import { useMemo, useRef, useState } from "react";
-import { LuDog } from "react-icons/lu";
 import Player from "video.js/dist/types/player";
 
 type HistoryTimelineViewProps = {
-  card: Card;
+  playback: TimelinePlayback;
   isMobile: boolean;
 };
 
 export default function HistoryTimelineView({
-  card,
+  playback,
   isMobile,
 }: HistoryTimelineViewProps) {
   const apiHost = useApiHost();
@@ -23,13 +20,14 @@ export default function HistoryTimelineView({
   const previewRef = useRef<Player | undefined>(undefined);
 
   const [scrubbing, setScrubbing] = useState(false);
-  const relevantPreview = {
-    src: "http://localhost:5173/clips/previews/side_cam/1703174400.071426-1703178000.011979.mp4",
-    start: 1703174400.071426,
-    end: 1703178000.011979,
-  };
 
-  const timelineTime = useMemo(() => card.entries.at(0)!!.timestamp, [card]);
+  const timelineTime = useMemo(() => {
+    if (!playback) {
+      return 0;
+    }
+
+    return playback.timelineItems.at(0)!!.timestamp;
+  }, [playback]);
   const playbackTimes = useMemo(() => {
     const date = new Date(timelineTime * 1000);
     date.setMinutes(0, 0, 0);
@@ -40,12 +38,12 @@ export default function HistoryTimelineView({
   }, [timelineTime]);
 
   const playbackUri = useMemo(() => {
-    if (!card) {
+    if (!playback) {
       return "";
     }
 
-    return `${apiHost}vod/${card?.camera}/start/${playbackTimes.start}/end/${playbackTimes.end}/master.m3u8`;
-  }, [card, playbackTimes]);
+    return `${apiHost}vod/${playback.camera}/start/${playbackTimes.start}/end/${playbackTimes.end}/master.m3u8`;
+  }, [playback, playbackTimes]);
 
   return (
     <>
@@ -92,7 +90,7 @@ export default function HistoryTimelineView({
                 loadingSpinner: false,
                 sources: [
                   {
-                    src: `${relevantPreview.src}`,
+                    src: `${playback.relevantPreview!!.src}`,
                     type: "video/mp4",
                   },
                 ],
@@ -107,7 +105,7 @@ export default function HistoryTimelineView({
             />
           </div>
           <ActivityScrubber
-            items={timelineItemsToScrubber(card.entries)}
+            items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
               min: new Date(parseInt(playbackTimes.start) * 1000),
@@ -122,7 +120,7 @@ export default function HistoryTimelineView({
 
               const seekTimestamp = data.time.getTime() / 1000;
               previewRef.current?.currentTime(
-                seekTimestamp - relevantPreview.start
+                seekTimestamp - playback.relevantPreview!!.start
               );
             }}
             timechangedHandler={(data) => {

@@ -14,7 +14,7 @@ type HistoryCardViewProps = {
   isDone: boolean;
   onNextPage: () => void;
   onDelete: (card: Card) => void;
-  onItemSelected: (card: Card) => void;
+  onItemSelected: (item: TimelinePlayback) => void;
 };
 
 export default function HistoryCardView({
@@ -115,7 +115,17 @@ export default function HistoryCardView({
                                 shouldAutoPlay={isMobileView}
                                 relevantPreview={relevantPreview}
                                 onClick={() => {
-                                  onItemSelected(timeline);
+                                  onItemSelected({
+                                    camera: timeline.camera,
+                                    timelineItems: Object.values(
+                                      timelineHour
+                                    ).flatMap((card) =>
+                                      card.camera == timeline.camera
+                                        ? card.entries
+                                        : []
+                                    ),
+                                    relevantPreview: relevantPreview,
+                                  });
                                 }}
                                 onDelete={() => onDelete(timeline)}
                               />
