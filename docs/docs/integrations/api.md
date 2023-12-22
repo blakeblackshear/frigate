@@ -175,7 +175,7 @@ Events from the database. Accepts the following query string parameters:
 | `min_length`         | float | Minimum length of the event                           |
 | `max_length`         | float | Maximum length of the event                           |
 | `search`             | str   | Search query for semantic search                      |
-| `like`               | str   | Event ID for thumbnail similarity search              |
+| `thumb_like`         | str   | Event ID for thumbnail similarity search              |
 
 ### `GET /api/timeline`
 

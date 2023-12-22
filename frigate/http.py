@@ -1056,7 +1056,7 @@ def events():
     max_length = request.args.get("max_length", type=float)
     search = request.args.get("search", type=str) or None
     search_type = request.args.get("search_type", "all")
-    like = request.args.get("like", type=str) or None
+    thumb_like = request.args.get("thumb_like", type=str) or None
 
     clauses = []
 
@@ -1219,10 +1219,10 @@ def events():
         elif len(embeddings_filters) == 1:
             where = embeddings_filters[0]
 
-        if like is not None:
+        if thumb_like is not None:
             # Grab the ids of events that match the thumbnail image embeddings
             thumbnails: Collection = current_app.embeddings.thumbnail
-            search_event = Event.get(Event.id == like)
+            search_event = Event.get(Event.id == thumb_like)
             thumbnail = base64.b64decode(search_event.thumbnail)
             img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
             thumb_result: QueryResult = thumbnails.query(

@@ -274,10 +274,10 @@ export default function Events({ path, ...props }) {
     if (e) {
       e.stopPropagation();
     }
-    if (searchParams?.like == event_id) {
+    if (searchParams?.thumb_like == event_id) {
       return;
     }
-    onFilter('like', event_id);
+    onFilter('thumb_like', event_id);
   };
 
   const showSubmitToPlus = (event_id, label, box, e) => {
@@ -310,7 +310,7 @@ export default function Events({ path, ...props }) {
     (name, value) => {
       setShowInProgress(false);
       const updatedParams = { ...searchParams, [name]: value };
-      if (name !== 'like') delete updatedParams['like'];
+      if (name !== 'thumb_like') delete updatedParams['thumb_like'];
       setSearchParams(updatedParams);
       const queryString = Object.keys(updatedParams)
         .map((key) => {
@@ -336,7 +336,7 @@ export default function Events({ path, ...props }) {
   const isDone =
     (eventPages?.[eventPages.length - 1]?.length ?? 0) < API_LIMIT ||
     (searchParams?.search?.length ?? 0) > 0 ||
-    (searchParams?.like?.length ?? 0) > 0;
+    (searchParams?.thumb_like?.length ?? 0) > 0;
 
   // hooks for infinite scroll
   const observer = useRef();
