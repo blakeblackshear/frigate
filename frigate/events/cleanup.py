@@ -213,11 +213,7 @@ class EventCleanup(threading.Thread):
             media_path.unlink(missing_ok=True)
 
         duplicate_ids = [event.id for event in duplicate_events]
-        Event.delete().where(Event.id << duplicate_ids).execute()
-        # Also remove from embeddings database
-        if self.embeddings is not None and len(duplicate_ids) > 0:
-            self.embeddings.thumbnail.delete(duplicate_ids)
-            self.embeddings.description.delete(duplicate_ids)
+        self._delete_ids(duplicate_ids)
 
     def run(self) -> None:
         # only expire events every 5 minutes
@@ -240,12 +236,16 @@ class EventCleanup(threading.Thread):
                 .iterator()
             )
             events_to_delete = [e.id for e in events]
-
-            if self.embeddings is not None and len(events_to_delete) > 0:
-                self.embeddings.thumbnail.delete(events_to_delete)
-                self.embeddings.description.delete(events_to_delete)
-
-            # drop events from db where has_clip and has_snapshot are false
-            Event.delete().where(Event.id << events_to_delete).execute()
+            self._delete_ids(events_to_delete)
 
         logger.info("Exiting event cleanup...")
+
+    def _delete_ids(self, ids: list[str]) -> None:
+        """Delete events by id."""
+        if len(ids) == 0:
+            return
+
+        Event.delete().where(Event.id << ids).execute()
+        if self.embeddings is not None:
+            self.embeddings.thumbnail.delete(ids)
+            self.embeddings.description.delete(ids)
