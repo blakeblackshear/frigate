@@ -538,18 +538,16 @@ class OnvifController:
             pan_tilt_status = getattr(status, "MoveStatus", None)
 
             # we're unsupported
-            if pan_tilt_status is None or pan_tilt_status.lower() not in [
-                "idle",
-                "moving",
+            if pan_tilt_status is None or pan_tilt_status not in [
+                "IDLE",
+                "MOVING",
             ]:
                 logger.error(
                     f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
                 )
                 return
 
-        if pan_tilt_status.lower() == "idle" and (
-            zoom_status is None or zoom_status.lower() == "idle"
-        ):
+        if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
             self.cams[camera_name]["active"] = False
             if not self.ptz_metrics[camera_name]["ptz_motor_stopped"].is_set():
                 self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
