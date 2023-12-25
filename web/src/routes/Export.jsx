@@ -237,7 +237,7 @@ function Exports({ exports, onSetClip, onDeleteClip }) {
               <div>
                 <ActivityIndicator size="sm" />
               </div>
-              <div className="px-2">{item.name.substring(12, item.name.length - 4)}</div>
+              <div className="px-2 overflow-hidden">{item.name.substring(12, item.name.length - 4)}</div>
             </div>
           ) : (
             <div className="flex justify-start items-center">
