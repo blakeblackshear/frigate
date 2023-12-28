@@ -19,6 +19,7 @@ from frigate.config import (
     MqttConfig,
     RecordConfig,
     SnapshotsConfig,
+    ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR
 from frigate.events.maintainer import EventTypeEnum
@@ -511,6 +512,39 @@ class CameraState:
                 ):
                     thickness = 5
                     color = self.config.model.colormap[obj["label"]]
+
+                    # debug autotracking zooming - show the zoom factor box
+                    if (
+                        self.camera_config.onvif.autotracking.zooming
+                        != ZoomingModeEnum.disabled
+                    ):
+                        max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
+                            self.name
+                        ]["max_target_box"]
+                        side_length = max_target_box * (
+                            max(
+                                self.camera_config.detect.width,
+                                self.camera_config.detect.height,
+                            )
+                        )
+
+                        centroid_x = (obj["box"][0] + obj["box"][2]) // 2
+                        centroid_y = (obj["box"][1] + obj["box"][3]) // 2
+                        top_left = (
+                            int(centroid_x - side_length // 2),
+                            int(centroid_y - side_length // 2),
+                        )
+                        bottom_right = (
+                            int(centroid_x + side_length // 2),
+                            int(centroid_y + side_length // 2),
+                        )
+                        cv2.rectangle(
+                            frame_copy,
+                            top_left,
+                            bottom_right,
+                            (255, 255, 0),
+                            2,
+                        )
 
                 # draw the bounding boxes on the frame
                 box = obj["box"]
