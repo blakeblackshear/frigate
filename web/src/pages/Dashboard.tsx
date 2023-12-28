@@ -10,8 +10,6 @@ import useSWR from "swr";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 import { Card } from "@/components/ui/card";
-import CameraImage from "@/components/camera/CameraImage";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { AiOutlinePicture } from "react-icons/ai";
 import { FaWalking } from "react-icons/fa";

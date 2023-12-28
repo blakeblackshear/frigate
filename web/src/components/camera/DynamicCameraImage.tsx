@@ -32,14 +32,12 @@ export default function DynamicCameraImage({
       return;
     }
 
-    const frigateEvent = event as unknown as FrigateEvent;
-
-    if (frigateEvent.after.camera != camera.name) {
+    if (event.after.camera != camera.name) {
       return;
     }
 
-    if (frigateEvent.type == "end") {
-      const eventIndex = activeObjects.indexOf(frigateEvent.after.id);
+    if (event.type == "end") {
+      const eventIndex = activeObjects.indexOf(event.after.id);
 
       if (eventIndex != -1) {
         const newActiveObjects = [...activeObjects];
@@ -47,11 +45,11 @@ export default function DynamicCameraImage({
         setActiveObjects(newActiveObjects);
       }
     } else {
-      if (!frigateEvent.after.stationary) {
-        const eventIndex = activeObjects.indexOf(frigateEvent.after.id);
+      if (!event.after.stationary) {
+        const eventIndex = activeObjects.indexOf(event.after.id);
 
         if (eventIndex == -1) {
-          const newActiveObjects = [...activeObjects, frigateEvent.after.id];
+          const newActiveObjects = [...activeObjects, event.after.id];
           setActiveObjects(newActiveObjects);
           setKey(Date.now());
         }
