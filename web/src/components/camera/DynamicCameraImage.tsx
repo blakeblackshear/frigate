@@ -6,7 +6,6 @@ import { CameraConfig } from "@/types/frigateConfig";
 import { TbUserScan } from "react-icons/tb";
 import { MdLeakAdd } from "react-icons/md";
 import { useFrigateEvents, useMotionActivity } from "@/api/ws";
-import { FrigateEvent } from "@/types/ws";
 
 type DynamicCameraImageProps = {
   camera: CameraConfig;
